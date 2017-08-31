@@ -1,0 +1,31 @@
+composer.lock
+
+# Email spool folder
+/app/spool/*
+
+# Cache, session files and logs (Symfony3)
+/var
+
+# Parameters
+/app/config/parameters.yml
+/app/config/parameters.ini
+
+/bin
+/web
+/vendor
+
+# PHPUnit
+/app/phpunit.xml
+/phpunit.xml
+
+# Build data
+/build/
+
+# Backup entities generated with doctrine:generate:entities command
+**/Entity/*~
+
+# Embedded web-server pid file
+/.web-server-pid
+
+/.idea
+LICENSE
