@@ -3,3 +3,6 @@ app:
     type: annotation
 fos_user:
     resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+authbucketoauth2bundle:
+    prefix:     /api/oauth2
+    resource:   "@AuthBucketOAuth2Bundle/Resources/config/routing.yml"

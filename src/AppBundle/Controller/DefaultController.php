@@ -18,4 +18,18 @@ class DefaultController extends Controller
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
         ]);
     }
+
+    /**
+     * @Route("/account", name="account")
+     */
+    public function accountAction(Request $request){
+        return $this->render('default/index.html.twig');
+    }
+
+    /**
+     * @Route("/find_me", name="find_me")
+     */
+    public function findUserAction(Request $request){
+        return $this->render('default/find_me.html.twig');
+    }
 }

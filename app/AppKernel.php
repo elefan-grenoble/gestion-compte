@@ -19,6 +19,7 @@ class AppKernel extends Kernel
             new Evheniy\JqueryBundle\JqueryBundle(),
             new Evheniy\MaterializeBundle\MaterializeBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
+            new AuthBucket\Bundle\OAuth2Bundle\AuthBucketOAuth2Bundle(),
             new AppBundle\AppBundle(),
         ];
 

@@ -24,7 +24,16 @@ security:
 
             logout:       true
             anonymous:    true
-
+        api_oauth2_authorize:
+            pattern:                ^/api/oauth2/authorize$
+            http_basic:             ~
+            provider:               fos_userbundle
+        api_oauth2_token:
+            pattern:                ^/api/oauth2/token$
+            oauth2_token:           ~
+        api_oauth2_debug:
+            pattern:                ^/api/oauth2/debug$
+            oauth2_resource:        ~
     access_control:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }

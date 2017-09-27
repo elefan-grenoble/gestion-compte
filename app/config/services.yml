@@ -37,3 +37,14 @@ services:
         class: AppBundle\Form\RegistrationType
         tags:
             - { name: form.type, alias: app_user_registration }
+    #########################
+    #       LISTENERS
+    #########################
+#    kernel.listener.createUser:
+#        class: Acme\AppBundle\EventListener\CreateUserEventListener
+#        tags:
+#            - { name: kernel.event_listener, event: createUser, method: askAffectationAdv }
+    kernel.listener.changePassword:
+        class: Acme\AppBundle\EventListener\ChangeUserEventListener
+        tags:
+            - { name: kernel.event_listener, event: changePassword, method: changePassword }

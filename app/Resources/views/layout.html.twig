@@ -42,7 +42,7 @@
                             <li><a href="{{ path('fos_user_security_logout') }}"><span class="glyphicon glyphicon-log-out"></span>
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
-                            <li><a href="/account"><span class="glyphicon glyphicon-user"></span> Mon compte</a></li>
+                            <li><a href="{{ path('account') }}"><span class="glyphicon glyphicon-user"></span> Mon compte</a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}

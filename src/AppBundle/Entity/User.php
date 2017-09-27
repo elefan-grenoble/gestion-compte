@@ -3,10 +3,15 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Event\ChangeUserPasswordEvent;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use AppBundle\Event\UserEvents;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Doctrine\Common\Collections\ArrayCollection;
+
 
 /**
  * @ORM\Entity
@@ -30,36 +35,43 @@ class User extends BaseUser
     protected $member_number;
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user")
      */
-    protected $lastname;
+    private $registrations;
 
     /**
-     * @ORM\Column(type="string")
-     * @Assert\NotBlank()
+     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user")
      */
-    protected $firstname;
+    private $beneficiaries;
 
     /**
-     * @ORM\Column(type="date", nullable=false, options={"default": "2017-01-01"})
+     * One User has One Address.
+     * @ORM\OneToOne(targetEntity="Address")
+     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      */
-    protected $registration_birthday;
-
-    /**
-     * @ORM\Column(type="string")
-     */
-    protected $phone;
-
-
+    private $address;
 
     public function __construct()
     {
-        $this->registration_birthday = new \Date('2017-01-01');
-        $this->phone = '';
         parent::__construct();
+        $this->registrations = new ArrayCollection();
+        $this->beneficiaries = new ArrayCollection();
         // your own logic
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setPassword($password)
+    {
+        // create the Event and dispatch it
+        $event = new ChangeUserPasswordEvent($this,$password);
+        $dispatcher = new EventDispatcher();
+        $dispatcher->dispatch( UserEvents::CHANGE_PASSWORD  , $event);
+
+        return parent::setPassword($password);
+    }
+
 
 
     /**
@@ -87,98 +99,94 @@ class User extends BaseUser
     }
 
     /**
-     * Set lastname
+     * Add registration
      *
-     * @param string $lastname
+     * @param \AppBundle\Entity\Registration $registration
      *
      * @return User
      */
-    public function setLastname($lastname)
+    public function addRegistration(\AppBundle\Entity\Registration $registration)
     {
-        $this->lastname = $lastname;
+        $this->registrations[] = $registration;
 
         return $this;
     }
 
     /**
-     * Get lastname
+     * Remove registration
      *
-     * @return string
+     * @param \AppBundle\Entity\Registration $registration
      */
-    public function getLastname()
+    public function removeRegistration(\AppBundle\Entity\Registration $registration)
     {
-        return $this->lastname;
+        $this->registrations->removeElement($registration);
     }
 
     /**
-     * Set firstname
+     * Get registrations
      *
-     * @param string $firstname
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRegistrations()
+    {
+        return $this->registrations;
+    }
+
+    /**
+     * Add beneficiary
+     *
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
      *
      * @return User
      */
-    public function setFirstname($firstname)
+    public function addBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
     {
-        $this->firstname = $firstname;
+        $this->beneficiaries[] = $beneficiary;
 
         return $this;
     }
 
     /**
-     * Get firstname
+     * Remove beneficiary
      *
-     * @return string
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
      */
-    public function getFirstname()
+    public function removeBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
     {
-        return $this->firstname;
+        $this->beneficiaries->removeElement($beneficiary);
     }
 
     /**
-     * Set registrationBirthday
+     * Get beneficiaries
      *
-     * @param \DateTime $registrationBirthday
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBeneficiaries()
+    {
+        return $this->beneficiaries;
+    }
+
+    /**
+     * Set address
+     *
+     * @param \AppBundle\Entity\Address $address
      *
      * @return User
      */
-    public function setRegistrationBirthday($registrationBirthday)
+    public function setAddress(\AppBundle\Entity\Address $address = null)
     {
-        $this->registration_birthday = $registrationBirthday;
+        $this->address = $address;
 
         return $this;
     }
 
     /**
-     * Get registrationBirthday
+     * Get address
      *
-     * @return \DateTime
+     * @return \AppBundle\Entity\Address
      */
-    public function getRegistrationBirthday()
+    public function getAddress()
     {
-        return $this->registration_birthday;
-    }
-
-    /**
-     * Set phone
-     *
-     * @param string $phone
-     *
-     * @return User
-     */
-    public function setPhone($phone)
-    {
-        $this->phone = $phone;
-
-        return $this;
-    }
-
-    /**
-     * Get phone
-     *
-     * @return string
-     */
-    public function getPhone()
-    {
-        return $this->phone;
+        return $this->address;
     }
 }
