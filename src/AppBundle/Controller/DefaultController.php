@@ -39,7 +39,7 @@ class DefaultController extends Controller
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
             $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
-            return $this->redirectToRoute('confirm',array('member_number'=>$user->getId()));
+            return $this->redirectToRoute('confirm',array('member_number'=>$user->getMemberNumber()));
         }
         return $this->render('user/find_me.html.twig', array(
             'form' => $form->createView(),

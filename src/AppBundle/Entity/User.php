@@ -283,7 +283,7 @@ class User extends BaseUser
                 $last_char = substr($mini_part,strlen($mini_part)-1,1);
                 $center = substr($mini_part,1,strlen($mini_part)-2);
                 if (strlen($center)>0)
-                    $return .= $first_char.preg_replace('/./','*',$center).$last_char;
+                    $return .= $first_char.preg_replace('/./','_',$center).$last_char;
                 else
                     $return .= $first_char.$last_char;
                 $return .= '.';
@@ -292,7 +292,7 @@ class User extends BaseUser
             $return .= '@';
         }
         $return = substr($return,0,strlen($return)-1);
-        return $return;
+        return preg_replace('/_{3}_*/','___',$return);
     }
 
     public  function getAnonymousLastname(){
