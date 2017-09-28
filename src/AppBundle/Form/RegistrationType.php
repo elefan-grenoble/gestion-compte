@@ -4,6 +4,7 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use AppBundle\Form\AddressType;
 use Symfony\Component\Form\FormBuilderInterface;
 
 class RegistrationType extends AbstractType

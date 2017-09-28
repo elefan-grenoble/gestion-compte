@@ -1,0 +1,8 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+{{ form_start(form, { 'action': path('fos_user_profile_edit'), 'attr': { 'class': 'fos_user_profile_edit' } }) }}
+    {{ form_widget(form) }}
+    <div>
+        <a class="btn-large waves-effect waves-light light-green">{{ 'profile.edit.submit'|trans }}</a>
+    </div>
+{{ form_end(form) }}

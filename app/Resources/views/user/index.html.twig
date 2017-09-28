@@ -1,0 +1,38 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h1>Liste des adhérents</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Numéro d'adhérent</th>
+                <th>Username</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            {% if user.mainBeneficiary %}
+                <tr>
+                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.mainBeneficiary.firstname }}</td>
+                    <td>{{ user.mainBeneficiary.lastname }}</td>
+                    <td>{{ user.email }}</td>
+                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('user_new') }}">Create a new user</a>
+        </li>
+    </ul>
+{% endblock %}

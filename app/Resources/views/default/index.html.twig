@@ -1,14 +1,14 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-<div style="width:100%;" class="parallax-container">
-    <div class="parallax">
-        {% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}
-        <img src="{{ asset_url }}" alt="bandeau" />
-        {% endimage %}
-    </div>
-</div>
-{% endblock %}
+{#{% block beforecontainer %}#}
+{#<div style="width:100%;" class="parallax-container">#}
+    {#<div class="parallax">#}
+        {#{% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}#}
+        {#<img src="{{ asset_url }}" alt="bandeau" />#}
+        {#{% endimage %}#}
+    {#</div>#}
+{#</div>#}
+{#{% endblock %}#}
 {% block aftercontainer %}
     <div style="width:100%;" class="parallax-container">
         <div class="parallax">
@@ -20,20 +20,40 @@
 {% endblock %}
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
-        <div class="container">
-            <br><br>
-            <h1 class="header center orange-text">Mon compte à l'éléfàn</h1>
-            <div class="row center">
-                <h5 class="header col s12 light">Bienvenue sur votre espace de gestion utilisateur</h5>
+        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <div class="container">
+                <br><br>
+                <h1 class="header center orange-text">Bonjour {{ app.user.username }}</h1>
+                <div class="row center">
+                    <h5 class="header col s12 light">Bienvenue sur ton espace personnel à l'éléfàn</h5>
+                </div>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <h3>Actions admin</h3>
+                    <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
+                {% endif %}
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <h3>Actions super admin</h3>
+                    <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commission</a>
+                    <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les services</a>
+                    <br>
+                    <a href="{{ path("user_import_csv") }}" class="">Importer des adhérents en CSV</a>
+                {% endif %}
             </div>
-            <div class="row center">
-                <a href="{{ path('find_me') }}" id="download-button" class="btn-large waves-effect waves-light orange">Créer mon compte</a>
+        {% else %}
+            <div class="container">
+                <br><br>
+                <h1 class="header center orange-text">Mon compte à l'éléfàn</h1>
+                <div class="row center">
+                    <h5 class="header col s12 light">Bienvenue sur votre espace de gestion utilisateur</h5>
+                </div>
+                <div class="row center">
+                    <a href="{{ path('find_me') }}" id="download-button" class="btn-large waves-effect waves-light orange">Créer mon compte</a>
+                </div>
+                <div class="row center">
+                    <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
+                </div>
             </div>
-            <div class="row center">
-                <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
-            </div>
-
-        </div>
+        {% endif %}
     </div>
 {% endblock %}
 

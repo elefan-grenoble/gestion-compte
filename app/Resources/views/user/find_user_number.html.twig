@@ -1,0 +1,64 @@
+{% extends 'layout.html.twig' %}
+
+{#{% block beforecontainer %}#}
+{#<div style="width:100%;" class="parallax-container">#}
+    {#<div class="parallax">#}
+        {#{% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}#}
+        {#<img src="{{ asset_url }}" alt="bandeau" />#}
+        {#{% endimage %}#}
+    {#</div>#}
+{#</div>#}
+{#{% endblock %}#}
+{% block aftercontainer %}
+    <div style="width:100%;" class="parallax-container">
+        <div class="parallax">
+            {% image '@AppBundle/Resources/public/img/jakob-owens-262566_2.jpg' %}
+            <img src="{{ asset_url }}" alt="bandeau" />
+            {% endimage %}
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <br><br>
+            <h2 class="header center orange-text">Recherche numéro d'adhérent</h2>
+            {% if form %}
+                {{ form_start(form) }}
+                {{ form_errors(form) }}
+                    <div class="row center">
+                        <div class="input-field col s6">
+                            {{ form_widget(form.firstname) }}
+                            {{ form_label(form.firstname) }}
+                        </div>
+                    </div>
+                    <div class="row center">
+                        {{ form_widget(form.find, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+                    </div>
+                {{ form_end(form) }}
+            {% endif %}
+            {% if beneficiaries %}
+            <div class="collection">
+                {% for beneficiary in beneficiaries %}
+                <a href="{{ path("confirm",{'member_number':beneficiary.user.memberNumber}) }}" class="collection-item">#{{ beneficiary.user.memberNumber }} {{ beneficiary.user.firstname }} {{ beneficiary.user.lastname | first | upper }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="row center">
+                <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            $('.parallax').parallax();
+        });
+    </script>
+{% endblock %}

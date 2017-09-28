@@ -44,7 +44,7 @@ services:
 #        class: Acme\AppBundle\EventListener\CreateUserEventListener
 #        tags:
 #            - { name: kernel.event_listener, event: createUser, method: askAffectationAdv }
-    kernel.listener.changePassword:
-        class: Acme\AppBundle\EventListener\ChangeUserEventListener
-        tags:
-            - { name: kernel.event_listener, event: changePassword, method: changePassword }
+#    kernel.listener.changePassword:
+#        class: Acme\AppBundle\EventListener\ChangeUserEventListener
+#        tags:
+#            - { name: kernel.event_listener, event: changePassword, method: changePassword }

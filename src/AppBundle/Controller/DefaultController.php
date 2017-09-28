@@ -2,9 +2,14 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\User;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 
 class DefaultController extends Controller
 {
@@ -20,16 +25,79 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/account", name="account")
+     * @Route("/find_me", name="find_me")
      */
-    public function accountAction(Request $request){
-        return $this->render('default/index.html.twig');
+    public function activeUserAccountAction(Request $request){
+        $form = $this->createFormBuilder()
+            ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent','attr' => array(
+                'placeholder' => '0',
+            )))
+            ->add('find', SubmitType::class, array('label' => 'Activer mon compte'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $member_number = $form->get('member_number')->getData();
+            $em = $this->getDoctrine()->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
+            return $this->redirectToRoute('confirm',array('member_number'=>$user->getId()));
+        }
+        return $this->render('user/find_me.html.twig', array(
+            'form' => $form->createView(),
+        ));
     }
 
     /**
-     * @Route("/find_me", name="find_me")
+     * @Route("/{member_number}/confirm", name="confirm")
+     */
+    public function confirmAction(User $user,Request $request){
+
+        return $this->render('user/confirm.html.twig', array(
+            'user' => $user,
+        ));
+    }
+
+    /**
+     * @Route("/find_user_number", name="find_user_number")
+     */
+    public function findUserNumberAction(Request $request){
+        $form = $this->createFormBuilder()
+            ->add('firstname', TextType::class, array('label' => 'Mon prénom','attr' => array(
+                'placeholder' => 'babar',
+            )))
+            ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $firstname = $form->get('firstname')->getData();
+            $em = $this->getDoctrine()->getManager();
+            $qb = $em->createQueryBuilder();
+            $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
+                ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')) )
+                ->getQuery()
+                ->getResult();
+            return $this->render('user/find_user_number.html.twig', array(
+                'form' => null,
+                'beneficiaries' => $beneficiaries
+            ));
+        }
+        return $this->render('user/find_user_number.html.twig', array(
+            'form' => $form->createView(),
+            'beneficiaries' => ''
+        ));
+    }
+    /**
+     * @Route("/help_find_user", name="find_user_help")
+     */
+    public function findUserHelpAction(Request $request){
+
+        return $this->render('default/find_user_number.html.twig');
+    }
+
+    /**
+     * @Route("/find_user", name="find_user")
      */
     public function findUserAction(Request $request){
-        return $this->render('default/find_me.html.twig');
+        die($request->getName());
     }
+
 }

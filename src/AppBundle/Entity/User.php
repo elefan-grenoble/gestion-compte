@@ -35,44 +35,42 @@ class User extends BaseUser
     protected $member_number;
 
     /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist"})
      */
     private $registrations;
 
     /**
-     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user")
+     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist"})
      */
     private $beneficiaries;
 
     /**
      * One User has One Address.
-     * @ORM\OneToOne(targetEntity="Address")
+     * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      */
     private $address;
+
+    /**
+    * Many Users have Many Commissions.
+    * @ORM\ManyToMany(targetEntity="Commission", inversedBy="users")
+    * @ORM\JoinTable(name="users_commissions")
+    */
+    private $commissions;
+
+    /**
+     * Many Users have Many Services.
+     * @ORM\ManyToMany(targetEntity="Service", inversedBy="users")
+     * @ORM\JoinTable(name="users_services")
+     */
+    private $services;
 
     public function __construct()
     {
         parent::__construct();
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
-        // your own logic
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function setPassword($password)
-    {
-        // create the Event and dispatch it
-        $event = new ChangeUserPasswordEvent($this,$password);
-        $dispatcher = new EventDispatcher();
-        $dispatcher->dispatch( UserEvents::CHANGE_PASSWORD  , $event);
-
-        return parent::setPassword($password);
-    }
-
-
 
     /**
      * Set memberNumber
@@ -188,5 +186,160 @@ class User extends BaseUser
     public function getAddress()
     {
         return $this->address;
+    }
+
+    /**
+     * Add commission
+     *
+     * @param \AppBundle\Entity\Commission $commission
+     *
+     * @return User
+     */
+    public function addComission(\AppBundle\Entity\Commission $commission)
+    {
+        $this->comissions[] = $commission;
+
+        return $this;
+    }
+
+    /**
+     * Remove commission
+     *
+     * @param \AppBundle\Entity\Commission $commission
+     */
+    public function removeCommission(\AppBundle\Entity\Commission $commission)
+    {
+        $this->comissions->removeElement($commission);
+    }
+
+    /**
+     * Get commissions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCommissions()
+    {
+        return $this->commissions;
+    }
+
+    /**
+     * Add service
+     *
+     * @param \AppBundle\Entity\Service $service
+     *
+     * @return User
+     */
+    public function addService(\AppBundle\Entity\Service $service)
+    {
+        $this->services[] = $service;
+
+        return $this;
+    }
+
+    /**
+     * Remove service
+     *
+     * @param \AppBundle\Entity\Service $service
+     */
+    public function removeService(\AppBundle\Entity\Service $service)
+    {
+        $this->services->removeElement($service);
+    }
+
+    /**
+     * Get services
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getServices()
+    {
+        return $this->services;
+    }
+
+    public function getMainBeneficiary(){
+        foreach ($this->getBeneficiaries() as $beneficiary){
+            if ($beneficiary->getIsMain())
+                return $beneficiary;
+        }
+        return null;
+    }
+
+    public function getFirstname() {
+        return $this->getMainBeneficiary()->getFirstname();
+    }
+
+    public function getLastname() {
+        return $this->getMainBeneficiary()->getLastname();
+    }
+
+    public  function getAnonymousEmail(){
+        $email = $this->getEmail();
+        $splited = explode("@",$email);
+        $return = '';
+        foreach ($splited as $part){
+            $splited_part = explode(".",$part);
+            foreach ($splited_part as $mini_part){
+                $first_char = substr($mini_part,0,1);
+                $last_char = substr($mini_part,strlen($mini_part)-1,1);
+                $center = substr($mini_part,1,strlen($mini_part)-2);
+                if (strlen($center)>0)
+                    $return .= $first_char.preg_replace('/./','*',$center).$last_char;
+                else
+                    $return .= $first_char.$last_char;
+                $return .= '.';
+            }
+            $return = substr($return,0,strlen($return)-1);
+            $return .= '@';
+        }
+        $return = substr($return,0,strlen($return)-1);
+        return $return;
+    }
+
+    public  function getAnonymousLastname(){
+        $lastname = $this->getLastname();
+        $splited = explode(" ",$lastname);
+        $return = '';
+        foreach ($splited as $part){
+            $splited_part = explode("-",$part);
+            foreach ($splited_part as $mini_part){
+                $first_char = substr($mini_part,0,1);
+                $last_char = substr($mini_part,strlen($mini_part)-1,1);
+                $center = substr($mini_part,1,strlen($mini_part)-2);
+                if (strlen($center)>0)
+                    $return .= $first_char.preg_replace('/./','*',$center).$last_char;
+                else
+                    $return .= $first_char.$last_char;
+                $return .= '-';
+            }
+            $return = substr($return,0,strlen($return)-1);
+            $return .= ' ';
+        }
+        $return = substr($return,0,strlen($return)-1);
+        return $return;
+    }
+
+    static function makeUsername($firstname,$lastname,$extra = ''){
+        $lastname = preg_replace('/[-\/]+/', ' ', $lastname);
+        $ln = explode(' ',$lastname);
+//        if (in_array(strtolower($ln[0]),array('la','du','de'))&&count($ln>1))
+        if (strlen($ln[0])<3&&count($ln)>1)
+            $ln = $ln[0].$ln[1];
+        else
+            $ln = $ln[0];
+        $username = strtolower(substr(explode(' ',$firstname)[0],0,1).$ln);
+        $username = preg_replace('/[^a-z]/', '', $username);
+        $username .= $extra;
+        return $username;
+    }
+
+    static function randomPassword() {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
     }
 }

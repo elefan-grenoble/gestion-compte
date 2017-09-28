@@ -29,6 +29,20 @@ class Beneficiary
     private $isMain;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_ambassador", type="boolean")
+     */
+    private $isAmbassador;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="is_expert", type="boolean")
+     */
+    private $isExpert;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="lastname", type="string", length=255)
@@ -214,5 +228,53 @@ class Beneficiary
     public function getUser()
     {
         return $this->user;
+    }
+
+    /**
+     * Set isAmbassador
+     *
+     * @param boolean $isAmbassador
+     *
+     * @return Beneficiary
+     */
+    public function setIsAmbassador($isAmbassador)
+    {
+        $this->isAmbassador = $isAmbassador;
+
+        return $this;
+    }
+
+    /**
+     * Get isAmbassador
+     *
+     * @return boolean
+     */
+    public function getIsAmbassador()
+    {
+        return $this->isAmbassador;
+    }
+
+    /**
+     * Set isExpert
+     *
+     * @param boolean $isExpert
+     *
+     * @return Beneficiary
+     */
+    public function setIsExpert($isExpert)
+    {
+        $this->isExpert = $isExpert;
+
+        return $this;
+    }
+
+    /**
+     * Get isExpert
+     *
+     * @return boolean
+     */
+    public function getIsExpert()
+    {
+        return $this->isExpert;
     }
 }

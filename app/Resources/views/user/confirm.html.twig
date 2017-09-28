@@ -1,0 +1,61 @@
+{% extends 'layout.html.twig' %}
+
+{#{% block beforecontainer %}#}
+{#<div style="width:100%;" class="parallax-container">#}
+    {#<div class="parallax">#}
+        {#{% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}#}
+        {#<img src="{{ asset_url }}" alt="bandeau" />#}
+        {#{% endimage %}#}
+    {#</div>#}
+{#</div>#}
+{#{% endblock %}#}
+{% block aftercontainer %}
+    <div style="width:100%;" class="parallax-container">
+        <div class="parallax">
+            {% image '@AppBundle/Resources/public/img/jakob-owens-262566_2.jpg' %}
+            <img src="{{ asset_url }}" alt="bandeau" />
+            {% endimage %}
+        </div>
+    </div>
+{% endblock %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <br>
+            {% if user %}
+            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} trouvé !</h2>
+            <div class="row center">
+                 Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                        <input type="hidden" name="username" value="{{ user.username }}" />
+                    <div>
+                        Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                        <br>
+                        <input type="submit" name="submit" value="Oui !" class="btn " />
+                    </div>
+                </form>
+            </div>
+            <div class="row center">
+                <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_user_number') }}">Cherchez mon numéro d'adhérent</a></p>
+            </div>
+            {% else %}
+                <h2 class="header center orange-text">Oups...</h2>
+                <h5>J'ai grande mémoire mais je n'ai rien trouvé...</h5>
+                <div class="row center">
+                    <p class=" col s12 light"><a href="{{ path('find_user_number') }}" class="btn">Cherchez mon numéro d'adhérent</a></p>
+                    <p class=" col s12 light"><a href="{{ path('find_user_help') }}">Je ne me trouves pas !</a></p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            $('.parallax').parallax();
+        });
+    </script>
+{% endblock %}

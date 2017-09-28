@@ -26,11 +26,13 @@
                 <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">L'éléfàn // compte</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            {{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |
-                            <li><a href="{{ path('fos_user_security_logout') }}"><span class="glyphicon glyphicon-log-out"></span>
-                                    {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
+                            {#{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |#}
+                            <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
+                                    {#{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}#}
                                 </a></li>
-                            <li><a href="/account"><span class="glyphicon glyphicon-user"></span> Mon compte</a></li>
+                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons small">settings</i>
+                                    {#{{ app.user.username }}#}
+                                </a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}
@@ -38,11 +40,12 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            {{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |
-                            <li><a href="{{ path('fos_user_security_logout') }}"><span class="glyphicon glyphicon-log-out"></span>
+                            {#{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |#}
+                            <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
-                            <li><a href="{{ path('account') }}"><span class="glyphicon glyphicon-user"></span> Mon compte</a></li>
+                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
+                                    {{ app.user.username }}</a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}
@@ -59,9 +62,14 @@
                     {% if app.request.hasPreviousSession %}
                         {% for type, messages in app.session.flashBag.all %}
                             {% for message in messages %}
-                                <div class="{{ type }}">
-                                    {{ message|trans({}, 'FOSUserBundle') }}
+                                <div class="row">
+                                    <div class="col s12 m6">
+                                        <div class="card-panel teal {{ type }}">
+                                            <span class="white-text">{{ message|trans({}, 'FOSUserBundle') }}</span>
+                                        </div>
+                                    </div>
                                 </div>
+
                             {% endfor %}
                         {% endfor %}
                     {% endif %}

@@ -1,0 +1,12 @@
+{% if  user %}
+    {{ user.username }} |
+    {% if  user.beneficiaries|length > 0 %}
+        {{ user.beneficiaries[0].firstname }}
+        <b>{{ user.beneficiaries[0].lastname|upper }}</b>
+    {% endif %}
+    {#{% if  user.address|length > 0 %}#}
+    {#{{ user.address.zipcode }}#}
+    {#{{ user.address.city }}#}
+    {#{% endif %}#}
+
+{% endif %}

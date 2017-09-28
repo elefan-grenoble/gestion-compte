@@ -12,6 +12,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Registration
 {
+    const TYPE_CASH = 1;
+    const TYPE_CHECK = 2;
+    const TYPE_LOCAL = 3;
+    const TYPE_CREDIT_CARD = 4;
+    const TYPE_DEFAULT = 5;
     /**
      * @var int
      *
@@ -38,7 +43,7 @@ class Registration
     /**
      * @var string
      *
-     * @ORM\Column(name="mode", type="string", length=255)
+     * @ORM\Column(name="mode", type="integer")
      */
     private $mode;
 

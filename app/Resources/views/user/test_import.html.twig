@@ -1,0 +1,19 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    Test import csv
+    <a href="{{ path("user_import_csv") }}" class="btn waves-effect waves-light">Import new csv</a>
+    <ul class="collection with-header">
+        <li class="collection-header"><h4>Users to import</h4></li>
+        {% for user in users %}
+            <li class="collection-item">
+                {% include "user/_partial/full_line.html.twig" with { user: user[0] } %}
+                <a href="#!" class="secondary-content">
+                    {{ user[1][1] }}
+                    <i class="material-icons">{{ user[1][0] }}</i>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
