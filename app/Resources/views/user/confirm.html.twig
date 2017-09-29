@@ -23,8 +23,18 @@
         <div class="container">
             <br>
             {% if user %}
-            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} trouvé !</h2>
+            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} actif !</h2>
             <div class="row center">
+                {% if user.isEnabled %}
+                    Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                    <br>
+                    Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
+                    <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                        <input type="hidden" name="username" value="{{ user.username }}" />
+                        <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
+                        <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
+                    </form>
+                {% else %}
                  Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
                 <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                         <input type="hidden" name="username" value="{{ user.username }}" />
@@ -34,6 +44,7 @@
                         <input type="submit" name="submit" value="Oui !" class="btn " />
                     </div>
                 </form>
+                {% endif %}
             </div>
             <div class="row center">
                 <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_user_number') }}">Cherchez mon numéro d'adhérent</a></p>
