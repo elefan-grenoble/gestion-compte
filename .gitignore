@@ -10,7 +10,7 @@ composer.lock
 /app/config/parameters.yml
 /app/config/parameters.ini
 
-/bin
+#/bin
 /web
 /vendor
 
