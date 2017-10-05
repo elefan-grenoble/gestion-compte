@@ -12,6 +12,9 @@ composer.lock
 
 #/bin
 /web
+!/web/app.php
+!/web/app_dev.php
+!/web/robots.txt
 /vendor
 
 # PHPUnit
