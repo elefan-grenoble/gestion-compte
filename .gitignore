@@ -11,10 +11,11 @@ composer.lock
 /app/config/parameters.ini
 
 #/bin
-/web
-!/web/app.php
-!/web/app_dev.php
-!/web/robots.txt
+/web/bundles
+/web/css
+/web/fonts
+/web/images
+/web/js
 /vendor
 
 # PHPUnit
