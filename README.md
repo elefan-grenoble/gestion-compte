@@ -14,3 +14,5 @@ Espace adhérent l'éléfàn
 
 * git clone *this_repo*
 * composer install
+* bin/console doctrine:schema:create
+* visite SITE_URL/user/install_admin
