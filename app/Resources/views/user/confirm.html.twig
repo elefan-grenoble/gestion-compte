@@ -23,7 +23,7 @@
         <div class="container">
             <br>
             {% if user %}
-            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} actif !</h2>
+            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} trouvé !</h2>
             <div class="row center">
                 {% if user.isEnabled %}
                     Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
