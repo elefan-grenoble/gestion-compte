@@ -265,7 +265,12 @@ class User extends BaseUser
     }
 
     public function getFirstname() {
-        return $this->getMainBeneficiary()->getFirstname();
+        $mainBeneficiary = $this->getMainBeneficiary();
+        if ($mainBeneficiary)
+            return $mainBeneficiary->getFirstname();
+        else
+            return $this->getUsername();
+
     }
 
     public function getLastname() {
