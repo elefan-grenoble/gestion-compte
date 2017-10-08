@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * User controller.
@@ -30,6 +31,7 @@ class UserController extends Controller
      *
      * @Route("/", name="user_index")
      * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -77,6 +79,7 @@ class UserController extends Controller
      *
      * @Route("/importcsv", name="user_import_csv")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function csvImportAction(Request $request)
     {
@@ -300,6 +303,7 @@ class UserController extends Controller
      *
      * @Route("/{username}", name="user_show")
      * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function showAction(User $user)
     {
@@ -316,6 +320,7 @@ class UserController extends Controller
      *
      * @Route("/{username}/edit", name="user_edit")
      * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, User $user)
     {
@@ -341,6 +346,7 @@ class UserController extends Controller
      *
      * @Route("/{id}", name="user_delete")
      * @Method("DELETE")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, User $user)
     {
