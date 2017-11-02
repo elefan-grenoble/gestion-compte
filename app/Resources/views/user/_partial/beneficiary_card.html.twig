@@ -1,0 +1,26 @@
+<div class="col s4 m6">
+    <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue{% endif %}">
+        <div class="card-content white-text">
+            <span class="card-title">{{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
+                {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
+                {% if beneficiary.isAmbassador %}<i class="material-icons">face</i>{% endif %}</span>
+            <div class="row">
+                <div class="col s4">{{ beneficiary.phone }}</div>
+                <div class="col s8">{{ beneficiary.email }}</div>
+            </div>
+        </div>
+        {% if not beneficiary.isMain %}
+            <div class="card-action">
+                {% if delete_form %}
+                    {{ form_start(delete_form) }}
+                        <a href="{{ path('user_edit_beneficiary_edit',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn">Editer</a>
+                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
+                    {{ form_end(delete_form) }}
+                {% else %}
+                    <a href="{{ path('user_edit_beneficiary_edit',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn">Editer</a>
+                {% endif %}
+            </div>
+        {% else %}
+        {% endif %}
+    </div>
+</div>

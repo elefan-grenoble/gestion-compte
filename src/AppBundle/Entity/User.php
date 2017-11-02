@@ -11,7 +11,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use AppBundle\Event\UserEvents;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Doctrine\Common\Collections\ArrayCollection;
-
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ORM\Entity
@@ -36,6 +36,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist"})
+     * @OrderBy({"date" = "DESC"})
      */
     private $registrations;
 
@@ -43,6 +44,13 @@ class User extends BaseUser
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist"})
      */
     private $beneficiaries;
+
+    /**
+     * One User has One Main Beneficiary.
+     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist"})
+     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id")
+     */
+    private $mainBeneficiary;
 
     /**
      * One User has One Address.
@@ -256,10 +264,13 @@ class User extends BaseUser
         return $this->services;
     }
 
-    public function getMainBeneficiary(){
-        foreach ($this->getBeneficiaries() as $beneficiary){
-            if ($beneficiary->getIsMain())
-                return $beneficiary;
+    public function setLastRegistration(){
+        return null;
+    }
+
+    public function getLastRegistration(){
+        if ($this->getRegistrations()->count()){
+            return ($this->getRegistrations()->first());
         }
         return null;
     }
@@ -275,6 +286,10 @@ class User extends BaseUser
 
     public function getLastname() {
         return $this->getMainBeneficiary()->getLastname();
+    }
+
+    public function getTmpToken($key = ''){
+        return md5($this->getEmail().$this->getLastname().$this->getPassword().$key.date('d'));
     }
 
     public  function getAnonymousEmail(){
@@ -346,5 +361,49 @@ class User extends BaseUser
             $pass[] = $alphabet[$n];
         }
         return implode($pass); //turn the array into a string
+    }
+
+    /**
+     * Add commission
+     *
+     * @param \AppBundle\Entity\Commission $commission
+     *
+     * @return User
+     */
+    public function addCommission(\AppBundle\Entity\Commission $commission)
+    {
+        $this->commissions[] = $commission;
+
+        return $this;
+    }
+
+    /**
+     * Set mainBeneficiary
+     *
+     * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
+     *
+     * @return User
+     */
+    public function setMainBeneficiary(\AppBundle\Entity\Beneficiary $mainBeneficiary = null)
+    {
+        $this->addBeneficiary($mainBeneficiary);
+
+        $this->mainBeneficiary = $mainBeneficiary;
+
+        return $this;
+    }
+
+    /**
+     * Get mainBeneficiary
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getMainBeneficiary()
+    {
+        if (!$this->mainBeneficiary){
+            if ($this->getBeneficiaries()->count())
+                $this->setMainBeneficiary($this->getBeneficiaries()->first());
+        }
+        return $this->mainBeneficiary;
     }
 }

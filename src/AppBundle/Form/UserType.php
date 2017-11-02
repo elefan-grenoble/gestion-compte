@@ -14,11 +14,9 @@ class UserType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('member_number',IntegerType::class);
+        $builder->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
         $builder->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
         $builder->add('address', AddressType::class,array('label'=>' '));
-        //$builder->add('registration', RegistrationType::class,array('label'=>'Inscription'));
-
     }
 
     /**

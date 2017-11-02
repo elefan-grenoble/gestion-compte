@@ -1,0 +1,17 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+        <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">edit</i><span>Editer un fiche adhérent</span>
+{% endblock %}
+
+{% block content %}
+    <h3>&Eacute;diter un utilisateur</h3>
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    {{ form_end(form) }}
+    <p>
+        Si tu ne connais pas le numéro d'adhérent, <a href="{{ path('find_user_number') }}">clique ici pour le retrouver</a>.
+    </p>
+{% endblock %}

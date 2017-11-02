@@ -3,30 +3,21 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>{% block title %}L&rsquo;éléfàn // compte{% endblock %}</title>
+        <title>{% block title %}espace membre @ l&rsquo;éléfàn{% endblock %}</title>
         {%- include "MaterializeBundle:Materialize:css.html.twig" -%}
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Raleway:400,600,800" rel="stylesheet">
         {% block stylesheets %}{% endblock %}
-        <style>
-            body {
-                display: flex;
-                min-height: 100vh;
-                flex-direction: column;
-            }
-
-            main {
-                flex: 1 0 auto;
-            }
-        </style>
+        <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
         <header>
-            <nav class="blue-grey lighten-1" role="navigation">
-                <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">L'éléfàn // compte</a>
+            <nav class="main-navigation" role="navigation">
+                <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">Espace membre @ L'éléfàn</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {#{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |#}
+                            <small>{{ app.user.username }}</small>
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
                                     {#{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}#}
                                 </a></li>
@@ -56,14 +47,19 @@
         </header>
         <main>
             {% block beforecontainer %}{% endblock %}
-
+            <div class="wrapper breadcrumbs blue-grey lighten-5">
+                <div class="col s12">
+                    {% block breadcrumps %}
+                    {% endblock breadcrumps %}
+                </div>
+            </div>
             <div class="container">
                 <div class="section">
                     {% if app.request.hasPreviousSession %}
                         {% for type, messages in app.session.flashBag.all %}
                             {% for message in messages %}
                                 <div class="row">
-                                    <div class="col s12 m6">
+                                    <div class="col s12">
                                         <div class="card-panel teal {{ type }}">
                                             <span class="white-text">{{ message|trans({}, 'FOSUserBundle') }}</span>
                                         </div>
@@ -81,42 +77,8 @@
 
             {% block aftercontainer %}{% endblock %}
 
-            {#<div class="container">#}
-            {#<div class="section">#}
-
-            {#<!--   Icon Section   -->#}
-            {#<div class="row">#}
-            {#<div class="col s12 m4">#}
-            {#<div class="icon-block">#}
-            {#<h2 class="center light-blue-text"><i class="material-icons">flash_on</i></h2>#}
-            {#<h5 class="center">Speeds up development</h5>#}
-
-            {#<p class="light">We did most of the heavy lifting for you to provide a default stylings that incorporate our custom components. Additionally, we refined animations and transitions to provide a smoother experience for developers.</p>#}
-            {#</div>#}
-            {#</div>#}
-
-            {#<div class="col s12 m4">#}
-            {#<div class="icon-block">#}
-            {#<h2 class="center light-blue-text"><i class="material-icons">group</i></h2>#}
-            {#<h5 class="center">User Experience Focused</h5>#}
-
-            {#<p class="light">By utilizing elements and principles of Material Design, we were able to create a framework that incorporates components and animations that provide more feedback to users. Additionally, a single underlying responsive system across all platforms allow for a more unified user experience.</p>#}
-            {#</div>#}
-            {#</div>#}
-
-            {#<div class="col s12 m4">#}
-            {#<div class="icon-block">#}
-            {#<h2 class="center light-blue-text"><i class="material-icons">settings</i></h2>#}
-            {#<h5 class="center">Easy to work with</h5>#}
-
-            {#<p class="light">We have provided detailed documentation as well as specific code examples to help new users get started. We are also always open to feedback and can answer any questions a user may have about Materialize.</p>#}
-            {#</div>#}
-            {#</div>#}
-            {#</div>#}
-            {#</div>#}
-            {#</div>#}
         </main>
-        <footer class="page-footer blue-grey">
+        <footer class="page-footer">
             <div class="footer-copyright">
                 <div class="container">
                     © 2017 Copyright L'éléfàn
@@ -125,7 +87,14 @@
             </div>
         </footer>
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
+        {#<script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>#}
         {%- include "MaterializeBundle:Materialize:js.html.twig" -%}
+        <script>
+            $(document).ready(function() {
+                $('select').material_select();
+            });
+            //todo put this in a file
+        </script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

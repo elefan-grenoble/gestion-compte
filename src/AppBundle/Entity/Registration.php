@@ -55,6 +55,12 @@ class Registration
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id")
+     */
+    private $registrar;
+
+    /**
      * Get id
      *
      * @return int
@@ -158,5 +164,29 @@ class Registration
     public function getUser()
     {
         return $this->user;
+    }
+
+    /**
+     * Set registrar
+     *
+     * @param \AppBundle\Entity\User $registrar
+     *
+     * @return Registration
+     */
+    public function setRegistrar(\AppBundle\Entity\User $registrar = null)
+    {
+        $this->registrar = $registrar;
+
+        return $this;
+    }
+
+    /**
+     * Get registrar
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getRegistrar()
+    {
+        return $this->registrar;
     }
 }

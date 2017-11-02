@@ -1,21 +1,12 @@
 {% extends 'layout.html.twig' %}
 
-{#{% block beforecontainer %}#}
-{#<div style="width:100%;" class="parallax-container">#}
-    {#<div class="parallax">#}
-        {#{% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}#}
-        {#<img src="{{ asset_url }}" alt="bandeau" />#}
-        {#{% endimage %}#}
-    {#</div>#}
-{#</div>#}
-{#{% endblock %}#}
+{% block beforecontainer %}
+{% endblock %}
 {% block aftercontainer %}
-    <div style="width:100%;" class="parallax-container">
-        <div class="parallax">
-            {% image '@AppBundle/Resources/public/img/jakob-owens-262566_2.jpg' %}
-            <img src="{{ asset_url }}" alt="bandeau" />
-            {% endimage %}
-        </div>
+    <div class="center-align">
+        {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
+        <img src="{{ asset_url }}" alt="elefan" />
+        {% endimage %}
     </div>
 {% endblock %}
 {% block content %}
@@ -23,16 +14,17 @@
         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             <div class="container">
                 <br><br>
-                <h1 class="header center orange-text">Bonjour {{ app.user.firstname }}</h1>
+                <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
                 <div class="row center">
-                    <h5 class="header col s12 light">Bienvenue sur ton espace personnel à l'éléfàn</h5>
+                    <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                 </div>
+                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% if is_granted("ROLE_ADMIN") %}
-                    <h3>Actions admin</h3>
+                    <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
                 {% endif %}
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
-                    <h3>Actions super admin</h3>
+                    <h5>Actions super admin</h5>
                     <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commission</a>
                     <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les services</a>
                     <br>
@@ -42,9 +34,9 @@
         {% else %}
             <div class="container">
                 <br><br>
-                <h1 class="header center orange-text">Mon compte à l'éléfàn</h1>
+                <h3 class="header center orange-text">Mon compte à l'éléfàn</h3>
                 <div class="row center">
-                    <h5 class="header col s12 light">Bienvenue sur votre espace de gestion utilisateur</h5>
+                    <p class="col s12 light">Bienvenue sur votre espace de gestion utilisateur</p>
                 </div>
                 <div class="row center">
                     <a href="{{ path('find_me') }}" id="download-button" class="btn-large waves-effect waves-light orange">Créer mon compte</a>
@@ -60,9 +52,4 @@
 {% block stylesheets %}
 {% endblock %}
 {% block javascripts %}
-    <script>
-        $(document).ready(function(){
-            $('.parallax').parallax();
-        });
-    </script>
 {% endblock %}

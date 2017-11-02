@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">build</i><span>Outils adhésion et ré-adhésion</span>
+{% endblock %}
+
+{% block content %}
+    <a href="{{ path('user_new') }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Nouvelle adhésion</a>
+    <a href="{{ path('find_user_number') }}" class="waves-effect waves-light btn"><i class="material-icons left">search</i>Trouver un numéro d'adhérent</a>
+    <a href="{{ path('user_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
+{% endblock %}

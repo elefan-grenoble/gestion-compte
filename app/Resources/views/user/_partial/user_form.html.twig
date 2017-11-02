@@ -1,0 +1,17 @@
+
+    {{ form_row(form.member_number) }}
+    {% include "user/_partial/beneficiary_form.html.twig" with { form: form.mainBeneficiary } %}
+<div class="address row">
+    <div class="stree1 col s6">
+        {{ form_row(form.address.street1) }}
+    </div>
+    <div class="stree2 col s6">
+        {{ form_row(form.address.street2) }}
+    </div>
+    <div class="zipcode col s3">
+        {{ form_row(form.address.zipcode) }}
+    </div>
+    <div class="city col s9">
+        {{ form_row(form.address.city) }}
+    </div>
+</div>

@@ -6,14 +6,20 @@ use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
-use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use AppBundle\Form\BeneficiaryType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -44,6 +50,16 @@ class UserController extends Controller
         ));
     }
 
+    /**
+     * Lists all user entities.
+     *
+     * @Route("/office_tools", name="user_office_tools")
+     * @Method("GET")
+     */
+    public function officeToolsAction()
+    {
+        return $this->render('user/office_tools.html.twig');
+    }
 
     /**
      * install admin
@@ -79,7 +95,7 @@ class UserController extends Controller
      *
      * @Route("/importcsv", name="user_import_csv")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function csvImportAction(Request $request)
     {
@@ -141,9 +157,15 @@ class UserController extends Controller
                     if (count($data)>11&&isset($data[3])&&isset($data[4])&&count($matches)&&strlen($data[3])>1&&strlen($data[4])>1){ // on ne traite que les colonnes qui commence par un numéro d'adhérent valide (entier)
                         $member_number = $data[0];
                         $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$member_number));
-                        if ($user)
-                            $return[] = array($user,array("error","user with same member number already exist"));
-                        else {
+                        if ($user){
+                            $mail = $data[9];
+                            if (isset($data[9])&&filter_var($mail, FILTER_VALIDATE_EMAIL)&&($user->getEmail() != $mail)) {
+                                $user->setEmail($mail)->save();
+                                $return[] = array($user,array("error","user with same member number already exist, email updated"));
+                            }else{
+                                $return[] = array($user,array("error","user with same member number already exist"));
+                            }
+                        } else {
                             $mail = $data[9];
                             $validator = $this->container->get('validator');
                             $constraints = array(
@@ -280,22 +302,56 @@ class UserController extends Controller
      */
     public function newAction(Request $request)
     {
-        $user = new User();
-        $form = $this->createForm('AppBundle\Form\UserType', $user);
-        $form->handleRequest($request);
+        $securityContext = $this->container->get('security.authorization_checker');
+        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $user = new User();
 
-        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
 
-            return $this->redirectToRoute('user_show', array('id' => $user->getId()));
+            //todo use the first available, not the bigest plus one
+            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'DESC'));
+            $mm = 1;
+            if (count($users) && isset($users[0]))
+                $mm = $users[0]->getMemberNumber() + 1;
+            $user->setMemberNumber($mm);
+
+            $form = $this->createForm('AppBundle\Form\UserType', $user);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $username = User::makeUsername($user->getFirstname(),$user->getLastname());
+                $qb = $em->createQueryBuilder();
+                $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+                    ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
+                    ->getQuery()
+                    ->getResult();
+                $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
+                if (count($users)||$already_registred){
+                    $username = User::makeUsername($user->getFirstname(),$user->getLastname(),count($users)+1+$already_registred);
+                }
+                $user->setUsername($username);
+                $password = User::randomPassword();
+                $user->setPassword($password);
+                $user->getMainBeneficiary()->setUser($user);
+                $user->setEmail($user->getMainBeneficiary()->getEmail());
+
+                $em->persist($user);
+                $em->flush();
+
+                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                else
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+            }
+
+            return $this->render('user/new.html.twig', array(
+                'user' => $user,
+                'form' => $form->createView(),
+            ));
+        }else{
+            return $this->redirectToRoute('fos_user_security_login');
         }
-
-        return $this->render('user/new.html.twig', array(
-            'user' => $user,
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -307,6 +363,10 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+
         $deleteForm = $this->createDeleteForm($user);
 
         return $this->render('user/show.html.twig', array(
@@ -315,30 +375,305 @@ class UserController extends Controller
         ));
     }
 
+
+
+    /**
+     * Displays a form to edit an existing user entity.
+     *
+     * @Route("/edit/firewall", name="user_edit_firewall")
+     * @Method({"GET", "POST"})
+     */
+    public function editFirewallAction(Request $request)
+    {
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $username = $request->request->get('username');
+        if ($username){
+            $em = $this->getDoctrine()->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            $form = $this->createFormBuilder()
+                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent','disabled' => true,'attr' => array( 'value'=>$user->getMemberNumber())))
+                ->add('username', HiddenType::class, array('attr' => array( 'value'=>$user->getUsername())))
+                ->add('email', EmailType::class, array('label' => 'Courriel complet','attr' => array('placeholder' => $user->getAnonymousEmail())))
+                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de '.$user->getFirstname(),'attr' => array('class' => 'btn')))
+                ->getForm();
+        }else{
+            $form = $this->createFormBuilder()
+                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                ->add('email', EmailType::class, array('label' => 'email'))
+                ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                ->getForm();
+        }
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $member_number = $form->get('member_number')->getData();
+            $username = $form->get('username')->getData();
+            $email = $form->get('email')->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $user = null;
+            if ($username)
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            else if($member_number)
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
+            if ($user&&$email&&($user->getEmail()==$email)){
+                $session = new Session();
+                $session->set('token_key',uniqid());
+                return $this->redirectToRoute('user_edit',array(
+                    'username'=>$user->getUsername(),
+                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                            ->getToken()->getUser()->getUsername())));
+            }
+        }
+
+        return $this->render('user/edit_firewall.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
     /**
      * Displays a form to edit an existing user entity.
      *
      * @Route("/{username}/edit", name="user_edit")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, User $user)
     {
-        $deleteForm = $this->createDeleteForm($user);
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
+            ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $editForm = $this->createForm('AppBundle\Form\UserType', $user);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+            else
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+        }
+        $beneficiary = new Beneficiary();
+        $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType',$beneficiary);
+        $beneficiaryForm->handleRequest($request);
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
+            $beneficiary->setUser($user);
+            $user->addBeneficiary($beneficiary);
 
-            return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($beneficiary);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+            else
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+        }
+
+        $registrationForm = $this->createFormBuilder()
+            ->setAction($this->generateUrl('user_edit_registration_add',array('username'=>$user->getUsername(),'token'=>$user->getTmpToken($session->get('token_key').$current_app_user->getUsername()))))
+            ->setMethod('POST')
+            ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
+            ->add('mode', ChoiceType::class, array('choices'  => array(
+                'Espèce' => Registration::TYPE_CASH,
+                'Chèque' => Registration::TYPE_CHECK,
+                'Cairn' => Registration::TYPE_LOCAL,
+                'CB' => Registration::TYPE_CREDIT_CARD,
+            ),'label' => 'Mode de réglement')) //todo, make it dynamic
+            ->add('submit', SubmitType::class, array('label' => 'Enregistrer','attr' => array('class' => 'btn')))
+            ->getForm();
+
+        $deleteBeneficiaryForms = array();
+        foreach ($user->getBeneficiaries() as $beneficiary){
+            $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
+                ->setMethod('DELETE')
+                ->getForm()->createView();
         }
 
         return $this->render('user/edit.html.twig', array(
             'user' => $user,
             'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
+            'new_registration_form' => $registrationForm->createView(),
+            'new_beneficiary_form' => $beneficiaryForm->createView(),
+            'delete_beneficiary_forms' => $deleteBeneficiaryForms
         ));
+    }
+
+    /**
+     * Displays a form to edit an existing user entity.
+     *
+     * @Route("/{username}/edit/add_registration", name="user_edit_registration_add")
+     * @Method({"POST"})
+     */
+    public function editAddRegistrationAction(Request $request, User $user)
+    {
+        $session = new Session();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
+                ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $form = $this->createFormBuilder()
+            ->add('amount', TextType::class)
+            ->add('mode', ChoiceType::class,array('choices'  => array(
+        'Espèce' => Registration::TYPE_CASH,
+        'Chèque' => Registration::TYPE_CHECK,
+        'Cairn' => Registration::TYPE_LOCAL,
+        'CB' => Registration::TYPE_CREDIT_CARD,
+    )))
+            ->add('submit', SubmitType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $amount = floatval($form->get('amount')->getData());
+            $mode = $form->get('mode')->getData();
+            if ($amount<=0){
+                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
+                return $this->redirectToRoute('user_edit',array(
+                    'username'=>$user->getUsername(),
+                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                            ->getToken()->getUser()->getUsername())));
+            }
+
+            if ($user){
+                if ($current_user->getId()==$user->getId()){
+                    $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
+                    return $this->redirectToRoute('user_edit',array(
+                        'username'=>$user->getUsername(),
+                        'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                                ->getToken()->getUser()->getUsername())));
+                }
+                $date = new DateTime('now');
+                $r = $user->getLastRegistration();
+                if ($r){
+                    $Y = $r->getDate()->format('Y');
+                    if ($Y == $date->format('Y')){
+                        $session->getFlashBag()->add('warning', 'l\'adhésion précédente du '.$r->getDate()->format('d F Y').' est encore valable !');
+                        return $this->redirectToRoute('user_edit',array(
+                            'username'=>$user->getUsername(),
+                            'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                                    ->getToken()->getUser()->getUsername())));
+                    }
+                }
+
+                $registration = new Registration();
+                $registration->setAmount($amount);
+                $registration->setMode($mode);
+                $registration->setRegistrar($current_user);
+
+                $registration->setDate($date); //Y-m-d H:i:s
+                $registration->setUser($user);
+
+                $user->addRegistration($registration);
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($registration);
+                $em->persist($user);
+                $em->flush();
+
+                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+                return $this->redirectToRoute('user_edit',array(
+                    'username'=>$user->getUsername(),
+                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                            ->getToken()->getUser()->getUsername())));
+            }
+        }
+
+        return $this->redirectToRoute('user_edit',array(
+        'username'=>$user->getUsername(),
+        'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                ->getToken()->getUser()->getUsername())));
+    }
+
+
+    /**
+     * Displays a form to edit an existing user entity.
+     *
+     * @Route("/{username}/beneficiary/{id}/edit", name="user_edit_beneficiary_edit")
+     * @Method({"GET", "POST"})
+     */
+    public function editBeneficiaryAction(Request $request, User $user, Beneficiary $beneficiary)
+    {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        //todo protect it from direct access
+//        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
+//                ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
+//            throw $this->createAccessDeniedException();
+//        }
+
+        $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                return $this->redirectToRoute('user_edit', array('username' => $beneficiary->getUser()->getUsername()));
+            else
+                return $this->redirectToRoute('user_edit', array(
+                    'username' => $beneficiary->getUser()->getUsername(),
+                    'token' => $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+        }
+
+        return $this->render('user/edit_beneficiary.html.twig', array(
+            'user' => $beneficiary->getUser(),
+            'edit_form' => $editForm->createView(),
+        ));
+    }
+
+    /**
+     * Deletes a beneficiary entity.
+     *
+     * @Route("/{username}/beneficiary/{id}", name="user_edit_beneficiary_delete")
+     * @Method("DELETE")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function deleteBeneficiaryAction(Request $request, User $user, Beneficiary $beneficiary)
+    {
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($beneficiary);
+            $em->flush();
+        }
+
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('user_edit', array('username' => $beneficiary->getUser()->getUsername()));
+        else
+            return $this->redirectToRoute('user_edit', array('username' => $beneficiary->getUser()->getUsername(),'token' => $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
     }
 
     /**

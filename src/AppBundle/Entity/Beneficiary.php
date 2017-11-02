@@ -24,21 +24,14 @@ class Beneficiary
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_main", type="boolean")
-     */
-    private $isMain;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_ambassador", type="boolean")
+     * @ORM\Column(name="is_ambassador", type="boolean", nullable=true)
      */
     private $isAmbassador;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_expert", type="boolean")
+     * @ORM\Column(name="is_expert", type="boolean", nullable=true)
      */
     private $isExpert;
 
@@ -84,30 +77,6 @@ class Beneficiary
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set isMain
-     *
-     * @param boolean $isMain
-     *
-     * @return Beneficiary
-     */
-    public function setIsMain($isMain)
-    {
-        $this->isMain = $isMain;
-
-        return $this;
-    }
-
-    /**
-     * Get isMain
-     *
-     * @return bool
-     */
-    public function getIsMain()
-    {
-        return $this->isMain;
     }
 
     /**
@@ -276,5 +245,10 @@ class Beneficiary
     public function getIsExpert()
     {
         return $this->isExpert;
+    }
+
+    public function isMain()
+    {
+        return $this === $this->getUser()->getMainBeneficiary();
     }
 }

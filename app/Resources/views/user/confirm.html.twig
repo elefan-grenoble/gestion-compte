@@ -1,54 +1,96 @@
 {% extends 'layout.html.twig' %}
 
-{#{% block beforecontainer %}#}
-{#<div style="width:100%;" class="parallax-container">#}
-    {#<div class="parallax">#}
-        {#{% image '@AppBundle/Resources/public/img/christine-donaldson-214622_2.jpg' %}#}
-        {#<img src="{{ asset_url }}" alt="bandeau" />#}
-        {#{% endimage %}#}
-    {#</div>#}
-{#</div>#}
-{#{% endblock %}#}
-{% block aftercontainer %}
-    <div style="width:100%;" class="parallax-container">
-        <div class="parallax">
-            {% image '@AppBundle/Resources/public/img/jakob-owens-262566_2.jpg' %}
-            <img src="{{ asset_url }}" alt="bandeau" />
-            {% endimage %}
-        </div>
-    </div>
+{% block breadcrumps %}
+    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">search</i><a href="{{ path('find_user_number') }}">Recherche numéro d'adhérent</a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">check</i><span>Trouvé</span>
+    {% endif %}
 {% endblock %}
+
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
             <br>
             {% if user %}
-            <h2 class="header center orange-text">Adhérent #{{ user.memberNumber }} trouvé !</h2>
+            <h3 class="header center">Adhérent #{{ user.memberNumber }} trouvé !</h3>
             <div class="row center">
-                {% if user.isEnabled %}
-                    Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
-                    <br>
-                    Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
-                    <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                        <input type="hidden" name="username" value="{{ user.username }}" />
-                        <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
-                        <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
-                    </form>
-                {% else %}
-                 Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
-                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                        <input type="hidden" name="username" value="{{ user.username }}" />
-                    <div>
-                        Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    {% if user.isEnabled %}
+                        Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
                         <br>
-                        <input type="submit" name="submit" value="Oui !" class="btn " />
-                    </div>
-                </form>
+                        Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
+                        <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
+                            <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
+                        </form>
+                        <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <div>
+                                <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
+                            </div>
+                        </form>
+                    {% else %}
+                        C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                        {% if not user.lastRegistration %}
+                            <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion.</div>
+                        {% else %}
+                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                <input type="hidden" name="username" value="{{ user.username }}" />
+                                <div>
+                                    Envoyer le lien de connection sur {{ user.anonymousEmail }}
+                                    <br>
+                                    <input type="submit" name="submit" value="Oui !" class="btn " />
+                                </div>
+                            </form>
+                        {% endif %}
+
+                        <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <div>
+                                <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
+                            </div>
+                        </form>
+                    {% endif %}
+                {% else %}
+                    {% if user.isEnabled %}
+                        Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                        <br>
+                        Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
+                        <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
+                            <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
+                        </form>
+                    {% else %}
+                     Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                        {% if not user.lastRegistration %}
+                            <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
+                        {% else %}
+                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                    <input type="hidden" name="username" value="{{ user.username }}" />
+                                <div>
+                                    Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                                    <br>
+                                    <input type="submit" name="submit" value="Oui !" class="btn " />
+                                </div>
+                            </form>
+                        {% endif %}
+                    {% endif %}
                 {% endif %}
             </div>
-            <div class="row center">
-                <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_user_number') }}">Cherchez mon numéro d'adhérent</a></p>
-            </div>
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <div class="row center">
+                        <p class=" col s12 light">Ce n'est pas celui que tu cherchais ? <a href="{{ path('find_user_number') }}">Chercher un autre numéro d'adhérent</a></p>
+                    </div>
+                {% else %}
+                    <div class="row center">
+                        <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_user_number') }}">Chercher mon numéro d'adhérent</a></p>
+                    </div>
+                {% endif %}
+
             {% else %}
                 <h2 class="header center orange-text">Oups...</h2>
                 <h5>J'ai grande mémoire mais je n'ai rien trouvé...</h5>
@@ -67,6 +109,7 @@
     <script>
         $(document).ready(function(){
             $('.parallax').parallax();
+            $('.modal').modal();
         });
     </script>
 {% endblock %}

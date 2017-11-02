@@ -1,16 +1,19 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i><span>Nouvelle adhésion</span>
+{% endblock %}
+
 {% block content %}
-    <h1>User creation</h1>
+    <h3>Nouvelle adhésion</h3>
 
     {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <input type="submit" value="Create" />
+    {% include "user/_partial/user_form.html.twig" with { form: form } %}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Adhérer</button>
+    </div>
     {{ form_end(form) }}
 
-    <ul>
-        <li>
-            <a href="{{ path('user_index') }}">Back to the list</a>
-        </li>
-    </ul>
 {% endblock %}

@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'black_jackregular';
+    src: url('blackjack-webfont.eot');
+    src: url('blackjack-webfont.eot?#iefix') format('embedded-opentype'),
+         /*url('blackjack-webfont.woff2') format('woff2'),*/
+         url('blackjack-webfont.woff') format('woff'),
+         url('blackjack-webfont.ttf') format('truetype'),
+         url('blackjack-webfont.svg#black_jackregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

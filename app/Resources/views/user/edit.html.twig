@@ -1,21 +1,82 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i><span>Edition fiche adhérent</span>
+{% endblock %}
+
 {% block content %}
-    <h1>User edit</h1>
+    <h3>Edition fiche adhérent</h3>
 
     {{ form_start(edit_form) }}
-        {{ form_widget(edit_form) }}
-        <input type="submit" value="Edit" />
+    {% include "user/_partial/user_form.html.twig" with { form: edit_form } %}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Editer</button>
+    </div>
     {{ form_end(edit_form) }}
 
+    <h4>Adhésions</h4>
     <ul>
+        {% for registration in user.registrations %}
+            <li><i class="material-icons">credit_card</i>
+            {{ registration.date | date('d F Y') }}</li>
+        {% endfor %}
+    </ul>
+    {% if not user.lastRegistration or user.lastRegistration.date|date('Y') < 'now'|date('Y') %}
+    <ul class="collapsible" data-collapsible="accordion">
         <li>
-            <a href="{{ path('user_index') }}">Back to the list</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Delete">
-            {{ form_end(delete_form) }}
+            {% if not user.lastRegistration %}
+                <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
+            {% else %}
+                <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
+            {% endif %}
+            <div class="collapsible-body new_registration_form">
+                {{ form_start(new_registration_form) }}
+                <div class="row">
+                    <div class="amount col s3">
+                        {{ form_row(new_registration_form.amount) }}
+                    </div>
+                    <div class="type col s3">
+                        {{ form_row(new_registration_form.mode) }}
+                    </div>
+                    <div class="col s3">
+                        Enregistré par <b><i>{{ app.user.firstname }}</i></b><br> le {{ 'now'|date('d F Y') }}
+                    </div>
+                    <div class="col s3">
+                        {{ form_row(new_registration_form.submit) }}
+                    </div>
+                </div>
+                {{ form_end(new_registration_form) }}
+            </div>
         </li>
     </ul>
+    {% endif %}
+
+    <h4>Bénéficiaires</h4>
+    <div class="row">
+        {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: user.mainBeneficiary } %}
+    </div>
+    <div class="row">
+        {% for beneficiary in user.beneficiaries %}
+            {% if not beneficiary.isMain %}
+                {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
+            {% endif %}
+        {% endfor %}
+    </div>
+    <ul class="collapsible" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
+            <div class="collapsible-body new_registration_form">
+                {{ form_start(new_beneficiary_form) }}
+                    {% include "user/_partial/beneficiary_form.html.twig" with { form: new_beneficiary_form } %}
+                    <div class="col s3">
+                        <button type="submit" class="btn"><i class="material-icons left">add</i>Ajouter</button>
+                    </div>
+                {{ form_end(new_beneficiary_form) }}
+            </div>
+        </li>
+    </ul>
+
+
 {% endblock %}

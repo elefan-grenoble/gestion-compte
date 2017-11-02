@@ -6,6 +6,7 @@
     <table>
         <thead>
             <tr>
+                <th>Activé</th>
                 <th>Numéro d'adhérent</th>
                 <th>Username</th>
                 <th>Prénom</th>
@@ -18,6 +19,7 @@
         {% for user in users %}
             {% if user.mainBeneficiary %}
                 <tr>
+                    <td>{% if user.isEnabled %}<i class="material-icons">check</i>{% endif %}</td>
                     <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.mainBeneficiary.firstname }}</td>

@@ -92,7 +92,7 @@ assetic:
     assets:
             jquery:
                 inputs:
-                    - %kernel.root_dir%/../vendor/components/jquery/jquery.js
+                    - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
                 output: js/jquery.js
 materialize: ~
 jquery: ~

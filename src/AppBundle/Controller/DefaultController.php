@@ -60,12 +60,22 @@ class DefaultController extends Controller
      * @Route("/find_user_number", name="find_user_number")
      */
     public function findUserNumberAction(Request $request){
-        $form = $this->createFormBuilder()
-            ->add('firstname', TextType::class, array('label' => 'Mon prénom','attr' => array(
-                'placeholder' => 'babar',
-            )))
-            ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
-            ->getForm();
+        $securityContext = $this->container->get('security.authorization_checker');
+        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $form = $this->createFormBuilder()
+                ->add('firstname', TextType::class, array('label' => 'Le prénom','attr' => array(
+                    'placeholder' => 'babar',
+                )))
+                ->add('find', SubmitType::class, array('label' => 'Trouver le numéro'))
+                ->getForm();
+        }else{
+            $form = $this->createFormBuilder()
+                ->add('firstname', TextType::class, array('label' => 'Mon prénom','attr' => array(
+                    'placeholder' => 'babar',
+                )))
+                ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
+                ->getForm();
+        }
 
         if ($form->handleRequest($request)->isValid()) {
             $firstname = $form->get('firstname')->getData();
@@ -73,6 +83,8 @@ class DefaultController extends Controller
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
                 ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')) )
+                ->join('b.user', 'u')
+                ->orderBy("u.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();
             return $this->render('user/find_user_number.html.twig', array(

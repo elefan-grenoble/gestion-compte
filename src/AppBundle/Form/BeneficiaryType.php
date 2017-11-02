@@ -3,6 +3,9 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +16,11 @@ class BeneficiaryType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('isMain')->add('lastname')->add('firstname')->add('email')->add('phone')->add('user');
+        $builder
+            ->add('lastname',TextType::class,array('label'=>'Nom de famille'))
+            ->add('firstname',TextType::class,array('label'=>'Prénom'))
+            ->add('email',EmailType::class,array('label'=>'Courriel'))
+            ->add('phone',TextType::class,array('label'=>'Téléphone'));
     }
     
     /**
