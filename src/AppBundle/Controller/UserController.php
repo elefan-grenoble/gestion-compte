@@ -120,7 +120,7 @@ class UserController extends Controller
             $filename = $file->getData()->getPathName();
 
             $row = 1;
-            $lastdate = DateTime::createFromFormat('d/m/Y', '04/05/2016')->format('Y-m-d H:i:s');
+            $lastdate = DateTime::createFromFormat('d/m/Y', '04/05/2016');
             $em = $this->getDoctrine()->getManager();
             $return = array();
             $usernames = array();
@@ -160,8 +160,15 @@ class UserController extends Controller
                         if ($user){
                             $mail = $data[9];
                             if (isset($data[9])&&filter_var($mail, FILTER_VALIDATE_EMAIL)&&($user->getEmail() != $mail)) {
-                                $user->setEmail($mail)->save();
-                                $return[] = array($user,array("error","user with same member number already exist, email updated"));
+                                $user_exist = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
+                                if (!$user_exist){
+                                    $user->setEmail($mail);
+                                    if ($persist)
+                                        $em->persist($user);
+                                    $return[] = array($user,array("error","user with same member number already exist, email updated"));
+                                }else{
+                                    $return[] = array($user,array("error","user with same member number already exist, email change but already in use"));
+                                }
                             }else{
                                 $return[] = array($user,array("error","user with same member number already exist"));
                             }
@@ -207,11 +214,10 @@ class UserController extends Controller
                                         $beneficiary->setLastname($lastname);
                                         $beneficiary->setPhone($data[8]);
                                         $beneficiary->setEmail($mail);
-                                        $beneficiary->setIsMain(true);
-                                        $beneficiary->setIsAmbassador(($data[8]!=''));
+                                        $beneficiary->setIsAmbassador(($data[8]!='')&&$data[8]=='1');
                                         $beneficiary->setIsExpert(false);//default all false
                                         $beneficiary->setUser($user);
-                                        $user->addBeneficiary($beneficiary);
+                                        $user->setMainBeneficiary($beneficiary);
                                         //address
                                         $address = new Address();
                                         $address->setStreet1($data[5]);
@@ -229,8 +235,6 @@ class UserController extends Controller
                                             $date = DateTime::createFromFormat('d/m/Y', $date);
                                             if (!$date)
                                                 $date = $lastdate;
-                                            else
-                                                $date->format('Y-m-d H:i:s');
                                         }
                                         $lastdate = $date;
                                         $registration->setDate($date); //Y-m-d H:i:s
@@ -523,7 +527,7 @@ class UserController extends Controller
     public function editAddRegistrationAction(Request $request, User $user)
     {
         $session = new Session();
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
@@ -558,7 +562,7 @@ class UserController extends Controller
             }
 
             if ($user){
-                if ($current_user->getId()==$user->getId()){
+                if ($current_app_user->getId()==$user->getId()){
                     $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
                     return $this->redirectToRoute('user_edit',array(
                         'username'=>$user->getUsername(),
@@ -573,15 +577,14 @@ class UserController extends Controller
                         $session->getFlashBag()->add('warning', 'l\'adhésion précédente du '.$r->getDate()->format('d F Y').' est encore valable !');
                         return $this->redirectToRoute('user_edit',array(
                             'username'=>$user->getUsername(),
-                            'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
-                                    ->getToken()->getUser()->getUsername())));
+                            'token'=>$user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
                     }
                 }
 
                 $registration = new Registration();
                 $registration->setAmount($amount);
                 $registration->setMode($mode);
-                $registration->setRegistrar($current_user);
+                $registration->setRegistrar($current_app_user);
 
                 $registration->setDate($date); //Y-m-d H:i:s
                 $registration->setUser($user);
