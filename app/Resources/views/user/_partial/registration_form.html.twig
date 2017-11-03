@@ -1,0 +1,22 @@
+
+<div class="row">
+    <div class="amount col s1">
+        {{ form_row(form.amount) }}
+    </div>
+    <div class="type col s2">
+        {{ form_row(form.mode) }}
+    </div>
+    <div class="date col s3">
+        <div class="row">
+            <div class="col s4">{{ form_row(form.date.day) }}</div>
+            <div class="col s4">{{ form_row(form.date.month) }}</div>
+            <div class="col s4">{{ form_row(form.date.year) }}</div>
+        </div>
+    </div>
+    <div class="col s3">
+        {{ form_row(form.registrar) }}
+    </div>
+    <div class="col s3">
+        {{ form_row(form.submit) }}
+    </div>
+</div>

@@ -288,6 +288,11 @@ class User extends BaseUser
         return $this->getMainBeneficiary()->getLastname();
     }
 
+    public function __toString()
+    {
+        return $this->getUsername();
+    }
+
     public function getTmpToken($key = ''){
         return md5($this->getEmail().$this->getLastname().$this->getPassword().$key.date('d'));
     }

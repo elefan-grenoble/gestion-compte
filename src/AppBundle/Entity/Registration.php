@@ -60,6 +60,7 @@ class Registration
      */
     private $registrar;
 
+    private $is_new;
     /**
      * Get id
      *
@@ -68,6 +69,13 @@ class Registration
     public function getId()
     {
         return $this->id;
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
+
+        return $this;
     }
 
     /**
@@ -188,5 +196,15 @@ class Registration
     public function getRegistrar()
     {
         return $this->registrar;
+    }
+
+    public function getIsNew(){
+        return $this->is_new;
+    }
+
+    public function setIsNew($value){
+        $this->is_new = $value;
+
+        return $this;
     }
 }

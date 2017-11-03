@@ -7,6 +7,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -482,6 +483,7 @@ class UserController extends Controller
             else
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
         }
+
         $beneficiary = new Beneficiary();
         $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType',$beneficiary);
         $beneficiaryForm->handleRequest($request);
@@ -500,18 +502,91 @@ class UserController extends Controller
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
         }
 
-        $registrationForm = $this->createFormBuilder()
-            ->setAction($this->generateUrl('user_edit_registration_add',array('username'=>$user->getUsername(),'token'=>$user->getTmpToken($session->get('token_key').$current_app_user->getUsername()))))
-            ->setMethod('POST')
-            ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
-            ->add('mode', ChoiceType::class, array('choices'  => array(
-                'Espèce' => Registration::TYPE_CASH,
-                'Chèque' => Registration::TYPE_CHECK,
-                'Cairn' => Registration::TYPE_LOCAL,
-                'CB' => Registration::TYPE_CREDIT_CARD,
-            ),'label' => 'Mode de réglement')) //todo, make it dynamic
-            ->add('submit', SubmitType::class, array('label' => 'Enregistrer','attr' => array('class' => 'btn')))
-            ->getForm();
+        $newReg = new Registration();
+        $newReg->setDate(new DateTime('now'));
+        $newReg->setRegistrar($current_app_user);
+        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        $registrationForm->add('is_new',HiddenType::class,array('attr'=>array('value'=>'1')));
+        $registrationForm->handleRequest($request);
+        if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
+            $amount = floatval($registrationForm->get('amount')->getData());
+            if ($amount<=0){
+                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
+                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                else
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+
+            }
+
+            if ($current_app_user->getId()==$user->getId()){
+                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
+                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                else
+                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+
+            }
+            $newReg->setRegistrar($current_app_user);
+
+            $date  =$registrationForm->get('date')->getData();
+            $r = $user->getLastRegistration();
+            if ($r){
+                $Y = $r->getDate()->format('Y');
+                if ($Y == $date->format('Y')){
+                    $session->getFlashBag()->add('warning', 'l\'adhésion précédente du '.$r->getDate()->format('d F Y').' est encore valable !');
+                    if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                    else
+                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+
+                }
+            }
+            $newReg->setUser($user);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($newReg);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Enregistrement effectuée');
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+            else
+                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+        }
+
+        $registrationForms = array();
+        foreach ($user->getRegistrations() as $registration){
+            $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $registrationForms[$registration->getId()] = $form->createView();
+        }
+
+        $id = $request->request->get("registration_id");
+        if ($id){
+            $em = $this->getDoctrine()->getManager();
+            $registration= $em->getRepository('AppBundle:Registration')->find($id);
+            if ($registration){
+                $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {
+                    if ($current_app_user->getId()==$user->getId()){
+                        $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
+                        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                        else
+                            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                    }
+                    $em->persist($registration);
+                    $em->flush();
+                    $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+                    if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                    else
+                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                }
+            }
+        }
+
 
         $deleteBeneficiaryForms = array();
         foreach ($user->getBeneficiaries() as $beneficiary){
@@ -526,100 +601,9 @@ class UserController extends Controller
             'edit_form' => $editForm->createView(),
             'new_registration_form' => $registrationForm->createView(),
             'new_beneficiary_form' => $beneficiaryForm->createView(),
-            'delete_beneficiary_forms' => $deleteBeneficiaryForms
+            'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'registration_forms' => $registrationForms
         ));
-    }
-
-    /**
-     * Displays a form to edit an existing user entity.
-     *
-     * @Route("/{username}/edit/add_registration", name="user_edit_registration_add")
-     * @Method({"POST"})
-     */
-    public function editAddRegistrationAction(Request $request, User $user)
-    {
-        $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-                ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $form = $this->createFormBuilder()
-            ->add('amount', TextType::class)
-            ->add('mode', ChoiceType::class,array('choices'  => array(
-        'Espèce' => Registration::TYPE_CASH,
-        'Chèque' => Registration::TYPE_CHECK,
-        'Cairn' => Registration::TYPE_LOCAL,
-        'CB' => Registration::TYPE_CREDIT_CARD,
-    )))
-            ->add('submit', SubmitType::class)
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $amount = floatval($form->get('amount')->getData());
-            $mode = $form->get('mode')->getData();
-            if ($amount<=0){
-                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
-                return $this->redirectToRoute('user_edit',array(
-                    'username'=>$user->getUsername(),
-                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
-                            ->getToken()->getUser()->getUsername())));
-            }
-
-            if ($user){
-                if ($current_app_user->getId()==$user->getId()){
-                    $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
-                    return $this->redirectToRoute('user_edit',array(
-                        'username'=>$user->getUsername(),
-                        'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
-                                ->getToken()->getUser()->getUsername())));
-                }
-                $date = new DateTime('now');
-                $r = $user->getLastRegistration();
-                if ($r){
-                    $Y = $r->getDate()->format('Y');
-                    if ($Y == $date->format('Y')){
-                        $session->getFlashBag()->add('warning', 'l\'adhésion précédente du '.$r->getDate()->format('d F Y').' est encore valable !');
-                        return $this->redirectToRoute('user_edit',array(
-                            'username'=>$user->getUsername(),
-                            'token'=>$user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
-                    }
-                }
-
-                $registration = new Registration();
-                $registration->setAmount($amount);
-                $registration->setMode($mode);
-                $registration->setRegistrar($current_app_user);
-
-                $registration->setDate($date); //Y-m-d H:i:s
-                $registration->setUser($user);
-
-                $user->addRegistration($registration);
-
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($registration);
-                $em->persist($user);
-                $em->flush();
-
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-                return $this->redirectToRoute('user_edit',array(
-                    'username'=>$user->getUsername(),
-                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
-                            ->getToken()->getUser()->getUsername())));
-            }
-        }
-
-        return $this->redirectToRoute('user_edit',array(
-        'username'=>$user->getUsername(),
-        'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
-                ->getToken()->getUser()->getUsername())));
     }
 
 

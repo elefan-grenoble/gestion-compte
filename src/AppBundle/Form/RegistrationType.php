@@ -3,30 +3,63 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
 use AppBundle\Form\AddressType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RegistrationType extends AbstractType
 {
+    private $tokenStorage;
+
+    public function __construct(TokenStorageInterface $tokenStorage)
+    {
+        $this->tokenStorage = $tokenStorage;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('member_number');
-    }
 
-    public function getParent()
-    {
-        return 'FOS\UserBundle\Form\Type\RegistrationFormType';
-    }
+        // grab the user, do a quick sanity check that one exists
+        $user = $this->tokenStorage->getToken()->getUser();
+        if (!$user) {
+            throw new \LogicException(
+                'cannot be used without an authenticated user!'
+            );
+        }
 
-    public function getBlockPrefix()
-    {
-        return 'app_user_registration';
-    }
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
+            // ... adding the name field if needed
+            $form = $event->getForm();
+            $registration = $event->getData();
 
-    // For Symfony 2.x
-    public function getName()
-    {
-        return $this->getBlockPrefix();
+            $form->add('date', DateType::class,array('label' => [
+                'dat' => 'Jour',
+                'year' => 'Année',
+                'month' => 'Mois',
+            ],'placeholder' => [
+                'year' => 'Année',
+                'month' => 'Mois',
+            ],
+                'years' => range(2016, date('Y')),'disabled' => !$user->hasRole('ROLE_ADMIN')))
+                ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
+                ->add('registrar',TextType::class,array('label' => 'Enregistré par', 'attr'=>array('disabled' => true)))
+                ->add('mode', ChoiceType::class, array('choices'  => array(
+                    'Espèce' => Registration::TYPE_CASH,
+                    'Chèque' => Registration::TYPE_CHECK,
+                    'Cairn' => Registration::TYPE_LOCAL,
+                    'CB' => Registration::TYPE_CREDIT_CARD,
+                ),'label' => 'Mode de réglement')) //todo, make it dynamic
+                ->add('submit', SubmitType::class, array('label' => 'Enregistrer','attr' => array('class' => 'btn')));
+        });
+
     }
 }
