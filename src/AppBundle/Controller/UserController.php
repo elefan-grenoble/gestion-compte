@@ -306,6 +306,7 @@ class UserController extends Controller
      */
     public function newAction(Request $request)
     {
+        $session = new Session();
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $user = new User();
@@ -345,8 +346,10 @@ class UserController extends Controller
 
                 if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                     return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                else
+                else{
+                    $session->set('token_key',uniqid());
                     return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                }
             }
 
             return $this->render('user/new.html.twig', array(
