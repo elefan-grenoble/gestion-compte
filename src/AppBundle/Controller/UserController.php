@@ -307,6 +307,7 @@ class UserController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $user = new User();
