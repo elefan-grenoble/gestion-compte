@@ -304,8 +304,10 @@ class User extends BaseUser
                 $center = substr($mini_part,1,strlen($mini_part)-2);
                 if (strlen($center)>0)
                     $return .= $first_char.preg_replace('/./','_',$center).$last_char;
-                else
+                elseif(strlen($mini_part)>1)
                     $return .= $first_char.$last_char;
+                else
+                    $return .= $first_char;
                 $return .= '.';
             }
             $return = substr($return,0,strlen($return)-1);

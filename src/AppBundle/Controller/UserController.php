@@ -467,7 +467,15 @@ class UserController extends Controller
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+            $em = $this->getDoctrine()->getManager();
+            $email = $editForm->get('mainBeneficiary')->get('email')->getData();
+            if ($email != $user->getEmail()){
+                $user->setEmail($email);
+                $em->persist($user);
+                $session->getFlashBag()->add('warning', 'l\'email principal a changé');
+            }
+            $em->flush();
+
             $session->getFlashBag()->add('success', 'Mise à jour effectuée');
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
