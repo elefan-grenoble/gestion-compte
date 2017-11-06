@@ -49,7 +49,7 @@ class RegistrationType extends AbstractType
                 'year' => 'Année',
                 'month' => 'Mois',
             ],
-                'years' => range(2016, date('Y')),'disabled' => !$user->hasRole('ROLE_ADMIN')))
+                'years' => range(2016, date('Y')),'disabled' => !($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))))
                 ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
                 ->add('registrar',TextType::class,array('label' => 'Enregistré par', 'attr'=>array('disabled' => true)))
                 ->add('mode', ChoiceType::class, array('choices'  => array(

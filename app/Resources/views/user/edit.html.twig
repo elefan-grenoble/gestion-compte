@@ -26,7 +26,7 @@
                     {% else %}
                         <i class="material-icons tiny">attach_money</i>
                     {% endif %}
-                    {{ registration.date | date('d F Y') }} {{ registration.id }}</div>
+                    {{ registration.date | date('d F Y') }}</div>
                 {% if is_granted("ROLE_ADMIN") %}
                 <div class="collapsible-body new_registration_form">
                     {{ form_start(registration_forms[registration.id]) }}
