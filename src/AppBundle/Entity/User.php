@@ -35,6 +35,14 @@ class User extends BaseUser
     protected $member_number;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="withdrawn", type="boolean", nullable=true, options={"default" : 0})
+     */
+    private $withdrawn;
+
+
+    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -412,5 +420,29 @@ class User extends BaseUser
                 $this->setMainBeneficiary($this->getBeneficiaries()->first());
         }
         return $this->mainBeneficiary;
+    }
+
+    /**
+     * Set withdrawn
+     *
+     * @param boolean $withdrawn
+     *
+     * @return User
+     */
+    public function setWithdrawn($withdrawn)
+    {
+        $this->withdrawn = $withdrawn;
+
+        return $this;
+    }
+
+    /**
+     * Get isWithdrawn
+     *
+     * @return boolean
+     */
+    public function isWithdrawn()
+    {
+        return $this->withdrawn;
     }
 }

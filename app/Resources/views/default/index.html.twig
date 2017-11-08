@@ -18,7 +18,9 @@
                 <div class="row center">
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                 </div>
-                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                {% if ((is_granted("ROLE_ADMIN")) or (ip == '127.0.0.1') or (ip == '78.209.62.101') or (ip == '193.33.56.47')  %}
+                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>

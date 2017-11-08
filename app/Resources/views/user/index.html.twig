@@ -18,7 +18,7 @@
         <tbody>
         {% for user in users %}
             {% if user.mainBeneficiary %}
-                <tr>
+                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
                     <td>{% if user.isEnabled %}<i class="material-icons">check</i>{% endif %}</td>
                     <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
                     <td>{{ user.username }}</td>
