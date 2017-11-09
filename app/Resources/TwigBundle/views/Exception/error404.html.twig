@@ -1,0 +1,21 @@
+{# app/Resources/TwigBundle/views/Exception/error404.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3 class="header center">Oups, nous n'avons pas trouvé ce que tu cherches</h3>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+
+    {% endif %}
+
+    <p>
+        La page demandée n'a pas pu être chargée.
+        Vérifie l'URL ou <a href="{{ path('homepage') }}">retourne à l'accueil</a>.
+    </p>
+{% endblock %}
+
+{% block aftercontainer %}
+    <div class="center-align">
+        <img class="responsive-img" src="/bundles/app/img/lost.gif" alt="lost" />
+    </div>
+{% endblock %}

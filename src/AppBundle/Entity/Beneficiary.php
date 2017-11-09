@@ -26,14 +26,14 @@ class Beneficiary
      *
      * @ORM\Column(name="is_ambassador", type="boolean", nullable=true)
      */
-    private $isAmbassador;
+    private $ambassador;
 
     /**
      * @var bool
      *
      * @ORM\Column(name="is_expert", type="boolean", nullable=true)
      */
-    private $isExpert;
+    private $expert;
 
     /**
      * @var string
@@ -200,15 +200,15 @@ class Beneficiary
     }
 
     /**
-     * Set isAmbassador
+     * Set ambassador
      *
-     * @param boolean $isAmbassador
+     * @param boolean $ambassador
      *
      * @return Beneficiary
      */
-    public function setIsAmbassador($isAmbassador)
+    public function setAmbassador($ambassador)
     {
-        $this->isAmbassador = $isAmbassador;
+        $this->ambassador = $ambassador;
 
         return $this;
     }
@@ -218,33 +218,33 @@ class Beneficiary
      *
      * @return boolean
      */
-    public function getIsAmbassador()
+    public function isAmbassador()
     {
-        return $this->isAmbassador;
+        return $this->ambassador;
     }
 
     /**
-     * Set isExpert
+     * Set expert
      *
-     * @param boolean $isExpert
+     * @param boolean $expert
      *
      * @return Beneficiary
      */
-    public function setIsExpert($isExpert)
+    public function setExpert($expert)
     {
-        $this->isExpert = $isExpert;
+        $this->expert = $expert;
 
         return $this;
     }
 
     /**
-     * Get isExpert
+     * Get expert
      *
      * @return boolean
      */
-    public function getIsExpert()
+    public function isExpert()
     {
-        return $this->isExpert;
+        return $this->expert;
     }
 
     public function isMain()

@@ -1,0 +1,21 @@
+{# app/Resources/TwigBundle/views/Exception/error404.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3 class="header center">Oups, tu n'as pas le droit de venir ici ...</h3>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+
+    {% endif %}
+
+    <p>
+        La page demandée n'a pas pu être chargée avec ton profil actuel. <br>
+        Il te manque sans doute une formation ou d'intégrer une commission ?
+    </p>
+{% endblock %}
+
+{% block aftercontainer %}
+    <div class="center-align">
+        <img class="responsive-img" src="/bundles/app/img/cry.gif" alt="lost" />
+    </div>
+{% endblock %}

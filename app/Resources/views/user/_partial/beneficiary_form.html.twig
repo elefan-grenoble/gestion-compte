@@ -11,4 +11,16 @@
     <div class="phone col s6">
         {{ form_row(form.phone) }}
     </div>
+    <div class="checkboxes col s6">
+        {% if form.children.expert is defined %}
+            {{ form_widget(form.expert) }}
+            {{ form_label(form.expert) }}
+        {% endif %}
+    </div>
+    <div class="checkboxes col s6">
+        {% if form.children.ambassador is defined %}
+            {{ form_widget(form.ambassador) }}
+            {{ form_label(form.ambassador) }}
+        {% endif %}
+    </div>
 </div>

@@ -36,11 +36,12 @@ class UserType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            //$userData = $event->getData();
+            $userData = $event->getData();
 
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
-                $form->add('withdrawn',CheckboxType::class, array('label'=> 'Retiré du projet'));
+                if ($userData->getId()) //in not new
+                    $form->add('withdrawn',CheckboxType::class, array('label'=> 'Retiré du projet','required' => false ));
             }else{
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
             }
