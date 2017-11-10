@@ -3,12 +3,10 @@
 
 namespace AppBundle\Entity;
 
-use AppBundle\Event\ChangeUserPasswordEvent;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use AppBundle\Event\UserEvents;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\OrderBy;
@@ -43,13 +41,13 @@ class User extends BaseUser
 
 
     /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
     private $registrations;
 
     /**
-     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist", "remove"})
      */
     private $beneficiaries;
 
