@@ -69,13 +69,15 @@ class DefaultController extends Controller
         $email = $request->request->get('email');
         $oldEmail = $user->getEmail();
         $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-        if (count($matches)){ //was a temp mail
+        if (count($matches) && filter_var($email,FILTER_VALIDATE_EMAIL)){ //was a temp mail
             $user->setEmail($email);
             $user->getMainBeneficiary()->setEmail($email);
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été entregistré');
+        }elseif (!filter_var($email,FILTER_VALIDATE_EMAIL)){
+            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problèmatique');
         }
         return $this->render('user/confirm.html.twig', array(
             'user' => $user,
