@@ -1,7 +1,13 @@
 {% trans_default_domain 'FOSUserBundle' %}
 
 {% if error %}
-    <div>{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    <div class="row">
+        <div class="col s12">
+            <div class="card-panel teal error">
+                <span class="white-text">{{ error.messageKey|trans(error.messageData, 'security') }}</span>
+            </div>
+        </div>
+    </div>
 {% endif %}
 
 <div class="row">
