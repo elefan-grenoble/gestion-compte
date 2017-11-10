@@ -13,11 +13,11 @@
             <div class="card-action">
                 {% if delete_form %}
                     {{ form_start(delete_form) }}
-                        <a href="{{ path('user_edit_beneficiary_edit',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn">Editer</a>
-                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
+                        <a href="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" class="btn">Editer</a>
+                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
                     {{ form_end(delete_form) }}
                 {% else %}
-                    <a href="{{ path('user_edit_beneficiary_edit',{'username':beneficiary.user.username,'id':beneficiary.id}) }}" class="btn">Editer</a>
+                    <a href="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" class="btn">Editer</a>
                 {% endif %}
             </div>
         {% else %}

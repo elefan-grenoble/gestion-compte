@@ -595,10 +595,10 @@ class UserController extends Controller
     /**
      * Displays a form to edit an existing user entity.
      *
-     * @Route("/beneficiary/{username}/{id}", name="user_edit_beneficiary_edit")
+     * @Route("/beneficiary/{id}", name="user_edit_beneficiary_edit")
      * @Method({"GET", "POST"})
      */
-    public function editBeneficiaryAction(Request $request, User $user, Beneficiary $beneficiary)
+    public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
@@ -634,11 +634,11 @@ class UserController extends Controller
     /**
      * Deletes a beneficiary entity.
      *
-     * @Route("/{username}/beneficiary/{id}", name="user_edit_beneficiary_delete")
+     * @Route("/beneficiary/{id}", name="user_edit_beneficiary_delete")
      * @Method("DELETE")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function deleteBeneficiaryAction(Request $request, User $user, Beneficiary $beneficiary)
+    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
