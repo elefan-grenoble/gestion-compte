@@ -36,7 +36,7 @@
                                 </div>
                             </form>
                         {% else %}
-                            C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                            C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> !
                             {% if not user.lastRegistration %}
                                 <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour se compte. <br/>Il ne peux donc pas être activé.</div>
                                 <div class="center-align">
@@ -92,7 +92,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                            Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> !
                             {% if not user.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
                             {% else %}
