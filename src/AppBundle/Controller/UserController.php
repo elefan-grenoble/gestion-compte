@@ -478,10 +478,17 @@ class UserController extends Controller
             $user->addBeneficiary($beneficiary);
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($beneficiary);
-            $em->flush();
+            $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email"=>$beneficiary->getEmail()));
+            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email"=>$beneficiary->getEmail()));
+            if (!$otherUser && !$otherBeneficiary){
+                $em->persist($beneficiary);
+                $em->flush();
 
-            $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+            }else{
+                $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
+            }
+
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
             else
