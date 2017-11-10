@@ -19,7 +19,13 @@
         {% for user in users %}
             {% if user.mainBeneficiary %}
                 <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td>{% if user.isEnabled %}<i class="material-icons">check</i>{% endif %}</td>
+                    <td>
+                        {% if user.withdrawn %}
+                            <i class="material-icons">visibility_off</i>
+                        {% else %}
+                            {% if user.isEnabled %}<i class="material-icons">check</i>{% endif %}
+                        {% endif %}
+                    </td>
                     <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
                     <td>{{ user.username }}</td>
                     <td>{{ user.mainBeneficiary.firstname }}</td>
