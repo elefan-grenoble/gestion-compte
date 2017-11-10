@@ -62,6 +62,27 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/{member_number}/set_email", name="set_email")
+     * @Method({"POST"})
+     */
+    public function setEmailAction(User $user,Request $request){
+        $email = $request->request->get('email');
+        $oldEmail = $user->getEmail();
+        $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+        if (count($matches)){ //was a temp mail
+            $user->setEmail($email);
+            $user->getMainBeneficiary()->setEmail($email);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été entregistré');
+        }
+        return $this->render('user/confirm.html.twig', array(
+            'user' => $user,
+        ));
+    }
+
+    /**
      * @Route("/find_user_number", name="find_user_number")
      */
     public function findUserNumberAction(Request $request){
@@ -89,7 +110,7 @@ class DefaultController extends Controller
             $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
                 ->join('b.user', 'u')
                 ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
-                ->andWhere("u.withdrawn != 1" )
+                ->andWhere("u.withdrawn != 1 or u.withdrawn is NULL" )
                 ->orderBy("u.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();

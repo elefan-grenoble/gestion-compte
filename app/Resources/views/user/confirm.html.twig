@@ -59,12 +59,16 @@
                                     ou
                                 {% endif %}
                             {% endif %}
-                            <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
-                                <input type="hidden" name="username" value="{{ user.username }}" />
-                                <div>
-                                    <a href="#" class="btn green waves-effect" onclick="$(this).closest('form').submit()"><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
-                                </div>
-                            </form>
+                            {% if is_granted("ROLE_ADMIN") %}
+                                <br><a href="{{ path('user_edit',{'username':user.username}) }}" class="btn green waves-effect" ><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
+                            {% else %}
+                                <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                                    <input type="hidden" name="username" value="{{ user.username }}" />
+                                    <div>
+                                        <a href="#" class="btn green waves-effect" onclick="$(this).closest('form').submit()"><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
+                                    </div>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     {% else %}
                         {% if user.isEnabled %}
@@ -92,14 +96,26 @@
                             {% if not user.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
                             {% else %}
-                                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                    <input type="hidden" name="username" value="{{ user.username }}" />
-                                    <div>
-                                        Recevoir mon lien de connection sur {{ user.anonymousEmail }}
-                                        <br>
-                                        <input type="submit" name="submit" value="Oui !" class="btn " />
-                                    </div>
-                                </form>
+                                {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                                    <br>
+                                    Oups, on ne connait pas ton adresse courriel !<br>
+                                    Pour utiliser l'espace membre elle est necessaire. <br>
+                                    <form action="{{ path('set_email',{'member_number':user.memberNumber}) }}" method="post">
+                                        <input type="email" name="email" placeholder="mon-email@..." />
+                                        <button type="submit" class="btn waves-effect">
+                                            Définir mon email
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                        <input type="hidden" name="username" value="{{ user.username }}" />
+                                        <div>
+                                            Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                                            <br>
+                                            <input type="submit" name="submit" value="Oui !" class="btn " />
+                                        </div>
+                                    </form>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endif %}

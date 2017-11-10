@@ -217,8 +217,8 @@ class UserController extends Controller
                                         $beneficiary->setLastname($lastname);
                                         $beneficiary->setPhone($data[8]);
                                         $beneficiary->setEmail($mail);
-                                        $beneficiary->setIsAmbassador(($data[8]!='')&&$data[8]=='1');
-                                        $beneficiary->setIsExpert(false);//default all false
+                                        $beneficiary->setAmbassador(($data[8]!='')&&$data[8]=='1');
+                                        $beneficiary->setExpert(false);//default all false
                                         $beneficiary->setUser($user);
                                         $user->setMainBeneficiary($beneficiary);
                                         //address
