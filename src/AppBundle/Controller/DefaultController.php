@@ -40,7 +40,10 @@ class DefaultController extends Controller
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
             $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
-            return $this->redirectToRoute('confirm',array('member_number'=>$user->getMemberNumber()));
+
+            return $this->render('user/confirm.html.twig', array(
+                'user' => $user,
+            ));
         }
         return $this->render('user/find_me.html.twig', array(
             'form' => $form->createView(),
@@ -49,6 +52,7 @@ class DefaultController extends Controller
 
     /**
      * @Route("/{member_number}/confirm", name="confirm")
+     * @Method({"POST"})
      */
     public function confirmAction(User $user,Request $request){
 
@@ -83,8 +87,9 @@ class DefaultController extends Controller
             $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
-                ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')) )
                 ->join('b.user', 'u')
+                ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
+                ->andWhere("u.withdrawn != 1" )
                 ->orderBy("u.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();
