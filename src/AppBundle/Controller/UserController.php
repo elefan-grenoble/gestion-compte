@@ -459,9 +459,9 @@ class UserController extends Controller
                 }else{
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
-            }else{
-                $em->flush();
             }
+            $em->flush();
+
 
             $session->getFlashBag()->add('success', 'Mise à jour effectuée');
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
