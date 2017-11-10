@@ -111,7 +111,7 @@ class Address
      */
     public function getZipcode()
     {
-        return $this->zipcode;
+        return intval($this->zipcode);
     }
 
     /**
