@@ -37,7 +37,7 @@
                         {% if not user.lastRegistration %}
                             <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour se compte. <br/>Il ne peux donc pas être activé.</div>
                         {% else %}
-                            {% if user.email matches '{^membres\+[0-9]+@lelefan\.org$}' %}
+                            {% if user.email matches '{^membres\+[0-9]+@lelefan\.org$}' %}{# todo but this regex in conf #}
                                 Oups, on ne connait pas l'adresse courriel de {{ user.firstname }}. Pour éditer son profil et saisir une adresse utilise <b>{{ user.email }}</b>
                             {% endif %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
