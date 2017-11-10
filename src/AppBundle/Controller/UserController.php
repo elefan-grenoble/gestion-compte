@@ -366,29 +366,6 @@ class UserController extends Controller
     }
 
     /**
-     * Finds and displays a user entity.
-     *
-     * @Route("/{username}", name="user_show")
-     * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function showAction(User $user)
-    {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $deleteForm = $this->createDeleteForm($user);
-
-        return $this->render('user/show.html.twig', array(
-            'user' => $user,
-            'delete_form' => $deleteForm->createView(),
-        ));
-    }
-
-
-
-    /**
      * Displays a form to edit an existing user entity.
      *
      * @Route("/edit/firewall", name="user_edit_firewall")
@@ -472,12 +449,19 @@ class UserController extends Controller
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $email = $editForm->get('mainBeneficiary')->get('email')->getData();
+            $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email"=>$email));
+            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email"=>$email));
             if ($email != $user->getEmail()){
-                $user->setEmail($email);
-                $em->persist($user);
-                $session->getFlashBag()->add('warning', 'l\'email principal a changé');
+                if (!$otherBeneficiary && !$otherUser){
+                    $user->setEmail($email);
+                    $em->persist($user);
+                    $session->getFlashBag()->add('warning', 'l\'email principal a changé');
+                }else{
+                    $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
+                }
+            }else{
+                $em->flush();
             }
-            $em->flush();
 
             $session->getFlashBag()->add('success', 'Mise à jour effectuée');
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
@@ -608,11 +592,10 @@ class UserController extends Controller
         ));
     }
 
-
     /**
      * Displays a form to edit an existing user entity.
      *
-     * @Route("/{username}/beneficiary/{id}/edit", name="user_edit_beneficiary_edit")
+     * @Route("/{username}/beneficiary/{id}", name="user_edit_beneficiary_edit")
      * @Method({"GET", "POST"})
      */
     public function editBeneficiaryAction(Request $request, User $user, Beneficiary $beneficiary)
@@ -678,9 +661,30 @@ class UserController extends Controller
     }
 
     /**
+     * Finds and displays a user entity.
+     *
+     * @Route("/{username}", name="user_show")
+     * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function showAction(User $user)
+    {
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $deleteForm = $this->createDeleteForm($user);
+
+        return $this->render('user/show.html.twig', array(
+            'user' => $user,
+            'delete_form' => $deleteForm->createView(),
+        ));
+    }
+
+    /**
      * Deletes a user entity.
      *
-     * @Route("/{id}", name="user_delete")
+     * @Route("/{username}", name="user_delete")
      * @Method("DELETE")
      * @Security("has_role('ROLE_ADMIN')")
      */
