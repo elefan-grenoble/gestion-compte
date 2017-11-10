@@ -41,7 +41,7 @@ class UserType extends AbstractType
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
                 if ($userData && $userData->getId()) //in not new
-                    $form->add('withdrawn',CheckboxType::class, array('label'=> 'Retiré du projet','required' => false ));
+                    $form->add('withdrawn',CheckboxType::class, array('label'=> 'Compte fermé','required' => false ));
             }else{
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
             }
