@@ -7,7 +7,7 @@
 
 {% block content %}
     {% if ((is_granted("ROLE_ADMIN")) or (ip == '127.0.0.1') or (ip == '78.209.62.101') or (ip == '193.33.56.47'))  %}
-        <a href="{{ path('user_new') }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Nouvelle adhésion</a>
+        <a href="{{ path('user_new') }}" class="waves-effect waves-light btn"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
         <a href="{{ path('find_user_number') }}" class="waves-effect waves-light btn"><i class="material-icons left">search</i>Trouver un numéro d'adhérent</a>
         <a href="{{ path('user_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
     {% endif %}
