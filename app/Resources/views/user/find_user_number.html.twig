@@ -32,7 +32,9 @@
             {% if beneficiaries %}
             <div class="collection">
                 {% for beneficiary in beneficiaries %}
-                <a href="{{ path("confirm",{'member_number':beneficiary.user.memberNumber}) }}" class="collection-item">#{{ beneficiary.user.memberNumber }} {{ beneficiary.user.firstname }} {{ beneficiary.user.lastname | first | upper }}{% if beneficiary.user.lastRegistration %} - {{ beneficiary.user.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                    <form action="{{ path("confirm",{'member_number':beneficiary.user.memberNumber}) }}" method="post" class="collection-item">
+                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.user.memberNumber }} {{ beneficiary.user.firstname }} {{ beneficiary.user.lastname | first | upper }}{% if beneficiary.user.lastRegistration %} - {{ beneficiary.user.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                    </form>
                 {% endfor %}
             </div>
             {% elseif not form %}
