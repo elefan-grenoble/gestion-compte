@@ -57,9 +57,11 @@ class UserController extends Controller
      * @Route("/office_tools", name="user_office_tools")
      * @Method("GET")
      */
-    public function officeToolsAction()
+    public function officeToolsAction(Request $request)
     {
-        return $this->render('user/office_tools.html.twig');
+        return $this->render('user/office_tools.html.twig', array(
+            'ip' => $request->getClientIp()
+        ));
     }
 
     /**
