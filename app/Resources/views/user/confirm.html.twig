@@ -16,70 +16,91 @@
             {% if user %}
             <h3 class="header center">Adhérent #{{ user.memberNumber }} trouvé !</h3>
             <div class="row center">
-                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                    {% if user.isEnabled %}
-                        Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
-                        <br>
-                        Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
-                        <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
-                            <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
-                            <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
-                        </form>
-                        <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
-                            <div>
-                                <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
-                            </div>
-                        </form>
-                    {% else %}
-                        C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
-                        {% if not user.lastRegistration %}
-                            <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour se compte. <br/>Il ne peux donc pas être activé.</div>
-                        {% else %}
-                            {% if user.email matches '{^membres\+[0-9]+@lelefan\.org$}' %}{# todo but this regex in conf #}
-                                Oups, on ne connait pas l'adresse courriel de {{ user.firstname }}. Pour éditer son profil et saisir une adresse utilise <b>{{ user.email }}</b>
-                            {% endif %}
+                {% if user.isWithdrawn %}
+                    Ce compte est fermé <i class="material-icons">visibility_off</i>
+                {% else %}
+                    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                        {% if user.isEnabled %}
+                            Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                            <br>
+                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
+                                <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
+                                <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
+                            </form>
+                            <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                                <input type="hidden" name="username" value="{{ user.username }}" />
                                 <div>
-                                    Envoyer le lien de connection sur {{ user.anonymousEmail }}
+                                    <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
+                                </div>
+                            </form>
+                        {% else %}
+                            C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                            {% if not user.lastRegistration %}
+                                <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour se compte. <br/>Il ne peux donc pas être activé.</div>
+                                <div class="center-align">
+                                    <img class="responsive-img" src="/bundles/app/img/cry.gif" alt="lost" />
+                                </div>
+                            {% else %}
+                                {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
                                     <br>
-                                    <input type="submit" name="submit" value="Oui !" class="btn " />
+                                    Oups, on ne connait pas l'adresse courriel de {{ user.firstname }}.<br>
+                                    Pour éditer son profil et <b>saisir une adresse correcte</b> utilise <b class="lighten-4 blue">{{ user.email }}</b>
+                                {% else %}
+                                    <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                        <input type="hidden" name="username" value="{{ user.username }}" />
+                                        <div>
+                                            Envoyer le lien de connection sur {{ user.anonymousEmail }}
+                                            <br>
+                                            <input type="submit" name="submit" value="Oui, Activer !" class="btn " />
+                                        </div>
+                                    </form>
+                                    ou
+                                {% endif %}
+                            {% endif %}
+                            <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                                <input type="hidden" name="username" value="{{ user.username }}" />
+                                <div>
+                                    <a href="#" class="btn green waves-effect" onclick="$(this).closest('form').submit()"><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
                                 </div>
                             </form>
                         {% endif %}
-
-                        <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
-                            <div>
-                                <a href="#" class="btn orange waves-effect" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
-                            </div>
-                        </form>
-                    {% endif %}
-                {% else %}
-                    {% if user.isEnabled %}
-                        Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
-                        <br>
-                        Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
-                        <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
-                            <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
-                            <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
-                        </form>
                     {% else %}
-                     Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
-                        {% if not user.lastRegistration %}
-                            <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
-                        {% else %}
-                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                    <input type="hidden" name="username" value="{{ user.username }}" />
-                                <div>
-                                    Recevoir mon lien de connection sur {{ user.anonymousEmail }}
-                                    <br>
-                                    <input type="submit" name="submit" value="Oui !" class="btn " />
+                        {% if user.isEnabled %}
+                            Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                            <br>
+                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}
+                            <br>
+                            <div class="row">
+                                <div class="col m6 center">
+                                    C'est moi ! <br>
+                                    <a href="{{ path('fos_user_security_login') }}" class="btn">Je me connecte</a>
                                 </div>
-                            </form>
+                                <div class="col m6 center">
+                                    Oups, j'ai perdu mes identifiants <br>
+                                    <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                        <input type="hidden" name="username" value="{{ user.username }}" />
+                                        <button type="submit" name="submit" class="btn orange waves-effect">
+                                            Redéfinir mon mot de passe
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% else %}
+                            Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b>!
+                            {% if not user.lastRegistration %}
+                                <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
+                            {% else %}
+                                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                    <input type="hidden" name="username" value="{{ user.username }}" />
+                                    <div>
+                                        Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                                        <br>
+                                        <input type="submit" name="submit" value="Oui !" class="btn " />
+                                    </div>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}
