@@ -9,7 +9,7 @@
 
     {% endif %}
     <p>
-        N'hésite pas à envoyer un courriel à <a href="mailto:membres@lelefan.org?subject=error_{{ status_code }}_{{ date('now')|format("h:i-d/m/Y") }}">membres@lelefan.org</a> pour expliquer les circonstances de ce bug... Merci !
+        N'hésite pas à envoyer un courriel à <a href="mailto:membres@lelefan.org?subject=error_{{ status_code }}_{{ 'now'|date("h:i-d/m/Y") }}">membres@lelefan.org</a> pour expliquer les circonstances de ce bug... Merci !
     </p>
 {% endblock %}
 
