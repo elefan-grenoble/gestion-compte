@@ -1,0 +1,20 @@
+{# app/Resources/TwigBundle/views/Exception/error.html.twig #}
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3 class="header center">Oups, quelque chose a mal tourné !</h3>
+    <h4>erreur {{ status_code }} : {{ status_text }}</h4>
+
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+
+    {% endif %}
+    <p>
+        N'hésite pas à envoyer un courriel à <a href="mailto:membres@lelefan.org?subject=error_{{ status_code }}_{{ date('now')|format("h:i-d/m/Y") }}">membres@lelefan.org</a> pour expliquer les circonstances de ce bug... Merci !
+    </p>
+{% endblock %}
+
+{% block aftercontainer %}
+    <div class="center-align">
+        <img class="responsive-img" src="/bundles/app/img/error.gif" alt="lost" />
+    </div>
+{% endblock %}
