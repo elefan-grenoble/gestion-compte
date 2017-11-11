@@ -595,13 +595,22 @@ class UserController extends Controller
 
         $deleteBeneficiaryForms = array();
         foreach ($user->getBeneficiaries() as $beneficiary){
-            $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
-                ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
-                ->setMethod('DELETE')
-                ->getForm()->createView();
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
+                    ->setMethod('DELETE')->getForm()->createView();
+            else
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('user_edit_beneficiary_delete', array(
+                        'username' => $beneficiary->getUser()->getUsername(),
+                        'id' => $beneficiary->getId(),
+                        'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())
+                    )))
+                    ->setMethod('DELETE')->getForm()->createView();
         }
 
         return $this->render('user/edit.html.twig', array(
+            'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername()),
             'user' => $user,
             'edit_form' => $editForm->createView(),
             'new_registration_form' => $registrationForm->createView(),
@@ -624,11 +633,10 @@ class UserController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        //todo protect it from direct access
-//        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-//                ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-//            throw $this->createAccessDeniedException();
-//        }
+        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
+                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
+            throw $this->createAccessDeniedException();
+        }
 
         $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
         $editForm->handleRequest($request);
@@ -663,12 +671,20 @@ class UserController extends Controller
      *
      * @Route("/beneficiary/{id}", name="user_edit_beneficiary_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
+                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
+            throw $this->createAccessDeniedException();
+        }
+
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
             ->setMethod('DELETE')

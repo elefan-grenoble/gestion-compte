@@ -1,5 +1,5 @@
 <div class="col s12 m6 l6 xl4">
-    <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue{% endif %}">
+    <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue-grey lighten-1{% endif %}">
         <div class="card-content white-text">
             <span class="card-title">{{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
@@ -11,16 +11,26 @@
         </div>
         {% if not beneficiary.isMain %}
             <div class="card-action">
-                {% if delete_form %}
-                    {{ form_start(delete_form) }}
-                        <a href="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" class="btn">Editer</a>
-                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
-                    {{ form_end(delete_form) }}
-                {% else %}
-                    <a href="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" class="btn">Editer</a>
-                {% endif %}
+                <table>
+                    <tr>
+                        <td>
+                            <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get">
+                            {% if not is_granted("ROLE_ADMIN") %}
+                                <input type="hidden" value="{{ token }}" name="token">
+                            {% endif %}
+                            <button type="submit" class="btn">Editer</button>
+                            </form>
+                        </td>
+                        {% if delete_form %}
+                            <td>
+                                {{ form_start(delete_form) }}
+                                <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
+                                {{ form_end(delete_form) }}
+                            </td>
+                        {% endif %}
+                    </tr>
+                </table>
             </div>
-        {% else %}
         {% endif %}
     </div>
 </div>
