@@ -460,10 +460,14 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-            $em->flush();
+            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
+            if ($phone){
+                $em->flush();
+                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+            }else{
+                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
+            }
 
-
-            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
             else
