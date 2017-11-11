@@ -418,6 +418,8 @@ class UserController extends Controller
                     'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
                             ->getToken()->getUser()->getUsername())));
             }
+            $session = new Session();
+            $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
         }
 
         return $this->render('user/edit_firewall.html.twig', array(
