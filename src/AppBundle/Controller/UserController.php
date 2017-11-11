@@ -480,19 +480,25 @@ class UserController extends Controller
         $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType',$beneficiary);
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
-            $beneficiary->setUser($user);
-            $user->addBeneficiary($beneficiary);
 
-            $em = $this->getDoctrine()->getManager();
-            $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email"=>$beneficiary->getEmail()));
-            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email"=>$beneficiary->getEmail()));
-            if (!$otherUser && !$otherBeneficiary){
-                $em->persist($beneficiary);
-                $em->flush();
+            if (count($user->getBeneficiaries())<4){ //todo put this in conf
 
-                $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                $beneficiary->setUser($user);
+                $user->addBeneficiary($beneficiary);
+
+                $em = $this->getDoctrine()->getManager();
+                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email"=>$beneficiary->getEmail()));
+                $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email"=>$beneficiary->getEmail()));
+                if (!$otherUser && !$otherBeneficiary){
+                    $em->persist($beneficiary);
+                    $em->flush();
+
+                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                }else{
+                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
+                }
             }else{
-                $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
+                $session->getFlashBag()->add('error', 'Maximum '.(5-1).' beneficiaires enregistrés'); //todo put this in conf
             }
 
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))

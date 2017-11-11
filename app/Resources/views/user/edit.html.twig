@@ -66,19 +66,22 @@
             {% endif %}
         {% endfor %}
     </div>
-    <ul class="collapsible" data-collapsible="accordion">
-        <li>
-            <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
-            <div class="collapsible-body new_registration_form">
-                {{ form_start(new_beneficiary_form) }}
+    {% if user.beneficiaries|length < 4 %}{#todo put this value in conf#}
+        <ul class="collapsible" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
+                <div class="collapsible-body new_registration_form">
+                    {{ form_start(new_beneficiary_form) }}
                     {% include "user/_partial/beneficiary_form.html.twig" with { form: new_beneficiary_form } %}
                     <div class="col s3">
                         <button type="submit" class="btn"><i class="material-icons left">add</i>Ajouter</button>
                     </div>
-                {{ form_end(new_beneficiary_form) }}
-            </div>
-        </li>
-    </ul>
+                    {{ form_end(new_beneficiary_form) }}
+                </div>
+            </li>
+        </ul>
+    {#{% else %}#}
+    {% endif %}
 
 
 {% endblock %}
