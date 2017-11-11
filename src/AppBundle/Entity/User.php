@@ -61,7 +61,7 @@ class User extends BaseUser
     /**
      * One User has One Address.
      * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
-     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="address_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $address;
 
@@ -399,7 +399,8 @@ class User extends BaseUser
      */
     public function setMainBeneficiary(\AppBundle\Entity\Beneficiary $mainBeneficiary = null)
     {
-        $this->addBeneficiary($mainBeneficiary);
+        if ($mainBeneficiary)
+            $this->addBeneficiary($mainBeneficiary);
 
         $this->mainBeneficiary = $mainBeneficiary;
 

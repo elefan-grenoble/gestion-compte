@@ -21,7 +21,7 @@
                             <button type="submit" class="btn">Editer</button>
                             </form>
                         </td>
-                        {% if delete_form %}
+                        {% if delete_form is defined %}
                             <td>
                                 {{ form_start(delete_form) }}
                                 <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn red">Supprimer</button>

@@ -24,6 +24,7 @@
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
+                    <a href="{{ path("user_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
                 {% endif %}
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <h5>Actions super admin</h5>

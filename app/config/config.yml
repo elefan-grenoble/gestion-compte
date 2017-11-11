@@ -94,5 +94,6 @@ assetic:
                 inputs:
                     - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
                 output: js/jquery.js
-materialize: ~
+materialize:
+        version: 0.100.2
 jquery: ~

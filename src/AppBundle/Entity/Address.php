@@ -52,7 +52,7 @@ class Address
     /**
      * One Address has User.
      * @ORM\OneToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id",onDelete="Cascade")
      */
     private $user;
 

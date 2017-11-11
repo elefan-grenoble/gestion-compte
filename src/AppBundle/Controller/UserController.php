@@ -7,6 +7,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
+use AppBundle\Form\UserType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -65,6 +66,63 @@ class UserController extends Controller
     }
 
     /**
+     * Import from CSV
+     *
+     * @Route("/join", name="user_join")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function joinAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
+            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes','attr' => array('class' => 'btn')))
+            ->getForm();
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $re = '/#([0-9]+).*/';
+            $str = $form->get('from_text')->getData()."\n".$form->get('dest_text')->getData();
+            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+            if (count($matches)>=2){
+                $fromUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[0][1]));
+                if ($fromUser){
+                    $destUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[1][1]));
+                    if ($destUser){
+                        foreach ($fromUser->getBeneficiaries() as $beneficiary){
+                            $destUser->addBeneficiary($beneficiary); //in
+                            $fromUser->removeBeneficiary($beneficiary); //out
+                            $beneficiary->setUser($destUser);
+                            $em->persist($beneficiary);
+                        }
+                        $em->persist($destUser);
+                        $em->flush();
+                        $fromUser->setMainBeneficiary(null);
+                        $em->remove($fromUser);
+                        $em->flush();
+
+                        $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
+
+                        return $this->redirectToRoute('user_edit',array('username'=>$destUser->getUsername()));
+                    }else{
+                        $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
+                    }
+                }else{
+                    $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
+                }
+            }
+
+        }
+
+        $users = $em->getRepository('AppBundle:User')->findAll(); //todo exclude closed
+        return $this->render('user/join.html.twig',array('form'=>$form->createView(),'users'=>$users));
+    }
+
+    /**
      * install admin
      *
      * @Route("/install_admin", name="user_install_admin")
@@ -81,7 +139,7 @@ class UserController extends Controller
         }
 
         $admin = new User();
-        $admin->setEmail("admin@lelefan.org");
+        $admin->setEmail("admin@lelefan.org"); //todo put this in conf
         $admin->setPlainPassword("password");
         $admin->setUsername("babar");
         $admin->setMemberNumber(0);
@@ -755,7 +813,7 @@ class UserController extends Controller
     private function createDeleteForm(User $user)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('user_delete', array('id' => $user->getId())))
+            ->setAction($this->generateUrl('user_delete', array('username' => $user->getUsername())))
             ->setMethod('DELETE')
             ->getForm()
         ;
