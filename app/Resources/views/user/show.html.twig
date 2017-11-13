@@ -1,32 +1,33 @@
 {% extends 'layout.html.twig' %}
 
-{% block body %}
-    <h1>User</h1>
+{% block content %}
+    <h3 class="header">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h3>
 
-    <table>
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Member_number</th>
-                <td>{{ user.membernumber }}</td>
-            </tr>
-        </tbody>
-    </table>
+    {% if is_granted("ROLE_ADMIN") %}
+        <h5>Actions admin</h5>
+        <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer</a>
+    {% endif %}
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <h5>Actions super admin</h5>
+        <h6>Recorded registration</h6>
+        <ul class="collapsible" data-collapsible="accordion">
+            {% for registration in user.recordedRegistrations %}
+                <li>
+                    <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                            <i class="material-icons tiny">credit_card</i>
+                        {% else %}
+                            <i class="material-icons tiny">attach_money</i>
+                        {% endif %}
+                        {{ registration.date | date('d F Y') }}</div>
+                        <div class="collapsible-body new_registration_form">
+                            {{ form_start(registration_forms[registration.id]) }}
+                            <input type="hidden" name="registration_id" value="{{ registration.id }}" />
+                            {% include "user/_partial/registration_form.html.twig" with { form: registration_forms[registration.id] } %}
+                            {{ form_end(registration_forms[registration.id]) }}
+                        </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 
-    <ul>
-        <li>
-            <a href="{{ path('user_index') }}">Back to the list</a>
-        </li>
-        <li>
-            <a href="{{ path('user_edit', { 'id': user.id }) }}">Edit</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Delete">
-            {{ form_end(delete_form) }}
-        </li>
-    </ul>
 {% endblock %}
