@@ -47,6 +47,12 @@ class User extends BaseUser
     private $registrations;
 
     /**
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
+     * @OrderBy({"date" = "DESC"})
+     */
+    private $recordedRegistrations;
+
+    /**
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist", "remove"})
      */
     private $beneficiaries;
@@ -443,5 +449,50 @@ class User extends BaseUser
     public function isWithdrawn()
     {
         return $this->withdrawn;
+    }
+
+    /**
+     * Get withdrawn
+     *
+     * @return boolean
+     */
+    public function getWithdrawn()
+    {
+        return $this->withdrawn;
+    }
+
+
+    /**
+     * Add recordedRegistration
+     *
+     * @param \AppBundle\Entity\Registration $recordedRegistration
+     *
+     * @return User
+     */
+    public function addRecordedRegistration(\AppBundle\Entity\Registration $recordedRegistration)
+    {
+        $this->recordedRegistrations[] = $recordedRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Remove recordedRegistration
+     *
+     * @param \AppBundle\Entity\Registration $recordedRegistration
+     */
+    public function removeRecordedRegistration(\AppBundle\Entity\Registration $recordedRegistration)
+    {
+        $this->recordedRegistrations->removeElement($recordedRegistration);
+    }
+
+    /**
+     * Get recordedRegistrations
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRecordedRegistrations()
+    {
+        return $this->recordedRegistrations;
     }
 }
