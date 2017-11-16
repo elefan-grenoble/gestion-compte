@@ -5,7 +5,7 @@
 {% block aftercontainer %}
     <div class="center-align">
         {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-        <img src="{{ asset_url }}" alt="elefan" />
+        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
         {% endimage %}
     </div>
 {% endblock %}
@@ -18,13 +18,13 @@
                 <div class="row center">
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                 </div>
-                {% if ((is_granted("ROLE_ADMIN")) or (ip == '127.0.0.1') or (ip == '78.209.62.101') or (ip == '193.33.56.47'))  %}
+                {% if (app.user.isRegistrar(ip))  %}
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
-                    <a href="{{ path("user_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
+                    <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <h5>Actions super admin</h5>
