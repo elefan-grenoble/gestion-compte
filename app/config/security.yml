@@ -11,7 +11,7 @@ security:
 
     providers:
         fos_userbundle:
-            id: fos_user.user_provider.username
+            id: fos_user.user_provider.username_email
 
     firewalls:
         main:
@@ -19,23 +19,30 @@ security:
             form_login:
                 provider: fos_userbundle
                 csrf_token_generator: security.csrf.token_manager
-                # if you are using Symfony < 2.8, use the following config instead:
-                # csrf_provider: form.csrf_provider
-
+                success_handler: app.authentication_success_handler
             logout:       true
             anonymous:    true
-        api_oauth2_authorize:
-            pattern:                ^/api/oauth2/authorize$
-            http_basic:             ~
-            provider:               fos_userbundle
-        api_oauth2_token:
-            pattern:                ^/api/oauth2/token$
-            oauth2_token:           ~
-        api_oauth2_debug:
-            pattern:                ^/api/oauth2/debug$
-            oauth2_resource:        ~
+        oauth_token:
+            pattern:    ^/oauth/v2/token
+            security:   false
+        api:
+            pattern:    ^/api
+            fos_oauth:  true
+            stateless:  true
+            anonymous:  false # can be omitted as its default value
+        oauth_authorize:
+            pattern:    ^/oauth/v2/auth
+            form_login:
+                provider: fos_userbundle
+                check_path: fos_user_security_check
+                login_path: fos_user_security_login
+            anonymous: true
+            context: test_connect
+            # Add your favorite authentication process here
     access_control:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/api, roles: [ IS_AUTHENTICATED_FULLY ] }
+        - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }

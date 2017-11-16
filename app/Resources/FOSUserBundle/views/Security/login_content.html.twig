@@ -12,27 +12,35 @@
 
 <div class="row">
     <div class="col s12 m9 offset-m2 l6 offset-l3">
-        <form action="{{ path("fos_user_security_check") }}" method="post">
-            {% if csrf_token %}
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
-            {% endif %}
-
-            <label for="username">{{ 'security.login.username'|trans }}</label>
-            <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
-            <br>
-            <label for="password">{{ 'security.login.password'|trans }}</label>
-            <input type="password" id="password" name="_password" required="required" />
-
-            <input type="checkbox" id="remember_me" name="_remember_me" value="on" />
-            <label for="remember_me">{{ 'security.login.remember_me'|trans }}</label>
-            <br>
-            <div class="center">
-                <button class="btn waves-effect waves-light" type="submit" id="_submit" name="_submit">{{ 'security.login.submit'|trans }}
-                    <i class="material-icons right">check</i>
-                </button>
-            </div>
-            <br>
-            <small><a href="{{ path('fos_user_resetting_request') }}">Mot de passe ou identifiant oublié ?</a></small>
-        </form>
+        <div class="row">
+            <form action="{{ path("fos_user_security_check") }}" method="post">
+                {% if csrf_token %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+                {% endif %}
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">person_outline</i>
+                    <label for="username">{{ 'security.login.username'|trans }}</label>
+                    <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
+                </div>
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">lock_outline</i>
+                    <label for="password">{{ 'security.login.password'|trans }}</label>
+                    <input type="password" id="password" name="_password" required="required" />
+                </div>
+                <input type="checkbox" id="remember_me" name="_remember_me" value="on" />
+                <label for="remember_me">{{ 'security.login.remember_me'|trans }}</label>
+                <br>
+                {% if app.request.get('_route') != app.request.headers.get('referer') %}
+                    <input type="hidden" name="target_path" value="{{ app.request.headers.get('referer') }}" />
+                {% endif %}
+                <div class="center">
+                    <button class="btn waves-effect waves-light" type="submit" id="_submit" name="_submit">{{ 'security.login.submit'|trans }}
+                        <i class="material-icons right">check</i>
+                    </button>
+                </div>
+                <br>
+                <small><a href="{{ path('fos_user_resetting_request') }}">Mot de passe ou identifiant oublié ?</a></small>
+            </form>
+        </div>
     </div>
 </div>

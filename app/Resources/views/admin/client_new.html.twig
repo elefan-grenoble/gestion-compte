@@ -1,0 +1,23 @@
+{% extends 'layout.html.twig' %}
+
+{% block beforecontainer %}
+{% endblock %}
+{% block aftercontainer %}
+{% endblock %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        {% if is_granted("ROLE_ADMIN") %}
+            <div class="container">
+                <h3 class=" enter">Nouveau client Oauth</h3>
+                {{ form_start(form) }}
+                    {{ form_row(form) }}
+                {{ form_end(form) }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

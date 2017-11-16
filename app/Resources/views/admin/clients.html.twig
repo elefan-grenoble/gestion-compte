@@ -1,0 +1,26 @@
+{% extends 'layout.html.twig' %}
+
+{% block beforecontainer %}
+{% endblock %}
+{% block aftercontainer %}
+{% endblock %}
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        {% if is_granted("ROLE_ADMIN") %}
+            <div class="container">
+                <h3 class=" enter">Gestion des clients (Oauth)</h3>
+                <ul>
+                    {% for client in clients %}
+                        <li>public:{{ client.publicId }} secret:{{ client.secret }}</li>
+                    {% endfor %}
+                </ul>
+                <a href="{{ path('admin_client_new') }}" class="btn waves-effect"><i class="material-icon">add</i>Nouveau client Oauth</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

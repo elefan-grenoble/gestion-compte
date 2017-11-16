@@ -20,6 +20,7 @@ class AppKernel extends Kernel
             new Evheniy\MaterializeBundle\MaterializeBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new AuthBucket\Bundle\OAuth2Bundle\AuthBucketOAuth2Bundle(),
+            new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
             new AppBundle\AppBundle(),
         ];
 

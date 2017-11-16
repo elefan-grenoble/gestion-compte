@@ -8,6 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -28,7 +29,7 @@ class DefaultController extends Controller
                 $lastyear = new \DateTime('-1 year');
                 $interval = $lastyear->diff($last->getDate());
                 if (intval($interval->format("%R%a"))<0)
-                    $session->getFlashBag()->add('error', 'Oups, ton adhésion '.$last->getDate()->format('Y').' a expirée il y a '.$interval->format('%a jours').'... n\'oublie pas de ré-adhérer !');
+                    $session->getFlashBag()->add('error', 'Oups, ton adhésion '.$last->getDate()->format('Y').' a expiré il y a '.$interval->format('%a jours').'... n\'oublie pas de ré-adhérer !');
                 elseif (intval($interval->format("%R%a"))<28)
                     $session->getFlashBag()->add('warning', 'Ton adhésion '.$last->getDate()->format('Y').' expire dans '.$interval->format('%a jours').'...');
             }else{
@@ -157,5 +158,5 @@ class DefaultController extends Controller
     public function findUserAction(Request $request){
         die($request->getName());
     }
-
+    
 }

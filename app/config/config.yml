@@ -26,7 +26,7 @@ framework:
     session:
         # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
         handler_id: session.handler.native_file
-        name: SFSESSID
+        name: MEMBRESSID
         cookie_domain: ".lelefan.org"
         save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
     fragments: ~
@@ -99,3 +99,13 @@ assetic:
 materialize:
         version: 0.100.2
 jquery: ~
+fos_oauth_server:
+    db_driver:            orm   # Drivers available: orm, mongodb, or propel
+    client_class:        AppBundle\Entity\Client
+    access_token_class:  AppBundle\Entity\AccessToken
+    refresh_token_class: AppBundle\Entity\RefreshToken
+    auth_code_class:     AppBundle\Entity\AuthCode
+    service:
+        user_provider: fos_user.user_provider.username_email
+        options:
+            supported_scopes: oauth_login
