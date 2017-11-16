@@ -44,9 +44,7 @@ class UserController extends Controller
     public function indexAction()
     {
         $em = $this->getDoctrine()->getManager();
-
         $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'));
-
         return $this->render('user/index.html.twig', array(
             'users' => $users,
         ));
@@ -60,6 +58,13 @@ class UserController extends Controller
      */
     public function officeToolsAction(Request $request)
     {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
+            throw $this->createAccessDeniedException();
+        }
         return $this->render('user/office_tools.html.twig', array(
             'ip' => $request->getClientIp()
         ));
@@ -369,6 +374,12 @@ class UserController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
+            throw $this->createAccessDeniedException();
+        }
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $user = new User();
@@ -431,7 +442,11 @@ class UserController extends Controller
      */
     public function editFirewallAction(Request $request)
     {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
             throw $this->createAccessDeniedException();
         }
 
@@ -496,6 +511,9 @@ class UserController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
             throw $this->createAccessDeniedException();
         }
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
@@ -686,9 +704,12 @@ class UserController extends Controller
      */
     public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
             throw $this->createAccessDeniedException();
         }
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
@@ -734,8 +755,10 @@ class UserController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$current_app_user->isRegistrar($request->getClientIp())) {
             throw $this->createAccessDeniedException();
         }
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
