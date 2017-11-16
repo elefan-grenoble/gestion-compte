@@ -401,9 +401,9 @@ class UserController extends Controller
                 if (!filter_var($email,FILTER_SANITIZE_EMAIL)||!filter_var($email,FILTER_VALIDATE_EMAIL)){
                     $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
                 }else{
-                    $user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$email));
-                    if ($user){
-                        $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! ('.'#'.$user->getMemberNumber()." ".$user->getFirstName()." ".$user->getLastName()[0].')');
+                    $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$email));
+                    if ($other_user){
+                        $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! ('.'#'.$other_user->getMemberNumber()." ".$other_user->getFirstName()." ".$other_user->getLastName()[0].')');
                     }else{
                         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$email));
                         if ($beneficiary){
