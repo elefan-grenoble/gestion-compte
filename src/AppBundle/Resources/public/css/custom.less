@@ -40,6 +40,12 @@ footer.page-footer{
 #logo-container{
   font-family: 'black_jackregular';
 }
+@media (max-width: 40em) {
+  #logo-container{
+    font-size: 15px; //
+  }
+}
+
 /* Links */
 .card .card-action a.btn{
   color: white;
@@ -47,6 +53,9 @@ footer.page-footer{
 .btn, .btn-large {
   color: #fff;
   background-color: @bluelelefan;
+}
+.btn:hover, .btn-large:hover {
+  background-color: darken(@bluelelefan,20%);
 }
 .breadcrumbs{
   font-size: 12px;
@@ -217,4 +226,13 @@ footer.page-footer{
   .cover-container {
     width: 42rem;
   }
+}
+
+input:not([type]):focus:not([readonly]), input[type=text]:not(.browser-default):focus:not([readonly]), input[type=password]:not(.browser-default):focus:not([readonly]), input[type=email]:not(.browser-default):focus:not([readonly]), input[type=url]:not(.browser-default):focus:not([readonly]), input[type=time]:not(.browser-default):focus:not([readonly]), input[type=date]:not(.browser-default):focus:not([readonly]), input[type=datetime]:not(.browser-default):focus:not([readonly]), input[type=datetime-local]:not(.browser-default):focus:not([readonly]), input[type=tel]:not(.browser-default):focus:not([readonly]), input[type=number]:not(.browser-default):focus:not([readonly]), input[type=search]:not(.browser-default):focus:not([readonly]), textarea.materialize-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid @bluelelefan;
+  -webkit-box-shadow: 0 1px 0 0 @bluelelefan;
+  box-shadow: 0 1px 0 0 @bluelelefan;
+}
+.input-field .prefix.active {
+  color: @bluelelefan;
 }
