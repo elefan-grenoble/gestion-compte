@@ -397,34 +397,47 @@ class UserController extends Controller
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+                $email = $user->getMainBeneficiary()->getEmail();
+                if (!filter_var($email,FILTER_SANITIZE_EMAIL)||!filter_var($email,FILTER_VALIDATE_EMAIL)){
+                    $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
+                }else{
+                    $user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$email));
+                    if ($user){
+                        $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! ('.'#'.$user->getMemberNumber()." ".$user->getFirstName()." ".$user->getLastName()[0].')');
+                    }else{
+                        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$email));
+                        if ($beneficiary){
+                            $session->getFlashBag()->add('error', 'Oups, un beneficiaire est déjà enregistré avec cet email !('.'#'.$beneficiary->getUser()->getMemberNumber()." ".$beneficiary->getUser()->getFirstName()." ".$beneficiary->getUser()->getLastName()[0].')');
+                        }else{
+                            $username = User::makeUsername($user->getFirstname(),$user->getLastname());
+                            $qb = $em->createQueryBuilder();
+                            $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+                                ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
+                                ->getQuery()
+                                ->getResult();
+                            $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
+                            if (count($users)||$already_registred){
+                                $username = User::makeUsername($user->getFirstname(),$user->getLastname(),count($users)+1+$already_registred);
+                            }
+                            $user->setUsername($username);
+                            $password = User::randomPassword();
+                            $user->setPassword($password);
+                            $user->getMainBeneficiary()->setUser($user);
+                            $user->setEmail($user->getMainBeneficiary()->getEmail());
 
-                $username = User::makeUsername($user->getFirstname(),$user->getLastname());
-                $qb = $em->createQueryBuilder();
-                $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-                    ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
-                    ->getQuery()
-                    ->getResult();
-                $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
-                if (count($users)||$already_registred){
-                    $username = User::makeUsername($user->getFirstname(),$user->getLastname(),count($users)+1+$already_registred);
-                }
-                $user->setUsername($username);
-                $password = User::randomPassword();
-                $user->setPassword($password);
-                $user->getMainBeneficiary()->setUser($user);
-                $user->setEmail($user->getMainBeneficiary()->getEmail());
+                            $em->persist($user);
+                            $em->flush();
 
-                $em->persist($user);
-                $em->flush();
-
-                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                else{
-                    $session->set('token_key',uniqid());
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                            else{
+                                $session->set('token_key',uniqid());
+                                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                            }
+                        }
+                    }
                 }
             }
-
             return $this->render('user/new.html.twig', array(
                 'user' => $user,
                 'form' => $form->createView(),

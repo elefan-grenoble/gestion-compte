@@ -4,8 +4,10 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}espace membre @ l&rsquo;éléfàn{% endblock %}</title>
-        {%- include "MaterializeBundle:Materialize:css.html.twig" -%}
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons|Raleway:400,600,800" rel="stylesheet">
+        {#{%- include "MaterializeBundle:Materialize:css.html.twig" -%}#}
+        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
+        <link href="https://fonts.googleapis.com/icon?family=Raleway:400,600,800" rel="stylesheet">
         {% block stylesheets %}{% endblock %}
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -87,8 +89,8 @@
             </div>
         </footer>
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
-        {#<script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>#}
-        {%- include "MaterializeBundle:Materialize:js.html.twig" -%}
+        <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
+        {#{%- include "MaterializeBundle:Materialize:js.html.twig" -%}#}
         <script>
             $(document).ready(function() {
                 $('select').material_select();
