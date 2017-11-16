@@ -5,32 +5,22 @@
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
                 {% if beneficiary.isAmbassador %}<i class="material-icons">face</i>{% endif %}</span>
             <div class="row">
-                <div class="col s4">{{ beneficiary.phone }}</div>
-                <div class="col s8">{{ beneficiary.email }}</div>
+                <div class="col s12 truncate"><i class="material-icons tiny">phone</i>{{ beneficiary.phone }}</div>
+                <div class="col s12 truncate"><i class="material-icons tiny">mail</i>{{ beneficiary.email }}</div>
             </div>
-        </div>
-        {% if not beneficiary.isMain %}
-            <div class="card-action">
-                <table>
-                    <tr>
-                        <td>
-                            <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get">
-                            {% if not is_granted("ROLE_ADMIN") %}
-                                <input type="hidden" value="{{ token }}" name="token">
-                            {% endif %}
-                            <button type="submit" class="btn">Editer</button>
-                            </form>
-                        </td>
-                        {% if delete_form is defined %}
-                            <td>
-                                {{ form_start(delete_form) }}
-                                <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn red">Supprimer</button>
-                                {{ form_end(delete_form) }}
-                            </td>
+            {% if not beneficiary.isMain %}
+                    <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
+                        {% if not is_granted("ROLE_ADMIN") %}
+                            <input type="hidden" value="{{ token }}" name="token">
                         {% endif %}
-                    </tr>
-                </table>
-            </div>
-        {% endif %}
+                        <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons">mode_edit</i></button>
+                    </form>
+                    {% if delete_form is defined %}
+                        {{ form_start(delete_form) }}
+                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn btn-floating waves-effect waves-light red"><i class="material-icons">remove</i></button>
+                        {{ form_end(delete_form) }}
+                    {% endif %}
+            {% endif %}
+        </div>
     </div>
 </div>
