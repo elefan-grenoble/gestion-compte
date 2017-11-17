@@ -19,3 +19,24 @@
         {{ form_row(form.address.city) }}
     </div>
 </div>
+{% if form.lastRegistration is defined %}
+    <h4>Première adhésion</h4>
+    <div class="row">
+        <div class="amount col s3">
+            {{ form_row(form.lastRegistration.amount) }}
+        </div>
+        <div class="type col s3">
+            {{ form_row(form.lastRegistration.mode) }}
+        </div>
+        <div class="date col s3">
+            <div class="row">
+                <div class="col s4">{{ form_row(form.lastRegistration.date.day) }}</div>
+                <div class="col s4">{{ form_row(form.lastRegistration.date.month) }}</div>
+                <div class="col s4">{{ form_row(form.lastRegistration.date.year) }}</div>
+            </div>
+        </div>
+        <div class="col s3">
+            {{ form_row(form.lastRegistration.registrar) }}
+        </div>
+    </div>
+{% endif %}

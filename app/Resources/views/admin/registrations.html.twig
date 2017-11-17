@@ -7,7 +7,7 @@
         <ul class="collapsible" data-collapsible="accordion">
             {% for registration in registrations %}
                 <li class="">
-                    <div class="collapsible-header {% if(registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                    <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                             <i class="material-icons tiny">credit_card</i>
                         {% else %}
                             <i class="material-icons tiny">attach_money</i>
@@ -27,14 +27,13 @@
                         {% endif %}
                         {% if registration.user  %}
                         pour #<a href="{{ path("user_show",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp
+                            {% if registration.user.mainBeneficiary %}
+                                {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
+                            {% endif %}
+                            {% if(registration.user.registrations | length) > 1 %}
+                                (Ré-adhésion)
+                            {% endif %}
                         {% endif %}
-                        {% if registration.user.mainBeneficiary %}
-                            {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
-                        {% endif %}
-                        {% if(registration.user.registrations | length) > 1 %}
-                            (Ré-adhésion)
-                        {% endif %}
-
                     </div>
                 </li>
             {% endfor %}

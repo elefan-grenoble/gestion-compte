@@ -393,6 +393,11 @@ class UserController extends Controller
                 $mm = $users[0]->getMemberNumber() + 1;
             $user->setMemberNumber($mm);
 
+            $registration = new Registration();
+            $registration->setDate(new DateTime('now'));
+            $registration->setUser($user);
+            $user->addRegistration($registration);
+
             $form = $this->createForm('AppBundle\Form\UserType', $user);
             $form->handleRequest($request);
 
@@ -427,6 +432,8 @@ class UserController extends Controller
 
                             $em->persist($user);
                             $em->flush();
+
+                            $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
 
                             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));

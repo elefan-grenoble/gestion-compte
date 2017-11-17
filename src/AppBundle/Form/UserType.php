@@ -2,8 +2,10 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -46,9 +48,12 @@ class UserType extends AbstractType
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
             }
 
-
             $form->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
             $form->add('address', AddressType::class,array('label'=>' '));
+
+            if (!$userData->getId()){
+                $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
+            }
 
         });
     }

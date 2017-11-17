@@ -280,6 +280,11 @@ class User extends BaseUser
         return null;
     }
 
+    /**
+     * Get lastRegistration
+     *
+     * @return \AppBundle\Entity\Registration
+     */
     public function getLastRegistration(){
         if ($this->getRegistrations()->count()){
             return ($this->getRegistrations()->first());
