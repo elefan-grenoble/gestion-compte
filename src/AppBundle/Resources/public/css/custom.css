@@ -224,3 +224,6 @@ textarea.materialize-textarea:focus:not([readonly]) {
 .input-field .prefix.active {
   color: #51CAE9;
 }
+form .errors ul li {
+  color: darkred;
+}

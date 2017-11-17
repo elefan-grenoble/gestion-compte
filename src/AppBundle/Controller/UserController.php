@@ -17,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -444,7 +445,13 @@ class UserController extends Controller
                         }
                     }
                 }
+            }elseif ($form->isSubmitted()){
+                foreach ($this->getErrorMessages($form) as $key => $errors){
+                    foreach ($errors as $error)
+                        $session->getFlashBag()->add('error', $key." : ".$error);
+                }
             }
+
             return $this->render('user/new.html.twig', array(
                 'user' => $user,
                 'form' => $form->createView(),
@@ -601,6 +608,11 @@ class UserController extends Controller
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
             else
                 return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+        }elseif ($beneficiaryForm->isSubmitted()){
+            foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors){
+                foreach ($errors as $error)
+                    $session->getFlashBag()->add('error', $key." : ".$error);
+            }
         }
 
         $newReg = new Registration();
@@ -860,5 +872,26 @@ class UserController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function getErrorMessages(Form $form) {
+        $errors = array();
+
+        foreach ($form->getErrors() as $key => $error) {
+            if ($form->isRoot()) {
+                $errors['#'][] = $error->getMessage();
+            } else {
+                $errors[] = $error->getMessage();
+            }
+        }
+
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $key = (isset($child->getConfig()->getOptions()['label'])) ? $child->getConfig()->getOptions()['label'] : $child->getName();
+                $errors[$key] = $this->getErrorMessages($child);
+            }
+        }
+
+        return $errors;
     }
 }
