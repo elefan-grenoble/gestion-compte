@@ -397,6 +397,7 @@ class UserController extends Controller
             $registration = new Registration();
             $registration->setDate(new DateTime('now'));
             $registration->setUser($user);
+            $registration->setRegistrar($current_app_user);
             $user->addRegistration($registration);
 
             $form = $this->createForm('AppBundle\Form\UserType', $user);
@@ -430,6 +431,9 @@ class UserController extends Controller
                             $user->setPassword($password);
                             $user->getMainBeneficiary()->setUser($user);
                             $user->setEmail($user->getMainBeneficiary()->getEmail());
+
+                            if (!$user->getLastRegistration()->getRegistrar())
+                                $user->getLastRegistration()->setRegistrar($current_app_user);
 
                             $em->persist($user);
                             $em->flush();

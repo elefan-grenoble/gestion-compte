@@ -70,7 +70,6 @@ class RegistrationType extends AbstractType
                     'label' => 'Enregistré par',
                     'class' => 'AppBundle:User',
                     'choice_label' => 'username',
-                    'data' => $user,
                     'attr'=>array('disabled' => true)));
             }
 
