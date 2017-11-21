@@ -6,8 +6,8 @@
 {% endblock %}
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
         {% if is_granted("ROLE_ADMIN") %}
-            <div class="container">
                 <br><br>
                 <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
                 <div class="row center">
@@ -16,8 +16,12 @@
                 <a href="{{ path("user_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
                 <a href="{{ path("admin_clients") }}" class="waves-effect waves-light btn"><i class="material-icons left">vpn_key</i>Gérer les clients Oauth</a>
                 <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
-            </div>
         {% endif %}
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+                <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>export emails as csv</a>
+        {% endif %}
+        </div>
+
     </div>
 {% endblock %}
 

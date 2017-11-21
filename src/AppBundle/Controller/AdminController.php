@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -127,5 +128,36 @@ class AdminController extends Controller
             'form' => $form->createView()
         ));
 
+    }
+
+    /**
+     * export all emails of members (including beneficiary)
+     *
+     * @Route("/emails_csv", name="admin_emails_csv")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function exportEmails(Request $request){
+        $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
+
+        $return = '';
+        if($beneficiaries) {
+
+            $d = ','; // this is the default but i like to be explicit
+            $e = '"'; // this is the default but i like to be explicit
+
+            foreach($beneficiaries as $beneficiary) {
+                $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+                if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                    $return .= $beneficiary->getFirstname().",".$beneficiary->getLastname().",".$beneficiary->getEmail()."\n";
+                }
+
+            }
+        }
+        return new Response($return, 200, array(
+            'Content-Encoding: UTF-8',
+            'Content-Type' => 'application/force-download; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+        ));
     }
 }
