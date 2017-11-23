@@ -32,4 +32,5 @@ composer.lock
 /.web-server-pid
 
 /.idea
+/*.iml
 LICENSE

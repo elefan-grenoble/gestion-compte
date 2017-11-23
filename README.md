@@ -1,6 +1,6 @@
 Espace adhérent l'éléfàn
 ========================
-== modèle de données ==
+## Modèle de données
 
 ![modele](https://yuml.me/6590c986.svg)
 
@@ -10,9 +10,19 @@ Espace adhérent l'éléfàn
       [User]++-1<>[Address|street;zip;city]
       [User]<*-*>[Commission|name],[User]<2-++[Commission],[user]1-*++[Registration|date;amount;mode]</code>
 
-== Install ==
+## Install
+
+### Prerequisites
+
+* PHP
+* Composer
+* Mysql installed and configured (or mariadb on Fedora)
+* php-mysql (php-pdo_mysql on Fedora)
+
+### Setup
 
 * git clone *this_repo*
 * composer install
 * bin/console doctrine:schema:create
+* php bin/console server:start
 * visite SITE_URL/user/install_admin
