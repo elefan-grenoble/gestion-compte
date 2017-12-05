@@ -51,7 +51,7 @@ class UserType extends AbstractType
             $form->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
             $form->add('address', AddressType::class,array('label'=>' '));
 
-            if (!$userData->getId()){
+            if ($userData && !$userData->getId()){
                 $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
             }
 
