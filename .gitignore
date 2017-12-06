@@ -11,11 +11,13 @@ composer.lock
 /app/config/parameters.ini
 
 #/bin
+/bin/symfony_requirements
 /web/bundles
 /web/css
 /web/fonts
 /web/images
 /web/js
+/web/config.php
 /vendor
 
 # PHPUnit
