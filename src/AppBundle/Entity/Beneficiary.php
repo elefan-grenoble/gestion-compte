@@ -23,20 +23,6 @@ class Beneficiary
     private $id;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_ambassador", type="boolean", nullable=true)
-     */
-    private $ambassador;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_expert", type="boolean", nullable=true)
-     */
-    private $expert;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="lastname", type="string", length=255)
@@ -69,6 +55,26 @@ class Beneficiary
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
     private $user;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
+     * @ORM\JoinColumn(name="commission_id", referencedColumnName="id")
+     */
+    private $own;
+
+    /**
+     * Many Beneficiary have Many Commissions.
+     * @ORM\ManyToMany(targetEntity="Commission", inversedBy="beneficiaries")
+     * @ORM\JoinTable(name="beneficiaries_commissions")
+     */
+    private $commissions;
+
+    /**
+     * Many Beneficiary have Many Roles.
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="beneficiaries")
+     * @ORM\JoinTable(name="beneficiaries_roles")
+     */
+    private $roles;
 
     /**
      * Get id
@@ -116,6 +122,10 @@ class Beneficiary
         $this->firstname = $firstname;
 
         return $this;
+    }
+
+    public function getDisplayName(){
+        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
     }
 
     /**
@@ -201,55 +211,119 @@ class Beneficiary
     }
 
     /**
-     * Set ambassador
-     *
-     * @param boolean $ambassador
-     *
-     * @return Beneficiary
-     */
-    public function setAmbassador($ambassador)
-    {
-        $this->ambassador = $ambassador;
-
-        return $this;
-    }
-
-    /**
      * Get isAmbassador
      *
      * @return boolean
+     * todo map it with roles
      */
     public function isAmbassador()
     {
-        return $this->ambassador;
+        return false;
     }
 
-    /**
-     * Set expert
-     *
-     * @param boolean $expert
-     *
-     * @return Beneficiary
-     */
-    public function setExpert($expert)
-    {
-        $this->expert = $expert;
-
-        return $this;
-    }
-
-    /**
-     * Get expert
-     *
-     * @return boolean
-     */
-    public function isExpert()
-    {
-        return $this->expert;
-    }
 
     public function isMain()
     {
         return $this === $this->getUser()->getMainBeneficiary();
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add commission
+     *
+     * @param \AppBundle\Entity\Commission $commission
+     *
+     * @return Beneficiary
+     */
+    public function addCommission(\AppBundle\Entity\Commission $commission)
+    {
+        $this->commissions[] = $commission;
+
+        return $this;
+    }
+
+    /**
+     * Remove commission
+     *
+     * @param \AppBundle\Entity\Commission $commission
+     */
+    public function removeCommission(\AppBundle\Entity\Commission $commission)
+    {
+        $this->commissions->removeElement($commission);
+    }
+
+    /**
+     * Get commissions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCommissions()
+    {
+        return $this->commissions;
+    }
+
+    /**
+     * Add role
+     *
+     * @param \AppBundle\Entity\Role $role
+     *
+     * @return Beneficiary
+     */
+    public function addRole(\AppBundle\Entity\Role $role)
+    {
+        $this->roles[] = $role;
+
+        return $this;
+    }
+
+    /**
+     * Remove role
+     *
+     * @param \AppBundle\Entity\Role $role
+     */
+    public function removeRole(\AppBundle\Entity\Role $role)
+    {
+        $this->roles->removeElement($role);
+    }
+
+    /**
+     * Get roles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRoles()
+    {
+        return $this->roles;
+    }
+
+    /**
+     * Set own
+     *
+     * @param \AppBundle\Entity\Commission $own
+     *
+     * @return Beneficiary
+     */
+    public function setOwn(\AppBundle\Entity\Commission $own = null)
+    {
+        $this->own = $own;
+
+        return $this;
+    }
+
+    /**
+     * Get own
+     *
+     * @return \AppBundle\Entity\Commission
+     */
+    public function getOwn()
+    {
+        return $this->own;
     }
 }

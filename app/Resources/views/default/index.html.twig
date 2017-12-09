@@ -27,13 +27,6 @@
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
                     <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
-                {% if is_granted("ROLE_SUPER_ADMIN") %}
-                    <h5>Actions super admin</h5>
-                    <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commission</a>
-                    <a class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les services</a>
-                    <br>
-                    <a href="{{ path("user_import_csv") }}" class="">Importer des adhérents en CSV</a>
-                {% endif %}
             </div>
         {% else %}
             <div class="container">

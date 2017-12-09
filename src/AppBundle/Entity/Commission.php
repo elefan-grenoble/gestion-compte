@@ -29,10 +29,30 @@ class Commission
     private $name;
 
     /**
-     * Many Commissions have Many Users.
-     * @ORM\ManyToMany(targetEntity="User", mappedBy="commissions")
+     * @var string
+     *
+     * @ORM\Column(name="description", type="string", length=255)
      */
-    private $users;
+    private $description;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="email", type="string", length=255)
+     */
+    private $email;
+
+    /**
+     * Many Commissions have Many Beneficiary.
+     * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
+     */
+    private $beneficiaries;
+
+    /**
+     * One Commission have Many Owners (Beneficiary).
+     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="own",cascade={"persist"})
+     */
+    private $owners;
 
     /**
      * Get id
@@ -73,40 +93,122 @@ class Commission
      */
     public function __construct()
     {
-        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
-     * Add user
+     * Add beneficiary
      *
-     * @param \AppBundle\Entity\User $user
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
      *
      * @return Commission
      */
-    public function addUser(\AppBundle\Entity\User $user)
+    public function addBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
     {
-        $this->users[] = $user;
+        $this->beneficiaries[] = $beneficiary;
 
         return $this;
     }
 
     /**
-     * Remove user
+     * Remove beneficiary
      *
-     * @param \AppBundle\Entity\User $user
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
      */
-    public function removeUser(\AppBundle\Entity\User $user)
+    public function removeBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
     {
-        $this->users->removeElement($user);
+        $this->beneficiaries->removeElement($beneficiary);
     }
 
     /**
-     * Get users
+     * Get beneficiaries
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getUsers()
+    public function getBeneficiaries()
     {
-        return $this->users;
+        return $this->beneficiaries;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Commission
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Add owner
+     *
+     * @param \AppBundle\Entity\Beneficiary $owner
+     *
+     * @return Commission
+     */
+    public function addOwner(\AppBundle\Entity\Beneficiary $owner)
+    {
+        $this->owners[] = $owner;
+
+        return $this;
+    }
+
+    /**
+     * Remove owner
+     *
+     * @param \AppBundle\Entity\Beneficiary $owner
+     */
+    public function removeOwner(\AppBundle\Entity\Beneficiary $owner)
+    {
+        $this->owners->removeElement($owner);
+    }
+
+    /**
+     * Get owners
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getOwners()
+    {
+        return $this->owners;
+    }
+
+    /**
+     * Set email
+     *
+     * @param string $email
+     *
+     * @return Commission
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 }

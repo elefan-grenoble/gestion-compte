@@ -7,6 +7,12 @@
             <div class="row">
                 <div class="col s12 truncate"><i class="material-icons tiny">phone</i>{{ beneficiary.phone }}</div>
                 <div class="col s12 truncate"><i class="material-icons tiny">mail</i>{{ beneficiary.email }}</div>
+                {% if beneficiary.roles | length %}
+                <div class="col s12 truncate"><i class="material-icons tiny">assignment_ind</i>{% for role in beneficiary.roles %}<div class="chip">{{ role.name }}</div>{% endfor %}</div>
+                {% endif %}
+                {% if beneficiary.commissions | length %}
+                <div class="col s12 truncate"><i class="material-icons tiny">group</i>{% for commission in beneficiary.commissions %}<div class="chip">{{ commission.name }}</div>{% endfor %}</div>
+                {% endif %}
             </div>
             {% if not beneficiary.isMain %}
                     <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">

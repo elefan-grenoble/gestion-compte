@@ -36,15 +36,15 @@
         </div>
     </div>
     <div class="checkboxes col s6">
-        {% if form.children.expert is defined %}
-            {{ form_widget(form.expert) }}
-            {{ form_label(form.expert) }}
+        {% if form.children.roles is defined %}
+            {{ form_widget(form.roles) }}
+            {{ form_label(form.roles) }}
         {% endif %}
     </div>
     <div class="checkboxes col s6">
-        {% if form.children.ambassador is defined %}
-            {{ form_widget(form.ambassador) }}
-            {{ form_label(form.ambassador) }}
+        {% if form.children.commissions is defined %}
+            {{ form_widget(form.commissions) }}
+            {{ form_label(form.commissions) }}
         {% endif %}
     </div>
 </div>
