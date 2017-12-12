@@ -59,7 +59,7 @@ class BookedShift
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="booked_shifts")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
-    private $schifter;
+    private $shifter;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
@@ -198,30 +198,6 @@ class BookedShift
     }
 
     /**
-     * Set schifter
-     *
-     * @param \AppBundle\Entity\Beneficiary $schifter
-     *
-     * @return BookedShift
-     */
-    public function setSchifter(\AppBundle\Entity\Beneficiary $schifter = null)
-    {
-        $this->schifter = $schifter;
-
-        return $this;
-    }
-
-    /**
-     * Get schifter
-     *
-     * @return \AppBundle\Entity\Beneficiary
-     */
-    public function getSchifter()
-    {
-        return $this->schifter;
-    }
-
-    /**
      * Set booker
      *
      * @param \AppBundle\Entity\Beneficiary $booker
@@ -243,5 +219,29 @@ class BookedShift
     public function getBooker()
     {
         return $this->booker;
+    }
+
+    /**
+     * Set shifter
+     *
+     * @param \AppBundle\Entity\Beneficiary $shifter
+     *
+     * @return BookedShift
+     */
+    public function setShifter(\AppBundle\Entity\Beneficiary $shifter = null)
+    {
+        $this->shifter = $shifter;
+
+        return $this;
+    }
+
+    /**
+     * Get shifter
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getShifter()
+    {
+        return $this->shifter;
     }
 }

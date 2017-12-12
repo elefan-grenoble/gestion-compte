@@ -169,4 +169,9 @@ class Shift
     {
         return $this->booked_shifts;
     }
+
+    public function getDuration()
+    {
+        return date_diff($this->start, $this->end);
+    }
 }

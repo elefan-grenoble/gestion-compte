@@ -514,6 +514,18 @@ class User extends BaseUser
 
     public function getShiftsDuration()
     {
-        return 0;
+        // TODO Prendre en compte les cycles
+        $duration = 0;
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getShifts() as $shift) {
+              $duration += $shift->getShift()->getDuration();
+            }
+        }
+        return $duration;
+    }
+
+    public function needToBookAShift()
+    {
+        return $this->getShiftsDuration() < 3600 * 3;
     }
 }

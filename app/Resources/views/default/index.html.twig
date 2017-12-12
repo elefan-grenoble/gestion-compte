@@ -19,9 +19,13 @@
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                     <p class="col s12">Cet espace, vide pour le moment, regroupera bientôt tous les services liés à ta qualité de membre.</p>
                 </div>
-                <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
+                {% if (app.user.needToBookAShift())  %}
+                    <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
+                {% endif %}
                 {% if (app.user.isRegistrar(ip))  %}
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                {% else %}
+                    <p>Shifts booked (TODO: display shifts)</p>
                 {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
