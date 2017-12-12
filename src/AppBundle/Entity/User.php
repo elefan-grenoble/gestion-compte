@@ -511,4 +511,9 @@ class User extends BaseUser
         }
         return false;
     }
+
+    public function getShiftsDuration()
+    {
+        return 0;
+    }
 }
