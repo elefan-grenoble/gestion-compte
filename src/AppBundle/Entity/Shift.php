@@ -42,6 +42,10 @@ class Shift
      */
     private $maxShiftersNb;
 
+    /**
+     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shift",cascade={"remove"})
+     */
+    private $booked_shifts;
 
     /**
      * Get id
@@ -124,5 +128,45 @@ class Shift
     {
         return $this->maxShiftersNb;
     }
-}
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->booked_shifts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
+    /**
+     * Add bookedShift
+     *
+     * @param \AppBundle\Entity\BookedShift $bookedShift
+     *
+     * @return Shift
+     */
+    public function addBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    {
+        $this->booked_shifts[] = $bookedShift;
+
+        return $this;
+    }
+
+    /**
+     * Remove bookedShift
+     *
+     * @param \AppBundle\Entity\BookedShift $bookedShift
+     */
+    public function removeBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    {
+        $this->booked_shifts->removeElement($bookedShift);
+    }
+
+    /**
+     * Get bookedShifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBookedShifts()
+    {
+        return $this->booked_shifts;
+    }
+}
