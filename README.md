@@ -2,13 +2,10 @@ Espace adhérent l'éléfàn
 ========================
 ## Modèle de données
 
-![modele](https://yuml.me/6590c986.svg)
+![modele](http://yuml.me/ee3093b1.svg)
 
 * yuml.me code:
-<code>[FOS User|username;password]1-1++[User|member_number]
-      [User]++1-1..*<>[Beneficiary|is_main;lastname;firstname;phone;email]
-      [User]++-1<>[Address|street;zip;city]
-      [User]<*-*>[Commission|name],[User]<2-++[Commission],[user]1-*++[Registration|date;amount;mode]</code>
+http://yuml.me/edit/ee3093b1
 
 ## Install
 
