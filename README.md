@@ -2,29 +2,54 @@ Espace adhérent l'éléfàn
 ========================
 ## Modèle de données
 
-![modele](https://yuml.me/6590c986.svg)
+![modele](http://yuml.me/ee3093b1.svg)
 
 * yuml.me code:
-<code>[FOS User|username;password]1-1++[User|member_number]
-      [User]++1-1..*<>[Beneficiary|is_main;lastname;firstname;phone;email]
-      [User]++-1<>[Address|street;zip;city]
-      [User]<*-*>[Commission|name],[User]<2-++[Commission],[user]1-*++[Registration|date;amount;mode]</code>
+http://yuml.me/edit/ee3093b1
 
-## Install
+## Guide du développeur
 
-### Prerequisites
+### Prérequis
 
-* PHP
-* Composer
-* Mysql installed and configured (or mariadb on Fedora)
+* PHP (version 7+) installé
+* Composer installé
+* Mysql installé et configuré (ou mariadb sur Fedora)
 * php-mysql (php-pdo_mysql on Fedora)
+* Créer une nouvelle base pour le projet
 
-### Setup
+### Installation
 
 * ``git clone https://github.com/elefan-grenoble/gestion-compte.git``
 * ``cd gestion-compte``
-* ``composer install``
+* ``composer install`` (utiliser le nom de la base précédemment créée)
 * ``bin/console doctrine:schema:create``
 * add ``127.0.0.1 membres.lelefan.local`` to your _/etc/hosts_ file
 * ``php bin/console server:start``
 * visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
+
+### Créer un utilisateur
+
+* Se connecter avec l'utilisateur super admin babar/password
+* Créer un utilisateur
+
+#### Activer l'utilisateur
+
+L'activation passe par un envoi de mail. Il faut installer un mail catcher pour pouvoir faire fonctionner l'envoi de mail en local.
+
+Sinon, il est possible d'activer un utilisateur via cette procédure:
+
+* Activer l'utilisateur avec la commande suivante ``php bin/console fos:user:activate $username``
+* Changer le mot de passe avec la commande suivante ``php bin/console fos:user:change-password $username newp@ssword``
+
+Documentation Symfony pour manipuler les utilisateurs: http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
+
+### Cheatsheet
+
+#### Mise à jour du modèle
+
+* Créer une nouvelle entité: ``php bin/console doctrine:generate:entity AppBundle:EntityName``
+* Générer les getters et setters d'une entité: ``php bin/console doctrine:generate:entities``
+* Appliquer les mises à jours sur la base: 
+   * Dryrun: ``php bin/console doctrine:schema:update``
+   * Voir les requêtes: ``php bin/console doctrine:schema:update --dump-sql``
+   * Appliquer les changements: ``php bin/console doctrine:schema:update --force``
