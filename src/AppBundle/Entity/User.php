@@ -516,12 +516,21 @@ class User extends BaseUser
     {
         // TODO Prendre en compte les cycles
         $duration = 0;
-        foreach ($this->getBeneficiaries() as $beneficiary) {
-            foreach ($beneficiary->getShifts() as $shift) {
-              $duration += $shift->getShift()->getDuration();
-            }
+        foreach ($this->getShifts() as $shift) {
+            $duration += $shift->getShift()->getDuration();
         }
         return $duration;
+    }
+
+    public function getShifts()
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
     }
 
     public function needToBookAShift()
