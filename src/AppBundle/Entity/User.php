@@ -480,6 +480,6 @@ class User extends BaseUser
 
     public function needToBookAShift()
     {
-        return $this->getShiftsDuration() < 3600 * 3;
+        return $this->getShiftsDuration() < 60 * 3;
     }
 }

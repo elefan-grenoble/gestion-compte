@@ -17,11 +17,23 @@
                 <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
                 <div class="row center">
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
-                    <p class="col s12">Cet espace, vide pour le moment, regroupera bientôt tous les services liés à ta qualité de membre.</p>
                 </div>
-                {% if (app.user.needToBookAShift())  %}
-                    <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
-                {% endif %}
+                <div class="row center">
+                    <h4 class="header center">Mes créneaux réservés</h4>
+                    {% for shift in app.user.getShifts() %}
+                        <div class="shift">
+                            <p>{{ shift.getShift().start|date('l jS \of F Y h:i:s A') }}</p>
+                            <div>
+                                <a>Oops, je ne pouvoir effectuer mon créneau...</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if (app.user.needToBookAShift())  %}
+                        <p>J'ai réservé pour {{ app.user.getShiftsDuration() }} minutes de créneaux.</p>
+                        <p>Je dois encore effectuer un total de ??? minutes de créneaux avant le ???</p>
+                        <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
+                    {% endif %}
+                </div>
                 {% if (app.user.isRegistrar(ip))  %}
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% else %}

@@ -1,7 +1,7 @@
+@import "../fonts/blackjack/stylesheet.css";
 /*
  * Globals
  */
-@import "../fonts/blackjack/stylesheet.css";
 h1,
 h2,
 h3,
@@ -12,6 +12,11 @@ h5 {
   text-transform: uppercase;
 }
 h3.header {
+  font-family: 'black_jackregular';
+  text-transform: none;
+  font-weight: normal;
+}
+h4.header {
   font-family: 'black_jackregular';
   text-transform: none;
   font-weight: normal;
@@ -28,10 +33,10 @@ main {
   flex: 1 0 auto;
 }
 .main-navigation {
-  background-color: #51CAE9;
+  background-color: #51cae9;
 }
 footer.page-footer {
-  background-color: #51CAE9;
+  background-color: #51cae9;
 }
 #logo-container {
   font-family: 'black_jackregular';
@@ -48,7 +53,7 @@ footer.page-footer {
 .btn,
 .btn-large {
   color: #fff;
-  background-color: #51CAE9;
+  background-color: #51cae9;
 }
 .btn:hover,
 .btn-large:hover {
@@ -78,7 +83,7 @@ footer.page-footer {
   background-color: #8bc34a !important;
 }
 .teal.error {
-  background-color: #F44336 !important;
+  background-color: #f44336 !important;
 }
 .teal.warning {
   background-color: #ff9800 !important;
@@ -217,13 +222,22 @@ input[type=tel]:not(.browser-default):focus:not([readonly]),
 input[type=number]:not(.browser-default):focus:not([readonly]),
 input[type=search]:not(.browser-default):focus:not([readonly]),
 textarea.materialize-textarea:focus:not([readonly]) {
-  border-bottom: 1px solid #51CAE9;
-  -webkit-box-shadow: 0 1px 0 0 #51CAE9;
-  box-shadow: 0 1px 0 0 #51CAE9;
+  border-bottom: 1px solid #51cae9;
+  -webkit-box-shadow: 0 1px 0 0 #51cae9;
+  box-shadow: 0 1px 0 0 #51cae9;
 }
 .input-field .prefix.active {
-  color: #51CAE9;
+  color: #51cae9;
 }
 form .errors ul li {
   color: darkred;
+}
+/*
+ * Shifts
+ */
+.shift {
+  width: 80%;
+  margin: auto;
+  border: solid 1px;
+  border-radius: 10px;
 }

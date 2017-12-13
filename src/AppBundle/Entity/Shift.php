@@ -172,6 +172,7 @@ class Shift
 
     public function getDuration()
     {
-        return date_diff($this->start, $this->end);
+        $diff = date_diff($this->start, $this->end);
+        return $diff->h * 60 + $diff->i;
     }
 }
