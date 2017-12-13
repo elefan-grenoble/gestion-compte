@@ -1,0 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin_commissions') }}"><i class="material-icons">list</i>commissions</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i>
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Editer commission</h4>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Editer</button>
+    </div>
+    {{ form_end(form) }}
+
+
+{% endblock %}

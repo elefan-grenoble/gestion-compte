@@ -72,13 +72,6 @@ class User extends BaseUser
     private $address;
 
     /**
-    * Many Users have Many Commissions.
-    * @ORM\ManyToMany(targetEntity="Commission", inversedBy="users")
-    * @ORM\JoinTable(name="users_commissions")
-    */
-    private $commissions;
-
-    /**
      * Many Users have Many Services.
      * @ORM\ManyToMany(targetEntity="Service", inversedBy="users")
      * @ORM\JoinTable(name="users_services")
@@ -206,40 +199,6 @@ class User extends BaseUser
     public function getAddress()
     {
         return $this->address;
-    }
-
-    /**
-     * Add commission
-     *
-     * @param \AppBundle\Entity\Commission $commission
-     *
-     * @return User
-     */
-    public function addComission(\AppBundle\Entity\Commission $commission)
-    {
-        $this->comissions[] = $commission;
-
-        return $this;
-    }
-
-    /**
-     * Remove commission
-     *
-     * @param \AppBundle\Entity\Commission $commission
-     */
-    public function removeCommission(\AppBundle\Entity\Commission $commission)
-    {
-        $this->comissions->removeElement($commission);
-    }
-
-    /**
-     * Get commissions
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getCommissions()
-    {
-        return $this->commissions;
     }
 
     /**
@@ -388,20 +347,6 @@ class User extends BaseUser
     }
 
     /**
-     * Add commission
-     *
-     * @param \AppBundle\Entity\Commission $commission
-     *
-     * @return User
-     */
-    public function addCommission(\AppBundle\Entity\Commission $commission)
-    {
-        $this->commissions[] = $commission;
-
-        return $this;
-    }
-
-    /**
      * Set mainBeneficiary
      *
      * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
@@ -506,7 +451,7 @@ class User extends BaseUser
             return true;
         }elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
             return true;
-        }elseif ($this->getMainBeneficiary()->isAmbassador()){ //todo check also other Beneficiary
+        }elseif ($this->getMainBeneficiary()->isAmbassador()){ //todo check also other Beneficiary ?
             return true;
         }
         return false;

@@ -1,0 +1,36 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>roles
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Liste des Roles</h4>
+
+    <table class="responsive-table striped">
+        <thead>
+        <tr>
+            <th>Role</th>
+            <th>Nombre de membres</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for role in roles %}
+            <tr>
+                <td>{{ role.name }}</td>
+                <td>{{ role.beneficiaries | length }}</td>
+                <td><a href="{{ path("role_edit",{'id':role.id}) }}">editer</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <a href="{{ path('role_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un role</a>
+    {% endif %}
+
+{% endblock %}

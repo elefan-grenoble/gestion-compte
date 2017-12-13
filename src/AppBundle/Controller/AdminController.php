@@ -4,7 +4,9 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Commission;
 use AppBundle\Entity\Registration;
+use AppBundle\Entity\Role;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
@@ -49,7 +51,7 @@ class AdminController extends Controller
     }
 
     /**
-     * Registration list
+     * Registrations list
      *
      * @Route("/registrations", name="admin_registrations")
      * @Method("GET")
@@ -70,6 +72,165 @@ class AdminController extends Controller
             ->getRepository('AppBundle:Registration')
             ->findBy(array(),array('date' => 'DESC'),$limit,($page-1)*$limit);
         return $this->render('admin/registrations.html.twig',array('registrations'=>$registrations,'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * Comissions list
+     *
+     * @Route("/commissions", name="admin_commissions")
+     * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function commissionsAction(Request $request)
+    {
+        $commissions = $this->getDoctrine()->getManager()->getRepository('AppBundle:Commission')->findAll();
+        return $this->render('admin/commission/list.html.twig',array('commissions'=>$commissions));
+    }
+
+    /**
+     * Comission new
+     *
+     * @Route("/commission/new", name="commission_new")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function commissionNewAction(Request $request)
+    {
+
+        $session = new Session();
+
+        $commission = new Commission();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $em->persist($commission);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
+
+            return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
+
+        }
+
+        return $this->render('admin/commission/new.html.twig', array(
+            'commission' => $commission,
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Comission edit
+     *
+     * @Route("/commission/{id}/edit", name="commission_edit")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function commissionEditAction(Request $request,Commission $commission)
+    {
+        $session = new Session();
+
+        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($commission);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'La commission a bien été éditée !');
+
+            return $this->redirectToRoute('admin_commissions');
+
+        }
+
+        return $this->render('admin/commission/edit.html.twig', array(
+            'commission' => $commission,
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Roles list
+     *
+     * @Route("/roles", name="admin_roles")
+     * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function rolesAction(Request $request)
+    {
+        $roles = $this->getDoctrine()->getManager()->getRepository('AppBundle:Role')->findAll();
+        return $this->render('admin/role/list.html.twig',array('roles'=>$roles));
+    }
+
+    /**
+     * role new
+     *
+     * @Route("/role_new", name="role_new")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function roleNewAction(Request $request)
+    {
+        $session = new Session();
+
+        $role = new Role();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->createForm('AppBundle\Form\RoleType', $role);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $em->persist($role);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le nouveau role a bien été créé !');
+
+            return $this->redirectToRoute('role_edit', array('id' => $role->getId()));
+
+        }
+
+        return $this->render('admin/role/new.html.twig', array(
+            'role' => $role,
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Comission edit
+     *
+     * @Route("/role/{id}/edit", name="role_edit")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function roleEditAction(Request $request,Role $role)
+    {
+        $session = new Session();
+
+        $form = $this->createForm('AppBundle\Form\RoleType', $role);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($role);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le role a bien été édité !');
+
+            return $this->redirectToRoute('admin_roles');
+
+        }
+
+        return $this->render('admin/role/edit.html.twig', array(
+            'role' => $role,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
@@ -159,5 +320,63 @@ class AdminController extends Controller
             'Content-Type' => 'application/force-download; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
         ));
+    }
+
+
+    /**
+     * Join two user
+     *
+     * @Route("/join", name="user_join")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function joinAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
+            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes','attr' => array('class' => 'btn')))
+            ->getForm();
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $re = '/#([0-9]+).*/';
+            $str = $form->get('from_text')->getData()."\n".$form->get('dest_text')->getData();
+            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+            if (count($matches)>=2){
+                $fromUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[0][1]));
+                if ($fromUser){
+                    $destUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[1][1]));
+                    if ($destUser){
+                        foreach ($fromUser->getBeneficiaries() as $beneficiary){
+                            $destUser->addBeneficiary($beneficiary); //in
+                            $fromUser->removeBeneficiary($beneficiary); //out
+                            $beneficiary->setUser($destUser);
+                            $em->persist($beneficiary);
+                        }
+                        $em->persist($destUser);
+                        $em->flush();
+                        $fromUser->setMainBeneficiary(null);
+                        $em->remove($fromUser);
+                        $em->flush();
+
+                        $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
+
+                        return $this->redirectToRoute('user_edit',array('username'=>$destUser->getUsername()));
+                    }else{
+                        $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
+                    }
+                }else{
+                    $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
+                }
+            }
+
+        }
+
+        $users = $em->getRepository('AppBundle:User')->findAll(); //todo exclude closed
+        return $this->render('admin/user/join.html.twig',array('form'=>$form->createView(),'users'=>$users));
     }
 }
