@@ -139,6 +139,13 @@ class AdminController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             $em = $this->getDoctrine()->getManager();
+
+            $owners = $commission->getOwners();
+            foreach ($owners as $beneficiary){
+                $beneficiary->setOwn($commission);
+                $em->persist($beneficiary);
+            }
+
             $em->persist($commission);
             $em->flush();
 
