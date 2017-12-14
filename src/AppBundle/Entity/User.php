@@ -39,6 +39,12 @@ class User extends BaseUser
      */
     private $withdrawn;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="froozen", type="boolean", nullable=true, options={"default" : 0})
+     */
+    private $frozen;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
@@ -455,5 +461,29 @@ class User extends BaseUser
             return true;
         }
         return false;
+    }
+
+    /**
+     * Set frozen
+     *
+     * @param boolean $frozen
+     *
+     * @return User
+     */
+    public function setFrozen($frozen)
+    {
+        $this->frozen = $frozen;
+
+        return $this;
+    }
+
+    /**
+     * Get frozen
+     *
+     * @return boolean
+     */
+    public function getFrozen()
+    {
+        return $this->frozen;
     }
 }

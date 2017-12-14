@@ -19,7 +19,10 @@
                         <p><i class="material-icons">group</i> membres : {{ commission.beneficiaries | length }}</p>
                         <ul>
                             {% for owner in commission.owners %}
-                                <li><i class="material-icons">person</i>{{ owner.displayname }}</li>
+                                <a class="chip" href="{{ path("user_show",{username:owner.user.username}) }}">
+                                    <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                    {{ owner.displayname }}
+                                </a>
                             {% endfor %}
                         </ul>
                     </div>

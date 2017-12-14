@@ -98,6 +98,10 @@ assetic:
                 output: js/jquery.js
 materialize:
         version: 0.100.2
+ornicar_gravatar:
+        rating: g
+        size: 80
+        default: robohash
 jquery: ~
 fos_oauth_server:
     db_driver:            orm   # Drivers available: orm, mongodb, or propel

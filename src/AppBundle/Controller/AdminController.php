@@ -307,19 +307,17 @@ class AdminController extends Controller
      */
     public function exportEmails(Request $request){
         $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
-
         $return = '';
         if($beneficiaries) {
-
             $d = ','; // this is the default but i like to be explicit
             $e = '"'; // this is the default but i like to be explicit
-
             foreach($beneficiaries as $beneficiary) {
-                $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-                if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
-                    $return .= $beneficiary->getFirstname().",".$beneficiary->getLastname().",".$beneficiary->getEmail()."\n";
+                if (!$beneficiary->getUser()->isWithdrawn()){
+                    $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+                    if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                        $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+                    }
                 }
-
             }
         }
         return new Response($return, 200, array(

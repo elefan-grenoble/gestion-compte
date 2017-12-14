@@ -1,6 +1,7 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
+    <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img">
     <h3 class="">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h3>
 
     {% if is_granted("ROLE_ADMIN") %}

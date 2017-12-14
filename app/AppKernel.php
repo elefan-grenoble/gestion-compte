@@ -21,6 +21,7 @@ class AppKernel extends Kernel
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new AuthBucket\Bundle\OAuth2Bundle\AuthBucketOAuth2Bundle(),
             new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
+            new Ornicar\GravatarBundle\OrnicarGravatarBundle(),
             new AppBundle\AppBundle(),
         ];
 

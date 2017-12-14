@@ -51,13 +51,15 @@ class BeneficiaryType extends AbstractType
                     'class' => 'AppBundle:Commission',
                     'choice_label'     => 'name',
                     'multiple'     => true,
-                    'required' => false
+                    'required' => false,
+                    'label'=>'Commission(s)'
                 ));
                 $form->add('roles',EntityType::class, array(
                     'class' => 'AppBundle:Role',
                     'choice_label'     => 'name',
                     'multiple'     => true,
-                    'required' => false
+                    'required' => false,
+                    'label'=>'Role(s)'
                 ));
             }
         });

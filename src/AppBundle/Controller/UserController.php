@@ -664,6 +664,10 @@ class UserController extends Controller
                     ->setMethod('DELETE')->getForm()->createView();
         }
 
+
+        if ($user->isWithdrawn())
+            $session->getFlashBag()->add('warning', 'Ce compte est fermé');
+
         return $this->render('user/edit.html.twig', array(
             'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername()),
             'user' => $user,
