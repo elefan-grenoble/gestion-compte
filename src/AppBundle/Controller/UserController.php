@@ -35,21 +35,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class UserController extends Controller
 {
-    /**
-     * Lists all user entities.
-     *
-     * @Route("/", name="user_index")
-     * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function indexAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'));
-        return $this->render('user/index.html.twig', array(
-            'users' => $users,
-        ));
-    }
 
     /**
      * Lists all user entities.

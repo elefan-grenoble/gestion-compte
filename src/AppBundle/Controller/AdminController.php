@@ -11,6 +11,7 @@ use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
 use OAuth2\OAuth2;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -35,6 +36,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * User controller.
  *
  * @Route("admin")
+ * @Security("has_role('ROLE_ADMIN')")
  */
 class AdminController extends Controller
 {
@@ -43,7 +45,6 @@ class AdminController extends Controller
      *
      * @Route("/", name="admin")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -51,11 +52,114 @@ class AdminController extends Controller
     }
 
     /**
+     * Lists all user entities.
+     *
+     * @Route("/users", name="user_index")
+     * @Method({"GET","POST"})
+     */
+    public function usersAction(Request $request)
+    {
+
+//        <th>Role(s)</th>
+//        <th>Commission(s)</th>
+
+        $form = $this->createFormBuilder()
+            ->add('withdrawn', CheckboxType::class, array('label' => 'fermé','required' => false))
+            ->add('enabled', CheckboxType::class, array('label' => 'activé','required' => false))
+            ->add('frozen', CheckboxType::class, array('label' => 'gelé','required' => false))
+            ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
+            ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
+            ->add('username', TextType::class, array('label' => 'username','required' => false))
+            ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
+            ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
+            ->add('email', TextType::class, array('label' => 'email','required' => false))
+            ->add('email', TextType::class, array('label' => 'email','required' => false))
+            ->add('roles',EntityType::class, array(
+                'class' => 'AppBundle:Role',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Role(s)'
+            ))
+            ->add('commissions',EntityType::class, array(
+                'class' => 'AppBundle:Commission',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Commissions(s)'
+            ))
+            ->add('submit', SubmitType::class, array('label' => 'OK','attr' => array('class' => 'btn')))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            //$session = new Session();
+
+            $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o')
+                ->leftJoin("o.beneficiaries", "b")->addSelect("b")
+                ->where('o.withdrawn = :withdrawn')
+                ->setParameter('withdrawn', $form->get('withdrawn')->getData());
+
+            if ($form->get('enabled')->getData() > 0){
+                $qb = $qb->andWhere('o.enabled = :enabled')
+                    ->setParameter('enabled', $form->get('enabled')->getData());
+            }
+            if ($form->get('frozen')->getData() > 0){
+                $qb = $qb->andWhere('o.frozen = :frozen')
+                    ->setParameter('frozen', $form->get('frozen')->getData());
+            }
+            if ($form->get('username')->getData()){
+                $qb = $qb->andWhere('o.username LIKE :username')
+                    ->setParameter('username', '%'.$form->get('username')->getData().'%');
+            }
+
+            if ($form->get('firstname')->getData()){
+                $qb = $qb->andWhere('b.firstname LIKE :firstname')
+                    ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
+            }
+            if ($form->get('lastname')->getData()){
+                $qb = $qb->andWhere('b.lastname LIKE :lastname')
+                    ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
+            }
+            if ($form->get('email')->getData()){
+                $qb = $qb->andWhere('b.email LIKE :email')
+                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
+            }
+            if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
+                $qb = $qb->leftJoin("b.roles", "r")->addSelect("r")
+                    ->andWhere('r.id IN (:ids)')
+                    ->setParameter('ids',$form->get('roles')->getData() );
+            }
+            if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
+                $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
+                    ->andWhere('c.id IN (:ids)')
+                    ->setParameter('ids',$form->get('commissions')->getData() );
+            }
+
+            $users = $qb
+                ->orderBy('o.member_number', 'ASC')
+                ->getQuery()
+                ->getResult();
+
+        }else{
+            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'));
+        }
+
+        return $this->render('admin/user/list.html.twig', array(
+            'users' => $users,
+            'form' => $form->createView(),
+            'nb_of_result' => count($users) //todo counting user not beneficiary
+        ));
+    }
+
+    /**
      * Registrations list
      *
      * @Route("/registrations", name="admin_registrations")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function registrationsAction(Request $request)
     {

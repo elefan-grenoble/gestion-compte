@@ -42,7 +42,7 @@ class User extends BaseUser
     /**
      * @var bool
      *
-     * @ORM\Column(name="froozen", type="boolean", nullable=true, options={"default" : 0})
+     * @ORM\Column(name="frozen", type="boolean", nullable=true, options={"default" : 0})
      */
     private $frozen;
 

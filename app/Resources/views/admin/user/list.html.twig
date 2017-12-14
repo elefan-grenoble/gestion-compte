@@ -1,0 +1,113 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h1>Liste des membres ({{ dump(nb_of_result) }})</h1>
+
+    {{ form_start(form) }}
+    <table class="responsive-table striped">
+        <thead>
+            <tr>
+                <th>{{ form_widget(form.withdrawn) }}
+                    {{ form_label(form.withdrawn) }}</th>
+                <th>{{ form_widget(form.enabled) }}
+                    {{ form_label(form.enabled) }}</th>
+                <th>{{ form_widget(form.frozen) }}
+                    {{ form_label(form.frozen) }}</th>
+                <th><div class="input-field">
+                        {{ form_widget(form.membernumber) }}
+                        {{ form_label(form.membernumber) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.username) }}
+                        {{ form_label(form.username) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.firstname) }}
+                        {{ form_label(form.firstname) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.lastname) }}
+                        {{ form_label(form.lastname) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.email) }}
+                        {{ form_label(form.email) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.roles) }}
+                        {{ form_label(form.roles) }}
+                    </div></th>
+                <th><div class="input-field">
+                        {{ form_widget(form.commissions) }}
+                        {{ form_label(form.commissions) }}
+                    </div></th>
+                <th>{{ form_widget(form.submit) }}</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            {% if user.mainBeneficiary %}
+                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
+                    <td>
+                        {% if user.withdrawn %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.isEnabled %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user.frozen %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
+                    <td>{{ user.username }}</td>
+
+                    <td>
+                        {% for beneficiary in user.beneficiaries %}
+                            {{ beneficiary.firstname }}<br/>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for beneficiary in user.beneficiaries %}
+                            {{ beneficiary.lastname }}<br/>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for beneficiary in user.beneficiaries %}
+                            {{ beneficiary.email }}<br/>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for beneficiary in user.beneficiaries %}
+                            {% for role in beneficiary.roles %}
+                                <div class="chip">
+                                    {{ role.name }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for beneficiary in user.beneficiaries %}
+                            {% for commission in beneficiary.commissions %}
+                                <div class="chip">
+                                    {{ commission.name }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </td>
+                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+    {{ form_end(form) }}
+
+{% endblock %}
