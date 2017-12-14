@@ -447,7 +447,7 @@ class User extends BaseUser
     }
 
     public function isRegistrar($ip){
-        if ($this->hasRole("ROLE_ADMIN") && $this->hasRole("ROLE_SUPER_ADMIN")){
+        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
             return true;
         }elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
             return true;
