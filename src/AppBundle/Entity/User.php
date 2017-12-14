@@ -3,6 +3,7 @@
 
 namespace AppBundle\Entity;
 
+use DateTime;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -457,17 +458,17 @@ class User extends BaseUser
         return false;
     }
 
-    public function getShiftsDuration()
+    public function getCycleShiftsDuration()
     {
         // TODO Prendre en compte les cycles
         $duration = 0;
-        foreach ($this->getShifts() as $shift) {
+        foreach ($this->getCycleShifts() as $shift) {
             $duration += $shift->getShift()->getDuration();
         }
         return $duration;
     }
 
-    public function getShifts()
+    public function getAllShifts()
     {
         $shifts = new ArrayCollection();
         foreach ($this->getBeneficiaries() as $beneficiary) {
@@ -478,8 +479,39 @@ class User extends BaseUser
         return $shifts;
     }
 
+    public function getCycleShifts()
+    {
+        return $this->getAllShifts()->filter(function($shift) {
+            return $shift->getShift()->getStart() > $this->startOfCycle() &&
+                $shift->getShift()->getEnd() < $this->endOfCycle();
+        });
+    }
+
     public function needToBookAShift()
     {
-        return $this->getShiftsDuration() < 60 * 3;
+        return $this->remainingToBook() > 0;
     }
+
+    // TODO Date à calculer à partir de la date de réfèrence en base
+    public function startOfCycle()
+    {
+        return DateTime::createFromFormat('j-M-Y', '15-Dec-2017');
+    }
+
+    // TODO Date à calculer à partir de la date de réfèrence en base
+    public function endOfCycle()
+    {
+        return DateTime::createFromFormat('j-M-Y', '15-Jan-2018');
+    }
+
+    // TODO Valeur à mettre dans une conf
+    public function shiftTimeByCycle()
+    {
+        return 60 * 3;
+    }
+
+    public function remainingToBook() {
+        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration();
+    }
+
 }

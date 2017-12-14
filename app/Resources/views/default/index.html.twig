@@ -20,7 +20,7 @@
                 </div>
                 <div class="row center">
                     <h4 class="header center">Mes créneaux réservés</h4>
-                    {% for shift in app.user.getShifts() %}
+                    {% for shift in app.user.getCycleShifts() %}
                         <div class="shift">
                             <p>{{ shift.getShift().start|date('l jS \of F Y h:i:s A') }}</p>
                             <div>
@@ -29,8 +29,8 @@
                         </div>
                     {% endfor %}
                     {% if (app.user.needToBookAShift())  %}
-                        <p>J'ai réservé pour {{ app.user.getShiftsDuration() }} minutes de créneaux.</p>
-                        <p>Je dois encore effectuer un total de ??? minutes de créneaux avant le ???</p>
+                        <p>J'ai réservé pour {{ app.user.getCycleShiftsDuration() }} minutes de créneaux.</p>
+                        <p>Je dois encore effectuer un total de {{ app.user.remainingToBook() }} minutes de créneaux avant le {{ app.user.endOfCycle()|date('l jS \of F Y h:i:s A') }}</p>
                         <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
                     {% endif %}
                 </div>
