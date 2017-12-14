@@ -39,12 +39,6 @@ class User extends BaseUser
      */
     private $withdrawn;
 
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="frozen", type="boolean", nullable=true, options={"default" : 0})
-     */
-    private $frozen;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
@@ -453,7 +447,7 @@ class User extends BaseUser
     }
 
     public function isRegistrar($ip){
-        if ($this->hasRole("ROLE_ADMIN")){
+        if ($this->hasRole("ROLE_ADMIN") && $this->hasRole("ROLE_SUPER_ADMIN")){
             return true;
         }elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
             return true;
@@ -463,27 +457,29 @@ class User extends BaseUser
         return false;
     }
 
-    /**
-     * Set frozen
-     *
-     * @param boolean $frozen
-     *
-     * @return User
-     */
-    public function setFrozen($frozen)
+    public function getShiftsDuration()
     {
-        $this->frozen = $frozen;
-
-        return $this;
+        // TODO Prendre en compte les cycles
+        $duration = 0;
+        foreach ($this->getShifts() as $shift) {
+            $duration += $shift->getShift()->getDuration();
+        }
+        return $duration;
     }
 
-    /**
-     * Get frozen
-     *
-     * @return boolean
-     */
-    public function getFrozen()
+    public function getShifts()
     {
-        return $this->frozen;
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
+    }
+
+    public function needToBookAShift()
+    {
+        return $this->getShiftsDuration() < 60 * 3;
     }
 }
