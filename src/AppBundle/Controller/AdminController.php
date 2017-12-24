@@ -10,6 +10,7 @@ use AppBundle\Entity\Role;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -61,9 +62,18 @@ class AdminController extends Controller
     {
 
         $form = $this->createFormBuilder()
-            ->add('withdrawn', CheckboxType::class, array('label' => 'fermé','required' => false))
-            ->add('enabled', CheckboxType::class, array('label' => 'activé','required' => false))
-            ->add('frozen', CheckboxType::class, array('label' => 'gelé','required' => false))
+            ->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
+                'fermé' => 2,
+                'ouvert' => 1,
+            )))
+            ->add('enabled', ChoiceType::class, array('label' => 'activé','required' => false,'choices'  => array(
+                'activé' => 2,
+                'Non activé' => 1,
+            )))
+            ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => false,'choices'  => array(
+                'gelé' => 2,
+                'Non gelé' => 1,
+            )))
             ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
@@ -85,6 +95,7 @@ class AdminController extends Controller
                 'label'=>'Commissions(s)'
             ))
             ->add('action', HiddenType::class,array())
+            ->add('page', HiddenType::class,array())
             ->add('submit', SubmitType::class, array('label' => 'OK','attr' => array('class' => 'btn','value' => 'show')))
             ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
             ->getForm();
@@ -95,24 +106,27 @@ class AdminController extends Controller
 
         $action = $form->get('action')->getData();
 
-        $offset = 0;
-        $limit = 50;
+        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o')
+            ->leftJoin("o.beneficiaries", "b")->addSelect("b");
+
+        $page = 1;
 
         if ($form->isSubmitted() && $form->isValid()) {
-            //$session = new Session();
 
-            $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o')
-                ->leftJoin("o.beneficiaries", "b")->addSelect("b")
-                ->where('o.withdrawn = :withdrawn')
-                ->setParameter('withdrawn', $form->get('withdrawn')->getData());
-
+            if ($form->get('page')->getData() > 0){
+                $page = $form->get('page')->getData();
+            }
+            if ($form->get('withdrawn')->getData() > 0){
+                $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                    ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+            }
             if ($form->get('enabled')->getData() > 0){
                 $qb = $qb->andWhere('o.enabled = :enabled')
-                    ->setParameter('enabled', $form->get('enabled')->getData());
+                    ->setParameter('enabled', $form->get('enabled')->getData()-1);
             }
             if ($form->get('frozen')->getData() > 0){
                 $qb = $qb->andWhere('o.frozen = :frozen')
-                    ->setParameter('frozen', $form->get('frozen')->getData());
+                    ->setParameter('frozen', $form->get('frozen')->getData()-1);
             }
             if ($form->get('membernumber')->getData()){
                 $qb = $qb->andWhere('o.member_number = :membernumber')
@@ -149,23 +163,22 @@ class AdminController extends Controller
                     ->andWhere('c.id IN (:ids)')
                     ->setParameter('ids',$form->get('commissions')->getData() );
             }
-
-            $order = 'ASC';
-            $sortby = 'o.member_number';
-
-            $qb = $qb->orderBy($sortby, $order);
-
-            if ($action != "csv"){
-                $qb = $qb->setFirstResult( $offset )->setMaxResults( $limit );
-            }
-
-            $users = $qb->getQuery()->getResult();
-
-        }else{
-            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'),$limit,$offset);
         }
 
-        if ($action == "csv"){
+        $limit = 25;
+        $qb2 = clone $qb;
+        $max = $qb2->select('count(o.id)')->getQuery()->getSingleScalarResult();
+        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+
+        $order = 'ASC';
+        $sortby = 'o.member_number';
+        $qb = $qb->orderBy($sortby, $order);
+        if ($action != "csv"){
+            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+            $users = new Paginator($qb->getQuery());
+        }else{
+            $users = $qb->getQuery()->getResult();
             $return = '';
             $d = ','; // this is the default but i like to be explicit
             foreach($users as $user) {
@@ -182,7 +195,9 @@ class AdminController extends Controller
         return $this->render('admin/user/list.html.twig', array(
             'users' => $users,
             'form' => $form->createView(),
-            'nb_of_result' => count($users) //todo counting user not beneficiary
+            'nb_of_result' => $max,
+            'page'=>$page,
+            'nb_of_pages'=>$nb_of_pages
         ));
     }
 

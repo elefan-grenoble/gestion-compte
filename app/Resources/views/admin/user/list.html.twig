@@ -42,7 +42,7 @@
                         {{ form_widget(form.commissions) }}
                         {{ form_label(form.commissions) }}
                     </div></th>
-                <th>{{ form_widget(form.submit) }}{{ form_widget(form.csv) }}{{ form_widget(form.action) }}</th>
+                <th>{{ form_widget(form.submit) }}{{ form_widget(form.csv) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -115,6 +115,21 @@
         </tbody>
     </table>
     {{ form_end(form) }}
+    <ul class="pagination">
+        <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(page==1) %}#!{% else %}{{ path("user_index",{'page':page-1}) }}{% endif %}" data-page="{{ page-1 }}">
+                <i class="material-icons">chevron_left</i>
+            </a>
+        </li>
+        {% for i in range(1,nb_of_pages) %}
+            <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+        {% endfor %}
+        <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("user_index",{'page':page+1}) }}{% endif %}" data-page="{{ page+1}}">
+                <i class="material-icons">chevron_right</i>
+            </a>
+        </li>
+    </ul>
 
 {% endblock %}
 
@@ -126,6 +141,14 @@
                 $('#form_action').val($(this).val());
                 $(this).closest('form').submit();
             });
+            $('.pagination li:not(.disabled) a').click(function(e){
+                e.preventDefault();
+                $('#form_page').val($(this).attr('data-page'));
+                $('form[name=form]').submit();
+            });
+            $('select').on('change', function() {
+                $('form[name=form]').submit();
+            })
         });
     </script>
 {% endblock %}
