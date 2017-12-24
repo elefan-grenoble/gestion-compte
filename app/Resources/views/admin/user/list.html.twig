@@ -4,7 +4,7 @@
     <h1>Liste des membres ({{ nb_of_result }})</h1>
 
     {{ form_start(form) }}
-    <table class="responsive-table striped">
+    <table class="striped">
         <thead>
             <tr>
                 <th>{{ form_widget(form.withdrawn) }}
@@ -33,6 +33,7 @@
                         {{ form_widget(form.email) }}
                         {{ form_label(form.email) }}
                     </div></th>
+                <th><a href="?sortby=last_reg_date&order=DESC">Adhésion</a></th>
                 <th><div class="input-field">
                         {{ form_widget(form.roles) }}
                         {{ form_label(form.roles) }}
@@ -41,7 +42,7 @@
                         {{ form_widget(form.commissions) }}
                         {{ form_label(form.commissions) }}
                     </div></th>
-                <th>{{ form_widget(form.submit) }}</th>
+                <th>{{ form_widget(form.submit) }}{{ form_widget(form.csv) }}{{ form_widget(form.action) }}</th>
             </tr>
         </thead>
         <tbody>
@@ -85,6 +86,11 @@
                         {% endfor %}
                     </td>
                     <td>
+                        {% if user.lastRegistration %}
+                            {{ user.lastRegistration.date | date('d F Y') }}
+                        {% endif %}
+                    </td>
+                    <td>
                         {% for beneficiary in user.beneficiaries %}
                             {% for role in beneficiary.roles %}
                                 <div class="chip">
@@ -110,4 +116,16 @@
     </table>
     {{ form_end(form) }}
 
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery(function(){
+            $('[type=submit]').click(function(e){
+                e.preventDefault();
+                $('#form_action').val($(this).val());
+                $(this).closest('form').submit();
+            });
+        });
+    </script>
 {% endblock %}

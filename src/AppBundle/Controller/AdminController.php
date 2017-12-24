@@ -60,20 +60,16 @@ class AdminController extends Controller
     public function usersAction(Request $request)
     {
 
-//        <th>Role(s)</th>
-//        <th>Commission(s)</th>
-
         $form = $this->createFormBuilder()
             ->add('withdrawn', CheckboxType::class, array('label' => 'fermé','required' => false))
             ->add('enabled', CheckboxType::class, array('label' => 'activé','required' => false))
             ->add('frozen', CheckboxType::class, array('label' => 'gelé','required' => false))
             ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
-            ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
             ->add('email', TextType::class, array('label' => 'email','required' => false))
-            ->add('email', TextType::class, array('label' => 'email','required' => false))
+//            ->add('last_reg', DateType::class, array('label' => 'adhésion','required' => false))
             ->add('roles',EntityType::class, array(
                 'class' => 'AppBundle:Role',
                 'choice_label'     => 'name',
@@ -88,12 +84,19 @@ class AdminController extends Controller
                 'required' => false,
                 'label'=>'Commissions(s)'
             ))
-            ->add('submit', SubmitType::class, array('label' => 'OK','attr' => array('class' => 'btn')))
+            ->add('action', HiddenType::class,array())
+            ->add('submit', SubmitType::class, array('label' => 'OK','attr' => array('class' => 'btn','value' => 'show')))
+            ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
             ->getForm();
 
         $form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
+
+        $action = $form->get('action')->getData();
+
+        $offset = 0;
+        $limit = 50;
 
         if ($form->isSubmitted() && $form->isValid()) {
             //$session = new Session();
@@ -111,11 +114,14 @@ class AdminController extends Controller
                 $qb = $qb->andWhere('o.frozen = :frozen')
                     ->setParameter('frozen', $form->get('frozen')->getData());
             }
+            if ($form->get('membernumber')->getData()){
+                $qb = $qb->andWhere('o.member_number = :membernumber')
+                    ->setParameter('membernumber', $form->get('membernumber')->getData());
+            }
             if ($form->get('username')->getData()){
                 $qb = $qb->andWhere('o.username LIKE :username')
                     ->setParameter('username', '%'.$form->get('username')->getData().'%');
             }
-
             if ($form->get('firstname')->getData()){
                 $qb = $qb->andWhere('b.firstname LIKE :firstname')
                     ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
@@ -128,6 +134,11 @@ class AdminController extends Controller
                 $qb = $qb->andWhere('b.email LIKE :email')
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
+//            if ($form->get('last_reg')->getData()){
+//                $qb = $qb->leftJoin("o.registration", "reg")->addSelect("reg")
+//                    ->andWhere('reg.date = (:date)')
+//                    ->setParameter('date',$form->get('last_reg')->getData() );
+//            }
             if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
                 $qb = $qb->leftJoin("b.roles", "r")->addSelect("r")
                     ->andWhere('r.id IN (:ids)')
@@ -139,13 +150,33 @@ class AdminController extends Controller
                     ->setParameter('ids',$form->get('commissions')->getData() );
             }
 
-            $users = $qb
-                ->orderBy('o.member_number', 'ASC')
-                ->getQuery()
-                ->getResult();
+            $order = 'ASC';
+            $sortby = 'o.member_number';
+
+            $qb = $qb->orderBy($sortby, $order);
+
+            if ($action != "csv"){
+                $qb = $qb->setFirstResult( $offset )->setMaxResults( $limit );
+            }
+
+            $users = $qb->getQuery()->getResult();
 
         }else{
-            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'));
+            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'),$limit,$offset);
+        }
+
+        if ($action == "csv"){
+            $return = '';
+            $d = ','; // this is the default but i like to be explicit
+            foreach($users as $user) {
+                foreach ($user->getBeneficiaries() as $beneficiary)
+                    $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+            }
+            return new Response($return, 200, array(
+                'Content-Encoding: UTF-8',
+                'Content-Type' => 'application/force-download; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+            ));
         }
 
         return $this->render('admin/user/list.html.twig', array(
