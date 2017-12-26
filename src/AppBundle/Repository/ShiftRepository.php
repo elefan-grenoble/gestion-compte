@@ -10,4 +10,19 @@ namespace AppBundle\Repository;
  */
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
+
+    public function findFutures()
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.start > :now')
+            ->setParameter('now', new \Datetime('now'))
+            ->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
 }

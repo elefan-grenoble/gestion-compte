@@ -175,4 +175,23 @@ class Shift
         $diff = date_diff($this->start, $this->end);
         return $diff->h * 60 + $diff->i;
     }
+
+    public function getDismissedShifts()
+    {
+        return $this->getBookedShifts()->filter(function($shift) {
+            return $shift->getIsDismissed();
+        });
+    }
+
+    public function getNotDismissedShifts()
+    {
+        return $this->getBookedShifts()->filter(function($shift) {
+            return !$shift->getIsDismissed();
+        });
+    }
+
+    public function getRemainingShifters()
+    {
+        return $this->getMaxShiftersNb() - $this->getNotDismissedShifts()->count();
+    }
 }

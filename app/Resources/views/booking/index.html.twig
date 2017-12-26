@@ -1,7 +1,16 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<p>Coucou</p>
+    {% for shift in shifts %}
+        <div>
+            <p>Début: {{ shift.start|date('l jS \of F Y h:i:s A') }}</p>
+            <p>Fin: {{ shift.end|date('l jS \of F Y h:i:s A') }}</p>
+            <p>Nombre de places restantes: {{ shift.getRemainingShifters() }}</p>
+            <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
+                <button class="btn">Réserver</button>
+            </form>
+        </div>
+    {% endfor %}
 {% endblock %}
 
 {% block stylesheets %}
