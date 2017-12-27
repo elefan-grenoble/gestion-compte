@@ -50,6 +50,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <h5>Adhésion(s)</h5>
                             <div class="row">
                                 <div class="col s4">
                                     <div class="input-field">
@@ -70,15 +71,36 @@
                                     </div>
                                 </div>
                             </div>
+                            <h5>Dernière Adhésion</h5>
+                            <div class="row">
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.lastregistrationdate) }}
+                                        {{ form_label(form.lastregistrationdate) }}
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.lastregistrationdategt) }}
+                                        {{ form_label(form.lastregistrationdategt) }}
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.lastregistrationdatelt) }}
+                                        {{ form_label(form.lastregistrationdatelt) }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                    <div class="col s12 m4">
                         <div>
                             <div class="input-field">
                                 {{ form_widget(form.username) }}
                                 {{ form_label(form.username) }}
                             </div>
                         </div>
-                    </div>
-                    <div class="col s12 m4">
                         <h5>Bénéficiaire(s)</h5>
                         <div class="input-field">
                             {{ form_widget(form.firstname) }}
@@ -129,7 +151,8 @@
                 <th data-col="b.firstname">prénom</th>
                 <th data-col="b.lastname">nom</th>
                 <th data-col="b.email">email</th>
-                <th data-col="r.date">Adhésion</th>
+                <th data-col="r.date">Adhésion(s)</th>
+                <th data-col="lr.date">Dernière Adhésion</th>
                 <th>Role(s)</th>
                 <th>Commission(s)</th>
                 <th></th>
@@ -176,8 +199,16 @@
                         {% endfor %}
                     </td>
                     <td>
-                        {% if user.lastRegistration %}
-                            {{ user.lastRegistration.date | date('d F Y') }}
+                        {% for registration in user.registrations %}
+                            {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
+                            {{ registration.date | date('d/m/Y') }}
+                            {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
+                            <br/>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% if user.lastregistration %}
+                            {{ user.lastregistration.date | date('d F Y') }}
                         {% endif %}
                     </td>
                     <td>
@@ -267,6 +298,9 @@
 
 {% block stylesheets %}
     <style>
+        td strong{
+            /*font-weight: 600;*/
+        }
         th.active{
             color: #51CAE9;
         }

@@ -77,9 +77,12 @@ class AdminController extends Controller
             ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
             ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
             ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
-            ->add('registrationdate', TextType::class, array('label' => 'adhésion le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('registrationdategt', TextType::class, array('label' => 'adhésion après','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('registrationdatelt', TextType::class, array('label' => 'adhésion avant','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
@@ -113,9 +116,11 @@ class AdminController extends Controller
 
         $action = $form->get('action')->getData();
 
-        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o')
-            ->leftJoin("o.beneficiaries", "b")->addSelect("b")
+        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");
+
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
 
         $page = 1;
@@ -158,6 +163,18 @@ class AdminController extends Controller
             if ($form->get('registrationdatelt')->getData()){
                 $qb = $qb->andWhere('r.date < :registrationdatelt')
                     ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+            }
+            if ($form->get('lastregistrationdate')->getData()){
+                $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
+                    ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
+            }
+            if ($form->get('lastregistrationdategt')->getData()){
+                $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+                    ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
+            }
+            if ($form->get('lastregistrationdatelt')->getData()){
+                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
             }
             if ($form->get('membernumber')->getData()){
                 $qb = $qb->andWhere('o.member_number = :membernumber')
@@ -263,6 +280,29 @@ class AdminController extends Controller
             ->getRepository('AppBundle:Registration')
             ->findBy(array(),array('date' => 'DESC'),$limit,($page-1)*$limit);
         return $this->render('admin/registrations.html.twig',array('registrations'=>$registrations,'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * Registrations correction
+     *
+     * @Route("/registrations_fix", name="admin_registrations_fix")
+     * @Method("GET")
+     */
+    public function registrationsFixAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $users = $em->getRepository('AppBundle:User')->findAll();
+        foreach ($users as $user){
+            if ($user->getRegistrations()->count() && $user->getRegistrations()->first())
+                $user->setLastRegistration($user->getRegistrations()->first());
+            else
+                $user->setLastRegistration();
+            $em->persist($user);
+        }
+        $em->flush();
+        $session = new Session();
+        $session->getFlashBag()->add('success', 'all last registration date fixed');
+        return $this->redirectToRoute('admin');
     }
 
     /**

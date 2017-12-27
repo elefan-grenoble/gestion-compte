@@ -3,6 +3,7 @@
 
 namespace AppBundle\Entity;
 
+use AppBundle\Repository\RegistrationRepository;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -51,6 +52,12 @@ class User extends BaseUser
      * @OrderBy({"date" = "DESC"})
      */
     private $registrations;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     */
+    private $lastRegistration;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
@@ -126,6 +133,10 @@ class User extends BaseUser
     {
         $this->registrations[] = $registration;
 
+        if ($registration->getDate()>$this->getLastRegistration()->getDate()){
+            $this->setLastRegistration($registration);
+        }
+
         return $this;
     }
 
@@ -137,6 +148,12 @@ class User extends BaseUser
     public function removeRegistration(\AppBundle\Entity\Registration $registration)
     {
         $this->registrations->removeElement($registration);
+
+        if ($this->getLastRegistration() === $registration){
+            if ($this->getRegistrations()->count()){
+                $this->setLastRegistration($this->getRegistrations()->first());
+            }
+        }
     }
 
     /**
@@ -239,22 +256,6 @@ class User extends BaseUser
     public function getServices()
     {
         return $this->services;
-    }
-
-    public function setLastRegistration(){
-        return null;
-    }
-
-    /**
-     * Get lastRegistration
-     *
-     * @return \AppBundle\Entity\Registration
-     */
-    public function getLastRegistration(){
-        if ($this->getRegistrations()->count()){
-            return ($this->getRegistrations()->first());
-        }
-        return null;
     }
 
     public function getFirstname() {
@@ -485,5 +486,30 @@ class User extends BaseUser
     public function getFrozen()
     {
         return $this->frozen;
+    }
+
+
+    /**
+     * Set lastRegistration
+     *
+     * @param \AppBundle\Entity\Registration $lastRegistration
+     *
+     * @return User
+     */
+    public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
+    {
+        $this->lastRegistration = $lastRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Get lastRegistration
+     *
+     * @return \AppBundle\Entity\Registration
+     */
+    public function getLastRegistration()
+    {
+        return $this->lastRegistration;
     }
 }

@@ -1,5 +1,5 @@
 <?php
-namespace AppBundle\Twig;
+namespace AppBundle\Twig\Extension;
 
 use Michelf\Markdown;
 
