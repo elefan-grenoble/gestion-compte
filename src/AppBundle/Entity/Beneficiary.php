@@ -70,6 +70,12 @@ class Beneficiary
     private $commissions;
 
     /**
+     * Many Beneficiary have Many Tasks.
+     * @ORM\ManyToMany(targetEntity="Task", inversedBy="owners")
+     */
+    private $tasks;
+
+    /**
      * Many Beneficiary have Many Roles.
      * @ORM\ManyToMany(targetEntity="Role", inversedBy="beneficiaries")
      * @ORM\JoinTable(name="beneficiaries_roles")
@@ -325,5 +331,39 @@ class Beneficiary
     public function getOwn()
     {
         return $this->own;
+    }
+
+    /**
+     * Add task
+     *
+     * @param \AppBundle\Entity\Task $task
+     *
+     * @return Beneficiary
+     */
+    public function addTask(\AppBundle\Entity\Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param \AppBundle\Entity\Task $task
+     */
+    public function removeTask(\AppBundle\Entity\Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

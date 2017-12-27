@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Twig\Extension;
 
+use AppBundle\Entity\Task;
 use Michelf\Markdown;
 
 class AppExtension extends \Twig_Extension
@@ -10,6 +11,7 @@ class AppExtension extends \Twig_Extension
         return array(
             new \Twig_SimpleFilter('markdown', array($this, 'markdown')),
             new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
+            new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
         );
     }
 
@@ -45,6 +47,25 @@ class AppExtension extends \Twig_Extension
         }
 
         return $encoded_text;
+    }
+
+    public function priority_to_color($priority){
+        $color = "grey";
+        switch ($priority){
+            case Task::PRIORITY_URGENT_VALUE :
+                $color = Task::PRIORITY_URGENT_COLOR;
+                break;
+            case Task::PRIORITY_IMPORTANT_VALUE :
+                $color = Task::PRIORITY_IMPORTANT_COLOR;
+                break;
+            case Task::PRIORITY_NORMAL_VALUE :
+                $color = Task::PRIORITY_NORMAL_COLOR;
+                break;
+            case Task::PRIORITY_ANNEXE_VALUE :
+                $color = Task::PRIORITY_ANNEXE_COLOR;
+                break;
+        }
+        return $color;
     }
 
     public function getName()

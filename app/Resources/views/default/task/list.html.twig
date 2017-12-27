@@ -1,0 +1,76 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+    <h4 class="">Liste des taches en cours</h4>
+<ul class="collapsible popout" data-collapsible="accordion">
+    {% for commission in commissions %}
+        <li>
+            <div class="collapsible-header">{{ commission.name }}<span class="badge">{{ commission.tasks | length }}</span></div>
+            <div class="collapsible-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>tache</th>
+                            <th>début</th>
+                            <th>échéance</th>
+                            <th>priorité</th>
+                            <th>Personne(s) référente(s)</th>
+                            <th>Progression</th>
+                            <th>Commission(s)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in commission.tasks %}
+                            <tr>
+                                <td>{% if task.closed %}<del>{% endif %}
+                                    {{ task.title }}
+                                    {% if task.closed %}</del>{% endif %}
+                                </td>
+                                <td>
+                                    {{ task.createdAt | date('d F Y') }}
+                                </td>
+                                <td>
+                                    {{ task.dueDate | date('d F Y') }}
+                                </td>
+                                <td>
+                                {% if not task.closed %}
+                                    <span class="chip {{ task.priority | priority_to_color }}">{{ task.priority }}</span>
+                                {% endif %}
+                                </td>
+                                <td>
+                                    {% for owner in task.owners %}
+                                        <span class="chip">
+                                            <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                            {{ owner.displayname }}
+                                        </span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if task.closed %}
+                                    <span class="chip light-green white-text">Terminée</span>
+                                    {% else %}
+                                        {{ task.status }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% for com in task.commissions %}
+                                        <span class="badge">{{ com.name }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td>
+                                    {% if task.canBeEditedBy(app.user) %}
+                                        <a href="{{ path("task_edit",{'id':task.id}) }}"><i class="material-icons">edit</i></a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+    {% if (app.user.isTaskEditor)  %}
+        <a href="{{ path("task_new") }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Ajouter une nouvelle tache</a>
+    {% endif %}
+{% endblock %}

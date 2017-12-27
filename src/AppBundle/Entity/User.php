@@ -453,6 +453,14 @@ class User extends BaseUser
         return $this->recordedRegistrations;
     }
 
+    public function getCommissions(){
+        $commissions = array();
+        foreach ($this->getBeneficiaries() as $beneficiary){
+            $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
+        }
+        return new ArrayCollection($commissions);
+    }
+
     public function isRegistrar($ip){
         if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
             return true;
@@ -460,6 +468,15 @@ class User extends BaseUser
             return true;
         //}elseif ($this->getMainBeneficiary()->isAmbassador()){ //todo check also other Beneficiary ?
         //    return true;
+        }
+        return false;
+    }
+
+    public function isTaskEditor(){
+        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
+            return true;
+        }elseif ($this->getCommissions()){ //todo put this in conf
+            return true;
         }
         return false;
     }
