@@ -287,6 +287,7 @@ class AdminController extends Controller
      *
      * @Route("/registrations_fix", name="admin_registrations_fix")
      * @Method("GET")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function registrationsFixAction(Request $request)
     {
@@ -302,6 +303,30 @@ class AdminController extends Controller
         $em->flush();
         $session = new Session();
         $session->getFlashBag()->add('success', 'all last registration date fixed');
+        return $this->redirectToRoute('admin');
+    }
+
+    /**
+     * Registrations correction
+     *
+     * @Route("/status_fix", name="admin_status_fix")
+     * @Method("GET")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function statusFixAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $users = $em->getRepository('AppBundle:User')->findAll();
+        foreach ($users as $user){
+            if ($user->getFrozen() === null)
+                $user->setFrozen(false);
+            if ($user->getWithdrawn() === null)
+                $user->setWithdrawn(false);
+            $em->persist($user);
+        }
+        $em->flush();
+        $session = new Session();
+        $session->getFlashBag()->add('success', 'all status fixed');
         return $this->redirectToRoute('admin');
     }
 
