@@ -396,6 +396,10 @@ class AdminController extends Controller
 
             $em = $this->getDoctrine()->getManager();
 
+            foreach ($commission->getBeneficiaries() as $beneficiary){
+                $beneficiary->setOwn();
+                $em->persist($beneficiary);
+            }
             $owners = $commission->getOwners();
             foreach ($owners as $beneficiary){
                 $beneficiary->setOwn($commission);
