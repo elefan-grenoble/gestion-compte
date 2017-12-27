@@ -133,7 +133,7 @@ class User extends BaseUser
     {
         $this->registrations[] = $registration;
 
-        if ($registration->getDate()>$this->getLastRegistration()->getDate()){
+        if (!$this->getLastRegistration() || $registration->getDate() > $this->getLastRegistration()->getDate()){
             $this->setLastRegistration($registration);
         }
 
