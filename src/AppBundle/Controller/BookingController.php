@@ -69,7 +69,7 @@ class BookingController extends Controller
      * Dismiss a booked shift.
      *
      * @Route("/shift/{id}/dismiss", name="shift_dismiss")
-     * @Method("GET")
+     * @Method("POST")
      */
     public function dismissShift(Request $request, BookedShift $shift)
     {
@@ -80,23 +80,17 @@ class BookingController extends Controller
         }
 
         // TODO Vérifier que le booked shift appartient bien à l'utilisateur authentifié
-        //     $form = $this->createFormBuilder()
-        //       ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
-        //     ->setMethod('POST')
-        //   ->getForm();
-
-        //$form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
 
         $shift->setIsDismissed(true);
         $shift->setDismissedTime(new DateTime('now'));
-        $shift->setDismissedReason("TODO");
+        $shift->setDismissedReason($request->get("reason"));
 
         $em->persist($shift);
         $em->flush();
 
         return $this->redirectToRoute('homepage');
     }
-    
+
 }

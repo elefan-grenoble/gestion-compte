@@ -19,34 +19,10 @@
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                 </div>
                 <div class="row center">
-                    <h4 class="header center">Mes créneaux à venir</h4>
-                    {% for shift in app.user.getCycleShifts() %}
-                        <div>
-                            <div class="card blue-grey darken-1">
-                                <div class="card-content white-text">
-                                    <span class="card-title">{{ shift.getShift().start|date('l jS \of F Y h:i:s A') }}</span>
-                                    <p>Durée: ???</p>
-                                    {% if (shift.getIsDismissed())  %}
-                                        <p>Créneau annulé, en attente de repreneur</p>
-                                    {% endif %}
-                                </div>
-                                {% if (not shift.getIsDismissed())  %}
-                                    <div class="card-action">
-                                        <a href="{{ path('shift_dismiss',{'id':shift.id}) }}">Oops, je ne vais pas pouvoir effectuer mon créneau...</a>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                    {% if (app.user.needToBookAShift())  %}
-                        <p>Je dois encore effectuer un total de {{ app.user.remainingToBook() }} minutes de créneaux avant le {{ app.user.endOfCycle()|date('l jS \of F Y h:i:s A') }}</p>
-                        <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
-                    {% endif %}
+                    {% include "booking/_partial/booked_shifts.html.twig" %}
                 </div>
                 {% if (app.user.isRegistrar(ip))  %}
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
-                {% else %}
-                    <p>Shifts booked (TODO: display shifts)</p>
                 {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>

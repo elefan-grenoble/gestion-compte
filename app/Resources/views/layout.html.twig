@@ -103,6 +103,10 @@
                     onClose: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
                 });
             });
+            $(document).ready(function(){
+                // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
+                $('.modal').modal();
+            });
             //todo put this in a file
         </script>
         {% block javascripts %}{% endblock %}

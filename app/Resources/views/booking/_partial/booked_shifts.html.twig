@@ -1,0 +1,45 @@
+<h4 class="header center">Mes créneaux à venir</h4>
+
+{% for shift in app.user.getCycleShifts() %}
+    <div>
+        <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+                <span class="card-title">{{ shift.getShift().start|date('l jS \of F Y h:i:s A') }}</span>
+                <p>Durée: ???</p>
+                {% if (shift.getIsDismissed()) %}
+                    <p>Créneau annulé, en attente de repreneur</p>
+                {% endif %}
+            </div>
+            {% if (not shift.getIsDismissed()) %}
+                <div class="card-action">
+                    <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oops, je ne vais pas pouvoir effectuer mon
+                        créneau...</a>
+                </div>
+                <div id="dismiss{{ shift.id }}" class="modal modal-fixed-footer">
+                    <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
+                        <div class="modal-content">
+                            <h4>Je ne peux pas faire mon créneau</h4>
+                            <p>Attention! En vous désistant sur un créneau, vous devrez attendre que quelqu'un reprenne
+                                votre créneau pour pouvoir vous réinscrire sur un nouveau.</p>
+                            <div class="input-field">
+                                <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
+                                <label for="reason">Commentaire</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!"
+                               class="modal-action modal-close waves-effect waves-green btn-flat ">Annuler</a>
+                            <button class="modal-action modal-close waves-effect waves-green btn-flat ">Valider</button>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endfor %}
+{% if (app.user.needToBookAShift()) %}
+    <p>Je dois encore effectuer un total de {{ app.user.remainingToBook() }} minutes de créneaux avant
+        le {{ app.user.endOfCycle()|date('l jS \of F Y h:i:s A') }}</p>
+    <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
+{% endif %}
