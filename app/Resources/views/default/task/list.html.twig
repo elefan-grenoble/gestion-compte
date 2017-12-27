@@ -26,10 +26,10 @@
                                     {% if task.closed %}</del>{% endif %}
                                 </td>
                                 <td>
-                                    {{ task.createdAt | date('d F Y') }}
+                                    {{ task.createdAt | date('d-m-Y') }}
                                 </td>
                                 <td>
-                                    {{ task.dueDate | date('d F Y') }}
+                                    {{ task.dueDate | date('m-Y') }}
                                 </td>
                                 <td>
                                 {% if not task.closed %}
@@ -40,7 +40,7 @@
                                     {% for owner in task.owners %}
                                         <span class="chip">
                                             <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
-                                            {{ owner.displayname }}
+                                            {{ owner.firstname }}&nbsp;{{ owner.lastname }}
                                         </span>
                                     {% endfor %}
                                 </td>

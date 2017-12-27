@@ -52,7 +52,7 @@ class Commission
     /**
      * Many Commissions have Many Tasks.
      * @ORM\ManyToMany(targetEntity="Task", mappedBy="commissions")
-     * @OrderBy({"closed" = "ASC","dueDate" = "DESC"})
+     * @OrderBy({"closed" = "ASC","dueDate" = "ASC"})
      */
     private $tasks;
 
