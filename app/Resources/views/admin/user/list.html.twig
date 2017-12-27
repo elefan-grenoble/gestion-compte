@@ -3,65 +3,135 @@
 {% block content %}
     <h1>Liste des membres ({{ nb_of_result }})</h1>
 
-    {{ form_start(form) }}
+    <ul class="collapsible" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
+            <div class="collapsible-body">
+                {{ form_start(form) }}
+
+                <div class="row">
+                    <div class="col s12 m4">
+                        <h5>Compte</h5>
+                        <div class="row">
+                            <div class="col s4">
+                                fermé :
+                                {{ form_widget(form.withdrawn) }}
+                                {{ form_label(form.withdrawn) }}
+                            </div>
+                            <div class="col s4">
+                                activé :
+                                {{ form_widget(form.enabled) }}
+                                {{ form_label(form.enabled) }}
+                            </div>
+                            <div class="col s4">
+                                gelé :
+                                {{ form_widget(form.frozen) }}
+                                {{ form_label(form.frozen) }}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="row">
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.membernumber) }}
+                                        {{ form_label(form.membernumber) }}
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.membernumbergt) }}
+                                        {{ form_label(form.membernumbergt) }}
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.membernumberlt) }}
+                                        {{ form_label(form.membernumberlt) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="input-field">
+                                {{ form_widget(form.username) }}
+                                {{ form_label(form.username) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <h5>Bénéficiaire(s)</h5>
+                        <div class="input-field">
+                            {{ form_widget(form.firstname) }}
+                            {{ form_label(form.firstname) }}
+                        </div>
+                        <div class="input-field">
+                            {{ form_widget(form.lastname) }}
+                            {{ form_label(form.lastname) }}
+                        </div>
+                        <div class="input-field">
+                            {{ form_widget(form.email) }}
+                            {{ form_label(form.email) }}
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <div>
+                            <h5>Roles / Commissions</h5>
+                            <div class="input-field">
+                                {{ form_widget(form.roles) }}
+                                {{ form_label(form.roles) }}
+                            </div>
+                            <div class="input-field">
+                                {{ form_widget(form.commissions) }}
+                                {{ form_label(form.commissions) }}
+                            </div>
+                        </div>
+                        <div>
+                            <h5>Actions</h5>
+                            {{ form_widget(form.submit) }}
+                            {{ form_widget(form.csv) }}
+                        </div>
+                    </div>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </li>
+    </ul>
+
     <table class="striped">
         <thead>
             <tr>
-                <th>{{ form_widget(form.withdrawn) }}
-                    {{ form_label(form.withdrawn) }}</th>
-                <th>{{ form_widget(form.enabled) }}
-                    {{ form_label(form.enabled) }}</th>
-                <th>{{ form_widget(form.frozen) }}
-                    {{ form_label(form.frozen) }}</th>
-                <th><div class="input-field">
-                        {{ form_widget(form.membernumber) }}
-                        {{ form_label(form.membernumber) }}
-                    </div></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.username) }}
-                        {{ form_label(form.username) }}
-                    </div></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.firstname) }}
-                        {{ form_label(form.firstname) }}
-                    </div></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.lastname) }}
-                        {{ form_label(form.lastname) }}
-                    </div></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.email) }}
-                        {{ form_label(form.email) }}
-                    </div></th>
-                <th><a href="?sortby=last_reg_date&order=DESC">Adhésion</a></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.roles) }}
-                        {{ form_label(form.roles) }}
-                    </div></th>
-                <th><div class="input-field">
-                        {{ form_widget(form.commissions) }}
-                        {{ form_label(form.commissions) }}
-                    </div></th>
-                <th>{{ form_widget(form.submit) }}{{ form_widget(form.csv) }}</th>
+                <th class="hide-on-small-only" data-col="o.withdrawn">Fermé</th>
+                <th class="hide-on-small-only" data-col="o.enabled">Activé</th>
+                <th class="hide-on-small-only" data-col="o.frozen">Gelé</th>
+                <th data-col="o.member_number">#</th>
+                <th data-col="o.username">username</th>
+                <th data-col="b.firstname">prénom</th>
+                <th data-col="b.lastname">nom</th>
+                <th data-col="b.email">email</th>
+                <th>Adhésion</th>
+                <th>Role(s)</th>
+                <th>Commission(s)</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
         {% for user in users %}
             {% if user.mainBeneficiary %}
                 <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td>
+                    <td class="hide-on-small-only">
                         {% if user.withdrawn %}
                             <i class="material-icons">check</i>
                         {% else %}
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="hide-on-small-only">
                         {% if user.isEnabled %}
                             <i class="material-icons">check</i>
                         {% else %}
                         {% endif %}
                     </td>
-                    <td>
+                    <td class="hide-on-small-only">
                         {% if user.frozen %}
                             <i class="material-icons">check</i>
                         {% else %}
@@ -110,11 +180,52 @@
                     </td>
                     <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
                 </tr>
+            {% else %}
+                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
+                    <td class="hide-on-small-only">
+                        {% if user.withdrawn %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td class="hide-on-small-only">
+                        {% if user.isEnabled %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td class="hide-on-small-only">
+                        {% if user.frozen %}
+                            <i class="material-icons">check</i>
+                        {% else %}
+                        {% endif %}
+                    </td>
+                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
+                    <td>{{ user.username }}</td>
+
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                        {% if user.lastRegistration %}
+                            {{ user.lastRegistration.date | date('d F Y') }}
+                        {% endif %}
+                    </td>
+                    <td>
+                    </td>
+                    <td>
+                    </td>
+                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
+                </tr>
             {% endif %}
         {% endfor %}
         </tbody>
     </table>
-    {{ form_end(form) }}
+
+    {% if nb_of_pages > 1 %}
     <ul class="pagination">
         <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
             <a href="{% if(page==1) %}#!{% else %}{{ path("user_index",{'page':page-1}) }}{% endif %}" data-page="{{ page-1 }}">
@@ -130,7 +241,16 @@
             </a>
         </li>
     </ul>
+    {% endif %}
 
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        th.active{
+            color: #51CAE9;
+        }
+    </style>
 {% endblock %}
 
 {% block javascripts %}
@@ -139,7 +259,7 @@
             $('[type=submit]').click(function(e){
                 e.preventDefault();
                 $('#form_action').val($(this).val());
-                $(this).closest('form').submit();
+                $('form[name=form]').submit();
             });
             $('.pagination li:not(.disabled) a').click(function(e){
                 e.preventDefault();
@@ -148,7 +268,19 @@
             });
             $('select').on('change', function() {
                 $('form[name=form]').submit();
-            })
+            });
+            $('th[data-col]').click(function(e){
+                e.preventDefault();
+                if ($('#form_sort').val() === $(this).attr('data-col')){
+                    $('#form_dir').val(($('#form_dir').val() === 'ASC') ? 'DESC' : 'ASC');
+                }else{
+                    $('#form_sort').val($(this).attr('data-col'));
+                }
+                $('th[data-col]').removeClass('active');
+                $(this).addClass('active');
+                $('form[name=form]').submit();
+            });
+            $('th[data-col="'+$('#form_sort').val()+'"]').addClass('active');
         });
     </script>
 {% endblock %}

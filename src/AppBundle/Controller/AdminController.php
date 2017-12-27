@@ -74,7 +74,9 @@ class AdminController extends Controller
                 'gelé' => 2,
                 'Non gelé' => 1,
             )))
-            ->add('membernumber', IntegerType::class, array('label' => '#','required' => false))
+            ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
+            ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
+            ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
@@ -96,7 +98,9 @@ class AdminController extends Controller
             ))
             ->add('action', HiddenType::class,array())
             ->add('page', HiddenType::class,array())
-            ->add('submit', SubmitType::class, array('label' => 'OK','attr' => array('class' => 'btn','value' => 'show')))
+            ->add('dir', HiddenType::class,array())
+            ->add('sort', HiddenType::class,array())
+            ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
             ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
             ->getForm();
 
@@ -110,12 +114,21 @@ class AdminController extends Controller
             ->leftJoin("o.beneficiaries", "b")->addSelect("b");
 
         $page = 1;
+        $order = 'ASC';
+        $sort = 'o.member_number';
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             if ($form->get('page')->getData() > 0){
                 $page = $form->get('page')->getData();
             }
+            if ($form->get('sort')->getData()){
+                $sort = $form->get('sort')->getData();
+            }
+            if ($form->get('dir')->getData()){
+                $order = $form->get('dir')->getData();
+            }
+
             if ($form->get('withdrawn')->getData() > 0){
                 $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                     ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
@@ -128,9 +141,20 @@ class AdminController extends Controller
                 $qb = $qb->andWhere('o.frozen = :frozen')
                     ->setParameter('frozen', $form->get('frozen')->getData()-1);
             }
+
+            $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+
             if ($form->get('membernumber')->getData()){
                 $qb = $qb->andWhere('o.member_number = :membernumber')
                     ->setParameter('membernumber', $form->get('membernumber')->getData());
+            }
+            if ($form->get('membernumbergt')->getData()){
+                $qb = $qb->andWhere('o.member_number > :membernumbergt')
+                    ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
+            }
+            if ($form->get('membernumberlt')->getData()){
+                $qb = $qb->andWhere('o.member_number < :membernumberlt')
+                    ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
             }
             if ($form->get('username')->getData()){
                 $qb = $qb->andWhere('o.username LIKE :username')
@@ -167,13 +191,12 @@ class AdminController extends Controller
 
         $limit = 25;
         $qb2 = clone $qb;
-        $max = $qb2->select('count(o.id)')->getQuery()->getSingleScalarResult();
+        $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
         $nb_of_pages = intval($max/$limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
 
-        $order = 'ASC';
-        $sortby = 'o.member_number';
-        $qb = $qb->orderBy($sortby, $order);
+
+        $qb = $qb->orderBy($sort, $order);
         if ($action != "csv"){
             $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
             $users = new Paginator($qb->getQuery());
