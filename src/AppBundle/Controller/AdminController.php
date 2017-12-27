@@ -77,6 +77,9 @@ class AdminController extends Controller
             ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
             ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
             ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
+            ->add('registrationdate', TextType::class, array('label' => 'adhésion le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdategt', TextType::class, array('label' => 'adhésion après','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdatelt', TextType::class, array('label' => 'adhésion avant','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
@@ -111,7 +114,9 @@ class AdminController extends Controller
         $action = $form->get('action')->getData();
 
         $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o')
-            ->leftJoin("o.beneficiaries", "b")->addSelect("b");
+            ->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("o.registrations", "r")->addSelect("r");
+        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
 
         $page = 1;
         $order = 'ASC';
@@ -142,8 +147,18 @@ class AdminController extends Controller
                     ->setParameter('frozen', $form->get('frozen')->getData()-1);
             }
 
-            $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
-
+            if ($form->get('registrationdate')->getData()){
+                $qb = $qb->andWhere('r.date LIKE :registrationdate')
+                    ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
+            }
+            if ($form->get('registrationdategt')->getData()){
+                $qb = $qb->andWhere('r.date > :registrationdategt')
+                    ->setParameter('registrationdategt', $form->get('registrationdategt')->getData());
+            }
+            if ($form->get('registrationdatelt')->getData()){
+                $qb = $qb->andWhere('r.date < :registrationdatelt')
+                    ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+            }
             if ($form->get('membernumber')->getData()){
                 $qb = $qb->andWhere('o.member_number = :membernumber')
                     ->setParameter('membernumber', $form->get('membernumber')->getData());
@@ -187,6 +202,9 @@ class AdminController extends Controller
                     ->andWhere('c.id IN (:ids)')
                     ->setParameter('ids',$form->get('commissions')->getData() );
             }
+        }else{
+            $form->get('sort')->setData($sort);
+            $form->get('dir')->setData($order);
         }
 
         $limit = 25;
