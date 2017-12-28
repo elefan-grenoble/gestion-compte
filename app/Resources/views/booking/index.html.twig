@@ -18,6 +18,14 @@
                             <h4>Réserver le créneau</h4>
                             <p>Vous êtes sur le point...</p>
                             <p>Attention! Vous ne pourrez annuler....</p>
+                            <div class="input-field">
+                                <select name="beneficiaryId">
+                                    {% for beneficiary in app.user.beneficiaries %}
+                                        <option value="{{ beneficiary.id }}">{{ beneficiary.firstname }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label>Choisir le bénéficiaire</label>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <a href="#!"

@@ -75,14 +75,18 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
+        $beneficiaryId = $request->get("beneficiaryId");
+
         $em = $this->getDoctrine()->getManager();
+
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
         $bookedShift = $em->getRepository('AppBundle:BookedShift')->findSoonestDismissed($shift);
         if (!$bookedShift) {
             $bookedShift = new BookedShift();
             $bookedShift->setShift($shift);
             $bookedShift->setBookedTime(new DateTime('now'));
-            $bookedShift->setBooker($current_app_user->getMainBeneficiary());
+            $bookedShift->setBooker($beneficiary);
         }
         $bookedShift->setShifter($current_app_user->getMainBeneficiary());
         $bookedShift->setIsDismissed(false);
