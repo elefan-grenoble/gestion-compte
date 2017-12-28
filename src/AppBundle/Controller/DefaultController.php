@@ -22,6 +22,7 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $first = null;
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
