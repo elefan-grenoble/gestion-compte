@@ -2,17 +2,17 @@ Espace adhérent l'éléfàn
 ========================
 ## Modèle de données
 
-![modele](http://yuml.me/ee3093b1.svg)
+![modele](http://yuml.me/5c392db4.svg)
 
 * yuml.me code:
-http://yuml.me/edit/ee3093b1
+http://yuml.me/edit/5c392db4
 
 ## Guide du développeur
 
 ### Prérequis
 
 * PHP (version 7+) installé
-* Composer installé
+* [Composer](https://getcomposer.org/) installé
 * Mysql installé et configuré (ou mariadb sur Fedora)
 * php-mysql (php-pdo_mysql on Fedora)
 * Créer une nouvelle base pour le projet
