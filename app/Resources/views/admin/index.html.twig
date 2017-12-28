@@ -17,6 +17,8 @@
                 <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
                 <a href="{{ path("admin_commissions") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commission</a>
                 <a href="{{ path("admin_roles") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les roles</a>
+            <h5>Créneaux</h5>
+                <a href="{{ path("period") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Semaine type</a>
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>
