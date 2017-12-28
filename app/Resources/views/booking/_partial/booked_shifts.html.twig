@@ -1,5 +1,9 @@
-<h4 class="header center">Mon premier créneau</h4>
-{{ first.getShift().start|date('l jS \of F Y h:i:s A') }}
+<h4 class="header center">Mon premier créneau (test)</h4>
+{% if (first) %}
+    {{ first.getShift().start|date('l jS \of F Y h:i:s A') }}
+{% else %}
+    Vous n'avez pas encore réservé de créneau
+{% endif %}
 
 <h4 class="header center">Mes créneaux à venir</h4>
 
