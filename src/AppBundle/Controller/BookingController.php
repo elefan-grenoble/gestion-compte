@@ -4,6 +4,8 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -107,7 +109,11 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        // TODO Vérifier que le booked shift appartient bien à l'utilisateur authentifié
+        //Vérifier que le booked shift appartient bien à l'utilisateur authentifié
+        if (!$current_app_user->getBeneficiaries()->contains($shift->getBooker())){
+            $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
+            return $this->redirectToRoute('booking');
+        }
 
         $em = $this->getDoctrine()->getManager();
 
