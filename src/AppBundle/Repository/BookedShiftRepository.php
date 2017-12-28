@@ -32,4 +32,27 @@ class BookedShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @param $user
+     * @return mixed
+     * @throws NonUniqueResultException
+     */
+    public function findFirst($user)
+    {
+        $qb = $this->createQueryBuilder('a');
+
+        $qb
+            ->join('a.shifter', "ben")
+            ->join('a.shift', "s")
+            ->where('ben.user = :user')
+            ->setParameter('user', $user)
+            ->andWhere('a.isDismissed = 0')
+            ->orderBy('s.start', 'ASC')
+            ->setMaxResults(1);
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

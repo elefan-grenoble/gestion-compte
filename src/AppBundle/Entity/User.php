@@ -487,6 +487,13 @@ class User extends BaseUser
         });
     }
 
+    public function getFutureShifts()
+    {
+        return $this->getAllShifts()->filter(function($shift) {
+            return $shift->getShift()->getStart() > new DateTime('now');
+        });
+    }
+
     public function needToBookAShift()
     {
         return $this->remainingToBook() > 0;

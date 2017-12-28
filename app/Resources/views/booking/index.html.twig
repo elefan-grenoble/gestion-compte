@@ -1,15 +1,34 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    {% for shift in shifts %}
-        <div>
-            <p>Début: {{ shift.start|date('l jS \of F Y h:i:s A') }}</p>
-            <p>Fin: {{ shift.end|date('l jS \of F Y h:i:s A') }}</p>
-            <p>Nombre de places restantes: {{ shift.getRemainingShifters() }}</p>
-            <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
-                <button class="btn">Réserver</button>
-            </form>
-        </div>
+    {% for week, shiftsByDay in shiftsByWeek %}
+        <h4>Semaine {{ week }}</h4>
+        {% for day, shifts in shiftsByDay %}
+            <h5>{{ days[day] }} {{ shifts[0].start|date('d') }} {{ shifts[0].start|date('m') }} {{ shifts[0].start|date('Y') }}</h5>
+            {% for shift in shifts %}
+                <a href="#book{{ shift.id }}" class="modal-trigger">
+                    <div>
+                        <p>{{ shift.start|date('H:i') }} - {{ shift.end|date('H:i') }}</p>
+                        <p><i>{{ shift.getRemainingShifters() }} places restantes</i></p>
+                    </div>
+                </a>
+                <div id="book{{ shift.id }}" class="modal modal-fixed-footer">
+                    <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
+                        <div class="modal-content">
+                            <h4>Réserver le créneau</h4>
+                            <p>Vous êtes sur le point...</p>
+                            <p>Attention! Vous ne pourrez annuler....</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!"
+                               class="modal-action modal-close waves-effect waves-green btn-flat ">Annuler</a>
+                            <button class="modal-action modal-close waves-effect waves-green btn-flat ">Réserver
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% endfor %}
+        {% endfor %}
     {% endfor %}
 {% endblock %}
 

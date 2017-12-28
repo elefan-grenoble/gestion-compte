@@ -37,11 +37,15 @@ class DefaultController extends Controller
             }else{
                 $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
             }
+
+            $em = $this->getDoctrine()->getManager();
+            $first = $em->getRepository('AppBundle:BookedShift')->findFirst($current_app_user);
         }
 
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-            'ip' => $request->getClientIp()
+            'ip' => $request->getClientIp(),
+            'first' => $first
         ]);
     }
 

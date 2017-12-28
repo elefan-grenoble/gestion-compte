@@ -1,11 +1,14 @@
+<h4 class="header center">Mon premier créneau</h4>
+{{ first.getShift().start|date('l jS \of F Y h:i:s A') }}
+
 <h4 class="header center">Mes créneaux à venir</h4>
 
-{% for shift in app.user.getCycleShifts() %}
+{% for shift in app.user.getFutureShifts() %}
     <div>
-        <div class="card blue-grey darken-1">
+        <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
             <div class="card-content white-text">
-                <span class="card-title">{{ shift.getShift().start|date('l jS \of F Y h:i:s A') }}</span>
-                <p>Durée: ???</p>
+                <span class="card-title">{{ shift.getShift().start|date('d/m/Y') }}</span>
+                <p>De {{ shift.getShift().start|date('H:i') }} à {{ shift.getShift().end|date('H:i') }}</p>
                 {% if (shift.getIsDismissed()) %}
                     <p>Créneau annulé, en attente de repreneur</p>
                 {% endif %}
