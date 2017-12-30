@@ -25,9 +25,11 @@ class TaskController extends Controller
      *
      * @Route("/", name="tasks_list")
      * @Method("GET")
-     * @Security(isGranted('IS_AUTHENTICATED_REMEMBERED'))
      */
     public function listAction(Request $request){
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
         $em = $this->getDoctrine()->getManager();
         $commissions = $em->getRepository('AppBundle:Commission')->findAll();
         return $this->render('default/task/list.html.twig', array(

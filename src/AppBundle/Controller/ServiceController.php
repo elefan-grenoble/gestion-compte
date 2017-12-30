@@ -63,6 +63,10 @@ class ServiceController extends Controller
             $em->persist($service);
             $em->flush();
 
+            if ($service->getLogo()){
+                $this->resolveLogo($service);
+            }
+
             $session->getFlashBag()->add('success', 'Le nouveau service a bien été créée !');
 
             return $this->redirectToRoute('admin_services');
@@ -98,6 +102,10 @@ class ServiceController extends Controller
 
             $em->persist($service);
             $em->flush();
+
+            if ($service->getLogo()){
+                $this->resolveLogo($service);
+            }
 
             $session->getFlashBag()->add('success', 'Le service a bien été édité !');
 
@@ -157,6 +165,18 @@ class ServiceController extends Controller
             ->setAction($this->generateUrl('service_remove', array('id' => $service->getId())))
             ->setMethod('DELETE')
             ->getForm();
+    }
+
+    /**
+     * @param Service $service
+     * @return string
+     */
+    protected function resolveLogo(Service $service){
+        $helper = $this->container->get('vich_uploader.templating.helper.uploader_helper');
+        $path = $helper->asset($service, 'logoFile');
+        $imagineCacheManager = $this->get('liip_imagine.cache.manager');
+        $resolvedPath = $imagineCacheManager->getBrowserPath($path, 'service_logo');
+        return $resolvedPath;
     }
 
     private function getErrorMessages(Form $form) {
