@@ -11,7 +11,7 @@
             <div class="row valign-wrapper">
                 <div class="col s2">
                     {% if client.service.logo %}
-                        <img src="{{ vich_uploader_asset(client.service, 'logoFile') | imagine_filter('service_logo') }}"
+                        <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
                              alt="{{ client.service.name }}"
                              class="circle responsive-img"
                              style="background: white" >
