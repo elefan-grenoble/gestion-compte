@@ -6,3 +6,33 @@
         <button type="submit" class="btn-large waves-effect waves-light btn">{{ 'profile.edit.submit'|trans }}</button>
     </div>
 {{ form_end(form) }}
+
+{% if app.user.clients | length %}
+<h5>Services ayant accès à ton compte</h5>
+    <div class="row">
+    {% for client in app.user.clients %}
+        <div class="card col s6 teal lighten-5 z-depth-3">
+            <div class="card-content">
+                <span class="card-title">{{ client.service.name }}</span>
+                <div class="row valign-wrapper">
+                    <div class="col s4">
+                        {% if client.service.logo %}
+                            <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
+                                 alt="{{ client.service.name }}"
+                                 class="circle responsive-img"
+                                 style="background: white" >
+                        {% endif %}
+                    </div>
+                    <div class="col s8">
+                        <p>{{ client.service.description }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-action">
+                <a href="{{ path('user_client_remove',{'username':app.user.username,'id':client.id}) }}" class="btn red">Supprimer</a>
+                <a href="{{ client.service.url }}" class="btn">{{ client.service.url }}</a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endif %}

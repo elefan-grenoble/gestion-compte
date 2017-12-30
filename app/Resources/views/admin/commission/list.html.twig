@@ -28,9 +28,6 @@
                     </div>
                     <div class="card-action">
                         <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                        {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        <a href="#">Supprimer</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>

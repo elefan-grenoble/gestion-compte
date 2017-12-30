@@ -1,0 +1,42 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>services
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Liste des Services</h4>
+
+    <table class="responsive-table striped">
+        <thead>
+        <tr>
+            <th>logo</th>
+            <th>Service</th>
+            <th>Description</th>
+            <th>Url</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for service in services %}
+            <tr>
+                <td>
+                    {% if service.logo %}
+                    <img src="{{ asset(vich_uploader_asset(service, 'logoFile')) | imagine_filter('service_logo') }}" />
+                    {% endif %}
+                </td>
+                <td>{{ service.name }}</td>
+                <td>{{ service.description }}</td>
+                <td><a href="{{ service.url }}">{{ service.url }}</a></td>
+                <td><a href="{{ path("service_edit",{'id':service.id}) }}">editer</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{{ path('service_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un service</a>
+
+{% endblock %}

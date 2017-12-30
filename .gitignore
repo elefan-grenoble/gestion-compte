@@ -10,12 +10,14 @@ composer.lock
 /app/config/parameters.yml
 /app/config/parameters.ini
 
-#/bin
+/bin
 /web/bundles
 /web/css
 /web/fonts
 /web/images
 /web/js
+/web/uploads
+/web/media
 /vendor
 
 # PHPUnit

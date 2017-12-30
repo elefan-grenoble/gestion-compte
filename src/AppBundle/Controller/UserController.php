@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Client;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
@@ -51,7 +52,7 @@ class UserController extends Controller
         if (!$current_app_user->isRegistrar($request->getClientIp())) {
             throw $this->createAccessDeniedException();
         }
-        return $this->render('user/office_tools.html.twig', array(
+        return $this->render('default/tools/office_tools.html.twig', array(
             'ip' => $request->getClientIp()
         ));
     }
@@ -75,7 +76,7 @@ class UserController extends Controller
         $admin = new User();
         $admin->setEmail("admin@lelefan.org"); //todo put this in conf
         $admin->setPlainPassword("password");
-        $admin->setUsername("babar");
+        $admin->setUsername("babar"); //todo put this in conf
         $admin->setMemberNumber(0);
         $admin->setEnabled(true);
         $admin->addRole('ROLE_SUPER_ADMIN');
@@ -83,214 +84,6 @@ class UserController extends Controller
         $em->flush();
 
         return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Import from CSV
-     *
-     * @Route("/importcsv", name="user_import_csv")
-     * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     */
-    public function csvImportAction(Request $request)
-    {
-        $form = $this->createFormBuilder()
-            ->add('submitFile', FileType::class, array('label' => 'File to Submit'))
-            ->add('delimiter', TextType::class, array('label' => 'delimiter','attr' => array(
-                'placeholder' => ',',
-            ),'data'=>','))
-            ->add('persist',CheckboxType::class,array('required'=>false,'label'=>'Sauver en base'))
-            ->add('compute', SubmitType::class, array('label' => 'compute'))
-        ->getForm();
-
-        if ($form->handleRequest($request)->isValid()) {
-
-            // Get file
-            $file = $form->get('submitFile');
-            $delimiter = ($form->get('delimiter'))? $form->get('delimiter')->getData() : ',';
-            $persist = ($form->get('persist'))? $form->get('persist')->getData() : false;
-
-            // Your csv file here when you hit submit button
-            $data = $file->getData();
-            $filename = $file->getData()->getPathName();
-
-            $row = 1;
-            $lastdate = DateTime::createFromFormat('d/m/Y', '04/05/2016');
-            $em = $this->getDoctrine()->getManager();
-            $return = array();
-            $usernames = array();
-            $emails = array();
-            if (($handle = fopen($filename, "r")) !== FALSE) {
-                while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE /*
-                    && $row<10 //*/
-                    ) {
-                    /*
-                     Array
-                    (
-                    [0] => compare
-                    [1] => Date d'adhésion
-                    [2] => Type Adhésion
-                    [3] => Nom
-                    [4] => Prénom
-                    [5] => Adresse1
-                    [6] => CP
-                    [7] => Ville
-                    [8] => Téléphone
-                    [9] => Mail
-                    [10] => Montant
-                    [11] => Mode de réglement
-                    [12] => A intégrer?
-                    [13] => Renouvellement adhésion - Date
-                    [14] => Montant
-                    [15] => Mode de réglement
-                    [16] => Qualité
-                    [17] => Bénévole Ressource
-                    [18] => Ambassadeur
-                    [19] =>
-                    )*/
-                    preg_match_all('/^[0-9]+$/', $data[0], $matches, PREG_SET_ORDER, 0);
-                    if (count($data)>11&&isset($data[3])&&isset($data[4])&&count($matches)&&strlen($data[3])>1&&strlen($data[4])>1){ // on ne traite que les colonnes qui commence par un numéro d'adhérent valide (entier)
-                        $member_number = $data[0];
-                        $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$member_number));
-                        if ($user){
-                            $mail = $data[9];
-                            if (isset($data[9])&&filter_var($mail, FILTER_VALIDATE_EMAIL)&&($user->getEmail() != $mail)) {
-                                $user_exist = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
-                                if (!$user_exist){
-                                    $user->setEmail($mail);
-                                    if ($persist)
-                                        $em->persist($user);
-                                    $return[] = array($user,array("error","user with same member number already exist, email updated"));
-                                }else{
-                                    $return[] = array($user,array("error","user with same member number already exist, email change but already in use"));
-                                }
-                            }else{
-                                $return[] = array($user,array("error","user with same member number already exist"));
-                            }
-                        } else {
-                            $mail = $data[9];
-                            $validator = $this->container->get('validator');
-                            $constraints = array(
-                                new EmailConstraint(),
-                                new NotBlank()
-                            );
-                            $error = $validator->validate($mail, $constraints);
-                            if ($error->count()){
-                                $return[] = array($user,array("error","email is not valid (".$mail.")"));
-                            }else{
-                                $user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
-                                $already_registred = (isset($emails[$mail])) ? true : false;
-                                if ($user||$already_registred)
-                                    $return[] = array($user,array("error","user with same email already exist"));
-                                else {
-                                    $user = new User();
-                                    $firstname = trim(preg_replace('/\s\s+/', ' ', $data[4]));
-                                    $lastname = trim(preg_replace('/\s\s+/', ' ', $data[3]));
-                                    $username = User::makeUsername($firstname,$lastname);
-                                    $qb = $em->createQueryBuilder();
-                                    $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-                                        ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
-                                        ->getQuery()
-                                        ->getResult();
-                                    //$users = $em->getRepository('AppBundle:User')->findBy(array("username"=>$username));
-                                    $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
-                                    if (count($users)||$already_registred){
-                                        $username = User::makeUsername($firstname,$lastname,count($users)+1+$already_registred);
-                                    }
-                                    if (strlen($username)>3){
-                                        $user->setUsername($username);
-                                        $user->setEmail($mail);
-                                        $user->setMemberNumber($member_number);
-                                        $password = User::randomPassword();
-                                        $user->setPassword($password);
-                                        //beneficiary
-                                        $beneficiary = new Beneficiary();
-                                        $beneficiary->setFirstname($firstname);
-                                        $beneficiary->setLastname($lastname);
-                                        $beneficiary->setPhone($data[8]);
-                                        $beneficiary->setEmail($mail);
-                                        $beneficiary->setAmbassador(($data[8]!='')&&$data[8]=='1');
-                                        $beneficiary->setExpert(false);//default all false
-                                        $beneficiary->setUser($user);
-                                        $user->setMainBeneficiary($beneficiary);
-                                        //address
-                                        $address = new Address();
-                                        $address->setStreet1($data[5]);
-                                        $address->setStreet2('');
-                                        $address->setZipcode($data[6]);
-                                        $address->setCity($data[7]);
-                                        $address->setUser($user);
-                                        $user->setAddress($address);
-                                        //registration
-                                        $registration = new Registration();
-                                        $date = $data[1];
-                                        if (!$date)
-                                            $date = $lastdate;
-                                        else {
-                                            $date = DateTime::createFromFormat('d/m/Y', $date);
-                                            if (!$date)
-                                                $date = $lastdate;
-                                        }
-                                        $lastdate = $date;
-                                        $registration->setDate($date); //Y-m-d H:i:s
-                                        $registration->setAmount(intval($data[10]));
-                                        $reglement = $data[11];
-                                        if (!$reglement&&strtolower($data[2])=='site')
-                                            $reglement = 'cb';
-                                        switch ($reglement){
-                                            case 'chq' :
-                                            case 'CHQ' :
-                                            case 'ch' :
-                                                $registration->setMode(Registration::TYPE_CHECK);
-                                                break;
-                                            case 'EPP':
-                                            case 'ESP':
-                                            case 'esp':
-                                            case 'Espèce':
-                                                $registration->setMode(Registration::TYPE_CASH);
-                                                break;
-                                            case 'Site':
-                                            case 'site':
-                                            case 'cb':
-                                                $registration->setMode(Registration::TYPE_CREDIT_CARD);
-                                                break;
-                                            default:
-                                                $registration->setMode(Registration::TYPE_DEFAULT);
-                                        }
-                                        $registration->setUser($user);
-                                        $user->addRegistration($registration);
-                                        $return[] = array($user,array("check","user added"));
-                                        $usernames[$user->getUsername()] = (isset($usernames[$user->getUsername()])) ? $usernames[$user->getUsername()] +1 : 1;
-                                        $emails[$user->getEmail()] = true;
-                                        if ($persist)
-                                            $em->persist($user);
-                                    }else{
-                                        $return[] = array($user,array("error","username build to short"));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    $row++;
-                }
-                fclose($handle);
-                $em->flush();
-            }
-
-            if ($persist){
-                $request->getSession()->getFlashBag()->add('notice', 'Le fichier a été traité complétement.');
-                return $this->redirectToRoute('user_index');
-            }else{
-                return $this->render('user/test_import.html.twig', array(
-                    'users' => $return,
-                ));
-            }
-
-        }
-
-        return $this->render('user/import.html.twig', array(
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -662,6 +455,31 @@ class UserController extends Controller
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'registration_forms' => $registrationForms
         ));
+    }
+
+    /**
+     * remove client from user
+     *
+     * @Route("/{username}/remove_client/{id}", name="user_client_remove")
+     * @Method({"GET", "POST"})
+     */
+    public function removeClientUserAction(Request $request,User $user,Client $client){
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')&&($current_app_user != $user)) {
+            throw $this->createAccessDeniedException();
+        }
+        if ($user->getClients()->contains($client)){
+            $user->removeClient($client);
+            $this->getDoctrine()->getManager()->flush($user);
+            $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+        }else{
+            $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+        }
+        return $this->redirectToRoute('fos_user_profile_edit');
     }
 
     /**
