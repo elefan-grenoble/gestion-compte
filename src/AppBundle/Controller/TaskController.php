@@ -25,27 +25,15 @@ class TaskController extends Controller
      *
      * @Route("/", name="tasks_list")
      * @Method("GET")
+     * @Security(isGranted('IS_AUTHENTICATED_REMEMBERED'))
      */
     public function listAction(Request $request){
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        $securityContext = $this->container->get('security.authorization_checker');
-        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $em = $this->getDoctrine()->getManager();
-            $commissions = $em->getRepository('AppBundle:Commission')->findAll();
-            return $this->render('default/task/list.html.twig', array(
-                'commissions' => $commissions,
-                'ip' => $request->getClientIp()
-            ));
-        }else{
-            return $this->redirectToRoute('fos_user_security_login');
-        }
-
+        $em = $this->getDoctrine()->getManager();
+        $commissions = $em->getRepository('AppBundle:Commission')->findAll();
+        return $this->render('default/task/list.html.twig', array(
+            'commissions' => $commissions,
+            'ip' => $request->getClientIp()
+        ));
     }
 
     /**
