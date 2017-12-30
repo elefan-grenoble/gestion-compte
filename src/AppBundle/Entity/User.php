@@ -4,6 +4,7 @@
 namespace AppBundle\Entity;
 
 use AppBundle\Repository\RegistrationRepository;
+use FOS\OAuthServerBundle\Model\ClientInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -85,11 +86,12 @@ class User extends BaseUser
     private $address;
 
     /**
-     * Many Users have Many Services.
-     * @ORM\ManyToMany(targetEntity="Service", inversedBy="users")
-     * @ORM\JoinTable(name="users_services")
+     * Many Users have Many clients.
+     * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
+     * @ORM\JoinTable(name="users_clients")
      */
-    private $services;
+    private $clients;
+
 
     public function __construct()
     {
@@ -222,40 +224,6 @@ class User extends BaseUser
     public function getAddress()
     {
         return $this->address;
-    }
-
-    /**
-     * Add service
-     *
-     * @param \AppBundle\Entity\Service $service
-     *
-     * @return User
-     */
-    public function addService(\AppBundle\Entity\Service $service)
-    {
-        $this->services[] = $service;
-
-        return $this;
-    }
-
-    /**
-     * Remove service
-     *
-     * @param \AppBundle\Entity\Service $service
-     */
-    public function removeService(\AppBundle\Entity\Service $service)
-    {
-        $this->services->removeElement($service);
-    }
-
-    /**
-     * Get services
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getServices()
-    {
-        return $this->services;
     }
 
     public function getFirstname() {
@@ -528,5 +496,48 @@ class User extends BaseUser
     public function getLastRegistration()
     {
         return $this->lastRegistration;
+    }
+
+    /**
+     * determine whether the given client (ClientInterface) is allowed by the user, or not.
+     * @param ClientInterface $client
+     * @return bool
+     */
+    public function isAuthorizedClient(Client $client){
+        return $this->getClients()->contains($client);
+    }
+
+    /**
+     * Add client
+     *
+     * @param \AppBundle\Entity\Client $client
+     *
+     * @return User
+     */
+    public function addClient(\AppBundle\Entity\Client $client)
+    {
+        $this->clients[] = $client;
+
+        return $this;
+    }
+
+    /**
+     * Remove client
+     *
+     * @param \AppBundle\Entity\Client $client
+     */
+    public function removeClient(\AppBundle\Entity\Client $client)
+    {
+        $this->clients->removeElement($client);
+    }
+
+    /**
+     * Get clients
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getClients()
+    {
+        return $this->clients;
     }
 }

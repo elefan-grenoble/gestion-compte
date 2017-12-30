@@ -15,13 +15,14 @@ class AppKernel extends Kernel
             new Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle(),
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new FOS\UserBundle\FOSUserBundle(),
             new Evheniy\JqueryBundle\JqueryBundle(),
             new Evheniy\MaterializeBundle\MaterializeBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
-            new AuthBucket\Bundle\OAuth2Bundle\AuthBucketOAuth2Bundle(),
+            new FOS\UserBundle\FOSUserBundle(),
             new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
             new Ornicar\GravatarBundle\OrnicarGravatarBundle(),
+            new Vich\UploaderBundle\VichUploaderBundle(),
+            new Liip\ImagineBundle\LiipImagineBundle(),
             new AppBundle\AppBundle(),
         ];
 
