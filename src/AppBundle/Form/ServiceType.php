@@ -2,20 +2,16 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Task;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Vich\UploaderBundle\Form\Type\VichImageType;
 
 class ServiceType extends AbstractType
 {
@@ -46,6 +42,11 @@ class ServiceType extends AbstractType
             $form->add('name',TextType::class,array('label'=>'nom','required' => true,))
                 ->add('description',TextType::class,array('label'=>'Description'))
                 ->add('url',TextType::class,array('label'=>'Adresse web'));
+            $form->add('logoFile', VichImageType::class, array(
+                'required' => false,
+                'allow_delete' => true,
+                'download_link' => true,
+            ));
         });
 
     }

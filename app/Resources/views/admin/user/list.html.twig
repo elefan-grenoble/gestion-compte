@@ -200,10 +200,15 @@
                     </td>
                     <td>
                         {% for registration in user.registrations %}
-                            {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                            {{ registration.date | date('d/m/Y') }}
-                            {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                            <br/>
+                            {% if user.lastregistration %}
+                                {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
+                                {{ registration.date | date('d/m/Y') }}
+                                {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
+                                <br/>
+                            {% else %}
+                                {{ registration.date | date('d/m/Y') }}
+                                /!\ need fix
+                            {% endif %}
                         {% endfor %}
                     </td>
                     <td>

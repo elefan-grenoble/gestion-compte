@@ -8,6 +8,9 @@ use AppBundle\Entity\Task;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -107,10 +110,73 @@ class ServiceController extends Controller
             }
         }
         return $this->render('admin/service/edit.html.twig', array(
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'delete_form' => $this->getDeleteForm($service)->createView()
         ));
 
 
     }
 
+
+    /**
+     * edit service.
+     *
+     * @Route("/{id}", name="service_remove")
+     * @Method({"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function removeAction(Request $request,Service $service){
+        $session = new Session();
+
+        $form = $this->getDeleteForm($service);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($service);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le service a bien été supprimé !');
+
+            return $this->redirectToRoute('admin_services');
+
+        }
+
+        return $this->redirectToRoute('admin_services');
+
+    }
+
+    /**
+     * @param Service $service
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(Service $service){
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('service_remove', array('id' => $service->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    private function getErrorMessages(Form $form) {
+        $errors = array();
+
+        foreach ($form->getErrors() as $key => $error) {
+            if ($form->isRoot()) {
+                $errors['#'][] = $error->getMessage();
+            } else {
+                $errors[] = $error->getMessage();
+            }
+        }
+
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $key = (isset($child->getConfig()->getOptions()['label'])) ? $child->getConfig()->getOptions()['label'] : $child->getName();
+                $errors[$key] = $this->getErrorMessages($child);
+            }
+        }
+
+        return $errors;
+    }
 }

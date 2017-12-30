@@ -15,7 +15,6 @@
     },
     "require": {
         "php": ">=5.5.9",
-        "authbucket/oauth2-symfony-bundle": "^4.2",
         "components/jquery": "^3.2",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/orm": "^2.5",
@@ -23,6 +22,7 @@
         "friendsofsymfony/oauth-server-bundle": "dev-master",
         "friendsofsymfony/user-bundle": "^2.0",
         "incenteev/composer-parameter-handler": "^2.0",
+        "liip/imagine-bundle": "^1.9",
         "michelf/php-markdown": "^1.7",
         "ornicar/gravatar-bundle": "^1.1",
         "sensio/distribution-bundle": "^5.0.19",
@@ -34,7 +34,8 @@
         "symfony/swiftmailer-bundle": "^2.3.10",
         "symfony/symfony": "3.3.*",
         "symfony/validator": "^3.3",
-        "twig/twig": "^1.0||^2.0"
+        "twig/twig": "^1.0||^2.0",
+        "vich/uploader-bundle": "^1.4"
     },
     "require-dev": {
         "sensio/generator-bundle": "^3.0",

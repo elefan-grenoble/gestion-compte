@@ -1,0 +1,38 @@
+
+
+{% extends 'layoutlight.html.twig' %}
+
+{% block content %}
+    <h5>Bonjour {{ app.user.firstname }}</h5>
+    <p>Le service suivant souhaite utiliser tes identifiants l'éléfàn</p>
+    <div class="card col s12 grey lighten-3 z-depth-1">
+        <div class="card-content">
+            <span class="card-title">{{ client.service.name }}</span>
+            <div class="row valign-wrapper">
+                <div class="col s2">
+                    {% if client.service.logo %}
+                        <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
+                             alt="{{ client.service.name }}"
+                             class="circle responsive-img"
+                             style="background: white" >
+                    {% endif %}
+                </div>
+                <div class="col s10">
+                    <p>{{ client.service.description }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ form_start(form, {'method': 'POST', 'action': path('fos_oauth_server_authorize'), 'label_attr': {'class': 'fos_oauth_server_authorize'} }) }}
+    <input type="submit" name="accepted" class="btn green" value="{{ 'authorize.accept'|trans({}, 'FOSOAuthServerBundle') }}" />
+    <input type="submit" name="rejected" class="btn deep-orange" value="{{ 'authorize.reject'|trans({}, 'FOSOAuthServerBundle') }}" />
+
+    {{ form_row(form.client_id) }}
+    {{ form_row(form.response_type) }}
+    {{ form_row(form.redirect_uri) }}
+    {{ form_row(form.state) }}
+    {{ form_row(form.scope) }}
+    {{ form_rest(form) }}
+    </form>
+
+{% endblock %}
