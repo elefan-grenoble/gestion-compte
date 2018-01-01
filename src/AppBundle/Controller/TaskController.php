@@ -60,9 +60,6 @@ class TaskController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $task = new Task();
@@ -122,7 +119,7 @@ class TaskController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
+        if (!$task->canBeEditedBy($current_app_user)) {
             throw $this->createAccessDeniedException();
         }
         $securityContext = $this->container->get('security.authorization_checker');

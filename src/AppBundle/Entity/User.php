@@ -443,7 +443,7 @@ class User extends BaseUser
     public function isTaskEditor(){
         if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
             return true;
-        }elseif ($this->getCommissions()){ //todo put this in conf
+        }elseif ($this->getCommissions()){
             return true;
         }
         return false;
