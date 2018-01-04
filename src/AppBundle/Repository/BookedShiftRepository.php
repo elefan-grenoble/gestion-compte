@@ -17,7 +17,7 @@ class BookedShiftRepository extends \Doctrine\ORM\EntityRepository
      * @return mixed
      * @throws NonUniqueResultException
      */
-    public function findSoonestDismissed($shift)
+    public function findFirstDismissed($shift)
     {
         $qb = $this->createQueryBuilder('s');
 
