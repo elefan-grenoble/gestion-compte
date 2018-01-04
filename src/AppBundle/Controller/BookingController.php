@@ -81,7 +81,7 @@ class BookingController extends Controller
 
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
-        $bookedShift = $em->getRepository('AppBundle:BookedShift')->findSoonestDismissed($shift);
+        $bookedShift = $em->getRepository('AppBundle:BookedShift')->findFirstDismissed($shift);
         if (!$bookedShift) {
             $bookedShift = new BookedShift();
             $bookedShift->setShift($shift);
@@ -113,7 +113,6 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        //Vérifier que le booked shift appartient bien à l'utilisateur authentifié
         if (!$current_app_user->getBeneficiaries()->contains($shift->getBooker())){
             $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
             return $this->redirectToRoute('booking');
