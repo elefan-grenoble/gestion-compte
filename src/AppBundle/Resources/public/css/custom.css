@@ -2,6 +2,7 @@
  * Globals
  */
 @import "../fonts/blackjack/stylesheet.css";
+@import "../fonts/raleway/stylesheet.css";
 h1,
 h2,
 h3,
@@ -54,6 +55,7 @@ footer.page-footer {
 .btn-large {
   color: #fff;
   background-color: #51CAE9;
+  margin-bottom: 5px;
 }
 .btn:hover,
 .btn-large:hover {

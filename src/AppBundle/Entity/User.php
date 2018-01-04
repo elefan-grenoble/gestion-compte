@@ -4,6 +4,8 @@
 namespace AppBundle\Entity;
 
 use DateTime;
+use AppBundle\Repository\RegistrationRepository;
+use FOS\OAuthServerBundle\Model\ClientInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -40,12 +42,24 @@ class User extends BaseUser
      */
     private $withdrawn;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="frozen", type="boolean", nullable=true, options={"default" : 0})
+     */
+    private $frozen;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
     private $registrations;
+
+    /**
+     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     */
+    private $lastRegistration;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
@@ -73,11 +87,12 @@ class User extends BaseUser
     private $address;
 
     /**
-     * Many Users have Many Services.
-     * @ORM\ManyToMany(targetEntity="Service", inversedBy="users")
-     * @ORM\JoinTable(name="users_services")
+     * Many Users have Many clients.
+     * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
+     * @ORM\JoinTable(name="users_clients")
      */
-    private $services;
+    private $clients;
+
 
     public function __construct()
     {
@@ -121,6 +136,10 @@ class User extends BaseUser
     {
         $this->registrations[] = $registration;
 
+        if (!$this->getLastRegistration() || $registration->getDate() > $this->getLastRegistration()->getDate()){
+            $this->setLastRegistration($registration);
+        }
+
         return $this;
     }
 
@@ -132,6 +151,12 @@ class User extends BaseUser
     public function removeRegistration(\AppBundle\Entity\Registration $registration)
     {
         $this->registrations->removeElement($registration);
+
+        if ($this->getLastRegistration() === $registration){
+            if ($this->getRegistrations()->count()){
+                $this->setLastRegistration($this->getRegistrations()->first());
+            }
+        }
     }
 
     /**
@@ -447,8 +472,16 @@ class User extends BaseUser
         return $this->recordedRegistrations;
     }
 
+    public function getCommissions(){
+        $commissions = array();
+        foreach ($this->getBeneficiaries() as $beneficiary){
+            $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
+        }
+        return new ArrayCollection($commissions);
+    }
+
     public function isRegistrar($ip){
-        if ($this->hasRole("ROLE_ADMIN")){
+        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
             return true;
         }elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
             return true;
@@ -456,6 +489,107 @@ class User extends BaseUser
         //    return true;
         }
         return false;
+    }
+
+    public function isTaskEditor(){
+        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
+            return true;
+        }elseif ($this->getCommissions()){ //todo put this in conf
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Set frozen
+     *
+     * @param boolean $frozen
+     *
+     * @return User
+     */
+    public function setFrozen($frozen)
+    {
+        $this->frozen = $frozen;
+
+        return $this;
+    }
+
+    /**
+     * Get frozen
+     *
+     * @return boolean
+     */
+    public function getFrozen()
+    {
+        return $this->frozen;
+    }
+
+
+    /**
+     * Set lastRegistration
+     *
+     * @param \AppBundle\Entity\Registration $lastRegistration
+     *
+     * @return User
+     */
+    public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
+    {
+        $this->lastRegistration = $lastRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Get lastRegistration
+     *
+     * @return \AppBundle\Entity\Registration
+     */
+    public function getLastRegistration()
+    {
+        return $this->lastRegistration;
+    }
+
+    /**
+     * determine whether the given client (ClientInterface) is allowed by the user, or not.
+     * @param ClientInterface $client
+     * @return bool
+     */
+    public function isAuthorizedClient(Client $client){
+        return $this->getClients()->contains($client);
+    }
+
+    /**
+     * Add client
+     *
+     * @param \AppBundle\Entity\Client $client
+     *
+     * @return User
+     */
+    public function addClient(\AppBundle\Entity\Client $client)
+    {
+        $this->clients[] = $client;
+
+        return $this;
+    }
+
+    /**
+     * Remove client
+     *
+     * @param \AppBundle\Entity\Client $client
+     */
+    public function removeClient(\AppBundle\Entity\Client $client)
+    {
+        $this->clients->removeElement($client);
+    }
+
+    /**
+     * Get clients
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getClients()
+    {
+        return $this->clients;
     }
 
     public function getCycleShiftsDuration()

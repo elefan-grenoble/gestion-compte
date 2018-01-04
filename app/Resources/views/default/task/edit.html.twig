@@ -1,0 +1,78 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h4 class="">editer tache</h4>
+
+    {{ form_start(form) }}
+    <div class="input-field">
+        {{ form_widget(form.title) }}
+        {{ form_label(form.title) }}
+    </div>
+    <div class="row">
+        <div class="col s6">
+            {{ form_label(form.commissions) }}
+            {{ form_widget(form.commissions) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(form.owners) }}
+            {{ form_widget(form.owners) }}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s3">
+            {{ form_label(form.created_at) }}
+            {{ form_widget(form.created_at) }}
+        </div>
+        <div class="col s3">
+            {{ form_label(form.due_date) }}
+            {{ form_widget(form.due_date) }}
+        </div>
+        <div class="col s3">
+            {{ form_widget(form.closed) }}
+            {{ form_label(form.closed) }}
+        </div>
+        <div class="col s3">
+            {{ form_label(form.priority) }}
+            {{ form_widget(form.priority) }}
+        </div>
+    </div>
+    <div class="input-field">
+        {{ form_widget(form.status) }}
+        {{ form_label(form.status) }}
+    </div>
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Editer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery.extend( jQuery.fn.pickadate.defaults, {
+            monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd',
+            labelMonthNext:"Mois suivant",
+            labelMonthPrev:"Mois précédent",
+            labelMonthSelect:"Sélectionner un mois",
+            labelYearSelect:"Sélectionner une année"
+        });
+
+        jQuery(function(){
+            $('.datepicker').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 2, // Creates a dropdown of 15 years to control year,
+                close: 'Ok',
+                closeOnSelect: true // Close upon selecting a date,
+            });
+        });
+    </script>
+{% endblock %}

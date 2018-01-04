@@ -2,8 +2,12 @@
 
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+{% if is_granted("ROLE_ADMIN") %}
+    <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
+{% else %}
     <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i><span>Edition fiche adhérent</span>
+{% endif %}
+    <i class="material-icons">edit</i><span>Edition fiche membre</span>
 {% endblock %}
 
 {% block content %}

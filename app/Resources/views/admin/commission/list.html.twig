@@ -14,20 +14,20 @@
                 <div class="card blue-grey darken-1">
                     <div class="card-content white-text">
                         <span class="card-title">{{ commission.name }}</span>
-                        <p>{{ commission.description }}</p>
-                        <p>{{ commission.email }}</p>
-                        <p><i class="material-icons left">group</i> membres : {{ commission.beneficiaries | length }}</p>
+                        {{ commission.description | markdown | raw }}
+                        <p>{{ commission.email | email_encode | raw }}</p>
+                        <p><i class="material-icons">group</i> membres : {{ commission.beneficiaries | length }}</p>
                         <ul>
-                            {% for owner in commission.owners %}#}
-                                <li><i class="material-icons left">person</i>{{ owner.displayname }}</li>
+                            {% for owner in commission.owners %}
+                                <a class="chip" href="{{ path("user_show",{username:owner.user.username}) }}">
+                                    <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                    {{ owner.displayname }}
+                                </a>
                             {% endfor %}
                         </ul>
                     </div>
                     <div class="card-action">
                         <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                        {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        <a href="#">Supprimer</a>
-                        {% endif %}
                     </div>
                 </div>
             </div>

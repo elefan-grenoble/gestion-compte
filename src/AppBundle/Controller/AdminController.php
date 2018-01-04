@@ -10,7 +10,9 @@ use AppBundle\Entity\Role;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -35,6 +37,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * User controller.
  *
  * @Route("admin")
+ * @Security("has_role('ROLE_ADMIN')")
  */
 class AdminController extends Controller
 {
@@ -43,7 +46,6 @@ class AdminController extends Controller
      *
      * @Route("/", name="admin")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -51,11 +53,217 @@ class AdminController extends Controller
     }
 
     /**
+     * Lists all user entities.
+     *
+     * @Route("/users", name="user_index")
+     * @Method({"GET","POST"})
+     */
+    public function usersAction(Request $request)
+    {
+
+        $form = $this->createFormBuilder()
+            ->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
+                'fermé' => 2,
+                'ouvert' => 1,
+            )))
+            ->add('enabled', ChoiceType::class, array('label' => 'activé','required' => false,'choices'  => array(
+                'activé' => 2,
+                'Non activé' => 1,
+            )))
+            ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => false,'choices'  => array(
+                'gelé' => 2,
+                'Non gelé' => 1,
+            )))
+            ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
+            ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
+            ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
+            ->add('registrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('registrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('username', TextType::class, array('label' => 'username','required' => false))
+            ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
+            ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
+            ->add('email', TextType::class, array('label' => 'email','required' => false))
+//            ->add('last_reg', DateType::class, array('label' => 'adhésion','required' => false))
+            ->add('roles',EntityType::class, array(
+                'class' => 'AppBundle:Role',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Role(s)'
+            ))
+            ->add('commissions',EntityType::class, array(
+                'class' => 'AppBundle:Commission',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Commissions(s)'
+            ))
+            ->add('action', HiddenType::class,array())
+            ->add('page', HiddenType::class,array())
+            ->add('dir', HiddenType::class,array())
+            ->add('sort', HiddenType::class,array())
+            ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
+            ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $action = $form->get('action')->getData();
+
+        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
+            ->leftJoin("o.registrations", "r")->addSelect("r");
+
+        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+
+        $page = 1;
+        $order = 'ASC';
+        $sort = 'o.member_number';
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($form->get('page')->getData() > 0){
+                $page = $form->get('page')->getData();
+            }
+            if ($form->get('sort')->getData()){
+                $sort = $form->get('sort')->getData();
+            }
+            if ($form->get('dir')->getData()){
+                $order = $form->get('dir')->getData();
+            }
+
+            if ($form->get('withdrawn')->getData() > 0){
+                $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                    ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+            }
+            if ($form->get('enabled')->getData() > 0){
+                $qb = $qb->andWhere('o.enabled = :enabled')
+                    ->setParameter('enabled', $form->get('enabled')->getData()-1);
+            }
+            if ($form->get('frozen')->getData() > 0){
+                $qb = $qb->andWhere('o.frozen = :frozen')
+                    ->setParameter('frozen', $form->get('frozen')->getData()-1);
+            }
+
+            if ($form->get('registrationdate')->getData()){
+                $qb = $qb->andWhere('r.date LIKE :registrationdate')
+                    ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
+            }
+            if ($form->get('registrationdategt')->getData()){
+                $qb = $qb->andWhere('r.date > :registrationdategt')
+                    ->setParameter('registrationdategt', $form->get('registrationdategt')->getData());
+            }
+            if ($form->get('registrationdatelt')->getData()){
+                $qb = $qb->andWhere('r.date < :registrationdatelt')
+                    ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+            }
+            if ($form->get('lastregistrationdate')->getData()){
+                $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
+                    ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
+            }
+            if ($form->get('lastregistrationdategt')->getData()){
+                $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+                    ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
+            }
+            if ($form->get('lastregistrationdatelt')->getData()){
+                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
+            }
+            if ($form->get('membernumber')->getData()){
+                $qb = $qb->andWhere('o.member_number = :membernumber')
+                    ->setParameter('membernumber', $form->get('membernumber')->getData());
+            }
+            if ($form->get('membernumbergt')->getData()){
+                $qb = $qb->andWhere('o.member_number > :membernumbergt')
+                    ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
+            }
+            if ($form->get('membernumberlt')->getData()){
+                $qb = $qb->andWhere('o.member_number < :membernumberlt')
+                    ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
+            }
+            if ($form->get('username')->getData()){
+                $qb = $qb->andWhere('o.username LIKE :username')
+                    ->setParameter('username', '%'.$form->get('username')->getData().'%');
+            }
+            if ($form->get('firstname')->getData()){
+                $qb = $qb->andWhere('b.firstname LIKE :firstname')
+                    ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
+            }
+            if ($form->get('lastname')->getData()){
+                $qb = $qb->andWhere('b.lastname LIKE :lastname')
+                    ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
+            }
+            if ($form->get('email')->getData()){
+                $qb = $qb->andWhere('b.email LIKE :email')
+                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
+            }
+//            if ($form->get('last_reg')->getData()){
+//                $qb = $qb->leftJoin("o.registration", "reg")->addSelect("reg")
+//                    ->andWhere('reg.date = (:date)')
+//                    ->setParameter('date',$form->get('last_reg')->getData() );
+//            }
+            if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
+                $qb = $qb->leftJoin("b.roles", "r")->addSelect("r")
+                    ->andWhere('r.id IN (:ids)')
+                    ->setParameter('ids',$form->get('roles')->getData() );
+            }
+            if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
+                $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
+                    ->andWhere('c.id IN (:ids)')
+                    ->setParameter('ids',$form->get('commissions')->getData() );
+            }
+        }else{
+            $form->get('sort')->setData($sort);
+            $form->get('dir')->setData($order);
+        }
+
+        $limit = 25;
+        $qb2 = clone $qb;
+        $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
+        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+
+
+        $qb = $qb->orderBy($sort, $order);
+        if ($action != "csv"){
+            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+            $users = new Paginator($qb->getQuery());
+        }else{
+            $users = $qb->getQuery()->getResult();
+            $return = '';
+            $d = ','; // this is the default but i like to be explicit
+            foreach($users as $user) {
+                foreach ($user->getBeneficiaries() as $beneficiary)
+                    $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+            }
+            return new Response($return, 200, array(
+                'Content-Encoding: UTF-8',
+                'Content-Type' => 'application/force-download; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+            ));
+        }
+
+        return $this->render('admin/user/list.html.twig', array(
+            'users' => $users,
+            'form' => $form->createView(),
+            'nb_of_result' => $max,
+            'page'=>$page,
+            'nb_of_pages'=>$nb_of_pages
+        ));
+    }
+
+    /**
      * Registrations list
      *
      * @Route("/registrations", name="admin_registrations")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function registrationsAction(Request $request)
     {
@@ -75,220 +283,51 @@ class AdminController extends Controller
     }
 
     /**
-     * Comissions list
+     * Registrations correction
      *
-     * @Route("/commissions", name="admin_commissions")
+     * @Route("/registrations_fix", name="admin_registrations_fix")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function commissionsAction(Request $request)
-    {
-        $commissions = $this->getDoctrine()->getManager()->getRepository('AppBundle:Commission')->findAll();
-        return $this->render('admin/commission/list.html.twig',array('commissions'=>$commissions));
-    }
-
-    /**
-     * Comission new
-     *
-     * @Route("/commission/new", name="commission_new")
-     * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function commissionNewAction(Request $request)
+    public function registrationsFixAction(Request $request)
     {
-
-        $session = new Session();
-
-        $commission = new Commission();
         $em = $this->getDoctrine()->getManager();
-
-        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em->persist($commission);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
-
-            return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
-
+        $users = $em->getRepository('AppBundle:User')->findAll();
+        foreach ($users as $user){
+            if ($user->getRegistrations()->count() && $user->getRegistrations()->first())
+                $user->setLastRegistration($user->getRegistrations()->first());
+            else
+                $user->setLastRegistration();
+            $em->persist($user);
         }
-
-        return $this->render('admin/commission/new.html.twig', array(
-            'commission' => $commission,
-            'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     * Comission edit
-     *
-     * @Route("/commission/{id}/edit", name="commission_edit")
-     * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     */
-    public function commissionEditAction(Request $request,Commission $commission)
-    {
+        $em->flush();
         $session = new Session();
-
-        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($commission);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'La commission a bien été éditée !');
-
-            return $this->redirectToRoute('admin_commissions');
-
-        }
-
-        return $this->render('admin/commission/edit.html.twig', array(
-            'commission' => $commission,
-            'form' => $form->createView(),
-        ));
+        $session->getFlashBag()->add('success', 'all last registration date fixed');
+        return $this->redirectToRoute('admin');
     }
 
     /**
-     * Roles list
+     * Registrations correction
      *
-     * @Route("/roles", name="admin_roles")
+     * @Route("/status_fix", name="admin_status_fix")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function rolesAction(Request $request)
-    {
-        $roles = $this->getDoctrine()->getManager()->getRepository('AppBundle:Role')->findAll();
-        return $this->render('admin/role/list.html.twig',array('roles'=>$roles));
-    }
-
-    /**
-     * role new
-     *
-     * @Route("/role_new", name="role_new")
-     * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function roleNewAction(Request $request)
+    public function statusFixAction(Request $request)
     {
-        $session = new Session();
-
-        $role = new Role();
         $em = $this->getDoctrine()->getManager();
-
-        $form = $this->createForm('AppBundle\Form\RoleType', $role);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em->persist($role);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'Le nouveau role a bien été créé !');
-
-            return $this->redirectToRoute('role_edit', array('id' => $role->getId()));
-
+        $users = $em->getRepository('AppBundle:User')->findAll();
+        foreach ($users as $user){
+            if ($user->getFrozen() === null)
+                $user->setFrozen(false);
+            if ($user->getWithdrawn() === null)
+                $user->setWithdrawn(false);
+            $em->persist($user);
         }
-
-        return $this->render('admin/role/new.html.twig', array(
-            'role' => $role,
-            'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     * Comission edit
-     *
-     * @Route("/role/{id}/edit", name="role_edit")
-     * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     */
-    public function roleEditAction(Request $request,Role $role)
-    {
+        $em->flush();
         $session = new Session();
-
-        $form = $this->createForm('AppBundle\Form\RoleType', $role);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($role);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'Le role a bien été édité !');
-
-            return $this->redirectToRoute('admin_roles');
-
-        }
-
-        return $this->render('admin/role/edit.html.twig', array(
-            'role' => $role,
-            'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     *
-     *
-     * @Route("/clients", name="admin_clients")
-     * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function clientsAction()
-    {
-        $clients = $this->getDoctrine()->getManager()->getRepository('AppBundle:Client')->findAll();
-        return $this->render('admin/clients.html.twig',array('clients'=>$clients));
-    }
-
-    /**
-     * Add new Client //todo put this auto in service création
-     *
-     * @Route("/client_new", name="admin_client_new")
-     * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function newClientAction(Request $request){
-
-        $form = $this->createFormBuilder()
-            ->add('url', TextType::class, array('label' => 'url','attr' => array(
-                'placeholder' => 'http://www.example.com',
-            )))
-            ->add('grant_types', ChoiceType::class,array('choices'  => array(
-                OAuth2::GRANT_TYPE_AUTH_CODE => OAuth2::GRANT_TYPE_AUTH_CODE,
-                OAuth2::GRANT_TYPE_IMPLICIT => OAuth2::GRANT_TYPE_IMPLICIT,
-                OAuth2::GRANT_TYPE_USER_CREDENTIALS => OAuth2::GRANT_TYPE_USER_CREDENTIALS,
-                OAuth2::GRANT_TYPE_CLIENT_CREDENTIALS => OAuth2::GRANT_TYPE_CLIENT_CREDENTIALS,
-                OAuth2::GRANT_TYPE_REFRESH_TOKEN => OAuth2::GRANT_TYPE_REFRESH_TOKEN,
-                OAuth2::GRANT_TYPE_EXTENSIONS => OAuth2::GRANT_TYPE_EXTENSIONS),'multiple'=>true))
-            ->add('add', SubmitType::class, array('label' => 'Ajouter'))
-            ->getForm();
-
-        if ($form->handleRequest($request)->isValid()) {
-
-            $url = $form->get('url')->getData();
-
-            $clientManager = $this->container->get('fos_oauth_server.client_manager.default');
-            $client = $clientManager->createClient();
-            $client->setRedirectUris(array($url));
-            $client->setAllowedGrantTypes($form->get('grant_types')->getData());
-            $clientManager->updateClient($client);
-
-            return $this->redirect($this->generateUrl('fos_oauth_server_authorize', array(
-                'client_id' => $client->getPublicId(),
-                'redirect_uri' => $url,
-                'response_type' => 'code'
-            )));
-        }
-        return $this->render('admin/client_new.html.twig', array(
-            'form' => $form->createView()
-        ));
-
+        $session->getFlashBag()->add('success', 'all status fixed');
+        return $this->redirectToRoute('admin');
     }
 
     /**
@@ -300,19 +339,17 @@ class AdminController extends Controller
      */
     public function exportEmails(Request $request){
         $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
-
         $return = '';
         if($beneficiaries) {
-
             $d = ','; // this is the default but i like to be explicit
             $e = '"'; // this is the default but i like to be explicit
-
             foreach($beneficiaries as $beneficiary) {
-                $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-                if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
-                    $return .= $beneficiary->getFirstname().",".$beneficiary->getLastname().",".$beneficiary->getEmail()."\n";
+                if (!$beneficiary->getUser()->isWithdrawn()){
+                    $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+                    if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                        $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+                    }
                 }
-
             }
         }
         return new Response($return, 200, array(
@@ -321,7 +358,6 @@ class AdminController extends Controller
             'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
         ));
     }
-
 
     /**
      * Join two user
@@ -378,5 +414,214 @@ class AdminController extends Controller
 
         $users = $em->getRepository('AppBundle:User')->findAll(); //todo exclude closed
         return $this->render('admin/user/join.html.twig',array('form'=>$form->createView(),'users'=>$users));
+    }
+
+
+    /**
+     * Import from CSV
+     *
+     * @Route("/importcsv", name="user_import_csv")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function csvImportAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('submitFile', FileType::class, array('label' => 'File to Submit'))
+            ->add('delimiter', TextType::class, array('label' => 'delimiter','attr' => array(
+                'placeholder' => ',',
+            ),'data'=>','))
+            ->add('persist',CheckboxType::class,array('required'=>false,'label'=>'Sauver en base'))
+            ->add('compute', SubmitType::class, array('label' => 'compute'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+
+            // Get file
+            $file = $form->get('submitFile');
+            $delimiter = ($form->get('delimiter'))? $form->get('delimiter')->getData() : ',';
+            $persist = ($form->get('persist'))? $form->get('persist')->getData() : false;
+
+            // Your csv file here when you hit submit button
+            $data = $file->getData();
+            $filename = $file->getData()->getPathName();
+
+            $row = 1;
+            $lastdate = DateTime::createFromFormat('d/m/Y', '04/05/2016');
+            $em = $this->getDoctrine()->getManager();
+            $return = array();
+            $usernames = array();
+            $emails = array();
+            if (($handle = fopen($filename, "r")) !== FALSE) {
+                while (($data = fgetcsv($handle, 1000, $delimiter)) !== FALSE /*
+                    && $row<10 //*/
+                ) {
+                    /*
+                     Array
+                    (
+                    [0] => compare
+                    [1] => Date d'adhésion
+                    [2] => Type Adhésion
+                    [3] => Nom
+                    [4] => Prénom
+                    [5] => Adresse1
+                    [6] => CP
+                    [7] => Ville
+                    [8] => Téléphone
+                    [9] => Mail
+                    [10] => Montant
+                    [11] => Mode de réglement
+                    [12] => A intégrer?
+                    [13] => Renouvellement adhésion - Date
+                    [14] => Montant
+                    [15] => Mode de réglement
+                    [16] => Qualité
+                    [17] => Bénévole Ressource
+                    [18] => Ambassadeur
+                    [19] =>
+                    )*/
+                    preg_match_all('/^[0-9]+$/', $data[0], $matches, PREG_SET_ORDER, 0);
+                    if (count($data)>11&&isset($data[3])&&isset($data[4])&&count($matches)&&strlen($data[3])>1&&strlen($data[4])>1){ // on ne traite que les colonnes qui commence par un numéro d'adhérent valide (entier)
+                        $member_number = $data[0];
+                        $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$member_number));
+                        if ($user){
+                            $mail = $data[9];
+                            if (isset($data[9])&&filter_var($mail, FILTER_VALIDATE_EMAIL)&&($user->getEmail() != $mail)) {
+                                $user_exist = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
+                                if (!$user_exist){
+                                    $user->setEmail($mail);
+                                    if ($persist)
+                                        $em->persist($user);
+                                    $return[] = array($user,array("error","user with same member number already exist, email updated"));
+                                }else{
+                                    $return[] = array($user,array("error","user with same member number already exist, email change but already in use"));
+                                }
+                            }else{
+                                $return[] = array($user,array("error","user with same member number already exist"));
+                            }
+                        } else {
+                            $mail = $data[9];
+                            $validator = $this->container->get('validator');
+                            $constraints = array(
+                                new EmailConstraint(),
+                                new NotBlank()
+                            );
+                            $error = $validator->validate($mail, $constraints);
+                            if ($error->count()){
+                                $return[] = array($user,array("error","email is not valid (".$mail.")"));
+                            }else{
+                                $user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
+                                $already_registred = (isset($emails[$mail])) ? true : false;
+                                if ($user||$already_registred)
+                                    $return[] = array($user,array("error","user with same email already exist"));
+                                else {
+                                    $user = new User();
+                                    $firstname = trim(preg_replace('/\s\s+/', ' ', $data[4]));
+                                    $lastname = trim(preg_replace('/\s\s+/', ' ', $data[3]));
+                                    $username = User::makeUsername($firstname,$lastname);
+                                    $qb = $em->createQueryBuilder();
+                                    $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+                                        ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
+                                        ->getQuery()
+                                        ->getResult();
+                                    //$users = $em->getRepository('AppBundle:User')->findBy(array("username"=>$username));
+                                    $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
+                                    if (count($users)||$already_registred){
+                                        $username = User::makeUsername($firstname,$lastname,count($users)+1+$already_registred);
+                                    }
+                                    if (strlen($username)>3){
+                                        $user->setUsername($username);
+                                        $user->setEmail($mail);
+                                        $user->setMemberNumber($member_number);
+                                        $password = User::randomPassword();
+                                        $user->setPassword($password);
+                                        //beneficiary
+                                        $beneficiary = new Beneficiary();
+                                        $beneficiary->setFirstname($firstname);
+                                        $beneficiary->setLastname($lastname);
+                                        $beneficiary->setPhone($data[8]);
+                                        $beneficiary->setEmail($mail);
+                                        $beneficiary->setAmbassador(($data[8]!='')&&$data[8]=='1');
+                                        $beneficiary->setExpert(false);//default all false
+                                        $beneficiary->setUser($user);
+                                        $user->setMainBeneficiary($beneficiary);
+                                        //address
+                                        $address = new Address();
+                                        $address->setStreet1($data[5]);
+                                        $address->setStreet2('');
+                                        $address->setZipcode($data[6]);
+                                        $address->setCity($data[7]);
+                                        $address->setUser($user);
+                                        $user->setAddress($address);
+                                        //registration
+                                        $registration = new Registration();
+                                        $date = $data[1];
+                                        if (!$date)
+                                            $date = $lastdate;
+                                        else {
+                                            $date = DateTime::createFromFormat('d/m/Y', $date);
+                                            if (!$date)
+                                                $date = $lastdate;
+                                        }
+                                        $lastdate = $date;
+                                        $registration->setDate($date); //Y-m-d H:i:s
+                                        $registration->setAmount(intval($data[10]));
+                                        $reglement = $data[11];
+                                        if (!$reglement&&strtolower($data[2])=='site')
+                                            $reglement = 'cb';
+                                        switch ($reglement){
+                                            case 'chq' :
+                                            case 'CHQ' :
+                                            case 'ch' :
+                                                $registration->setMode(Registration::TYPE_CHECK);
+                                                break;
+                                            case 'EPP':
+                                            case 'ESP':
+                                            case 'esp':
+                                            case 'Espèce':
+                                                $registration->setMode(Registration::TYPE_CASH);
+                                                break;
+                                            case 'Site':
+                                            case 'site':
+                                            case 'cb':
+                                                $registration->setMode(Registration::TYPE_CREDIT_CARD);
+                                                break;
+                                            default:
+                                                $registration->setMode(Registration::TYPE_DEFAULT);
+                                        }
+                                        $registration->setUser($user);
+                                        $user->addRegistration($registration);
+                                        $return[] = array($user,array("check","user added"));
+                                        $usernames[$user->getUsername()] = (isset($usernames[$user->getUsername()])) ? $usernames[$user->getUsername()] +1 : 1;
+                                        $emails[$user->getEmail()] = true;
+                                        if ($persist)
+                                            $em->persist($user);
+                                    }else{
+                                        $return[] = array($user,array("error","username build to short"));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    $row++;
+                }
+                fclose($handle);
+                $em->flush();
+            }
+
+            if ($persist){
+                $request->getSession()->getFlashBag()->add('notice', 'Le fichier a été traité complétement.');
+                return $this->redirectToRoute('user_index');
+            }else{
+                return $this->render('admin/user/test_import.html.twig', array(
+                    'users' => $return,
+                ));
+            }
+
+        }
+
+        return $this->render('admin/user/import.html.twig', array(
+            'form' => $form->createView(),
+        ));
     }
 }

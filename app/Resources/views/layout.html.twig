@@ -4,10 +4,8 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}espace membre @ l&rsquo;éléfàn{% endblock %}</title>
-        {#{%- include "MaterializeBundle:Materialize:css.html.twig" -%}#}
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize.min.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
-        <link href="https://fonts.googleapis.com/icon?family=Raleway:400,600,800" rel="stylesheet">
         {% block stylesheets %}{% endblock %}
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
@@ -94,6 +92,7 @@
         <script>
             $(document).ready(function() {
                 $('select').material_select();
+                $('.collapsible').collapsible();
                 $('.button-collapse').sideNav({
                     menuWidth: 300, // Default is 300
                     edge: 'right', // Choose the horizontal origin

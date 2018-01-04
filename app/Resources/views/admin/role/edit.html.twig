@@ -13,8 +13,15 @@
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Editer</button>
+        <button type="submit" class="btn waves-effect waves-light">Editer</button>
     </div>
     {{ form_end(form) }}
+
+    {{ form_start(delete_form) }}
+    {{ form_widget(delete_form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+    </div>
+    {{ form_end(delete_form) }}
 
 {% endblock %}

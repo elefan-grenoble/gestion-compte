@@ -9,12 +9,16 @@
         {% if is_granted("ROLE_ADMIN") %}
             <div class="container">
                 <h3 class=" enter">Gestion des clients (Oauth)</h3>
-                <ul>
+                <div class="collection">
                     {% for client in clients %}
-                        <li>public:{{ client.publicId }} secret:{{ client.secret }}</li>
+                        <div class="collection-item">
+                            {% if client.service %}{{ client.service.name }}<br>{% endif %}
+                            public: <input type="text" value="{{ client.publicId }}"> secret:<input type="text" value="{{ client.secret }}">
+                            <a href="{{ path('client_edit',{'id':client.id}) }}">editer</a>
+                        </div>
                     {% endfor %}
-                </ul>
-                <a href="{{ path('admin_client_new') }}" class="btn waves-effect"><i class="material-icon">add</i>Nouveau client Oauth</a>
+                </div>
+                <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Nouveau client Oauth</a>
             </div>
         {% endif %}
     </div>

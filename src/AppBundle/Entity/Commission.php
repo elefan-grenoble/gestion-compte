@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * Commission
@@ -47,6 +48,13 @@ class Commission
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
      */
     private $beneficiaries;
+
+    /**
+     * Many Commissions have Many Tasks.
+     * @ORM\ManyToMany(targetEntity="Task", mappedBy="commissions")
+     * @OrderBy({"closed" = "ASC","dueDate" = "ASC"})
+     */
+    private $tasks;
 
     /**
      * One Commission have Many Owners (Beneficiary).
@@ -210,5 +218,39 @@ class Commission
     public function getEmail()
     {
         return $this->email;
+    }
+
+    /**
+     * Add task
+     *
+     * @param \AppBundle\Entity\Task $task
+     *
+     * @return Commission
+     */
+    public function addTask(\AppBundle\Entity\Task $task)
+    {
+        $this->tasks[] = $task;
+
+        return $this;
+    }
+
+    /**
+     * Remove task
+     *
+     * @param \AppBundle\Entity\Task $task
+     */
+    public function removeTask(\AppBundle\Entity\Task $task)
+    {
+        $this->tasks->removeElement($task);
+    }
+
+    /**
+     * Get tasks
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTasks()
+    {
+        return $this->tasks;
     }
 }

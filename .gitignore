@@ -10,14 +10,15 @@ composer.lock
 /app/config/parameters.yml
 /app/config/parameters.ini
 
-#/bin
-/bin/symfony_requirements
+/bin
 /web/bundles
 /web/css
 /web/fonts
 /web/images
 /web/js
 /web/config.php
+/web/uploads
+/web/media
 /vendor
 
 # PHPUnit
