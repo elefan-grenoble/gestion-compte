@@ -1,12 +1,40 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
+    <div class="row">
+        <div class="col m2">
+        </div>
+        <div class="col m10">
+            <div style="display: flex;">
+                {% for i in hours %}
+                    {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
+                    <div style="flex: 1">
+                        <div style="text-align: center;width: 100%;margin-left: -50%;">
+                            {{ i }}
+                        </div>
+
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
     {% for shifts in shiftsByDay %}
-        {{ (shifts|first).start|date_fr_long }}
-        {% for shift in shifts %}
-            {% include "booking/_partial/shift.html.twig" with { user: app.user, shift: shift } %}
-        {% endfor %}
+        <div class="row" style="display: flex;height: 40px">
+            <div class="col m2 valign-wrapper">
+                <div>
+                    {{ (shifts|first).start|date_fr_long }}
+                </div>
+            </div>
+            <div class="col m10">
+                <div style="position: relative">
+                    {% for shift in shifts %}
+                        {% include "booking/_partial/shift.html.twig" with { user: app.user, shift: shift, start: hours|first, end: hours|last   } %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
     {% endfor %}
+
 {% endblock %}
 
 {% block stylesheets %}

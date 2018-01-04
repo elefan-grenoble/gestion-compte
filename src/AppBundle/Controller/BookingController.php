@@ -31,6 +31,11 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
 
+        $hours = array();
+        for ($i = 6; $i < 22; $i++) {
+            $hours[] = $i;
+        }
+
         $shiftsByDay = array();
         foreach ($shifts as $shift) {
             $day = $shift->getStart()->format("d m Y");
@@ -41,7 +46,8 @@ class BookingController extends Controller
         }
 
         return $this->render('booking/index.html.twig', [
-            'shiftsByDay' => $shiftsByDay
+            'shiftsByDay' => $shiftsByDay,
+            'hours' => $hours
         ]);
     }
 

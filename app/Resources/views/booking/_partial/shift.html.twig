@@ -1,13 +1,24 @@
-<a href="#book{{ shift.id }}" class="modal-trigger">
-    <span>
-        <p>{{ shift.start|date('H:i') }} - {{ shift.end|date('H:i') }}</p>
-        <p><i>{{ shift.getRemainingShifters() }} places restantes</i></p>
-    </span>
-</a>
+<div
+        data-offset="{{ (((shift.start|date('G')-start)*60 + shift.start|date('i'))/60)}}"
+        data-length="{{ (100/(end-start+1)) }}"
+        style="padding: 0 1px;width:{{ (shift.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left:{{ (((shift.start|date('G')-start)*60 + shift.start|date('i'))/60)*(100/(end-start+1)) }}% ">
+    <a href="#book{{ shift.id }}" class="modal-trigger">
+        <div class="teal white-text z-depth-2 lighten-2">
+            <div class="" style="font-size: 11px;padding:3px">
+                <div>{{ shift.start|date('G\\hi') }} - {{ shift.end|date('G\\hi') }}</div>
+                <div><i>{{ shift.getRemainingShifters() }} places</i></div>
+            </div>
+        </div>
+    </a>
+</div>
+
 <div id="book{{ shift.id }}" class="modal modal-fixed-footer">
     <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
         <div class="modal-content">
             <h4>Réserver le créneau</h4>
+            <div>
+
+            </div>
             <p>Vous êtes sur le point...</p>
             <p>Attention! Vous ne pourrez annuler....</p>
             <div class="input-field">
