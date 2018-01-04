@@ -13,6 +13,7 @@ use DateTime;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Date;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * User controller.
@@ -23,41 +24,24 @@ class BookingController extends Controller
 {
     /**
      * @Route("/", name="booking")
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
      */
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
 
-        $result = array();
+        $shiftsByDay = array();
         foreach ($shifts as $shift) {
-            $week = $shift->getStart()->format("W");
-            $dayOfWeek = $shift->getStart()->format("w");
-
-            if (!isset($result[$week])) {
-                $result[$week] = array();
+            $day = $shift->getStart()->format("d m Y");
+            if (!isset($shiftsByDay[$day])) {
+                $shiftsByDay[$day] = array();
             }
-
-            if (!isset($result[$week][$dayOfWeek])) {
-                $result[$week][$dayOfWeek] = array();
-            }
-            $result[$week][$dayOfWeek][] = $shift;
+            $shiftsByDay[$day][] = $shift;
         }
 
-        $days = [
-            0 => "Dimanche",
-            1 => "Lundi",
-            2 => "Mardi",
-            3 => "Mercredi",
-            4 => "Jeudi",
-            5 => "Vendredi",
-            6 => "Samedi"
-        ];
-
         return $this->render('booking/index.html.twig', [
-            'shifts' => $shifts,
-            'shiftsByWeek' => $result,
-            'days' => $days
+            'shiftsByDay' => $shiftsByDay
         ]);
     }
 

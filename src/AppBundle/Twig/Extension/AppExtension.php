@@ -12,6 +12,7 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('markdown', array($this, 'markdown')),
             new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
             new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
+            new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
         );
     }
 
@@ -71,5 +72,11 @@ class AppExtension extends \Twig_Extension
     public function getName()
     {
         return 'my_app_extension';
+    }
+
+    public function date_fr_long(\DateTime $date)
+    {
+        setlocale(LC_TIME, "fr_FR");
+        return strftime("%A %e %B", $date->getTimestamp());
     }
 }
