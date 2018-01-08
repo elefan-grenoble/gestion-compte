@@ -7,6 +7,10 @@ Espace adhérent l'éléfàn
 * yuml.me code:
 http://yuml.me/edit/5c392db4
 
+Nouveau schema :
+![modele V2](http://yuml.me/41bcdcb0.svg)
+https://yuml.me/edit/41bcdcb0
+
 ## Guide du développeur
 
 ### Prérequis
