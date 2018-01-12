@@ -1,8 +1,8 @@
-@import "../fonts/blackjack/stylesheet.css";
-@import "../fonts/raleway/stylesheet.css";
 /*
  * Globals
  */
+@import "../fonts/blackjack/stylesheet.css";
+@import "../fonts/raleway/stylesheet.css";
 h1,
 h2,
 h3,
@@ -34,10 +34,10 @@ main {
   flex: 1 0 auto;
 }
 .main-navigation {
-  background-color: #51cae9;
+  background-color: #51CAE9;
 }
 footer.page-footer {
-  background-color: #51cae9;
+  background-color: #51CAE9;
 }
 #logo-container {
   font-family: 'black_jackregular';
@@ -54,7 +54,7 @@ footer.page-footer {
 .btn,
 .btn-large {
   color: #fff;
-  background-color: #51cae9;
+  background-color: #51CAE9;
   margin-bottom: 5px;
 }
 .btn:hover,
@@ -85,7 +85,7 @@ footer.page-footer {
   background-color: #8bc34a !important;
 }
 .teal.error {
-  background-color: #f44336 !important;
+  background-color: #F44336 !important;
 }
 .teal.warning {
   background-color: #ff9800 !important;
@@ -224,12 +224,12 @@ input[type=tel]:not(.browser-default):focus:not([readonly]),
 input[type=number]:not(.browser-default):focus:not([readonly]),
 input[type=search]:not(.browser-default):focus:not([readonly]),
 textarea.materialize-textarea:focus:not([readonly]) {
-  border-bottom: 1px solid #51cae9;
-  -webkit-box-shadow: 0 1px 0 0 #51cae9;
-  box-shadow: 0 1px 0 0 #51cae9;
+  border-bottom: 1px solid #51CAE9;
+  -webkit-box-shadow: 0 1px 0 0 #51CAE9;
+  box-shadow: 0 1px 0 0 #51CAE9;
 }
 .input-field .prefix.active {
-  color: #51cae9;
+  color: #51CAE9;
 }
 form .errors ul li {
   color: darkred;
