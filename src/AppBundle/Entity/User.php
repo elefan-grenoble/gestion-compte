@@ -92,6 +92,12 @@ class User extends BaseUser
      */
     private $clients;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
+     * @OrderBy({"created_at" = "DESC"})
+     */
+    private $notes;
+
 
     public function __construct()
     {
@@ -539,5 +545,39 @@ class User extends BaseUser
     public function getClients()
     {
         return $this->clients;
+    }
+
+    /**
+     * Add note
+     *
+     * @param \AppBundle\Entity\Note $note
+     *
+     * @return User
+     */
+    public function addNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes[] = $note;
+
+        return $this;
+    }
+
+    /**
+     * Remove note
+     *
+     * @param \AppBundle\Entity\Note $note
+     */
+    public function removeNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes->removeElement($note);
+    }
+
+    /**
+     * Get notes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getNotes()
+    {
+        return $this->notes;
     }
 }
