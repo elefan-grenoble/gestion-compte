@@ -1,0 +1,218 @@
+<?php
+
+namespace AppBundle\Controller;
+
+
+use AppBundle\Entity\Note;
+use AppBundle\Entity\Task;
+use AppBundle\Entity\User;
+use AppBundle\Form\NoteType;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Validator\Constraints\DateTime;
+
+/**
+ * Task controller.
+ *
+ * @Route("ambassador")
+ */
+class AmbassadorController extends Controller
+{
+
+    /**
+     * Lists all tasks.
+     *
+     * @Route("/phone", name="ambassador_phone_list")
+     * @Method({"GET","POST"})
+     */
+    public function phoneAction(Request $request){
+
+        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
+
+        $session = new Session();
+        $lastYear = new \DateTime('last year');
+        $form = $this->createFormBuilder()
+            ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
+            ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
+            ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
+            ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
+            ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
+            ->add('email', TextType::class, array('label' => 'email','required' => false))
+            ->add('action', HiddenType::class,array())
+            ->add('page', HiddenType::class,array())
+            ->add('dir', HiddenType::class,array())
+            ->add('sort', HiddenType::class,array())
+            ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        $action = $form->get('action')->getData();
+
+        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
+            ->leftJoin("o.registrations", "r")->addSelect("r");
+
+        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+        $qb = $qb->andWhere('o.withdrawn = 0');
+        $qb = $qb->andWhere('o.frozen = 0');
+
+        $page = 1;
+        $order = 'ASC';
+        $sort = 'o.member_number';
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($form->get('page')->getData() > 0){
+                $page = $form->get('page')->getData();
+            }
+            if ($form->get('sort')->getData()){
+                $sort = $form->get('sort')->getData();
+            }
+            if ($form->get('dir')->getData()){
+                $order = $form->get('dir')->getData();
+            }
+
+            if ($form->get('lastregistrationdategt')->getData()){
+                $date = $form->get('lastregistrationdategt')->getData();
+                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
+                if ($datetime > $lastYear){
+                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                    $date = $lastYear->format('Y-m-d') ;
+                }
+                $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+                        ->setParameter('lastregistrationdategt', $date);
+            }
+            if ($form->get('lastregistrationdatelt')->getData()){
+                $date = $form->get('lastregistrationdatelt')->getData();
+                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
+                if ($datetime > $lastYear){
+                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                    $date = $lastYear->format('Y-m-d') ;
+                }
+                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                        ->setParameter('lastregistrationdatelt', $date);
+            }else{
+                $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                $date = $lastYear->format('Y-m-d') ;
+                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $date);
+            }
+            if ($form->get('membernumber')->getData()){
+                $qb = $qb->andWhere('o.member_number = :membernumber')
+                    ->setParameter('membernumber', $form->get('membernumber')->getData());
+            }
+            if ($form->get('membernumbergt')->getData()){
+                $qb = $qb->andWhere('o.member_number > :membernumbergt')
+                    ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
+            }
+            if ($form->get('membernumberlt')->getData()){
+                $qb = $qb->andWhere('o.member_number < :membernumberlt')
+                    ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
+            }
+            if ($form->get('firstname')->getData()){
+                $qb = $qb->andWhere('b.firstname LIKE :firstname')
+                    ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
+            }
+            if ($form->get('lastname')->getData()){
+                $qb = $qb->andWhere('b.lastname LIKE :lastname')
+                    ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
+            }
+            if ($form->get('email')->getData()){
+                $qb = $qb->andWhere('b.email LIKE :email')
+                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
+            }
+        }else{
+            $form->get('sort')->setData($sort);
+            $form->get('dir')->setData($order);
+            $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
+        }
+
+        $limit = 25;
+        $qb2 = clone $qb;
+        $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
+        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+
+        $qb = $qb->orderBy($sort, $order);
+        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+        $users = new Paginator($qb->getQuery());
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'users' => $users,
+            'form' => $form->createView(),
+            'nb_of_result' => $max,
+            'page'=>$page,
+            'nb_of_pages'=>$nb_of_pages
+        ));
+
+    }
+
+    /**
+     * display a user phones.
+     *
+     * @Route("/phone/{username}", name="ambassador_phone_show")
+     * @Method("GET")
+     */
+    public function showAction(User $user)
+    {
+        $this->denyAccessUnlessGranted('view', $user);
+
+        $note = new Note();
+        $form = $this->createForm('AppBundle\Form\NoteType', $note,array(
+            'action' => $this->generateUrl('ambassador_new_note',array("username"=>$user->getUsername())),
+            'method' => 'POST',
+        ));
+
+        return $this->render('ambassador/phone/show.html.twig', array(
+            'user' => $user,
+            'note_form' => $form->createView()
+        ));
+    }
+
+    /**
+     *
+     * @Route("/note/{username}", name="ambassador_new_note")
+     * @Method("POST")
+     */
+    public function newNoteAction(User $user,Request $request){
+
+        $this->denyAccessUnlessGranted('annotate', $user);
+        $session = new Session();
+        $note = new Note();
+        $form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()){
+
+            $note->setSubject($user);
+            $note->setAuthor($this->get('security.token_storage')->getToken()->getUser());
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($note);
+            $em->flush();
+
+            $session->getFlashBag()->add('success','La note a bien été ajoutée');
+        }else{
+            $session->getFlashBag()->add('error','oups');
+        }
+
+        return $this->redirectToRoute("ambassador_phone_show", array('username'=>$user->getUsername()));
+    }
+}

@@ -217,13 +217,30 @@ class Beneficiary
     }
 
     /**
-     * Get isAmbassador
+     * Get hasViewUserDataRights
      *
      * @return boolean
-     * todo map it with roles
      */
-    public function isAmbassador()
+    public function canViewUserData()
     {
+        foreach ($this->getRoles() as $role){
+            if ($role->hasViewUserDataRights())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get hasViewUserDataRights
+     *
+     * @return boolean
+     */
+    public function canEditUserData()
+    {
+        foreach ($this->getRoles() as $role){
+            if ($role->hasEditUserDataRights())
+                return true;
+        }
         return false;
     }
 

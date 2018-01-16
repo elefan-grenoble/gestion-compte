@@ -210,8 +210,8 @@ class AdminController extends Controller
 //                    ->setParameter('date',$form->get('last_reg')->getData() );
 //            }
             if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
-                $qb = $qb->leftJoin("b.roles", "r")->addSelect("r")
-                    ->andWhere('r.id IN (:ids)')
+                $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro")
+                    ->andWhere('ro.id IN (:ids)')
                     ->setParameter('ids',$form->get('roles')->getData() );
             }
             if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
@@ -241,7 +241,13 @@ class AdminController extends Controller
             $d = ','; // this is the default but i like to be explicit
             foreach($users as $user) {
                 foreach ($user->getBeneficiaries() as $beneficiary)
-                    $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+                    $return .=
+                        $beneficiary->getUser()->getMemberNumber().$d.
+                        $beneficiary->getFirstname().$d.
+                        $beneficiary->getLastname().$d.
+                        $beneficiary->getEmail().$d.
+                        $beneficiary->getPhone().
+                        "\n";
             }
             return new Response($return, 200, array(
                 'Content-Encoding: UTF-8',
@@ -278,8 +284,55 @@ class AdminController extends Controller
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
         $registrations = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:Registration')
-            ->findBy(array(),array('date' => 'DESC'),$limit,($page-1)*$limit);
-        return $this->render('admin/registrations.html.twig',array('registrations'=>$registrations,'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+            ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
+        $delete_forms = array();
+        foreach ($registrations as $registration){
+            $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
+        }
+        return $this->render('admin/registrations.html.twig',array('registrations'=>$registrations,'delete_forms'=>$delete_forms,'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * remove registration
+     *
+     * @Route("/remove_registration/{id}", name="admin_registration_remove")
+     * @Method({"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function removeRegistrationAction(Request $request,Registration $registration){
+        $session = new Session();
+        $form = $this->getRegistrationDeleteForm($registration);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()){
+                $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
+            }else{
+                $em = $this->getDoctrine()->getManager();
+                if ($registration->getUser()){
+                    $registration->getUser()->removeRegistration($registration);
+                    $em->persist($registration->getUser());
+                }
+                if ($registration->getRegistrar()){
+                    $registration->getRegistrar()->removeRecordedRegistration($registration);
+                    $em->persist($registration->getRegistrar());
+                }
+                $em->remove($registration);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'L&rsquo;adhésion a bien été supprimée !');
+            }
+        }
+        return $this->redirectToRoute('admin_registrations');
+    }
+
+    /**
+     * @param Registration $registration
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getRegistrationDeleteForm(Registration $registration){
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('admin_registration_remove', array('id' => $registration->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     /**
@@ -299,10 +352,16 @@ class AdminController extends Controller
             else
                 $user->setLastRegistration();
             $em->persist($user);
+            foreach ($user->getRegistrations() as $registration){
+                if ($registration->getCreatedAt()->format('Y') < 0){
+                    $registration->setCreatedAt($registration->getDate());
+                    $em->persist($registration);
+                }
+            }
         }
         $em->flush();
         $session = new Session();
-        $session->getFlashBag()->add('success', 'all last registration date fixed');
+        $session->getFlashBag()->add('success', 'all registrations dates fixed');
         return $this->redirectToRoute('admin');
     }
 
@@ -327,6 +386,49 @@ class AdminController extends Controller
         $em->flush();
         $session = new Session();
         $session->getFlashBag()->add('success', 'all status fixed');
+        return $this->redirectToRoute('admin');
+    }
+
+    /**
+     * Phone correction
+     *
+     * @Route("/phone_fix", name="admin_phone_fix")
+     * @Method("GET")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function phoneFixAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $users = $em->getRepository('AppBundle:User')->findAll();
+        foreach ($users as $user){
+            foreach ($user->getBeneficiaries() as $beneficiary){
+                $phone = $beneficiary->getPhone();
+                // 0 missing at start ?
+                $re = '/^[123456789][0-9]{8}$/';
+                preg_match_all($re, $phone, $matches, PREG_SET_ORDER, 0);
+                if(count($matches) >= 1){
+                    $phone = '0'.$phone;
+                }
+                // to many 0 at start ?
+                $re = '/^[0][0]([0-9]*)$/';
+                preg_match_all($re, $phone, $matches, PREG_SET_ORDER, 0);
+                if(count($matches) >= 1){
+                    $phone = '0'.$matches[0][1];
+                }
+                //space ?
+                $phone = str_replace(' ','',$phone);
+                //dot ?
+                $phone = str_replace('.','',$phone);
+                //
+                if (!($phone === $beneficiary->getPhone())){
+                    $beneficiary->setPhone($phone);
+                    $em->persist($beneficiary);
+                }
+            }
+        }
+        $em->flush();
+        $session = new Session();
+        $session->getFlashBag()->add('success', 'all phone fixed');
         return $this->redirectToRoute('admin');
     }
 

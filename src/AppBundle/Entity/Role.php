@@ -35,6 +35,20 @@ class Role
     private $beneficiaries;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="has_view_user_data_rights", type="boolean", unique=false, options={"default" : 0})
+     */
+    private $has_view_user_data_rights;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="has_edit_user_data_rights", type="boolean", unique=false, options={"default" : 0})
+     */
+    private $has_edit_user_data_rights;
+
+    /**
      * Get id
      *
      * @return int
@@ -107,5 +121,63 @@ class Role
     public function getBeneficiaries()
     {
         return $this->beneficiaries;
+    }
+
+    public function hasViewUserDataRights()
+    {
+        return $this->has_view_user_data_rights;
+    }
+
+    public function hasEditUserDataRights()
+    {
+        return $this->has_edit_user_data_rights;
+    }
+
+    /**
+     * Set hasViewUserDataRights
+     *
+     * @param boolean $hasViewUserDataRights
+     *
+     * @return Role
+     */
+    public function setHasViewUserDataRights($hasViewUserDataRights)
+    {
+        $this->has_view_user_data_rights = $hasViewUserDataRights;
+
+        return $this;
+    }
+
+    /**
+     * Get hasViewUserDataRights
+     *
+     * @return boolean
+     */
+    public function getHasViewUserDataRights()
+    {
+        return $this->has_view_user_data_rights;
+    }
+
+    /**
+     * Set hasEditUserDataRights
+     *
+     * @param boolean $hasEditUserDataRights
+     *
+     * @return Role
+     */
+    public function setHasEditUserDataRights($hasEditUserDataRights)
+    {
+        $this->has_edit_user_data_rights = $hasEditUserDataRights;
+
+        return $this;
+    }
+
+    /**
+     * Get hasEditUserDataRights
+     *
+     * @return boolean
+     */
+    public function getHasEditUserDataRights()
+    {
+        return $this->has_edit_user_data_rights;
     }
 }
