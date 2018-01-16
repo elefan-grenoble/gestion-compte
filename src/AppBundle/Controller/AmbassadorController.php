@@ -3,7 +3,10 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Note;
 use AppBundle\Entity\Task;
+use AppBundle\Entity\User;
+use AppBundle\Form\NoteType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,21 +33,21 @@ class AmbassadorController extends Controller
     /**
      * Lists all tasks.
      *
-     * @Route("/phone", name="ambassador_phone")
+     * @Route("/phone", name="ambassador_phone_list")
      * @Method({"GET","POST"})
      */
     public function phoneAction(Request $request){
+
+        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
+
+        $session = new Session();
+        $lastYear = new \DateTime('last year');
         $form = $this->createFormBuilder()
             ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
             ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
             ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
-            ->add('registrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('registrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('registrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('lastregistrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
             ->add('email', TextType::class, array('label' => 'email','required' => false))
@@ -86,29 +89,30 @@ class AmbassadorController extends Controller
                 $order = $form->get('dir')->getData();
             }
 
-            if ($form->get('registrationdate')->getData()){
-                $qb = $qb->andWhere('r.date LIKE :registrationdate')
-                    ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
-            }
-            if ($form->get('registrationdategt')->getData()){
-                $qb = $qb->andWhere('r.date > :registrationdategt')
-                    ->setParameter('registrationdategt', $form->get('registrationdategt')->getData());
-            }
-            if ($form->get('registrationdatelt')->getData()){
-                $qb = $qb->andWhere('r.date < :registrationdatelt')
-                    ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
-            }
-            if ($form->get('lastregistrationdate')->getData()){
-                $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
-                    ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
-            }
             if ($form->get('lastregistrationdategt')->getData()){
+                $date = $form->get('lastregistrationdategt')->getData();
+                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
+                if ($datetime > $lastYear){
+                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                    $date = $lastYear->format('Y-m-d') ;
+                }
                 $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
-                    ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
+                        ->setParameter('lastregistrationdategt', $date);
             }
             if ($form->get('lastregistrationdatelt')->getData()){
+                $date = $form->get('lastregistrationdatelt')->getData();
+                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
+                if ($datetime > $lastYear){
+                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                    $date = $lastYear->format('Y-m-d') ;
+                }
                 $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
-                    ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
+                        ->setParameter('lastregistrationdatelt', $date);
+            }else{
+                $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
+                $date = $lastYear->format('Y-m-d') ;
+                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $date);
             }
             if ($form->get('membernumber')->getData()){
                 $qb = $qb->andWhere('o.member_number = :membernumber')
@@ -121,10 +125,6 @@ class AmbassadorController extends Controller
             if ($form->get('membernumberlt')->getData()){
                 $qb = $qb->andWhere('o.member_number < :membernumberlt')
                     ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
-            }
-            if ($form->get('username')->getData()){
-                $qb = $qb->andWhere('o.username LIKE :username')
-                    ->setParameter('username', '%'.$form->get('username')->getData().'%');
             }
             if ($form->get('firstname')->getData()){
                 $qb = $qb->andWhere('b.firstname LIKE :firstname')
@@ -141,6 +141,8 @@ class AmbassadorController extends Controller
         }else{
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
+            $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
         }
 
         $limit = 25;
@@ -149,27 +151,11 @@ class AmbassadorController extends Controller
         $nb_of_pages = intval($max/$limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
 
-
         $qb = $qb->orderBy($sort, $order);
-        if ($action != "csv"){
-            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-            $users = new Paginator($qb->getQuery());
-        }else{
-            $users = $qb->getQuery()->getResult();
-            $return = '';
-            $d = ','; // this is the default but i like to be explicit
-            foreach($users as $user) {
-                foreach ($user->getBeneficiaries() as $beneficiary)
-                    $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
-            }
-            return new Response($return, 200, array(
-                'Content-Encoding: UTF-8',
-                'Content-Type' => 'application/force-download; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
-            ));
-        }
+        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+        $users = new Paginator($qb->getQuery());
 
-        return $this->render('ambassador/phone.html.twig', array(
+        return $this->render('ambassador/phone/list.html.twig', array(
             'users' => $users,
             'form' => $form->createView(),
             'nb_of_result' => $max,
@@ -179,4 +165,54 @@ class AmbassadorController extends Controller
 
     }
 
+    /**
+     * display a user phones.
+     *
+     * @Route("/phone/{username}", name="ambassador_phone_show")
+     * @Method("GET")
+     */
+    public function showAction(User $user)
+    {
+        $this->denyAccessUnlessGranted('view', $user);
+
+        $note = new Note();
+        $form = $this->createForm('AppBundle\Form\NoteType', $note,array(
+            'action' => $this->generateUrl('ambassador_new_note',array("username"=>$user->getUsername())),
+            'method' => 'POST',
+        ));
+
+        return $this->render('ambassador/phone/show.html.twig', array(
+            'user' => $user,
+            'note_form' => $form->createView()
+        ));
+    }
+
+    /**
+     *
+     * @Route("/note/{username}", name="ambassador_new_note")
+     * @Method("POST")
+     */
+    public function newNoteAction(User $user,Request $request){
+
+        $this->denyAccessUnlessGranted('annotate', $user);
+        $session = new Session();
+        $note = new Note();
+        $form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()){
+
+            $note->setSubject($user);
+            $note->setAuthor($this->get('security.token_storage')->getToken()->getUser());
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($note);
+            $em->flush();
+
+            $session->getFlashBag()->add('success','La note a bien été ajoutée');
+        }else{
+            $session->getFlashBag()->add('error','oups');
+        }
+
+        return $this->redirectToRoute("ambassador_phone_show", array('username'=>$user->getUsername()));
+    }
 }

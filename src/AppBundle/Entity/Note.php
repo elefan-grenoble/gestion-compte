@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Note
  *
  * @ORM\Table(name="note")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\NoteRepository")
  */
 class Note
@@ -24,7 +25,7 @@ class Note
     /**
      * @var string
      *
-     * @ORM\Column(name="text", type="text")
+     * @ORM\Column(name="text", type="string")
      */
     private $text;
 
@@ -33,7 +34,7 @@ class Note
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
-    private $createdAt;
+    private $created_at;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -41,6 +42,19 @@ class Note
      */
     private $author;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    private $subject;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->created_at = new \DateTime();
+    }
 
     /**
      * Get id
@@ -79,13 +93,13 @@ class Note
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $created_at
      *
      * @return Note
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($created_at)
     {
-        $this->createdAt = $createdAt;
+        $this->created_at = $created_at;
 
         return $this;
     }
@@ -97,7 +111,7 @@ class Note
      */
     public function getCreatedAt()
     {
-        return $this->createdAt;
+        return $this->created_at;
     }
 
     /**
@@ -122,5 +136,29 @@ class Note
     public function getAuthor()
     {
         return $this->author;
+    }
+
+    /**
+     * Set subject
+     *
+     * @param \AppBundle\Entity\User $subject
+     *
+     * @return Note
+     */
+    public function setSubject(\AppBundle\Entity\User $subject = null)
+    {
+        $this->subject = $subject;
+
+        return $this;
+    }
+
+    /**
+     * Get subject
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getSubject()
+    {
+        return $this->subject;
     }
 }

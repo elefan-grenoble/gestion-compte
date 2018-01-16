@@ -5,10 +5,12 @@
                 <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
                 {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
-                {% if beneficiary.isAmbassador %}<i class="material-icons">face</i>{% endif %}</span>
+                {% if beneficiary.canViewUserData %}<i class="material-icons">face</i>{% endif %}</span>
             <div class="row">
                 <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}</div>
+                {% if phone_only is not defined %}
                 <div class="col s12 truncate"><i class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}</div>
+                {% endif %}
                 {% if beneficiary.roles | length %}
                 <div class="col s12 truncate"><i class="material-icons tiny">assignment_ind</i>&nbsp;{% for role in beneficiary.roles %}<div class="chip">{{ role.name }}</div>{% endfor %}</div>
                 {% endif %}
@@ -16,9 +18,9 @@
                 <div class="col s12 truncate"><i class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}<div class="chip">{{ commission.name }}</div>{% endfor %}</div>
                 {% endif %}
             </div>
-            {% if not beneficiary.isMain %}
+            {% if not beneficiary.isMain and is_granted("edit",beneficiary.user) %}
                     <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
-                        {% if not is_granted("ROLE_ADMIN") %}
+                        {% if not is_granted("ROLE_ADMIN") and token is defined %}
                             <input type="hidden" value="{{ token }}" name="token">
                         {% endif %}
                         <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons">mode_edit</i></button>

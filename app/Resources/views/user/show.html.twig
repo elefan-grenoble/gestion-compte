@@ -2,8 +2,15 @@
 
 {% block content %}
     <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img">
-    <h3 class="">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h3>
-
+    <h4 class="">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h4>
+    <div class="row">
+        {% for beneficiary in user.beneficiaries %}
+            {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary } %}
+        {% endfor %}
+    </div>
+    {% if user.notes | length %}
+    <h5>Note(s) à propos de ce membre</h5>
+    {% endif %}
     {% if is_granted("ROLE_ADMIN") %}
         <h5>Actions admin</h5>
         <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer</a>

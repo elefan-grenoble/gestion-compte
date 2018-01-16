@@ -1,7 +1,13 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i><span>Liste des retardataires</span>
+{% endblock %}
+
 {% block content %}
-    <h1>Liste des membres ({{ nb_of_result }})</h1>
+    <h1>Liste des membres en retard d'adhésion ({{ nb_of_result }})</h1>
 
     <ul class="collapsible" data-collapsible="accordion">
         <li>
@@ -33,57 +39,26 @@
                                     </div>
                                 </div>
                             </div>
-                            <h5>Adhésion(s)</h5>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdate) }}
-                                        {{ form_label(form.registrationdate) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdategt) }}
-                                        {{ form_label(form.registrationdategt) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdatelt) }}
-                                        {{ form_label(form.registrationdatelt) }}
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <h5>Dernière Adhésion</h5>
+                        <div class="row">
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdatelt) }}
+                                    {{ form_label(form.lastregistrationdatelt) }}
                                 </div>
                             </div>
-                            <h5>Dernière Adhésion</h5>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdate) }}
-                                        {{ form_label(form.lastregistrationdate) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdategt) }}
-                                        {{ form_label(form.lastregistrationdategt) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdatelt) }}
-                                        {{ form_label(form.lastregistrationdatelt) }}
-                                    </div>
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdategt) }}
+                                    {{ form_label(form.lastregistrationdategt) }}
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col s12 m4">
-                        <div>
-                            <div class="input-field">
-                                {{ form_widget(form.username) }}
-                                {{ form_label(form.username) }}
-                            </div>
-                        </div>
                         <h5>Bénéficiaire(s)</h5>
                         <div class="input-field">
                             {{ form_widget(form.firstname) }}
@@ -109,22 +84,17 @@
         <thead>
         <tr>
             <th data-col="o.member_number">#</th>
-            <th data-col="o.username">username</th>
             <th data-col="b.firstname">prénom</th>
             <th data-col="b.lastname">nom</th>
-            <th data-col="b.email">email</th>
             <th data-col="r.date">Adhésion(s)</th>
-            <th data-col="lr.date">Dernière Adhésion</th>
+            <th>Note(s)</th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         {% for user in users %}
-            {% if user.mainBeneficiary %}
                 <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
                     <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>{{ user.username }}</td>
-
                     <td>
                         {% for beneficiary in user.beneficiaries %}
                             {{ beneficiary.firstname }}<br/>
@@ -133,11 +103,6 @@
                     <td>
                         {% for beneficiary in user.beneficiaries %}
                             {{ beneficiary.lastname }}<br/>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for beneficiary in user.beneficiaries %}
-                            {{ beneficiary.email }}<br/>
                         {% endfor %}
                     </td>
                     <td>
@@ -152,55 +117,23 @@
                                 /!\ need fix
                             {% endif %}
                         {% endfor %}
-                    </td>
-                    <td>
                         {% if user.lastregistration %}
-                            {{ user.lastregistration.date | date('d F Y') }}
+                            {% set difference = user.lastregistration.date.diff(date('now')) %}
+                            {% set m = difference.m %}
+                            {% set y = difference.y %}
+                            {% if y > 0 or m > 12 %}
+                                <strong class="red-text">dépassé de {{ difference.days - 365 }} jours</strong>
+                            {% endif %}
                         {% endif %}
                     </td>
-                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">leave note</a></td>
+                    <td>{% for note in user.notes %}
+                            <blockquote>
+                                {{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text  }}
+                            </blockquote>
+                        {% endfor %}
+                    </td>
+                    <td><i class="material-icons">phone</i><a href="{{ path('ambassador_phone_show', { 'username': user.username }) }}" class="">Appeler</a></td>
                 </tr>
-            {% else %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td class="hide-on-small-only">
-                        {% if user.withdrawn %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-small-only">
-                        {% if user.isEnabled %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-small-only">
-                        {% if user.frozen %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>{{ user.username }}</td>
-
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        {% if user.lastRegistration %}
-                            {{ user.lastRegistration.date | date('d F Y') }}
-                        {% endif %}
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
-                </tr>
-            {% endif %}
         {% endfor %}
         </tbody>
     </table>
