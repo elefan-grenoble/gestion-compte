@@ -29,7 +29,7 @@
         </tbody>
     </table>
     <br>
-    {% if is_granted("ROLE_SUPER_ADMIN") %}
+    {% if is_granted("ROLE_ADMIN") %}
         <a href="{{ path('role_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un role</a>
     {% endif %}
 
