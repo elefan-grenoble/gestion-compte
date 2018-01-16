@@ -5,8 +5,8 @@
     <a {% if shift.getRemainingShifters() != 0 %}href="#book{{ shift.id }}"{% endif %} class="modal-trigger">
         <div class="{% if shift.getRemainingShifters() == 0 %}grey {% else %}orange {% if shift.getRemainingShifters() > 1 %}darken-{{ min(4, shift.getRemainingShifters() - 1) }} {% endif %}{% endif %} white-text z-depth-2">
             <div class="" style="font-size: 11px;padding:3px">
-                <div>{{ shift.start|date('G\\hi') }} - {{ shift.end|date('G\\hi') }}</div>
-                <div><i>{{ shift.getRemainingShifters() }} places</i></div>
+                <div>{{ shift.start|date('G\\hi') }}</div>
+                <div>{{ shift.end|date('G\\hi') }}</div>
             </div>
         </div>
     </a>
@@ -19,7 +19,7 @@
             <div>
 
             </div>
-            <p>Vous êtes sur le point...</p>
+            <p><label>Nombre de places restantes: </label>{{ shift.getRemainingShifters() }}</p>
             <p>Attention! Vous ne pourrez annuler....</p>
             <div class="input-field">
                 <select name="beneficiaryId">
