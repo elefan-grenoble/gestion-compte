@@ -8,8 +8,9 @@ Espace adhérent l'éléfàn
 http://yuml.me/edit/5c392db4
 
 Nouveau schema :
-![modele V2](http://yuml.me/41bcdcb0.svg)
-https://yuml.me/edit/41bcdcb0
+
+![modele V2](http://yuml.me/edit/463ff905.svg)
+http://yuml.me/edit/463ff905
 
 ## Guide du développeur
 
