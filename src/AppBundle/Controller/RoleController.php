@@ -37,7 +37,7 @@ class RoleController extends Controller
      *
      * @Route("/new", name="role_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -71,7 +71,7 @@ class RoleController extends Controller
      *
      * @Route("/{id}/edit", name="role_edit")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request,Role $role)
     {

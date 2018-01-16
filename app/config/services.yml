@@ -41,15 +41,6 @@ services:
         class: AppBundle\Twig\Extension\AppExtension
         tags:
             - { name: twig.extension }
-#    app.my_user_repository:
-#        class: Doctrine\ORM\EntityRepository
-#        factory: ["@doctrine.orm.entity_manager", getRepository]
-#        arguments:
-#          - AppBundle\Entity\User
-#    app.grant_type.user.my_user_repository:
-#        class: AppBundle\EventListener\OAuthEventListener
-#        arguments:
-#            - "@app.my_user_repository"
     oauth_event_listener:
             class:  AppBundle\EventListener\OAuthEventListener
             arguments:

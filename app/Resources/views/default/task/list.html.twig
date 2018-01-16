@@ -57,7 +57,7 @@
                                     {% endfor %}
                                 </td>
                                 <td>
-                                    {% if task.canBeEditedBy(app.user) %}
+                                    {% if is_granted('edit',task) %}
                                         <a href="{{ path("task_edit",{'id':task.id}) }}"><i class="material-icons">edit</i></a>
                                     {% endif %}
                                 </td>
@@ -70,7 +70,7 @@
         </li>
     {% endfor %}
 </ul>
-    {% if (app.user.isTaskEditor)  %}
+    {% if is_granted('create',task) %}
         <a href="{{ path("task_new") }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Ajouter une nouvelle tache</a>
     {% endif %}
 {% endblock %}

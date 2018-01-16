@@ -6,11 +6,16 @@
 {% endblock %}
 
 {% block content %}
-    {% if (app.user.isRegistrar(ip))  %}
+    {% if is_granted("access_tools",app.user)  %}
         <div class="center">
             <a href="{{ path('user_new') }}" class="waves-effect waves-light indigo btn"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
             <a href="{{ path('find_user_number') }}" class="waves-effect waves-light orange btn"><i class="material-icons left">search</i>Trouver un numéro d'adhérent</a>
             <a href="{{ path('user_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
         </div>
+    {% endif %}
+    {% if is_granted("view",app.user)  %}
+    <div class="center">
+        <a href="{{ path('ambassador_phone_list') }}" class="waves-effect waves-light teal btn"><i class="material-icons left">phone</i>Appeler pour réadhésions</a>
+    </div>
     {% endif %}
 {% endblock %}

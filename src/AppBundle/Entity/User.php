@@ -92,6 +92,17 @@ class User extends BaseUser
      */
     private $clients;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
+     * @OrderBy({"created_at" = "DESC"})
+     */
+    private $notes;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
+     * @OrderBy({"created_at" = "DESC"})
+     */
+    private $annotations;
 
     public function __construct()
     {
@@ -429,26 +440,6 @@ class User extends BaseUser
         return new ArrayCollection($commissions);
     }
 
-    public function isRegistrar($ip){
-        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
-            return true;
-        }elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
-            return true;
-        //}elseif ($this->getMainBeneficiary()->isAmbassador()){ //todo check also other Beneficiary ?
-        //    return true;
-        }
-        return false;
-    }
-
-    public function isTaskEditor(){
-        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
-            return true;
-        }elseif ($this->getCommissions()){ //todo put this in conf
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Set frozen
      *
@@ -539,5 +530,110 @@ class User extends BaseUser
     public function getClients()
     {
         return $this->clients;
+    }
+
+    /**
+     * Add note
+     *
+     * @param \AppBundle\Entity\Note $note
+     *
+     * @return User
+     */
+    public function addNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes[] = $note;
+
+        return $this;
+    }
+
+    /**
+     * Remove note
+     *
+     * @param \AppBundle\Entity\Note $note
+     */
+    public function removeNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes->removeElement($note);
+    }
+
+    /**
+     * Get notes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getNotes()
+    {
+        return $this->notes;
+    }
+
+    /**
+     * Add annotation
+     *
+     * @param \AppBundle\Entity\Note $annotation
+     *
+     * @return User
+     */
+    public function addAnnotation(\AppBundle\Entity\Note $annotation)
+    {
+        $this->annotations[] = $annotation;
+
+        return $this;
+    }
+
+    /**
+     * Remove annotation
+     *
+     * @param \AppBundle\Entity\Note $annotation
+     */
+    public function removeAnnotation(\AppBundle\Entity\Note $annotation)
+    {
+        $this->annotations->removeElement($annotation);
+    }
+
+    /**
+     * Get annotations
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAnnotations()
+    {
+        return $this->annotations;
+    }
+
+    /**
+     * Check if registration is possible
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function canRegister(\DateTime $date = null)
+    {
+        $remainder = $this->getRemainder($date);
+        if ( ! $remainder->invert ){ //still some days
+            $min_delay_to_anticipate =  \DateInterval::createFromDateString('15 days');
+            return ($remainder < $min_delay_to_anticipate);
+        }
+        else {
+            return true;
+        }
+    }
+
+    /**
+     * get remainder
+     *
+     * @return DateInterval|false
+     */
+    public function getRemainder(\DateTime $date = null)
+    {
+        if (!$date){
+            $date = new \DateTime('now');
+        }
+        if (!$this->getLastRegistration()){
+            $expire = new \DateTime('-1 day');
+            return date_diff($date,$expire);
+        }
+        $expire = clone $this->getLastRegistration()->getDate();
+        $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
+        return date_diff($date,$expire);
     }
 }

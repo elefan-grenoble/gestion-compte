@@ -19,10 +19,10 @@
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                     <p class="col s12">Cet espace, vide pour le moment, regroupera bientôt tous les services liés à ta qualité de membre.</p>
                 </div>
-                {% if (app.user.isRegistrar(ip))  %}
+                {% if is_granted("access_tools",app.user)  %}
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
-                <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn pulse"><i class="material-icons left">list</i>Taches en cours</a>
+                <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
