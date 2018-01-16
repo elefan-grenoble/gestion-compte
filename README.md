@@ -9,7 +9,7 @@ http://yuml.me/edit/5c392db4
 
 Nouveau schema :
 
-![modele V2](http://yuml.me/edit/463ff905.svg)
+![modele V2](http://yuml.me/463ff905.svg)
 http://yuml.me/edit/463ff905
 
 ## Guide du développeur
