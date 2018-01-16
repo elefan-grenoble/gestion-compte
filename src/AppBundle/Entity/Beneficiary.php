@@ -57,12 +57,6 @@ class Beneficiary
     private $user;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Member", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="member_id", referencedColumnName="id")
-     */
-    private $member;
-
-    /**
      * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shifter",cascade={"remove"})
      */
     private $shifts;
@@ -97,20 +91,6 @@ class Beneficiary
      * @ORM\JoinTable(name="beneficiaries_roles")
      */
     private $roles;
-
-    /**
-     * One User has One Address.
-     * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
-     * @ORM\JoinColumn(name="address_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    private $address;
-
-    /**
-     * Many Users have Many clients.
-     * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
-     * @ORM\JoinTable(name="users_clients")
-     */
-    private $clients;
 
     /**
      * Get id
@@ -465,63 +445,5 @@ class Beneficiary
     public function getTasks()
     {
         return $this->tasks;
-    }
-
-    /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Address $address
-     *
-     * @return Beneficiary
-     */
-    public function setAddress(\AppBundle\Entity\Address $address = null)
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Address
-     */
-    public function getAddress()
-    {
-        return $this->address;
-    }
-
-    /**
-     * Add client
-     *
-     * @param \AppBundle\Entity\Client $client
-     *
-     * @return Beneficiary
-     */
-    public function addClient(\AppBundle\Entity\Client $client)
-    {
-        $this->clients[] = $client;
-
-        return $this;
-    }
-
-    /**
-     * Remove client
-     *
-     * @param \AppBundle\Entity\Client $client
-     */
-    public function removeClient(\AppBundle\Entity\Client $client)
-    {
-        $this->clients->removeElement($client);
-    }
-
-    /**
-     * Get clients
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getClients()
-    {
-        return $this->clients;
     }
 }

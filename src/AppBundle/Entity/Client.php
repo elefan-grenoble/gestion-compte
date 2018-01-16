@@ -25,8 +25,8 @@ class Client extends BaseClient
     private $service;
 
     /**
-     * Many Clients have Many Users (beneficiary).
-     * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="clients")
+     * Many Clients have Many Users.
+     * @ORM\ManyToMany(targetEntity="User", mappedBy="clients")
      */
     private $users;
 
@@ -73,11 +73,11 @@ class Client extends BaseClient
     /**
      * Add user
      *
-     * @param \AppBundle\Entity\Beneficiary $user
+     * @param \AppBundle\Entity\User $user
      *
      * @return Client
      */
-    public function addUser(\AppBundle\Entity\Beneficiary $user)
+    public function addUser(\AppBundle\Entity\User $user)
     {
         $this->users[] = $user;
 
@@ -87,9 +87,9 @@ class Client extends BaseClient
     /**
      * Remove user
      *
-     * @param \AppBundle\Entity\Beneficiary $user
+     * @param \AppBundle\Entity\User $user
      */
-    public function removeUser(\AppBundle\Entity\Beneficiary $user)
+    public function removeUser(\AppBundle\Entity\User $user)
     {
         $this->users->removeElement($user);
     }
