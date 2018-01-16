@@ -65,6 +65,11 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
+        if ($shift->getRemainingShifters() <= 0) {
+            $session->getFlashBag()->add("error", "Désolé, le créneau est plein");
+            return $this->redirectToRoute("booking");   
+        }
+
         $beneficiaryId = $request->get("beneficiaryId");
 
         $em = $this->getDoctrine()->getManager();
