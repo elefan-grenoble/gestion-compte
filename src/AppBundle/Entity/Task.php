@@ -346,20 +346,4 @@ class Task
     {
         return $this->closed;
     }
-
-    public function canBeEditedBy(User $user){
-        if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))
-            return true;
-        foreach ($user->getBeneficiaries() as $beneficiary){
-            if ($this->getOwners()->contains($beneficiary)){
-                return true;
-            }
-            foreach ($this->getCommissions() as $commission ){
-                if ($commission->getBeneficiaries()->contains($beneficiary)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
 }

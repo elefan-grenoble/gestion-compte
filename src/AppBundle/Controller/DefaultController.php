@@ -24,22 +24,19 @@ class DefaultController extends Controller
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            $last = $current_app_user->getLastRegistration();
-            if ($last){
-                $lastyear = new \DateTime('-1 year');
-                $interval = $lastyear->diff($last->getDate());
-                if (intval($interval->format("%R%a"))<0)
-                    $session->getFlashBag()->add('error', 'Oups, ton adhésion '.$last->getDate()->format('Y').' a expiré il y a '.$interval->format('%a jours').'... n\'oublie pas de ré-adhérer !');
-                elseif (intval($interval->format("%R%a"))<28)
-                    $session->getFlashBag()->add('warning', 'Ton adhésion '.$last->getDate()->format('Y').' expire dans '.$interval->format('%a jours').'...');
+            $remainder = $current_app_user->getRemainder();
+            if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
+                if (intval($remainder->format("%R%a"))<0)
+                    $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
+                elseif (intval($remainder->format("%R%a"))<15) //todo put this in conf
+                    $session->getFlashBag()->add('warning', 'Ton adhésion expire dans '.$remainder->format('%a jours').'...');
             }else{
                 $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
             }
         }
 
         return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-            'ip' => $request->getClientIp()
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR
         ]);
     }
 

@@ -4,15 +4,24 @@
     <h4 class="">Liste des dernières adhésions / ré-adhésions</h4>
 
     {% if is_granted("ROLE_ADMIN") %}
-        <ul class="collapsible" data-collapsible="accordion">
+
+            {% set date = null %}
             {% for registration in registrations %}
+                {% if not date or date != (registration.createdAt | date('d F Y')) %}
+                    {% if date %}
+                        </ul>
+                    {% endif %}
+                    {% set date = (registration.createdAt | date('d F Y')) %}
+                    <h5>{{ date }}</h5>
+                    <ul class="collapsible" data-collapsible="accordion">
+                {% endif %}
                 <li class="">
                     <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                             <i class="material-icons tiny">credit_card</i>
                         {% else %}
                             <i class="material-icons tiny">attach_money</i>
                         {% endif %}
-                        {{ registration.date | date('d F Y') }} {{ registration.date | date('H:i') }} {{ registration.amount }}
+                        {{ registration.amount }}
                         {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                             € en CARTE CREDIT
                         {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
@@ -23,21 +32,39 @@
                             € en CHEQUE
                         {% endif %}
                         {% if registration.registrar  %}
-                        par&nbsp<a href="{{ path("user_show",{"username":registration.registrar.username}) }}">{{ registration.registrar.username }}</a>&nbsp
+                            par&nbsp;
+                            <a href="{{ path("user_show",{"username":registration.registrar.username}) }}">{{ registration.registrar.username }}</a>
+                            &nbsp;&agrave;&nbsp;
+                            {{ registration.createdAt | date('H:i') }}
+                            &nbsp;
                         {% endif %}
                         {% if registration.user  %}
-                        pour #<a href="{{ path("user_show",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp
+                        pour #<a href="{{ path("user_show",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp;
                             {% if registration.user.mainBeneficiary %}
                                 {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
                             {% endif %}
                             {% if(registration.user.registrations | length) > 1 %}
-                                (Ré-adhésion)
+                                (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
                             {% endif %}
                         {% endif %}
                     </div>
+                    {% if is_granted("ROLE_SUPER_ADMIN") %}
+                        {% if(registration.user.registrations | length) > 1 %}
+                        <div class="collapsible-body">
+
+                            {{ form_start(delete_forms[registration.id]) }}
+                            {{ form_widget(delete_forms[registration.id]) }}
+                            <div>
+                                <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                            </div>
+                            {{ form_end(delete_forms[registration.id]) }}
+                        </div>
+                        {% endif %}
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
+                        <br>
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
                 <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1}) }}{% endif %}">

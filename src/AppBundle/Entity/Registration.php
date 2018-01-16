@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Registration
  *
  * @ORM\Table(name="registration")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\RegistrationRepository")
  */
 class Registration
@@ -32,6 +33,13 @@ class Registration
      * @ORM\Column(name="date", type="datetime")
      */
     private $date;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $created_at;
 
     /**
      * @var string
@@ -61,6 +69,15 @@ class Registration
     private $registrar;
 
     private $is_new;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->created_at = new \DateTime();
+    }
+
     /**
      * Get id
      *
@@ -206,5 +223,53 @@ class Registration
         $this->is_new = $value;
 
         return $this;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Registration
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->created_at = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    /**
+     * Set updatedAt
+     *
+     * @param \DateTime $updatedAt
+     *
+     * @return Registration
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updated_at = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
     }
 }
