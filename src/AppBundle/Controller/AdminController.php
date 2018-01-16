@@ -318,7 +318,7 @@ class AdminController extends Controller
                 }
                 $em->remove($registration);
                 $em->flush();
-                $session->getFlashBag()->add('success', 'L&rsquo;adhésion a bien été supprimée !');
+                $session->getFlashBag()->add('success', 'L\'adhésion a bien été supprimée !');
             }
         }
         return $this->redirectToRoute('admin_registrations');
