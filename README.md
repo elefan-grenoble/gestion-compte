@@ -20,6 +20,7 @@ http://yuml.me/edit/463ff905
 * [Composer](https://getcomposer.org/) installé
 * Mysql installé et configuré (ou mariadb sur Fedora)
 * php-mysql (php-pdo_mysql on Fedora)
+* php-xml
 * Créer une nouvelle base pour le projet
 
 ### Installation
