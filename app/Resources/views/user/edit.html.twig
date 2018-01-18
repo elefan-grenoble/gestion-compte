@@ -52,7 +52,7 @@
             </li>
         {% endfor %}
     </ul>
-    {#% if user.canRegister and not user == app.user %#}
+    {% if user.canRegister and user != app.user %}
     <ul class="collapsible" data-collapsible="accordion">
         <li>
             {% if not user.lastRegistration %}
@@ -67,7 +67,7 @@
             </div>
         </li>
     </ul>
-    {#% endif %#}
+    {% endif %}
 
     <h4>Bénéficiaires</h4>
     <div class="row">
