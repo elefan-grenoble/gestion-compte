@@ -20,6 +20,7 @@
     </div>
     {{ form_end(edit_form) }}
     {% if not user.isEnabled %}
+        {% if not user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
         <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
             <input type="hidden" name="username" value="{{ user.username }}" />
             <div>
@@ -28,6 +29,7 @@
                 <input type="submit" name="submit" value="Activer le compte" class="btn-large waves-effect waves-light light-green" />
             </div>
         </form>
+        {% endif %}
     {% endif %}
 
     <h4>Adhésions</h4>
