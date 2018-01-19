@@ -437,10 +437,10 @@ class UserController extends Controller
     /**
      * remove client from user
      *
-     * @Route("/{username}/remove_client/{id}", name="user_client_remove")
+     * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
      * @Method({"GET", "POST"})
      */
-    public function removeClientUserAction(Request $request,User $user,Client $client){
+    public function removeClientUserAction(User $user,$client_id){
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -449,13 +449,23 @@ class UserController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')&&($current_app_user != $user)) {
             throw $this->createAccessDeniedException();
         }
-        if ($user->getClients()->contains($client)){
-            $user->removeClient($client);
-            $this->getDoctrine()->getManager()->flush($user);
-            $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+        if ($client_id){
+            $client = $this->getDoctrine()->getManager()->getRepository('AppBundle:Client')->find($client_id);
+            if ($client->getId()){
+                if ($user->getClients()->contains($client)){
+                    $user->removeClient($client);
+                    $this->getDoctrine()->getManager()->flush($user);
+                    $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+                }else{
+                    $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+                }
+            }else{
+                $session->getFlashBag()->add('error','ce client n\'existe pas');
+            }
         }else{
-            $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+            $session->getFlashBag()->add('error','ce client n\'existe pas');
         }
+
         return $this->redirectToRoute('fos_user_profile_edit');
     }
 
