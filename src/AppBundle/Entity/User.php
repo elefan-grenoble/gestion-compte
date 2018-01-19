@@ -56,7 +56,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $lastRegistration;
 
@@ -74,7 +74,7 @@ class User extends BaseUser
     /**
      * One User has One Main Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist"})
-     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $mainBeneficiary;
 

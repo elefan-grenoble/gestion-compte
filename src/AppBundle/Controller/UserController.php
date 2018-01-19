@@ -571,17 +571,24 @@ class UserController extends Controller
      *
      * @Route("/{username}", name="user_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, User $user)
     {
         $form = $this->createDeleteForm($user);
         $form->handleRequest($request);
 
+        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $em->remove($user->getMainBeneficiary());
+            foreach ($user->getBeneficiaries() as $beneficiary){
+                $em->remove($beneficiary);
+            }
             $em->remove($user);
             $em->flush();
+
+            $session->getFlashBag()->add('success',"L'utilisateur a bien été supprimé");
         }
 
         return $this->redirectToRoute('user_index');
