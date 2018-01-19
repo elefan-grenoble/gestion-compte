@@ -257,6 +257,15 @@ class UserController extends Controller
         $session = new Session();
         $this->denyAccessUnlessGranted('edit', $user);
 
+        $re = '/(membres\+.*[0-9]+@lelefan\.org)/i';
+        $email = $user->getEmail();
+        preg_match($re, $email, $matches, PREG_OFFSET_CAPTURE, 0);
+        if (count($matches)){
+            $session->getFlashBag()->add('warning',
+                'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
+            $user->getMainBeneficiary()->setEmail('');
+        }
+
         $editForm = $this->createForm('AppBundle\Form\UserType', $user);
         $editForm->handleRequest($request);
 
