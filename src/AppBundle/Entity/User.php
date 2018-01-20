@@ -636,4 +636,11 @@ class User extends BaseUser
         $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
         return date_diff($date,$expire);
     }
+
+    public function getAutocompleteLabel(){
+        if ($this->getMainBeneficiary())
+            return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+        else
+            return '#'.$this->getMemberNumber().' '.$this->getUsername();
+    }
 }

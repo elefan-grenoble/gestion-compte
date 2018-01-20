@@ -52,17 +52,9 @@ class AdminController extends Controller
         return $this->render('admin/index.html.twig');
     }
 
-    /**
-     * Lists all user entities.
-     *
-     * @Route("/users", name="user_index")
-     * @Method({"GET","POST"})
-     */
-    public function usersAction(Request $request)
-    {
-
-        $form = $this->createFormBuilder()
-            ->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
+    public function getSearchForm(){
+        $fb =  $this->createFormBuilder();
+        $fb->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
                 'fermé' => 2,
                 'ouvert' => 1,
             )))
@@ -108,20 +100,122 @@ class AdminController extends Controller
             ->add('sort', HiddenType::class,array())
             ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
             ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
-            ->getForm();
+            ->add('mail', SubmitType::class, array('label' => 'Mail','attr' => array('class' => 'btn','value' => 'mail')));
+        return $fb->getForm();
+    }
 
-        $form->handleRequest($request);
-
+    public function initSearchQuery(){
         $em = $this->getDoctrine()->getManager();
-
-        $action = $form->get('action')->getData();
-
         $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");
-
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+        return $qb;
+    }
+
+    public function processSearchFormData($form,$qb){
+        if ($form->get('withdrawn')->getData() > 0){
+            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+        }
+        if ($form->get('enabled')->getData() > 0){
+            $qb = $qb->andWhere('o.enabled = :enabled')
+                ->setParameter('enabled', $form->get('enabled')->getData()-1);
+        }
+        if ($form->get('frozen')->getData() > 0){
+            $qb = $qb->andWhere('o.frozen = :frozen')
+                ->setParameter('frozen', $form->get('frozen')->getData()-1);
+        }
+
+        if ($form->get('registrationdate')->getData()){
+            $qb = $qb->andWhere('r.date LIKE :registrationdate')
+                ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
+        }
+        if ($form->get('registrationdategt')->getData()){
+            $qb = $qb->andWhere('r.date > :registrationdategt')
+                ->setParameter('registrationdategt', $form->get('registrationdategt')->getData());
+        }
+        if ($form->get('registrationdatelt')->getData()){
+            $qb = $qb->andWhere('r.date < :registrationdatelt')
+                ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+        }
+        if ($form->get('lastregistrationdate')->getData()){
+            $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
+                ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
+        }
+        if ($form->get('lastregistrationdategt')->getData()){
+            $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+                ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
+        }
+        if ($form->get('lastregistrationdatelt')->getData()){
+            $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
+        }
+        if ($form->get('membernumber')->getData()){
+            $qb = $qb->andWhere('o.member_number = :membernumber')
+                ->setParameter('membernumber', $form->get('membernumber')->getData());
+        }
+        if ($form->get('membernumbergt')->getData()){
+            $qb = $qb->andWhere('o.member_number > :membernumbergt')
+                ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
+        }
+        if ($form->get('membernumberlt')->getData()){
+            $qb = $qb->andWhere('o.member_number < :membernumberlt')
+                ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
+        }
+        if ($form->get('username')->getData()){
+            $qb = $qb->andWhere('o.username LIKE :username')
+                ->setParameter('username', '%'.$form->get('username')->getData().'%');
+        }
+        if ($form->get('firstname')->getData()){
+            $qb = $qb->andWhere('b.firstname LIKE :firstname')
+                ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
+        }
+        if ($form->get('lastname')->getData()){
+            $qb = $qb->andWhere('b.lastname LIKE :lastname')
+                ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
+        }
+        if ($form->get('email')->getData()){
+            $qb = $qb->andWhere('b.email LIKE :email')
+                ->setParameter('email', '%'.$form->get('email')->getData().'%');
+        }
+//            if ($form->get('last_reg')->getData()){
+//                $qb = $qb->leftJoin("o.registration", "reg")->addSelect("reg")
+//                    ->andWhere('reg.date = (:date)')
+//                    ->setParameter('date',$form->get('last_reg')->getData() );
+//            }
+        if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
+            $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro")
+                ->andWhere('ro.id IN (:ids)')
+                ->setParameter('ids',$form->get('roles')->getData() );
+        }
+        if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
+            $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
+                ->andWhere('c.id IN (:ids)')
+                ->setParameter('ids',$form->get('commissions')->getData() );
+        }
+
+        return $qb;
+    }
+
+    /**
+     * Lists all user entities.
+     *
+     * @param Request $request
+     * @return Response
+     * @Route("/users", name="user_index")
+     * @Method({"GET","POST"})
+     */
+    public function usersAction(Request $request)
+    {
+
+        $form = $this->getSearchForm();
+        $form->handleRequest($request);
+
+        $action = $form->get('action')->getData();
+
+        $qb = $this->initSearchQuery();
 
         $page = 1;
         $order = 'ASC';
@@ -139,86 +233,9 @@ class AdminController extends Controller
                 $order = $form->get('dir')->getData();
             }
 
-            if ($form->get('withdrawn')->getData() > 0){
-                $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                    ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
-            }
-            if ($form->get('enabled')->getData() > 0){
-                $qb = $qb->andWhere('o.enabled = :enabled')
-                    ->setParameter('enabled', $form->get('enabled')->getData()-1);
-            }
-            if ($form->get('frozen')->getData() > 0){
-                $qb = $qb->andWhere('o.frozen = :frozen')
-                    ->setParameter('frozen', $form->get('frozen')->getData()-1);
-            }
+            $qb = $this->processSearchFormData($form,$qb);
 
-            if ($form->get('registrationdate')->getData()){
-                $qb = $qb->andWhere('r.date LIKE :registrationdate')
-                    ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
-            }
-            if ($form->get('registrationdategt')->getData()){
-                $qb = $qb->andWhere('r.date > :registrationdategt')
-                    ->setParameter('registrationdategt', $form->get('registrationdategt')->getData());
-            }
-            if ($form->get('registrationdatelt')->getData()){
-                $qb = $qb->andWhere('r.date < :registrationdatelt')
-                    ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
-            }
-            if ($form->get('lastregistrationdate')->getData()){
-                $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
-                    ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
-            }
-            if ($form->get('lastregistrationdategt')->getData()){
-                $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
-                    ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
-            }
-            if ($form->get('lastregistrationdatelt')->getData()){
-                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
-                    ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
-            }
-            if ($form->get('membernumber')->getData()){
-                $qb = $qb->andWhere('o.member_number = :membernumber')
-                    ->setParameter('membernumber', $form->get('membernumber')->getData());
-            }
-            if ($form->get('membernumbergt')->getData()){
-                $qb = $qb->andWhere('o.member_number > :membernumbergt')
-                    ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
-            }
-            if ($form->get('membernumberlt')->getData()){
-                $qb = $qb->andWhere('o.member_number < :membernumberlt')
-                    ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
-            }
-            if ($form->get('username')->getData()){
-                $qb = $qb->andWhere('o.username LIKE :username')
-                    ->setParameter('username', '%'.$form->get('username')->getData().'%');
-            }
-            if ($form->get('firstname')->getData()){
-                $qb = $qb->andWhere('b.firstname LIKE :firstname')
-                    ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
-            }
-            if ($form->get('lastname')->getData()){
-                $qb = $qb->andWhere('b.lastname LIKE :lastname')
-                    ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
-            }
-            if ($form->get('email')->getData()){
-                $qb = $qb->andWhere('b.email LIKE :email')
-                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
-            }
-//            if ($form->get('last_reg')->getData()){
-//                $qb = $qb->leftJoin("o.registration", "reg")->addSelect("reg")
-//                    ->andWhere('reg.date = (:date)')
-//                    ->setParameter('date',$form->get('last_reg')->getData() );
-//            }
-            if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
-                $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro")
-                    ->andWhere('ro.id IN (:ids)')
-                    ->setParameter('ids',$form->get('roles')->getData() );
-            }
-            if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
-                $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
-                    ->andWhere('c.id IN (:ids)')
-                    ->setParameter('ids',$form->get('commissions')->getData() );
-            }
+
         }else{
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
@@ -232,10 +249,7 @@ class AdminController extends Controller
 
 
         $qb = $qb->orderBy($sort, $order);
-        if ($action != "csv"){
-            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-            $users = new Paginator($qb->getQuery());
-        }else{
+        if ($action == "csv"){
             $users = $qb->getQuery()->getResult();
             $return = '';
             $d = ','; // this is the default but i like to be explicit
@@ -254,6 +268,13 @@ class AdminController extends Controller
                 'Content-Type' => 'application/force-download; charset=UTF-8',
                 'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
             ));
+        }else if($action === "mail") {
+            return $this->redirectToRoute('mail_edit', [
+                'request' => $request
+            ], 307);
+        }else{
+            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+            $users = new Paginator($qb->getQuery());
         }
 
         return $this->render('admin/user/list.html.twig', array(
