@@ -10,6 +10,9 @@
     </div>
     {% if user.notes | length %}
     <h5>Note(s) à propos de ce membre</h5>
+        {%  for note in user.notes %}
+            {% include "ambassador/phone/_note.html.twig" with { note: note } %}
+        {% endfor %}
     {% endif %}
     {% if is_granted("ROLE_ADMIN") %}
         <h5>Actions admin</h5>
