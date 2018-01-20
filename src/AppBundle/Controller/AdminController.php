@@ -80,6 +80,10 @@ class AdminController extends Controller
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
             ->add('email', TextType::class, array('label' => 'email','required' => false))
 //            ->add('last_reg', DateType::class, array('label' => 'adhésion','required' => false))
+            ->add('phone', ChoiceType::class, array('label' => 'téléphone','required' => false,'choices'  => array(
+                'Renseigné' => 2,
+                'Non renseigné' => 1,
+            )))
             ->add('roles',EntityType::class, array(
                 'class' => 'AppBundle:Role',
                 'choice_label'     => 'name',
@@ -126,6 +130,14 @@ class AdminController extends Controller
         if ($form->get('frozen')->getData() > 0){
             $qb = $qb->andWhere('o.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
+        }
+
+        if ($form->get('phone')->getData() > 0){
+            if ($form->get('phone')->getData() == 1) { //non renseigné
+                $qb = $qb->andWhere('b.phone < 100000000');
+            }else{
+                $qb = $qb->andWhere('b.phone > 100000000');
+            }
         }
 
         if ($form->get('registrationdate')->getData()){
