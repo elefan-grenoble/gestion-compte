@@ -207,33 +207,25 @@ class AdminController extends Controller
                 ->setParameter('email', '%'.$form->get('email')->getData().'%');
         }
 
-        $role_left_join = false;
-        $commission_left_join = false;
         if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
             $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro")
                 ->andWhere('ro.id IN (:rids)')
                 ->setParameter('rids',$form->get('roles')->getData() );
-            $role_left_join = true;
         }
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
             $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
                 ->andWhere('c.id IN (:cids)')
                 ->setParameter('cids',$form->get('commissions')->getData() );
-            $commission_left_join = true;
         }
         if ($form->get('not_roles')->getData() && count($form->get('not_roles')->getData())){
-            if (!$role_left_join){
-                $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro");
-            }
-            $qb = $qb->andWhere('ro.id NOT IN (:nrids)')
+            $qb = $qb->leftJoin("b.roles", "nro")->addSelect("nro")
+                ->andWhere('nro.id NOT IN (:nrids)')
                 ->setParameter('nrids',$form->get('not_roles')->getData() );
 
         }
         if ($form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())){
-            if (!$commission_left_join){
-                $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c");
-            }
-            $qb = $qb->andWhere('c.id NOT IN (:ncids)')
+            $qb = $qb->leftJoin("b.commissions", "nc")->addSelect("nc")
+                ->andWhere('nc.id NOT IN (:ncids)')
                 ->setParameter('ncids',$form->get('not_commissions')->getData() );
         }
 
