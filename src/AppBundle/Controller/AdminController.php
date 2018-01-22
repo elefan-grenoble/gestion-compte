@@ -10,6 +10,7 @@ use AppBundle\Entity\Role;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -207,34 +208,48 @@ class AdminController extends Controller
                 ->setParameter('email', '%'.$form->get('email')->getData().'%');
         }
 
-        $role_join = false;
-        $commission_join = false;
+        $join_roles = false;
         if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
-            $qb = $qb->join("b.roles", "ro")->addSelect("ro")
+            $qb = $qb->leftjoin("b.roles", "ro")->addSelect("ro")
                 ->andWhere('ro.id IN (:rids)')
                 ->setParameter('rids',$form->get('roles')->getData() );
-            $role_join = true;
+            $join_roles = true;
         }
+        $join_commissions = false;
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
-            $qb = $qb->join("b.commissions", "c")->addSelect("c")
+            $qb = $qb->leftjoin("b.commissions", "c")->addSelect("c")
                 ->andWhere('c.id IN (:cids)')
                 ->setParameter('cids',$form->get('commissions')->getData() );
-            $commission_join = true;
+            $join_commissions = true;
         }
         if ($form->get('not_roles')->getData() && count($form->get('not_roles')->getData())){
-            if (!$role_join){
-                $qb = $qb->join("b.roles", "ro")->addSelect("ro");
+            $nrqb = clone $qb;
+            if (!$join_roles){
+                $nrqb = $nrqb->leftjoin("b.roles", "ro")->addSelect("ro")
+                    ->andWhere('ro.id IN (:rids)');
             }
-            $qb = $qb->andWhere('ro.id NOT IN (:nrids)')
-                ->setParameter('nrids',$form->get('not_roles')->getData() );
+            $nrqb->setParameter('rids',$form->get('not_roles')->getData() );
+            $subQuery = $nrqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+
+            if (count($subQuery)){
+                $qb = $qb->andWhere('o.id NOT IN (:subQueryRoles)')
+                    ->setParameter('subQueryRoles', $subQuery);
+            }
 
         }
         if ($form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())){
-            if (!$commission_join){
-                $qb = $qb->join("b.commissions", "c")->addSelect("c");
+            $ncqb = clone $qb;
+            if (!$join_commissions){
+                $ncqb = $ncqb->leftjoin("b.commissions", "c")->addSelect("c")
+                        ->andWhere('c.id IN (:cids)');
             }
-            $qb = $qb->andWhere('c.id NOT IN (:ncids)')
-                ->setParameter('ncids',$form->get('not_commissions')->getData() );
+            $ncqb->setParameter('cids',$form->get('not_commissions')->getData() );
+            $subQuery = $ncqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+
+            if (count($subQuery)){
+                $qb = $qb->andWhere('o.id NOT IN (:subQueryRoles)')
+                    ->setParameter('subQueryRoles', $subQuery);
+            }
         }
 
         return $qb;
