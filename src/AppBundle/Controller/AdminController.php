@@ -89,14 +89,28 @@ class AdminController extends Controller
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
-                'label'=>'Role(s)'
+                'label'=>'Avec le(s) Role(s)'
             ))
             ->add('commissions',EntityType::class, array(
                 'class' => 'AppBundle:Commission',
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
-                'label'=>'Commissions(s)'
+                'label'=>'Dans la/les commissions(s)'
+            ))
+            ->add('not_roles',EntityType::class, array(
+                'class' => 'AppBundle:Role',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Sans le(s) Role(s)'
+            ))
+            ->add('not_commissions',EntityType::class, array(
+                'class' => 'AppBundle:Commission',
+                'choice_label'     => 'name',
+                'multiple'     => true,
+                'required' => false,
+                'label'=>'Hors de la/les Commissions(s)'
             ))
             ->add('action', HiddenType::class,array())
             ->add('page', HiddenType::class,array())
@@ -192,20 +206,35 @@ class AdminController extends Controller
             $qb = $qb->andWhere('b.email LIKE :email')
                 ->setParameter('email', '%'.$form->get('email')->getData().'%');
         }
-//            if ($form->get('last_reg')->getData()){
-//                $qb = $qb->leftJoin("o.registration", "reg")->addSelect("reg")
-//                    ->andWhere('reg.date = (:date)')
-//                    ->setParameter('date',$form->get('last_reg')->getData() );
-//            }
+
+        $role_left_join = false;
+        $commission_left_join = false;
         if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
             $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro")
-                ->andWhere('ro.id IN (:ids)')
-                ->setParameter('ids',$form->get('roles')->getData() );
+                ->andWhere('ro.id IN (:rids)')
+                ->setParameter('rids',$form->get('roles')->getData() );
+            $role_left_join = true;
         }
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){
             $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c")
-                ->andWhere('c.id IN (:ids)')
-                ->setParameter('ids',$form->get('commissions')->getData() );
+                ->andWhere('c.id IN (:cids)')
+                ->setParameter('cids',$form->get('commissions')->getData() );
+            $commission_left_join = true;
+        }
+        if ($form->get('not_roles')->getData() && count($form->get('not_roles')->getData())){
+            if (!$role_left_join){
+                $qb = $qb->leftJoin("b.roles", "ro")->addSelect("ro");
+            }
+            $qb = $qb->andWhere('ro.id NOT IN (:nrids)')
+                ->setParameter('nrids',$form->get('not_roles')->getData() );
+
+        }
+        if ($form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())){
+            if (!$commission_left_join){
+                $qb = $qb->leftJoin("b.commissions", "c")->addSelect("c");
+            }
+            $qb = $qb->andWhere('c.id NOT IN (:ncids)')
+                ->setParameter('ncids',$form->get('not_commissions')->getData() );
         }
 
         return $qb;

@@ -133,6 +133,17 @@
                             </div>
                         </div>
                         <div>
+                            <h5>!Roles / !Commissions</h5>
+                            <div class="input-field">
+                                {{ form_widget(form.not_roles) }}
+                                {{ form_label(form.not_roles) }}
+                            </div>
+                            <div class="input-field">
+                                {{ form_widget(form.not_commissions) }}
+                                {{ form_label(form.not_commissions) }}
+                            </div>
+                        </div>
+                        <div>
                             <h5>Actions</h5>
                             {{ form_widget(form.submit) }}
                             {{ form_widget(form.csv) }}
