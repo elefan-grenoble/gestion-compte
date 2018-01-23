@@ -220,20 +220,18 @@ class AdminController extends Controller
                 foreach ($roles as $role){
                     $tmp_qb = clone $qb;
                     $tmp_qb = $tmp_qb->leftjoin("b.roles", "ro")->addSelect("ro")
-                        ->andWhere('ro.id = (:rid)')
+                        ->andWhere('ro.id IN (:rid)')
                         ->setParameter('rid',$role );
                     $ids_groups[] = $tmp_qb->select('DISTINCT o.id')->getQuery()->getArrayResult();
                 }
                 $ids = $ids_groups[0];
-                for( $i= 1; $i < count($ids_groups); $i++){
-                    $ids =  array_uintersect($ids,$ids_groups[$i],function ($v1,$v2)
-                    {
-                        if ($v1['id']===$v2['id'])
-                        {
-                            return 0;
+                for( $i= 1; $i < count($ids_groups); $i++) {
+                    foreach ($ids_groups[$i] as $j => $array) {
+                        if (!in_array($array, $ids)) {
+                            unset($ids_groups[$i][$j]);
                         }
-                        return 1;
-                    });
+                    }
+                    $ids = $ids_groups[$i];
                 }
                 $qb = $qb->andWhere('o.id IN (:all_roles)')
                         ->setParameter('all_roles', $ids);
