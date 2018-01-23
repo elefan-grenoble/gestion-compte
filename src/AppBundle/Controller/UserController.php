@@ -283,13 +283,13 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
-            if ($phone){
+//            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
+//            if ($phone){
                 $em->flush();
                 $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            }else{
-                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
-            }
+//            }else{
+//                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
+//            }
             return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
