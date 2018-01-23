@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use Metadata\Tests\Driver\Fixture\C\SubDir\C;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -21,6 +22,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class MailController extends Controller
 {
+    protected $_emails;
+
+    //todo put this in conf
+    function init()
+    {
+        $this->_emails = array(
+            "Gestion des membres" => "membres@lelefan.org",
+            "Gestion des créneaux" => "creneaux@lelefan.org",
+            "Association l'éléfàn" => "contact@lelefan.org"
+        );
+    }
+
     /**
      * Edit a message
      *
@@ -74,12 +87,23 @@ class MailController extends Controller
             $em = $this->getDoctrine()->getManager();
             $users = $em->getRepository('AppBundle:User')->findBy(array('member_number'=>$members_numbers));
             $nb = 0;
+
+            $from_email = $mailform->get('from')->getData();
+            $from = '';
+            if (in_array($from_email,$this->_emails)){
+                $from = array($from_email => array_search($from_email, $this->_emails));
+            }else{
+                //email not listed !
+                $session->getFlashBag()->add('error','cet email n\'est pas autorisé !');
+                return $this->redirectToRoute('mail_edit');
+            }
+
             foreach ($users as $user){
                 $template = $this->get('twig')->createTemplate($mailform->get('message')->getData());
                 $body = $template->render(array('user' => $user));
                 $message = (new \Swift_Message($mailform->get('subject')->getData()))
-                    ->setFrom('membres@lelefan.org')
-                    ->setTo($user->getEmail())
+                    ->setFrom($from)
+                    ->setTo([$user->getEmail() => $user->getFirstname().' '.$user->getLastname()])
                     ->addPart(
                         $body,
                         'text/plain'
@@ -112,9 +136,11 @@ class MailController extends Controller
     }
 
     private function getMailForm(){
+        $this->init();
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
+            ->add('from', ChoiceType::class, array('label' => 'depuis','required' => true, 'choices' => $this->_emails))
             ->add('to', HiddenType::class, array('label' => 'à','required' => true))
             ->add('subject', TextType::class, array('label' => 'sujet','required' => true))
             ->add('message', TextareaType::class, array('label' => 'message','required' => true,'attr'=>array('class'=>'materialize-textarea')))

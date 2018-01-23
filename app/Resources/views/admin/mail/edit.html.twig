@@ -4,6 +4,10 @@
 {{ form_start(form) }}
 
     <div class="row">
+        <div class="input-field col s12">
+            {{ form_widget(form.from) }}
+            {{ form_label(form.from) }}
+        </div>
         <div class="col s12">
             <div class="chips ">
                 {% for t in to %}
@@ -21,6 +25,9 @@
         <div class="input-field col s12">
             {{ form_widget(form.message) }}
             {{ form_label(form.message) }}
+        </div>
+        <div class="tips right small">
+            prénom : {{ '{{' }} user.firstname {{ '}}' }}
         </div>
     </div>
 
