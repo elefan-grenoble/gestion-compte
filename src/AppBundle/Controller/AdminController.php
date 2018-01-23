@@ -92,6 +92,10 @@ class AdminController extends Controller
                 'required' => false,
                 'label'=>'Avec le(s) Role(s)'
             ))
+            ->add('or_and_exp_roles', ChoiceType::class, array('label' => 'Tous ?','required' => true,'choices'  => array(
+                'Au moins un role' => 1,
+                'Tous ces roles' => 2,
+            )))
             ->add('commissions',EntityType::class, array(
                 'class' => 'AppBundle:Commission',
                 'choice_label'     => 'name',
@@ -210,10 +214,35 @@ class AdminController extends Controller
 
         $join_roles = false;
         if ($form->get('roles')->getData() && count($form->get('roles')->getData())){
-            $qb = $qb->leftjoin("b.roles", "ro")->addSelect("ro")
-                ->andWhere('ro.id IN (:rids)')
-                ->setParameter('rids',$form->get('roles')->getData() );
-            $join_roles = true;
+            if (($form->get('or_and_exp_roles')->getData() > 1) && (count($form->get('roles')->getData()) > 1)){ //AND not OR
+                $roles = $form->get('roles')->getData();
+                $ids_groups = array();
+                foreach ($roles as $role){
+                    $tmp_qb = clone $qb;
+                    $tmp_qb = $tmp_qb->leftjoin("b.roles", "ro")->addSelect("ro")
+                        ->andWhere('ro.id = (:rid)')
+                        ->setParameter('rid',$role );
+                    $ids_groups[] = $tmp_qb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+                }
+                $ids = $ids_groups[0];
+                for( $i= 1; $i < count($ids_groups); $i++){
+                    $ids =  array_uintersect($ids,$ids_groups[$i],function ($v1,$v2)
+                    {
+                        if ($v1['id']===$v2['id'])
+                        {
+                            return 0;
+                        }
+                        return 1;
+                    });
+                }
+                $qb = $qb->andWhere('o.id IN (:all_roles)')
+                        ->setParameter('all_roles', $ids);
+            }else{
+                $qb = $qb->leftjoin("b.roles", "ro")->addSelect("ro")
+                    ->andWhere('ro.id IN (:rids)')
+                    ->setParameter('rids',$form->get('roles')->getData() );
+                $join_roles = true;
+            }
         }
         $join_commissions = false;
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())){

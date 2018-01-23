@@ -123,9 +123,15 @@
                     <div class="col s12 m4">
                         <div>
                             <h5>Roles / Commissions</h5>
-                            <div class="input-field">
-                                {{ form_widget(form.roles) }}
-                                {{ form_label(form.roles) }}
+                            <div class="row">
+                                <div class="input-field col s6">
+                                    {{ form_widget(form.roles) }}
+                                    {{ form_label(form.roles) }}
+                                </div>
+                                <div class="col s6 input-field">
+                                    {{ form_widget(form.or_and_exp_roles) }}
+                                    {{ form_label(form.or_and_exp_roles) }}
+                                </div>
                             </div>
                             <div class="input-field">
                                 {{ form_widget(form.commissions) }}
