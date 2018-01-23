@@ -28,6 +28,9 @@ class BookingController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
 
@@ -45,10 +48,18 @@ class BookingController extends Controller
             $shiftsByDay[$day][] = $shift;
         }
 
+        $first = $em->getRepository('AppBundle:BookedShift')->findFirst($current_app_user);
+        if ($first) {
+            $now = new DateTime('now');
+            $diff = $first->getShift()->getStart()->diff($now);
+            $modFirst = $diff->format('%a') % 28;
+        }
         return $this->render('booking/index.html.twig', [
             'shiftsByDay' => $shiftsByDay,
-            'hours' => $hours
-        ]);
+            'hours' => $hours,
+            'first' => $first,
+            'modFirst' => $modFirst
+        ]);  
     }
 
     /**
@@ -63,6 +74,11 @@ class BookingController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
+        }
+
+        if ($shift->getRemainingShifters() <= 0) {
+            $session->getFlashBag()->add("error", "Désolé, le créneau est plein");
+            return $this->redirectToRoute("booking");   
         }
 
         $beneficiaryId = $request->get("beneficiaryId");

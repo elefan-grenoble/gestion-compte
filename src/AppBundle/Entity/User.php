@@ -605,7 +605,7 @@ class User extends BaseUser
 
     public function needToBookAShift()
     {
-        return $this->remainingToBook() > 0;
+	    return $this->remainingToBook() > 0;
     }
 
     // TODO Date à calculer à partir de la date de réfèrence en base
