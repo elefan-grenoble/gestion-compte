@@ -49,6 +49,7 @@ class BookingController extends Controller
         }
 
         $first = $em->getRepository('AppBundle:BookedShift')->findFirst($current_app_user);
+        $modFirst = null;
         if ($first) {
             $now = new DateTime('now');
             $diff = $first->getShift()->getStart()->diff($now);
