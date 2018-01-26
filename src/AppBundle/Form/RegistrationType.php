@@ -79,7 +79,7 @@ class RegistrationType extends AbstractType
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
                     'Cairn' => Registration::TYPE_LOCAL,
-                    'CB' => Registration::TYPE_CREDIT_CARD,
+//                    'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
         });
 
