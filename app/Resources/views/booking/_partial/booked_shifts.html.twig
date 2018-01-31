@@ -39,7 +39,7 @@
 
 {% endfor %}
 {% if (app.user.needToBookAShift()) %}
-    <p>Je dois encore effectuer un total de {{ app.user.remainingToBook() }} minutes de créneaux avant
-        le {{ app.user.endOfCycle()|date('l jS \of F Y h:i:s A') }}</p>
+    <p>J'ai {{ app.user.remainingToBook()|duration_from_minutes }} de bénévolat à faire avant
+        le {{ app.user.endOfCycle()|date_fr_long }}</p>
     <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
 {% endif %}

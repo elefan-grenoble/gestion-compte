@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Twig\Extension;
 
+use DateInterval;
 use AppBundle\Entity\Task;
 use Michelf\Markdown;
 
@@ -13,6 +14,7 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
             new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
+            new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
         );
     }
 
@@ -78,5 +80,10 @@ class AppExtension extends \Twig_Extension
     {
         setlocale(LC_TIME, "fr_FR");
         return strftime("%A %e %B", $date->getTimestamp());
+    }
+
+    public function duration_from_minutes(int $minutes)
+    {
+        return date("G\hi", $minutes * 60);
     }
 }
