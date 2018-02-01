@@ -176,6 +176,13 @@ class Shift
         return $diff->h * 60 + $diff->i;
     }
 
+    public function isBookedBy($userId)
+    {
+        return $this->getBookedShifts()->filter(function($shift) use ($userId) {
+            return $shift->getShifter()->getUser()->getId() == $userId;
+        })->count() > 0;
+    }
+
     public function getDismissedShifts()
     {
         return $this->getBookedShifts()->filter(function($shift) {
