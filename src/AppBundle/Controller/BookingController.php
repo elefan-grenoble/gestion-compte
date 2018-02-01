@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use DateTime;
+use DateInterval;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Date;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -48,18 +49,62 @@ class BookingController extends Controller
             $shiftsByDay[$day][] = $shift;
         }
 
+
+/* A SUPPRIMER */
+        /* Modulo first shift */
         $first = $em->getRepository('AppBundle:BookedShift')->findFirst($current_app_user);
         $modFirst = null;
         if ($first) {
             $now = new DateTime('now');
-            $diff = $first->getShift()->getStart()->diff($now);
+            $diff = $first->getShift()->getStart()->diff($now);           
             $modFirst = $diff->format('%a') % 28;
+        } 
+        
+        /* Current cycle */             
+        $startCurrCycle = null;
+        if ($modFirst) {
+            /* Exception if first cycle in the future */          
+            if ($first->getShift()->getStart() < $now) {
+            	 $deltaModDay = new DateInterval("P".$modFirst."D");
+            	 $startCurrCycle = clone($now);           
+                $startCurrCycle->sub($deltaModDay);
+            }
+            else {
+            	 $startCurrCycle = $first->getShift()->getStart();
+            }
         }
+        
+        $endCurrCycle = null;
+        if ($startCurrCycle) {
+        	   $delta28Day = new DateInterval("P28D");
+            $endCurrCycle = clone($startCurrCycle);
+            $endCurrCycle->add($delta28Day);
+        }
+        
+        /* Next cycle */
+        $startNextCycle = null;
+        if ($endCurrCycle) {
+        	   $delta1Day = new DateInterval("P1D");
+            $startNextCycle = clone($endCurrCycle);     
+            $startNextCycle->add($delta1Day);
+        }
+        
+        $endNextCycle = null;
+        if ($startNextCycle) {
+            $endNextCycle = clone($startNextCycle);
+            $endNextCycle->add($delta28Day);
+        }
+/* A SUPPRIMER */
+
         return $this->render('booking/index.html.twig', [
             'shiftsByDay' => $shiftsByDay,
             'hours' => $hours,
             'first' => $first,
-            'modFirst' => $modFirst
+            'modFirst' => $modFirst,
+            'startCurrCycle' => $startCurrCycle,
+            'endCurrCycle' => $endCurrCycle,
+            'startNextCycle' => $startNextCycle,
+            'endNextCycle' => $endNextCycle
         ]);  
     }
 

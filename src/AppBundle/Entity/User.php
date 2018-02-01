@@ -3,7 +3,7 @@
 
 namespace AppBundle\Entity;
 
-use DateTime;
+use DateTime, DateInterval;
 use AppBundle\Repository\RegistrationRepository;
 use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
@@ -570,7 +570,6 @@ class User extends BaseUser
 
     public function getCycleShiftsDuration()
     {
-        // TODO Prendre en compte les cycles
         $duration = 0;
         foreach ($this->getCycleShifts() as $shift) {
             $duration += $shift->getShift()->getDuration();
@@ -620,16 +619,40 @@ class User extends BaseUser
 	    return $this->remainingToBook() > 0;
     }
 
-    // TODO Date à calculer à partir de la date de réfèrence en base
     public function startOfCycle()
     {
-        return DateTime::createFromFormat('j-M-Y', '15-Dec-2017');
+    	  $first = $this->getFirstShift();
+        $modFirst = null;
+        if ($first) {  	  
+    	  		$now = new DateTime('now');
+            $diff = $first->getShift()->getStart()->diff($now);           
+            $modFirst = $diff->format('%a') % 28;
+        }
+        $startCurrCycle = null;
+        if ($modFirst) {
+            /* Exception if first cycle in the future */          
+            if ($first->getShift()->getStart() < $now) {
+            	 $deltaModDay = new DateInterval("P".$modFirst."D");
+            	 $startCurrCycle = clone($now);           
+                $startCurrCycle->sub($deltaModDay);
+            }
+            else {
+            	 $startCurrCycle = $first->getShift()->getStart();
+            }
+        }
+        return $startCurrCycle;
     }
-
-    // TODO Date à calculer à partir de la date de réfèrence en base
+    
     public function endOfCycle()
     {
-        return DateTime::createFromFormat('j-M-Y', '15-Jan-2018');
+    	  $endCurrCycle = null;
+    	  $startCurrCycle = $this->startOfCycle();
+        if ($startCurrCycle) {
+        	   $delta28Day = new DateInterval("P28D");
+            $endCurrCycle = clone($startCurrCycle);
+            $endCurrCycle->add($delta28Day);
+        }
+        return $endCurrCycle;
     }
 
     // TODO Valeur à mettre dans une conf
