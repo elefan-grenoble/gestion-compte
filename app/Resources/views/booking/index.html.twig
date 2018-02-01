@@ -2,9 +2,11 @@
 
 {% block content %}
 <div class="row"><label>Premier créneau: </label>{% if (first) %}{{ first.getShift().start|date('d/m/Y H:i') }}{% else %}N/A{% endif %}</div>
+<div class="row"><label>Premier créneau bis: </label>{% if (app.user.firstShift()) %}{{ app.user.firstShift().shift.start|date('d/m/Y H:i') }}{% else %}N/A{% endif %}</div>
 <div class="row"><label>Jour du cycle: </label>{{ modFirst }}</div>
 <div class="row"><label>Début du cycle en cours: </label></div>
 <div class="row"><label>Fin du cycle en cours: </label></div>
+<div class="row"><label>Restant à réserver: </label>{{ app.user.remainingToBook() }}</div>
 <div class="row"><label>Réservé sur le cycle en cours: </label></div>
 <div class="row"><label>Début du prochain cycle: </label></div>
 <div class="row"><label>Fin du prochain cycle: </label></div>

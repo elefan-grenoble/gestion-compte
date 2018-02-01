@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 
 use DateTime;
 use AppBundle\Repository\RegistrationRepository;
+use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
@@ -588,6 +589,17 @@ class User extends BaseUser
         return $shifts;
     }
 
+    public function getAllBookedShifts()
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getBookedShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
+    }
+
     public function getCycleShifts()
     {
         return $this->getAllShifts()->filter(function($shift) {
@@ -628,6 +640,17 @@ class User extends BaseUser
 
     public function remainingToBook() {
         return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration();
+    }
+
+    public function getFirstShift()
+    {
+        $first = null;
+        foreach ($this->getAllBookedShifts() as $shift) {
+            if (!$first || $shift->getShift()->getStart() < $first->getShift()->getStart()) {
+                $first = $shift;
+            }
+        };
+        return $first;
     }
 
 }
