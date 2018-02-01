@@ -3,7 +3,7 @@
 
 namespace AppBundle\Entity;
 
-use DateTime, DateInterval;
+use DateTime;
 use AppBundle\Repository\RegistrationRepository;
 use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
@@ -632,9 +632,8 @@ class User extends BaseUser
         if ($modFirst) {
             /* Exception if first cycle in the future */          
             if ($first->getShift()->getStart() < $now) {
-            	 $deltaModDay = new DateInterval("P".$modFirst."D");
             	 $startCurrCycle = clone($now);           
-                $startCurrCycle->sub($deltaModDay);
+                $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
             	 $startCurrCycle = $first->getShift()->getStart();
@@ -648,11 +647,32 @@ class User extends BaseUser
     	  $endCurrCycle = null;
     	  $startCurrCycle = $this->startOfCycle();
         if ($startCurrCycle) {
-        	   $delta28Day = new DateInterval("P28D");
             $endCurrCycle = clone($startCurrCycle);
-            $endCurrCycle->add($delta28Day);
+            $endCurrCycle->modify("+28 days");
         }
         return $endCurrCycle;
+    }
+    
+    public function startOfNextCycle()
+    {
+        $startNextCycle = null;
+        $endCurrCycle = $this->endOfCycle();
+        if ($endCurrCycle) {
+            $startNextCycle = clone($endCurrCycle);     
+            $startNextCycle->modify("+1 day");
+        }
+        return $startNextCycle;
+    }
+    
+    public function endOfNextCycle()
+    {
+    	  $endNextCycle = null;
+    	  $startNextCycle = $this->startOfNextCycle();
+        if ($startNextCycle) {
+            $endNextCycle = clone($startNextCycle);
+            $endNextCycle->modify("+28 days");
+        }
+        return $endNextCycle;
     }
 
     // TODO Valeur à mettre dans une conf
