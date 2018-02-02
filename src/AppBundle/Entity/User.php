@@ -624,7 +624,7 @@ class User extends BaseUser
     	  $first = $this->getFirstShift();
         $modFirst = null;
         if ($first) {  	  
-    	  		$now = new DateTime('now');
+    	  	$now = new DateTime('now');
             $diff = $first->getShift()->getStart()->diff($now);           
             $modFirst = $diff->format('%a') % 28;
         }
