@@ -568,6 +568,9 @@ class User extends BaseUser
         return $this->clients;
     }
 
+    /**
+     * Get total shift duration for current cycle
+     */
     public function getCycleShiftsDuration()
     {
         $duration = 0;
@@ -577,6 +580,9 @@ class User extends BaseUser
         return $duration;
     }
 
+    /**
+     * Get all shifts for all beneficiaries
+     */
     public function getAllShifts()
     {
         $shifts = new ArrayCollection();
@@ -588,6 +594,9 @@ class User extends BaseUser
         return $shifts;
     }
 
+    /**
+     * Get all booked shifts for all beneficiaries
+     */
     public function getAllBookedShifts()
     {
         $shifts = new ArrayCollection();
@@ -599,6 +608,9 @@ class User extends BaseUser
         return $shifts;
     }
 
+    /**
+     * Get shifts in the current cycle
+     */
     public function getCycleShifts()
     {
         return $this->getAllShifts()->filter(function($shift) {
@@ -607,6 +619,10 @@ class User extends BaseUser
         });
     }
 
+    /**
+     * Get all shifts in the future
+     * TODO Fonction utilisée ???
+     */
     public function getFutureShifts()
     {
         return $this->getAllShifts()->filter(function($shift) {
@@ -619,6 +635,9 @@ class User extends BaseUser
 	    return $this->remainingToBook() > 0;
     }
 
+    /**
+     * Get start date of current cycle
+     */
     public function startOfCycle()
     {
         $first = $this->getFirstShift();
@@ -636,12 +655,17 @@ class User extends BaseUser
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
-            	 $startCurrCycle = $first->getShift()->getStart();
+            	 $startCurrCycle = clone($first->getShift()->getStart());
             }
+            /* Reset time, keep only date */
+            $startCurrCycle->setTime(0, 0, 0);
         }
         return $startCurrCycle;
     }
     
+    /**
+     * Get end date of current cycle
+     */
     public function endOfCycle()
     {
         $endCurrCycle = null;
@@ -653,6 +677,9 @@ class User extends BaseUser
         return $endCurrCycle;
     }
     
+    /**
+     * Get start date of next cycle
+     */
     public function startOfNextCycle()
     {
         $startNextCycle = null;
@@ -664,6 +691,9 @@ class User extends BaseUser
         return $startNextCycle;
     }
     
+    /**
+     * Get end date of next cycle
+     */
     public function endOfNextCycle()
     {
     	  $endNextCycle = null;
@@ -675,16 +705,25 @@ class User extends BaseUser
         return $endNextCycle;
     }
 
+    /**
+     * Get total shift time for a cycle
+     */
     // TODO Valeur à mettre dans une conf
     public function shiftTimeByCycle()
     {
         return 60 * 3;
     }
 
+    /**
+     * Get remaining time to book
+     */
     public function remainingToBook() {
         return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration();
     }
 
+    /**
+     * Get first shift ever
+     */
     public function getFirstShift()
     {
         $first = null;
@@ -695,5 +734,4 @@ class User extends BaseUser
         };
         return $first;
     }
-
 }

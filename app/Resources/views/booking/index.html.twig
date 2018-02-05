@@ -5,7 +5,7 @@
 <div class="row"><label>Début du cycle en cours: </label>{{ app.user.startOfCycle()|date('d/m/Y') }}</div>
 <div class="row"><label>Fin du cycle en cours: </label>{{ app.user.endOfCycle()|date('d/m/Y') }}</div>
 <div class="row"><label>Restant à réserver: </label>{{ app.user.remainingToBook() }}</div>
-<div class="row"><label>Réservé sur le cycle en cours: </label></div>
+<div class="row"><label>Réservé sur le cycle en cours: </label>{{ app.user.cycleShiftsDuration }}</div>
 <div class="row"><label>Début du prochain cycle: </label>{{ app.user.startOfNextCycle|date('d/m/Y') }}</div>
 <div class="row"><label>Fin du prochain cycle: </label>{{ app.user.endOfNextCycle|date('d/m/Y') }}</div>
 

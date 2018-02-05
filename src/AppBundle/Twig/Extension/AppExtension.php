@@ -84,6 +84,6 @@ class AppExtension extends \Twig_Extension
 
     public function duration_from_minutes(int $minutes)
     {
-        return date("G\hi", $minutes * 60);
+        return date("G\hi", ($minutes - 60) * 60);
     }
 }
