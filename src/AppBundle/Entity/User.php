@@ -621,10 +621,10 @@ class User extends BaseUser
 
     public function startOfCycle()
     {
-    	  $first = $this->getFirstShift();
+        $first = $this->getFirstShift();
         $modFirst = null;
         if ($first) {  	  
-    	  	$now = new DateTime('now');
+            $now = new DateTime('now');
             $diff = $first->getShift()->getStart()->diff($now);           
             $modFirst = $diff->format('%a') % 28;
         }
@@ -632,7 +632,7 @@ class User extends BaseUser
         if ($modFirst) {
             /* Exception if first cycle in the future */          
             if ($first->getShift()->getStart() < $now) {
-            	 $startCurrCycle = clone($now);           
+                $startCurrCycle = clone($now);           
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
@@ -644,8 +644,8 @@ class User extends BaseUser
     
     public function endOfCycle()
     {
-    	  $endCurrCycle = null;
-    	  $startCurrCycle = $this->startOfCycle();
+        $endCurrCycle = null;
+        $startCurrCycle = $this->startOfCycle();
         if ($startCurrCycle) {
             $endCurrCycle = clone($startCurrCycle);
             $endCurrCycle->modify("+28 days");
