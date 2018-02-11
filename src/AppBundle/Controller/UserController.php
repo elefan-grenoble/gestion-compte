@@ -518,17 +518,8 @@ class UserController extends Controller
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
-        }
+
+        $this->denyAccessUnlessGranted('edit', $beneficiary->getUser());
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
