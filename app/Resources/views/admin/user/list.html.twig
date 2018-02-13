@@ -114,13 +114,24 @@
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
                         </div>
+                        <div class="">
+                            Téléphone :
+                            {{ form_widget(form.phone) }}
+                            {{ form_label(form.phone) }}
+                        </div>
                     </div>
                     <div class="col s12 m4">
                         <div>
                             <h5>Roles / Commissions</h5>
-                            <div class="input-field">
-                                {{ form_widget(form.roles) }}
-                                {{ form_label(form.roles) }}
+                            <div class="row">
+                                <div class="input-field col s6">
+                                    {{ form_widget(form.roles) }}
+                                    {{ form_label(form.roles) }}
+                                </div>
+                                <div class="col s6 input-field">
+                                    {{ form_widget(form.or_and_exp_roles) }}
+                                    {{ form_label(form.or_and_exp_roles) }}
+                                </div>
                             </div>
                             <div class="input-field">
                                 {{ form_widget(form.commissions) }}
@@ -128,9 +139,21 @@
                             </div>
                         </div>
                         <div>
+                            <h5>!Roles / !Commissions</h5>
+                            <div class="input-field">
+                                {{ form_widget(form.not_roles) }}
+                                {{ form_label(form.not_roles) }}
+                            </div>
+                            <div class="input-field">
+                                {{ form_widget(form.not_commissions) }}
+                                {{ form_label(form.not_commissions) }}
+                            </div>
+                        </div>
+                        <div>
                             <h5>Actions</h5>
                             {{ form_widget(form.submit) }}
                             {{ form_widget(form.csv) }}
+                            {{ form_widget(form.mail) }}
                         </div>
                     </div>
                 </div>
