@@ -85,7 +85,6 @@ class BookingController extends Controller
             $bookedShift->setShift($shift);
             $bookedShift->setBookedTime(new DateTime('now'));
         }
-        $bookedShift->setBooker($beneficiary);
         $bookedShift->setShifter($current_app_user->getMainBeneficiary());
         $bookedShift->setIsDismissed(false);
         $bookedShift->setDismissedReason(null);
@@ -111,7 +110,7 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        if (!$current_app_user->getBeneficiaries()->contains($shift->getBooker())) {
+        if (!$current_app_user->getBeneficiaries()->contains($shift->getShifter())) {
             $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
             return $this->redirectToRoute('booking');
         }
@@ -121,6 +120,7 @@ class BookingController extends Controller
         $shift->setIsDismissed(true);
         $shift->setDismissedTime(new DateTime('now'));
         $shift->setDismissedReason($request->get("reason"));
+        $shift->setShifter($shift->getBooker());
 
         $em->persist($shift);
         $em->flush();
