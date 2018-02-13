@@ -26,6 +26,9 @@
                                 Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
                                 {% set proxy_given = true %}
                             {% endif %}
+                            {% if proxy.owner in app.user.beneficiary|keys %}
+                                Procuration pour &nbsp;<b>{{ proxy.owner.firstname }}</b> de la part de &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
+                            {% endif %}
                         {% endfor %}
                         {% if not proxy_given %}
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
