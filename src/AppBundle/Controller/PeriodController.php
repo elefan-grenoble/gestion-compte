@@ -8,6 +8,7 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -133,6 +134,59 @@ class PeriodController extends Controller
 
         return $this->redirectToRoute('period');
 
+    }
+
+    /**
+     * @Route("/generateShifts/", name="shifts_generation")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"GET","POST"})
+     */
+    public function generateShiftsForDateAction(Request $request){
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('shifts_generation'))
+            ->add('date',TextType::class,array('label'=>'jour','attr'=>array('class'=>'datepicker')))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $date = $form->get('date')->getData();
+            $date = date_create_from_format('Y-m-d', $date);
+            $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+            $em = $this->getDoctrine()->getManager();
+            $periodRepository = $em->getRepository('AppBundle:Period');
+            $qb = $periodRepository
+                ->createQueryBuilder('p');
+            $qb->where('p.dayOfWeek = :dow')
+                ->setParameter('dow', $dayOfWeek)
+                ->orderBy('p.start');
+            $periods = $qb->getQuery()->getResult();
+            $count = 0;
+            foreach ($periods as $period) {
+                $shift = new Shift();
+                $start = date_create_from_format('Y-m-d H:i', $form->get('date')->getData().' '.$period->getStart()->format('H:i'));
+                $shift->setStart($start);
+                $end = date_create_from_format('Y-m-d H:i', $form->get('date')->getData().' '.$period->getEnd()->format('H:i'));
+                $shift->setEnd($end);
+                $shift->setMaxShiftersNb($period->getMaxShiftersNb());
+                $em->persist($shift);
+                $count++;
+            }
+            $em->flush();
+
+            $session = new Session();
+            if (!$count)
+                $session->getFlashBag()->add('warning','Aucun créneau n\'a été ajouté.');
+            else
+               $session->getFlashBag()->add('success',$count.' créneaux ont été ajoutés.');
+
+            return $this->redirectToRoute('period');
+        }
+
+        return $this->render('admin/period/generate_shifts.html.twig',array(
+            "form" => $form->createView()
+        ));
     }
     
 }
