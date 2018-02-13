@@ -1,3 +1,3 @@
-Bonjour {{ proxy.owner.firstname }},
-Tu viens de recevoir la procuration de {{ proxy.giver }} pour {{ proxy.event.title }} le {{ proxy.event.date | date('d M à H:i') }}.
-Fais en bon usage.
+Bonjour {{ proxy.owner.firstname }},<br/>
+Tu viens de recevoir la procuration de <b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b> pour <b>{{ proxy.event.title }}</b> le {{ proxy.event.date | date('d/m/y à H:i') }}.<br>
+Fais en bon usage, ce membre compte sur toi !

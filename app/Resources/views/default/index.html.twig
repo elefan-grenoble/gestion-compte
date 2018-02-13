@@ -22,14 +22,25 @@
                         <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
                         {% for beneficiary in app.user.beneficiaries %}
                             {% for proxy in beneficiary.receivedProxies %}
-                                {{ beneficiary }} -> {{ proxy.id }}
+                                <ul>
+                                {% if proxy.event == event %}
+                                    <li>{{ beneficiary.firstname }} a procuration pour &nbsp;<b>{{ proxy.giver }}</b></li>
+                                {% endif %}
+                                </ul>
                             {% endfor %}
                         {% endfor %}
+                        {% set proxy_given = false %}
                         {% for proxy in app.user.givenProxies %}
-                            Une procuration pour {{ proxy.event.title }}
+                            {% if proxy.event == event %}
+                                Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
+                                <b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b>
+                                {% set proxy_given = true %}
+                            {% endif %}
                         {% endfor %}
-                        <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
-                        <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
+                        {% if not proxy_given %}
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
+                            <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 <a href="https://lelefan.org/creneaux_fevrier_2018/?from=membres.lelefan.org" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Creneaux février 2018</a><br>

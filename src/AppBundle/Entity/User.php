@@ -114,7 +114,6 @@ class User extends BaseUser
         parent::__construct();
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
-        $this->given_proxies = new ArrayCollection();
     }
 
     /**
@@ -253,7 +252,11 @@ class User extends BaseUser
     }
 
     public function getLastname() {
-        return $this->getMainBeneficiary()->getLastname();
+        $mainBeneficiary = $this->getMainBeneficiary();
+        if ($mainBeneficiary)
+            return $mainBeneficiary->getLastname();
+        else
+            return '';
     }
 
     public function __toString()

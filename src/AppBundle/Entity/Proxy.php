@@ -36,13 +36,13 @@ class Proxy
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="received_proxies")
-     * @ORM\JoinColumn(name="owner_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="owner", referencedColumnName="id", onDelete="CASCADE")
      */
     private $owner;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="given_proxies")
-     * @ORM\JoinColumn(name="giver_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="giver", referencedColumnName="id", onDelete="CASCADE")
      */
     private $giver;
 
