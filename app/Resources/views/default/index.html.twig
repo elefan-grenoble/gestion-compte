@@ -27,7 +27,10 @@
                                 {% set proxy_given = true %}
                             {% endif %}
                             {% if proxy.owner in app.user.beneficiaries %}
-                                Procuration pour &nbsp;<b>{{ proxy.owner.firstname }}</b> de la part de &nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b><br>
+                                Procuration pour &nbsp;<b>{{ proxy.owner.firstname }}</b> de la part de
+                                {% if proxy.giver %}
+                                    &nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b>
+                                {% endif %}<br>
                             {% endif %}
                         {% endfor %}
                         {% if not proxy_given %}
