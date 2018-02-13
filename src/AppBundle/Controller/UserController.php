@@ -257,6 +257,15 @@ class UserController extends Controller
         $session = new Session();
         $this->denyAccessUnlessGranted('edit', $user);
 
+        $re = '/(membres\+.*[0-9]+@lelefan\.org)/i';
+        $email = $user->getEmail();
+        preg_match($re, $email, $matches, PREG_OFFSET_CAPTURE, 0);
+        if (count($matches)){
+            $session->getFlashBag()->add('warning',
+                'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
+            $user->getMainBeneficiary()->setEmail('');
+        }
+
         $editForm = $this->createForm('AppBundle\Form\UserType', $user);
         $editForm->handleRequest($request);
 
@@ -274,13 +283,13 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
-            if ($phone){
+//            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
+//            if ($phone){
                 $em->flush();
                 $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            }else{
-                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
-            }
+//            }else{
+//                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
+//            }
             return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
@@ -428,10 +437,10 @@ class UserController extends Controller
     /**
      * remove client from user
      *
-     * @Route("/{username}/remove_client/{id}", name="user_client_remove")
+     * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
      * @Method({"GET", "POST"})
      */
-    public function removeClientUserAction(Request $request,User $user,Client $client){
+    public function removeClientUserAction(User $user,$client_id){
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -440,13 +449,23 @@ class UserController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')&&($current_app_user != $user)) {
             throw $this->createAccessDeniedException();
         }
-        if ($user->getClients()->contains($client)){
-            $user->removeClient($client);
-            $this->getDoctrine()->getManager()->flush($user);
-            $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+        if ($client_id){
+            $client = $this->getDoctrine()->getManager()->getRepository('AppBundle:Client')->find($client_id);
+            if ($client->getId()){
+                if ($user->getClients()->contains($client)){
+                    $user->removeClient($client);
+                    $this->getDoctrine()->getManager()->flush($user);
+                    $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+                }else{
+                    $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+                }
+            }else{
+                $session->getFlashBag()->add('error','ce client n\'existe pas');
+            }
         }else{
-            $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+            $session->getFlashBag()->add('error','ce client n\'existe pas');
         }
+
         return $this->redirectToRoute('fos_user_profile_edit');
     }
 
@@ -499,17 +518,8 @@ class UserController extends Controller
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
-        }
+
+        $this->denyAccessUnlessGranted('edit', $beneficiary->getUser());
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
@@ -552,17 +562,24 @@ class UserController extends Controller
      *
      * @Route("/{username}", name="user_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, User $user)
     {
         $form = $this->createDeleteForm($user);
         $form->handleRequest($request);
 
+        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $em->remove($user->getMainBeneficiary());
+            foreach ($user->getBeneficiaries() as $beneficiary){
+                $em->remove($beneficiary);
+            }
             $em->remove($user);
             $em->flush();
+
+            $session->getFlashBag()->add('success',"L'utilisateur a bien été supprimé");
         }
 
         return $this->redirectToRoute('user_index');

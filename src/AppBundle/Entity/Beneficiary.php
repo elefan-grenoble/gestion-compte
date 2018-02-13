@@ -46,19 +46,19 @@ class Beneficiary
     /**
      * @var string
      *
-     * @ORM\Column(name="phone", type="string", length=255)
+     * @ORM\Column(name="phone", type="string", length=255, nullable=true)
      */
     private $phone;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $user;
 
     /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
-     * @ORM\JoinColumn(name="commission_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="commission_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $own;
 

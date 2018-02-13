@@ -10,13 +10,21 @@
     </div>
     {% if user.notes | length %}
     <h5>Note(s) à propos de ce membre</h5>
+        {%  for note in user.notes %}
+            {% include "ambassador/phone/_note.html.twig" with { note: note } %}
+        {% endfor %}
     {% endif %}
     {% if is_granted("ROLE_ADMIN") %}
         <h5>Actions admin</h5>
         <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer</a>
+
     {% endif %}
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <h5>Actions super admin</h5>
+        {{ form_start(delete_form) }}
+        {{ form_widget(delete_form) }}
+        <button type="submit" class="btn red">Supprimer</button>
+        {{ form_end(delete_form) }}
         <h6>Recorded registrations</h6>
         <ul class="collapsible" data-collapsible="accordion">
             {% for registration in user.recordedRegistrations %}

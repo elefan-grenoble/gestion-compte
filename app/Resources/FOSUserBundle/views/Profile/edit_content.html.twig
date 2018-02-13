@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="card-action">
-                <a href="{{ path('user_client_remove',{'username':app.user.username,'id':client.id}) }}" class="btn red">Supprimer</a>
+                <a href="{{ path('user_client_remove',{'username':app.user.username,'client_id':client.id}) }}" class="btn red">Supprimer</a>
                 <a href="{{ client.service.url }}" class="btn">{{ client.service.url }}</a>
             </div>
         </div>

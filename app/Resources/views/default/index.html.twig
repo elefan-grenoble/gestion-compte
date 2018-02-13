@@ -32,6 +32,7 @@
                         <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
                     {% endfor %}
                 </div>
+                <a href="https://lelefan.org/creneaux_fevrier_2018/?from=membres.lelefan.org" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Creneaux février 2018</a><br>
                 {% if is_granted("access_tools",app.user)  %}
                     <h5>Outils</h5>
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>

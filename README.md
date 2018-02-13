@@ -7,6 +7,11 @@ Espace adhérent l'éléfàn
 * yuml.me code:
 http://yuml.me/edit/5c392db4
 
+Nouveau schema :
+
+![modele V2](http://yuml.me/463ff905.svg)
+http://yuml.me/edit/463ff905
+
 ## Guide du développeur
 
 ### Prérequis
@@ -15,6 +20,7 @@ http://yuml.me/edit/5c392db4
 * [Composer](https://getcomposer.org/) installé
 * Mysql installé et configuré (ou mariadb sur Fedora)
 * php-mysql (php-pdo_mysql on Fedora)
+* php-xml
 * Créer une nouvelle base pour le projet
 
 ### Installation
