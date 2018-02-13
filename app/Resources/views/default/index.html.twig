@@ -17,9 +17,31 @@
                 <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
                 <div class="row center">
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
+                    {% for event in events %}
+                        <h5>{{ event.title }}</h5>
+                        <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
+                        {% set proxy_given = false %}
+                        {% for proxy in event.proxies %}
+                            {% if proxy.giver == app.user %}
+                                Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
+                                {% set proxy_given = true %}
+                            {% endif %}
+                            {% if proxy.owner in app.user.beneficiaries %}
+                                Procuration pour &nbsp;<b>{{ proxy.owner.firstname }}</b> de la part de
+                                {% if proxy.giver %}
+                                    &nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b>
+                                {% endif %}<br>
+                            {% endif %}
+                        {% endfor %}
+                        {% if not proxy_given %}
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
+                            <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
+                        {% endif %}
+                    {% endfor %}
                 </div>
                 <a href="https://lelefan.org/creneaux_fevrier_2018/?from=membres.lelefan.org" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Creneaux février 2018</a><br>
                 {% if is_granted("access_tools",app.user)  %}
+                    <h5>Outils</h5>
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
