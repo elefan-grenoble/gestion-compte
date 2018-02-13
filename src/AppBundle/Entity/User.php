@@ -682,9 +682,9 @@ class User extends BaseUser
         });
     }
 
-    public function needToBookAShift()
+    public function canBook()
     {
-	    return $this->remainingToBook() > 0;
+	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
     }
 
     /**
@@ -699,8 +699,8 @@ class User extends BaseUser
     /**
      * Get remaining time to book
      */
-    public function remainingToBook() {
-        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration(1);
+    public function remainingToBook($cycleIndex) {
+        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex);
     }
 
     /**
