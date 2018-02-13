@@ -39,7 +39,7 @@
 
 {% endfor %}
 {% if (app.user.needToBookAShift()) %}
-    <p>J'ai {{ app.user.remainingToBook()|duration_from_minutes }} de bénévolat à faire {% if app.user.endOfCycle(1)%}avant
-        le {{ app.user.endOfCycle(1)|date_fr_long }}{% else %}pour mon premier cycle{% endif %}</p>
+    <p>J'ai {{ app.user.remainingToBook()|duration_from_minutes }} de bénévolat à faire avant
+        le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
     <a href="{{ path("booking") }}" class="btn">Je réserve un créneau</a>
 {% endif %}
