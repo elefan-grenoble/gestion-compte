@@ -2,12 +2,12 @@
 
 {% block content %}
 <div class="row"><label>Premier créneau: </label>{% if (app.user.firstShift()) %}{{ app.user.firstShift().shift.start|date('d/m/Y H:i') }}{% else %}N/A{% endif %}</div>
-<div class="row"><label>Début du cycle en cours: </label>{{ app.user.startOfCycle()|date('d/m/Y') }}</div>
-<div class="row"><label>Fin du cycle en cours: </label>{{ app.user.endOfCycle()|date('d/m/Y') }}</div>
+<div class="row"><label>Début du cycle en cours: </label>{{ app.user.startOfCycle(1)|date('d/m/Y') }}</div>
+<div class="row"><label>Fin du cycle en cours: </label>{{ app.user.endOfCycle(1)|date('d/m/Y') }}</div>
 <div class="row"><label>Restant à réserver: </label>{{ app.user.remainingToBook() }}</div>
-<div class="row"><label>Réservé sur le cycle en cours: </label>{{ app.user.cycleShiftsDuration }}</div>
-<div class="row"><label>Début du prochain cycle: </label>{{ app.user.startOfNextCycle|date('d/m/Y') }}</div>
-<div class="row"><label>Fin du prochain cycle: </label>{{ app.user.endOfNextCycle|date('d/m/Y') }}</div>
+<div class="row"><label>Réservé sur le cycle en cours: </label>{{ app.user.cycleShiftsDuration(1) }}</div>
+<div class="row"><label>Début du prochain cycle: </label>{{ app.user.startOfCycle(2)|date('d/m/Y') }}</div>
+<div class="row"><label>Fin du prochain cycle: </label>{{ app.user.endOfCycle(2)|date('d/m/Y') }}</div>
 
     <div class="row">
         <div class="col m2">

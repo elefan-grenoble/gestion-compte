@@ -4,11 +4,11 @@
         style="padding: 0 1px;width:{{ (shift.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left:{{ (((shift.start|date('G')-start)*60 + shift.start|date('i'))/60)*(100/(end-start+1)) }}% ">
     <a {% if shift.remainingShifters() != 0
            and not shift.isBookedBy(app.user.id)
-           and (shift.start > app.user.endOfCycle() or shift.duration() <= app.user.remainingToBook()) %}href="#book{{ shift.id }}"{% endif %}
+           and (shift.start > app.user.endOfCycle(1) or shift.duration() <= app.user.remainingToBook()) %}href="#book{{ shift.id }}"{% endif %}
        class="modal-trigger">
         <div class="{% if (shift.remainingShifters() == 0)
             or shift.isBookedBy(app.user.id)
-            or (shift.start <= app.user.endOfCycle() and shift.duration() > app.user.remainingToBook()) %}grey {% else %}orange {% if shift.getRemainingShifters() > 1 %}darken-{{ min(4, shift.getRemainingShifters() - 1) }} {% endif %}{% endif %} white-text z-depth-2">
+            or (shift.start <= app.user.endOfCycle(1) and shift.duration() > app.user.remainingToBook()) %}grey {% else %}orange {% if shift.getRemainingShifters() > 1 %}darken-{{ min(4, shift.getRemainingShifters() - 1) }} {% endif %}{% endif %} white-text z-depth-2">
             <div class="" style="font-size: 11px;padding:3px">
                 <div>{{ shift.start|date('G\\hi') }}</div>
                 <div>{{ shift.end|date('G\\hi') }}</div>
