@@ -20,20 +20,10 @@
                     {% for event in events %}
                         <h5>{{ event.title }}</h5>
                         <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
-                        {% for beneficiary in app.user.beneficiaries %}
-                            {% for proxy in beneficiary.receivedProxies %}
-                                <ul>
-                                {% if proxy.event == event %}
-                                    <li>{{ beneficiary.firstname }} a procuration pour &nbsp;<b>{{ proxy.giver }}</b></li>
-                                {% endif %}
-                                </ul>
-                            {% endfor %}
-                        {% endfor %}
                         {% set proxy_given = false %}
-                        {% for proxy in app.user.givenProxies %}
-                            {% if proxy.event == event %}
+                        {% for proxy in event.proxies %}
+                            {% if proxy.giver == app.user %}
                                 Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
-                                <b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b>
                                 {% set proxy_given = true %}
                             {% endif %}
                         {% endfor %}
