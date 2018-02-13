@@ -84,8 +84,9 @@ class BookingController extends Controller
             $bookedShift = new BookedShift();
             $bookedShift->setShift($shift);
             $bookedShift->setBookedTime(new DateTime('now'));
+            $bookedShift->setBooker($beneficiary);
         }
-        $bookedShift->setShifter($current_app_user->getMainBeneficiary());
+        $bookedShift->setShifter($beneficiary);
         $bookedShift->setIsDismissed(false);
         $bookedShift->setDismissedReason(null);
         $bookedShift->setDismissedTime(null);
