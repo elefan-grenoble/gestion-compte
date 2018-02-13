@@ -17,9 +17,23 @@
                 <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
                 <div class="row center">
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
-                    <p class="col s12">Cet espace, vide pour le moment, regroupera bientôt tous les services liés à ta qualité de membre.</p>
+                    {% for event in events %}
+                        <h5>{{ event.title }}</h5>
+                        <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
+                        {% for beneficiary in app.user.beneficiaries %}
+                            {% for proxy in beneficiary.receivedProxies %}
+                                {{ beneficiary }} -> {{ proxy.id }}
+                            {% endfor %}
+                        {% endfor %}
+                        {% for proxy in app.user.givenProxies %}
+                            Une procuration pour {{ proxy.event.title }}
+                        {% endfor %}
+                        <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
+                        <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
+                    {% endfor %}
                 </div>
                 {% if is_granted("access_tools",app.user)  %}
+                    <h5>Outils</h5>
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>

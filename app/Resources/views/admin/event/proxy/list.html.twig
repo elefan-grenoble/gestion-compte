@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('event_list') }}"><i class="material-icons">list</i>événements</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>procurations
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Liste des procurations en cours</h4>
+    {% if event %}
+    <h5>{{ event.title }}</h5>
+    {% endif %}
+    <ul class="collapsible popout" data-collapsible="accordion">
+        {% for proxy in proxies %}
+            <li>
+                <div class="collapsible-header">
+                    {% if not proxy.giver %}
+                        Pour le premier volontaire
+                    {% else %}
+                        De &nbsp;<b>{{ proxy.giver.mainBeneficiary }}</b>&nbsp;
+                    {% endif %}
+                    {% if not proxy.owner %}
+                        porté par le premier volontaire
+                    {% else %}
+                        porté par &nbsp;<b>{{ proxy.owner }}</b>&nbsp;
+                    {% endif %}
+                    {% if  not event and proxy.event  %}[{{ proxy.event.title }}]{% endif %}
+                </div>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <div class="collapsible-body">
+                        {{ form_start(delete_forms[proxy.id]) }}
+                        {{ form_widget(delete_forms[proxy.id]) }}
+                        <div>
+                            <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                        </div>
+                        {{ form_end(delete_forms[proxy.id]) }}
+                    </div>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

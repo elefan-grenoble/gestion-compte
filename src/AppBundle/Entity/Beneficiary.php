@@ -83,6 +83,11 @@ class Beneficiary
     private $roles;
 
     /**
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
+     */
+    private $received_proxies;
+
+    /**
      * Get id
      *
      * @return int
@@ -132,6 +137,14 @@ class Beneficiary
 
     public function getDisplayName(){
         return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+    }
+
+    public function getPublicDisplayName(){
+        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
+    }
+
+    public function __toString() {
+        return $this->getDisplayName();
     }
 
     /**
@@ -382,5 +395,83 @@ class Beneficiary
     public function getTasks()
     {
         return $this->tasks;
+    }
+
+    /**
+     * Add givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     *
+     * @return Beneficiary
+     */
+    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxys[] = $givenProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     */
+    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxys->removeElement($givenProxy);
+    }
+
+    /**
+     * Get givenProxys
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGivenProxys()
+    {
+        return $this->given_proxys;
+    }
+
+    /**
+     * Get givenProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGivenProxies()
+    {
+        return $this->given_proxies;
+    }
+
+    /**
+     * Add receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     *
+     * @return Beneficiary
+     */
+    public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxies[] = $receivedProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     */
+    public function removeReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxies->removeElement($receivedProxy);
+    }
+
+    /**
+     * Get receivedProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReceivedProxies()
+    {
+        return $this->received_proxies;
     }
 }

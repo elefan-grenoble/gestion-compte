@@ -113,7 +113,7 @@ class CommissionController extends Controller
     }
 
     /**
-     * Comission edit
+     * Comission delete
      *
      * @Route("/{id}", name="commission_delete")
      * @Method({"DELETE"})

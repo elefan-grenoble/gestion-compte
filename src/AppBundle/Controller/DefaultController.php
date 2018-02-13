@@ -34,9 +34,18 @@ class DefaultController extends Controller
                 $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
             }
         }
+        $em = $this->getDoctrine()->getManager();
+        $qb = $em->createQueryBuilder();
+        $futur_events = $qb->select('e')->from('AppBundle\Entity\Event', 'e')
+            ->Where("e.date > :now" )
+            ->orderBy("e.id", 'ASC')
+            ->setParameter('now',new \DateTime())
+            ->getQuery()
+            ->getResult();
 
         return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+            'events' => $futur_events
         ]);
     }
 
@@ -133,7 +142,9 @@ class DefaultController extends Controller
                 ->getResult();
             return $this->render('user/find_user_number.html.twig', array(
                 'form' => null,
-                'beneficiaries' => $beneficiaries
+                'beneficiaries' => $beneficiaries,
+                'return_path' => 'confirm',
+                'params' => array()
             ));
         }
         return $this->render('user/find_user_number.html.twig', array(
