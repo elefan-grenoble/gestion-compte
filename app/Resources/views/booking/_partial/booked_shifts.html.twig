@@ -41,3 +41,17 @@ J'ai encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévol
 {% endfor %}
 
 <a href="{{ path("booking") }}" class="btn" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
+
+{% for bookedshift in app.user.getFutureBookedShifts() %}
+    {% if (bookedshift.getBooker() != bookedshift.getShifter()) %}
+        <div>
+            <div class="card green darken-4">
+            <div class="card-content white-text">
+                <span class="card-title">{{ bookedshift.getShift().start|date('d/m/Y') }}</span>
+                <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
+                <p>Créneau repris</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}

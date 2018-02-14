@@ -673,7 +673,6 @@ class User extends BaseUser
 
     /**
      * Get all shifts in the future
-     * TODO Fonction utilisée ???
      */
     public function getFutureShifts()
     {
@@ -681,7 +680,20 @@ class User extends BaseUser
             return $shift->getShift()->getStart() > new DateTime('now');
         });
     }
+    
+    /**
+     * Get all booked shifts in the future
+     */
+    public function getFutureBookedShifts()
+    {
+        return $this->getAllBookedShifts()->filter(function($shift) {
+            return $shift->getShift()->getStart() > new DateTime('now');        
+        });
+    }
 
+    /**
+     * Can book a shift
+     */
     public function canBook()
     {
 	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
