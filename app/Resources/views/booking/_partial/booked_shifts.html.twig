@@ -1,4 +1,7 @@
 <h4 class="header center">Mes créneaux à venir</h4>
+<p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+<p>{% if (app.user.remainingToBook(1)|duration_from_minutes == 0) %} Bravo ! Tous mes créneaux sont planifiés sur le cycle actuel {% else %}
+J'ai encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévolat à faire {% endif %}</p>
 
 {% for shift in app.user.getFutureShifts() %}
     <div>
@@ -12,8 +15,7 @@
             </div>
             {% if (not shift.getIsDismissed()) %}
                 <div class="card-action">
-                    <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oops, je ne vais pas pouvoir effectuer mon
-                        créneau...</a>
+                    <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oops, je ne vais pas pouvoir effectuer mon créneau...</a>
                 </div>
                 <div id="dismiss{{ shift.id }}" class="modal modal-fixed-footer">
                     <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
@@ -36,7 +38,6 @@
             {% endif %}
         </div>
     </div>
-
 {% endfor %}
-<p>J'ai {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévolat à faire avant le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+
 <a href="{{ path("booking") }}" class="btn" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
