@@ -25,13 +25,35 @@
                 {{ form_label(form.title) }}
             </div>
         </div>
-        <div class="col s3">
+        <div class="col s6">
             <div class="errors">
                 {{ form_errors(form.date) }}
             </div>
+            <div>
+                {{ form_label(form.date) }}
+            </div>
             <div class="input-field">
                 {{ form_widget(form.date) }}
-                {{ form_label(form.date) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(form.need_proxy) }}
+            </div>
+            <div class="">
+                {{ form_widget(form.need_proxy) }}
+                {{ form_label(form.need_proxy) }}
+            </div>
+        </div>
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(form.min_date_of_last_registration) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.min_date_of_last_registration) }}
+                {{ form_label(form.min_date_of_last_registration) }}
             </div>
         </div>
     </div>
@@ -75,6 +97,12 @@
 
         jQuery(function(){
             $('#appbundle_event_date_date').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 2, // Creates a dropdown of 15 years to control year,
+                close: 'Ok',
+                closeOnSelect: true // Close upon selecting a date,
+            });
+            $('#appbundle_event_min_date_of_last_registration').pickadate({
                 selectMonths: true, // Creates a dropdown to control month
                 selectYears: 2, // Creates a dropdown of 15 years to control year,
                 close: 'Ok',

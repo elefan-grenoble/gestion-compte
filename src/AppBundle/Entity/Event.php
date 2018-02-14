@@ -43,6 +43,13 @@ class Event
     private $date;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="min_date_of_last_registration", type="datetime")
+     */
+    private $min_date_of_last_registration;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0})
@@ -245,5 +252,29 @@ class Event
     public function getNeedProxy()
     {
         return $this->need_proxy;
+    }
+
+    /**
+     * Set minDateOfLastRegistration
+     *
+     * @param \DateTime $minDateOfLastRegistration
+     *
+     * @return Event
+     */
+    public function setMinDateOfLastRegistration($minDateOfLastRegistration)
+    {
+        $this->min_date_of_last_registration = $minDateOfLastRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Get minDateOfLastRegistration
+     *
+     * @return \DateTime
+     */
+    public function getMinDateOfLastRegistration()
+    {
+        return $this->min_date_of_last_registration;
     }
 }
