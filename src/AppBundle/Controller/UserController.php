@@ -84,7 +84,7 @@ class UserController extends Controller
      * @Route("/new", name="user_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, \Swift_Mailer $mailer)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -145,6 +145,18 @@ class UserController extends Controller
                         $em->flush();
 
                         $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+
+                        $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn'))
+                            ->setFrom('membres@lelefan.org')
+                            ->setTo($user->getEmail())
+                            ->setBody(
+                                $this->renderView(
+                                    'emails/welcome.html.twig',
+                                    array('user' => $user)
+                                ),
+                                'text/html'
+                            );
+                        $mailer->send($welcome);
 
                         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                             return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
@@ -283,13 +295,9 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-//            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
-//            if ($phone){
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-//            }else{
-//                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
-//            }
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+
             return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
