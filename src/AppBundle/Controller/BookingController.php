@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use DateTime;
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
@@ -9,7 +10,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use DateTime;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Date;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -48,17 +48,9 @@ class BookingController extends Controller
             $shiftsByDay[$day][] = $shift;
         }
 
-        $first = $em->getRepository('AppBundle:BookedShift')->findFirst($current_app_user);
-        if ($first) {
-            $now = new DateTime('now');
-            $diff = $first->getShift()->getStart()->diff($now);
-            $modFirst = $diff->format('%a') % 28;
-        }
         return $this->render('booking/index.html.twig', [
             'shiftsByDay' => $shiftsByDay,
             'hours' => $hours,
-            'first' => $first,
-            'modFirst' => $modFirst
         ]);  
     }
 
@@ -94,7 +86,7 @@ class BookingController extends Controller
             $bookedShift->setBookedTime(new DateTime('now'));
             $bookedShift->setBooker($beneficiary);
         }
-        $bookedShift->setShifter($current_app_user->getMainBeneficiary());
+        $bookedShift->setShifter($beneficiary);
         $bookedShift->setIsDismissed(false);
         $bookedShift->setDismissedReason(null);
         $bookedShift->setDismissedTime(null);
@@ -119,7 +111,7 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        if (!$current_app_user->getBeneficiaries()->contains($shift->getBooker())){
+        if (!$current_app_user->getBeneficiaries()->contains($shift->getShifter())) {
             $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
             return $this->redirectToRoute('booking');
         }
@@ -129,6 +121,7 @@ class BookingController extends Controller
         $shift->setIsDismissed(true);
         $shift->setDismissedTime(new DateTime('now'));
         $shift->setDismissedReason($request->get("reason"));
+        $shift->setShifter($shift->getBooker());
 
         $em->persist($shift);
         $em->flush();

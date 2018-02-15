@@ -1,14 +1,10 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-<div class="row"><label>Premier créneau: </label>{% if (first) %}{{ first.getShift().start|date('d/m/Y H:i') }}{% else %}N/A{% endif %}</div>
-<div class="row"><label>Jour du cycle: </label>{{ modFirst }}</div>
-<div class="row"><label>Début du cycle en cours: </label></div>
-<div class="row"><label>Fin du cycle en cours: </label></div>
-<div class="row"><label>Réservé sur le cycle en cours: </label></div>
-<div class="row"><label>Début du prochain cycle: </label></div>
-<div class="row"><label>Fin du prochain cycle: </label></div>
-<div class="row"><label>Fin du prochain cycle: </label></div>
+<div class="row" align="center">
+<p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+<p>Nombre d'heures de bénévolat restantes : {{ app.user.remainingToBook(1)|duration_from_minutes }}</p>
+</div>
 
     <div class="row">
         <div class="col m2">
@@ -21,7 +17,6 @@
                         <div style="text-align: center;width: 100%;margin-left: -50%;">
                             {{ i }}
                         </div>
-
                     </div>
                 {% endfor %}
             </div>
