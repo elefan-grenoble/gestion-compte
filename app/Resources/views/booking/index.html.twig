@@ -1,43 +1,67 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">date_range</i><span>Créneaux</span>
+{% endblock %}
+
 {% block content %}
 <div class="row" align="center">
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
-<p>Nombre d'heures de bénévolat restantes : {{ app.user.remainingToBook(1)|duration_from_minutes }}</p>
+<p>Nombre d'heures de bénévolat restantes à plannifier : {{ app.user.remainingToBook(1)|duration_from_minutes }}</p>
 </div>
 
-    <div class="row">
-        <div class="col m2">
-        </div>
-        <div class="col m10">
-            <div style="display: flex;">
-                {% for i in hours %}
-                    {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
-                    <div style="flex: 1">
-                        <div style="text-align: center;width: 100%;margin-left: -50%;">
-                            {{ i }}
+        <div class="row">
+            <div class="col m2 hide-on-small-only">
+            </div>
+            <div class="col s12 m10">
+                <div style="display: flex;">
+                    {% for i in hours %}
+                        {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
+                        <div style="flex: 1">
+                            <div style="text-align: center;width: 100%;margin-left: -50%;">
+                                {{ i }}h
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    {% for shifts in shiftsByDay %}
-        <div class="row" style="display: flex;height: 40px">
-            <div class="col m2 valign-wrapper">
-                <div>
-                    {{ (shifts|first).start|date_fr_long }}
-                </div>
-            </div>
-            <div class="col m10">
-                <div style="position: relative">
-                    {% for shift in shifts %}
-                        {% include "booking/_partial/shift.html.twig" with { user: app.user, shift: shift, start: hours|first, end: hours|last   } %}
                     {% endfor %}
                 </div>
             </div>
         </div>
-    {% endfor %}
+        {% for shifts in shiftsByDay %}
+            <div class="row center show-on-small hide-on-med-and-up">{{ (shifts|first).start|date_fr_long }}</div>
+            <div class="row" style="display: flex;min-height: 40px;">
+                <div class="col m2 hide-on-small-only valign-wrapper">
+                    <div>
+                        {{ (shifts|first).start|date_fr_long }}
+                    </div>
+                </div>
+                <div class="col m10 s12">
+                    <div style="position: relative">
+                        {% set lignes = {} %}
+                        {% for shift in shifts %}
+                            {#compute lines #}
+                            {% set l = 0 %}
+                            {% set break = false %}
+                            {% for i in 0..100 if not break %}
+                                {% if lignes[i~'_'] is not defined %}
+                                    {% set l = i %}
+                                    {% set lignes = lignes|merge({(i~'_'): shift.end}) %}
+                                    {% set break = true %}
+                                {% else %}
+                                    {% if lignes[i~'_'] < shift.start  %}
+                                        {% set l = i %}
+                                        {% set lignes = lignes|merge({(i~'_'): shift.end}) %}
+                                        {% set break = true %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {# / compute lines #}
+                            {% include "booking/_partial/shift.html.twig" with { user: app.user, shift: shift, start: hours|first, end: hours|last, line:l  } %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
 
 {% endblock %}
 

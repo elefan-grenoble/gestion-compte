@@ -1,0 +1,29 @@
+<div id="book{{ shift.id }}" class="modal modal-fixed-footer">
+    <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
+        <div class="modal-content">
+            <h4>Réserver ce créneau</h4>
+            {% if user.beneficiaries | length < 1 %}
+                <p>Vous n'avez pas de bénéficiares</p>
+            {% else %}
+                <p><label>Nombre de places restantes: </label>{{ shift.getRemainingShifters() }}</p>
+                <p>Attention! Vous ne pourrez annuler...</p>
+                <div class="input-field">
+                    <select name="beneficiaryId">
+                        {% for beneficiary in user.beneficiaries %}
+                            <option value="{{ beneficiary.id }}">{{ beneficiary.firstname }}</option>
+                        {% endfor %}
+                    </select>
+                    <label>Choisir le bénéficiaire</label>
+                </div>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <a href="#!"
+               class="modal-action modal-close waves-effect waves-green btn-flat ">Annuler</a>
+            {% if user.beneficiaries | length >= 1 %}
+                <button class="modal-action modal-close waves-effect waves-green btn-flat ">Réserver
+                </button>
+            {% endif %}
+        </div>
+    </form>
+</div>

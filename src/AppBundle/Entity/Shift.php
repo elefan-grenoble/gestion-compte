@@ -43,7 +43,7 @@ class Shift
     private $maxShiftersNb;
 
     /**
-     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shift",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shift",cascade={"persist", "remove"})
      */
     private $booked_shifts;
 

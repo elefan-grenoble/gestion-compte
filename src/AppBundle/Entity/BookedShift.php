@@ -51,7 +51,7 @@ class BookedShift
 
     /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="booked_shifts")
-     * @ORM\JoinColumn(name="shift_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="shift_id", referencedColumnName="id",onDelete="CASCADE")
      */
     private $shift;
 

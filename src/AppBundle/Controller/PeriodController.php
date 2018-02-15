@@ -8,11 +8,16 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
@@ -137,11 +142,61 @@ class PeriodController extends Controller
     }
 
     /**
+     * @Route("/copyPeriod/", name="period_copy")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"GET","POST"})
+     */
+    public function periodCopyAction(Request $request){
+        $days = array(
+            "Lundi" => 0,
+            "Mardi" => 1,
+            "Mercredi" => 2,
+            "Jeudi" => 3,
+            "Vendredi" => 4,
+            "Samedi" => 5,
+            "Dimanche" => 6,
+        );
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('period_copy'))
+            ->add('day_of_week_from',ChoiceType::class,array('label'=>'Jour de la semaine référence','choices' => $days))
+            ->add('day_of_week_to',ChoiceType::class,array('label'=>'Jour de la semaine destination','choices' => $days))
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $from = $form->get('day_of_week_from')->getData();
+            $to = $form->get('day_of_week_to')->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $periods = $em->getRepository('AppBundle:Period')->findBy(array('dayOfWeek'=>$from));
+
+            $count = 0;
+            foreach ($periods as $period){
+                $p = clone $period;
+                $p->setDayOfWeek($to);
+                $em->persist($p);
+                $count++;
+            }
+            $em->flush();
+
+            $session = new Session();
+            $session->getFlashBag()->add('success',$count.' creneaux copiés de'.array_search($from,$days).' à '.array_search($to,$days));
+
+            return $this->redirectToRoute('period');
+        }
+
+        return $this->render('admin/period/copy_periods.html.twig',array(
+            "form" => $form->createView()
+        ));
+    }
+
+    /**
      * @Route("/generateShifts/", name="shifts_generation")
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET","POST"})
      */
-    public function generateShiftsForDateAction(Request $request){
+    public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shifts_generation'))
             ->add('date',TextType::class,array('label'=>'jour','attr'=>array('class'=>'datepicker')))
@@ -152,34 +207,21 @@ class PeriodController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             $date = $form->get('date')->getData();
-            $date = date_create_from_format('Y-m-d', $date);
-            $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
-            $em = $this->getDoctrine()->getManager();
-            $periodRepository = $em->getRepository('AppBundle:Period');
-            $qb = $periodRepository
-                ->createQueryBuilder('p');
-            $qb->where('p.dayOfWeek = :dow')
-                ->setParameter('dow', $dayOfWeek)
-                ->orderBy('p.start');
-            $periods = $qb->getQuery()->getResult();
-            $count = 0;
-            foreach ($periods as $period) {
-                $shift = new Shift();
-                $start = date_create_from_format('Y-m-d H:i', $form->get('date')->getData().' '.$period->getStart()->format('H:i'));
-                $shift->setStart($start);
-                $end = date_create_from_format('Y-m-d H:i', $form->get('date')->getData().' '.$period->getEnd()->format('H:i'));
-                $shift->setEnd($end);
-                $shift->setMaxShiftersNb($period->getMaxShiftersNb());
-                $em->persist($shift);
-                $count++;
-            }
-            $em->flush();
+
+            $application = new Application($kernel);
+            $application->setAutoExit(false);
+
+            $input = new ArrayInput(array(
+                'command' => 'app:shift-generate',
+                'date' => $date
+            ));
+
+            $output = new BufferedOutput();
+            $application->run($input, $output);
+            $content = $output->fetch();
 
             $session = new Session();
-            if (!$count)
-                $session->getFlashBag()->add('warning','Aucun créneau n\'a été ajouté.');
-            else
-               $session->getFlashBag()->add('success',$count.' créneaux ont été ajoutés.');
+            $session->getFlashBag()->add('success',$content);
 
             return $this->redirectToRoute('period');
         }

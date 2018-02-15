@@ -1,13 +1,16 @@
 <h4 class="header center">Mes créneaux à venir</h4>
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
-<p>{% if (app.user.remainingToBook(1)|duration_from_minutes == 0) %} Bravo ! Tous mes créneaux sont planifiés sur le cycle actuel {% else %}
-J'ai encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévolat à faire {% endif %}</p>
-
+<p>{% if (app.user.remainingToBook(1)|duration_from_minutes == 0) %}
+       <i class="material-icons">stars</i> Bravo ! Tous tes créneaux sont planifiés sur le cycle actuel !
+    {% else %}
+        Tu as encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévolat à planifier pour ce cycle
+    {% endif %}
+</p>
+<div class="row">
 {% for shift in app.user.getFutureShifts() %}
-    <div>
-        <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
+        <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %} col m6 s12 {% if (app.user.getFutureShifts() | length) < 2 %}push-m3{% endif %}">
             <div class="card-content white-text">
-                <span class="card-title">{{ shift.getShift().start|date('d/m/Y') }}</span>
+                <span class="card-title">{{ shift.getShift().start|date_fr_long }}</span>
                 <p>De {{ shift.getShift().start|date('H:i') }} à {{ shift.getShift().end|date('H:i') }}</p>
                 {% if (shift.getIsDismissed()) %}
                     <p>Créneau annulé, en attente de repreneur</p>
@@ -15,14 +18,14 @@ J'ai encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévol
             </div>
             {% if (not shift.getIsDismissed()) %}
                 <div class="card-action">
-                    <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oops, je ne vais pas pouvoir effectuer mon créneau...</a>
+                    <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oups, je ne vais pas pouvoir effectuer mon créneau...</a>
                 </div>
                 <div id="dismiss{{ shift.id }}" class="modal modal-fixed-footer">
                     <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
                         <div class="modal-content">
                             <h4>Je ne peux pas faire mon créneau</h4>
-                            <p>Attention! En vous désistant sur un créneau, vous devrez attendre que quelqu'un reprenne
-                                votre créneau pour pouvoir vous réinscrire sur un nouveau.</p>
+                            <p>Attention! En vous désistant d'un créneau réservé, vous devrez attendre qu'un autre membre le reprenne
+                                pour pouvoir vous inscrire de nouveau.</p>
                             <div class="input-field">
                                 <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
                                 <label for="reason">Commentaire</label>
@@ -37,21 +40,21 @@ J'ai encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévol
                 </div>
             {% endif %}
         </div>
-    </div>
 {% endfor %}
+</div>
 
 <a href="{{ path("booking") }}" class="btn" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
 
 {% for bookedshift in app.user.getFutureBookedShifts() %}
     {% if (bookedshift.getBooker() != bookedshift.getShifter()) %}
         <div>
-            <div class="card green darken-4">
-            <div class="card-content white-text">
-                <span class="card-title">{{ bookedshift.getShift().start|date('d/m/Y') }}</span>
-                <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
-                <p>Créneau repris</p>
+            <div class="card green lighten-5">
+                <div class="card-content green-text">
+                    <span class="card-title">{{ bookedshift.getShift().start|date_fr_long }}</span>
+                    <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
+                    <p>Créneau repris</p>
+                </div>
             </div>
         </div>
-    </div>
     {% endif %}
 {% endfor %}
