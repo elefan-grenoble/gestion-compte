@@ -620,7 +620,11 @@ class User extends BaseUser
         $remainder = $this->getRemainder($date);
         if ( ! $remainder->invert ){ //still some days
             $min_delay_to_anticipate =  \DateInterval::createFromDateString('15 days');
-            return ($remainder < $min_delay_to_anticipate);
+            $now = new \DateTimeImmutable();
+            $away = $now->add($min_delay_to_anticipate);
+            $now = new \DateTimeImmutable();
+            $expire = $now->add($remainder);
+            return ($expire < $away);
         }
         else {
             return true;
@@ -630,7 +634,7 @@ class User extends BaseUser
     /**
      * get remainder
      *
-     * @return DateInterval|false
+     * @return \DateInterval|false
      */
     public function getRemainder(\DateTime $date = null)
     {
