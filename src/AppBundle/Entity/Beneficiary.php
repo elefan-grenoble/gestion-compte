@@ -52,7 +52,7 @@ class Beneficiary
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $user;
 
@@ -68,7 +68,7 @@ class Beneficiary
 
     /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
-     * @ORM\JoinColumn(name="commission_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="commission_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $own;
 
@@ -91,6 +91,11 @@ class Beneficiary
      * @ORM\JoinTable(name="beneficiaries_roles")
      */
     private $roles;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
+     */
+    private $received_proxies;
 
     /**
      * Get id
@@ -142,6 +147,14 @@ class Beneficiary
 
     public function getDisplayName(){
         return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+    }
+
+    public function getPublicDisplayName(){
+        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
+    }
+
+    public function __toString() {
+        return $this->getDisplayName();
     }
 
     /**
@@ -227,13 +240,30 @@ class Beneficiary
     }
 
     /**
-     * Get isAmbassador
+     * Get hasViewUserDataRights
      *
      * @return boolean
-     * todo map it with roles
      */
-    public function isAmbassador()
+    public function canViewUserData()
     {
+        foreach ($this->getRoles() as $role){
+            if ($role->hasViewUserDataRights())
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get hasViewUserDataRights
+     *
+     * @return boolean
+     */
+    public function canEditUserData()
+    {
+        foreach ($this->getRoles() as $role){
+            if ($role->hasEditUserDataRights())
+                return true;
+        }
         return false;
     }
 
@@ -445,5 +475,83 @@ class Beneficiary
     public function getTasks()
     {
         return $this->tasks;
+    }
+
+    /**
+     * Add givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     *
+     * @return Beneficiary
+     */
+    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxys[] = $givenProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     */
+    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxys->removeElement($givenProxy);
+    }
+
+    /**
+     * Get givenProxys
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGivenProxys()
+    {
+        return $this->given_proxys;
+    }
+
+    /**
+     * Get givenProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGivenProxies()
+    {
+        return $this->given_proxies;
+    }
+
+    /**
+     * Add receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     *
+     * @return Beneficiary
+     */
+    public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxies[] = $receivedProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     */
+    public function removeReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxies->removeElement($receivedProxy);
+    }
+
+    /**
+     * Get receivedProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReceivedProxies()
+    {
+        return $this->received_proxies;
     }
 }

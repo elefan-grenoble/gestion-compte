@@ -58,7 +58,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $lastRegistration;
 
@@ -76,7 +76,7 @@ class User extends BaseUser
     /**
      * One User has One Main Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist"})
-     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $mainBeneficiary;
 
@@ -94,6 +94,22 @@ class User extends BaseUser
      */
     private $clients;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
+     * @OrderBy({"created_at" = "DESC"})
+     */
+    private $notes;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
+     * @OrderBy({"created_at" = "DESC"})
+     */
+    private $annotations;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner",cascade={"persist", "remove"})
+     */
+    private $given_proxies;
 
     public function __construct()
     {
@@ -228,56 +244,6 @@ class User extends BaseUser
         return $this->address;
     }
 
-    /**
-     * Add service
-     *
-     * @param \AppBundle\Entity\Service $service
-     *
-     * @return User
-     */
-    public function addService(\AppBundle\Entity\Service $service)
-    {
-        $this->services[] = $service;
-
-        return $this;
-    }
-
-    /**
-     * Remove service
-     *
-     * @param \AppBundle\Entity\Service $service
-     */
-    public function removeService(\AppBundle\Entity\Service $service)
-    {
-        $this->services->removeElement($service);
-    }
-
-    /**
-     * Get services
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getServices()
-    {
-        return $this->services;
-    }
-
-    public function setLastRegistration(){
-        return null;
-    }
-
-    /**
-     * Get lastRegistration
-     *
-     * @return \AppBundle\Entity\Registration
-     */
-    public function getLastRegistration(){
-        if ($this->getRegistrations()->count()){
-            return ($this->getRegistrations()->first());
-        }
-        return null;
-    }
-
     public function getFirstname() {
         $mainBeneficiary = $this->getMainBeneficiary();
         if ($mainBeneficiary)
@@ -288,7 +254,11 @@ class User extends BaseUser
     }
 
     public function getLastname() {
-        return $this->getMainBeneficiary()->getLastname();
+        $mainBeneficiary = $this->getMainBeneficiary();
+        if ($mainBeneficiary)
+            return $mainBeneficiary->getLastname();
+        else
+            return '';
     }
 
     public function __toString()
@@ -481,28 +451,6 @@ class User extends BaseUser
         return new ArrayCollection($commissions);
     }
 
-    public function isRegistrar($ip){
-        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
-            return true;
-        }
-        elseif (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))){ //todo put this in conf
-            return true;
-        //}elseif ($this->getMainBeneficiary()->isAmbassador()){ //todo check also other Beneficiary ?
-        //    return true;
-        }
-        return false;
-    }
-
-    public function isTaskEditor(){
-        if ($this->hasRole("ROLE_ADMIN") || $this->hasRole("ROLE_SUPER_ADMIN")){
-            return true;
-        }
-        elseif ($this->getCommissions()){ //todo put this in conf
-            return true;
-        }
-        return false;
-    }
-
     /**
      * Set frozen
      *
@@ -680,14 +628,14 @@ class User extends BaseUser
             return $shift->getShift()->getStart() > new DateTime('now');
         });
     }
-    
+
     /**
      * Get all booked shifts in the future
      */
     public function getFutureBookedShifts()
     {
         return $this->getAllBookedShifts()->filter(function($shift) {
-            return $shift->getShift()->getStart() > new DateTime('now');        
+            return $shift->getShift()->getStart() > new DateTime('now');
         });
     }
 
@@ -727,5 +675,199 @@ class User extends BaseUser
             }
         };
         return $first;
+    }
+
+    /**
+     * Add note
+     *
+     * @param \AppBundle\Entity\Note $note
+     *
+     * @return User
+     */
+    public function addNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes[] = $note;
+
+        return $this;
+    }
+
+    /**
+     * Remove note
+     *
+     * @param \AppBundle\Entity\Note $note
+     */
+    public function removeNote(\AppBundle\Entity\Note $note)
+    {
+        $this->notes->removeElement($note);
+    }
+
+    /**
+     * Get notes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getNotes()
+    {
+        return $this->notes;
+    }
+
+    /**
+     * Add annotation
+     *
+     * @param \AppBundle\Entity\Note $annotation
+     *
+     * @return User
+     */
+    public function addAnnotation(\AppBundle\Entity\Note $annotation)
+    {
+        $this->annotations[] = $annotation;
+
+        return $this;
+    }
+
+    /**
+     * Remove annotation
+     *
+     * @param \AppBundle\Entity\Note $annotation
+     */
+    public function removeAnnotation(\AppBundle\Entity\Note $annotation)
+    {
+        $this->annotations->removeElement($annotation);
+    }
+
+    /**
+     * Get annotations
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAnnotations()
+    {
+        return $this->annotations;
+    }
+
+    /**
+     * Check if registration is possible
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function canRegister(\DateTime $date = null)
+    {
+        $remainder = $this->getRemainder($date);
+        if ( ! $remainder->invert ){ //still some days
+            $min_delay_to_anticipate =  \DateInterval::createFromDateString('15 days');
+            $now = new \DateTimeImmutable();
+            $away = $now->add($min_delay_to_anticipate);
+            $now = new \DateTimeImmutable();
+            $expire = $now->add($remainder);
+            return ($expire < $away);
+        }
+        else {
+            return true;
+        }
+    }
+
+    /**
+     * get remainder
+     *
+     * @return \DateInterval|false
+     */
+    public function getRemainder(\DateTime $date = null)
+    {
+        if (!$date){
+            $date = new \DateTime('now');
+        }
+        if (!$this->getLastRegistration()){
+            $expire = new \DateTime('-1 day');
+            return date_diff($date,$expire);
+        }
+        $expire = clone $this->getLastRegistration()->getDate();
+        $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
+        return date_diff($date,$expire);
+    }
+
+    /**
+     * Add receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     *
+     * @return User
+     */
+    public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxys[] = $receivedProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove receivedProxy
+     *
+     * @param \AppBundle\Entity\Proxy $receivedProxy
+     */
+    public function removeReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
+    {
+        $this->received_proxys->removeElement($receivedProxy);
+    }
+
+    /**
+     * Get receivedProxys
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReceivedProxys()
+    {
+        return $this->received_proxys;
+    }
+
+    /**
+     * Get receivedProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReceivedProxies()
+    {
+        return $this->received_proxies;
+    }
+
+    /**
+     * Add givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     *
+     * @return User
+     */
+    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxies[] = $givenProxy;
+
+        return $this;
+    }
+
+    /**
+     * Remove givenProxy
+     *
+     * @param \AppBundle\Entity\Proxy $givenProxy
+     */
+    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
+    {
+        $this->given_proxies->removeElement($givenProxy);
+    }
+
+    /**
+     * Get givenProxies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGivenProxies()
+    {
+        return $this->given_proxies;
+    }
+
+    public function getAutocompleteLabel(){
+        if ($this->getMainBeneficiary())
+            return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+        else
+            return '#'.$this->getMemberNumber().' '.$this->getUsername();
     }
 }

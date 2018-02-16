@@ -16,9 +16,23 @@
     {{ form_start(edit_form) }}
     {% include "user/_partial/user_form.html.twig" with { form: edit_form } %}
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Mettre à jour</button>
+        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
     </div>
     {{ form_end(edit_form) }}
+    {% if not user.isEnabled %}
+        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+
+            {% else %}
+                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                    <input type="hidden" name="username" value="{{ user.username }}" />
+                    <div>
+                        Envoyer le lien de connection sur {{ user.email }} ?
+                        <br>
+                        <input type="submit" name="submit" value="Activer le compte" class="btn-large waves-effect waves-light light-green" />
+                    </div>
+                </form>
+        {% endif %}
+    {% endif %}
 
     <h4>Adhésions</h4>
 
@@ -42,7 +56,7 @@
             </li>
         {% endfor %}
     </ul>
-    {% if not user.lastRegistration or user.lastRegistration.date|date('Y') < 'now'|date('Y') %}
+    {% if user.canRegister and user != app.user %}
     <ul class="collapsible" data-collapsible="accordion">
         <li>
             {% if not user.lastRegistration %}
@@ -57,13 +71,24 @@
             </div>
         </li>
     </ul>
+    {% else %}
+    <ul class="collapsible" data-collapsible="accordion">
+        <li>
+            {% if not user.lastRegistration %}
+                <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
+            {% else %}
+                <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
+            {% endif %}
+            <div class="collapsible-body new_registration_form">
+                Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ user.remainder | date('%a') }} jours.
+            </div>
+        </li>
+    </ul>
     {% endif %}
 
     <h4>Bénéficiaires</h4>
     <div class="row">
         {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: user.mainBeneficiary } %}
-    </div>
-    <div class="row">
         {% for beneficiary in user.beneficiaries %}
             {% if not beneficiary.isMain %}
                 {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
@@ -86,6 +111,13 @@
         </ul>
     {#{% else %}#}
     {% endif %}
+    {% if user.notes | length %}
+        <h4>Note{% if user.notes | length > 1 %}s{% endif %} à propos de ce membre</h4>
+        {%  for note in user.notes %}
+            {% include "ambassador/phone/_note.html.twig" with { note: note } %}
+        {% endfor %}
+    {% endif %}
+
 
 
 {% endblock %}

@@ -94,7 +94,7 @@
                         {% else %}
                             Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> !
                             {% if not user.lastRegistration %}
-                                <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peu pas être activé.</div>
+                                <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peut pas être activé.</div>
                             {% else %}
                                 {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
                                     <br>

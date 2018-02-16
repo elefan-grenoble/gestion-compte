@@ -15,6 +15,11 @@ parameters:
     mailer_port: 25
     mailer_user: ~
     mailer_password: ~
+    mailer_encryption: null
+
+    # mail user used for transactional
+    transactional_mailer_user: ~
+    transactional_mailer_user_name: 'espace membre'
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt

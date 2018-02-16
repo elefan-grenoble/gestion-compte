@@ -43,18 +43,10 @@ class UserController extends Controller
      * @Route("/office_tools", name="user_office_tools")
      * @Method("GET")
      */
-    public function officeToolsAction(Request $request)
+    public function officeToolsAction()
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        return $this->render('default/tools/office_tools.html.twig', array(
-            'ip' => $request->getClientIp()
-        ));
+        $this->denyAccessUnlessGranted('access_tools', $this->get('security.token_storage')->getToken()->getUser());
+        return $this->render('default/tools/office_tools.html.twig');
     }
 
     /**
@@ -92,98 +84,100 @@ class UserController extends Controller
      * @Route("/new", name="user_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, \Swift_Mailer $mailer)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        $securityContext = $this->container->get('security.authorization_checker');
-        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $user = new User();
+        $this->denyAccessUnlessGranted('create', $current_app_user);
+        $user = new User();
 
-            $em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
 
-            //todo use the first available, not the bigest plus one
-            $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'DESC'));
-            $mm = 1;
-            if (count($users) && isset($users[0]))
-                $mm = $users[0]->getMemberNumber() + 1;
-            $user->setMemberNumber($mm);
+        //todo use the first available, not the bigest plus one
+        $users = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'DESC'));
+        $mm = 1;
+        if (count($users) && isset($users[0]))
+            $mm = $users[0]->getMemberNumber() + 1;
+        $user->setMemberNumber($mm);
 
-            $registration = new Registration();
-            $registration->setDate(new DateTime('now'));
-            $registration->setUser($user);
-            $registration->setRegistrar($current_app_user);
-            $user->addRegistration($registration);
+        $registration = new Registration();
+        $registration->setDate(new DateTime('now'));
+        $registration->setUser($user);
+        $registration->setRegistrar($current_app_user);
+        $user->addRegistration($registration);
 
-            $form = $this->createForm('AppBundle\Form\UserType', $user);
-            $form->handleRequest($request);
+        $form = $this->createForm('AppBundle\Form\UserType', $user);
+        $form->handleRequest($request);
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $email = $user->getMainBeneficiary()->getEmail();
-                if (!filter_var($email,FILTER_SANITIZE_EMAIL)||!filter_var($email,FILTER_VALIDATE_EMAIL)){
-                    $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $user->getMainBeneficiary()->getEmail();
+            if (!filter_var($email,FILTER_SANITIZE_EMAIL)||!filter_var($email,FILTER_VALIDATE_EMAIL)){
+                $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
+            }else{
+                $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$email));
+                if ($other_user){
+                    $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! ('.'#'.$other_user->getMemberNumber()." ".$other_user->getFirstName()." ".$other_user->getLastName()[0].')');
                 }else{
-                    $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$email));
-                    if ($other_user){
-                        $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! ('.'#'.$other_user->getMemberNumber()." ".$other_user->getFirstName()." ".$other_user->getLastName()[0].')');
+                    $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$email));
+                    if ($beneficiary){
+                        $session->getFlashBag()->add('error', 'Oups, un beneficiaire est déjà enregistré avec cet email !('.'#'.$beneficiary->getUser()->getMemberNumber()." ".$beneficiary->getUser()->getFirstName()." ".$beneficiary->getUser()->getLastName()[0].')');
                     }else{
-                        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$email));
-                        if ($beneficiary){
-                            $session->getFlashBag()->add('error', 'Oups, un beneficiaire est déjà enregistré avec cet email !('.'#'.$beneficiary->getUser()->getMemberNumber()." ".$beneficiary->getUser()->getFirstName()." ".$beneficiary->getUser()->getLastName()[0].')');
-                        }else{
-                            $username = User::makeUsername($user->getFirstname(),$user->getLastname());
-                            $qb = $em->createQueryBuilder();
-                            $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-                                ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
-                                ->getQuery()
-                                ->getResult();
-                            $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
-                            if (count($users)||$already_registred){
-                                $username = User::makeUsername($user->getFirstname(),$user->getLastname(),count($users)+1+$already_registred);
-                            }
-                            $user->setUsername($username);
-                            $password = User::randomPassword();
-                            $user->setPassword($password);
-                            $user->getMainBeneficiary()->setUser($user);
-                            $user->setEmail($user->getMainBeneficiary()->getEmail());
+                        $username = User::makeUsername($user->getFirstname(),$user->getLastname());
+                        $qb = $em->createQueryBuilder();
+                        $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+                            ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
+                            ->getQuery()
+                            ->getResult();
+                        $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
+                        if (count($users)||$already_registred){
+                            $username = User::makeUsername($user->getFirstname(),$user->getLastname(),count($users)+1+$already_registred);
+                        }
+                        $user->setUsername($username);
+                        $password = User::randomPassword();
+                        $user->setPassword($password);
+                        $user->getMainBeneficiary()->setUser($user);
+                        $user->setEmail($user->getMainBeneficiary()->getEmail());
 
-                            if (!$user->getLastRegistration()->getRegistrar())
-                                $user->getLastRegistration()->setRegistrar($current_app_user);
+                        if (!$user->getLastRegistration()->getRegistrar())
+                            $user->getLastRegistration()->setRegistrar($current_app_user);
 
-                            $em->persist($user);
-                            $em->flush();
+                        $em->persist($user);
+                        $em->flush();
 
-                            $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+                        $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
 
-                            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                            else{
-                                $session->set('token_key',uniqid());
-                                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
-                            }
+                        $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn'))
+                            ->setFrom('membres@lelefan.org')
+                            ->setTo($user->getEmail())
+                            ->setBody(
+                                $this->renderView(
+                                    'emails/welcome.html.twig',
+                                    array('user' => $user)
+                                ),
+                                'text/html'
+                            );
+                        $mailer->send($welcome);
+
+                        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+                        else{
+                            $session->set('token_key',uniqid());
+                            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
                         }
                     }
                 }
-            }elseif ($form->isSubmitted()){
-                foreach ($this->getErrorMessages($form) as $key => $errors){
-                    foreach ($errors as $error)
-                        $session->getFlashBag()->add('error', $key." : ".$error);
-                }
             }
-
-            return $this->render('user/new.html.twig', array(
-                'user' => $user,
-                'form' => $form->createView(),
-            ));
-        }else{
-            return $this->redirectToRoute('fos_user_security_login');
+        }elseif ($form->isSubmitted()){
+            foreach ($this->getErrorMessages($form) as $key => $errors){
+                foreach ($errors as $error)
+                    $session->getFlashBag()->add('error', $key." : ".$error);
+            }
         }
+
+        return $this->render('user/new.html.twig', array(
+            'user' => $user,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
@@ -194,18 +188,17 @@ class UserController extends Controller
      */
     public function editFirewallAction(Request $request)
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-
+        $session = new Session();
         $username = $request->request->get('username');
         if ($username){
             $em = $this->getDoctrine()->getManager();
             $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            if ($this->isGranted('view', $user)){
+                return $this->redirectToRoute('user_edit',array(
+                    'username'=>$user->getUsername(),
+                    'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
+                            ->getToken()->getUser()->getUsername())));
+            }
             $form = $this->createFormBuilder()
                 ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent','disabled' => true,'attr' => array( 'value'=>$user->getMemberNumber())))
                 ->add('username', HiddenType::class, array('attr' => array( 'value'=>$user->getUsername())))
@@ -213,12 +206,22 @@ class UserController extends Controller
                 ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de '.$user->getFirstname(),'attr' => array('class' => 'btn')))
                 ->getForm();
         }else{
-            $form = $this->createFormBuilder()
-                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
-                ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
-                ->add('email', EmailType::class, array('label' => 'email'))
-                ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
-                ->getForm();
+            if ($this->isGranted('view', new User())){
+                $form = $this->createFormBuilder()
+                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('email', HiddenType::class, array('label' => 'email'))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->getForm();
+            }else{
+                $form = $this->createFormBuilder()
+                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('email', EmailType::class, array('label' => 'email'))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->getForm();
+            }
+
         }
 
         $form->handleRequest($request);
@@ -235,16 +238,18 @@ class UserController extends Controller
                 $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
             else if($member_number)
                 $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
-            if ($user&&$email&&($user->getEmail()==$email)){
-                $session = new Session();
+
+            if ($user&&($this->isGranted('view',$user) || ($email&&($user->getEmail()==$email)))){
                 $session->set('token_key',uniqid());
                 return $this->redirectToRoute('user_edit',array(
                     'username'=>$user->getUsername(),
                     'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
                             ->getToken()->getUser()->getUsername())));
             }
-            $session = new Session();
-            $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
+            if ($email)
+                $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
+            if (!$user)
+                $session->getFlashBag()->add('error', 'membre non trouvé');
         }
 
         return $this->render('user/edit_firewall.html.twig', array(
@@ -262,15 +267,15 @@ class UserController extends Controller
     {
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-            ($request->query->get('token') != $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
+        $this->denyAccessUnlessGranted('edit', $user);
+
+        $re = '/(membres\+.*[0-9]+@lelefan\.org)/i';
+        $email = $user->getEmail();
+        preg_match($re, $email, $matches, PREG_OFFSET_CAPTURE, 0);
+        if (count($matches)){
+            $session->getFlashBag()->add('warning',
+                'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
+            $user->getMainBeneficiary()->setEmail('');
         }
 
         $editForm = $this->createForm('AppBundle\Form\UserType', $user);
@@ -290,18 +295,10 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
-            if ($phone){
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            }else{
-                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
-            }
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
 
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-            else
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+            return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
         $beneficiary = new Beneficiary();
@@ -328,11 +325,7 @@ class UserController extends Controller
             }else{
                 $session->getFlashBag()->add('error', 'Maximum '.(5-1).' beneficiaires enregistrés'); //todo put this in conf
             }
-
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-            else
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+            return $this->redirectToEdit($user,$session,$current_app_user);
         }elseif ($beneficiaryForm->isSubmitted()){
             foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors){
                 foreach ($errors as $error)
@@ -341,7 +334,14 @@ class UserController extends Controller
         }
 
         $newReg = new Registration();
-        $newReg->setDate(new DateTime('now'));
+        $remainder = $user->getRemainder();
+        if ( ! $remainder->invert ){ //still some days
+            $date = clone $user->getLastRegistration()->getDate();
+            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+        }
+        else { //register now !
+            $newReg->setDate(new DateTime('now'));
+        }
         $newReg->setRegistrar($current_app_user);
         $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
         $registrationForm->add('is_new',HiddenType::class,array('attr'=>array('value'=>'1')));
@@ -350,47 +350,29 @@ class UserController extends Controller
             $amount = floatval($registrationForm->get('amount')->getData());
             if ($amount<=0){
                 $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
-                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                else
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
-
+                return $this->redirectToEdit($user,$session,$current_app_user);
             }
 
             if ($current_app_user->getId()==$user->getId()){
                 $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
-                if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                else
-                    return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
-
+                return $this->redirectToEdit($user,$session,$current_app_user);
             }
             $newReg->setRegistrar($current_app_user);
 
-            $date  =$registrationForm->get('date')->getData();
-            $r = $user->getLastRegistration();
-            if ($r){
-                $Y = $r->getDate()->format('Y');
-                if ($Y == $date->format('Y')){
-                    $session->getFlashBag()->add('warning', 'l\'adhésion précédente du '.$r->getDate()->format('d F Y').' est encore valable !');
-                    if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                    else
-                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
-
-                }
+            $date  = $registrationForm->get('date')->getData();
+            if (!$user->canRegister($date)){
+                $session->getFlashBag()->add('warning', 'l\'adhésion précédente du est encore valable à cette date !');
+                return $this->redirectToEdit($user,$session,$current_app_user);
             }
             $newReg->setUser($user);
+            $user->addRegistration($newReg);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($newReg);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Enregistrement effectuée');
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-            else
-                return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+            return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
         $registrationForms = array();
@@ -417,14 +399,10 @@ class UserController extends Controller
                     $em->persist($registration);
                     $em->flush();
                     $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-                    if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
-                    else
-                        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+                    return $this->redirectToEdit($user,$session,$current_app_user);
                 }
             }
         }
-
 
         $deleteBeneficiaryForms = array();
         foreach ($user->getBeneficiaries() as $beneficiary){
@@ -442,7 +420,6 @@ class UserController extends Controller
                     ->setMethod('DELETE')->getForm()->createView();
         }
 
-
         if ($user->isWithdrawn())
             $session->getFlashBag()->add('warning', 'Ce compte est fermé');
 
@@ -457,13 +434,21 @@ class UserController extends Controller
         ));
     }
 
+    private function redirectToEdit($user,$session,$current_app_user)
+    {
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+        else
+            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+    }
+
     /**
      * remove client from user
      *
-     * @Route("/{username}/remove_client/{id}", name="user_client_remove")
+     * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
      * @Method({"GET", "POST"})
      */
-    public function removeClientUserAction(Request $request,User $user,Client $client){
+    public function removeClientUserAction(User $user,$client_id){
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
@@ -472,13 +457,23 @@ class UserController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')&&($current_app_user != $user)) {
             throw $this->createAccessDeniedException();
         }
-        if ($user->getClients()->contains($client)){
-            $user->removeClient($client);
-            $this->getDoctrine()->getManager()->flush($user);
-            $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+        if ($client_id){
+            $client = $this->getDoctrine()->getManager()->getRepository('AppBundle:Client')->find($client_id);
+            if ($client->getId()){
+                if ($user->getClients()->contains($client)){
+                    $user->removeClient($client);
+                    $this->getDoctrine()->getManager()->flush($user);
+                    $session->getFlashBag()->add('success','Le service a bien été supprimé de votre compte');
+                }else{
+                    $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+                }
+            }else{
+                $session->getFlashBag()->add('error','ce client n\'existe pas');
+            }
         }else{
-            $session->getFlashBag()->add('error','ce client n\'est pas associé à votre compte');
+            $session->getFlashBag()->add('error','ce client n\'existe pas');
         }
+
         return $this->redirectToRoute('fos_user_profile_edit');
     }
 
@@ -492,16 +487,7 @@ class UserController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('edit', $beneficiary->getUser());
 
         $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
         $editForm->handleRequest($request);
@@ -540,17 +526,8 @@ class UserController extends Controller
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$current_app_user->isRegistrar($request->getClientIp())) {
-            throw $this->createAccessDeniedException();
-        }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ( !$session->get('token_key') ||
-                ($request->query->get('token') != $beneficiary->getUser()->getTmpToken($session->get('token_key').$current_app_user->getUsername())) ) ) {
-            throw $this->createAccessDeniedException();
-        }
+
+        $this->denyAccessUnlessGranted('edit', $beneficiary->getUser());
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('user_edit_beneficiary_delete', array('username' => $beneficiary->getUser()->getUsername(),'id' => $beneficiary->getId())))
@@ -575,13 +552,10 @@ class UserController extends Controller
      *
      * @Route("/{username}", name="user_show")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
      */
     public function showAction(User $user)
     {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
+        $this->denyAccessUnlessGranted('view', $user);
 
         $deleteForm = $this->createDeleteForm($user);
 
@@ -596,17 +570,24 @@ class UserController extends Controller
      *
      * @Route("/{username}", name="user_delete")
      * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, User $user)
     {
         $form = $this->createDeleteForm($user);
         $form->handleRequest($request);
 
+        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $em->remove($user->getMainBeneficiary());
+            foreach ($user->getBeneficiaries() as $beneficiary){
+                $em->remove($beneficiary);
+            }
             $em->remove($user);
             $em->flush();
+
+            $session->getFlashBag()->add('success',"L'utilisateur a bien été supprimé");
         }
 
         return $this->redirectToRoute('user_index');

@@ -1,0 +1,38 @@
+<div class="col s6 m12">
+    <div class="card-panel white">
+        <h5>{{ event.title }}</h5>
+        <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
+        {% if event.needProxy %}
+            {% if not app.user.lastRegistration %}
+                <b>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</b>
+            {% else %}
+                {% if app.user.lastRegistration.date < event.minDateOfLastRegistration %}
+                    <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                    <br>Penses à mettre à jour ton adhésion pour participer ! :)
+                {% else %}
+                    {% set proxy_given = false %}
+                    <ul>
+                    {% for proxy in event.proxies %}
+                        {% if proxy.giver == app.user %}
+                            <li>Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b></li>
+                            {% set proxy_given = true %}
+                        {% endif %}
+
+                        {% if proxy.owner in app.user.beneficiaries %}
+                            {% if proxy.giver %}
+                                <li>Procuration pour <b>{{ proxy.owner.firstname }}</b> de la part de&nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b></li>
+                            {% else %}
+                                <li><b>{{ proxy.owner.firstname }}</b> accepte une procuration.</li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
+                    {% if not proxy_given %}
+                        <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
+                        <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+</div>

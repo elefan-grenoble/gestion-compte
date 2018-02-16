@@ -1,0 +1,62 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i>procuration
+{% endblock %}
+
+{% block content %}
+
+    <h4 class="">Donner une procuration</h4>
+    <h5 class="">{{ event.title }}&nbsp;<i>{{ event.date | date('d F Y H:i') }}</i></h5>
+
+    {% if search_form is defined %}
+    {{ form_start(search_form) }}
+    <h6 class="">Donner ma procuration une personne que je connais</h6>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(search_form.firstname) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(search_form.firstname) }}
+                {{ form_label(search_form.firstname) }}
+            </div>
+        </div>
+        <div class="col s6">
+            <button type="submit" class="btn-large waves-effect waves-light purple" id="find_beneficiary"><i class="material-icons left">search</i>Chercher ce bénéficiaire</button>
+        </div>
+    </div>
+    {{ form_end(search_form) }}
+    {% endif %}
+
+    {% if confirm_form is defined %}
+    {{ form_start(confirm_form) }}
+    <h6 class="">Donner ma procuration une personne que je connais</h6>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(confirm_form.owner) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(confirm_form.owner) }}
+                {{ form_label(confirm_form.owner) }}
+            </div>
+        </div>
+        <div class="col s6">
+            <button type="submit" class="btn-large waves-effect waves-light purple" id="find_beneficiary"><i class="material-icons left">check</i>Valider</button>
+        </div>
+    </div>
+    {{ form_end(confirm_form) }}
+    {% endif %}
+
+    {% if confirm_form is not defined %}
+    {{ form_start(form) }}
+    <div>
+        <h6 class="">Donner ma procuration à une personne qui se propose</h6>
+        <button type="submit" class="btn-large waves-effect waves-light green" id="submit">Oui, Merci à elle !</button>
+    </div>
+    {{ form_end(form) }}
+    {% endif %}
+
+{% endblock %}

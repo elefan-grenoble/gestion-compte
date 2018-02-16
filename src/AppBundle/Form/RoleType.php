@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +14,9 @@ class RoleType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name');
+        $builder->add('name')
+        ->add('has_view_user_data_rights', CheckboxType::class,array('required' => false,'label'=>'Peut consulter les données utilisateurs'))
+        ->add('has_edit_user_data_rights', CheckboxType::class,array('required' => false,'label'=>'Peut editer les données utilisateurs'));
     }
     
     /**

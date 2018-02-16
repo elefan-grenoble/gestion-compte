@@ -17,48 +17,43 @@
                     <h3 class="header">Bonjour {{ app.user.firstname }}</h3>
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
                 </div>
+                <div class="row">
+                    {% for event in events %}
+                        {% include "default/event/_event.html.twig" with { event: event } %}
+                    {% endfor %}
+                </div>
 
+                <h5>Participer</h5>
                 <div class="section">
                     {% include "booking/_partial/booked_shifts.html.twig" %}
                 </div>
 
-                <div class="section">
-                    <h4 class="header">Participer</h4>
-                    <div class="row">
-                        <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
-                    </div>
-                    {% if (app.user.isRegistrar(ip))  %}
-                        <div class="row">
-                            <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
-                        </div>
-                    {% endif %}
-                </div>
+                <h5>Construire</h5>
+                {% if is_granted("access_tools",app.user)  %}
+                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                {% endif %}
+                <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
 
                 {% if is_granted("ROLE_ADMIN") %}
-                    <div class="section">
-                        <h4 class="header">Administration </h4>
-                        <div class="row">
-                            <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
-                        </div>
-                        <div class="row">
-                            <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
-                        </div>
-                    </div>
+                    <h5>Actions admin</h5>
+                    <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
+                    <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
             </div>
         {% else %}
-            <div class="container center">
+            <div class="container">
                 <br><br>
-                <h3 class="header orange-text">Mon compte à l'éléfàn</h3>
-                <div class="row">
+                <h3 class="header center orange-text">Mon compte à l'éléfàn</h3>
+                <div class="row center">
                     <p class="col s12 light">Bienvenue sur l'espace membre</p>
                 </div>
-                <div class="row">
-                    <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light">Me connecter</a>
+                <div class="row center">
+                    <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light"><i class="material-icons left">lock_outline</i>Se connecter</a>
                 </div>
-                <div class="row">
-                    <p class=" col s12 light">Nouveau à l'éléfan ?</p>
-                    <a href="{{ path('find_me') }}" id="download-button" class="btn-large waves-effect waves-light orange">Créer mon compte</a>
+                <div class="row center">
+                    <p class=" col s12 light"> Pas encore d'identifiant ?
+                        <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
+                    </p>
                 </div>
             </div>
         {% endif %}
