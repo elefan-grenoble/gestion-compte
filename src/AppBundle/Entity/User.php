@@ -476,6 +476,28 @@ class User extends BaseUser
     }
 
     /**
+     * Set lastRegistration
+     *
+     * @param \AppBundle\Entity\Registration $lastRegistration
+     *
+     * @return User
+     */
+    public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
+    {
+        $this->lastRegistration = $lastRegistration;
+        return $this;
+    }
+    /**
+     * Get lastRegistration
+     *
+     * @return \AppBundle\Entity\Registration
+     */
+    public function getLastRegistration()
+    {
+        return $this->lastRegistration;
+    }
+
+    /**
      * determine whether the given client (ClientInterface) is allowed by the user, or not.
      * @param ClientInterface $client
      * @return bool

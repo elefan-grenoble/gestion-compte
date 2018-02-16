@@ -1,9 +1,9 @@
-<h4 class="header center">Mes créneaux à venir</h4>
+<h5>Mes créneaux à venir</h5>
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
 <p>{% if (app.user.remainingToBook(1)|duration_from_minutes == 0) %}
        <i class="material-icons">stars</i> Bravo ! Tous tes créneaux sont planifiés sur le cycle actuel !
     {% else %}
-        Tu as encore {{ app.user.remainingToBook(1)|duration_from_minutes }} de bénévolat à planifier pour ce cycle
+        Tu as encore <b>{{ app.user.remainingToBook(1)|duration_from_minutes }}</b> de bénévolat à planifier pour ce cycle
     {% endif %}
 </p>
 <div class="row">
@@ -43,7 +43,7 @@
 {% endfor %}
 </div>
 
-<a href="{{ path("booking") }}" class="btn" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
+<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
 
 {% for bookedshift in app.user.getFutureBookedShifts() %}
     {% if (bookedshift.getBooker() != bookedshift.getShifter()) %}
