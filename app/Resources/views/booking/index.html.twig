@@ -61,6 +61,9 @@
                     </div>
                 </div>
             </div>
+            {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((shifts|first).start) | date('Y-m-d') ) %}
+                <hr>
+            {% endif %}
         {% endfor %}
 
 {% endblock %}

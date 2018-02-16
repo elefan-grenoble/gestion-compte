@@ -1,28 +1,44 @@
-<div id="book{{ shift.id }}" class="modal modal-fixed-footer">
+<div id="book{{ shift.id }}" class="modal">
     <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
         <div class="modal-content">
             <h4>Réserver ce créneau</h4>
+            <h5>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h5>
+            {% if shift.dismissedShifts | length > 0 %}
+                <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
+            {% endif %}
             {% if user.beneficiaries | length < 1 %}
                 <p>Vous n'avez pas de bénéficiares</p>
             {% else %}
-                <p><label>Nombre de places restantes: </label>{{ shift.getRemainingShifters() }}</p>
-                <p>Attention! Vous ne pourrez annuler...</p>
-                <div class="input-field">
-                    <select name="beneficiaryId">
-                        {% for beneficiary in user.beneficiaries %}
-                            <option value="{{ beneficiary.id }}">{{ beneficiary.firstname }}</option>
-                        {% endfor %}
-                    </select>
-                    <label>Choisir le bénéficiaire</label>
+                <p><label>Nombre de places restantes: </label>{{ shift.remainingShifters }}/{{ shift.maxShiftersNb }}</p>
+                <div class="row">
+                    {% for shifter in 1..shift.maxShiftersNb  %}
+                        {% if loop.index <= shift.remainingShifters %}
+                            <div class="green lighten-1 left" style=" height:5px; width: {{ 100/shift.maxShiftersNb }}%"></div>
+                        {% else %}
+                            <div class="grey lighten-3 left" style="height:5px; width: {{ 100/shift.maxShiftersNb }}%"></div>
+                        {% endif %}
+                    {% endfor %}
                 </div>
+                <p>Attention ! Cette inscription vous engage. <br> Pour pouvoir annuler, votre créneaux devra trouver repreneur. </p>
+                {% if user.beneficiaries | length > 1 %}
+                    <div class="input-field">
+                        <select name="beneficiaryId">
+                            {% for beneficiary in user.beneficiaries %}
+                                <option value="{{ beneficiary.id }}">{{ beneficiary.firstname }}</option>
+                            {% endfor %}
+                        </select>
+                        <label>Choisir le bénéficiaire</label>
+                    </div>
+                {% else %}
+                    <input type="hidden" name="beneficiaryId" value="{{ (user.beneficiaries|first).id }}">
+                {% endif %}
             {% endif %}
         </div>
         <div class="modal-footer">
             <a href="#!"
-               class="modal-action modal-close waves-effect waves-green btn-flat ">Annuler</a>
+               class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Annuler</a>
             {% if user.beneficiaries | length >= 1 %}
-                <button class="modal-action modal-close waves-effect waves-green btn-flat ">Réserver
-                </button>
+                <button class="modal-action modal-close waves-effect waves-green btn teal">Confirmer</button>
             {% endif %}
         </div>
     </form>

@@ -9,13 +9,29 @@
            and (shift.start > app.user.endOfCycle(1) or shift.duration() <= app.user.remainingToBook(1))
            and (shift.start < app.user.startOfCycle(2) or shift.duration() <= app.user.remainingToBook(2)) %}href="#book{{ shift.id }}"{% endif %}
        class="modal-trigger">
-        <div class="{% if (shift.remainingShifters() == 0)
-            or shift.isBookedBy(app.user.id)
-            or (shift.start <= app.user.endOfCycle(1) and shift.duration() > app.user.remainingToBook(1))
-            or (shift.start > app.user.startOfCycle(2) and shift.duration() > app.user.remainingToBook(2))%}grey {% else %}orange {% if shift.getRemainingShifters() > 1 %}darken-{{ min(4, shift.getRemainingShifters() - 1) }} {% endif %}{% endif %} white-text z-depth-2">
-            <div class="" style="font-size: 11px;padding:3px">
-                <div>{{ shift.start|date('G\\hi') }}</div>
-                <div>{{ shift.end|date('G\\hi') }}</div>
+        <div class=" white-text z-depth-2" style="height:40px;">
+            <div style="height:100%; width: 100%;position: absolute;">
+            {% for shifter in 1..shift.maxShiftersNb  %}
+                {% if loop.index <= shift.remainingShifters %}
+                    <div class="{% if (shift.remainingShifters() == 0)
+                        or shift.isBookedBy(app.user.id)
+                        or (shift.start <= app.user.endOfCycle(1) and shift.duration() > app.user.remainingToBook(1))
+                        or (shift.start > app.user.startOfCycle(2) and shift.duration() > app.user.remainingToBook(2))%}grey {% else %}orange {% if shift.getRemainingShifters() > 1 %}darken-{{ min(4, shift.getRemainingShifters() - 1) }} {% endif %}{% endif %} left"
+                         style="height:100%; width: {{ 100/shift.maxShiftersNb }}%"></div>
+                {% else %}
+                    <div class="grey lighten-3 left" style="height:100%; width: {{ 100/shift.maxShiftersNb }}%"></div>
+                {% endif %}
+            {% endfor %}
+            </div>
+            <div class="row" style="font-size: 11px;padding:3px;position: absolute;">
+                <div class="col s6">{{ shift.start|date('G\\hi') }}</div>
+                <div class="col s6 right">
+                    &nbsp;
+                    {% if shift.dismissedShifts | length > 0 %}
+                        <i class="material-icons">star</i>
+                    {% endif %}
+                </div>
+                <div class="col s6">{{ shift.end|date('G\\hi') }}</div>
             </div>
         </div>
     </a>
