@@ -270,12 +270,16 @@ class EventController extends Controller
             $em = $this->getDoctrine()->getManager();
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($request->get("beneficiary"));
             if ($beneficiary && $beneficiary->getUser()->getMemberNumber() == $request->get("member_number")){
-                $proxy = new Proxy();
-                $proxy->setEvent($event);
-                $proxy->setCreatedAt(new \DateTime());
+
+                $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>null,"owner"=>$beneficiary));
+                if (!$proxy){
+                    $proxy = new Proxy();
+                    $proxy->setEvent($event);
+                    $proxy->setCreatedAt(new \DateTime());
+                    $proxy->setOwner($beneficiary);
+                }
                 $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
                 $proxy->setGiver($current_app_user);
-                $proxy->setOwner($beneficiary);
                 $confirm_form = $this->createForm('AppBundle\Form\ProxyType', $proxy);
                 $confirm_form->handleRequest($request);
 
