@@ -20,7 +20,7 @@
                 <div class="card-action">
                     <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oups, je ne vais pas pouvoir effectuer mon créneau...</a>
                 </div>
-                <div id="dismiss{{ shift.id }}" class="modal modal-fixed-footer">
+                <div id="dismiss{{ shift.id }}" class="modal">
                     <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
                         <div class="modal-content">
                             <h4>Je ne peux pas faire mon créneau</h4>
@@ -28,13 +28,13 @@
                                 pour pouvoir vous inscrire de nouveau.</p>
                             <div class="input-field">
                                 <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
-                                <label for="reason">Commentaire</label>
+                                <label for="reason">Justification éventuelle</label>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <a href="#!"
-                               class="modal-action modal-close waves-effect waves-green btn-flat ">Annuler</a>
-                            <button class="modal-action modal-close waves-effect waves-green btn-flat ">Valider</button>
+                               class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Annuler</a>
+                            <button class="modal-action modal-close waves-effect waves-green btn teal ">Valider</button>
                         </div>
                     </form>
                 </div>

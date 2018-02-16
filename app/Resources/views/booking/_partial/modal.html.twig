@@ -24,7 +24,7 @@
                     <div class="input-field">
                         <select name="beneficiaryId">
                             {% for beneficiary in user.beneficiaries %}
-                                <option value="{{ beneficiary.id }}">{{ beneficiary.firstname }}</option>
+                                <option value="{{ beneficiary.id }}" data-icon="{{ gravatar(beneficiary.email) }}" class="left circle">{{ beneficiary.firstname }}</option>
                             {% endfor %}
                         </select>
                         <label>Choisir le bénéficiaire</label>
