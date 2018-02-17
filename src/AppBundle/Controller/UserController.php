@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
+use AppBundle\Entity\Note;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
@@ -41,12 +42,23 @@ class UserController extends Controller
      * Lists all user entities.
      *
      * @Route("/office_tools", name="user_office_tools")
-     * @Method("GET")
+     * @Method({"GET","POST"})
      */
-    public function officeToolsAction()
+    public function officeToolsAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->get('security.token_storage')->getToken()->getUser());
-        return $this->render('default/tools/office_tools.html.twig');
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->denyAccessUnlessGranted('access_tools',$current_app_user);
+        $postit = new Note();
+        $postit->setAuthor($current_app_user);
+        $postit_form = $this->createForm('AppBundle\Form\NoteType', $postit);
+        $postit_form->handleRequest($request);
+
+        if ($postit_form->isSubmitted() && $postit_form->isValid()) {
+
+        }
+        return $this->render('default/tools/office_tools.html.twig', array(
+            'postit_form' => $postit_form->createView(),
+        ));
     }
 
     /**
