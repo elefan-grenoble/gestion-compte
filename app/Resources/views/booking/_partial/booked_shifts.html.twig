@@ -52,7 +52,7 @@
 
 <a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
 
-{% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris</h5>{% endif %}
+{% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux repris</h5>{% endif %}
 {% for bookedshift in app.user.getFutureRebookedShifts() %}
 <div class="row">
     <div class="col m6 s12 {% if (app.user.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
