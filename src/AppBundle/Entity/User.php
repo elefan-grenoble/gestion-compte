@@ -652,12 +652,12 @@ class User extends BaseUser
     }
 
     /**
-     * Get all booked shifts in the future
+     * Get all rebooked shifts in the future
      */
-    public function getFutureBookedShifts()
+    public function getFutureRebookedShifts()
     {
         return $this->getAllBookedShifts()->filter(function($shift) {
-            return $shift->getShift()->getStart() > new DateTime('now');
+            return ($shift->getShift()->getStart() > new DateTime('now') && $shift->getBooker() != $shift->getShifter());
         });
     }
 

@@ -7,7 +7,7 @@
     {% endif %}
 </p>
 <div class="row">
-    {% set cycle = 1 %}
+{% set cycle = 1 %}
 {% for shift in app.user.getFutureShifts() %}
     {% if  ( app.user.endOfCycle(cycle) | date('Ymd') ) < (shift.shift.start | date('Ymd') ) %}
         <hr class="col s12">
@@ -52,16 +52,17 @@
 
 <a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
 
-{% for bookedshift in app.user.getFutureBookedShifts() %}
-    {% if (bookedshift.getBooker() != bookedshift.getShifter()) %}
-        <div>
-            <div class="card green lighten-5">
-                <div class="card-content green-text">
-                    <span class="card-title">{{ bookedshift.getShift().start|date_fr_long }}</span>
-                    <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
-                    <p>Créneau repris</p>
-                </div>
+{% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris</h5>{% endif %}
+{% for bookedshift in app.user.getFutureRebookedShifts() %}
+<div class="row">
+    <div class="col m6 s12 {% if (app.user.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
+        <div class="card green lighten-5">
+            <div class="card-content green-text">
+                <span class="card-title">{{ bookedshift.getShift().start|date_fr_long }}</span>
+                <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
+                <p>Créneau repris</p>
             </div>
         </div>
-    {% endif %}
+    </div>
+</div>
 {% endfor %}
