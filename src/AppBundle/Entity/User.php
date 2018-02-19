@@ -642,12 +642,13 @@ class User extends BaseUser
     }
 
     /**
-     * Get all shifts in the future
+     * Get all shifts in the future for this cycle
      */
-    public function getFutureShifts()
+    public function getFutureShiftsOfCycle($cycleIndex)
     {
-        return $this->getAllShifts()->filter(function($shift) {
-            return $shift->getShift()->getStart() > new DateTime('now');
+        return $this->getAllShifts()->filter(function($shift) use ($cycleIndex) {
+            return $shift->getShift()->getStart() > $this->startOfCycle($cycleIndex) && 
+                $shift->getShift()->getEnd() < $this->endOfCycle($cycleIndex);
         });
     }
 
@@ -657,7 +658,8 @@ class User extends BaseUser
     public function getFutureRebookedShifts()
     {
         return $this->getAllBookedShifts()->filter(function($shift) {
-            return ($shift->getShift()->getStart() > new DateTime('now') && $shift->getBooker() != $shift->getShifter());
+            return $shift->getShift()->getStart() > new DateTime('now') && 
+                $shift->getBooker() != $shift->getShifter();
         });
     }
 

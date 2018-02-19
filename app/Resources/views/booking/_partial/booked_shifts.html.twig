@@ -6,14 +6,14 @@
         Tu as encore <b>{{ app.user.remainingToBook(1)|duration_from_minutes }}</b> de bénévolat à planifier pour ce cycle
     {% endif %}
 </p>
+
 <div class="row">
-{% set cycle = 1 %}
-{% for shift in app.user.getFutureShifts() %}
-    {% if  ( app.user.endOfCycle(cycle) | date('Ymd') ) < (shift.shift.start | date('Ymd') ) %}
+{% for cycle in 1..2 %}
+    {% for shift in app.user.getFutureShiftsOfCycle(cycle) %}
+    {% if  cycle > 1 and loop.index == 1 and ( app.user.endOfCycle(cycle-1) | date('Ymd') ) < (shift.shift.start | date('Ymd') ) %}
         <hr class="col s12">
-        {% set cycle = cycle + 1 %}
     {% endif %}
-    <div class="col m6 s12 {% if (app.user.getFutureShifts() | length) < 2 %}push-m3{% endif %}">
+    <div class="col m6 s12 {% if (app.user.getFutureShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">
         <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
             <div class="card-content white-text">
                 <span class="card-title">{{ shift.getShift().start|date_fr_long }}</span>
@@ -47,6 +47,7 @@
             {% endif %}
         </div>
     </div>
+    {% endfor %}
 {% endfor %}
 </div>
 
