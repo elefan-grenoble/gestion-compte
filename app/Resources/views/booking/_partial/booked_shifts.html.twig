@@ -54,8 +54,9 @@
 <a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
 
 {% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris par un autre bénévole</h5>{% endif %}
-{% for bookedshift in app.user.getFutureRebookedShifts() %}
+
 <div class="row">
+{% for bookedshift in app.user.getFutureRebookedShifts() %}
     <div class="col m6 s12 {% if (app.user.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
         <div class="card green lighten-5">
             <div class="card-content green-text">
@@ -65,5 +66,5 @@
             </div>
         </div>
     </div>
-</div>
 {% endfor %}
+</div>
