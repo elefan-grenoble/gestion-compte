@@ -16,8 +16,8 @@
     <div class="col m6 s12 {% if (app.user.getFutureShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">
         <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
             <div class="card-content white-text">
-                <span class="card-title">{{ shift.getShift().start|date_fr_long }}</span>
-                <p>De {{ shift.getShift().start|date('H:i') }} à {{ shift.getShift().end|date('H:i') }}</p>
+                <span class="card-title">{{ shift.start|date_fr_long }}</span>
+                <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</p>
                 {% if (shift.getIsDismissed()) %}
                     <p>Créneau annulé, en attente de repreneur</p>
                 {% endif %}

@@ -548,7 +548,7 @@ class User extends BaseUser
     {
         $duration = 0;
         foreach ($this->getShiftsOfCycle($cycleIndex, $excludeDismissed) as $shift) {
-            $duration += $shift->getShift()->getDuration();
+            $duration += $shift->getDuration();
         }
         return $duration;
     }
@@ -594,8 +594,8 @@ class User extends BaseUser
     public function getShiftsOfCycle($cycleIndex, $excludeDismissed = false)
     {
         return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
-            return $shift->getShift()->getStart() > $this->startOfCycle($cycleIndex) &&
-                $shift->getShift()->getEnd() < $this->endOfCycle($cycleIndex);
+            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
+                $shift->getEnd() < $this->endOfCycle($cycleIndex);
         });
     }
 
@@ -608,18 +608,18 @@ class User extends BaseUser
         $modFirst = null;
         $now = new DateTime('now');
         if ($first) {
-            $diff = $first->getShift()->getStart()->diff($now);
+            $diff = $first->getStart()->diff($now);
             $modFirst = $diff->format('%a') % 28;
         }
         $startCurrCycle = null;
         if ($modFirst) {
             /* Exception if first cycle in the future */
-            if ($first->getShift()->getStart() < $now) {
+            if ($first->getStart() < $now) {
                 $startCurrCycle = clone($now);
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
-                $startCurrCycle = clone($first->getShift()->getStart());
+                $startCurrCycle = clone($first->getStart());
             }
         } else {
             $startCurrCycle = $now;
@@ -653,8 +653,8 @@ class User extends BaseUser
     public function getFutureShiftsOfCycle($cycleIndex, $excludeDismissed = false)
     {
         return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
-            return $shift->getShift()->getStart() > $this->startOfCycle($cycleIndex) && 
-                $shift->getShift()->getEnd() < $this->endOfCycle($cycleIndex);
+            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
+                $shift->getEnd() < $this->endOfCycle($cycleIndex);
         });
     }
 
@@ -664,7 +664,7 @@ class User extends BaseUser
     public function getFutureRebookedShifts()
     {
         return $this->getAllBookedShifts()->filter(function($shift) {
-            return $shift->getShift()->getStart() > new DateTime('now') && 
+            return $shift->getStart() > new DateTime('now') &&
                 $shift->getBooker() != $shift->getShifter();
         });
     }

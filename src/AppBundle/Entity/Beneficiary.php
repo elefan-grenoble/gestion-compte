@@ -57,12 +57,12 @@ class Beneficiary
     private $user;
 
     /**
-     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shifter",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
      */
     private $shifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="booker",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="booker",cascade={"remove"})
      */
     private $booked_shifts;
 
@@ -378,11 +378,11 @@ class Beneficiary
     /**
      * Add shift
      *
-     * @param \AppBundle\Entity\BookedShift $shift
+     * @param \AppBundle\Entity\Shift $shift
      *
      * @return Beneficiary
      */
-    public function addShift(\AppBundle\Entity\BookedShift $shift)
+    public function addShift(\AppBundle\Entity\Shift $shift)
     {
         $this->shifts[] = $shift;
 
@@ -392,9 +392,9 @@ class Beneficiary
     /**
      * Remove shift
      *
-     * @param \AppBundle\Entity\BookedShift $shift
+     * @param \AppBundle\Entity\Shift $shift
      */
-    public function removeShift(\AppBundle\Entity\BookedShift $shift)
+    public function removeShift(\AppBundle\Entity\Shift $shift)
     {
         $this->shifts->removeElement($shift);
     }
@@ -412,11 +412,11 @@ class Beneficiary
     /**
      * Add bookedShift
      *
-     * @param \AppBundle\Entity\BookedShift $bookedShift
+     * @param \AppBundle\Entity\Shift $bookedShift
      *
      * @return Beneficiary
      */
-    public function addBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    public function addBookedShift(\AppBundle\Entity\Shift $bookedShift)
     {
         $this->booked_shifts[] = $bookedShift;
 
@@ -426,9 +426,9 @@ class Beneficiary
     /**
      * Remove bookedShift
      *
-     * @param \AppBundle\Entity\BookedShift $bookedShift
+     * @param \AppBundle\Entity\Shift $bookedShift
      */
-    public function removeBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    public function removeBookedShift(\AppBundle\Entity\Shift $bookedShift)
     {
         $this->booked_shifts->removeElement($bookedShift);
     }

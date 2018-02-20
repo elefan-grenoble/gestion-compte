@@ -3,7 +3,6 @@
 namespace AppBundle\Controller;
 
 use DateTime;
-use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -45,7 +44,10 @@ class BookingController extends Controller
             if (!isset($shiftsByDay[$day])) {
                 $shiftsByDay[$day] = array();
             }
-            $shiftsByDay[$day][] = $shift;
+            if (!isset($shiftsByDay[$day][$shift->getInterval()])) {
+                $shiftsByDay[$day][$shift->getInterval()] = array();
+            }
+            $shiftsByDay[$day][$shift->getInterval()][] = $shift;
         }
 
         return $this->render('booking/index.html.twig', [
@@ -68,8 +70,8 @@ class BookingController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        if ($shift->getRemainingShifters() <= 0) {
-            $session->getFlashBag()->add("error", "Désolé, le créneau est plein");
+        if ($shift->getShifter() && !$shift->getIsDismissed()) {
+            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
             return $this->redirectToRoute("booking");   
         }
 
@@ -79,19 +81,16 @@ class BookingController extends Controller
 
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
-        $bookedShift = $em->getRepository('AppBundle:BookedShift')->findFirstDismissed($shift);
-        if (!$bookedShift) {
-            $bookedShift = new BookedShift();
-            $bookedShift->setShift($shift);
-            $bookedShift->setBookedTime(new DateTime('now'));
-            $bookedShift->setBooker($beneficiary);
+        if (!$shift->getBooker()) {
+            $shift->setBooker($beneficiary);
+            $shift->setBookedTime(new DateTime('now'));
         }
-        $bookedShift->setShifter($beneficiary);
-        $bookedShift->setIsDismissed(false);
-        $bookedShift->setDismissedReason(null);
-        $bookedShift->setDismissedTime(null);
+        $shift->setShifter($beneficiary);
+        $shift->setIsDismissed(false);
+        $shift->setDismissedReason(null);
+        $shift->setDismissedTime(null);
 
-        $em->persist($bookedShift);
+        $em->persist($shift);
         $em->flush();
 
         return $this->redirectToRoute('homepage');
@@ -103,7 +102,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/dismiss", name="shift_dismiss")
      * @Method("POST")
      */
-    public function dismissShift(Request $request, BookedShift $shift)
+    public function dismissShift(Request $request, Shift $shift)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();

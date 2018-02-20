@@ -36,16 +36,44 @@ class Shift
     private $end;
 
     /**
-     * @var int
+     * @var \DateTime
      *
-     * @ORM\Column(name="max_shifters_nb", type="smallint")
+     * @ORM\Column(name="booked_time", type="datetime")
      */
-    private $maxShiftersNb;
+    private $bookedTime;
 
     /**
-     * @ORM\OneToMany(targetEntity="BookedShift", mappedBy="shift",cascade={"persist", "remove"})
+     * @var bool
+     *
+     * @ORM\Column(name="is_dismissed", type="boolean")
      */
-    private $booked_shifts;
+    private $isDismissed;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="dismissed_time", type="datetime", nullable=true)
+     */
+    private $dismissedTime;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="dismissed_reason", type="string", length=255, nullable=true)
+     */
+    private $dismissedReason;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="booked_shifts")
+     * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
+     */
+    private $shifter;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
+     * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
+     */
+    private $booker;
 
     /**
      * Get id
@@ -106,69 +134,149 @@ class Shift
     }
 
     /**
-     * Set maxShiftersNb
+     * Set bookedTime
      *
-     * @param integer $maxShiftersNb
+     * @param \DateTime $bookedTime
      *
-     * @return Shift
+     * @return BookedShift
      */
-    public function setMaxShiftersNb($maxShiftersNb)
+    public function setBookedTime($bookedTime)
     {
-        $this->maxShiftersNb = $maxShiftersNb;
+        $this->bookedTime = $bookedTime;
 
         return $this;
     }
 
     /**
-     * Get maxShiftersNb
+     * Get bookedTime
      *
-     * @return int
+     * @return \DateTime
      */
-    public function getMaxShiftersNb()
+    public function getBookedTime()
     {
-        return $this->maxShiftersNb;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->booked_shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->bookedTime;
     }
 
     /**
-     * Add bookedShift
+     * Set isDismissed
      *
-     * @param \AppBundle\Entity\BookedShift $bookedShift
+     * @param boolean $isDismissed
      *
-     * @return Shift
+     * @return BookedShift
      */
-    public function addBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    public function setIsDismissed($isDismissed)
     {
-        $this->booked_shifts[] = $bookedShift;
+        $this->isDismissed = $isDismissed;
 
         return $this;
     }
 
     /**
-     * Remove bookedShift
+     * Get isDismissed
      *
-     * @param \AppBundle\Entity\BookedShift $bookedShift
+     * @return bool
      */
-    public function removeBookedShift(\AppBundle\Entity\BookedShift $bookedShift)
+    public function getIsDismissed()
     {
-        $this->booked_shifts->removeElement($bookedShift);
+        return $this->isDismissed;
     }
 
     /**
-     * Get bookedShifts
+     * Set dismissedTime
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @param \DateTime $dismissedTime
+     *
+     * @return BookedShift
      */
-    public function getBookedShifts()
+    public function setDismissedTime($dismissedTime)
     {
-        return $this->booked_shifts;
+        $this->dismissedTime = $dismissedTime;
+
+        return $this;
     }
+
+    /**
+     * Get dismissedTime
+     *
+     * @return \DateTime
+     */
+    public function getDismissedTime()
+    {
+        return $this->dismissedTime;
+    }
+
+    /**
+     * Set dismissedReason
+     *
+     * @param string $dismissedReason
+     *
+     * @return BookedShift
+     */
+    public function setDismissedReason($dismissedReason)
+    {
+        $this->dismissedReason = $dismissedReason;
+
+        return $this;
+    }
+
+    /**
+     * Get dismissedReason
+     *
+     * @return string
+     */
+    public function getDismissedReason()
+    {
+        return $this->dismissedReason;
+    }
+
+    /**
+     * Set booker
+     *
+     * @param \AppBundle\Entity\Beneficiary $booker
+     *
+     * @return BookedShift
+     */
+    public function setBooker(\AppBundle\Entity\Beneficiary $booker = null)
+    {
+        $this->booker = $booker;
+
+        return $this;
+    }
+
+    /**
+     * Get booker
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getBooker()
+    {
+        return $this->booker;
+    }
+
+    /**
+     * Set shifter
+     *
+     * @param \AppBundle\Entity\Beneficiary $shifter
+     *
+     * @return BookedShift
+     */
+    public function setShifter(\AppBundle\Entity\Beneficiary $shifter = null)
+    {
+        $this->shifter = $shifter;
+
+        return $this;
+    }
+
+    /**
+     * Get shifter
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getShifter()
+    {
+        return $this->shifter;
+    }
+
 
     public function getDuration()
     {
@@ -176,29 +284,14 @@ class Shift
         return $diff->h * 60 + $diff->i;
     }
 
-    public function isBookedBy($userId)
+    public function getInterval()
     {
-        return $this->getBookedShifts()->filter(function($shift) use ($userId) {
-            return $shift->getShifter()->getUser()->getId() == $userId;
-        })->count() > 0;
+        return $this->start->format("h-i") . $this->end->format("h-i");
     }
 
-    public function getDismissedShifts()
+    // TODO A CHANGER
+    public function getMaxShiftersNb()
     {
-        return $this->getBookedShifts()->filter(function($shift) {
-            return $shift->getIsDismissed();
-        });
-    }
-
-    public function getNotDismissedShifts()
-    {
-        return $this->getBookedShifts()->filter(function($shift) {
-            return !$shift->getIsDismissed();
-        });
-    }
-
-    public function getRemainingShifters()
-    {
-        return $this->getMaxShiftersNb() - $this->getNotDismissedShifts()->count();
+        return 7;
     }
 }

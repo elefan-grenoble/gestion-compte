@@ -3,16 +3,16 @@
         <div class="modal-content">
             <h4>Réserver ce créneau</h4>
             <h5>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h5>
-            {% if shift.dismissedShifts | length > 0 %}
+            {% if shift.isDismissed | length > 0 %}
                 <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
             {% endif %}
             {% if user.beneficiaries | length < 1 %}
                 <p>Vous n'avez pas de bénéficiares</p>
             {% else %}
-                <p><label>Nombre de places restantes: </label>{{ shift.remainingShifters }}/{{ shift.maxShiftersNb }}</p>
+                <p><label>Nombre de places restantes: </label>{{ remaining }}/{{ shift.maxShiftersNb }}</p>
                 <div class="row">
                     {% for shifter in 1..shift.maxShiftersNb  %}
-                        {% if loop.index <= shift.remainingShifters %}
+                        {% if loop.index <= remaining %}
                             <div class="green lighten-1 left" style=" height:5px; width: {{ 100/shift.maxShiftersNb }}%"></div>
                         {% else %}
                             <div class="grey lighten-3 left" style="height:5px; width: {{ 100/shift.maxShiftersNb }}%"></div>

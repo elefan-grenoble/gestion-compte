@@ -24,4 +24,26 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param $user
+     * @return mixed
+     * @throws NonUniqueResultException
+     */
+    public function findFirst($user)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->join('s.shifter', "ben")
+            ->where('ben.user = :user')
+            ->setParameter('user', $user)
+            ->andWhere('s.isDismissed = 0')
+            ->orderBy('s.start', 'ASC')
+            ->setMaxResults(1);
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
