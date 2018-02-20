@@ -544,10 +544,10 @@ class User extends BaseUser
     /**
      * Get total shift duration for current cycle
      */
-    public function getCycleShiftsDuration($cycleIndex)
+    public function getCycleShiftsDuration($cycleIndex, $excludeDismissed = false)
     {
         $duration = 0;
-        foreach ($this->getShiftsOfCycle($cycleIndex) as $shift) {
+        foreach ($this->getShiftsOfCycle($cycleIndex, $excludeDismissed) as $shift) {
             $duration += $shift->getShift()->getDuration();
         }
         return $duration;
@@ -556,7 +556,7 @@ class User extends BaseUser
     /**
      * Get all shifts for all beneficiaries
      */
-    public function getAllShifts()
+    public function getAllShifts($excludeDismissed = false)
     {
         $shifts = new ArrayCollection();
         foreach ($this->getBeneficiaries() as $beneficiary) {
@@ -564,7 +564,13 @@ class User extends BaseUser
                 $shifts->add($shift);
             }
         }
-        return $shifts;
+        if ($excludeDismissed) {
+            return $shifts->filter(function($shift) {
+                return !$shift->getIsDismissed();
+            });
+        } else {
+            return $shifts;
+        }
     }
 
     /**
@@ -585,9 +591,9 @@ class User extends BaseUser
      * Get shifts of a specific cycle
      * @param $cycleIndex index of the cycle (1 for current cycle)
      */
-    public function getShiftsOfCycle($cycleIndex)
+    public function getShiftsOfCycle($cycleIndex, $excludeDismissed = false)
     {
-        return $this->getAllShifts()->filter(function($shift) use ($cycleIndex) {
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
             return $shift->getShift()->getStart() > $this->startOfCycle($cycleIndex) &&
                 $shift->getShift()->getEnd() < $this->endOfCycle($cycleIndex);
         });
@@ -644,9 +650,9 @@ class User extends BaseUser
     /**
      * Get all shifts in the future for this cycle
      */
-    public function getFutureShiftsOfCycle($cycleIndex)
+    public function getFutureShiftsOfCycle($cycleIndex, $excludeDismissed = false)
     {
-        return $this->getAllShifts()->filter(function($shift) use ($cycleIndex) {
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
             return $shift->getShift()->getStart() > $this->startOfCycle($cycleIndex) && 
                 $shift->getShift()->getEnd() < $this->endOfCycle($cycleIndex);
         });
@@ -683,8 +689,8 @@ class User extends BaseUser
     /**
      * Get remaining time to book
      */
-    public function remainingToBook($cycleIndex) {
-        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex);
+    public function remainingToBook($cycleIndex, $excludeDismissed = false) {
+        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed);
     }
 
     /**

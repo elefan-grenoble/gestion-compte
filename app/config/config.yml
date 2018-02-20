@@ -76,8 +76,8 @@ fos_user:
   firewall_name: main
   user_class: AppBundle\Entity\User
   from_email:
-    address: '%transactional_mailer_user%'
-    sender_name: '%transactional_mailer_user_name%'
+    address: deshayeb@gmail.com
+    sender_name: Bastien Deshayes
   registration:
     form:
       type: AppBundle\Form\RegistrationType
