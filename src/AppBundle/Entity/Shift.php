@@ -284,14 +284,8 @@ class Shift
         return $diff->h * 60 + $diff->i;
     }
 
-    public function getInterval()
+    public function getIntervalCode()
     {
         return $this->start->format("h-i") . $this->end->format("h-i");
-    }
-
-    // TODO A CHANGER
-    public function getMaxShiftersNb()
-    {
-        return 7;
     }
 }

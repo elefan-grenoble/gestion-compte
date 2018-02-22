@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Controller\ShiftBucket;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
@@ -38,20 +39,20 @@ class BookingController extends Controller
             $hours[] = $i;
         }
 
-        $shiftsByDay = array();
+        $bucketsByDay = array();
         foreach ($shifts as $shift) {
             $day = $shift->getStart()->format("d m Y");
-            if (!isset($shiftsByDay[$day])) {
-                $shiftsByDay[$day] = array();
+            if (!isset($bucketsByDay[$day])) {
+                $bucketsByDay[$day] = array();
             }
-            if (!isset($shiftsByDay[$day][$shift->getInterval()])) {
-                $shiftsByDay[$day][$shift->getInterval()] = array();
+            if (!isset($bucketsByDay[$day][$shift->getIntervalCode()])) {
+                $bucketsByDay[$day][$shift->getIntervalCode()] = new ShiftBucket();
             }
-            $shiftsByDay[$day][$shift->getInterval()][] = $shift;
+            $bucketsByDay[$day][$shift->getIntervalCode()]->addShift($shift);
         }
 
         return $this->render('booking/index.html.twig', [
-            'shiftsByDay' => $shiftsByDay,
+            'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
         ]);  
     }
