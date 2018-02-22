@@ -23,6 +23,26 @@ class ShiftBucket
     public function addShift(Shift $shift)
     {
         $this->shifts[] = $shift;
+        $this->sort();
+    }
+
+    public function sort()
+    {
+        usort($this->shifts, function(Shift $a, Shift $b) {
+           if ($a->getIsDismissed()) {
+               if ($b->getIsDismissed()) {
+                   if ($a->getDismissedTime() == $b->getDismissedTime()) {
+                       return 0;
+                   } else {
+                       return $a->getDismissedTime() < $b->getDismissedTime() ? 1 : -1;
+                   }
+               } else {
+                   return 1;
+               }
+           } else {
+               return $b->getIsDismissed() ? -1 : 0;
+           }
+        });
     }
 
     public function getShifts()
@@ -57,19 +77,19 @@ class ShiftBucket
         });
     }
 
+    public function isBookable(User $user)
+    {
+        return count($this->getBookableShifts($user)) != 0;
+    }
+
     public function getFirstBookable(User $user)
     {
-        $this->getBookableShifts($user)[0];
+        return $this->getBookableShifts($user)[0];
     }
 
     public function getRemainingBookable(User $user)
     {
         return count($this->getBookableShifts($user));
-    }
-
-    public function isBookable(User $user)
-    {
-        return count($this->getBookableShifts($user)) != 0;
     }
 
     public function getIntervalCode()

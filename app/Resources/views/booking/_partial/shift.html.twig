@@ -4,13 +4,13 @@
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <a {% if bucket.isBookable(app.user) | length < 1 %}href="#book{{ bucket.firstBookable(app.user).id }}"{% endif %}
+    <a {% if bucket.isBookable(app.user) %}href="#book{{ bucket.firstBookable(app.user).id }}"{% endif %}
        class="modal-trigger">
         <div class=" white-text z-depth-2" style="height:40px;">
             <div style="height:100%; width: 100%;position: absolute;">
                 {% for shifter in 1..bucket.getRemainingBookable(app.user) %}
                     {% if loop.index <= bucket.getRemainingBookable(app.user) %}
-                        <div class="{% if not bucket.isBookable(app.user) | length < 1 %}grey {% else %}orange {% if bucket.getRemainingBookable(app.user) > 1 %}darken-{{ min(4, bucket.getRemainingBookable(app.user) - 1) }} {% endif %}{% endif %} left"
+                        <div class="{% if bucket.firstBookable(app.user) is null %}grey {% else %}orange {% if bucket.getRemainingBookable(app.user) > 1 %}darken-{{ min(4, bucket.getRemainingBookable(app.user) - 1) }} {% endif %}{% endif %} left"
                              style="height:100%; width: {{ 100/(bucket.shifts|length) }}%"></div>
                     {% else %}
                         <div class="grey lighten-3 left"
@@ -22,7 +22,7 @@
                 <div class="col s6">{{ bucket.start|date('G\\hi') }}</div>
                 <div class="col s6 right">
                     &nbsp;
-                    {% if bucket.firstBookable(app.user) != null and bucket.firstBookable(app.user).isDismissed %}
+                    {% if bucket.isBookable(app.user) and bucket.firstBookable(app.user).isDismissed %}
                         <i class="material-icons">star</i>
                     {% endif %}
                 </div>
@@ -32,6 +32,6 @@
     </a>
 </div>
 
-{% if bucket.isBookable(app.user) | length < 1 %}
+{% if bucket.isBookable(app.user) %}
     {% include "booking/_partial/modal.html.twig" with { user: app.user, bucket: bucket } %}
 {% endif %}
