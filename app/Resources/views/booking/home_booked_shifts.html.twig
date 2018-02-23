@@ -1,0 +1,39 @@
+<h5>Mes créneaux à venir</h5>
+<p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+<p>{% if (app.user.remainingToBook(1, true)|duration_from_minutes == 0) %}
+       <i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !
+    {% else %}
+        Tu as encore <b>{{ app.user.remainingToBook(1, true)|duration_from_minutes }}</b> de bénévolat à planifier pour ce cycle
+    {% endif %}
+</p>
+
+<div class="row">
+{% for cycle in 1..2 %}
+    {% for shift in app.user.getFutureShiftsOfCycle(cycle) %}
+    {% if  cycle > 1 and loop.index == 1 and ( app.user.endOfCycle(cycle-1) | date('Ymd') ) < (shift.shift.start | date('Ymd') ) %}
+        <hr class="col s12">
+    {% endif %}
+    <div class="col m6 s12 {% if (app.user.getFutureShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">
+        {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
+    </div>
+    {% endfor %}
+{% endfor %}
+</div>
+
+<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
+
+{% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris par un autre bénévole</h5>{% endif %}
+
+<div class="row">
+{% for bookedshift in app.user.getFutureRebookedShifts() %}
+    <div class="col m6 s12 {% if (app.user.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
+        <div class="card green lighten-5">
+            <div class="card-content green-text">
+                <span class="card-title">{{ bookedshift.getShift().start|date_fr_long }}</span>
+                <p>De {{ bookedshift.getShift().start|date('H:i') }} à {{ bookedshift.getShift().end|date('H:i') }}</p>
+                <p>Créneau repris</p>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+</div>

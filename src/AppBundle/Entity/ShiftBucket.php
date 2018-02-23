@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Shift Bucket
@@ -17,7 +18,7 @@ class ShiftBucket
 
     public function __construct()
     {
-        $this->shifts = [];
+        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function addShift(Shift $shift)
@@ -28,21 +29,23 @@ class ShiftBucket
 
     public function sort()
     {
-        usort($this->shifts, function(Shift $a, Shift $b) {
-           if ($a->getIsDismissed()) {
-               if ($b->getIsDismissed()) {
-                   if ($a->getDismissedTime() == $b->getDismissedTime()) {
-                       return 0;
-                   } else {
-                       return $a->getDismissedTime() < $b->getDismissedTime() ? 1 : -1;
-                   }
-               } else {
-                   return 1;
-               }
-           } else {
-               return $b->getIsDismissed() ? -1 : 0;
-           }
+        $iterator = $this->shifts->getIterator();
+        $iterator->uasort(function(Shift $a, Shift $b) {
+            if ($a->getIsDismissed()) {
+                if ($b->getIsDismissed()) {
+                    if ($a->getDismissedTime() == $b->getDismissedTime()) {
+                        return 0;
+                    } else {
+                        return $a->getDismissedTime() < $b->getDismissedTime() ? 1 : -1;
+                    }
+                } else {
+                    return 1;
+                }
+            } else {
+                return $b->getIsDismissed() ? -1 : 0;
+            }
         });
+        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
     }
 
     public function getShifts()
@@ -52,22 +55,22 @@ class ShiftBucket
 
     public function getStart()
     {
-        return $this->shifts[0]->getStart();
+        return $this->shifts->first()->getStart();
     }
 
     public function getEnd()
     {
-        return $this->shifts[0]->getEnd();
+        return $this->shifts->first()->getEnd();
     }
 
     public function getDuration()
     {
-        return $this->shifts[0]->getDuration();
+        return $this->shifts->first()->getDuration();
     }
 
     public function getBookableShifts(User $user)
     {
-        return array_filter($this->shifts, function (Shift $shift) use ($user) {
+        return $this->shifts->filter(function (Shift $shift) use ($user) {
             return
                 ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
                 && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
@@ -79,12 +82,15 @@ class ShiftBucket
 
     public function isBookable(User $user)
     {
-        return count($this->getBookableShifts($user)) != 0;
+        return count($this->getBookableShifts($user)) > 0;
     }
 
     public function getFirstBookable(User $user)
     {
-        return $this->getBookableShifts($user)[0];
+        if ($this->isBookable($user))
+            return $this->getBookableShifts($user)->first();
+        else
+            return null;
     }
 
     public function getRemainingBookable(User $user)

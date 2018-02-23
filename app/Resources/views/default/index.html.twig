@@ -23,7 +23,7 @@
                     {% endfor %}
                 </div>
 
-                {% include "booking/_partial/booked_shifts.html.twig" %}
+                {% include "booking/home_booked_shifts.html.twig" %}
 
                 <h5>Construire</h5>
                 {% if is_granted("access_tools",app.user)  %}

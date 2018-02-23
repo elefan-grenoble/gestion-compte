@@ -4,7 +4,9 @@
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <a {% if bucket.isBookable(app.user) %}href="#book{{ bucket.firstBookable(app.user).id }}"{% endif %}
+    <a {% if bucket.isBookable(app.user) %}
+        href="#book{{ bucket.firstBookable(app.user).id }}"
+    {% endif %}
        class="modal-trigger">
         <div class=" white-text z-depth-2" style="height:40px;">
             <div style="height:100%; width: 100%;position: absolute;">
