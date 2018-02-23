@@ -38,7 +38,6 @@ class PeriodPosition
     /**
      * Many Positions have Many Periods.
      * @ORM\ManyToMany(targetEntity="Period", inversedBy="positions")
-     * @ORM\JoinTable(name="period_positions")
      */
     private $periods;
 
@@ -104,9 +103,9 @@ class PeriodPosition
     public function __toString()
     {
         if ($this->getRole())
-            return $this->getNbOfShifter()."&cross;".$this->getRole()->getName();
+            return $this->getNbOfShifter()."x".$this->getRole()->getName();
         else
-            return $this->getNbOfShifter()."&cross;"."any";
+            return $this->getNbOfShifter()." membre".(($this->getNbOfShifter()>1) ? "s" : "");
     }
     /**
      * Constructor

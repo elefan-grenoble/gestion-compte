@@ -136,7 +136,7 @@ class PeriodController extends Controller
                 $session->getFlashBag()->add('info', 'La position existe déjà');
                 $position = $existingPosition;
             }
-            $period->addPeriodPosition($position);
+            $period->addPosition($position);
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'La position '.$position.' a bien été ajoutée');

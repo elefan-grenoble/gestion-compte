@@ -52,6 +52,7 @@ class Period
     /**
      * Many Period have Many Positions.
      * @ORM\ManyToMany(targetEntity="PeriodPosition", mappedBy="periods",cascade={"persist"})
+     * @ORM\JoinTable(name="period_positions")
      */
     private $positions;
 
@@ -177,8 +178,9 @@ class Period
      *
      * @return Period
      */
-    public function addPeriodPosition(\AppBundle\Entity\PeriodPosition $position)
+    public function addPosition(\AppBundle\Entity\PeriodPosition $position)
     {
+        $position->addPeriod($this);
         $this->positions[] = $position;
 
         return $this;
