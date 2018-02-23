@@ -27,11 +27,16 @@ class ShiftCommand extends ContainerAwareCommand
         $from_given = $input->getArgument('date');
         $to_given = $input->getOption('to');
         $from = date_create_from_format('Y-m-d',$from_given);
+        if (!$from || $from->format('Y-m-d') != $from_given){
+            $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
+            return;
+        }
         if ($to_given){
             $to = date_create_from_format('Y-m-d',$to_given);
             $output->writeln('<fg=yellow;>'.'Shift generation from <fg=cyan;>'.$from->format('d M Y').'</><fg=yellow;> to </><fg=cyan;>'.$to->format('d M Y').'</>');
         }else{
-            $to = $from;
+            $to = clone $from;
+            $to->add(\DateInterval::createFromDateString('+1 Day'));
             $output->writeln('<fg=yellow;>'.'Shift generation for </><fg=cyan;>'.$from->format('d M Y').'</>');
         }
         $interval = \DateInterval::createFromDateString('1 day');
@@ -58,13 +63,20 @@ class ShiftCommand extends ContainerAwareCommand
                 $shift->setStart($start);
                 $end = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i'));
                 $shift->setEnd($end);
-                $shift->setMaxShiftersNb($period->getMaxShiftersNb());
-                $exist_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $start, 'end' => $end));
-                if ($exist_shift) {
-                    $count2++;
-                } else {
-                    $em->persist($shift);
-                    $count++;
+
+                foreach ($period->getPositions() as $position){
+                    for ($i=0;$i<$position->getNbOfShifter();$i++){
+                        $current_shift = clone $shift;
+                        $current_shift->setJob($period->getJob());
+                        $current_shift->setRole($position->getRole());
+                        $exist_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                        if ($exist_shift) {
+                            $count2++;
+                        } else {
+                            $em->persist($current_shift);
+                            $count++;
+                        }
+                    }
                 }
             }
             $em->flush();

@@ -38,14 +38,14 @@ class Shift
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="booked_time", type="datetime")
+     * @ORM\Column(name="booked_time", type="datetime", nullable=true)
      */
     private $bookedTime;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_dismissed", type="boolean")
+     * @ORM\Column(name="is_dismissed", type="boolean", options={"default" : 0})
      */
     private $isDismissed;
 
@@ -74,6 +74,26 @@ class Shift
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
+
+    /**
+     * One Period has One Role.
+     * @ORM\OneToOne(targetEntity="Role")
+     * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
+     */
+    private $role;
+
+    /**
+     * One Period has One Job.
+     * @ORM\OneToOne(targetEntity="Job")
+     * @ORM\JoinColumn(name="job_name", referencedColumnName="name")
+     */
+    private $job;
+
+
+    public function __construct()
+    {
+        $this->isDismissed = false;
+    }
 
     /**
      * Get id
@@ -287,5 +307,53 @@ class Shift
     public function getIntervalCode()
     {
         return $this->start->format("h-i") . $this->end->format("h-i");
+    }
+
+    /**
+     * Set role
+     *
+     * @param \AppBundle\Entity\Role $role
+     *
+     * @return Shift
+     */
+    public function setRole(\AppBundle\Entity\Role $role = null)
+    {
+        $this->role = $role;
+
+        return $this;
+    }
+
+    /**
+     * Get role
+     *
+     * @return \AppBundle\Entity\Role
+     */
+    public function getRole()
+    {
+        return $this->role;
+    }
+
+    /**
+     * Set job
+     *
+     * @param \AppBundle\Entity\Job $job
+     *
+     * @return Shift
+     */
+    public function setJob(\AppBundle\Entity\Job $job = null)
+    {
+        $this->job = $job;
+
+        return $this;
+    }
+
+    /**
+     * Get job
+     *
+     * @return \AppBundle\Entity\Job
+     */
+    public function getJob()
+    {
+        return $this->job;
     }
 }

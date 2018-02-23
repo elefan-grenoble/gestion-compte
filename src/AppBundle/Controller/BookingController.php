@@ -2,9 +2,9 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Controller\ShiftBucket;
 use DateTime;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;

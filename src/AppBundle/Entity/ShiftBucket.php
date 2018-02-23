@@ -1,6 +1,6 @@
 <?php
 
-namespace AppBundle\Controller;
+namespace AppBundle\Entity;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
