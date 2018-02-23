@@ -53,6 +53,11 @@ class ShiftBucket
         return $this->shifts;
     }
 
+    public function getFirst()
+    {
+        return $this->shifts->first();
+    }
+
     public function getStart()
     {
         return $this->shifts->first()->getStart();

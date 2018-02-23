@@ -35,20 +35,25 @@ class BookingController extends Controller
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
 
         $hours = array();
-        for ($i = 6; $i < 22; $i++) {
+        for ($i = 6; $i < 22; $i++) { //todo put this in conf
             $hours[] = $i;
         }
 
         $bucketsByDay = array();
         foreach ($shifts as $shift) {
             $day = $shift->getStart()->format("d m Y");
+            $job = $shift->getJob()->getId();
+            $interval = $shift->getIntervalCode();
             if (!isset($bucketsByDay[$day])) {
                 $bucketsByDay[$day] = array();
             }
-            if (!isset($bucketsByDay[$day][$shift->getIntervalCode()])) {
-                $bucketsByDay[$day][$shift->getIntervalCode()] = new ShiftBucket();
+            if (!isset($bucketsByDay[$day][$job])) {
+                $bucketsByDay[$day][$job] = array();
             }
-            $bucketsByDay[$day][$shift->getIntervalCode()]->addShift($shift);
+            if (!isset($bucketsByDay[$day][$job][$interval])) {
+                $bucketsByDay[$day][$job][$interval] = new ShiftBucket();
+            }
+            $bucketsByDay[$day][$job][$interval]->addShift($shift);
         }
 
         return $this->render('booking/index.html.twig', [
