@@ -43,12 +43,17 @@ class Period
     private $end;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="max_shifters_nb", type="smallint")
+     * One Period has One Job.
+     * @ORM\OneToOne(targetEntity="Job")
+     * @ORM\JoinColumn(name="job_name", referencedColumnName="name")
      */
-    private $maxShiftersNb;
+    private $job;
 
+    /**
+     * Many Period have Many Positions.
+     * @ORM\ManyToMany(targetEntity="PeriodPosition", mappedBy="periods",cascade={"persist"})
+     */
+    private $positions;
 
     /**
      * Get id
@@ -132,28 +137,70 @@ class Period
         return $this->end;
     }
 
+
     /**
-     * Set maxShiftersNb
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Set job
      *
-     * @param integer $maxShiftersNb
+     * @param \AppBundle\Entity\Job $job
      *
      * @return Period
      */
-    public function setMaxShiftersNb($maxShiftersNb)
+    public function setJob(\AppBundle\Entity\Job $job = null)
     {
-        $this->maxShiftersNb = $maxShiftersNb;
+        $this->job = $job;
 
         return $this;
     }
 
     /**
-     * Get maxShiftersNb
+     * Get job
      *
-     * @return int
+     * @return \AppBundle\Entity\Job
      */
-    public function getMaxShiftersNb()
+    public function getJob()
     {
-        return $this->maxShiftersNb;
+        return $this->job;
+    }
+
+    /**
+     * Add periodPosition
+     *
+     * @param \AppBundle\Entity\PeriodPosition $periodPosition
+     *
+     * @return Period
+     */
+    public function addPeriodPosition(\AppBundle\Entity\PeriodPosition $position)
+    {
+        $this->positions[] = $position;
+
+        return $this;
+    }
+
+    /**
+     * Remove periodPosition
+     *
+     * @param \AppBundle\Entity\PeriodPosition $position
+     */
+    public function removePosition(\AppBundle\Entity\PeriodPosition $position)
+    {
+        $this->positions->removeElement($position);
+    }
+
+    /**
+     * Get periodPositions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPositions()
+    {
+        return $this->positions;
     }
 }
-

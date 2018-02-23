@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Period;
+use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -65,7 +66,7 @@ class PeriodController extends Controller
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le nouveau creneau type a bien été créé !');
-            return $this->redirectToRoute('period');
+            return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
         return $this->render('admin/period/new.html.twig',array(
@@ -109,8 +110,40 @@ class PeriodController extends Controller
 
         return $this->render('admin/period/edit.html.twig',array(
             "form" => $form->createView(),
+            "period" => $period,
+            "position_form" => $this->createForm('AppBundle\Form\PeriodPositionType',new PeriodPosition(),array('action'=>$this->generateUrl('add_position_to_period',array('id'=>$period->getId()))))->createView(),
             "delete_form" => $delete_form->createView(),
         ));
+    }
+
+    /**
+     * @Route("/{id}/add_position/", name="add_position_to_period")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"POST"})
+     */
+    public function addPositionToPeriodAction(Request $request,Period $period)
+    {
+        $session = new Session();
+
+        $position = new PeriodPosition();
+        $form = $this->createForm('AppBundle\Form\PeriodPositionType',$position);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $existingPosition = $em->getRepository('AppBundle:PeriodPosition')->findOneBy(array("role"=>$position->getRole(),"nbOfShifter"=>$position->getNbOfShifter()));
+            if ($existingPosition){
+                $session->getFlashBag()->add('info', 'La position existe déjà');
+                $position = $existingPosition;
+            }
+            $period->addPeriodPosition($position);
+            $em->persist($period);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La position '.$position.' a bien été ajoutée');
+            return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
+        }
+
+        return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
     }
 
     /**

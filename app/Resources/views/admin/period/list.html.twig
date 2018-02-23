@@ -29,7 +29,9 @@
                                 <div class="card-panel teal lighten-2">
                                   <span class="white-text">
                                       {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
-                                      <i class="material-icons">person</i>&cross;{{ period.maxShiftersNb }}
+                                      {% for position in period.positions %}
+                                          <i class="material-icons">person</i>{{ position }}
+                                      {% endfor %}
                                   </span>
                                 </div>
                             </a>

@@ -4,6 +4,7 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
+use AppBundle\Entity\Role;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -14,7 +15,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
-class PeriodType extends AbstractType
+class PeriodPositionType extends AbstractType
 {
     /**
      * {@inheritdoc}
@@ -22,17 +23,14 @@ class PeriodType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('day_of_week', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => array(
-                "Lundi" => 0,
-                "Mardi" => 1,
-                "Mercredi" => 2,
-                "Jeudi" => 3,
-                "Vendredi" => 4,
-                "Samedi" => 5,
-                "Dimanche" => 6,
-            )))
-            ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')));
+            ->add('nb_of_shifter',IntegerType::class,array('label'=>'Nombre de postes disponibles'))
+            ->add('role',EntityType::class, array(
+                'label'=>'Role necessaire',
+                'choice_label' => 'name',
+                'class' => Role::class,
+                'multiple' => false,
+                'required' => false
+            ));
     }
 
     /**
@@ -41,7 +39,7 @@ class PeriodType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Period'
+            'data_class' => 'AppBundle\Entity\PeriodPosition'
         ));
     }
 
@@ -50,7 +48,7 @@ class PeriodType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'appbundle_period';
+        return 'appbundle_period_position';
     }
 
 

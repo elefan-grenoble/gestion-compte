@@ -12,9 +12,32 @@
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light">Editer</button>
+        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
     </div>
     {{ form_end(form) }}
+
+    <h5>Roles liés</h5>
+    <ul>
+        {% for position in period.positions %}
+            <li>{{ position }}</li>
+        {% endfor %}
+    </ul>
+    {{ form_start(position_form) }}
+    <div class="row">
+        <div class="col s6">
+            {{ form_label(position_form.nb_of_shifter) }}
+            {{ form_widget(position_form.nb_of_shifter) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(position_form.role) }}
+            {{ form_widget(position_form.role) }}
+        </div>
+    </div>
+    <div>
+        <button type="submit" class="btn waves-effect waves-light teal">Ajouter</button>
+    </div>
+    {{ form_end(position_form) }}
+
 
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
