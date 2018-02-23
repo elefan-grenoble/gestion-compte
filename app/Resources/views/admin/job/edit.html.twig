@@ -1,0 +1,10 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h4 class="">editer job</h4>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+    <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+    {{ form_end(form) }}
+{% endblock %}

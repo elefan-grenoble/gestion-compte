@@ -27,12 +27,13 @@
                         {% for period in periods[i] %}
                             <a href="{{ path("period_edit",{'id': period.id}) }}">
                                 <div class="card-panel teal lighten-2">
-                                  <span class="white-text">
-                                      {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
-                                      {% for position in period.positions %}
-                                          <i class="material-icons">person</i>{{ position }}
-                                      {% endfor %}
-                                  </span>
+                                     <p class="white-text">
+                                         <b class="white-text">{{ period.job.name }}</b><br>
+                                          {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
+                                          {% for position in period.positions %}
+                                              <i class="material-icons">person</i>{{ position }}
+                                          {% endfor %}
+                                      </p>
                                 </div>
                             </a>
                         {% endfor %}

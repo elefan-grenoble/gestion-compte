@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Job;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -32,7 +33,14 @@ class PeriodType extends AbstractType
                 "Dimanche" => 6,
             )))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')));
+            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
+            ->add('job', EntityType::class, array(
+                'label' => 'Tache',
+                'class' => 'AppBundle:Job',
+                'choice_label'=> 'name',
+                'multiple'     => false,
+                'required' => true
+            ));
     }
 
     /**

@@ -10,7 +10,7 @@
 <div class="row">
 {% for cycle in 1..2 %}
     {% for shift in app.user.getFutureShiftsOfCycle(cycle) %}
-    {% if  cycle > 1 and loop.index == 1 and ( app.user.endOfCycle(cycle-1) | date('Ymd') ) < (shift.shift.start | date('Ymd') ) %}
+    {% if  cycle > 1 and loop.index == 1 and ( app.user.endOfCycle(cycle-1) | date('Ymd') ) < (shift.start | date('Ymd') ) %}
         <hr class="col s12">
     {% endif %}
     <div class="col m6 s12 {% if (app.user.getFutureShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">

@@ -22,6 +22,8 @@
                 <a href="{{ path("event_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les événements</a>
                 <h5>Créneaux</h5>
                 <a href="{{ path("period") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Semaine type</a>
+                <a href="{{ path("job_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">person</i>Postes de bénévolat</a>
+
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>

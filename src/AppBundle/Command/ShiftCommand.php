@@ -65,17 +65,14 @@ class ShiftCommand extends ContainerAwareCommand
                 $shift->setEnd($end);
 
                 foreach ($period->getPositions() as $position){
-                    for ($i=0;$i<$position->getNbOfShifter();$i++){
+                    $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                    $count2+= count($existing_shifts);
+                    for ($i=0;$i<$position->getNbOfShifter()-count($existing_shifts);$i++){
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
                         $current_shift->setRole($position->getRole());
-                        $exist_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
-                        if ($exist_shift) {
-                            $count2++;
-                        } else {
-                            $em->persist($current_shift);
-                            $count++;
-                        }
+                        $em->persist($current_shift);
+                        $count++;
                     }
                 }
             }

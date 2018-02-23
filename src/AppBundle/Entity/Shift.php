@@ -77,15 +77,15 @@ class Shift
 
     /**
      * One Period has One Role.
-     * @ORM\OneToOne(targetEntity="Role")
+     * @ORM\ManyToOne(targetEntity="Role")
      * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
      */
     private $role;
 
     /**
      * One Period has One Job.
-     * @ORM\OneToOne(targetEntity="Job")
-     * @ORM\JoinColumn(name="job_name", referencedColumnName="name")
+     * @ORM\ManyToOne(targetEntity="Job")
+     * @ORM\JoinColumn(name="job_id", referencedColumnName="id")
      */
     private $job;
 

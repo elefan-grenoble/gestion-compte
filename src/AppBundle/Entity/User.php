@@ -700,7 +700,7 @@ class User extends BaseUser
     {
         $first = null;
         foreach ($this->getAllBookedShifts() as $shift) {
-            if (!$first || $shift->getShift()->getStart() < $first->getShift()->getStart()) {
+            if (!$first || $shift->getStart() < $first->getStart()) {
                 $first = $shift;
             }
         };
