@@ -27,41 +27,41 @@
                 </div>
             </div>
         </div>
-        {% for shifts in shiftsByDay %}
-            <div class="row center show-on-small hide-on-med-and-up">{{ (shifts|first).start|date_fr_long }}</div>
+        {% for buckets in bucketsByDay %}
+            <div class="row center show-on-small hide-on-med-and-up">{{ (buckets|first).start|date_fr_long }}</div>
             <div class="row" style="display: flex;min-height: 40px;">
                 <div class="col m2 hide-on-small-only valign-wrapper">
                     <div>
-                        {{ (shifts|first).start|date_fr_long }}
+                        {{ (buckets|first).start|date_fr_long }}
                     </div>
                 </div>
                 <div class="col m10 s12">
                     <div style="position: relative">
                         {% set lignes = {} %}
-                        {% for shift in shifts %}
+                        {% for bucket in buckets %}
                             {#compute lines #}
                             {% set l = 0 %}
                             {% set break = false %}
                             {% for i in 0..100 if not break %}
                                 {% if lignes[i~'_'] is not defined %}
                                     {% set l = i %}
-                                    {% set lignes = lignes|merge({(i~'_'): shift.end}) %}
+                                    {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
                                     {% set break = true %}
                                 {% else %}
-                                    {% if lignes[i~'_'] < shift.start  %}
+                                    {% if lignes[i~'_'] < bucket.start  %}
                                         {% set l = i %}
-                                        {% set lignes = lignes|merge({(i~'_'): shift.end}) %}
+                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
                                         {% set break = true %}
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
                             {# / compute lines #}
-                            {% include "booking/_partial/shift.html.twig" with { user: app.user, shift: shift, start: hours|first, end: hours|last, line:l  } %}
+                            {% include "booking/_partial/shift.html.twig" with { user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
                         {% endfor %}
                     </div>
                 </div>
             </div>
-            {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((shifts|first).start) | date('Y-m-d') ) %}
+            {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((buckets|first).start) | date('Y-m-d') ) %}
                 <hr>
             {% endif %}
         {% endfor %}
