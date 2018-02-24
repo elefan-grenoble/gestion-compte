@@ -30,9 +30,10 @@ class BookingController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $beneficiary = $current_app_user->getMainBeneficiary();
 
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+        $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
 
         $hours = array();
         for ($i = 6; $i < 22; $i++) { //todo put this in conf
