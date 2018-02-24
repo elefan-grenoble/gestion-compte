@@ -26,10 +26,13 @@ class ShiftBucket
         $this->shifts[] = $shift;
     }
 
-    public function sort()
+    function compareShifts(Shift $a, Shift $b)
     {
-        $iterator = $this->shifts->getIterator();
-        $iterator->uasort(function(Shift $a, Shift $b) {
+        if ($a->getRole()) {
+            return $b->getRole() ? 0 : 1;
+        } else if ($b->getRole()) {
+            return -1;
+        } else {
             if ($a->getIsDismissed()) {
                 if ($b->getIsDismissed()) {
                     if ($a->getDismissedTime() == $b->getDismissedTime()) {
@@ -43,8 +46,7 @@ class ShiftBucket
             } else {
                 return $b->getIsDismissed() ? 1 : 0;
             }
-        });
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
+        }
     }
 
     public function getShifts()
@@ -74,7 +76,7 @@ class ShiftBucket
 
     public function canBookInterval(User $user)
     {
-        return !$user->getAllShifts()->exists(function($key, Shift $shift) {
+        return !$user->getAllShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
         });
     }
@@ -102,10 +104,16 @@ class ShiftBucket
 
     public function getFirstBookable(User $user)
     {
-        if ($this->isBookable($user))
-            return $this->getBookableShifts($user)->first();
-        else
+        if ($this->isBookable($user)) {
+            $iterator = $this->getBookableShifts($user)->getIterator();
+            $iterator->uasort(function (Shift $a, Shift $b) {
+                return $this->compareShifts($a, $b) * -1; // We want priority shift first
+            });
+            $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
+            return $sorted->first();
+        } else {
             return null;
+        }
     }
 
     public function getRemainingBookable(User $user)

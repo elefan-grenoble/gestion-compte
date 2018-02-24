@@ -56,13 +56,6 @@ class BookingController extends Controller
             $bucketsByDay[$day][$job][$interval]->addShift($shift);
         }
 
-        foreach ($bucketsByDay as $bucketsByJob){
-            foreach ($bucketsByJob as $buckets){
-                foreach ($buckets as $bucket)
-                    $bucket->sort();
-            }
-        }
-
         return $this->render('booking/index.html.twig', [
             'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
