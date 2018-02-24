@@ -8,11 +8,11 @@
         href="#book{{ bucket.firstBookable(app.user).id }}"
     {% endif %}
        class="modal-trigger">
-        <div class=" white-text z-depth-2" style="height:40px;">
-            <div style="height:100%; width: 100%;position: absolute;">
+        <div class="z-depth-1 {% if bucket.firstBookable(app.user) is null %}grey {% else %}{{ bucket.firstBookable(app.user).job.color }} {% if bucket.getRemainingBookable(app.user) > 1 %}lighten-{{ min(4, bucket.getRemainingBookable(app.user) - 1) }} {% endif %}{% if bucket.getRemainingBookable(app.user) > 2 %}black-text {% else %}white-text {% endif %}{% endif %}" style="height:40px;position: relative">
+            <div style="height:2px; width: 100%;position: absolute;">
                 {% for shifter in 1..bucket.getRemainingBookable(app.user) %}
                     {% if loop.index <= bucket.getRemainingBookable(app.user) %}
-                        <div class="{% if bucket.firstBookable(app.user) is null %}grey {% else %}orange {% if bucket.getRemainingBookable(app.user) > 1 %}darken-{{ min(4, bucket.getRemainingBookable(app.user) - 1) }} {% endif %}{% endif %} left"
+                        <div class="green lighten-3 left"
                              style="height:100%; width: {{ 100/(bucket.shifts|length) }}%"></div>
                     {% else %}
                         <div class="grey lighten-3 left"
@@ -20,15 +20,12 @@
                     {% endif %}
                 {% endfor %}
             </div>
-            <div class="row" style="font-size: 11px;padding:3px;position: absolute;">
-                <div class="col s6">{{ bucket.start|date('G\\hi') }}</div>
-                <div class="col s6 right">
-                    &nbsp;
-                    {% if bucket.isBookable(app.user) and bucket.firstBookable(app.user).isDismissed %}
-                        <i class="material-icons">star</i>
-                    {% endif %}
-                </div>
-                <div class="col s6">{{ bucket.end|date('G\\hi') }}</div>
+            <div style="font-size: 11px;padding:3px;width: 100%;" >
+                {{ bucket.start|date('G\\hi') }}<br>
+                {{ bucket.end|date('G\\hi') }}
+                {% if bucket.isBookable(app.user) and bucket.firstBookable(app.user).isDismissed %}
+                    <div style="position: absolute;right: 4px;top: 4px;"><i class="material-icons tiny">star_border</i></div>
+                {% endif %}
             </div>
         </div>
     </a>

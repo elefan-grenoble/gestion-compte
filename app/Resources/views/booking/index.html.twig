@@ -28,13 +28,16 @@
             </div>
         </div>
         {% for bucketsByjob in bucketsByDay %}
+            {% set date = false %}
             {% for buckets in bucketsByjob %}
-                <div class="row center show-on-small hide-on-med-and-up">{{ (buckets|first).start|date_fr_long }} // {{ (buckets|first).first.job.name }}</div>
+                <div class="row center show-on-small hide-on-med-and-up">
+                    {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% endif %}{{ (buckets|first).first.job.name }}
+                </div>
                 <div class="row" style="display: flex;min-height: 40px;">
                     <div class="col m2 hide-on-small-only valign-wrapper">
                         <div>
-                            {{ (buckets|first).start|date_fr_long }}
-                            <br>{{ (buckets|first).first.job.name }}
+                            {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}{% endif %}
+                            {{ (buckets|first).first.job.name }}
                         </div>
                     </div>
                     <div class="col m10 s12">

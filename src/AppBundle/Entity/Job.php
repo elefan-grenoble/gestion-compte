@@ -30,6 +30,14 @@ class Job
 
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="color", type="string", length=255, unique=false)
+     */
+    private $color;
+
+
+    /**
      * Get id
      *
      * @return int
@@ -61,5 +69,29 @@ class Job
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Set color
+     *
+     * @param string $color
+     *
+     * @return Job
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    /**
+     * Get color
+     *
+     * @return string
+     */
+    public function getColor()
+    {
+        return $this->color;
     }
 }

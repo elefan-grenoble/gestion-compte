@@ -24,7 +24,6 @@ class ShiftBucket
     public function addShift(Shift $shift)
     {
         $this->shifts[] = $shift;
-        $this->sort();
     }
 
     public function sort()
@@ -36,13 +35,13 @@ class ShiftBucket
                     if ($a->getDismissedTime() == $b->getDismissedTime()) {
                         return 0;
                     } else {
-                        return $a->getDismissedTime() < $b->getDismissedTime() ? 1 : -1;
+                        return $a->getDismissedTime() < $b->getDismissedTime() ? -1 : 1;
                     }
                 } else {
-                    return 1;
+                    return -1;
                 }
             } else {
-                return $b->getIsDismissed() ? -1 : 0;
+                return $b->getIsDismissed() ? 1 : 0;
             }
         });
         $this->shifts = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));

@@ -23,7 +23,8 @@ class JobType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name',TextType::class,array('label'=>'Poste de bénévolat'));
+            ->add('name',TextType::class,array('label'=>'Poste de bénévolat'))
+            ->add('color',TextType::class,array('label'=>'Couleur des créneaux dans le planning'));
     }
 
     /**
