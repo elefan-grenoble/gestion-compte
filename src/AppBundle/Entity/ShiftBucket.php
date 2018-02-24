@@ -72,16 +72,27 @@ class ShiftBucket
         return $this->shifts->first()->getDuration();
     }
 
+    public function canBookInterval(User $user)
+    {
+        return !$user->getAllShifts()->exists(function($key, Shift $shift) {
+            return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
+        });
+    }
+
     public function getBookableShifts(User $user)
     {
-        return $this->shifts->filter(function (Shift $shift) use ($user) {
-            return
-                ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
-                && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
-                    || !$shift->getShifter());
+        if ($this->canBookInterval($user)) {
+            return $this->shifts->filter(function (Shift $shift) use ($user) {
+                return
+                    ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
+                    && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
+                    && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
+                        || !$shift->getShifter());
 
-        });
+            });
+        } else {
+            return new \Doctrine\Common\Collections\ArrayCollection();
+        }
     }
 
     public function isBookable(User $user)
