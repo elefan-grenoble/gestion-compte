@@ -13,9 +13,9 @@
                 <div class="row">
                     {% for shifter in 1..bucket.shifts|length  %}
                         {% if loop.index <= bucket.bookableShifts(app.user)|length %}
-                            <div class="green lighten-1 right" style=" height:5px; width: {{ 100/(bucket.shifts|length) }}%"></div>
+                            <div class="green lighten-1 left" style=" height:5px; width: {{ 100/(bucket.shifts|length) }}%"></div>
                         {% else %}
-                            <div class="grey lighten-3 right" style="height:5px; width: {{ 100/(bucket.shifts|length) }}%"></div>
+                            <div class="grey lighten-3 left" style="height:5px; width: {{ 100/(bucket.shifts|length) }}%"></div>
                         {% endif %}
                     {% endfor %}
                 </div>
