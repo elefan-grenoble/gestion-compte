@@ -1,7 +1,8 @@
 <div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
     <div class="card-content white-text">
         <span class="card-title">{{ shift.start|date_fr_long }}</span>
-        <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }} pour <i class="material-icons">person</i>{{ shift.shifter.firstname }}</p>
+        <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
+            <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
         {% if (shift.getIsDismissed()) %}
             <p>Créneau annulé, en attente de repreneur</p>
         {% endif %}
