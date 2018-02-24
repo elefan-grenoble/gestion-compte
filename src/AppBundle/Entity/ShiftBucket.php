@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
+use AppBundle\Entity\Beneficiary;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
@@ -26,37 +27,43 @@ class ShiftBucket
         $this->shifts[] = $shift;
     }
 
-    function compareShifts(Shift $a, Shift $b)
+    static private function compareShifts(Shift $a, Shift $b)
     {
-        if ($a->getRole()) {
-            return $b->getRole() ? 0 : 1;
-        } else if ($b->getRole()) {
-            return -1;
-        } else {
-            if ($a->getIsDismissed()) {
-                if ($b->getIsDismissed()) {
-                    if ($a->getDismissedTime() == $b->getDismissedTime()) {
-                        return 0;
-                    } else {
-                        return $a->getDismissedTime() < $b->getDismissedTime() ? -1 : 1;
-                    }
+        if ($a->getIsDismissed()) {
+            if ($b->getIsDismissed()) {
+                if ($a->getDismissedTime() == $b->getDismissedTime()) {
+                    return 0;
                 } else {
-                    return -1;
+                    return $a->getDismissedTime() < $b->getDismissedTime() ? -1 : 1;
                 }
             } else {
-                return $b->getIsDismissed() ? 1 : 0;
+                return -1;
             }
+        } else {
+            return $b->getIsDismissed() ? 1 : 0;
         }
     }
 
-    public function getShifts()
+    private function getShifts(Beneficiary $beneficiary)
     {
-        return $this->shifts;
+        $bookableShifts = $this->getBookableShifts($beneficiary);
+        $bookableIntersectRoles = ShiftBucket::shiftIntersectRoles($bookableShifts, $beneficiary->getRoles());
+        return $this->shifts->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectRoles));
     }
 
-    public function getFirst()
+    public function getShiftsCount(Beneficiary $beneficiary)
+    {
+        return count($this->getShifts($beneficiary));
+    }
+
+    private function getFirst()
     {
         return $this->shifts->first();
+    }
+
+    public function getJob()
+    {
+        return $this->getFirst()->getJob();
     }
 
     public function getStart()
@@ -81,48 +88,116 @@ class ShiftBucket
         });
     }
 
-    public function getBookableShifts(User $user)
+    private function getBookableShifts(Beneficiary $beneficiary)
     {
-        if ($this->canBookInterval($user)) {
-            return $this->shifts->filter(function (Shift $shift) use ($user) {
-                return
-                    ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
-                    && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                    && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
-                        || !$shift->getShifter());
-
+        $user = $beneficiary->getUser();
+        $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
+            return
+                ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
+                && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
+                && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
+                    || !$shift->getShifter());
             });
-        } else {
-            return new \Doctrine\Common\Collections\ArrayCollection();
-        }
+        return $bookableShifts;
     }
 
-    public function isBookable(User $user)
+    public function isBookable(Beneficiary $beneficiary)
     {
-        return count($this->getBookableShifts($user)) > 0;
+        return $this->getBookableShiftsCount($beneficiary) > 0;
     }
 
-    public function getFirstBookable(User $user)
+    /***
+     * Renvoie le premier shift bookable.
+     */
+    public function getFirstBookable(Beneficiary $beneficiary)
     {
-        if ($this->isBookable($user)) {
-            $iterator = $this->getBookableShifts($user)->getIterator();
+        $user = $beneficiary->getUser();
+        if ($this->isBookable($beneficiary)) {
+            $bookableShifts = $this->getBookableShifts($beneficiary);
+            $iterator = ShiftBucket::filterByRoles($bookableShifts, $beneficiary->getRoles())->getIterator();
             $iterator->uasort(function (Shift $a, Shift $b) {
-                return $this->compareShifts($a, $b) * -1; // We want priority shift first
+                return ShiftBucket::compareShifts($a, $b);
             });
             $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
-            return $sorted->first();
+            return $sorted->isEmpty() ? null : $sorted->first();
         } else {
             return null;
         }
     }
 
-    public function getRemainingBookable(User $user)
+    /***
+     * Renvoie le nombre de shits bookable.
+     */
+    public function getBookableShiftsCount(Beneficiary $beneficiary)
     {
-        return count($this->getBookableShifts($user));
+        $bookableShifts = $this->getBookableShifts($beneficiary);
+        return count(ShiftBucket::filterByRoles($bookableShifts, $beneficiary->getRoles()));
     }
 
     public function getIntervalCode()
     {
         return $this->shifts[0]->getIntervalCode();
+    }
+
+    /**
+     * Return true if the intersection between $roles and
+     * the shifts' roles is not empty.
+     */
+    static private function shiftIntersectRoles($shifts, $roles)
+    {
+        $roleIds = [];
+        foreach ($roles as $role)
+        {
+            $roleIds[] = $role->getId();
+        }
+
+        $roleInRoleIdsCallback = function ($key, Shift $shift) use($roleIds)
+        {
+            $role = $shift->getRole();
+            return !$role ? false : in_array($role->getId(), $roleIds);
+        };
+
+        return $shifts->exists($roleInRoleIdsCallback);
+    }
+
+    /**
+     * Renvoie une collection filtrée en fonction des rôles.
+     * 
+     * Si un des shifts a un rôle qui appartient à $roles,
+     * on renvoie seulement les shifts qui ont un rôle.
+     * 
+     * Sinon, on renvoie seulement les shifts qui n'ont pas de rôle.
+     */
+    static private function filterByRoles($shifts, $roles)
+    {
+        $intersectionNotEmpty = ShiftBucket::shiftIntersectRoles($shifts, $roles);
+        $filterCallback = ShiftBucket::createShiftFilterCallback($intersectionNotEmpty);
+        return $shifts->filter($filterCallback);
+    }
+
+    /**
+     * If $withRoles, return a callback which returns true if the
+     * shift has a role.
+     * 
+     * Else, return a callback which return true if the shift
+     * doesn't have a role.
+     */
+    static private function createShiftFilterCallback($withRoles)
+    {
+        if ($withRoles)
+        {
+            return function(Shift $shift)
+            {
+                if ($shift->getRole())
+                    return true;
+            };
+        }
+        else {
+            return function(Shift $shift)
+            {
+                if (!$shift->getRole())
+                    return true;
+            };
+        }
     }
 }

@@ -10,6 +10,23 @@
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
 <p>Nombre d'heures de bénévolat restantes à plannifier : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
 </div>
+<div class="row center">
+<form method="GET">
+    <label for="beneficiary">Bénéficiaire qui va effectuer le créneau</label>
+    <select class="form-control col s8" name="beneficiaryId">
+      {% for local_beneficiary in app.user.beneficiaries %}
+      <option value="{{local_beneficiary.id}}" 
+      {% if local_beneficiary.id == beneficiary.id %}
+        selected
+      {% endif %}
+      >
+      {{local_beneficiary.firstname}} {{local_beneficiary.lastname}}
+      </option>
+      {% endfor %}
+      <input class="btn-large waves-effect waves-light" type="submit" value="Choisir"/>
+</select>
+</form>
+</div>
 <div class="row">
 <h5>legende</h5>
 <ul>
@@ -39,13 +56,13 @@
             {% set date = false %}
             {% for buckets in bucketsByjob %}
                 <div class="row center show-on-small hide-on-med-and-up">
-                    {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% endif %}{{ (buckets|first).first.job.name }}
+                    {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% endif %}{{ (buckets|first).job.name }}
                 </div>
                 <div class="row" style="display: flex;min-height: 40px;">
                     <div class="col m2 hide-on-small-only valign-wrapper">
                         <div>
                             {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}{% endif %}
-                            {{ (buckets|first).first.job.name }}
+                            {{ (buckets|first).job.name }}
                         </div>
                     </div>
                     <div class="col m10 s12">
@@ -69,7 +86,9 @@
                                     {% endif %}
                                 {% endfor %}
                                 {# / compute lines #}
-                                {% include "booking/_partial/shift.html.twig" with { user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                                {% if bucket.isBookable(beneficiary) %}
+                                {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                                {% endif %}
                             {% endfor %}
                         </div>
                     </div>

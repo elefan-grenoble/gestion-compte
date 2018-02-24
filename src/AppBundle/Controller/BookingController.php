@@ -30,10 +30,24 @@ class BookingController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $beneficiary = $current_app_user->getMainBeneficiary();
-
+        $beneficiaryId = $request->get("beneficiaryId");
         $em = $this->getDoctrine()->getManager();
+        $beneficiary = null;
+        if ($beneficiaryId)
+        {
+            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+            if ($beneficiary->getUser()->getId() != $current_app_user->getId())
+            {
+                $beneficiary = null;
+            }
+        }
+        if (!$beneficiary)
+        {
+            $beneficiary = $current_app_user->getMainBeneficiary();
+        }
+
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
+        
 
         $hours = array();
         for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -52,7 +66,8 @@ class BookingController extends Controller
                 $bucketsByDay[$day][$job] = array();
             }
             if (!isset($bucketsByDay[$day][$job][$interval])) {
-                $bucketsByDay[$day][$job][$interval] = new ShiftBucket();
+                $bucket = new ShiftBucket();
+                $bucketsByDay[$day][$job][$interval] = $bucket;
             }
             $bucketsByDay[$day][$job][$interval]->addShift($shift);
         }
@@ -60,6 +75,7 @@ class BookingController extends Controller
         return $this->render('booking/index.html.twig', [
             'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
+            'beneficiary' => $beneficiary
         ]);  
     }
 

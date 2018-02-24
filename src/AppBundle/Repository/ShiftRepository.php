@@ -15,10 +15,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     {
         $qb = $this->createQueryBuilder('s');
 
-        //->andWhere('s.role IN :roles')
-        //->orWhere('s.role IS NULL')
-        //->setParameter('roles', $roles)
-
         $qb
             ->where('s.start > :now')
             ->setParameter('now', new \Datetime('now'))
