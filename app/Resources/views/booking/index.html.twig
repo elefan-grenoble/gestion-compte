@@ -8,7 +8,7 @@
 {% block content %}
 <div class="row center">
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
-<p>Nombre d'heures de bénévolat restantes à plannifier : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
+<p>Nombre d'heures de bénévolat restantes à planifier : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
 </div>
 <div class="row center">
 <form method="GET">
