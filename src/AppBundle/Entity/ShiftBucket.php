@@ -78,7 +78,7 @@ class ShiftBucket
             return
                 ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
                 && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                && (($shift->getIsDismissed() && $shift->getBooker()->getId() == $user->getId())
+                && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
                     || !$shift->getShifter());
 
         });
