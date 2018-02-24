@@ -6,9 +6,17 @@
 {% endblock %}
 
 {% block content %}
-<div class="row" align="center">
+<div class="row center">
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
 <p>Nombre d'heures de bénévolat restantes à plannifier : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
+</div>
+<div class="row">
+<h5>legende</h5>
+<ul>
+    <li>
+        <i class="material-icons tiny">star_border</i>Créneau à reprendre, aide un bénévole en galère !
+    </li>
+</ul>
 </div>
 
         <div class="row">
