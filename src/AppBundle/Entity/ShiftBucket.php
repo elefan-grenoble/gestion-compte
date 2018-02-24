@@ -11,6 +11,10 @@ use Doctrine\Common\Collections\ArrayCollection;
  * Shift Bucket
  * List of shift sharing the same start, end and job
  *
+ * /!\ ATTENTION /!\
+ * Le comportement implémenté repose sur l'hypothèse qu'il ne peut y avoir qu'un seul
+ * rôle possible pour un bucket, donc pour un job. Il faudra modifier l'implémentation
+ * si cela n'est plus le cas.
  */
 class ShiftBucket
 {
