@@ -32,7 +32,18 @@ class BookingController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if ($current_app_user->getBeneficiaries()->count()<1){
+            $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré !');
+            return $this->redirectToRoute('homepage');
+        }else{
+            $remainder = $current_app_user->getRemainder();
+            if (intval($remainder->format("%R%a"))<0){
+                $session->getFlashBag()->add('warning', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
+                return $this->redirectToRoute('homepage');
+            }
+        }
 
         $beneficiaryForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking'))
@@ -52,11 +63,11 @@ class BookingController extends Controller
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $current_app_user->getBeneficiaries()->count()==1) {
 
             if ($current_app_user->getBeneficiaries()->count() > 1){
-                $em = $this->getDoctrine()->getManager();
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
             }else{
-                $beneficiary = $current_app_user->getBeneficiaries()->getFirst();
+                $beneficiary = $current_app_user->getBeneficiaries()->first();
             }
+            $em = $this->getDoctrine()->getManager();
             $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
 
             $hours = array();
@@ -85,7 +96,8 @@ class BookingController extends Controller
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
                 'hours' => $hours,
-                'beneficiary' => $beneficiary
+                'beneficiary' => $beneficiary,
+                'jobs' => $em->getRepository('AppBundle:Job')->findAll()
             ]);
         }else{
             return $this->render('booking/index.html.twig', [

@@ -3,7 +3,7 @@
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('period') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
     <i class="material-icons">add</i>Nouveau
 {% endblock %}
 
@@ -19,7 +19,11 @@
     <h5>Roles liés</h5>
     <ul>
         {% for position in period.positions %}
-            <li>{{ position }}</li>
+            <li>
+                {{ form_start(positions_delete_form[position.id]) }}
+                {{ form_widget(positions_delete_form[position.id]) }}
+                {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
+                {{ form_end(positions_delete_form[position.id]) }}</li>
         {% endfor %}
     </ul>
     {{ form_start(position_form) }}

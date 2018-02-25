@@ -108,11 +108,20 @@ class PeriodController extends Controller
             ->setMethod('DELETE')
             ->getForm();
 
+        $positions_delete_form = array();
+        foreach($period->getPositions() as $position){
+            $positions_delete_form[$position->getId()] = $this->createFormBuilder()
+                ->setAction($this->generateUrl('remove_position_from_period', array('period' => $period->getId(),'position' => $position->getId())))
+                ->setMethod('DELETE')
+                ->getForm()->createView();
+        }
+
         return $this->render('admin/period/edit.html.twig',array(
             "form" => $form->createView(),
             "period" => $period,
             "position_form" => $this->createForm('AppBundle\Form\PeriodPositionType',new PeriodPosition(),array('action'=>$this->generateUrl('add_position_to_period',array('id'=>$period->getId()))))->createView(),
             "delete_form" => $delete_form->createView(),
+            "positions_delete_form" => $positions_delete_form
         ));
     }
 
@@ -140,6 +149,33 @@ class PeriodController extends Controller
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'La position '.$position.' a bien été ajoutée');
+            return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
+        }
+
+        return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
+    }
+
+    /**
+     * @Route("/{period}/remove_position/{position}", name="remove_position_from_period")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"DELETE"})
+     */
+    public function removePositionToPeriodAction(Request $request,Period $period,PeriodPosition $position)
+    {
+        $session = new Session();
+
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('remove_position_from_period', array('period' => $period->getId(),'position' => $position->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $period->removePosition($position);
+            $em->persist($period);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La position '.$position.' a bien été supprimée');
             return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
@@ -208,6 +244,9 @@ class PeriodController extends Controller
             foreach ($periods as $period){
                 $p = clone $period;
                 $p->setDayOfWeek($to);
+                foreach ($period->getPositions() as $position){
+                    $p->addPosition($position);
+                }
                 $em->persist($p);
                 $count++;
             }
@@ -232,21 +271,24 @@ class PeriodController extends Controller
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shifts_generation'))
-            ->add('date',TextType::class,array('label'=>'jour','attr'=>array('class'=>'datepicker')))
+            ->add('date_from',TextType::class,array('label'=>'du*','attr'=>array('class'=>'datepicker')))
+            ->add('date_to',TextType::class,array('label'=>'au' ,'attr'=>array('class'=>'datepicker','require' => false)))
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $date = $form->get('date')->getData();
+            $date_from = $form->get('date_from')->getData();
+            $date_to = $form->get('date_to')->getData();
 
             $application = new Application($kernel);
             $application->setAutoExit(false);
 
             $input = new ArrayInput(array(
                 'command' => 'app:shift-generate',
-                'date' => $date
+                'date' => $date_from,
+                '--to' => $date_to
             ));
 
             $output = new BufferedOutput();

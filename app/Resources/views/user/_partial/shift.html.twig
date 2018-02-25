@@ -1,0 +1,16 @@
+<div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
+    <div class="card-content white-text">
+        <span class="card-title">{{ shift.start|date_fr_long }}</span>
+        <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
+            <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
+        {% if (shift.getIsDismissed()) %}
+            <p>Créneau annulé, en attente de repreneur</p>
+        {% endif %}
+    </div>
+    <div class="card-action">
+        {{ form_start(free_shift_forms[shift.id]) }}
+        {{ form_widget(free_shift_forms[shift.id]) }}
+            <button type="submit" class="btn red"><i class="material-icons left">delete</i>Libérer</button>
+        {{ form_end(free_shift_forms[shift.id]) }}
+    </div>
+</div>

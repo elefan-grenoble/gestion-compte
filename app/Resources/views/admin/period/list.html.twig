@@ -26,7 +26,7 @@
                     <td>
                         {% for period in periods[i] %}
                             <a href="{{ path("period_edit",{'id': period.id}) }}">
-                                <div class="card-panel teal lighten-2">
+                                <div class="card-panel {{ period.job.color }} lighten-2">
                                      <p class="white-text">
                                          <b class="white-text">{{ period.job.name }}</b><br>
                                           {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>

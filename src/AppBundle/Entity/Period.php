@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * Period
@@ -44,7 +45,7 @@ class Period
 
     /**
      * One Period has One Job.
-     * @ORM\OneToOne(targetEntity="Job")
+     * @ORM\ManyToOne(targetEntity="Job")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id")
      */
     private $job;
@@ -52,6 +53,7 @@ class Period
     /**
      * Many Period have Many Positions.
      * @ORM\ManyToMany(targetEntity="PeriodPosition", mappedBy="periods",cascade={"persist"})
+     * @OrderBy({"nbOfShifter" = "ASC"})
      * @ORM\JoinTable(name="period_positions")
      */
     private $positions;
@@ -193,6 +195,7 @@ class Period
      */
     public function removePosition(\AppBundle\Entity\PeriodPosition $position)
     {
+        $position->removePeriod($this);
         $this->positions->removeElement($position);
     }
 

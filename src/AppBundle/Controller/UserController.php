@@ -6,6 +6,7 @@ use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Registration;
+use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
@@ -58,10 +59,11 @@ class UserController extends Controller
     public function installAdminAction()
     {
         $em = $this->getDoctrine()->getManager();
-
+        $session = new Session();
         $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>0));
 
         if ($user){
+            $session->getFlashBag()->add('error','user super admin already exist !');
             return $this->redirectToRoute('homepage');
         }
 
@@ -74,6 +76,8 @@ class UserController extends Controller
         $admin->addRole('ROLE_SUPER_ADMIN');
         $em->persist($admin);
         $em->flush();
+
+        $session->getFlashBag()->add('success','user super admin created with success !');
 
         return $this->redirectToRoute('homepage');
     }
@@ -559,10 +563,57 @@ class UserController extends Controller
 
         $deleteForm = $this->createDeleteForm($user);
 
+        $free_shift_forms = array();
+        for($cycle=1;$cycle<3;$cycle++) //cycle in 1..2
+        {
+            foreach ($user->getFutureShiftsOfCycle($cycle) as $shift){
+                $free_shift_forms[$shift->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
+                    ->setMethod('DELETE')
+                    ->getForm()
+                    ->createView();
+            }
+        }
+
         return $this->render('user/show.html.twig', array(
             'user' => $user,
             'delete_form' => $deleteForm->createView(),
+            'free_shift_forms' => $free_shift_forms,
         ));
+    }
+
+    /**
+     * free a shift.
+     *
+     * @Route("/{user}/free_shift/{shift}", name="free_shift")
+     * @Method("DELETE")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function freeShiftAction(Request $request, User $user,Shift $shift)
+    {
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+        $form->handleRequest($request);
+
+        $session = new Session();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $shift->setBooker(null);
+            $shift->setBookedTime(null);
+            $shift->setDismissedReason('');
+            $shift->setIsDismissed(false);
+            $shift->setDismissedTime(null);
+            $shift->setShifter(null);
+            $em->persist($shift);
+            $em->flush();
+
+            $session->getFlashBag()->add('success',"Le shift a bien été libéré");
+        }
+
+        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+
     }
 
     /**
