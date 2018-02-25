@@ -113,7 +113,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShift(Request $request, Shift $shift)
+    public function bookShift(Request $request, Shift $shift, \Swift_Mailer $mailer)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -143,6 +143,19 @@ class BookingController extends Controller
 
         $em->persist($shift);
         $em->flush();
+
+        $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
+            ->setFrom('membres@lelefan.org')
+            ->setTo('membres@lelefan.org')
+            ->setReplyTo($beneficiary->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/new_booking.html.twig',
+                    array('shift' => $shift)
+                ),
+                'text/html'
+            );
+        $mailer->send($archive);
 
         return $this->redirectToRoute('homepage');
     }
