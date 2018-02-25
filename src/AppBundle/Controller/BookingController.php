@@ -7,7 +7,10 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -25,58 +28,71 @@ class BookingController extends Controller
     /**
      * @Route("/", name="booking")
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
+     * @Method({"GET","POST"})
      */
     public function indexAction(Request $request)
     {
-        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $beneficiaryId = $request->get("beneficiaryId");
-        $em = $this->getDoctrine()->getManager();
-        $beneficiary = null;
-        if ($beneficiaryId)
-        {
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
-            if ($beneficiary->getUser()->getId() != $current_app_user->getId())
-            {
-                $beneficiary = null;
+
+        $beneficiaryForm = $this->createFormBuilder()
+            ->setAction($this->generateUrl('booking'))
+            ->setMethod('POST')
+            ->add('beneficiary', EntityType::class, array(
+                'label' => 'Reserver un pour',
+                'required' => true,
+                'class' => 'AppBundle:Beneficiary',
+                'choices' => $current_app_user->getBeneficiaries(),
+                'choice_label' => 'firstname',
+                'multiple' => false,
+            ))
+            ->getForm();
+
+        $beneficiaryForm->handleRequest($request);
+
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $current_app_user->getBeneficiaries()->count()==1) {
+
+            if ($current_app_user->getBeneficiaries()->count() > 1){
+                $em = $this->getDoctrine()->getManager();
+                $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
+            }else{
+                $beneficiary = $current_app_user->getBeneficiaries()->getFirst();
             }
-        }
-        if (!$beneficiary)
-        {
-            $beneficiary = $current_app_user->getMainBeneficiary();
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
+
+            $hours = array();
+            for ($i = 6; $i < 22; $i++) { //todo put this in conf
+                $hours[] = $i;
+            }
+
+            $bucketsByDay = array();
+            foreach ($shifts as $shift) {
+                $day = $shift->getStart()->format("d m Y");
+                $job = $shift->getJob()->getId();
+                $interval = $shift->getIntervalCode();
+                if (!isset($bucketsByDay[$day])) {
+                    $bucketsByDay[$day] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job])) {
+                    $bucketsByDay[$day][$job] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job][$interval])) {
+                    $bucket = new ShiftBucket();
+                    $bucketsByDay[$day][$job][$interval] = $bucket;
+                }
+                $bucketsByDay[$day][$job][$interval]->addShift($shift);
+            }
+
+            return $this->render('booking/index.html.twig', [
+                'bucketsByDay' => $bucketsByDay,
+                'hours' => $hours,
+                'beneficiary' => $beneficiary
+            ]);
+        }else{
+            return $this->render('booking/index.html.twig', [
+                'beneficiary_form' => $beneficiaryForm->createView(),
+            ]);
         }
 
-        $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
-        
-
-        $hours = array();
-        for ($i = 6; $i < 22; $i++) { //todo put this in conf
-            $hours[] = $i;
-        }
-
-        $bucketsByDay = array();
-        foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
-            $job = $shift->getJob()->getId();
-            $interval = $shift->getIntervalCode();
-            if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job])) {
-                $bucketsByDay[$day][$job] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job][$interval])) {
-                $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$job][$interval] = $bucket;
-            }
-            $bucketsByDay[$day][$job][$interval]->addShift($shift);
-        }
-
-        return $this->render('booking/index.html.twig', [
-            'bucketsByDay' => $bucketsByDay,
-            'hours' => $hours,
-            'beneficiary' => $beneficiary
-        ]);  
     }
 
     /**
