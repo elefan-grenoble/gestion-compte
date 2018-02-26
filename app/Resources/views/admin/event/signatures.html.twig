@@ -1,0 +1,182 @@
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #FAFAFA;
+            font-size: 12px ;
+            font-family: 'Montserrat', sans-serif;
+        }
+        * {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 10mm auto;
+            border: 1px #D3D3D3 solid;
+            border-radius: 5px;
+            background: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .subpage {
+            /*padding: 1cm;*/
+            /*border: 5px red solid;*/
+            height: 257mm;
+            /*outline: 2cm #FFEAEA solid;*/
+        }
+        .subpage table{
+            width: 100%;
+            border: 0;
+            border-collapse: collapse;
+        }
+        .subpage table th{
+            text-align: left;
+        }
+        .subpage table tr{
+            height: 1cm;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        @media print {
+            html, body {
+                width: 210mm;
+                height: 297mm;
+            }
+            .page {
+                margin: 0;
+                border: initial;
+                border-radius: initial;
+                width: initial;
+                min-height: initial;
+                box-shadow: initial;
+                background: initial;
+                page-break-after: always;
+            }
+        }
+        .wrong{
+            background: lightgray;
+            color: black;
+            text-align: center;
+            font-size: 10px;
+        }.warning{
+             background: yellow;
+             color: black;
+             text-align: center;
+             font-size: 10px;
+         }
+        .index{
+            font-size: 8px;
+            color: gray;
+        }
+        .date{
+            font-size: 9px;
+        }
+        .smaller{
+            font-size: 9px;
+        }
+        tr.odd{
+            background: lightgray;
+        }
+        .sign{
+            border: 2px solid black;
+            background: white;
+        }
+        .center{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="book">
+    <div class="page">
+        <div class="subpage">
+            {#<h3 class="center">Emargement {{ event.title }} / {{ event.date | date('d-m-Y H:i') }}</h3>#}
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Nom</th>
+                    <th>Prenom</th>
+                    <th>numéro</th>
+                    <th>(re)adhésion</th>
+                    <th>Signature</th>
+                </tr>
+                {% set index = 1 %}
+                {% set letter = "" %}
+                {% for beneficiary in beneficiaries %}
+                {% if beneficiary.user.lastRegistration %}
+                    {% if beneficiary.lastname|first != letter %}
+                        {% set letter = beneficiary.lastname|first %}
+                        <tr>
+                            <td colspan="6" align="center">- <b>{{ letter }}</b> -</td>
+                        </tr>
+                        {% set index = index + 1 %}
+                    {% endif %}
+                    <tr class="{% if loop.index is divisibleby(2) %}odd{% else %}even{% endif %}" >
+                        <td class="index">{{ loop.index }}</td>
+                        <td {% if beneficiary.lastname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
+                        <td {% if beneficiary.firstname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
+                        <td>#{{ beneficiary.user.memberNumber }}</td>
+                        <td class="date">{{ beneficiary.user.lastRegistration.date | date('d-m-Y') }}</td>
+                        {% if not beneficiary.isMain %}
+                            <td class="warning">Beneficiaire de <b>{{ beneficiary.user.mainBeneficiary.lastname }}&nbsp;{{ beneficiary.user.mainBeneficiary.firstname }}</b></td>
+                        {% elseif (event.proxiesByGiver(beneficiary.user) | length > 0) %}
+                            <td class="warning">Procuration donnée à {{ event.proxiesByGiver(beneficiary.user).first.owner.lastname }}&nbsp;                                {{ event.proxiesByGiver(beneficiary.user).first.owner.firstname }}&nbsp;{{ event.proxiesByGiver(beneficiary.user).first.owner.user.memberNumber }}</td>
+                        {% elseif ( beneficiary.user.lastRegistration.date < event.minDateOfLastRegistration) %}
+                            <td class="wrong">Adhésion expirée</td>
+                        {% else %}
+                            <td class="sign"></td>
+                        {% endif %}
+
+                    </tr>
+                    {% set index = index + 1 %}
+                    {% if ((event.proxiesByOwner(beneficiary) | length) > 0) and (event.proxiesByOwner(beneficiary).first.giver) %}
+                        <tr class="{% if loop.index is divisibleby(2) %}odd{% else %}even{% endif %}">
+                            <td class="smaller">Procuration</td>
+                            <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.lastname }}</td>
+                            <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.firstname }}</td>
+                            <td>#{{ event.proxiesByOwner(beneficiary).first.giver.memberNumber }}</td>
+                            <td></td>
+                            <td class="sign"></td>
+                        </tr>
+                        {% set index = index + 1 %}
+                    {% endif %}
+                {% endif %}
+                {% if (index > 0) and index >= 22 %}
+                {% set index = 0 %}
+            </table>
+        </div>
+    </div>
+    <div class="page">
+        <div class="subpage">
+            {#<h3 class="center">Emargement {{ event.title }} / {{ event.date | date('d-m-Y H:i') }}</h3>#}
+            <table>
+                <tr>
+                    <th></th>
+                    <th>Nom</th>
+                    <th>Prenom</th>
+                    <th>numéro</th>
+                    <th>(re)adhésion</th>
+                    <th>Signature</th>
+                </tr>
+                {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    window.print();
+</script>
+</body>
+</html>

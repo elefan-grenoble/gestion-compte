@@ -18,11 +18,18 @@
                         {{ event.description | markdown | raw }}
                     </div>
                     <div class="card-action">
+
                         <div class="left">
                             <a href="{{ path("event_edit",{'id':event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
                         </div>
-                        <div>
+                        <div class="left">
                             <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
+                        </div>
+                        <div class="left">
+                            <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons left">list</i>Emargement</a>
+                        </div>
+                        <div>
+                            &nbsp;
                         </div>
                     </div>
                 </div>

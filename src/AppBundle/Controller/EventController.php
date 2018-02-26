@@ -89,26 +89,17 @@ class EventController extends Controller
      */
     public function newAction(Request $request)
     {
-
         $session = new Session();
-
         $event = new Event();
         $em = $this->getDoctrine()->getManager();
-
         $form = $this->createForm('AppBundle\Form\EventType', $event);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em->persist($event);
             $em->flush();
-
             $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');
-
             return $this->redirectToRoute('event_edit', array('id' => $event->getId()));
-
         }
-
         return $this->render('admin/event/new.html.twig', array(
             'commission' => $event,
             'form' => $form->createView(),
@@ -436,5 +427,19 @@ class EventController extends Controller
         $mailer->send($owner);
         $mailer->send($giver);
 
+    }
+
+    /**
+     * signatures list
+     *
+     * @Route("/{id}/signatures/", name="event_signatures")
+     * @Method({"GET","POST"})
+     */
+    public function signaturesListAction(Request $request,Event $event){
+        $em = $this->getDoctrine()->getManager();
+        return $this->render('admin/event/signatures.html.twig', array(
+            'event' => $event,
+            'beneficiaries' => $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'))
+        ));
     }
 }

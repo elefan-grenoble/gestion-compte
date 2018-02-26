@@ -128,7 +128,7 @@ class Beneficiary
      */
     public function getLastname()
     {
-        return $this->lastname;
+        return strtoupper($this->lastname);
     }
 
     /**
@@ -164,7 +164,7 @@ class Beneficiary
      */
     public function getFirstname()
     {
-        return $this->firstname;
+        return ucfirst(strtolower($this->firstname));
     }
 
     /**

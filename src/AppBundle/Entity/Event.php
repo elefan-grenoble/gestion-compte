@@ -67,7 +67,7 @@ class Event
      */
     public function __construct()
     {
-        $this->proxys = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->proxies = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -162,14 +162,19 @@ class Event
         $this->proxys->removeElement($proxy);
     }
 
-    /**
-     * Get proxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getProxys()
+
+    public function getProxiesByOwner(Beneficiary $beneficiary)
     {
-        return $this->proxys;
+        return $this->proxies->filter(function (Proxy $proxy) use ($beneficiary) {
+            return ($proxy->getOwner() === $beneficiary);
+        });
+    }
+
+    public function getProxiesByGiver(User $user)
+    {
+        return $this->proxies->filter(function (Proxy $proxy) use ($user) {
+            return ($proxy->getGiver() === $user);
+        });
     }
 
     /**
