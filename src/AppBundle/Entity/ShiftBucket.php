@@ -48,8 +48,10 @@ class ShiftBucket
         }
     }
 
-    private function getShifts(Beneficiary $beneficiary)
+    public function getShifts(Beneficiary $beneficiary = null)
     {
+        if (!$beneficiary)
+            return $this->shifts;
         $bookableShifts = $this->getBookableShifts($beneficiary);
         $bookableIntersectRoles = ShiftBucket::shiftIntersectRoles($bookableShifts, $beneficiary->getRoles());
         return $this->shifts->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectRoles));
@@ -60,7 +62,7 @@ class ShiftBucket
         return count($this->getShifts($beneficiary));
     }
 
-    private function getFirst()
+    public function getFirst()
     {
         return $this->shifts->first();
     }
@@ -92,16 +94,22 @@ class ShiftBucket
         });
     }
 
-    private function getBookableShifts(Beneficiary $beneficiary)
+    private function getBookableShifts(Beneficiary $beneficiary = null)
     {
-        $user = $beneficiary->getUser();
-        $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
-            return
-                ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
-                && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
-                    || !$shift->getShifter());
+        if (!$beneficiary){
+            $bookableShifts = $this->shifts->filter(function (Shift $shift) {
+                return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
             });
+        }else{
+            $user = $beneficiary->getUser();
+            $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
+                return
+                    ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
+                    && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
+                    && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
+                        || !$shift->getShifter());
+            });
+        }
         return $bookableShifts;
     }
 
@@ -132,9 +140,11 @@ class ShiftBucket
     /***
      * Renvoie le nombre de shits bookable.
      */
-    public function getBookableShiftsCount(Beneficiary $beneficiary)
+    public function getBookableShiftsCount(Beneficiary $beneficiary = null)
     {
         $bookableShifts = $this->getBookableShifts($beneficiary);
+        if (!$beneficiary)
+            return count($bookableShifts);
         return count(ShiftBucket::filterByRoles($bookableShifts, $beneficiary->getRoles()));
     }
 

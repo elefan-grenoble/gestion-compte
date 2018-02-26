@@ -1,0 +1,4 @@
+Bonjour {{ shift.shifter.firstname | lower | capitalize }},
+le créneau {{ shift.job.name }} du {{ shift.start | date('d-m-Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}
+que tu avais reservé le {{ shift.bookedTime | date('d-m-Y à H:i') }} à été supprimé.
+Rendez-vous sur ton espace membre pour un reserver un nouveau.

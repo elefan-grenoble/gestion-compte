@@ -356,4 +356,19 @@ class Shift
     {
         return $this->job;
     }
+
+    /**
+     * free // unbook
+     *
+     * @return \AppBundle\Entity\Shift
+     */
+    public function free(){
+        $this->setBooker(null);
+        $this->setBookedTime(null);
+        $this->setDismissedReason('');
+        $this->setIsDismissed(false);
+        $this->setDismissedTime(null);
+        $this->setShifter(null);
+        return $this;
+    }
 }

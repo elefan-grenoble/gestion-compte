@@ -698,12 +698,7 @@ class UserController extends Controller
         $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $shift->setBooker(null);
-            $shift->setBookedTime(null);
-            $shift->setDismissedReason('');
-            $shift->setIsDismissed(false);
-            $shift->setDismissedTime(null);
-            $shift->setShifter(null);
+            $shift->free();
             $em->persist($shift);
             $em->flush();
 
