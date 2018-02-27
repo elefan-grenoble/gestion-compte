@@ -50,7 +50,7 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('booking'))
             ->setMethod('POST')
             ->add('beneficiary', EntityType::class, array(
-                'label' => 'Reserver un pour',
+                'label' => 'Réserver un créneau pour',
                 'required' => true,
                 'class' => 'AppBundle:Beneficiary',
                 'choices' => $current_app_user->getBeneficiaries(),
