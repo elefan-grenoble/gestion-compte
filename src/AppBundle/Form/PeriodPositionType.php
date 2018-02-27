@@ -25,7 +25,7 @@ class PeriodPositionType extends AbstractType
         $builder
             ->add('nb_of_shifter',IntegerType::class,array('label'=>'Nombre de postes disponibles'))
             ->add('role',EntityType::class, array(
-                'label'=>'Role necessaire',
+                'label'=>'Rôle necessaire',
                 'choice_label' => 'name',
                 'class' => Role::class,
                 'multiple' => false,

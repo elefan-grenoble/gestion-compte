@@ -9,7 +9,7 @@
 
     {% if beneficiary is not defined %}
         <div class="row center">
-            <h5 class="col s12">Qui est-ce qui programme son bénévolat ?</h5>
+            <h5 class="col s12">Qui programme son bénévolat ?</h5>
             <div class="col s12 m6 push-m3">
                 {{ form_start(beneficiary_form) }}
                 {{ form_widget(beneficiary_form) }}
@@ -106,7 +106,6 @@
                 {% endfor %}
             {% endfor %}
     {% endif %}
-
 
 {% endblock %}
 

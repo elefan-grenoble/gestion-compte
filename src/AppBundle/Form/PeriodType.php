@@ -35,7 +35,7 @@ class PeriodType extends AbstractType
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
             ->add('job', EntityType::class, array(
-                'label' => 'Tache',
+                'label' => 'Poste',
                 'class' => 'AppBundle:Job',
                 'choice_label'=> 'name',
                 'multiple'     => false,
