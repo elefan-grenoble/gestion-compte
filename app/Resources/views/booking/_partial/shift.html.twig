@@ -1,6 +1,7 @@
 <div
 {% set nbShifts = bucket.shiftsCount(beneficiary) %}
 {% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
         data-length="{{ (100/(end-start+1)) }}"
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
@@ -10,7 +11,7 @@
         href="#book{{ bucket.firstBookable(beneficiary).id }}"
     {% endif %}
        class="modal-trigger">
-        <div class="z-depth-1 {% if bucket.firstBookable(beneficiary) is null %}grey {% else %}{{ bucket.firstBookable(beneficiary).job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookableShifts - 1) }} {% endif %}{% if nbBookableShifts > 2 %}black-text {% else %}white-text {% endif %}{% endif %}" style="height:40px;position: relative">
+        <div class="z-depth-1 {% if bucket.firstBookable(beneficiary) is null %}grey {% else %}{{ bucket.firstBookable(beneficiary).job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookedShifts + 1) }} {% endif %}{% if nbBookedShifts > 1 %}black-text {% else %}white-text {% endif %}{% endif %}" style="height:40px;position: relative">
             <div style="height:2px; width: 100%;position: absolute;">
                 {% for shifter in 1..nbBookableShifts %}
                     {% if loop.index <= nbBookableShifts %}
