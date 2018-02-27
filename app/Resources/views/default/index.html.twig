@@ -34,6 +34,7 @@
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
+                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
                     <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
             </div>

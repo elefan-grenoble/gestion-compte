@@ -1,0 +1,89 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">date_range</i><span>Créneaux ADMIN</span>
+{% endblock %}
+
+{% block content %}
+
+        <div class="row center">
+            <h4 class="header">Admin créneaux</h4>
+        </div>
+        <div class="row">
+            {#<ul class="collapsible" data-collapsible="accordion">#}
+                {#<li>#}
+                    {#<div class="collapsible-header"><i class="material-icons">help_outline</i>Outils</div>#}
+                    {#<div class="collapsible-body">#}
+                        {#<ul>#}
+                            {#<li>#}
+                            {#</li>#}
+                        {#</ul>#}
+                    {#</div>#}
+                {#</li>#}
+            {#</ul>#}
+        </div>
+        <div class="row">
+            <div class="col m2 hide-on-small-only">
+            </div>
+            <div class="col s12 m10">
+                <div style="display: flex;">
+                    {% for i in hours %}
+                        {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
+                        <div style="flex: 1">
+                            <div style="text-align: center;width: 100%;margin-left: -50%;">
+                                {{ i }}h
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% for bucketsByjob in bucketsByDay %}
+            {% set date = false %}
+            {% for buckets in bucketsByjob %}
+                <div class="row center show-on-small hide-on-med-and-up ">
+                    {% if not date %}{{ (buckets|first).start|date_fr_long }}{% endif %}
+                </div>
+                <div class="row" style="display: flex;min-height: 60px;">
+                    <div class="col m2 hide-on-small-only valign-wrapper">
+                        <div>
+                            {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}{% endif %}
+                        </div>
+                    </div>
+                    <div class="col m10 s12">
+                        <div style="position: relative">
+                            {% set lignes = {} %}
+                            {% for bucket in buckets %}
+                                {#compute lines #}
+                                {% set l = 0 %}
+                                {% set break = false %}
+                                {% for i in 0..100 if not break %}
+                                    {% if lignes[i~'_'] is not defined %}
+                                        {% set l = i %}
+                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                        {% set break = true %}
+                                    {% else %}
+                                        {% if lignes[i~'_'] < bucket.start  %}
+                                            {% set l = i %}
+                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                            {% set break = true %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                {# / compute lines #}
+                                {% include "admin/booking/_partial/shift.html.twig" with { bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

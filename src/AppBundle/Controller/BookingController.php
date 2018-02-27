@@ -34,9 +34,10 @@ class BookingController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $mode = null;
         if ($current_app_user->getBeneficiaries()->count()<1){
-            $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré !');
-            return $this->redirectToRoute('homepage');
+            $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
+            return $this->redirectToRoute('booking_admin');
         }else{
             $remainder = $current_app_user->getRemainder();
             if (intval($remainder->format("%R%a"))<0){
@@ -60,15 +61,19 @@ class BookingController extends Controller
 
         $beneficiaryForm->handleRequest($request);
 
-        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $current_app_user->getBeneficiaries()->count()==1) {
+        //beneficiary selected, or only one beneficiary
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $current_app_user->getBeneficiaries()->count()==1 ) {
 
+            $em = $this->getDoctrine()->getManager();
             if ($current_app_user->getBeneficiaries()->count() > 1){
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
-            }else{
+                $roles = $beneficiary->getRoles();
+            }else {
                 $beneficiary = $current_app_user->getBeneficiaries()->first();
+                $roles = $beneficiary->getRoles();
             }
-            $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($beneficiary->getRoles());
+
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -99,7 +104,9 @@ class BookingController extends Controller
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository('AppBundle:Job')->findAll()
             ]);
-        }else{
+
+        }else{ // no beneficiary selected
+
             return $this->render('booking/index.html.twig', [
                 'beneficiary_form' => $beneficiaryForm->createView(),
             ]);
@@ -108,12 +115,114 @@ class BookingController extends Controller
     }
 
     /**
+     * @Route("/admin", name="booking_admin")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"GET","POST"})
+     */
+    public function adminAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $roles = $em->getRepository('AppBundle:Role')->findAll();
+        $jobs = $em->getRepository('AppBundle:Job')->findAll();
+        $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
+
+        $hours = array();
+        for ($i = 6; $i < 22; $i++) { //todo put this in conf
+            $hours[] = $i;
+        }
+
+        $bucketsByDay = array();
+        foreach ($shifts as $shift) {
+            $day = $shift->getStart()->format("d m Y");
+            $job = $shift->getJob()->getId();
+            $interval = $shift->getIntervalCode();
+            if (!isset($bucketsByDay[$day])) {
+                $bucketsByDay[$day] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job])) {
+                $bucketsByDay[$day][$job] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job][$interval])) {
+                $bucket = new ShiftBucket();
+                $bucketsByDay[$day][$job][$interval] = $bucket;
+            }
+            $bucketsByDay[$day][$job][$interval]->addShift($shift);
+        }
+
+        $delete_bucket_forms = array();
+
+        foreach ($bucketsByDay as $bucketsByJob){
+            foreach ($bucketsByJob as $bucketsByInterval){
+                foreach ($bucketsByInterval as $bucket){
+                    $delete_bucket_forms[$bucket->getFirst()->getId()] = $this->createFormBuilder()
+                        ->setAction($this->generateUrl('delete_bucket',array('id'=>$bucket->getFirst()->getId())))
+                        ->setMethod('DELETE')
+                        ->getForm()
+                        ->createView();
+                }
+            }
+        }
+
+        return $this->render('admin/booking/index.html.twig', [
+            'bucketsByDay' => $bucketsByDay,
+            'hours' => $hours,
+            'jobs' => $jobs,
+            'delete_bucket_forms' => $delete_bucket_forms
+        ]);
+    }
+
+    /**
+     * delete all shifts in bucket.
+     *
+     * @Route("/delete_bucket/{id}", name="delete_bucket")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method("DELETE")
+     */
+    public function deleteBucketAction(Request $request,Shift $shift, \Swift_Mailer $mailer){
+
+        $session = new Session();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('delete_bucket',array('id'=>$shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() ) {
+            $em = $this->getDoctrine()->getManager();
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job'=>$shift->getJob(),'start'=>$shift->getStart(),'end'=>$shift->getEnd()));
+            $count = 0;
+            foreach ($shifts as $s){
+                if ($s->getShifter()){ //warn shifter
+                    $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
+                        ->setFrom('membres@lelefan.org')
+                        ->setTo($s->getShifter()->getEmail())
+                        ->setBody(
+                            $this->renderView(
+                                'emails/deleted_shift.html.twig',
+                                array('shift' => $shift)
+                            ),
+                            'text/html'
+                        );
+                    $mailer->send($warn);
+                }
+                $em->remove($s);
+                $count++;
+            }
+            $em->flush();
+            $session->getFlashBag()->add('success', $count." shifts removed");
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
      * Book a shift.
      *
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShift(Request $request, Shift $shift)
+    public function bookShiftAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -144,6 +253,19 @@ class BookingController extends Controller
         $em->persist($shift);
         $em->flush();
 
+        $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
+            ->setFrom('membres@lelefan.org')
+            ->setTo('creneaux@lelefan.org')
+            ->setReplyTo($beneficiary->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/new_booking.html.twig',
+                    array('shift' => $shift)
+                ),
+                'text/html'
+            );
+        $mailer->send($archive);
+
         return $this->redirectToRoute('homepage');
     }
 
@@ -153,7 +275,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/dismiss", name="shift_dismiss")
      * @Method("POST")
      */
-    public function dismissShift(Request $request, Shift $shift)
+    public function dismissShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
