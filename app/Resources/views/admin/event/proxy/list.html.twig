@@ -30,6 +30,12 @@
                 </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <div class="collapsible-body">
+                        {{ form_start(edit_forms[proxy.id]) }}
+                        {{ form_widget(edit_forms[proxy.id]) }}
+                        <div>
+                            <button type="submit" class="btn waves-effect waves-light teal">Editer</button>
+                        </div>
+                        {{ form_end(edit_forms[proxy.id]) }}
                         {{ form_start(delete_forms[proxy.id]) }}
                         {{ form_widget(delete_forms[proxy.id]) }}
                         <div>
