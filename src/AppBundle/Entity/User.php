@@ -263,7 +263,7 @@ class User extends BaseUser
 
     public function __toString()
     {
-        return $this->getUsername();
+        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
     }
 
     public function getTmpToken($key = ''){
