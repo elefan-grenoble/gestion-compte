@@ -29,7 +29,7 @@ framework:
     handler_id: session.handler.native_file
     name: MEMBRESSID
     cookie_domain: ".lelefan.org"
-    save_path: '/var/lib/php/sessions'
+    save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
   fragments: ~
   http_method_override: true
   assets: ~
