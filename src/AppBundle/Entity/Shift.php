@@ -64,13 +64,13 @@ class Shift
     private $dismissedReason;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="booked_shifts")
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
     private $shifter;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="booked_shifts")
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;

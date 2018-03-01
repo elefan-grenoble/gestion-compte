@@ -51,7 +51,7 @@
                                     <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                         <input type="hidden" name="username" value="{{ user.username }}" />
                                         <div>
-                                            Envoyer le lien de connection sur {{ user.anonymousEmail }}
+                                            Envoyer le lien de connexion sur {{ user.anonymousEmail }}
                                             <br>
                                             <input type="submit" name="submit" value="Oui, Activer !" class="btn " />
                                         </div>
@@ -110,7 +110,7 @@
                                     <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                         <input type="hidden" name="username" value="{{ user.username }}" />
                                         <div>
-                                            Recevoir mon lien de connection sur {{ user.anonymousEmail }}
+                                            Recevoir mon lien de connexion sur {{ user.anonymousEmail }}
                                             <br>
                                             <input type="submit" name="submit" value="Oui !" class="btn " />
                                         </div>

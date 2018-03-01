@@ -50,7 +50,7 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('booking'))
             ->setMethod('POST')
             ->add('beneficiary', EntityType::class, array(
-                'label' => 'Reserver un pour',
+                'label' => 'Réserver un créneau pour',
                 'required' => true,
                 'class' => 'AppBundle:Beneficiary',
                 'choices' => $current_app_user->getBeneficiaries(),
@@ -124,6 +124,7 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $roles = $em->getRepository('AppBundle:Role')->findAll();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
+        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
         $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
 
         $hours = array();
@@ -167,7 +168,8 @@ class BookingController extends Controller
             'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
             'jobs' => $jobs,
-            'delete_bucket_forms' => $delete_bucket_forms
+            'delete_bucket_forms' => $delete_bucket_forms,
+            'beneficiaries' => $beneficiaries
         ]);
     }
 
@@ -299,6 +301,66 @@ class BookingController extends Controller
         $em->flush();
 
         return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Book a shift admin.
+     *
+     * @Route("/admin/shift/{id}/book", name="admin_shift_book")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method("POST")
+     */
+    public function bookShiftAdminAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    {
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
+
+        if ($shift->getShifter() && !$shift->getIsDismissed()) {
+            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
+            return $this->redirectToRoute("booking");
+        }
+
+        $re = '/.*\(([0-9]+)\)/';
+        $str = $request->get('beneficiary');
+        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+        if (count($matches) == 1){
+            $beneficiaryId = $matches[0][1];
+
+            $em = $this->getDoctrine()->getManager();
+
+            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
+            if (!$shift->getBooker()) {
+                $shift->setBooker($beneficiary);
+                $shift->setBookedTime(new DateTime('now'));
+            }
+            $shift->setShifter($beneficiary);
+            $shift->setIsDismissed(false);
+            $shift->setDismissedReason(null);
+            $shift->setDismissedTime(null);
+
+            $em->persist($shift);
+            $em->flush();
+
+            $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
+                ->setFrom('membres@lelefan.org')
+                ->setTo('creneaux@lelefan.org')
+                ->setReplyTo($beneficiary->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/new_booking.html.twig',
+                        array('shift' => $shift)
+                    ),
+                    'text/html'
+                );
+            $mailer->send($archive);
+
+            $session->getFlashBag()->add("success", "Créneau réservé avec succès");
+            return $this->redirectToRoute('booking_admin');
+        }
+
+
     }
 
 }

@@ -26,7 +26,7 @@
                 <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                     <input type="hidden" name="username" value="{{ user.username }}" />
                     <div>
-                        Envoyer le lien de connection sur {{ user.email }} ?
+                        Envoyer le lien de connexion sur {{ user.email }} ?
                         <br>
                         <input type="submit" name="submit" value="Activer le compte" class="btn-large waves-effect waves-light light-green" />
                     </div>

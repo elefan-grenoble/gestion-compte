@@ -86,4 +86,20 @@
 {% block stylesheets %}
 {% endblock %}
 {% block javascripts %}
+    <script>
+        jQuery(function ($) {
+            $('input.empty-shift').autocomplete({
+                data: {
+                    {% for beneficiary in beneficiaries %}
+                    "#{{ beneficiary.user.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname }} ({{ beneficiary.id }})" : null,
+                    {% endfor %}
+                },
+                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
+                onAutocomplete: function(val) {
+                    // Callback function when value is autcompleted.
+                },
+                minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
+            });
+        })
+    </script>
 {% endblock %}
