@@ -48,16 +48,13 @@ class EventController extends Controller
     public function listProxiesAction(){
         $em = $this->getDoctrine()->getManager();
         $proxies = $em->getRepository('AppBundle:Proxy')->findAll();
-        $edit_forms = array();
         $delete_forms = array();
         foreach ($proxies as $proxy){
             $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
-            $edit_forms[$proxy->getId()] = $this->createForm('AppBundle\Form\ProxyType', $proxy,['method' => 'POST', 'action' => $this->generateUrl('proxy_edit',['id'=>$proxy->getId()])])->createView();
         }
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
             'delete_forms' => $delete_forms,
-            'edit_forms' => $edit_forms,
             'event' => null,
         ));
     }
@@ -73,19 +70,14 @@ class EventController extends Controller
 
         $proxies = $event->getProxies();
         $delete_forms = array();
-        $edit_forms = array();
         foreach ($proxies as $proxy){
-            $edit_forms[$proxy->getId()] = $this->createForm('AppBundle\Form\ProxyType', $proxy,['method' => 'POST', 'action' => $this->generateUrl('proxy_edit',['id'=>$proxy->getId()])])->createView();
             $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
         }
         $em = $this->getDoctrine()->getManager();
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
             'delete_forms' => $delete_forms,
-            'edit_forms' => $edit_forms,
             'event' => $event,
-            'users' => $em->getRepository('AppBundle:User')->findAll(),
-            'beneficiaries' => $em->getRepository('AppBundle:Beneficiary')->findAll()
         ));
     }
 
@@ -197,7 +189,7 @@ class EventController extends Controller
      * Proxy edit
      *
      * @Route("/proxy/{id}", name="proxy_edit")
-     * @Method({"POST"})
+     * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function editProxyAction(Request $request,Proxy $proxy,\Swift_Mailer $mailer)
@@ -264,7 +256,11 @@ class EventController extends Controller
 
             return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
         }
-        return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
+
+        return $this->render('admin/event/proxy/edit.html.twig', array(
+            'form' => $form->createView(),
+            'delete_form' => $this->getProxyDeleteForm($proxy)->createView(),
+        ));
     }
 
     /**

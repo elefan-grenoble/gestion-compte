@@ -68,11 +68,7 @@ class ProxyType extends AbstractType
                         'label'=>'beneficiaire présent acceptant la procuration'));
                 }
             }
-
-
         });
-
-
     }
     
     /**

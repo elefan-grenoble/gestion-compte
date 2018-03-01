@@ -1,0 +1,27 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('event_list') }}"><i class="material-icons">list</i>événements</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i>
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Edit proxy</h4>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+
+    {{ form_start(delete_form) }}
+    {{ form_widget(delete_form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+    </div>
+    {{ form_end(delete_form) }}
+
+{% endblock %}
