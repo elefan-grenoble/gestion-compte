@@ -103,9 +103,9 @@ class PeriodPosition
     public function __toString()
     {
         if ($this->getRole())
-            return $this->getNbOfShifter()."x".$this->getRole()->getName();
+            return $this->getNbOfShifter()." x ".$this->getRole()->getName();
         else
-            return $this->getNbOfShifter()." membre".(($this->getNbOfShifter()>1) ? "s" : "");
+            return $this->getNbOfShifter()." x Membre";
     }
     /**
      * Constructor

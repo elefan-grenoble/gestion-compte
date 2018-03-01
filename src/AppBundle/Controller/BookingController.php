@@ -313,12 +313,10 @@ class BookingController extends Controller
     public function bookShiftAdminAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
 
         if ($shift->getShifter() && !$shift->getIsDismissed()) {
             $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return $this->redirectToRoute("booking");
+            return $this->redirectToRoute("booking_admin");
         }
 
         $re = '/.*\(([0-9]+)\)/';
@@ -330,6 +328,11 @@ class BookingController extends Controller
             $em = $this->getDoctrine()->getManager();
 
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (".$shift->getRole()->getName().")");
+                return $this->redirectToRoute("booking_admin");
+            }
 
             if (!$shift->getBooker()) {
                 $shift->setBooker($beneficiary);
@@ -356,7 +359,7 @@ class BookingController extends Controller
                 );
             $mailer->send($archive);
 
-            $session->getFlashBag()->add("success", "Créneau réservé avec succès");
+            $session->getFlashBag()->add("success", "Créneau réservé avec succès pour ".$shift->getShifter());
             return $this->redirectToRoute('booking_admin');
         }
 
