@@ -14,8 +14,13 @@
                     <ul>
                     {% for proxy in event.proxies %}
                         {% if proxy.giver == app.user %}
-                            <li>Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b></li>
-                            {% set proxy_given = true %}
+                            {% if proxy.owner is null %}
+                                <li>Procuration donnée au premier volontaire</li>
+                                {% set proxy_given = true %}
+                            {% else %}
+                                <li>Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b></li>
+                                {% set proxy_given = true %}
+                            {% endif %}
                         {% endif %}
 
                         {% if proxy.owner in app.user.beneficiaries %}

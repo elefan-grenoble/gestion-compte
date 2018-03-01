@@ -96,6 +96,14 @@ class EventController extends Controller
         $form = $this->createForm('AppBundle\Form\EventType', $event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            if (!$event->getDescription()){
+                $session->getFlashBag()->add('error', 'La description est obligatoire !');
+                return $this->render('admin/event/new.html.twig', array(
+                    'commission' => $event,
+                    'form' => $form->createView(),
+                    'errors' => $form->getErrors()
+                ));
+            }
             $em->persist($event);
             $em->flush();
             $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');
@@ -200,15 +208,19 @@ class EventController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
-            if ($existing_proxy && $existing_proxy != $proxy){
-                $session->getFlashBag()->add('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
-                return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
+            if ($proxy->getOwner()){
+                $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
+                if ($existing_proxy && $existing_proxy != $proxy){
+                    $session->getFlashBag()->add('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
+                    return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
+                }
             }
-            $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
-            if ($existing_proxy && $existing_proxy != $proxy){
-                $session->getFlashBag()->add('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
-                return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
+            if ($proxy->getGiver()){
+                $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
+                if ($existing_proxy && $existing_proxy != $proxy){
+                    $session->getFlashBag()->add('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
+                    return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
+                }
             }
             if (!$proxy->getOwner() && $proxy->getGiver()){
                 $proxy_waiting = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>null));
@@ -301,8 +313,12 @@ class EventController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
+        $beneficiaries_ids = array();
+        foreach ($current_app_user->getBeneficiaries() as $b){
+            $beneficiaries_ids[] = $b;
+        }
         $received_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
-            array("owner"=>array('in',$current_app_user->getBeneficiaries()))
+            array("owner"=>$beneficiaries_ids)
         );
         if ($received_proxy){
             $session->getFlashBag()->add('error', 'Oups, '.$received_proxy->getGiver().' a donné une procuration à '.$received_proxy->getOwner().', il compte dessus !');
@@ -492,7 +508,8 @@ class EventController extends Controller
     public function sendProxyMail(Proxy $proxy,\Swift_Mailer $mailer){
         $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
             ->setFrom('membres@lelefan.org')
-            ->setTo($proxy->getOwner()->getEmail())
+            ->setTo([$proxy->getOwner()->getEmail()=> $proxy->getOwner()->getFirstname().' '.$proxy->getOwner()->getLastname()])
+            ->setReplyTo([$proxy->getGiver()->getEmail()=> $proxy->getGiver()->getFirstname().' '.$proxy->getGiver()->getLastname()])
             ->setBody(
                 $this->renderView(
                     'emails/proxy_owner.html.twig',
@@ -502,7 +519,8 @@ class EventController extends Controller
             );
         $giver = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] votre procuration'))
             ->setFrom('membres@lelefan.org')
-            ->setTo($proxy->getGiver()->getEmail())
+            ->setTo([$proxy->getGiver()->getEmail()=> $proxy->getGiver()->getFirstname().' '.$proxy->getGiver()->getLastname()])
+            ->setReplyTo([$proxy->getOwner()->getEmail()=> $proxy->getOwner()->getFirstname().' '.$proxy->getOwner()->getLastname()])
             ->setBody(
                 $this->renderView(
                     'emails/proxy_giver.html.twig',

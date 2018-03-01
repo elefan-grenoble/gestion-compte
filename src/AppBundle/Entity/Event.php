@@ -45,14 +45,14 @@ class Event
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="min_date_of_last_registration", type="datetime")
+     * @ORM\Column(name="min_date_of_last_registration", type="datetime", nullable=true)
      */
     private $min_date_of_last_registration;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0})
+     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
      */
     private $need_proxy;
 
