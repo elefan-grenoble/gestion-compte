@@ -29,7 +29,7 @@ framework:
     handler_id: session.handler.native_file
     name: MEMBRESSID
     cookie_domain: ".lelefan.org"
-    save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
+    save_path: '/var/lib/php/sessions'
   fragments: ~
   http_method_override: true
   assets: ~
@@ -76,8 +76,8 @@ fos_user:
   firewall_name: main
   user_class: AppBundle\Entity\User
   from_email:
-    address: deshayeb@gmail.com
-    sender_name: Bastien Deshayes
+    address: '%transactional_mailer_user%'
+    sender_name: '%transactional_mailer_user_name%'
   registration:
     form:
       type: AppBundle\Form\RegistrationType
