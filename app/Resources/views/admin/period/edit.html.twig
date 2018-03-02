@@ -1,0 +1,68 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('period') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i>Nouveau
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Editer créneau type</h4>
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
+    </div>
+    {{ form_end(form) }}
+
+    <h5>Roles liés</h5>
+    <ul>
+        {% for position in period.positions %}
+            <li>
+                {{ form_start(positions_delete_form[position.id]) }}
+                {{ form_widget(positions_delete_form[position.id]) }}
+                {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
+                {{ form_end(positions_delete_form[position.id]) }}</li>
+        {% endfor %}
+    </ul>
+    {{ form_start(position_form) }}
+    <div class="row">
+        <div class="col s3">
+            {{ form_label(position_form.nb_of_shifter) }}
+            {{ form_widget(position_form.nb_of_shifter) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(position_form.role) }}
+            {{ form_widget(position_form.role) }}
+        </div>
+        <div class="col s3">
+            <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+        </div>
+    </div>
+    {{ form_end(position_form) }}
+
+
+    {{ form_start(delete_form) }}
+    {{ form_widget(delete_form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+    </div>
+    {{ form_end(delete_form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $('.timepicker').pickatime({
+            default: 'now', // Set default time: 'now', '1:30AM', '16:30'
+            fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+            twelvehour: false, // Use AM/PM or 24-hour format
+            donetext: 'OK', // text for done-button
+            cleartext: 'Effacer', // text for clear-button
+            canceltext: 'Annuler', // Text for cancel-button
+            autoclose: true, // automatic close timepicker
+            ampmclickable: true, // make AM PM clickable
+            aftershow: function(){} //Function for after opening timepicker
+        });
+    </script>
+{% endblock %}

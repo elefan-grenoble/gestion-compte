@@ -14,6 +14,7 @@ class TaskVoter extends Voter
     const VIEW = 'view';
     const CREATE = 'create';
     const EDIT = 'edit';
+    const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -25,7 +26,7 @@ class TaskVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW))) {
+        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE))) {
             return false;
         }
 
@@ -69,6 +70,11 @@ class TaskVoter extends Voter
                     return true;
                 }
                 return $this->canEdit($task, $user);
+            case self::DELETE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                    return true;
+                }
+                return $this->canDelete($task, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
@@ -96,6 +102,21 @@ class TaskVoter extends Voter
             }
             foreach ($task->getCommissions() as $commission ){
                 if ($commission->getBeneficiaries()->contains($beneficiary)){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private function canDelete(Task $task, User $user)
+    {
+        foreach ($user->getBeneficiaries() as $beneficiary){
+            if ($task->getOwners()->contains($beneficiary)){
+                return true;
+            }
+            foreach ($task->getCommissions() as $commission ){
+                if ($commission->getOwners()->contains($beneficiary)){
                     return true;
                 }
             }

@@ -1,0 +1,51 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">date_range</i>Semaine type
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Semaine type</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Lundi</th>
+                <th>Mardi</th>
+                <th>Mercredi</th>
+                <th>Jeudi</th>
+                <th>Vendredi</th>
+                <th>Samedi</th>
+                <th>Dimanche</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for i in 0..6 %}
+                    <td>
+                        {% for period in periods[i] %}
+                            <a href="{{ path("period_edit",{'id': period.id}) }}">
+                                <div class="card-panel {% if period.job %}{{ period.job.color }}{% else %}blue{% endif %} lighten-2">
+                                     <p class="white-text">
+                                         {% if period.job %}<b class="white-text">{{ period.job.name }}</b>{% endif %}<br>
+                                          {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
+                                          {% for position in period.positions %}
+                                              <i class="material-icons">person</i>{{ position }}
+                                          {% endfor %}
+                                      </p>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path("period_new") }}" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Nouveau créneau type</a>
+    <br>
+    <a href="{{ path("period_copy") }}" class="btn waves-effect waves-light"><i class="material-icons left">content_copy</i>Dupliquer les créneaux types d'un jour vers un autre</a>
+    <br>
+    <a href="{{ path("shifts_generation") }}" class="btn waves-effect waves-light purple"><i class="material-icons left">date_range</i>Generer des créneaux</a>
+{% endblock %}

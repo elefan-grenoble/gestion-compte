@@ -66,12 +66,6 @@ class TaskController extends Controller
             $new_date = new \DateTime($date);
             $task->setDueDate($new_date);
 
-            $owners = $task->getOwners();
-            foreach ($owners as $beneficiary){
-                $beneficiary->addTask($task);
-                $em->persist($beneficiary);
-            }
-
             $em->persist($task);
             $em->flush();
 
@@ -119,13 +113,6 @@ class TaskController extends Controller
             $new_date = new \DateTime($date);
             $task->setCreatedAt($new_date);
 
-            $owners = $task->getOwners();
-            foreach ($owners as $beneficiary){
-                if (! in_array($task,$beneficiary->getTasks()->toArray()))
-                    $beneficiary->addTask($task);
-                $em->persist($beneficiary);
-            }
-
             $em->persist($task);
             $em->flush();
 
@@ -140,9 +127,45 @@ class TaskController extends Controller
             }
         }
         return $this->render('default/task/edit.html.twig', array(
-            'form' => $form->createView()
+            'task' => $task,
+            'form' => $form->createView(),
+            'delete_form' => $this->getDeleteForm($task)->createView()
         ));
 
+    }
+
+
+    /**
+     * task delete
+     *
+     * @Route("/{id}", name="task_delete")
+     * @Method({"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function removeAction(Request $request,Task $task)
+    {
+        $this->denyAccessUnlessGranted('delete',$task);
+        $session = new Session();
+        $form = $this->getDeleteForm($task);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($task);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
+        }
+        return $this->redirectToRoute('tasks_list');
+    }
+
+    /**
+     * @param Task $task
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(Task $task){
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('task_delete', array('id' => $task->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
 }

@@ -16,6 +16,7 @@ composer.lock
 /web/fonts
 /web/images
 /web/js
+/web/config.php
 /web/uploads
 /web/media
 /vendor
@@ -36,3 +37,11 @@ composer.lock
 /.idea
 /*.iml
 LICENSE
+
+.!
+.buildpath
+.gitignore.swp
+.project
+.settings/
+
+**/*~

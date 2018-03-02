@@ -1,0 +1,33 @@
+<div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
+    <div class="card-content white-text">
+        <span class="card-title">{{ shift.start|date_fr_long }}</span>
+        <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
+            <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
+        {% if (shift.getIsDismissed()) %}
+            <p>Créneau annulé, en attente de repreneur</p>
+        {% endif %}
+    </div>
+    {% if (not shift.getIsDismissed()) %}
+        <div class="card-action">
+            <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oups, je ne vais pas pouvoir effectuer ce créneau...</a>
+        </div>
+        <div id="dismiss{{ shift.id }}" class="modal">
+            <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
+                <div class="modal-content">
+                    <h4>Je ne peux pas faire mon créneau</h4>
+                    <p>Attention! En vous désistant d'un créneau réservé, vous devrez attendre qu'un autre membre le reprenne
+                        pour pouvoir vous inscrire de nouveau.</p>
+                    <div class="input-field">
+                        <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
+                        <label for="reason">Justification éventuelle</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="#!"
+                       class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Retour</a>
+                    <button class="modal-action modal-close waves-effect waves-green btn teal ">Oui, je me désiste</button>
+                </div>
+            </form>
+        </div>
+    {% endif %}
+</div>

@@ -2,6 +2,8 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\BookedShift;
+use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -20,6 +22,7 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
+        $first = null;
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();

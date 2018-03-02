@@ -67,7 +67,7 @@ class Task
 
     /**
      * Many Tasks have Many Owners (beneficiaries).
-     * @ORM\ManyToMany(targetEntity="Beneficiary", inversedBy="tasks")
+     * @ORM\ManyToMany(targetEntity="Beneficiary", inversedBy="tasks", cascade={"persist"})
      * @ORM\JoinTable(name="tasks_beneficiaries")
      */
     private $owners;
@@ -251,6 +251,7 @@ class Task
     public function addOwner(\AppBundle\Entity\Beneficiary $owner)
     {
         $this->owners[] = $owner;
+        $owner->addTask($this);
 
         return $this;
     }

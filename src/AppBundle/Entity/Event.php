@@ -43,9 +43,16 @@ class Event
     private $date;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="min_date_of_last_registration", type="datetime", nullable=true)
+     */
+    private $min_date_of_last_registration;
+
+    /**
      * @var bool
      *
-     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0})
+     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
      */
     private $need_proxy;
 
@@ -60,7 +67,7 @@ class Event
      */
     public function __construct()
     {
-        $this->proxys = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->proxies = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -155,14 +162,19 @@ class Event
         $this->proxys->removeElement($proxy);
     }
 
-    /**
-     * Get proxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getProxys()
+
+    public function getProxiesByOwner(Beneficiary $beneficiary)
     {
-        return $this->proxys;
+        return $this->proxies->filter(function (Proxy $proxy) use ($beneficiary) {
+            return ($proxy->getOwner() === $beneficiary);
+        });
+    }
+
+    public function getProxiesByGiver(User $user)
+    {
+        return $this->proxies->filter(function (Proxy $proxy) use ($user) {
+            return ($proxy->getGiver() === $user);
+        });
     }
 
     /**
@@ -245,5 +257,29 @@ class Event
     public function getNeedProxy()
     {
         return $this->need_proxy;
+    }
+
+    /**
+     * Set minDateOfLastRegistration
+     *
+     * @param \DateTime $minDateOfLastRegistration
+     *
+     * @return Event
+     */
+    public function setMinDateOfLastRegistration($minDateOfLastRegistration)
+    {
+        $this->min_date_of_last_registration = $minDateOfLastRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Get minDateOfLastRegistration
+     *
+     * @return \DateTime
+     */
+    public function getMinDateOfLastRegistration()
+    {
+        return $this->min_date_of_last_registration;
     }
 }
