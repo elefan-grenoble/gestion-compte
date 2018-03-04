@@ -12,42 +12,29 @@
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            <div class="container">
-                <br><br>
-                <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
-                <div class="row center">
+            <div class="container center">
+                <div class="section no-pad-bot">
+                    <h3 class="header">Bonjour {{ app.user.firstname }}</h3>
                     <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
+                </div>
+                <div class="row">
                     {% for event in events %}
-                        <h5>{{ event.title }}</h5>
-                        <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
-                        {% set proxy_given = false %}
-                        {% for proxy in event.proxies %}
-                            {% if proxy.giver == app.user %}
-                                Procuration donnée à &nbsp;<b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b><br>
-                                {% set proxy_given = true %}
-                            {% endif %}
-                            {% if proxy.owner in app.user.beneficiaries %}
-                                Procuration pour &nbsp;<b>{{ proxy.owner.firstname }}</b> de la part de
-                                {% if proxy.giver %}
-                                    &nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b>
-                                {% endif %}<br>
-                            {% endif %}
-                        {% endfor %}
-                        {% if not proxy_given %}
-                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple">Je ne peux pas venir, je fais une procuration</a>
-                            <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green">Je viens, j'accepte une procuration</a>
-                        {% endif %}
+                        {% include "default/event/_event.html.twig" with { event: event } %}
                     {% endfor %}
                 </div>
-                <a href="https://lelefan.org/creneaux_fevrier_2018/?from=membres.lelefan.org" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Creneaux février 2018</a><br>
+
+                {% include "booking/home_booked_shifts.html.twig" %}
+
+                <h5>Construire</h5>
                 {% if is_granted("access_tools",app.user)  %}
-                    <h5>Outils</h5>
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
+
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
+                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
                     <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
             </div>
@@ -56,13 +43,15 @@
                 <br><br>
                 <h3 class="header center orange-text">Mon compte à l'éléfàn</h3>
                 <div class="row center">
-                    <p class="col s12 light">Bienvenue sur votre espace de gestion utilisateur</p>
+                    <p class="col s12 light">Bienvenue sur l'espace membre</p>
                 </div>
                 <div class="row center">
-                    <a href="{{ path('find_me') }}" id="download-button" class="btn-large waves-effect waves-light orange">Créer mon compte</a>
+                    <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light"><i class="material-icons left">lock_outline</i>Se connecter</a>
                 </div>
                 <div class="row center">
-                    <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
+                    <p class=" col s12 light"> Pas encore d'identifiant ?
+                        <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
+                    </p>
                 </div>
             </div>
         {% endif %}

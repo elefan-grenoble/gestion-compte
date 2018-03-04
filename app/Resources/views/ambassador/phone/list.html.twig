@@ -128,7 +128,7 @@
                     </td>
                     <td>{% for note in user.notes %}
                             <blockquote>
-                                {{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text  }}
+                                <i>{{ note.createdAt | date('d/m H:i') }} : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text  }}
                             </blockquote>
                         {% endfor %}
                     </td>

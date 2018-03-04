@@ -3,7 +3,9 @@
 
 namespace AppBundle\Entity;
 
+use DateTime;
 use AppBundle\Repository\RegistrationRepository;
+use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
@@ -261,7 +263,7 @@ class User extends BaseUser
 
     public function __toString()
     {
-        return $this->getUsername();
+        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
     }
 
     public function getTmpToken($key = ''){
@@ -473,7 +475,6 @@ class User extends BaseUser
         return $this->frozen;
     }
 
-
     /**
      * Set lastRegistration
      *
@@ -484,10 +485,8 @@ class User extends BaseUser
     public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
     {
         $this->lastRegistration = $lastRegistration;
-
         return $this;
     }
-
     /**
      * Get lastRegistration
      *
@@ -503,7 +502,8 @@ class User extends BaseUser
      * @param ClientInterface $client
      * @return bool
      */
-    public function isAuthorizedClient(Client $client){
+    public function isAuthorizedClient(Client $client)
+    {
         return $this->getClients()->contains($client);
     }
 
@@ -539,6 +539,172 @@ class User extends BaseUser
     public function getClients()
     {
         return $this->clients;
+    }
+
+    /**
+     * Get total shift duration for current cycle
+     */
+    public function getCycleShiftsDuration($cycleIndex, $excludeDismissed = false)
+    {
+        $duration = 0;
+        foreach ($this->getShiftsOfCycle($cycleIndex, $excludeDismissed) as $shift) {
+            $duration += $shift->getDuration();
+        }
+        return $duration;
+    }
+
+    /**
+     * Get all shifts for all beneficiaries
+     */
+    public function getAllShifts($excludeDismissed = false)
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        if ($excludeDismissed) {
+            return $shifts->filter(function($shift) {
+                return !$shift->getIsDismissed();
+            });
+        } else {
+            return $shifts;
+        }
+    }
+
+    /**
+     * Get all booked shifts for all beneficiaries
+     */
+    public function getAllBookedShifts()
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getBookedShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
+    }
+
+    /**
+     * Get shifts of a specific cycle
+     * @param $cycleIndex index of the cycle (1 for current cycle)
+     */
+    public function getShiftsOfCycle($cycleIndex, $excludeDismissed = false)
+    {
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
+            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
+                $shift->getEnd() < $this->endOfCycle($cycleIndex);
+        });
+    }
+
+    /**
+     * Get start date of current cycle
+     */
+    public function startOfCycle($cycleIndex)
+    {
+        $first = $this->getFirstShift();
+        $modFirst = null;
+        $now = new DateTime('now');
+        if ($first) {
+            $diff = $first->getStart()->diff($now);
+            $modFirst = $diff->format('%a') % 28;
+        }
+        $startCurrCycle = null;
+        if ($modFirst) {
+            /* Exception if first cycle in the future */
+            if ($first->getStart() < $now) {
+                $startCurrCycle = clone($now);
+                $startCurrCycle->modify("-".$modFirst." days");
+            }
+            else {
+                $startCurrCycle = clone($first->getStart());
+            }
+        } else {
+            $startCurrCycle = $now;
+        }
+
+        /* Reset time, keep only date */
+        $startCurrCycle->setTime(0, 0, 0);
+
+        for ($i = 1; $i < $cycleIndex; $i++) {
+            $startCurrCycle->modify("+28 days");
+        }
+
+        return $startCurrCycle;
+    }
+
+    /**
+     * Get end date of current cycle
+     */
+    public function endOfCycle($cycleIndex)
+    {
+        $endCurrCycle = clone($this->startOfCycle($cycleIndex));
+        $endCurrCycle->modify("+27 days");
+        $endCurrCycle->setTime(23, 59, 59);
+
+        return $endCurrCycle;
+    }
+
+    /**
+     * Get all shifts in the future for this cycle
+     */
+    public function getFutureShiftsOfCycle($cycleIndex, $excludeDismissed = false)
+    {
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
+            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
+                $shift->getEnd() < $this->endOfCycle($cycleIndex);
+        });
+    }
+
+    /**
+     * Get all rebooked shifts in the future
+     */
+    public function getFutureRebookedShifts()
+    {
+        return $this->getAllBookedShifts()->filter(function($shift) {
+            return $shift->getStart() > new DateTime('now') &&
+                $shift->getBooker() != $shift->getShifter();
+        });
+    }
+
+    /**
+     * Can book a shift
+     */
+    public function canBook()
+    {
+	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+    }
+
+    /**
+     * Get total shift time for a cycle
+     */
+    // TODO Valeur à mettre dans une conf
+    public function shiftTimeByCycle()
+    {
+        return 60 * 3;
+    }
+
+    /**
+     * Get remaining time to book
+     */
+    public function remainingToBook($cycleIndex, $excludeDismissed = false) {
+        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed);
+    }
+
+    /**
+     * Get first shift ever
+     */
+    public function getFirstShift()
+    {
+        $first = null;
+        foreach ($this->getAllBookedShifts() as $shift) {
+            if (!$first || $shift->getStart() < $first->getStart()) {
+                $first = $shift;
+            }
+        };
+        return $first;
     }
 
     /**
@@ -620,7 +786,11 @@ class User extends BaseUser
         $remainder = $this->getRemainder($date);
         if ( ! $remainder->invert ){ //still some days
             $min_delay_to_anticipate =  \DateInterval::createFromDateString('15 days');
-            return ($remainder < $min_delay_to_anticipate);
+            $now = new \DateTimeImmutable();
+            $away = $now->add($min_delay_to_anticipate);
+            $now = new \DateTimeImmutable();
+            $expire = $now->add($remainder);
+            return ($expire < $away);
         }
         else {
             return true;
@@ -630,7 +800,7 @@ class User extends BaseUser
     /**
      * get remainder
      *
-     * @return DateInterval|false
+     * @return \DateInterval|false
      */
     public function getRemainder(\DateTime $date = null)
     {

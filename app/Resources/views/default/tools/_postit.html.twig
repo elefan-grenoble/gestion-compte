@@ -1,0 +1,33 @@
+<div class="col s6 m4 l3">
+    <div class="postit-container">
+        <div class="postit">
+            <span class="info">
+                {{ note.author.firstname }} le {{ note.createdAt | date('d/m/Y à H:i') }}
+            </span>
+            <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger action"><i class="material-icons tiny">settings</i></a>
+            <p class="black-text">
+                {{ note.text }}
+            </p>
+            {#<img src="{{ gravatar(note.author.email) }}" alt="" class="circle responsive-img" width="30px">#}
+        </div>
+    </div>
+</div>
+<div id="post-it_edit{{ note.id }}" class="modal">
+
+    <div class="modal-content">
+        <h4>Editer le post-it</h4>
+        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id }}) }}
+        {{ form_widget(notes_form[note.id]) }}
+        {{ form_end(notes_form[note.id]) }}
+
+        {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form-note-delete-'~note.id }}) }}
+        {{ form_widget(notes_delete_form[note.id]) }}
+        {{ form_end(notes_delete_form[note.id]) }}
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn red" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+    </div>
+
+</div>

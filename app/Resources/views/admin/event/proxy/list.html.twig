@@ -30,6 +30,8 @@
                 </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <div class="collapsible-body">
+                        <a href="{{ path("proxy_edit",{'id':proxy.id}) }}" class="btn waves-effect waves-light">Editer</a>
+
                         {{ form_start(delete_forms[proxy.id]) }}
                         {{ form_widget(delete_forms[proxy.id]) }}
                         <div>

@@ -5,7 +5,9 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
+use AppBundle\Entity\Note;
 use AppBundle\Entity\Registration;
+use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
@@ -41,13 +43,110 @@ class UserController extends Controller
      * Lists all user entities.
      *
      * @Route("/office_tools", name="user_office_tools")
-     * @Method("GET")
+     * @Method({"GET","POST"})
      */
-    public function officeToolsAction()
+    public function officeToolsAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->get('security.token_storage')->getToken()->getUser());
-        return $this->render('default/tools/office_tools.html.twig');
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->denyAccessUnlessGranted('access_tools',$current_app_user);
+        $note = new Note();
+        $note->setAuthor($current_app_user);
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($note_form->isSubmitted() && $note_form->isValid()) {
+            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject"=>null,"author"=>$current_app_user,"text"=>$note->getText()));
+            $session = new Session();
+            if ($existing_note){
+                $session->getFlashBag()->add('error','Ce post-it existe déjà');
+            }else{
+                $em->persist($note);
+                $em->flush();
+                $session->getFlashBag()->add('success','Post-it ajouté');
+            }
+        }
+
+        $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject"=>null));
+        $notes_form = array();
+        $notes_delete_form = array();
+        foreach ($notes as $n){
+            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n,array('action'=>$this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+        }
+        return $this->render('default/tools/office_tools.html.twig', array(
+            'note_form' => $note_form->createView(),
+            'notes_form' => $notes_form,
+            'notes_delete_form' => $notes_delete_form,
+            'notes' => $notes
+        ));
     }
+
+    /**
+     * edit a note
+     *
+     * @Route("/note/{id}/edit", name="note_edit")
+     * @Method({"GET","POST"})
+     */
+    public function noteEditAction(Request $request, Note $note)
+    {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->denyAccessUnlessGranted('access_tools',$current_app_user);
+
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form->handleRequest($request);
+
+        if ($note_form->isSubmitted() && $note_form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($note);
+            $em->flush();
+            if ($note->getSubject()){
+                $session->getFlashBag()->add('success','note éditée');
+                return $this->redirectToRoute('user_show',array('username'=>$note->getSubject()->getUsername()));
+            }
+            $session->getFlashBag()->add('success','Post-it édité');
+        }
+        return $this->redirectToRoute('user_office_tools');
+    }
+
+    /**
+     * Creates a form to delete a note entity.
+     *
+     * @param Note $note the note entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createNoteDeleteForm(Note $note)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Deletes a user entity.
+     *
+     * @Route("/note/{id}", name="note_delete")
+     * @Method("DELETE")
+     */
+    public function deleteNoteAction(Request $request, Note $note)
+    {
+        $form = $this->createNoteDeleteForm($note);
+        $form->handleRequest($request);
+        $session = new Session();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($note);
+            $em->flush();
+            $session->getFlashBag()->add('success',"la note a bien été supprimée");
+        }
+
+        return $this->redirectToRoute('user_office_tools');
+    }
+
 
     /**
      * install admin
@@ -58,10 +157,11 @@ class UserController extends Controller
     public function installAdminAction()
     {
         $em = $this->getDoctrine()->getManager();
-
+        $session = new Session();
         $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>0));
 
         if ($user){
+            $session->getFlashBag()->add('error','user super admin already exist !');
             return $this->redirectToRoute('homepage');
         }
 
@@ -75,6 +175,8 @@ class UserController extends Controller
         $em->persist($admin);
         $em->flush();
 
+        $session->getFlashBag()->add('success','user super admin created with success !');
+
         return $this->redirectToRoute('homepage');
     }
 
@@ -84,7 +186,7 @@ class UserController extends Controller
      * @Route("/new", name="user_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, \Swift_Mailer $mailer)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -145,6 +247,18 @@ class UserController extends Controller
                         $em->flush();
 
                         $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+
+                        $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn'))
+                            ->setFrom('membres@lelefan.org')
+                            ->setTo($user->getEmail())
+                            ->setBody(
+                                $this->renderView(
+                                    'emails/welcome.html.twig',
+                                    array('user' => $user)
+                                ),
+                                'text/html'
+                            );
+                        $mailer->send($welcome);
 
                         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                             return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
@@ -283,13 +397,9 @@ class UserController extends Controller
                     $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
                 }
             }
-//            $phone = $editForm->get('mainBeneficiary')->get('phone')->getData();
-//            if ($phone){
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-//            }else{
-//                $session->getFlashBag()->add('error', 'Le numéro de téléphone est demandé');
-//            }
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+
             return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
@@ -551,10 +661,52 @@ class UserController extends Controller
 
         $deleteForm = $this->createDeleteForm($user);
 
+        $free_shift_forms = array();
+        for($cycle=1;$cycle<3;$cycle++) //cycle in 1..2
+        {
+            foreach ($user->getFutureShiftsOfCycle($cycle) as $shift){
+                $free_shift_forms[$shift->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
+                    ->setMethod('DELETE')
+                    ->getForm()
+                    ->createView();
+            }
+        }
+
         return $this->render('user/show.html.twig', array(
             'user' => $user,
             'delete_form' => $deleteForm->createView(),
+            'free_shift_forms' => $free_shift_forms,
         ));
+    }
+
+    /**
+     * free a shift.
+     *
+     * @Route("/{user}/free_shift/{shift}", name="free_shift")
+     * @Method("DELETE")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function freeShiftAction(Request $request, User $user,Shift $shift)
+    {
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+        $form->handleRequest($request);
+
+        $session = new Session();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $shift->free();
+            $em->persist($shift);
+            $em->flush();
+
+            $session->getFlashBag()->add('success',"Le shift a bien été libéré");
+        }
+
+        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+
     }
 
     /**

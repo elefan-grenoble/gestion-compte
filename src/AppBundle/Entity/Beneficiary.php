@@ -57,6 +57,16 @@ class Beneficiary
     private $user;
 
     /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
+     */
+    private $shifts;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="booker",cascade={"remove"})
+     */
+    private $booked_shifts;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
      * @ORM\JoinColumn(name="commission_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -118,7 +128,7 @@ class Beneficiary
      */
     public function getLastname()
     {
-        return $this->lastname;
+        return strtoupper($this->lastname);
     }
 
     /**
@@ -154,7 +164,7 @@ class Beneficiary
      */
     public function getFirstname()
     {
-        return $this->firstname;
+        return ucfirst(strtolower($this->firstname));
     }
 
     /**
@@ -269,6 +279,8 @@ class Beneficiary
     {
         $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
         $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->booked_shifts = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -361,6 +373,74 @@ class Beneficiary
     public function getOwn()
     {
         return $this->own;
+    }
+
+    /**
+     * Add shift
+     *
+     * @param \AppBundle\Entity\Shift $shift
+     *
+     * @return Beneficiary
+     */
+    public function addShift(\AppBundle\Entity\Shift $shift)
+    {
+        $this->shifts[] = $shift;
+
+        return $this;
+    }
+
+    /**
+     * Remove shift
+     *
+     * @param \AppBundle\Entity\Shift $shift
+     */
+    public function removeShift(\AppBundle\Entity\Shift $shift)
+    {
+        $this->shifts->removeElement($shift);
+    }
+
+    /**
+     * Get shifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShifts()
+    {
+        return $this->shifts;
+    }
+
+    /**
+     * Add bookedShift
+     *
+     * @param \AppBundle\Entity\Shift $bookedShift
+     *
+     * @return Beneficiary
+     */
+    public function addBookedShift(\AppBundle\Entity\Shift $bookedShift)
+    {
+        $this->booked_shifts[] = $bookedShift;
+
+        return $this;
+    }
+
+    /**
+     * Remove bookedShift
+     *
+     * @param \AppBundle\Entity\Shift $bookedShift
+     */
+    public function removeBookedShift(\AppBundle\Entity\Shift $bookedShift)
+    {
+        $this->booked_shifts->removeElement($bookedShift);
+    }
+
+    /**
+     * Get bookedShifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBookedShifts()
+    {
+        return $this->booked_shifts;
     }
 
     /**

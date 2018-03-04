@@ -1,0 +1,36 @@
+{% set nbShifts = bucket.shiftsCount(beneficiary) %}
+{% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
+<div id="book{{ bucket.firstBookable(beneficiary).id }}" class="modal">
+    <form action="{{ path('shift_book',{'id':bucket.firstBookable(beneficiary).id}) }}" method="post">
+        <div class="modal-content">
+            <h4>Réserver ce créneau / <span class="{{ bucket.firstBookable(beneficiary).job.color }}-text">{{ bucket.firstBookable(beneficiary).job.name }}</span></h4>
+            <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
+            {% if bucket.firstBookable(beneficiary).isDismissed %}
+                <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
+            {% endif %}
+            {% if user.beneficiaries | length < 1 %}
+                <p>Vous n'avez pas de bénéficiares</p>
+            {% else %}
+                <p><label>Nombre de places restantes: </label>{{ nbBookableShifts }}/{{ nbShifts }}</p>
+                <div class="row">
+                    {% for shifter in 1..nbShifts  %}
+                        {% if loop.index <= nbBookableShifts %}
+                            <div class="green lighten-1 left" style=" height:5px; width: {{ 100/(nbShifts) }}%"></div>
+                        {% else %}
+                            <div class="grey lighten-3 left" style="height:5px; width: {{ 100/(nbShifts) }}%"></div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <p>Attention ! Cette inscription vous engage. <br> Pour pouvoir annuler, votre créneau devra trouver repreneur. </p>
+                <input type="hidden" name="beneficiaryId" value="{{ beneficiary.id }}">
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            <a href="#!"
+               class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Annuler</a>
+            {% if user.beneficiaries | length >= 1 %}
+                <button class="modal-action modal-close waves-effect waves-green btn teal">Confirmer</button>
+            {% endif %}
+        </div>
+    </form>
+</div>

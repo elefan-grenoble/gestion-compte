@@ -1,0 +1,94 @@
+{% set nbBookableShifts = bucket.bookableShiftsCount() %}
+{% set nbShifts = (bucket.shifts() | length) %}
+<div
+        data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
+        data-length="{{ (100/(end-start+1)) }}"
+        style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
+                left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
+                top: {{ line*10 }}px;">
+    <a href="#edit{{ bucket.first.id }}"
+       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
+        <div class="z-depth-1 {{ bucket.first.job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookableShifts + 1) }} {% endif %}black-text "
+             style="position: relative;height: 60px;">
+            <div style="height:2px; width: 100%;position: absolute;">
+                {% for shifter in 1..nbBookableShifts %}
+                    {% if loop.index <= nbBookableShifts %}
+                        <div class="green lighten-3 left"
+                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
+                    {% else %}
+                        <div class="grey lighten-3 left"
+                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div >
+                <div style="position: absolute;width:60px;height: 60px;top: 0;left: 2px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
+                        &nbsp;{{ bucket.end|date('G\\hi') }}</div>
+                <ul style="font-size: 9px; padding-left: 20px;">
+                    {% set shiftercount = 0 %}
+                    {% for shift in bucket.shifts() %}
+                        {% if shift.shifter and shiftercount < 3 %}{# is booked #}
+                            <li>{% if shift.role %}<b
+                                        data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
+                                    &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
+                            </li>
+                            {% set shiftercount = shiftercount + 1 %}
+                        {% endif %}
+                        {% if shiftercount == 3 %}
+                            <li>( ... )</li>
+                            {% set shiftercount = shiftercount + 1 %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </a>
+</div>
+
+<div id="edit{{ bucket.first.id }}" class="modal">
+    <div class="modal-content">
+        <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
+        <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
+        remplissage {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)
+        <ul class="collapsible" data-collapsible="accordion">
+            {% for shift in bucket.shifts() %}
+                {% if shift.shifter %}{# is booked #}
+                    <li>
+                        <div class="collapsible-header">
+                        {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
+                            <a href="{{ path("user_show",{'username':shift.shifter.user.username}) }}">#{{ shift.shifter.user.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                            {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                        </div>
+                    </li>
+                {% else %}
+                    <li>
+                        <div class="collapsible-header">
+                            {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %} <span style="font-style: italic">libre</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                        </div>
+                        <div class="collapsible-body">
+                            <form action="{{ path('admin_shift_book',{'id': shift.id }) }}" method="post">
+                                <div class="row">
+                                    <div class="input-field col s6">
+                                        <input type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
+                                    </div>
+                                    <div class="col s4">
+                                        <button class="btn">Ajouter</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+
+    </div>
+    <div class="modal-footer">
+        {{ form_start(delete_bucket_forms[ bucket.first.id ]) }}
+        {{ form_widget(delete_bucket_forms[ bucket.first.id ]) }}
+        <a href="#" onclick="$(this).closest('form').submit()" class="red-text"><i class="material-icons">delete</i>Supprimer
+            tous les créneaux à cette heure et ce poste</a>
+        {{ form_end(delete_bucket_forms[ bucket.first.id ]) }}
+    </div>
+    </form>
+</div>

@@ -34,7 +34,7 @@
         {% endfor %}
     </div>
     {% if is_granted("ROLE_SUPER_ADMIN") %}
-        <a href="{{ path('commission_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une comission</a>
+        <a href="{{ path('commission_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une commission</a>
     {% endif %}
 
 {% endblock %}

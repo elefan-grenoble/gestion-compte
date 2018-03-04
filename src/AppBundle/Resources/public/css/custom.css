@@ -17,6 +17,11 @@ h3.header {
   text-transform: none;
   font-weight: normal;
 }
+h4.header {
+  font-family: 'black_jackregular';
+  text-transform: none;
+  font-weight: normal;
+}
 html {
   font-family: 'Raleway', sans-serif;
 }
@@ -228,4 +233,13 @@ textarea.materialize-textarea:focus:not([readonly]) {
 }
 form .errors ul li {
   color: darkred;
+}
+/*
+ * Shifts
+ */
+.shift {
+  width: 80%;
+  margin: auto;
+  border: solid 1px;
+  border-radius: 10px;
 }
