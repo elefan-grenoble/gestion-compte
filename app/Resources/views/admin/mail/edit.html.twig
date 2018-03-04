@@ -10,12 +10,6 @@
         </div>
         <div class="col s12">
             <div class="chips ">
-                {% for t in to %}
-                    <div class="chip">
-                        {{ t.autocompleteLabel }}
-                        <i class="close material-icons">close</i>
-                    </div>
-                {% endfor %}
             </div>
         </div>
         <div class="input-field col s12">
@@ -27,7 +21,7 @@
             {{ form_label(form.message) }}
         </div>
         <div class="tips right small">
-            prénom : {{ '{{' }} user.firstname {{ '}}' }}
+            prénom : <input value="{{ '{{' }} user.firstname {{ '}}' }}"/>
         </div>
     </div>
 

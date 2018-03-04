@@ -325,7 +325,7 @@ class User extends BaseUser
         else
             $ln = $ln[0];
         $username = strtolower(substr(explode(' ',$firstname)[0],0,1).$ln);
-        $username = preg_replace('/[^a-z]/', '', $username);
+        $username = preg_replace('/[^a-z0-9]/', '', $username);
         $username .= $extra;
         return $username;
     }
