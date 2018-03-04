@@ -102,13 +102,20 @@ class ShiftBucket
             });
         }else{
             $user = $beneficiary->getUser();
-            $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
-                return
-                    ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
-                    && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                    && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
-                        || !$shift->getShifter());
-            });
+            if ($this->canBookInterval($user))
+            {
+                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
+                    return
+                        ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
+                        && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
+                        && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
+                            || !$shift->getShifter());
+                });
+            }
+            else
+            {
+                $bookableShifts = new ArrayCollection();
+            }
         }
         return $bookableShifts;
     }
