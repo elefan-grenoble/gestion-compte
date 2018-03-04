@@ -1,0 +1,15 @@
+/*
+ * Shifts
+ */
+.shift {
+    width: 80%;
+    margin: auto;
+    border: solid 1px;
+    border-radius: 10px;
+}
+
+.shift-block {
+    font-size: 11px;
+    padding: 3px;
+    width: 100%;
+}
