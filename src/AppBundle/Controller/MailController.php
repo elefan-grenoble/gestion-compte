@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Service\SearchUserFormHelper;
 use Metadata\Tests\Driver\Fixture\C\SubDir\C;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -30,27 +31,31 @@ class MailController extends Controller
         $this->_emails = array(
             "Gestion des membres" => "membres@lelefan.org",
             "Gestion des créneaux" => "creneaux@lelefan.org",
-            "Association l'éléfàn" => "contact@lelefan.org"
+            "Association l'éléfàn" => "contact@lelefan.org",
+            "Formation l'éléfàn" => "formation@lelefan.org"
         );
     }
 
     /**
      * Edit a message
      *
-     * @Route("/edit", name="mail_edit")
+     * @Route("/", name="mail_edit")
      * @Method({"GET","POST"})
      */
-    public function editAction(Request $request){
-        $adminController = new AdminController();
-        $adminController->setContainer($this->container);
-        $form = $adminController->getSearchForm();
+    public function editAction(Request $request, SearchUserFormHelper $formHelper){
+
+        $form = $formHelper->getSearchForm($this->createFormBuilder());
         $form->handleRequest($request);
-        $qb = $adminController->initSearchQuery();
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
         if ($form->isSubmitted() && $form->isValid()) {
-            $qb = $adminController->processSearchFormData($form,$qb);
+            $qb = $formHelper->processSearchFormData($form,$qb);
             $to = $qb->getQuery()->getResult();
         }else{
             $to = array();
+        }
+        $params = array();
+        foreach ($request->request as $k => $param) {
+            $params[$k] = $param;
         }
         $mailform = $this->getMailForm();
         $em = $this->getDoctrine()->getManager();
@@ -140,7 +145,7 @@ class MailController extends Controller
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
-            ->add('from', ChoiceType::class, array('label' => 'depuis','required' => true, 'choices' => $this->_emails))
+            ->add('from', ChoiceType::class, array('label' => 'depuis','required' => false, 'choices' => $this->_emails))
             ->add('to', HiddenType::class, array('label' => 'à','required' => true))
             ->add('subject', TextType::class, array('label' => 'sujet','required' => true))
             ->add('message', TextareaType::class, array('label' => 'message','required' => true,'attr'=>array('class'=>'materialize-textarea')))
