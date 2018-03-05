@@ -1,35 +1,34 @@
 <div
-{% set nbShifts = bucket.shiftsCount(beneficiary) %}
-{% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
-{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+        {% set nbShifts = bucket.shiftsCount(beneficiary) %}
+        {% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
+        {% set nbBookedShifts = nbShifts - nbBookableShifts %}
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
         data-length="{{ (100/(end-start+1)) }}"
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <a {% if bucket.isBookable(beneficiary) %}
-        href="#book{{ bucket.firstBookable(beneficiary).id }}"
-    {% endif %}
-       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.firstBookable(beneficiary).job.name }}">
-        <div class="z-depth-1 {% if bucket.firstBookable(beneficiary) is null %}grey {% else %}{{ bucket.firstBookable(beneficiary).job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookedShifts + 1) }} {% endif %}black-text {% endif %}" style="height:40px;position: relative">
-            {% if nbBookedShifts < nbShifts %}
-            <div style="height:2px; width: 100%;position: absolute;">
-                {% for shifter in 1..nbBookableShifts %}
-                    {% if loop.index <= nbBookableShifts %}
-                        <div class="green lighten-3 left"
-                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% else %}
-                        <div class="grey lighten-3 left"
-                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            {% endif %}
-            <div style="font-size: 11px;padding:3px;width: 100%;" >
-                {{ bucket.start|date('G\\hi') }}<br>
-                {{ bucket.end|date('G\\hi') }}
+    <a href="#book{{ bucket.firstBookable(beneficiary).id }}"
+       class="modal-trigger tooltipped" data-position="top" data-delay="100"
+       data-tooltip="{{ bucket.firstBookable(beneficiary).job.name }}">
+        <div class="z-depth-1 {{ bucket.firstBookable(beneficiary).job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookedShifts + 1) }} {% endif %}black-text"
+             style="position: relative">
+            <div class="shift-block">
+                {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
                 {% if bucket.isBookable(beneficiary) and bucket.firstBookable(beneficiary).isDismissed %}
-                    <div style="position: absolute;right: 4px;top: 4px;"><i class="material-icons tiny">star_border</i></div>
+                    <div style="position: absolute;right: 4px;top: 4px;"><i class="material-icons tiny">star_border</i>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="shift-block">
+                {% if nbBookedShifts != 0 %}
+                    {% for shifter in 1..nbBookedShifts %}
+                        <span><i class="material-icons shifter">person</i></span>
+                    {% endfor %}
+                {% endif %}
+                {% if nbBookableShifts != 0 %}
+                    {% for shifter in 1..nbBookableShifts %}
+                        <span><i class="material-icons shifter">person_outline</i></span>
+                    {% endfor %}
                 {% endif %}
             </div>
         </div>
