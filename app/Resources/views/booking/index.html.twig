@@ -50,48 +50,54 @@
                 </li>
             </ul>
         </div>
-        {% for bucketsByjob in bucketsByDay %}
-            <div class="row">
-                <b>{{ (bucketsByjob|first|first).start|date_fr_long }}</b>
-            </div>
-            {% for buckets in bucketsByjob %}
-                <div class="row" style="display: flex;min-height: 40px;">
-                    <div class="col s12">
-                        <div style="position: relative">
-                            {% set lignes = {} %}
-                            {% for bucket in buckets %}
-                                {#compute lines #}
-                                {% set l = 0 %}
-                                {% set break = false %}
-                                {% for i in 0..100 if not break %}
-                                    {% if lignes[i~'_'] is not defined %}
+    </div> <!-- end div.section -->
+</div> <!-- end div.container -->
+<div style="padding: 5px;">
+    {% for bucketsByjob in bucketsByDay %}
+        <div class="row">
+            <b>{{ (bucketsByjob|first|first).start|date_fr_long }}</b>
+        </div>
+        {% for buckets in bucketsByjob %}
+            <div class="row" style="display: flex;min-height: 40px;">
+                <div class="col s12">
+                    <div style="position: relative">
+                        {% set lignes = {} %}
+                        {% for bucket in buckets %}
+                            {#compute lines #}
+                            {% set l = 0 %}
+                            {% set break = false %}
+                            {% for i in 0..100 if not break %}
+                                {% if lignes[i~'_'] is not defined %}
+                                    {% set l = i %}
+                                    {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                    {% set break = true %}
+                                {% else %}
+                                    {% if lignes[i~'_'] < bucket.start %}
                                         {% set l = i %}
                                         {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
                                         {% set break = true %}
-                                    {% else %}
-                                        {% if lignes[i~'_'] < bucket.start %}
-                                            {% set l = i %}
-                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                            {% set break = true %}
-                                        {% endif %}
                                     {% endif %}
-                                {% endfor %}
-                                {# / compute lines #}
-                                {% if bucket.isBookable(beneficiary) %}
-                                    {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                                {% else %}
-                                    {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
                                 {% endif %}
                             {% endfor %}
-                        </div>
+                            {# / compute lines #}
+                            {% if bucket.isBookable(beneficiary) %}
+                                {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                            {% else %}
+                                {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
-            {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') ) %}
-                <hr>
-            {% endif %}
+            </div>
         {% endfor %}
-    {% endif %}
+        {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') ) %}
+            <hr>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+</div>
+<div class="container">
+    <div class="section">
 
 {% endblock %}
 
