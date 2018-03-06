@@ -18,94 +18,86 @@
             </div>
         </div>
     {% else %}
-            <div class="row center">
-                <h4 class="header">Créneaux disponibles pour <span class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %} <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer ]</a>{% endif %}</h4>
-                <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
-                <p>Nombre d'heures de bénévolat restantes à planifier : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
-            </div>
-            <div class="row">
-                <ul class="collapsible" data-collapsible="accordion">
-                    <li>
-                        <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
-                        <div class="collapsible-body">
-                            <ul>
+        <div class="row center">
+            <h4 class="header">Créneaux disponibles pour <span
+                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
+                <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
+                    ]</a>{% endif %}</h4>
+            <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine
+                le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+            <p>Nombre d'heures de bénévolat restantes à planifier
+                : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
+        </div>
+        <div class="row">
+            <ul class="collapsible" data-collapsible="accordion">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-body">
+                        <ul>
+                            <li>
+                                <i class="material-icons tiny">star_border</i>Créneau à reprendre, aide un bénévole en
+                                galère !
+                            </li>
+                            {% for job in jobs %}
                                 <li>
-                                    <i class="material-icons tiny">star_border</i>Créneau à reprendre, aide un bénévole en galère !
+                                    <div style="width: 200px; padding: 3px;margin:5px"
+                                         class="{{ job.color }} z-depth-1 white-text valign-wrapper">
+                                        <p>{{ job.name }}</p></div>
                                 </li>
-                                {% for job in jobs %}
-                                <li>
-                                    <div style="width: 200px; padding: 3px;margin:5px" class="{{ job.color }} z-depth-1 white-text valign-wrapper"><p>{{ job.name }}</p></div>
-                                </li>
-                                 {% endfor %}
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="row">
-                <div class="col m2 hide-on-small-only">
-                </div>
-                <div class="col s12 m10">
-                    <div style="display: flex;">
-                        {% for i in hours %}
-                            {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
-                            <div style="flex: 1">
-                                <div style="text-align: center;width: 100%;margin-left: -50%;">
-                                    {{ i }}h
-                                </div>
-                            </div>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div> <!-- end div.section -->
+</div> <!-- end div.container -->
+<div style="padding: 5px;">
+    {% for bucketsByjob in bucketsByDay %}
+        <div class="row">
+            <b>{{ (bucketsByjob|first|first).start|date_fr_long }}</b>
+        </div>
+        {% for buckets in bucketsByjob %}
+            <div class="row" style="display: flex;min-height: 40px;">
+                <div class="col s12">
+                    <div style="position: relative">
+                        {% set lignes = {} %}
+                        {% for bucket in buckets %}
+                            {#compute lines #}
+                            {% set l = 0 %}
+                            {% set break = false %}
+                            {% for i in 0..100 if not break %}
+                                {% if lignes[i~'_'] is not defined %}
+                                    {% set l = i %}
+                                    {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                    {% set break = true %}
+                                {% else %}
+                                    {% if lignes[i~'_'] < bucket.start %}
+                                        {% set l = i %}
+                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                        {% set break = true %}
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {# / compute lines #}
+                            {% if bucket.isBookable(beneficiary) %}
+                                {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                            {% else %}
+                                {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </div>
             </div>
-            {% for bucketsByjob in bucketsByDay %}
-                {% set date = false %}
-                {% for buckets in bucketsByjob %}
-                    <div class="row center show-on-small hide-on-med-and-up ">
-                        {% if not date %}{{ (buckets|first).start|date_fr_long }}{% endif %}
-                    </div>
-                    <div class="row" style="display: flex;min-height: 40px;">
-                        <div class="col m2 hide-on-small-only valign-wrapper">
-                            <div>
-                                {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}{% endif %}
-                            </div>
-                        </div>
-                        <div class="col m10 s12">
-                            <div style="position: relative">
-                                {% set lignes = {} %}
-                                {% for bucket in buckets %}
-                                    {#compute lines #}
-                                    {% set l = 0 %}
-                                    {% set break = false %}
-                                    {% for i in 0..100 if not break %}
-                                        {% if lignes[i~'_'] is not defined %}
-                                            {% set l = i %}
-                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                            {% set break = true %}
-                                        {% else %}
-                                            {% if lignes[i~'_'] < bucket.start  %}
-                                                {% set l = i %}
-                                                {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                                {% set break = true %}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {# / compute lines #}
-                                    {% if bucket.isBookable(beneficiary) %}
-                                        {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                                    {% else %}
-                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                    {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((buckets|first).start) | date('Y-m-d') ) %}
-                        <hr>
-                    {% endif %}
-                {% endfor %}
-            {% endfor %}
-    {% endif %}
+        {% endfor %}
+        {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') ) %}
+            <hr>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+</div>
+<div class="container">
+    <div class="section">
 
 {% endblock %}
 

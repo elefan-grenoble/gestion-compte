@@ -30,7 +30,7 @@ class PeriodPosition
 
     /**
      * One Period has One Role.
-     * @ORM\OneToOne(targetEntity="Role")
+     * @ORM\ManyToOne(targetEntity="Role")
      * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
      */
     private $role;
