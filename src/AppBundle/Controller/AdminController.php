@@ -144,6 +144,37 @@ class AdminController extends Controller
     }
 
     /**
+     * Lists all user entities.
+     *
+     * @param Request $request, SearchUserFormHelper $formHelper
+     * @return Response
+     * @Route("/admin_users", name="admins_list")
+     * @Method({"GET","POST"})
+     */
+    public function adminUsersAction(Request $request,SearchUserFormHelper $formHelper)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('u')
+            ->andWhere('u.member_number <= 0')
+            ->orderBy('u.member_number', 'DESC')
+            ->getQuery();
+
+        $admins =  $qb->execute();
+        $delete_forms = array();
+        foreach ($admins as $admin){
+            $delete_forms[$admin->getId()] = $this->createFormBuilder()
+                ->setAction($this->generateUrl('user_delete', array('username' => $admin->getUsername())))
+                ->setMethod('DELETE')
+                ->getForm()->createView();
+        }
+
+        return $this->render('admin/user/admin_list.html.twig', array(
+            'admins' => $admins,
+            'delete_forms' => $delete_forms
+        ));
+    }
+
+    /**
      * Registrations list
      *
      * @Route("/registrations", name="admin_registrations")

@@ -1,0 +1,13 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3>Créer un utilisateur admin</h3>
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}
