@@ -18,6 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
@@ -152,32 +153,84 @@ class UserController extends Controller
      * install admin
      *
      * @Route("/install_admin", name="user_install_admin")
-     * @Method("GET")
+     * @Method({"GET","POST"})
      */
-    public function installAdminAction()
+    public function installAdminAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $session = new Session();
         $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>0));
 
-        if ($user){
-            $session->getFlashBag()->add('error','user super admin already exist !');
+        if ($user){ //main super admin exist
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+                $form = $this->createFormBuilder()
+                    ->add('username',TextType::class,array('label'=>"Nom d'utilisateur"))
+                    ->add('password',PasswordType::class,array('label'=>"Mot de passe"))
+                    ->add('email',EmailType::class,array('label'=>"Adresse email", "required" => false ))
+                    ->getForm();
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()){
+
+                    $existing_user = $em->getRepository('AppBundle:User')->findOneBy(array("username"=>$form->get('username')->getData()));
+                    if ($existing_user){
+                        $session->getFlashBag()->add('error','A user with this username already exist !');
+                        return $this->render('admin/user/new_admin.html.twig', array(
+                            'form' => $form->createView(),
+                        ));
+                    }
+                    $existing_user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$form->get('email')->getData()));
+                    if ($existing_user){
+                        $session->getFlashBag()->add('error','A user with this email already exist !');
+                        $session->getFlashBag()->add('warning','Put an empty email, we will provide one for your');
+                        return $this->render('admin/user/new_admin.html.twig', array(
+                            'form' => $form->createView(),
+                        ));
+                    }
+                    $last_admin_recorded = $em->getRepository('AppBundle:User')->findBy(array(),array('member_number'=>'ASC'),1);
+                    $lowest_member_number_yet = $last_admin_recorded[0]->getMemberNumber();
+
+                    $email = $form->get('email')->getData();
+                    if (!$form->get('email')->getData()) {
+                        $email = "membres+admin".($lowest_member_number_yet-1)."@lelefan.org";//todo put this in conf
+                    }
+
+                    $new_admin = new User();
+                    $new_admin->setEmail($email);
+                    $new_admin->setPlainPassword($form->get('password')->getData());
+                    $new_admin->setUsername($form->get('username')->getData());
+                    $new_admin->setMemberNumber($lowest_member_number_yet-1);
+                    $new_admin->setEnabled(true);
+                    $new_admin->addRole('ROLE_ADMIN');
+                    $em->persist($new_admin);
+                    $em->flush();
+
+                    $session->getFlashBag()->add('success','new user admin created with success !');
+                    return $this->redirectToRoute('admin');
+                }else{
+                    return $this->render('admin/user/new_admin.html.twig', array(
+                        'form' => $form->createView(),
+                    ));
+                }
+            }else{
+                $session->getFlashBag()->add('error','Main super admin user already exist !');
+                return $this->redirectToRoute('homepage');
+            }
+        }else{ //main super user not created yet
+            $admin = new User();
+            $admin->setEmail("admin@lelefan.org"); //todo put this in conf
+            $admin->setPlainPassword("password");
+            $admin->setUsername("babar"); //todo put this in conf
+            $admin->setMemberNumber(0);
+            $admin->setEnabled(true);
+            $admin->addRole('ROLE_SUPER_ADMIN');
+            $em->persist($admin);
+            $em->flush();
+
+            $session->getFlashBag()->add('success','user super admin created with success !');
+
             return $this->redirectToRoute('homepage');
         }
 
-        $admin = new User();
-        $admin->setEmail("admin@lelefan.org"); //todo put this in conf
-        $admin->setPlainPassword("password");
-        $admin->setUsername("babar"); //todo put this in conf
-        $admin->setMemberNumber(0);
-        $admin->setEnabled(true);
-        $admin->addRole('ROLE_SUPER_ADMIN');
-        $em->persist($admin);
-        $em->flush();
-
-        $session->getFlashBag()->add('success','user super admin created with success !');
-
-        return $this->redirectToRoute('homepage');
     }
 
     /**
@@ -377,7 +430,8 @@ class UserController extends Controller
         if (count($matches)){
             $session->getFlashBag()->add('warning',
                 'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
-            $user->getMainBeneficiary()->setEmail('');
+            if ($user->getMainBeneficiary())
+                $user->getMainBeneficiary()->setEmail('');
         }
 
         $editForm = $this->createForm('AppBundle\Form\UserType', $user);
@@ -724,9 +778,11 @@ class UserController extends Controller
         $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->remove($user->getMainBeneficiary());
-            foreach ($user->getBeneficiaries() as $beneficiary){
-                $em->remove($beneficiary);
+            if (count($user->getBeneficiaries())){ //admin do not have any Beneficiary
+                $em->remove($user->getMainBeneficiary());
+                foreach ($user->getBeneficiaries() as $beneficiary){
+                    $em->remove($beneficiary);
+                }
             }
             $em->remove($user);
             $em->flush();
