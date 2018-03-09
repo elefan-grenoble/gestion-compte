@@ -690,7 +690,7 @@ class User extends BaseUser
      * Get remaining time to book
      */
     public function remainingToBook($cycleIndex, $excludeDismissed = false) {
-        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed);
+        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed));
     }
 
     /**
