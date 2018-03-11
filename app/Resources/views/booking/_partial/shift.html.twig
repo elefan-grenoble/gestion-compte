@@ -10,7 +10,7 @@
     <a href="#book{{ bucket.firstBookable(beneficiary).id }}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100"
        data-tooltip="{{ bucket.firstBookable(beneficiary).job.name }}">
-        <div class="z-depth-1 {{ bucket.firstBookable(beneficiary).job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookedShifts + 1) }} {% endif %}black-text"
+        <div class="z-depth-1 {{ bucket.firstBookable(beneficiary).job.color }} lighten-{{ min(nbBookedShifts * 2, 5) }} black-text"
              style="position: relative">
             <div class="shift-block">
                 {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
