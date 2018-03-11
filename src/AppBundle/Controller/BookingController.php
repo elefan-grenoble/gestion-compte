@@ -122,10 +122,13 @@ class BookingController extends Controller
     public function adminAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $roles = $em->getRepository('AppBundle:Role')->findAll();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
         $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
-        $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
+
+        $monday = strtotime('last monday', strtotime('tomorrow'));
+        $from = new DateTime();
+        $from->setTimestamp($monday);
+        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from);
 
         $hours = array();
         for ($i = 6; $i < 22; $i++) { //todo put this in conf

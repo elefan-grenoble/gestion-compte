@@ -25,6 +25,20 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findFrom(\DateTime $from)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.start > :from')
+            ->setParameter('from', $from)
+            ->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * @param $user
      * @return mixed
