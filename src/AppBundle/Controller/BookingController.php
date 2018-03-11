@@ -17,6 +17,8 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Date;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 /**
  * User controller.
@@ -121,13 +123,30 @@ class BookingController extends Controller
      */
     public function adminAction(Request $request)
     {
+        $monday = strtotime('last monday', strtotime('tomorrow'));
+        $defaultFrom = new DateTime();
+        $defaultFrom->setTimestamp($monday);
+
+        $form = $this->createFormBuilder()
+            ->add('from', TextType::class, [
+                'label' => 'A partir de',
+                'required' => true,
+                'data' => $defaultFrom->format('Y-m-d'),
+                'attr' => array( 'class' => 'datepicker')])
+            ->add('filter', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn')))
+            ->getForm();
+        $form->handleRequest($request);
+
+        $from = $defaultFrom;
+        if ($form->isSubmitted() && $form->isValid()) {
+           $dateStr = $form->get('from')->getData();
+           $from = new DateTime($dateStr);
+        }
+
         $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
         $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
 
-        $monday = strtotime('last monday', strtotime('tomorrow'));
-        $from = new DateTime();
-        $from->setTimestamp($monday);
         $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from);
 
         $hours = array();
@@ -168,6 +187,7 @@ class BookingController extends Controller
         }
 
         return $this->render('admin/booking/index.html.twig', [
+            'form'=> $form->createView(),
             'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
             'jobs' => $jobs,
