@@ -14,7 +14,7 @@
              style="position: relative">
             <div class="shift-block">
                 {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
-                {% if bucket.isBookable(beneficiary) and bucket.firstBookable(beneficiary).isDismissed %}
+                {% if bucket.firstBookable(beneficiary).isDismissed %}
                     <div style="position: absolute;right: 4px;top: 4px;"><i class="material-icons tiny">star_border</i>
                     </div>
                 {% endif %}
@@ -35,6 +35,4 @@
     </a>
 </div>
 
-{% if bucket.isBookable(beneficiary) %}
-    {% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket } %}
-{% endif %}
+{% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket } %}
