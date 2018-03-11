@@ -14,10 +14,6 @@
              style="position: relative">
             <div class="shift-block">
                 {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
-                {% if bucket.firstBookable(beneficiary).isDismissed %}
-                    <div style="position: absolute;right: 4px;top: 4px;"><i class="material-icons tiny">star_border</i>
-                    </div>
-                {% endif %}
             </div>
             <div class="shift-block">
                 {% if nbBookedShifts != 0 %}
@@ -29,6 +25,9 @@
                     {% for shifter in 1..nbBookableShifts %}
                         <span><i class="material-icons shifter">person_outline</i></span>
                     {% endfor %}
+                {% endif %}
+                {% if bucket.firstBookable(beneficiary).isDismissed %}
+                    <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
                 {% endif %}
             </div>
         </div>
