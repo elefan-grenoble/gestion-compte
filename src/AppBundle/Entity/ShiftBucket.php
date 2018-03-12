@@ -57,6 +57,21 @@ class ShiftBucket
         return $this->shifts->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectRoles));
     }
 
+    public function getShiftsWithRole()
+    {
+        return $this->shifts->filter(function(Shift $shift) {
+            return $shift->getRole();
+        });
+    }
+
+    public function getShiftsWithoutRole()
+    {
+        return $this->shifts->filter(function(Shift $shift) {
+            return !$shift->getRole();
+        });
+    }
+
+
     public function getShiftsCount(Beneficiary $beneficiary)
     {
         return count($this->getShifts($beneficiary));

@@ -8,55 +8,58 @@
 {% block content %}
 
     {% if beneficiary is not defined %}
-        <div class="row center">
-            <h5 class="col s12">Qui programme son bénévolat ?</h5>
-            <div class="col s12 m6 push-m3">
-                {{ form_start(beneficiary_form) }}
-                {{ form_widget(beneficiary_form) }}
-                <button type="submit" class="btn waves-effect">Choisir</button>
-                {{ form_end(beneficiary_form) }}
+<div class="row center">
+    <h5 class="col s12">Qui programme son bénévolat ?</h5>
+    <div class="col s12 m6 push-m3">
+        {{ form_start(beneficiary_form) }}
+        {{ form_widget(beneficiary_form) }}
+        <button type="submit" class="btn waves-effect">Choisir</button>
+        {{ form_end(beneficiary_form) }}
+    </div>
+</div>
+{% else %}
+<div class="row center">
+    <h4 class="header">Créneaux disponibles pour <span
+                class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
+        <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
+            ]</a>{% endif %}</h4>
+    <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine
+        le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+    <p>Nombre d'heures de bénévolat restantes à planifier
+        : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
+</div>
+<div class="row">
+    <ul class="collapsible" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
+            <div class="collapsible-body">
+                <ul>
+                    <li>
+                        <i class="material-icons tiny">star_border</i> Créneau à reprendre, aide un bénévole en
+                        galère !
+                    </li>
+                    <li>
+                        <i class="material-icons tiny">person_outline</i>/<i class="material-icons tiny">person</i>
+                        Place à prendre / place réservée par un bénévole
+                    </li>
+                    <li>
+                        <i class="material-icons tiny shift-with-role">person_outline</i>/<i
+                                class="material-icons tiny shift-with-role">person</i> Place à prendre / place réservée
+                        pour un bénévole qualifié (resource, ambassadeur...)
+                    </li>
+                </ul>
+                <div style="margin-top: 10px;">
+                    {% for job in jobs %}
+                        <span style="width: 200px; padding: 3px 5px;margin:5px;display: inline-block"
+                              class="{{ job.color }} z-depth-1 white-text valign-wrapper">
+                                        <p>{{ job.name }}</p></span>
+                    {% endfor %}
+                </div>
             </div>
-        </div>
-    {% else %}
-        <div class="row center">
-            <h4 class="header">Créneaux disponibles pour <span
-                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
-                <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
-                    ]</a>{% endif %}</h4>
-            <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine
-                le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
-            <p>Nombre d'heures de bénévolat restantes à planifier
-                : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
-        </div>
-        <div class="row">
-            <ul class="collapsible" data-collapsible="accordion">
-                <li>
-                    <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
-                    <div class="collapsible-body">
-                        <ul>
-                            <li>
-                                <i class="material-icons tiny">star_border</i> Créneau à reprendre, aide un bénévole en
-                                galère !
-                            </li>
-                            <li>
-                                <i class="material-icons tiny">person_outline</i>/<i class="material-icons tiny">person</i> Place à prendre / place réservée par un bénévole
-                            </li>
-                            <li>
-                                <i class="material-icons tiny shift-with-role">person_outline</i>/<i class="material-icons tiny shift-with-role">person</i> Place à prendre / place réservée pour un rôle (resource, ambassadeur...)
-                            </li>
-                            {% for job in jobs %}
-                                <li>
-                                    <div style="width: 200px; padding: 3px;margin:5px"
-                                         class="{{ job.color }} z-depth-1 white-text valign-wrapper">
-                                        <p>{{ job.name }}</p></div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div> <!-- end div.section -->
+        </li>
+    </ul>
+</div>
+</div> <!-- end div.section -->
 </div> <!-- end div.container -->
 <div style="padding: 5px;">
     {% for bucketsByjob in bucketsByDay %}
@@ -86,11 +89,7 @@
                                 {% endif %}
                             {% endfor %}
                             {# / compute lines #}
-                            {% if bucket.isBookable(beneficiary) %}
-                                {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                            {% else %}
-                                {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
-                            {% endif %}
+                            {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
                         {% endfor %}
                     </div>
                 </div>
@@ -100,14 +99,14 @@
             <hr>
         {% endif %}
     {% endfor %}
-{% endif %}
+    {% endif %}
 </div>
 <div class="container">
     <div class="section">
 
-{% endblock %}
+        {% endblock %}
 
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
-{% endblock %}
+        {% block stylesheets %}
+        {% endblock %}
+        {% block javascripts %}
+        {% endblock %}
