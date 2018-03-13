@@ -101,6 +101,9 @@
             {% endfor %}
         {% endfor %}
 
+    {{ form_start(delete_bucket_form,{ 'attr' : { 'id' : 'delete_bucket'}}) }}
+    {{ form_widget(delete_bucket_form) }}
+    {{ form_end(delete_bucket_form) }}
 
 {% endblock %}
 

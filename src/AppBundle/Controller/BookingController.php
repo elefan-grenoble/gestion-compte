@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -172,26 +173,18 @@ class BookingController extends Controller
             $bucketsByDay[$day][$job][$interval]->addShift($shift);
         }
 
-        $delete_bucket_forms = array();
-
-        foreach ($bucketsByDay as $bucketsByJob){
-            foreach ($bucketsByJob as $bucketsByInterval){
-                foreach ($bucketsByInterval as $bucket){
-                    $delete_bucket_forms[$bucket->getFirst()->getId()] = $this->createFormBuilder()
-                        ->setAction($this->generateUrl('delete_bucket',array('id'=>$bucket->getFirst()->getId())))
-                        ->setMethod('DELETE')
-                        ->getForm()
-                        ->createView();
-                }
-            }
-        }
+        $delete_bucket_form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('delete_bucket'))
+            ->setMethod('DELETE')
+            ->add('shift_id',HiddenType::class)
+            ->getForm();
 
         return $this->render('admin/booking/index.html.twig', [
             'form'=> $form->createView(),
             'bucketsByDay' => $bucketsByDay,
             'hours' => $hours,
             'jobs' => $jobs,
-            'delete_bucket_forms' => $delete_bucket_forms,
+            'delete_bucket_form' => $delete_bucket_form->createView(),
             'beneficiaries' => $beneficiaries
         ]);
     }
@@ -199,45 +192,51 @@ class BookingController extends Controller
     /**
      * delete all shifts in bucket.
      *
-     * @Route("/delete_bucket/{id}", name="delete_bucket")
+     * @Route("/delete_bucket/", name="delete_bucket")
      * @Security("has_role('ROLE_ADMIN')")
      * @Method("DELETE")
      */
-    public function deleteBucketAction(Request $request,Shift $shift, \Swift_Mailer $mailer){
+    public function deleteBucketAction(Request $request, \Swift_Mailer $mailer){
 
         $session = new Session();
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket',array('id'=>$shift->getId())))
+            ->setAction($this->generateUrl('delete_bucket'))
             ->setMethod('DELETE')
+            ->add('shift_id',HiddenType::class)
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid() ) {
             $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job'=>$shift->getJob(),'start'=>$shift->getStart(),'end'=>$shift->getEnd()));
-            $count = 0;
-            foreach ($shifts as $s){
-                if ($s->getShifter()){ //warn shifter
-                    $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
-                        ->setFrom('membres@lelefan.org')
-                        ->setTo($s->getShifter()->getEmail())
-                        ->setBody(
-                            $this->renderView(
-                                'emails/deleted_shift.html.twig',
-                                array('shift' => $shift)
-                            ),
-                            'text/html'
-                        );
-                    $mailer->send($warn);
+            $shift_id = $form->get('shift_id')->getData();
+            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
+            if ($shift){
+                $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job'=>$shift->getJob(),'start'=>$shift->getStart(),'end'=>$shift->getEnd()));
+                $count = 0;
+                foreach ($shifts as $s){
+                    if ($s->getShifter()){ //warn shifter
+                        $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
+                            ->setFrom('membres@lelefan.org')
+                            ->setTo($s->getShifter()->getEmail())
+                            ->setBody(
+                                $this->renderView(
+                                    'emails/deleted_shift.html.twig',
+                                    array('shift' => $shift)
+                                ),
+                                'text/html'
+                            );
+                        $mailer->send($warn);
+                    }
+                    $em->remove($s);
+                    $count++;
                 }
-                $em->remove($s);
-                $count++;
+                $em->flush();
+                $session->getFlashBag()->add('success', $count." shifts removed");
+            }else{
+                $session->getFlashBag()->add('xarning',"shift not found");
             }
-            $em->flush();
-            $session->getFlashBag()->add('success', $count." shifts removed");
         }
-
         return $this->redirectToRoute('booking_admin');
     }
 
