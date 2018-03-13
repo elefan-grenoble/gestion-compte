@@ -129,6 +129,7 @@ class BookingController extends Controller
         $defaultFrom->setTimestamp($monday);
 
         $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('booking_admin'))
             ->add('from', TextType::class, [
                 'label' => 'A partir de',
                 'required' => true,

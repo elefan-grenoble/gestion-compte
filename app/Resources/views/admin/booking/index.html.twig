@@ -37,7 +37,7 @@
                         {{ form_label(form.from) }}
                     </div>
                 </div>
-
+                {{ form_widget(form.filter) }}
                 {{ form_end(form) }}
             </div>
         </li>
@@ -151,31 +151,6 @@
                 close: 'Ok',
                 closeOnSelect: true // Close upon selecting a date,
             });
-            $('[type=submit]').click(function(e){
-                e.preventDefault();
-                $('#form_action').val($(this).val());
-                $('form[name=form]').submit();
-            });
-            $('.pagination li:not(.disabled) a').click(function(e){
-                e.preventDefault();
-                $('#form_page').val($(this).attr('data-page'));
-                $('form[name=form]').submit();
-            });
-            // $('select').on('change', function() {
-            //     $('form[name=form]').submit();
-            // });
-            $('th[data-col]').click(function(e){
-                e.preventDefault();
-                if ($('#form_sort').val() === $(this).attr('data-col')){
-                    $('#form_dir').val(($('#form_dir').val() === 'ASC') ? 'DESC' : 'ASC');
-                }else{
-                    $('#form_sort').val($(this).attr('data-col'));
-                }
-                $('th[data-col]').removeClass('active');
-                $(this).addClass('active');
-                $('form[name=form]').submit();
-            });
-            $('th[data-col="'+$('#form_sort').val()+'"]').addClass('active');
         });
     </script>
 {% endblock %}
