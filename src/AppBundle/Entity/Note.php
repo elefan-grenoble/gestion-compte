@@ -49,6 +49,12 @@ class Note
     private $subject;
 
     /**
+     * @ORM\OneToOne(targetEntity="Note")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
+     */
+    private $parent;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
@@ -160,5 +166,29 @@ class Note
     public function getSubject()
     {
         return $this->subject;
+    }
+
+    /**
+     * Set parent
+     *
+     * @param \AppBundle\Entity\Note $parent
+     *
+     * @return Note
+     */
+    public function setParent(\AppBundle\Entity\Note $parent = null)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * Get parent
+     *
+     * @return \AppBundle\Entity\Note
+     */
+    public function getParent()
+    {
+        return $this->parent;
     }
 }
