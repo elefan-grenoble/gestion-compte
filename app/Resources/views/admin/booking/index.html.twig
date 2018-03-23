@@ -120,7 +120,7 @@
             $('input.empty-shift').autocomplete({
                 data: {
                     {% for beneficiary in beneficiaries %}
-                        {{ beneficiary.autocompleteLabel }} : null,
+                        "{{ beneficiary.autocompleteLabel }}" : null,
                     {% endfor %}
                 },
                 limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
