@@ -25,14 +25,20 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFrom(\DateTime $from)
+    public function findFrom(\DateTime $from,\DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('s');
 
         $qb
             ->where('s.start > :from')
-            ->setParameter('from', $from)
-            ->orderBy('s.start', 'ASC');
+            ->setParameter('from', $from);
+        if ($max){
+            $qb
+                ->andWhere('s.end < :max')
+                ->setParameter('max', $max);
+        }
+
+        $qb->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()

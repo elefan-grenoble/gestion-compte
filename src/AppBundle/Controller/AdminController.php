@@ -67,7 +67,7 @@ class AdminController extends Controller
      */
     public function usersAction(Request $request,SearchUserFormHelper $formHelper)
     {
-        $form = $formHelper->getSearchForm($this->createFormBuilder());;
+        $form = $formHelper->getSearchForm($this->createFormBuilder(),$request->getQueryString());
         $form->handleRequest($request);
 
         $action = $form->get('action')->getData();
@@ -90,13 +90,14 @@ class AdminController extends Controller
                 $order = $form->get('dir')->getData();
             }
 
-            $qb = $formHelper->processSearchFormData($form,$qb);
-
+            $formHelper->processSearchFormData($form,$qb);
 
         }else{
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
         }
+
+        $formHelper->processSearchQueryData($request->getQueryString(),$qb);
 
         $limit = 25;
         $qb2 = clone $qb;

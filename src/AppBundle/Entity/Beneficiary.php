@@ -554,4 +554,8 @@ class Beneficiary
     {
         return $this->received_proxies;
     }
+
+    public function getAutocompleteLabel(){
+        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
+    }
 }
