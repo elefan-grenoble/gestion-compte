@@ -32,12 +32,17 @@
                 {{ form_start(form) }}
 
                 <div class="row">
-                    <div class="input-field">
+                    <div class="input-field col m3">
                         {{ form_widget(form.from) }}
                         {{ form_label(form.from) }}
                     </div>
+                    <div class="input-field col m3">
+                        {{ form_widget(form.to) }}
+                        {{ form_label(form.to) }}
+                    </div>
                 </div>
                 {{ form_widget(form.filter) }}
+                {{ form_widget(form.booker) }}
                 {{ form_end(form) }}
             </div>
         </li>
@@ -115,7 +120,7 @@
             $('input.empty-shift').autocomplete({
                 data: {
                     {% for beneficiary in beneficiaries %}
-                    "#{{ beneficiary.user.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname }} ({{ beneficiary.id }})" : null,
+                        {{ beneficiary.autocompleteLabel }} : null,
                     {% endfor %}
                 },
                 limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
@@ -150,6 +155,11 @@
                 selectYears: 2, // Creates a dropdown of 15 years to control year,
                 close: 'Ok',
                 closeOnSelect: true // Close upon selecting a date,
+            });
+            $('[type=submit]').click(function(e){
+                e.preventDefault();
+                $('#form_action').val($(this).val());
+                $('form[name=form]').submit();
             });
         });
     </script>

@@ -135,59 +135,82 @@ class BookingController extends Controller
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
                 'attr' => array( 'class' => 'datepicker')])
-            ->add('filter', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn')))
+            ->add('to', TextType::class, [
+                'label' => 'Jusqu\'à',
+                'required' => false,
+                'data' => '',
+                'attr' => array( 'class' => 'datepicker')])
+            ->add('action', HiddenType::class,array())
+            ->add('filter', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'filtrer')))
+            ->add('booker', SubmitType::class, array('label' => 'Voir les booker','attr' => array('class' => 'btn','value' => 'booker')))
             ->getForm();
         $form->handleRequest($request);
 
         $from = $defaultFrom;
+        $to = null;
         if ($form->isSubmitted() && $form->isValid()) {
            $dateStr = $form->get('from')->getData();
            $from = new DateTime($dateStr);
+           $to = $form->get('to')->getData();
+           if ($to)
+               $to = new DateTime($to);
         }
 
         $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
         $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
 
-        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from);
+        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from,$to);
 
-        $hours = array();
-        for ($i = 6; $i < 22; $i++) { //todo put this in conf
-            $hours[] = $i;
+        $action = $form->get('action')->getData();
+
+        if ($action == "booker"){
+            $mm = array();
+            foreach ($shifts as $shift) {
+                if ($shift->getBooker()){
+                    $mm[] = $shift->getBooker()->getUser()->getMemberNumber();
+                }
+            }
+            return $this->redirectToRoute('user_index',array('membernumber'=>implode(',',$mm)));
+        }else{
+            $hours = array();
+            for ($i = 6; $i < 22; $i++) { //todo put this in conf
+                $hours[] = $i;
+            }
+
+            $bucketsByDay = array();
+            foreach ($shifts as $shift) {
+                $day = $shift->getStart()->format("d m Y");
+                $job = $shift->getJob()->getId();
+                $interval = $shift->getIntervalCode();
+                if (!isset($bucketsByDay[$day])) {
+                    $bucketsByDay[$day] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job])) {
+                    $bucketsByDay[$day][$job] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job][$interval])) {
+                    $bucket = new ShiftBucket();
+                    $bucketsByDay[$day][$job][$interval] = $bucket;
+                }
+                $bucketsByDay[$day][$job][$interval]->addShift($shift);
+            }
+
+            $delete_bucket_form = $this->createFormBuilder()
+                ->setAction($this->generateUrl('delete_bucket'))
+                ->setMethod('DELETE')
+                ->add('shift_id',HiddenType::class)
+                ->getForm();
+
+            return $this->render('admin/booking/index.html.twig', [
+                'form'=> $form->createView(),
+                'bucketsByDay' => $bucketsByDay,
+                'hours' => $hours,
+                'jobs' => $jobs,
+                'delete_bucket_form' => $delete_bucket_form->createView(),
+                'beneficiaries' => $beneficiaries
+            ]);
         }
-
-        $bucketsByDay = array();
-        foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
-            $job = $shift->getJob()->getId();
-            $interval = $shift->getIntervalCode();
-            if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job])) {
-                $bucketsByDay[$day][$job] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job][$interval])) {
-                $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$job][$interval] = $bucket;
-            }
-            $bucketsByDay[$day][$job][$interval]->addShift($shift);
-        }
-
-        $delete_bucket_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket'))
-            ->setMethod('DELETE')
-            ->add('shift_id',HiddenType::class)
-            ->getForm();
-
-        return $this->render('admin/booking/index.html.twig', [
-            'form'=> $form->createView(),
-            'bucketsByDay' => $bucketsByDay,
-            'hours' => $hours,
-            'jobs' => $jobs,
-            'delete_bucket_form' => $delete_bucket_form->createView(),
-            'beneficiaries' => $beneficiaries
-        ]);
     }
 
     /**
@@ -342,15 +365,11 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking_admin");
         }
 
-        $re = '/.*\(([0-9]+)\)/';
         $str = $request->get('beneficiary');
-        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-        if (count($matches) == 1){
-            $beneficiaryId = $matches[0][1];
+        $em = $this->getDoctrine()->getManager();
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
 
-            $em = $this->getDoctrine()->getManager();
-
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+        if ($beneficiary){
 
             if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (".$shift->getRole()->getName().")");
