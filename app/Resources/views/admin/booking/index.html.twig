@@ -159,7 +159,7 @@
             $('[type=submit]').click(function(e){
                 e.preventDefault();
                 $('#form_action').val($(this).val());
-                $('form[name=form]').submit();
+                $('#form_action').closest('form').submit();
             });
         });
     </script>
