@@ -601,32 +601,33 @@ class User extends BaseUser
 
     /**
      * Get start date of current cycle
+     * IMPORTANT : time are reset, only date are kept
      */
     public function startOfCycle($cycleIndex)
     {
         $first = $this->getFirstShift();
         $modFirst = null;
         $now = new DateTime('now');
+        $now->setTime(0, 0, 0);
         if ($first) {
-            $diff = $first->getStart()->diff($now);
+            $firstDate = clone($first->getStart());
+            $firstDate->setTime(0, 0, 0);
+            $diff = $firstDate->diff($now);
             $modFirst = $diff->format('%a') % 28;
         }
         $startCurrCycle = null;
         if ($modFirst) {
             /* Exception if first cycle in the future */
             if ($first->getStart() < $now) {
-                $startCurrCycle = clone($now);
+                $startCurrCycle = $now;
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
-                $startCurrCycle = clone($first->getStart());
+                $startCurrCycle = $firstDate;
             }
         } else {
             $startCurrCycle = $now;
         }
-
-        /* Reset time, keep only date */
-        $startCurrCycle->setTime(0, 0, 0);
 
         for ($i = 1; $i < $cycleIndex; $i++) {
             $startCurrCycle->modify("+28 days");
@@ -690,7 +691,7 @@ class User extends BaseUser
      * Get remaining time to book
      */
     public function remainingToBook($cycleIndex, $excludeDismissed = false) {
-        return $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed);
+        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed));
     }
 
     /**

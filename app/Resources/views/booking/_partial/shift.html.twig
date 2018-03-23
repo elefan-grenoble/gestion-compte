@@ -2,15 +2,17 @@
         {% set nbShifts = bucket.shiftsCount(beneficiary) %}
         {% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
         {% set nbBookedShifts = nbShifts - nbBookableShifts %}
+        {% set firstBookableShift = bucket.firstBookable(beneficiary) %}
+        {% set customRoleClass = firstBookableShift.getRole() ? "shift-with-role" : "" %}
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
         data-length="{{ (100/(end-start+1)) }}"
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <a href="#book{{ bucket.firstBookable(beneficiary).id }}"
+    <a href="#book{{ firstBookableShift.id }}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100"
-       data-tooltip="{{ bucket.firstBookable(beneficiary).job.name }}">
-        <div class="z-depth-1 {{ bucket.firstBookable(beneficiary).job.color }} lighten-{{ min(nbBookedShifts * 2, 5) }} black-text"
+       data-tooltip="{{ firstBookableShift.job.name }}">
+        <div class="z-depth-1 {{ firstBookableShift.job.color }} lighten-{{ min(nbBookedShifts * 2, 5) }} black-text"
              style="position: relative">
             <div class="shift-block">
                 {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
@@ -18,15 +20,15 @@
             <div class="shift-block">
                 {% if nbBookedShifts != 0 %}
                     {% for shifter in 1..nbBookedShifts %}
-                        <span><i class="material-icons shifter">person</i></span>
+                        <span><i class="material-icons shifter {{ customRoleClass }}">person</i></span>
                     {% endfor %}
                 {% endif %}
                 {% if nbBookableShifts != 0 %}
                     {% for shifter in 1..nbBookableShifts %}
-                        <span><i class="material-icons shifter">person_outline</i></span>
+                        <span><i class="material-icons shifter {{ customRoleClass }}">person_outline</i></span>
                     {% endfor %}
                 {% endif %}
-                {% if bucket.firstBookable(beneficiary).isDismissed %}
+                {% if firstBookableShift.isDismissed %}
                     <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
                 {% endif %}
             </div>

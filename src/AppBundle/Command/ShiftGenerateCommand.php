@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/ShiftCommand.php
+// src/AppBundle/Command/ShiftGenerateCommand.php
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Shift;
@@ -9,12 +9,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ShiftCommand extends ContainerAwareCommand
+class ShiftGenerateCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         $this
-            ->setName('app:shift-generate')
+            ->setName('app:shift:generate')
             ->setDescription('Generate shift from period')
             ->setHelp('This command allows you to generate shift using period')
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
