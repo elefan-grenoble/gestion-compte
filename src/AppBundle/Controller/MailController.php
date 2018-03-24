@@ -32,7 +32,7 @@ class MailController extends Controller
             "Gestion des membres" => "membres@lelefan.org",
             "Gestion des créneaux" => "creneaux@lelefan.org",
             "Association l'éléfàn" => "contact@lelefan.org",
-            "Formation l'éléfàn" => "formation@lelefan.org"
+            "Formation l'éléfàn" => "formations@lelefan.org"
         );
     }
 
