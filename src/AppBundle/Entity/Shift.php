@@ -371,4 +371,31 @@ class Shift
         $this->setShifter(null);
         return $this;
     }
+
+    public function canBookInterval(Beneficiary $beneficiary)
+    {
+        return !$beneficiary->getShifts()->exists(function (Shift $shift) {
+            return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
+        });
+    }
+
+    /**
+     * Is the shift bookable for the given beneficiary
+     *
+     * @return boolean
+     */
+    public function isBookable(Beneficiary $beneficiary)
+    {
+        return $this->canBookInterval($beneficiary);
+    }
+
+    /**
+     * Is the shift booked (and not dismissed)
+     *
+     * @return boolean
+     */
+    public function isBooked()
+    {
+        return $this->getShifter() && !$this->getIsDismissed();
+    }
 }

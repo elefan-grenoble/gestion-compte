@@ -76,7 +76,7 @@ class BookingController extends Controller
                 $roles = $beneficiary->getRoles();
             }
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom(new \Datetime('now'));
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
