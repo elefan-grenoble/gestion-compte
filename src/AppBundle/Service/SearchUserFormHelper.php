@@ -12,7 +12,9 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class SearchUserFormHelper {
 
 
-    public function getSearchForm($formBuilder){
+    public function getSearchForm($formBuilder,$params_string = ''){
+        $params = array();
+        parse_str($params_string,$params);
         $formBuilder->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
             'fermé' => 2,
             'ouvert' => 1,
@@ -24,9 +26,14 @@ class SearchUserFormHelper {
             ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => false,'choices'  => array(
                 'gelé' => 2,
                 'Non gelé' => 1,
-            )))
-            ->add('membernumber', TextType::class, array('label' => '# =','required' => false))
-            ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
+            )));
+
+        if ($params && $params['membernumber'])
+            $formBuilder->add('membernumber', TextType::class, array('label' => '# =','required' => false, 'attr' => array('value' => $params['membernumber'])));
+        else
+            $formBuilder->add('membernumber', TextType::class, array('label' => '# =','required' => false));
+
+        $formBuilder->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
             ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
             ->add('membernumberdiff', TextType::class, array('label' => '# <>','required' => false))
             ->add('registrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
@@ -95,7 +102,7 @@ class SearchUserFormHelper {
         return $qb;
     }
 
-    public function processSearchFormData($form,$qb){
+    public function processSearchFormData($form,&$qb){
         if ($form->get('withdrawn')->getData() > 0){
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
@@ -264,6 +271,22 @@ class SearchUserFormHelper {
             }
         }
 
+        return $qb;
+    }
+
+    public function processSearchQueryData($params_string,&$qb){
+        $params = array();
+        parse_str($params_string,$params);
+        if ($params && $params['membernumber']){
+            $list  = explode(',',$params['membernumber']);
+            if (count($list)>1){
+                $qb = $qb->andWhere('o.member_number IN (:membernumber)')
+                    ->setParameter('membernumber', $list);
+            }else{
+                $qb = $qb->andWhere('o.member_number = :membernumber')
+                    ->setParameter('membernumber', $params['membernumber']);
+            }
+        }
         return $qb;
     }
 }

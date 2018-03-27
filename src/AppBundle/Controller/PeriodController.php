@@ -286,7 +286,7 @@ class PeriodController extends Controller
             $application->setAutoExit(false);
 
             $input = new ArrayInput(array(
-                'command' => 'app:shift-generate',
+                'command' => 'app:shift:generate',
                 'date' => $date_from,
                 '--to' => $date_to
             ));

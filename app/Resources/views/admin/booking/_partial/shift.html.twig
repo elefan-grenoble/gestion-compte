@@ -84,11 +84,7 @@
 
     </div>
     <div class="modal-footer">
-        {{ form_start(delete_bucket_forms[ bucket.first.id ]) }}
-        {{ form_widget(delete_bucket_forms[ bucket.first.id ]) }}
-        <a href="#" onclick="$(this).closest('form').submit()" class="red-text"><i class="material-icons">delete</i>Supprimer
+        <a href="#" onclick="$('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();" class="red-text"><i class="material-icons">delete</i>Supprimer
             tous les créneaux à cette heure et ce poste</a>
-        {{ form_end(delete_bucket_forms[ bucket.first.id ]) }}
     </div>
-    </form>
 </div>

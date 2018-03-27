@@ -23,6 +23,32 @@
                 {#</li>#}
             {#</ul>#}
         </div>
+
+
+    <ul class="collapsible" data-collapsible="accordion">
+        <li>
+            <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
+            <div class="collapsible-body">
+                {{ form_start(form) }}
+
+                <div class="row">
+                    <div class="input-field col m3">
+                        {{ form_widget(form.from) }}
+                        {{ form_label(form.from) }}
+                    </div>
+                    <div class="input-field col m3">
+                        {{ form_widget(form.to) }}
+                        {{ form_label(form.to) }}
+                    </div>
+                </div>
+                {{ form_widget(form.filter) }}
+                {{ form_widget(form.booker) }}
+                {{ form_end(form) }}
+            </div>
+        </li>
+    </ul>
+
+
         <div class="row">
             <div class="col m2 hide-on-small-only">
             </div>
@@ -80,6 +106,9 @@
             {% endfor %}
         {% endfor %}
 
+    {{ form_start(delete_bucket_form,{ 'attr' : { 'id' : 'delete_bucket'}}) }}
+    {{ form_widget(delete_bucket_form) }}
+    {{ form_end(delete_bucket_form) }}
 
 {% endblock %}
 
@@ -91,7 +120,7 @@
             $('input.empty-shift').autocomplete({
                 data: {
                     {% for beneficiary in beneficiaries %}
-                    "#{{ beneficiary.user.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname }} ({{ beneficiary.id }})" : null,
+                        "{{ beneficiary.autocompleteLabel }}" : null,
                     {% endfor %}
                 },
                 limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
@@ -101,5 +130,37 @@
                 minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
             });
         })
+    </script>
+    <script>
+        jQuery.extend( jQuery.fn.pickadate.defaults, {
+            monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd',
+            labelMonthNext:"Mois suivant",
+            labelMonthPrev:"Mois précédent",
+            labelMonthSelect:"Sélectionner un mois",
+            labelYearSelect:"Sélectionner une année"
+        });
+
+        jQuery(function(){
+            $('.datepicker').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 2, // Creates a dropdown of 15 years to control year,
+                close: 'Ok',
+                closeOnSelect: true // Close upon selecting a date,
+            });
+            $('[type=submit]').click(function(e){
+                e.preventDefault();
+                $('#form_action').val($(this).val());
+                $('#form_action').closest('form').submit();
+            });
+        });
     </script>
 {% endblock %}
