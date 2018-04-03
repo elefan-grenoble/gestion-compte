@@ -350,6 +350,40 @@ class BookingController extends Controller
     }
 
     /**
+     * Undismiss a shift
+     *
+     * @Route("/undismiss_shift/", name="undismiss_shift")
+     * @Method("POST")
+     */
+    public function undismissShift(Request $request){
+
+        $session = new Session();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('undismiss_shift'))
+            ->setMethod('POST')
+            ->add('shift_id',HiddenType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() ) {
+            $em = $this->getDoctrine()->getManager();
+            $shift_id = $form->get('shift_id')->getData();
+            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
+            if ($shift){
+                $shift->setIsDismissed(false);
+                $shift->setDismissedTime(null);
+                $shift->setDismissedReason(null);
+                $em->persist($shift);
+                $em->flush();
+            } else {
+                $session->getFlashBag()->add('xarning',"shift not found");
+            }
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
      * Book a shift admin.
      *
      * @Route("/admin/shift/{id}/book", name="admin_shift_book")

@@ -87,28 +87,28 @@ class ShiftBucket
         return $this->shifts->first()->getDuration();
     }
 
-    public function canBookInterval(User $user)
+    public function canBookInterval(Beneficiary $beneficiary)
     {
-        return !$user->getAllShifts()->exists(function ($key, Shift $shift) {
+        return !$beneficiary->getShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
         });
     }
 
     private function getBookableShifts(Beneficiary $beneficiary = null)
     {
-        if (!$beneficiary){
+        if (!$beneficiary) {
             $bookableShifts = $this->shifts->filter(function (Shift $shift) {
                 return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
             });
-        }else{
+        } else {
             $user = $beneficiary->getUser();
-            if ($this->canBookInterval($user))
+            if ($this->canBookInterval($beneficiary))
             {
-                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user) {
+                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user, $beneficiary) {
                     return
                         ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
                         && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                        && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $user->getId())
+                        && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId())
                             || !$shift->getShifter());
                 });
             }

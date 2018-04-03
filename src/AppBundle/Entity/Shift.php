@@ -371,4 +371,15 @@ class Shift
         $this->setShifter(null);
         return $this;
     }
+
+    /**
+     * Return true if the shift is in the past
+     *
+     * @return boolean
+     */
+    public function getIsPast()
+    {
+        $now = new \DateTime('now');
+        return $this->start < $now;
+    }
 }
