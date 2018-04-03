@@ -7,7 +7,7 @@
             <p>Créneau annulé, en attente de repreneur</p>
         {% endif %}
     </div>
-    {% if (not shift.getIsDismissed()) %}
+    {% if (not shift.getIsDismissed() and not shift.getIsPast()) %}
         <div class="card-action">
             <a href="#dismiss{{ shift.id }}" class="modal-trigger">Oups, je ne vais pas pouvoir effectuer ce créneau...</a>
         </div>
@@ -29,5 +29,26 @@
                 </div>
             </form>
         </div>
+    {% endif %}
+    {% if (shift.getIsDismissed() and not shift.getIsPast()) %}
+        <div class="card-action">
+            <a href="#undismiss{{ shift.id }}" class="modal-trigger">Je vais finalement pouvoir tenir mon créneau</a>
+        </div>
+        <div id="undismiss{{ shift.id }}" class="modal">
+            <div class="modal-content">
+                <h4>Confirmation</h4>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+                <a href="#"
+                   class="modal-action modal-close waves-effect waves-green btn teal"
+                   onclick="$('#form_shift_id').val({{ shift.id }});$('#undismiss_shift').submit();">Oui, je reprends mon créneau</a>
+            </div>
+        </div>
+
+        {{ form_start(undismiss_shift_form,{ 'attr' : { 'id' : 'undismiss_shift'}}) }}
+        {{ form_widget(undismiss_shift_form) }}
+        {{ form_end(undismiss_shift_form) }}
+
     {% endif %}
 </div>
