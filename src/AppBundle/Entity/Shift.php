@@ -76,6 +76,12 @@ class Shift
     private $booker;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="reservedShifts")
+     * @ORM\JoinColumn(name="last_shifter_id", referencedColumnName="id")
+     */
+    private $lastShifter;
+
+    /**
      * One Period has One Role.
      * @ORM\ManyToOne(targetEntity="Role")
      * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
@@ -381,5 +387,29 @@ class Shift
     {
         $now = new \DateTime('now');
         return $this->start < $now;
+    }
+
+    /**
+     * Set lastShifter
+     *
+     * @param \AppBundle\Entity\Beneficiary $lastShifter
+     *
+     * @return Shift
+     */
+    public function setLastShifter(\AppBundle\Entity\Beneficiary $lastShifter = null)
+    {
+        $this->lastShifter = $lastShifter;
+
+        return $this;
+    }
+
+    /**
+     * Get lastShifter
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getLastShifter()
+    {
+        return $this->lastShifter;
     }
 }

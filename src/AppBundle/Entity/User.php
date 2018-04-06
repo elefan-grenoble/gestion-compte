@@ -588,6 +588,21 @@ class User extends BaseUser
     }
 
     /**
+     * Get all reserved shifts for all beneficiaries
+     */
+    public function getReservedShifts()
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getReservedShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
+    }
+
+
+    /**
      * Get shifts of a specific cycle
      * @param $cycleIndex index of the cycle (1 for current cycle)
      */
