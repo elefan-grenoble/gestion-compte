@@ -66,4 +66,18 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findReservedBefore(\DateTime $max)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.start < :max')
+            ->andWhere('s.lastShifter is not null')
+            ->setParameter('max', $max);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

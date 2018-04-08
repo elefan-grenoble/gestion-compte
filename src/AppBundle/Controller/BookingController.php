@@ -297,6 +297,7 @@ class BookingController extends Controller
         $shift->setIsDismissed(false);
         $shift->setDismissedReason(null);
         $shift->setDismissedTime(null);
+        $shift->setLastShifter(null);
 
         $em->persist($shift);
         $em->flush();
@@ -485,6 +486,7 @@ class BookingController extends Controller
             $shift->setIsDismissed(false);
             $shift->setDismissedReason(null);
             $shift->setDismissedTime(null);
+            $shift->setLastShifter(null);
 
             $em->persist($shift);
             $em->flush();

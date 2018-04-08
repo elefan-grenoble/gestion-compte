@@ -50,6 +50,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             ////////////////////////
             $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
             $em = $this->getContainer()->get('doctrine')->getManager();
+            $mailer = $this->getContainer()->get('mailer');
             $periodRepository = $em->getRepository('AppBundle:Period');
             $qb = $periodRepository
                 ->createQueryBuilder('p');
@@ -64,13 +65,38 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 $end = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i'));
                 $shift->setEnd($end);
 
-                foreach ($period->getPositions() as $position){
+                foreach ($period->getPositions() as $position) {
+
+                    $lastStart = $this->lastCycleDate($start);
+                    $lastEnd = $this->lastCycleDate($end);
+
+                    $last_cycle_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                    $last_cycle_shifts =  array_filter($last_cycle_shifts, function($shift) {return $shift->getShifter();});
+
                     $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
-                    $count2+= count($existing_shifts);
-                    for ($i=0;$i<$position->getNbOfShifter()-count($existing_shifts);$i++){
+                    $count2 += count($existing_shifts);
+                    for ($i=0; $i<$position->getNbOfShifter()-count($existing_shifts); $i++){
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
                         $current_shift->setRole($position->getRole());
+
+                        if ($i < count($last_cycle_shifts)) {
+                            $shifter = $last_cycle_shifts[$i]->getShifter();
+                            $current_shift->setLastShifter($shifter);
+
+                            $mail = (new \Swift_Message('Reprends ton créneau dans 28 jours'))
+                                ->setFrom('creneaux@lelefan.org')
+                                ->setTo($shifter->getEmail())
+                                ->setBody(
+                                    $this->getContainer()->get('twig')->render(
+                                        'emails/shift_reserved.html.twig',
+                                        array('shift' => $current_shift)
+                                    ),
+                                    'text/html'
+                                );
+                            $mailer->send($mail);
+                        }
+
                         $em->persist($current_shift);
                         $count++;
                     }
@@ -82,5 +108,12 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
         $message = $count2.' créneau'.(($count2>1) ? 'x':'').' existe'.(($count2>1) ? 'nt':'');
         $output->writeln('<fg=cyan;>>>></><fg=red;> '.$message.' déjà </>');
+    }
+
+    protected function lastCycleDate(\DateTime $date)
+    {
+        $lastCycleDate = clone($date);
+        $lastCycleDate->modify("-28 days");
+        return $lastCycleDate;
     }
 }

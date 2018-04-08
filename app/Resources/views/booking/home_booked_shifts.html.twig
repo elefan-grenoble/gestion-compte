@@ -1,7 +1,9 @@
-<h5>Mes créneaux à accepter</h5>
-{% for shift in app.user.getReservedShifts() %}
-    {% include "booking/_partial/reserved_shift.html.twig" with { shift: shift  } %}
-{% endfor %}
+{% if (app.user.reservedShifts | length) > 0 %}
+    <h5>Mes créneaux à accepter</h5>
+    {% for shift in app.user.reservedShifts %}
+        {% include "booking/_partial/reserved_shift.html.twig" with { shift: shift  } %}
+    {% endfor %}
+{% endif %}
 
 <h5>Mes créneaux à venir</h5>
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine le {{ app.user.endOfCycle(1)|date_fr_long }}</p>

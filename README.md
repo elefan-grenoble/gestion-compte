@@ -34,11 +34,13 @@ http://yuml.me/edit/463ff905
 * visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
 
 ### Installation du mailcatcher
-https://mailcatcher.me/
-sudo apt-get install unzip ruby-full build-essential
-unzip mailcatcher-master.zip
-sudo gem install mailcatcher
-mailcatcher
+
+* https://mailcatcher.me/
+* sudo apt-get install unzip ruby-full build-essential
+* unzip mailcatcher-master.zip
+* sudo gem install mailcatcher
+* mailcatcher
+
 #### Configuration du serveur symfony pour envoi des mails
 Modifications des fichiers config.yml et parameters.yml, ajout du champ mailer_port = 1025
 
