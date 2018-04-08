@@ -58,6 +58,7 @@
                         {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
                             <a href="{{ path("user_show",{'username':shift.shifter.user.username}) }}">#{{ shift.shifter.user.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                             {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                     </li>
                 {% else %}
