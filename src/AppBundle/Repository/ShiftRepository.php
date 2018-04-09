@@ -99,4 +99,20 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findFirstShiftWithUserNotInitialized()
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->join('s.shifter', "ben")
+            ->join('ben.user', "user")
+            ->where('user.firstShiftDate is NULL')
+            ->addOrderBy('user.id', 'ASC')
+            ->addOrderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

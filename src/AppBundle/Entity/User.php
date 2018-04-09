@@ -111,6 +111,13 @@ class User extends BaseUser
      */
     private $given_proxies;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="first_shift_date", type="date", nullable=true)
+     */
+    private $firstShiftDate;
+
     public function __construct()
     {
         parent::__construct();
@@ -620,20 +627,18 @@ class User extends BaseUser
      */
     public function startOfCycle($cycleIndex)
     {
-        $first = $this->getFirstShift();
+        $firstDate = $this->getFirstShiftDate();
         $modFirst = null;
         $now = new DateTime('now');
         $now->setTime(0, 0, 0);
-        if ($first) {
-            $firstDate = clone($first->getStart());
-            $firstDate->setTime(0, 0, 0);
+        if ($firstDate) {
             $diff = $firstDate->diff($now);
             $modFirst = $diff->format('%a') % 28;
         }
         $startCurrCycle = null;
         if ($modFirst) {
             /* Exception if first cycle in the future */
-            if ($first->getStart() < $now) {
+            if ($firstDate < $now) {
                 $startCurrCycle = $now;
                 $startCurrCycle->modify("-".$modFirst." days");
             }
@@ -915,5 +920,30 @@ class User extends BaseUser
             return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
         else
             return '#'.$this->getMemberNumber().' '.$this->getUsername();
+    }
+
+
+    /**
+     * Set firstShiftDate
+     *
+     * @param \DateTime $firstShiftDate
+     *
+     * @return User
+     */
+    public function setFirstShiftDate($firstShiftDate)
+    {
+        $this->firstShiftDate = $firstShiftDate;
+
+        return $this;
+    }
+
+    /**
+     * Get firstShiftDate
+     *
+     * @return \DateTime
+     */
+    public function getFirstShiftDate()
+    {
+        return $this->firstShiftDate;
     }
 }
