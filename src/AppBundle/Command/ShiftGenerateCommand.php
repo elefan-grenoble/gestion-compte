@@ -84,7 +84,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $shifter = $last_cycle_shifts[$i]->getShifter();
                             $current_shift->setLastShifter($shifter);
 
-                            $mail = (new \Swift_Message('Reprends ton créneau dans 28 jours'))
+                            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau dans 28 jours'))
                                 ->setFrom('creneaux@lelefan.org')
                                 ->setTo($shifter->getEmail())
                                 ->setBody(

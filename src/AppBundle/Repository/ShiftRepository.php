@@ -80,4 +80,23 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findReservedAt(\DateTime $date)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $datePlusOne = clone $date;
+        $datePlusOne->modify('+1 day');
+
+        $qb
+            ->where('s.start >= :date')
+            ->andwhere('s.start < :datePlusOne')
+            ->andWhere('s.lastShifter is not null')
+            ->setParameter('date', $date)
+            ->setParameter('datePlusOne',$datePlusOne );
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
