@@ -297,6 +297,7 @@ class BookingController extends Controller
         $shift->setIsDismissed(false);
         $shift->setDismissedReason(null);
         $shift->setDismissedTime(null);
+        $shift->setLastShifter(null);
 
         $em->persist($shift);
         $em->flush();
@@ -384,6 +385,73 @@ class BookingController extends Controller
     }
 
     /**
+     * Accept a reserved shift
+     *
+     * @Route("/accept_reserved_shift/", name="accept_reserved_shift")
+     * @Method("POST")
+     */
+    public function acceptReservedShift(Request $request){
+
+        $session = new Session();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('accept_reserved_shift'))
+            ->setMethod('POST')
+            ->add('accept_shift_id',HiddenType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() ) {
+            $em = $this->getDoctrine()->getManager();
+            $shift_id = $form->get('accept_shift_id')->getData();
+            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
+            if ($shift){
+                $shift->setBooker($shift->getLastShifter());
+                $shift->setShifter($shift->getLastShifter());
+                $shift->setBookedTime(new DateTime('now'));
+                $shift->setLastShifter(null);
+                $em->persist($shift);
+                $em->flush();
+            } else {
+                $session->getFlashBag()->add('xarning',"shift not found");
+            }
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Reject a reserved shift
+     *
+     * @Route("/reject_reserved_shift/", name="reject_reserved_shift")
+     * @Method("POST")
+     */
+    public function rejectReservedShift(Request $request){
+
+        $session = new Session();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('reject_reserved_shift'))
+            ->setMethod('POST')
+            ->add('reject_shift_id',HiddenType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() ) {
+            $em = $this->getDoctrine()->getManager();
+            $shift_id = $form->get('reject_shift_id')->getData();
+            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
+            if ($shift){
+                $shift->setLastShifter(null);
+                $em->persist($shift);
+                $em->flush();
+            } else {
+                $session->getFlashBag()->add('xarning',"shift not found");
+            }
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
      * Book a shift admin.
      *
      * @Route("/admin/shift/{id}/book", name="admin_shift_book")
@@ -418,6 +486,7 @@ class BookingController extends Controller
             $shift->setIsDismissed(false);
             $shift->setDismissedReason(null);
             $shift->setDismissedTime(null);
+            $shift->setLastShifter(null);
 
             $em->persist($shift);
             $em->flush();

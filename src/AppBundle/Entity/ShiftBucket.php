@@ -31,8 +31,14 @@ class ShiftBucket
         $this->shifts[] = $shift;
     }
 
-    static private function compareShifts(Shift $a, Shift $b)
+    static private function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary)
     {
+        if ($a->getLastShifter() && $a->getLastShifter()->getId() == $beneficiary->getId()) {
+            return -1;
+        }
+        if ($b->getLastShifter() && $b->getLastShifter()->getId() == $beneficiary->getId()) {
+            return 1;
+        }
         if ($a->getIsDismissed()) {
             if ($b->getIsDismissed()) {
                 if ($a->getDismissedTime() == $b->getDismissedTime()) {
@@ -108,8 +114,8 @@ class ShiftBucket
                     return
                         ($this->getStart() > $user->endOfCycle(1) || $this->getDuration() <= $user->remainingToBook(1))
                         && ($this->getStart() < $user->startOfCycle(2) || $this->getDuration() <= $user->remainingToBook(2))
-                        && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId())
-                            || !$shift->getShifter());
+                        && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
+                        && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
                 });
             }
             else
@@ -130,12 +136,11 @@ class ShiftBucket
      */
     public function getFirstBookable(Beneficiary $beneficiary)
     {
-        $user = $beneficiary->getUser();
         if ($this->isBookable($beneficiary)) {
             $bookableShifts = $this->getBookableShifts($beneficiary);
             $iterator = ShiftBucket::filterByRoles($bookableShifts, $beneficiary->getRoles())->getIterator();
-            $iterator->uasort(function (Shift $a, Shift $b) {
-                return ShiftBucket::compareShifts($a, $b);
+            $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
+                return ShiftBucket::compareShifts($a, $b, $beneficiary);
             });
             $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
             return $sorted->isEmpty() ? null : $sorted->first();
