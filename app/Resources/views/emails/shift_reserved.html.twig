@@ -1,12 +1,12 @@
 Bonjour {{ shift.lastShifter.firstname | lower | capitalize }},<br >
 <br >
 Tu viens de réaliser un créneau à l'épicerie, merci de rendre possible notre projet.<br >
-Nous t'avons réservé ce même créneau dans 28 jours, soit le {{ shift.start | date('d/m/Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br >
+Nous te proposons de reprende le même créneau dans 28 jours, soit le {{ shift.start | date('d/m/Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br >
+Tu es prioritaire sur ce créneau pendant 7 jours, ensuite il deviendra disponible à la réservation pour les autres membres.<br >
 <br >
-Merci de nous indiquer si tu souhaites le reprendre via ton espace membre:<br >
-https://membres.lelefan.org<br >
+Merci de nous indiquer si tu souhaites le reprendre via <a href="{{ absolute_url(path("homepage")) }}">ton espace membre</a>.<br >
 <br >
-Tu as 7 jours pour te décider, ensuite ce créneau deviendra disponible à la réservation pour tous les autres membres.<br >
+Il n'est pas nécessaire de répondre à ce mail, sauf si tu as des questions.<br >
 <br >
 Belle journée à toi.<br >
 Céleste, la petite fée des créneaux :)
