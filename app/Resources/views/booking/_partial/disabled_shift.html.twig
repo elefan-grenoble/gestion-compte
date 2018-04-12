@@ -4,7 +4,7 @@
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <div class="z-depth-1 grey lighten-1 white-text" style="height:40px;position: relative; cursor: not-allowed">
+    <div class="z-depth-1 grey lighten-3" style="height:40px;position: relative; cursor: not-allowed">
 
         <div class="shift-block">
             {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
