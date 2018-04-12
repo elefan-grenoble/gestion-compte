@@ -6,8 +6,8 @@
                     class="{{ shift.job.color }}-text">{{ shift.job.name }}</b></p>
     </div>
     <div class="card-action">
-        <a href="#accept{{ shift.id }}" class="modal-trigger">J'accepte</a>
-        <a href="#reject{{ shift.id }}" class="modal-trigger">Je refuse</a>
+        <a href="#accept{{ shift.id }}" class="modal-trigger btn waves-effect waves-green green">J'accepte</a>
+        <a href="#reject{{ shift.id }}" class="modal-trigger btn waves-effect waves-orange orange">Je refuse</a>
     </div>
     <div id="accept{{ shift.id }}" class="modal">
         <div class="modal-content">
@@ -28,7 +28,7 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
             <a href="#"
                class="modal-action modal-close waves-effect waves-green btn teal"
-               onclick="$('#form_reject_shift_id').val({{ shift.id }});$('#reject_reserved_shift').submit();">Confirmer</a>
+               onclick="$('#form_reject_shift_id').val({{ shift.id }});$('#reject_reserved_shift').submit();">Oui, Je ne reprends pas ce créneau</a>
         </div>
     </div>
 
