@@ -20,7 +20,7 @@
     {% else %}
         {% if (shift.getIsDismissed() ) %}
             <div class="card-action">
-                <a href="#undismiss{{ shift.id }}" class="modal-trigger btn green">reprendre mon créneau</a>
+                <a href="#undismiss{{ shift.id }}" class="modal-trigger btn green truncate">reprendre mon créneau</a>
             </div>
             <div id="undismiss{{ shift.id }}" class="modal black-text">
                 <div class="modal-content">
