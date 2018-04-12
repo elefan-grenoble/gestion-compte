@@ -8,7 +8,7 @@
                 top: {{ line*10 }}px;">
     <a href="#edit{{ bucket.first.id }}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
-        <div class="z-depth-1 {{ bucket.first.job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookableShifts + 1) }} {% endif %}black-text "
+        <div class="z-depth-1 {{ bucket.first.job.color }} lighten-5 black-text "
              style="position: relative;height: 60px;">
             <div style="height:2px; width: 100%;position: absolute;">
                 {% for shifter in 1..nbBookableShifts %}
@@ -28,7 +28,7 @@
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.shifts() %}
                         {% if shift.shifter and shiftercount < 3 %}{# is booked #}
-                            <li>{% if shift.role %}<b
+                            <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
                                         data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
                                     &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
                             </li>
@@ -41,6 +41,11 @@
                     {% endfor %}
                 </ul>
             </div>
+            {% if (shiftercount == 0) %}
+                <span class="badge red white-text">fermeture</span>
+            {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
+                <span class="badge orange white-text">fermeture</span>
+            {% endif %}
         </div>
     </a>
 </div>
