@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/FreeReservedShiftsCommand.php
+// src/AppBundle/Command/SendCycleStartEmailsCommand.php
 namespace AppBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
@@ -7,26 +7,29 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitUsersFirstShiftDate extends ContainerAwareCommand
+class SendCycleStartEmailsCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         $this
-            ->setName('app:user:init_first_shift_date')
-            ->setDescription('Init first_shift_date of users')
-            ->setHelp('This command allows you to init users first shift date');
+            ->setName('app:user:send_cycle_start_emails')
+            ->setDescription('Send emails to member with a cycle starting today and with shift remaining to book')
+            ->setHelp('This command allows you to send emails to member with a cycle starting today and with shift remaining to book');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $date = new \DateTime('now');
+
         $count = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findFirstShiftWithUserNotInitialized();
-        $last_user_id = null;
-        foreach ($shifts as $shift) {
-            $user = $shift->getShifter()->getUser();
-            if ($user->getId() != $last_user_id) {
-                $last_user_id = $user->getId();
+        $users = $em->getRepository('AppBundle:User')->findFirstShiftWithUserNotInitialized();
+        foreach ($users as $user) {
+            if ($user->remainingToBook(1, true) > 0) {
+
+
+
+
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
                 $user->setFirstShiftDate($firstDate);
