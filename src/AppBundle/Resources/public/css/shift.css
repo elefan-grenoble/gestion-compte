@@ -7,18 +7,22 @@
   border: solid 1px;
   border-radius: 10px;
 }
-
 .shift-block {
   font-size: 11px;
   padding: 2px 3px 0 3px;
   width: 100%;
 }
-
 .shifter {
   font-size: 16px;
   width: 10px;
 }
-
 .shift-with-role {
   color: #ff1744;
+}
+.shift-bucket {
+  position: absolute;
+  padding: 0 1px;
+}
+.shift-bucket:hover {
+  z-index: 999;
 }

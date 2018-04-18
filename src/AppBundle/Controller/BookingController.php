@@ -84,6 +84,7 @@ class BookingController extends Controller
             }
 
             $bucketsByDay = array();
+            $dismissedShifts = array();
             foreach ($shifts as $shift) {
                 $day = $shift->getStart()->format("d m Y");
                 $job = $shift->getJob()->getId();
@@ -99,10 +100,15 @@ class BookingController extends Controller
                     $bucketsByDay[$day][$job][$interval] = $bucket;
                 }
                 $bucketsByDay[$day][$job][$interval]->addShift($shift);
+                //dismissed
+                if ($shift->getIsDismissed()){
+                    $dismissedShifts[] = $shift;
+                }
             }
 
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
+                'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository('AppBundle:Job')->findAll()
@@ -272,15 +278,10 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
     {
-        $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if ($shift->getShifter() && !$shift->getIsDismissed()) {
-            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return $this->redirectToRoute("booking");   
+        if (!$this->isGranted('book', $shift)){
+            $session = new Session();
+            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
+            return $this->redirectToRoute("booking");
         }
 
         $beneficiaryId = $request->get("beneficiaryId");
@@ -326,15 +327,10 @@ class BookingController extends Controller
      */
     public function dismissShiftAction(Request $request, Shift $shift)
     {
-        $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if (!$current_app_user->getBeneficiaries()->contains($shift->getShifter())) {
-            $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
-            return $this->redirectToRoute('booking');
+        if (!$this->isGranted('dismiss', $shift)){
+            $session = new Session();
+            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
+            return $this->redirectToRoute("booking");
         }
 
         $em = $this->getDoctrine()->getManager();

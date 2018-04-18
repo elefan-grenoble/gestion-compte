@@ -692,10 +692,31 @@ class User extends BaseUser
 
     /**
      * Can book a shift
+     *
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
+     * @param \AppBundle\Entity\Shift $shift
+     *
+     * @return Boolean
      */
-    public function canBook()
+    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
-	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+        if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
+    	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+        else{
+            if ($beneficiary->getUser() != $this){
+                return false;
+            }
+            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+                return false;
+            }
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
+                return false;
+            }
+            return ($shift->getStart() > $this->endOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
+            && ($shift->getStart() < $this->startOfCycle(2) || $shift->getDuration() <= $this->remainingToBook(2))
+            && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
+            && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
+        }
     }
 
     /**
