@@ -299,8 +299,16 @@ class BookingController extends Controller
         $shift->setDismissedReason(null);
         $shift->setDismissedTime(null);
         $shift->setLastShifter(null);
-
         $em->persist($shift);
+
+        $user = $beneficiary->getUser();
+        if ($user->getFirstShiftgetFirstShiftDate() == null) {
+            $firstDate = clone($shift->getStart());
+            $firstDate->setTime(0, 0, 0);
+            $user->setFirstShiftDate($firstDate);
+            $em->persist($user);
+        }
+
         $em->flush();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -487,10 +495,10 @@ class BookingController extends Controller
             $em->persist($shift);
 
             $user = $beneficiary->getUser();
-            if (!$user->getFirstShiftDate()) {
+            if ($user->getFirstShiftgetFirstShiftDate() == null) {
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
-                $user->getFirstShiftDate($firstDate);
+                $user->setFirstShiftDate($firstDate);
                 $em->persist($user);
             }
 

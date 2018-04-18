@@ -736,20 +736,6 @@ class User extends BaseUser
     }
 
     /**
-     * Get first shift ever
-     */
-    public function getFirstShift()
-    {
-        $first = null;
-        foreach ($this->getAllBookedShifts() as $shift) {
-            if (!$first || $shift->getStart() < $first->getStart()) {
-                $first = $shift;
-            }
-        };
-        return $first;
-    }
-
-    /**
      * Add note
      *
      * @param \AppBundle\Entity\Note $note
@@ -954,7 +940,6 @@ class User extends BaseUser
     public function setFirstShiftDate($firstShiftDate)
     {
         $this->firstShiftDate = $firstShiftDate;
-
         return $this;
     }
 
