@@ -302,7 +302,7 @@ class BookingController extends Controller
         $em->persist($shift);
 
         $user = $beneficiary->getUser();
-        if ($user->getFirstShiftgetFirstShiftDate() == null) {
+        if ($user->getFirstShiftDate() == null) {
             $firstDate = clone($shift->getStart());
             $firstDate->setTime(0, 0, 0);
             $user->setFirstShiftDate($firstDate);
@@ -495,7 +495,7 @@ class BookingController extends Controller
             $em->persist($shift);
 
             $user = $beneficiary->getUser();
-            if ($user->getFirstShiftgetFirstShiftDate() == null) {
+            if ($user->getFirstShiftDate() == null) {
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
                 $user->setFirstShiftDate($firstDate);
