@@ -643,7 +643,7 @@ class User extends BaseUser
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
-                $startCurrCycle = $firstDate;
+                $startCurrCycle = clone($firstDate);
             }
         } else {
             $startCurrCycle = $now;
