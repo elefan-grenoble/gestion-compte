@@ -16,7 +16,9 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('u');
 
         $qb
-            ->where('u.firstShiftDate is not NULL')
+            ->where('u.withdrawn = 0')
+            ->andWhere('u.frozen = 0')
+            ->andWhere('u.firstShiftDate is not NULL')
             ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0')
             ->setParameter('now', new \Datetime('now'));
 
