@@ -14,6 +14,7 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
             new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
+            new \Twig_SimpleFilter('date_fr_full',array($this, 'date_fr_full')),
             new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
         );
     }
@@ -80,6 +81,12 @@ class AppExtension extends \Twig_Extension
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $date->getTimestamp());
+    }
+
+    public function date_fr_full(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
     public function duration_from_minutes(int $minutes)
