@@ -19,26 +19,24 @@ class SendCycleStartEmailsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $date = new \DateTime('now');
-
-        $count = 0;
+        $mailer = $this->getContainer()->get('mailer');
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('AppBundle:User')->findFirstShiftWithUserNotInitialized();
+        $users = $em->getRepository('AppBundle:User')->findWithNewCycleStarting();
+        $count = 0;
         foreach ($users as $user) {
-            if ($user->remainingToBook(1, true) > 0) {
+            if ($user->remainingToBook(1) > 0) {
 
+                $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
+                    ->setFrom('creneaux@lelefan.org')
+                    ->setTo($user->getEmail())
+                    ->setBody($this->getContainer()->get('twig')->render('emails/cycle_start.html.twig'), 'text/html');
 
+                $mailer->send($mail);
 
-
-                $firstDate = clone($shift->getStart());
-                $firstDate->setTime(0, 0, 0);
-                $user->setFirstShiftDate($firstDate);
-                $em->persist($user);
                 $count++;
             }
         }
-        $em->flush();
-        $message = $count . ' membre' . (($count > 1) ? 's' : '') . ' mis à jour';
+        $message = $count . ' email' . (($count > 1) ? 's' : '') . ' envoyé' . (($count > 1) ? 's' : '');
         $output->writeln($message);
     }
 
