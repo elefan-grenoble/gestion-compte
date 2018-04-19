@@ -29,7 +29,13 @@ class SendCycleStartEmailsCommand extends ContainerAwareCommand
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                     ->setFrom('creneaux@lelefan.org')
                     ->setTo($user->getEmail())
-                    ->setBody($this->getContainer()->get('twig')->render('emails/cycle_start.html.twig'), 'text/html');
+                    ->setBody(
+                        $this->getContainer()->get('twig')->render(
+                            'emails/cycle_start.html.twig',
+                            array('user' => $user)
+                        ),
+                        'text/html'
+                    );
 
                 $mailer->send($mail);
 

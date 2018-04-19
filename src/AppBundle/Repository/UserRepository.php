@@ -17,7 +17,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
 
         $qb
             ->where('u.firstShiftDate is not NULL')
-            ->andWhere('(DATEDIFF(:now, u.firstShiftDate) % 28) = 0')
+            ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0')
             ->setParameter('now', new \Datetime('now'));
 
         return $qb
