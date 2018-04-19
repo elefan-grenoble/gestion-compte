@@ -15,9 +15,8 @@
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-            <a href="#"
-               class="modal-action modal-close waves-effect waves-green btn teal"
-               onclick="$('#form_accept_shift_id').val({{ shift.id }});$('#accept_reserved_shift').submit();">Oui, je reprends mon créneau</a>
+            <a href="{{ path("accept_reserved_shift",{ id : shift.id }) }}"
+               class="modal-action modal-close waves-effect waves-green btn teal">Oui, je reprends mon créneau</a>
         </div>
     </div>
     <div id="reject{{ shift.id }}" class="modal">
@@ -26,18 +25,10 @@
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-            <a href="#"
-               class="modal-action modal-close waves-effect waves-green btn teal"
-               onclick="$('#form_reject_shift_id').val({{ shift.id }});$('#reject_reserved_shift').submit();">Oui, Je ne reprends pas ce créneau</a>
+            <a href="{{ path("reject_reserved_shift",{ id : shift.id }) }}"
+               class="modal-action modal-close waves-effect waves-green btn teal">Oui, Je ne reprends pas ce créneau</a>
         </div>
     </div>
 
-    {{ form_start(accept_reserved_shift_form,{ 'attr' : { 'id' : 'accept_reserved_shift'}}) }}
-    {{ form_widget(accept_reserved_shift_form) }}
-    {{ form_end(accept_reserved_shift_form) }}
-
-    {{ form_start(reject_reserved_shift_form,{ 'attr' : { 'id' : 'reject_reserved_shift'}}) }}
-    {{ form_widget(reject_reserved_shift_form) }}
-    {{ form_end(reject_reserved_shift_form) }}
 
 </div>

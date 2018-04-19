@@ -23,3 +23,8 @@ parameters:
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
+
+    #router https://symfony.com/doc/3.4/console/request_context.html
+    router.request_context.host: membres.lelefan.local
+    router.request_context.scheme: https
+    router.request_context.base_url:

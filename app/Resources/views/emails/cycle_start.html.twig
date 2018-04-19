@@ -1,8 +1,7 @@
 Bonjour {{ user.firstname | lower | capitalize }},<br >
 <br >
 Ton nouveau cycle commence aujourd'hui.<br >
-Penses à aller sur ton espace membre pour réserver tes {{ user.remainingToBook(1, true)|duration_from_minutes }} restantes de bénévolat.<br >
-https://membres.lelefan.org<br >
+Penses à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver tes {{ user.remainingToBook(1, true)|duration_from_minutes }} restantes de bénévolat.<br >
 <br >
 Merci<br >
 <br >

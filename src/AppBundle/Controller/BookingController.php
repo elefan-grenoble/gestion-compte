@@ -252,7 +252,7 @@ class BookingController extends Controller
                             ->setBody(
                                 $this->renderView(
                                     'emails/deleted_shift.html.twig',
-                                    array('shift' => $shift)
+                                    array('shift' => $s)
                                 ),
                                 'text/html'
                             );
@@ -391,67 +391,60 @@ class BookingController extends Controller
     /**
      * Accept a reserved shift
      *
-     * @Route("/accept_reserved_shift/", name="accept_reserved_shift")
-     * @Method("POST")
+     * @Route("/shift/{id}/accept/", name="accept_reserved_shift")
+     * @Method("GET")
      */
-    public function acceptReservedShift(Request $request){
+    public function acceptReservedShift(Request $request,Shift $shift){
 
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('accept_reserved_shift'))
-            ->setMethod('POST')
-            ->add('accept_shift_id',HiddenType::class)
-            ->getForm();
 
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid() ) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('accept_shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift){
-                $shift->setBooker($shift->getLastShifter());
-                $shift->setShifter($shift->getLastShifter());
-                $shift->setBookedTime(new DateTime('now'));
-                $shift->setLastShifter(null);
-                $em->persist($shift);
-                $em->flush();
-            } else {
-                $session->getFlashBag()->add('xarning',"shift not found");
-            }
+        if (!$this->isGranted('accept', $shift)){
+            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
+            return $this->redirectToRoute("homepage");
         }
+
+        if ($shift->getId()){
+            $shift->setBooker($shift->getLastShifter());
+            $shift->setShifter($shift->getLastShifter());
+            $shift->setBookedTime(new DateTime('now'));
+            $shift->setLastShifter(null);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+            $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
+        } else {
+            $session->getFlashBag()->add('error',"shift not found");
+        }
+
         return $this->redirectToRoute('homepage');
     }
 
     /**
      * Reject a reserved shift
      *
-     * @Route("/reject_reserved_shift/", name="reject_reserved_shift")
-     * @Method("POST")
+     * @Route("/shift/{id}/reject/", name="reject_reserved_shift")
+     * @Method("GET")
      */
-    public function rejectReservedShift(Request $request){
+    public function rejectReservedShift(Request $request,Shift $shift){
 
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('reject_reserved_shift'))
-            ->setMethod('POST')
-            ->add('reject_shift_id',HiddenType::class)
-            ->getForm();
 
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid() ) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('reject_shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift){
-                $shift->setLastShifter(null);
-                $em->persist($shift);
-                $em->flush();
-            } else {
-                $session->getFlashBag()->add('xarning',"shift not found");
-            }
+        if (!$this->isGranted('reject', $shift)){
+            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
+            return $this->redirectToRoute("homepage");
         }
+
+        if ($shift->getId()){
+            $shift->setLastShifter(null);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+            $session->getFlashBag()->add('success',"Créneau libéré");
+            $session->getFlashBag()->add('warning',"Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
+        } else {
+            $session->getFlashBag()->add('error',"shift not found");
+        }
+
         return $this->redirectToRoute('homepage');
     }
 
