@@ -404,14 +404,18 @@ class BookingController extends Controller
         }
 
         if ($shift->getId()){
-            $shift->setBooker($shift->getLastShifter());
-            $shift->setShifter($shift->getLastShifter());
-            $shift->setBookedTime(new DateTime('now'));
-            $shift->setLastShifter(null);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($shift);
-            $em->flush();
-            $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
+            if ($shift->getLastShifter()){
+                $shift->setBooker($shift->getLastShifter());
+                $shift->setShifter($shift->getLastShifter());
+                $shift->setBookedTime(new DateTime('now'));
+                $shift->setLastShifter(null);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+                $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
+            }else{
+                $session->getFlashBag()->add('error',"Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
         } else {
             $session->getFlashBag()->add('error',"shift not found");
         }
@@ -434,14 +438,18 @@ class BookingController extends Controller
             return $this->redirectToRoute("homepage");
         }
 
-        if ($shift->getId()){
-            $shift->setLastShifter(null);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($shift);
-            $em->flush();
-            $session->getFlashBag()->add('success',"Créneau libéré");
-            $session->getFlashBag()->add('warning',"Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
-        } else {
+        if ($shift->getId()) {
+            if ($shift->getLastShifter()){
+                $shift->setLastShifter(null);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+                $session->getFlashBag()->add('success', "Créneau libéré");
+                $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
+            }else{
+                $session->getFlashBag()->add('error',"Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
+        }else{
             $session->getFlashBag()->add('error',"shift not found");
         }
 
