@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SendCycleStartEmailsCommand extends ContainerAwareCommand
 {
@@ -23,6 +24,10 @@ class SendCycleStartEmailsCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
         $users = $em->getRepository('AppBundle:User')->findWithNewCycleStarting();
         $count = 0;
+
+        $router = $this->getContainer()->get('router');
+        $home_url = $router->generate('homepage',array(),UrlGeneratorInterface::ABSOLUTE_URL);
+
         foreach ($users as $user) {
             if ($user->remainingToBook(1) > 0) {
 
@@ -32,7 +37,7 @@ class SendCycleStartEmailsCommand extends ContainerAwareCommand
                     ->setBody(
                         $this->getContainer()->get('twig')->render(
                             'emails/cycle_start.html.twig',
-                            array('user' => $user)
+                            array('user' => $user,'home_url' => $home_url)
                         ),
                         'text/html'
                     );
