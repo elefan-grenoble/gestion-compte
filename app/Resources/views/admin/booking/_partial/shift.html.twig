@@ -31,6 +31,7 @@
                             <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
                                         data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
                                     &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
+                                {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>
                             {% set shiftercount = shiftercount + 1 %}
                         {% endif %}

@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ShiftGenerateCommand extends ContainerAwareCommand
 {
@@ -44,6 +45,10 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
         $count = 0;
         $count2 = 0;
+
+        $reservedShifts = array();
+
+        $router = $this->getContainer()->get('router');
 
         foreach ( $period as $date ) {
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
@@ -83,18 +88,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         if ($i < count($last_cycle_shifts)) {
                             $shifter = $last_cycle_shifts[$i]->getShifter();
                             $current_shift->setLastShifter($shifter);
-
-                            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau dans 28 jours'))
-                                ->setFrom('creneaux@lelefan.org')
-                                ->setTo($shifter->getEmail())
-                                ->setBody(
-                                    $this->getContainer()->get('twig')->render(
-                                        'emails/shift_reserved.html.twig',
-                                        array('shift' => $current_shift)
-                                    ),
-                                    'text/html'
-                                );
-                            $mailer->send($mail);
+                            $reservedShifts[] = $current_shift;
                         }
 
                         $em->persist($current_shift);
@@ -103,6 +97,23 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 }
             }
             $em->flush();
+            foreach ($reservedShifts as $shift){
+                $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau dans 28 jours'))
+                    ->setFrom('creneaux@lelefan.org')
+                    ->setTo($shift->getLastShifter()->getEmail())
+                    ->setBody(
+                        $this->getContainer()->get('twig')->render(
+                            'emails/shift_reserved.html.twig',
+                            array('shift' => $shift,
+                                'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                                'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                            )
+                        ),
+                        'text/html'
+                    );
+                $mailer->send($mail);
+            }
+
         }
         $message = $count.' créneau'.(($count>1) ? 'x':'').' généré'.(($count>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');

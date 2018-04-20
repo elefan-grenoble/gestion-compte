@@ -91,24 +91,9 @@ class DefaultController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
-        $accept_reserved_shift_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('accept_reserved_shift'))
-            ->setMethod('POST')
-            ->add('accept_shift_id',HiddenType::class)
-            ->getForm();
-
-        $reject_reserved_shift_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('reject_reserved_shift'))
-            ->setMethod('POST')
-            ->add('reject_shift_id',HiddenType::class)
-            ->getForm();
-
-
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
             'undismiss_shift_form' => $undismiss_shift_form->createView(),
-            'accept_reserved_shift_form' => $accept_reserved_shift_form->createView(),
-            'reject_reserved_shift_form' => $reject_reserved_shift_form->createView(),
             'events' => $futur_events
         ]);
     }
