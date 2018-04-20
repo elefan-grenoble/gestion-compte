@@ -11,6 +11,7 @@ class AppExtension extends \Twig_Extension
     {
         return array(
             new \Twig_SimpleFilter('markdown', array($this, 'markdown')),
+            new \Twig_SimpleFilter('json_decode', array($this, 'jsonDecode')),
             new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
             new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
@@ -92,5 +93,9 @@ class AppExtension extends \Twig_Extension
     public function duration_from_minutes(int $minutes)
     {
         return date("G\hi", ($minutes - 60) * 60);
+    }
+
+    public function jsonDecode($str) {
+        return json_decode($str);
     }
 }

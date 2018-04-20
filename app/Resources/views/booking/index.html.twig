@@ -29,9 +29,9 @@
                 : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
         </div>
         <div class="row">
-            <ul class="collapsible" data-collapsible="accordion">
+            <ul class="collapsible" data-collapsible="accordion" id="legend">
                 <li>
-                    <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-header {% if not frontend_cookie or not frontend_cookie.booking or not frontend_cookie.booking.legend_closed %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
                     <div class="collapsible-body">
                         <ul>
                             <li>
@@ -73,8 +73,9 @@
                 </li>
             </ul>
         </div>
+        {% if dismissedShifts | length %}
         <div class="row">
-            <ul class="collapsible" data-collapsible="expandable">
+            <ul class="collapsible" data-collapsible="expandable" id="dismissed">
                 <li>
                     <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
                     <div class="collapsible-body row">
@@ -89,6 +90,7 @@
                 </li>
             </ul>
         </div>
+        {% endif %}
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
 {% endblock %}
@@ -104,6 +106,22 @@
     <script>
         jQuery(function () {
             $('.collapsible li').click();
+            $('#legend .collapsible-header').on('click',function () {
+                var data_raw = Cookies.get("frontend");
+                var data = undefined;
+                if (data_raw)
+                    data = JSON.parse(data_raw);
+                if (!data)
+                    data = {};
+                if (!data.booking)
+                    data.booking = {};
+                data.booking.legend_closed = $(this).hasClass("active");
+                Cookies.set("frontend",data);
+            });
+            //todo put it server side
+            if ($('#dismissed .collapsible-header div').length < 1){
+                $('#dismissed').hide();
+            }
         });
     </script>
 {% endblock %}
