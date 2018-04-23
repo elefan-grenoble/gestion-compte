@@ -19,7 +19,7 @@
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/orm": "^2.5",
         "evheniy/materialize-bundle": "^1.2",
-        "friendsofsymfony/oauth-server-bundle": "1.5",
+        "friendsofsymfony/oauth-server-bundle": "^1.5",
         "friendsofsymfony/user-bundle": "^2.0",
         "incenteev/composer-parameter-handler": "^2.0",
         "liip/imagine-bundle": "^1.9",

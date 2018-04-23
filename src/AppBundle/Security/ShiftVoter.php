@@ -88,6 +88,10 @@ class ShiftVoter extends Voter
 
     private function canBook(Shift $shift, User $user)
     {
+        if ($user->isWithdrawn())
+            return false;
+        if ($user->getFrozen())
+            return false;
         foreach ($user->getBeneficiaries() as $beneficiary){
             $bool = $user->canBook($beneficiary,$shift);
             if ($bool)
