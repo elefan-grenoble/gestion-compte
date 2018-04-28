@@ -616,7 +616,9 @@ class User extends BaseUser
 
     /**
      * Get shifts of a specific cycle
-     * @param $cycleIndex index of the cycle (1 for current cycle)
+     * @param $cycleIndex int index of the cycle (1 for current cycle)
+     * @param bool $excludeDismissed
+     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
      */
     public function getShiftsOfCycle($cycleIndex, $excludeDismissed = false)
     {
@@ -629,6 +631,8 @@ class User extends BaseUser
     /**
      * Get start date of current cycle
      * IMPORTANT : time are reset, only date are kept
+     * @param int $cycleIndex
+     * @return DateTime|null
      */
     public function startOfCycle($cycleIndex)
     {
@@ -654,8 +658,14 @@ class User extends BaseUser
             $startCurrCycle = $now;
         }
 
-        for ($i = 1; $i < $cycleIndex; $i++) {
-            $startCurrCycle->modify("+28 days");
+        if ($cycleIndex > 0) {
+            for ($i = 1; $i < $cycleIndex; $i++) {
+                $startCurrCycle->modify("+28 days");
+            }
+        } else {
+            for ($i = $cycleIndex; $i < 1; $i++) {
+                $startCurrCycle->modify("-28 days");
+            }
         }
 
         return $startCurrCycle;
@@ -663,6 +673,8 @@ class User extends BaseUser
 
     /**
      * Get end date of current cycle
+     * @param int $cycleIndex
+     * @return DateTime|null
      */
     public function endOfCycle($cycleIndex)
     {
