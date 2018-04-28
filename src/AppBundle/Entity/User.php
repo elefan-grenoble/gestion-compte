@@ -118,6 +118,11 @@ class User extends BaseUser
      */
     private $firstShiftDate;
 
+    /**
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="user",cascade={"persist", "remove"})
+     */
+    private $timeLogs;
+
     public function __construct()
     {
         parent::__construct();
@@ -951,5 +956,39 @@ class User extends BaseUser
     public function getFirstShiftDate()
     {
         return $this->firstShiftDate;
+    }
+
+    /**
+     * Add timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     *
+     * @return User
+     */
+    public function addTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs[] = $timeLog;
+
+        return $this;
+    }
+
+    /**
+     * Remove timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     */
+    public function removeTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs->removeElement($timeLog);
+    }
+
+    /**
+     * Get timeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTimeLogs()
+    {
+        return $this->timeLogs;
     }
 }

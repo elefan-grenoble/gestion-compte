@@ -95,6 +95,10 @@ class Shift
      */
     private $job;
 
+    /**
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift",cascade={"persist", "remove"})
+     */
+    private $timeLogs;
 
     public function __construct()
     {
@@ -415,5 +419,39 @@ class Shift
 
     public function getTmpToken($key = ''){
         return md5($this->getId().$this->getStart()->format('d-m-Y').$this->getEnd()->format('d-m-Y').$key);
+    }
+
+    /**
+     * Add timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     *
+     * @return Shift
+     */
+    public function addTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs[] = $timeLog;
+
+        return $this;
+    }
+
+    /**
+     * Remove timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     */
+    public function removeTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs->removeElement($timeLog);
+    }
+
+    /**
+     * Get timeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTimeLogs()
+    {
+        return $this->timeLogs;
     }
 }
