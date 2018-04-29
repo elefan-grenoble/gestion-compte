@@ -67,6 +67,11 @@ class Beneficiary
     private $booked_shifts;
 
     /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter",cascade={"remove"})
+     */
+    private $reservedShifts;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
      * @ORM\JoinColumn(name="commission_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -553,5 +558,44 @@ class Beneficiary
     public function getReceivedProxies()
     {
         return $this->received_proxies;
+    }
+
+    public function getAutocompleteLabel(){
+        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
+    }
+    
+
+    /**
+     * Add reservedShift
+     *
+     * @param \AppBundle\Entity\Shift $reservedShift
+     *
+     * @return Beneficiary
+     */
+    public function addReservedShift(\AppBundle\Entity\Shift $reservedShift)
+    {
+        $this->reservedShifts[] = $reservedShift;
+
+        return $this;
+    }
+
+    /**
+     * Remove reservedShift
+     *
+     * @param \AppBundle\Entity\Shift $reservedShift
+     */
+    public function removeReservedShift(\AppBundle\Entity\Shift $reservedShift)
+    {
+        $this->reservedShifts->removeElement($reservedShift);
+    }
+
+    /**
+     * Get reservedShifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getReservedShifts()
+    {
+        return $this->reservedShifts;
     }
 }

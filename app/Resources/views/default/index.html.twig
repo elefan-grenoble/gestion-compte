@@ -54,6 +54,10 @@
                     </p>
                 </div>
             </div>
+            </div>
+            {#<h4 class="header center gray-text">Planning</h4>#}
+            {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+            <div>
         {% endif %}
     </div>
 {% endblock %}
@@ -61,4 +65,11 @@
 {% block stylesheets %}
 {% endblock %}
 {% block javascripts %}
+    <script>
+        jQuery(function () {
+            $(".collapsible .modal-trigger").on('click',function (e) {
+                e.preventDefault();
+            })
+        })
+    </script>
 {% endblock %}

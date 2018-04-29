@@ -8,7 +8,7 @@
                 top: {{ line*10 }}px;">
     <a href="#edit{{ bucket.first.id }}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
-        <div class="z-depth-1 {{ bucket.first.job.color }} {% if nbBookableShifts > 1 %}lighten-{{ min(4, nbBookableShifts + 1) }} {% endif %}black-text "
+        <div class="z-depth-1 {{ bucket.first.job.color }} lighten-5 black-text "
              style="position: relative;height: 60px;">
             <div style="height:2px; width: 100%;position: absolute;">
                 {% for shifter in 1..nbBookableShifts %}
@@ -28,9 +28,10 @@
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.shifts() %}
                         {% if shift.shifter and shiftercount < 3 %}{# is booked #}
-                            <li>{% if shift.role %}<b
+                            <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
                                         data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
                                     &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
+                                {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>
                             {% set shiftercount = shiftercount + 1 %}
                         {% endif %}
@@ -41,6 +42,11 @@
                     {% endfor %}
                 </ul>
             </div>
+            {% if (shiftercount == 0) %}
+                <span class="badge red white-text">fermeture</span>
+            {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
+                <span class="badge orange white-text">fermeture</span>
+            {% endif %}
         </div>
     </a>
 </div>
@@ -58,12 +64,13 @@
                         {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
                             <a href="{{ path("user_show",{'username':shift.shifter.user.username}) }}">#{{ shift.shifter.user.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                             {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                     </li>
                 {% else %}
                     <li>
                         <div class="collapsible-header">
-                            {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %} <span style="font-style: italic">libre</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
                         </div>
                         <div class="collapsible-body">
                             <form action="{{ path('admin_shift_book',{'id': shift.id }) }}" method="post">

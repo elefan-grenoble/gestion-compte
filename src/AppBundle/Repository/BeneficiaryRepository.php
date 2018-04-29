@@ -10,4 +10,14 @@ namespace AppBundle\Repository;
  */
 class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findFromAutoComplete($str)
+    {
+        $re = '/.*\(([0-9]+)\)/';
+        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+        if (count($matches) == 1) {
+            $beneficiaryId = $matches[0][1];
+            return $this->find($beneficiaryId);
+        }
+        return null;
+    }
 }

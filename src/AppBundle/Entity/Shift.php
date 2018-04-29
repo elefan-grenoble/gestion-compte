@@ -76,6 +76,12 @@ class Shift
     private $booker;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="reservedShifts")
+     * @ORM\JoinColumn(name="last_shifter_id", referencedColumnName="id")
+     */
+    private $lastShifter;
+
+    /**
      * One Period has One Role.
      * @ORM\ManyToOne(targetEntity="Role")
      * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
@@ -370,5 +376,44 @@ class Shift
         $this->setDismissedTime(null);
         $this->setShifter(null);
         return $this;
+    }
+
+    /**
+     * Return true if the shift is in the past
+     *
+     * @return boolean
+     */
+    public function getIsPast()
+    {
+        $now = new \DateTime('now');
+        return $this->start < $now;
+    }
+
+    /**
+     * Set lastShifter
+     *
+     * @param \AppBundle\Entity\Beneficiary $lastShifter
+     *
+     * @return Shift
+     */
+    public function setLastShifter(\AppBundle\Entity\Beneficiary $lastShifter = null)
+    {
+        $this->lastShifter = $lastShifter;
+
+        return $this;
+    }
+
+    /**
+     * Get lastShifter
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getLastShifter()
+    {
+        return $this->lastShifter;
+    }
+
+    public function getTmpToken($key = ''){
+        return md5($this->getId().$this->getStart()->format('d-m-Y').$this->getEnd()->format('d-m-Y').$key);
     }
 }

@@ -4,8 +4,10 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -23,6 +25,7 @@ class DefaultController extends Controller
     public function indexAction(Request $request)
     {
         $first = null;
+        $em = $this->getDoctrine()->getManager();
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
@@ -36,8 +39,44 @@ class DefaultController extends Controller
             }else{
                 $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
             }
+        }else{
+            $today = strtotime('today');
+            $from = new \DateTime();
+            $from->setTimestamp($today);
+//            $nextMonday = strtotime('next monday');
+//            $to = new \DateTime();
+//            $to->setTimestamp($nextMonday);
+            $to = new \DateTime();
+            $to->modify('+7 days');
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from,$to);
+
+            $hours = array();
+            for ($i = 6; $i < 22; $i++) { //todo put this in conf
+                $hours[] = $i;
+            }
+
+            $bucketsByDay = array();
+            foreach ($shifts as $shift) {
+                $day = $shift->getStart()->format("d m Y");
+                $job = $shift->getJob()->getId();
+                $interval = $shift->getIntervalCode();
+                if (!isset($bucketsByDay[$day])) {
+                    $bucketsByDay[$day] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job])) {
+                    $bucketsByDay[$day][$job] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job][$interval])) {
+                    $bucket = new ShiftBucket();
+                    $bucketsByDay[$day][$job][$interval] = $bucket;
+                }
+                $bucketsByDay[$day][$job][$interval]->addShift($shift);
+            }
+            return $this->render('default/index.html.twig', [
+                'bucketsByDay' => $bucketsByDay,
+                'hours' => $hours
+            ]);
         }
-        $em = $this->getDoctrine()->getManager();
         $qb = $em->createQueryBuilder();
         $futur_events = $qb->select('e')->from('AppBundle\Entity\Event', 'e')
             ->Where("e.date > :now" )
@@ -46,8 +85,15 @@ class DefaultController extends Controller
             ->getQuery()
             ->getResult();
 
+        $undismiss_shift_form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('undismiss_shift'))
+            ->setMethod('POST')
+            ->add('shift_id',HiddenType::class)
+            ->getForm();
+
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+            'undismiss_shift_form' => $undismiss_shift_form->createView(),
             'events' => $futur_events
         ]);
     }

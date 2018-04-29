@@ -16,7 +16,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\OrderBy;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  * @ORM\Table(name="fos_user")
  * @UniqueEntity("member_number")
  */
@@ -110,6 +110,13 @@ class User extends BaseUser
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner",cascade={"persist", "remove"})
      */
     private $given_proxies;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="first_shift_date", type="date", nullable=true)
+     */
+    private $firstShiftDate;
 
     public function __construct()
     {
@@ -588,6 +595,21 @@ class User extends BaseUser
     }
 
     /**
+     * Get all reserved shifts for all beneficiaries
+     */
+    public function getReservedShifts()
+    {
+        $shifts = new ArrayCollection();
+        foreach ($this->getBeneficiaries() as $beneficiary) {
+            foreach ($beneficiary->getReservedShifts() as $shift) {
+                $shifts->add($shift);
+            }
+        }
+        return $shifts;
+    }
+
+
+    /**
      * Get shifts of a specific cycle
      * @param $cycleIndex index of the cycle (1 for current cycle)
      */
@@ -601,32 +623,31 @@ class User extends BaseUser
 
     /**
      * Get start date of current cycle
+     * IMPORTANT : time are reset, only date are kept
      */
     public function startOfCycle($cycleIndex)
     {
-        $first = $this->getFirstShift();
+        $firstDate = $this->getFirstShiftDate();
         $modFirst = null;
         $now = new DateTime('now');
-        if ($first) {
-            $diff = $first->getStart()->diff($now);
+        $now->setTime(0, 0, 0);
+        if ($firstDate) {
+            $diff = $firstDate->diff($now);
             $modFirst = $diff->format('%a') % 28;
         }
         $startCurrCycle = null;
         if ($modFirst) {
             /* Exception if first cycle in the future */
-            if ($first->getStart() < $now) {
-                $startCurrCycle = clone($now);
+            if ($firstDate < $now) {
+                $startCurrCycle = $now;
                 $startCurrCycle->modify("-".$modFirst." days");
             }
             else {
-                $startCurrCycle = clone($first->getStart());
+                $startCurrCycle = clone($firstDate);
             }
         } else {
             $startCurrCycle = $now;
         }
-
-        /* Reset time, keep only date */
-        $startCurrCycle->setTime(0, 0, 0);
 
         for ($i = 1; $i < $cycleIndex; $i++) {
             $startCurrCycle->modify("+28 days");
@@ -671,10 +692,31 @@ class User extends BaseUser
 
     /**
      * Can book a shift
+     *
+     * @param \AppBundle\Entity\Beneficiary $beneficiary
+     * @param \AppBundle\Entity\Shift $shift
+     *
+     * @return Boolean
      */
-    public function canBook()
+    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
-	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+        if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
+    	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+        else{
+            if ($beneficiary->getUser() != $this){
+                return false;
+            }
+            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+                return false;
+            }
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
+                return false;
+            }
+            return ($shift->getStart() > $this->endOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
+            && ($shift->getStart() < $this->startOfCycle(2) || $shift->getDuration() <= $this->remainingToBook(2))
+            && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
+            && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
+        }
     }
 
     /**
@@ -691,20 +733,6 @@ class User extends BaseUser
      */
     public function remainingToBook($cycleIndex, $excludeDismissed = false) {
         return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed));
-    }
-
-    /**
-     * Get first shift ever
-     */
-    public function getFirstShift()
-    {
-        $first = null;
-        foreach ($this->getAllBookedShifts() as $shift) {
-            if (!$first || $shift->getStart() < $first->getStart()) {
-                $first = $shift;
-            }
-        };
-        return $first;
     }
 
     /**
@@ -899,5 +927,29 @@ class User extends BaseUser
             return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
         else
             return '#'.$this->getMemberNumber().' '.$this->getUsername();
+    }
+
+
+    /**
+     * Set firstShiftDate
+     *
+     * @param \DateTime $firstShiftDate
+     *
+     * @return User
+     */
+    public function setFirstShiftDate($firstShiftDate)
+    {
+        $this->firstShiftDate = $firstShiftDate;
+        return $this;
+    }
+
+    /**
+     * Get firstShiftDate
+     *
+     * @return \DateTime
+     */
+    public function getFirstShiftDate()
+    {
+        return $this->firstShiftDate;
     }
 }

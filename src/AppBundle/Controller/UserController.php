@@ -848,7 +848,7 @@ class UserController extends Controller
             $session->getFlashBag()->add('success',"Le shift a bien été libéré");
         }
 
-        return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+        return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
 
     }
 

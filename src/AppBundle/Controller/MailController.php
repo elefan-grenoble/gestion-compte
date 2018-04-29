@@ -32,7 +32,7 @@ class MailController extends Controller
             "Gestion des membres" => "membres@lelefan.org",
             "Gestion des créneaux" => "creneaux@lelefan.org",
             "Association l'éléfàn" => "contact@lelefan.org",
-            "Formation l'éléfàn" => "formation@lelefan.org"
+            "Formation l'éléfàn" => "formations@lelefan.org"
         );
     }
 
@@ -58,11 +58,11 @@ class MailController extends Controller
             $params[$k] = $param;
         }
         $mailform = $this->getMailForm();
-        $em = $this->getDoctrine()->getManager();
-        $users = $em->getRepository('AppBundle:User')->findAll();
+        //$em = $this->getDoctrine()->getManager();
+        //$beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
         return $this->render('admin/mail/edit.html.twig', array(
             'form' => $mailform->createView(),
-            'users' => $users,
+            //'beneficiaries' => $beneficiaries,
             'to' => $to,
         ));
     }
@@ -80,17 +80,14 @@ class MailController extends Controller
         if ($mailform->isSubmitted() && $mailform->isValid()) {
             $to = $mailform->get('to')->getData();
             $chips = json_decode($to);
-            $members_numbers = array();
-            foreach ($chips as $chip){
-                $re = '/#([0-9]+)([a-z\s])*/i';
-                $tag = $chip->tag;
-                preg_match_all($re, $tag, $matches, PREG_SET_ORDER, 0);
-                if (count($matches)){
-                    $members_numbers[] = $matches[0][1];
-                }
-            }
+            $beneficiaries = array();
+
             $em = $this->getDoctrine()->getManager();
-            $users = $em->getRepository('AppBundle:User')->findBy(array('member_number'=>$members_numbers));
+
+            foreach ($chips as $chip){
+                $beneficiaries[] = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($chip->tag);
+            }
+
             $nb = 0;
 
             $from_email = $mailform->get('from')->getData();
@@ -103,12 +100,12 @@ class MailController extends Controller
                 return $this->redirectToRoute('mail_edit');
             }
 
-            foreach ($users as $user){
+            foreach ($beneficiaries as $beneficiary){
                 $template = $this->get('twig')->createTemplate($mailform->get('message')->getData());
-                $body = $template->render(array('user' => $user));
+                $body = $template->render(array('beneficiary' => $beneficiary));
                 $message = (new \Swift_Message($mailform->get('subject')->getData()))
                     ->setFrom($from)
-                    ->setTo([$user->getEmail() => $user->getFirstname().' '.$user->getLastname()])
+                    ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname().' '.$beneficiary->getLastname()])
                     ->addPart(
                         $body,
                         'text/plain'
@@ -127,15 +124,15 @@ class MailController extends Controller
     /**
      * Edit a message
      *
-     * @Route("/users", name="mail_get_users")
+     * @Route("/beneficiaries", name="mail_get_beneficiaries")
      * @Method({"GET"})
      */
-    public function allUsersAction(){
+    public function allBeneficiariesAction(){
         $em = $this->getDoctrine()->getManager();
-        $users = $em->getRepository('AppBundle:User')->findAll();
+        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
         $r = array();
-        foreach ($users as $user){
-            $r[] = $user->getAutocompleteLabel();
+        foreach ($beneficiaries as $beneficiary){
+            $r[] = $beneficiary->getAutocompleteLabel();
         }
         return $this->json($r);
     }

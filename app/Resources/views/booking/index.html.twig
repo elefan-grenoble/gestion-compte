@@ -23,91 +23,105 @@
                         class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
                 <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
                     ]</a>{% endif %}</h4>
-            <p>Mon cycle actuel commence le {{ app.user.startOfCycle(1)|date_fr_long }} et termine
-                le {{ app.user.endOfCycle(1)|date_fr_long }}</p>
+            <p>Mon cycle actuel commence le <b>{{ app.user.startOfCycle(1)|date_fr_long }}</b> et termine
+                le <b>{{ app.user.endOfCycle(1)|date_fr_long }}</b></p>
             <p>Nombre d'heures de bénévolat restantes à planifier
                 : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
         </div>
         <div class="row">
-            <ul class="collapsible" data-collapsible="accordion">
+            <ul class="collapsible" data-collapsible="accordion" id="legend">
                 <li>
-                    <div class="collapsible-header"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-header {% if not frontend_cookie or not frontend_cookie.booking or not frontend_cookie.booking.legend_closed %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
                     <div class="collapsible-body">
                         <ul>
                             <li>
-                                <i class="material-icons tiny">star_border</i> Créneau à reprendre, aide un bénévole en
-                                galère !
+                                <i class="material-icons tiny">star_border</i> Créneau à reprendre, aide un bénévole en galère !
                             </li>
                             <li>
-                                <i class="material-icons tiny">person_outline</i>/<i class="material-icons tiny">person</i> Place à prendre / place réservée par un bénévole
+                                <i class="material-icons tiny green-text">person</i>/<i class="material-icons tiny grey-text">person</i> Place disponible / indisponible
                             </li>
                             <li>
-                                <i class="material-icons tiny shift-with-role">person_outline</i>/<i class="material-icons tiny shift-with-role">person</i> Place à prendre / place réservée pour un rôle (resource, ambassadeur...)
+                                <i class="material-icons tiny green-text">account_circle</i>/<i class="material-icons tiny grey-text">account_circle</i> Place à rôle (resource, ambassadeur...) disponible / indisponible
                             </li>
-                            {% for job in jobs %}
-                                <li>
-                                    <div style="width: 200px; padding: 3px;margin:5px"
-                                         class="{{ job.color }} z-depth-1 white-text valign-wrapper">
-                                        <p>{{ job.name }}</p></div>
-                                </li>
-                            {% endfor %}
+                            <li class="row">
+                                {% for job in jobs %}
+                                <div class="col s4">
+                                    <div style="padding: 3px;margin:5px"
+                                     class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
+                                    <p>{{ job.name }}</p></div>
+                                </div>
+                                {% endfor %}
+                            </li>
+                            <li class="row">
+                                <div class="col s4">
+                                    <div style="padding: 3px;margin:5px"
+                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                        <p>Aucun bénévole inscrit</p>
+                                        <span class="badge red white-text">fermeture</span>
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div style="padding: 3px;margin:5px"
+                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                        <p>Pas assez de bénévoles inscrits</p>
+                                        <span class="badge orange white-text">fermeture</span>
+                                    </div>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </li>
             </ul>
         </div>
-    </div> <!-- end div.section -->
-</div> <!-- end div.container -->
-<div style="padding: 5px;">
-    {% for bucketsByjob in bucketsByDay %}
+        {% if dismissedShifts | length %}
         <div class="row">
-            <b>{{ (bucketsByjob|first|first).start|date_fr_long }}</b>
-        </div>
-        {% for buckets in bucketsByjob %}
-            <div class="row" style="display: flex;min-height: 40px;">
-                <div class="col s12">
-                    <div style="position: relative">
-                        {% set lignes = {} %}
-                        {% for bucket in buckets %}
-                            {#compute lines #}
-                            {% set l = 0 %}
-                            {% set break = false %}
-                            {% for i in 0..100 if not break %}
-                                {% if lignes[i~'_'] is not defined %}
-                                    {% set l = i %}
-                                    {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                    {% set break = true %}
-                                {% else %}
-                                    {% if lignes[i~'_'] < bucket.start %}
-                                        {% set l = i %}
-                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                        {% set break = true %}
-                                    {% endif %}
-                                {% endif %}
-                            {% endfor %}
-                            {# / compute lines #}
-                            {% if bucket.isBookable(beneficiary) %}
-                                {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                            {% else %}
-                                {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
+            <ul class="collapsible" data-collapsible="expandable" id="dismissed">
+                <li>
+                    <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
+                    <div class="collapsible-body row">
+                        {% for shift in dismissedShifts %}
+                            {% if app.user.canBook(beneficiary,shift) %}
+                            <div class="col s6 m3">
+                                {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
+                            </div>
                             {% endif %}
                         {% endfor %}
                     </div>
-                </div>
-            </div>
-        {% endfor %}
-        {% if ( app.user.endOfCycle(1) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') ) %}
-            <hr>
+                </li>
+            </ul>
+        </div>
         {% endif %}
-    {% endfor %}
-{% endif %}
-</div>
-<div class="container">
-    <div class="section">
-
+        {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+    {% endif %}
 {% endblock %}
 
 {% block stylesheets %}
+    <style>
+        .collapsible-header.not-allowed{
+            cursor: not-allowed;
+        }
+    </style>
 {% endblock %}
 {% block javascripts %}
+    <script>
+        jQuery(function () {
+            $('.collapsible li').click();
+            $('#legend .collapsible-header').on('click',function () {
+                var data_raw = Cookies.get("frontend");
+                var data = undefined;
+                if (data_raw)
+                    data = JSON.parse(data_raw);
+                if (!data)
+                    data = {};
+                if (!data.booking)
+                    data.booking = {};
+                data.booking.legend_closed = $(this).hasClass("active");
+                Cookies.set("frontend",data);
+            });
+            //todo put it server side
+            if ($('#dismissed .collapsible-header div').length < 1){
+                $('#dismissed').hide();
+            }
+        });
+    </script>
 {% endblock %}

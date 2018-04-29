@@ -25,14 +25,20 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFrom(\DateTime $from)
+    public function findFrom(\DateTime $from,\DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('s');
 
         $qb
             ->where('s.start > :from')
-            ->setParameter('from', $from)
-            ->orderBy('s.start', 'ASC');
+            ->setParameter('from', $from);
+        if ($max){
+            $qb
+                ->andWhere('s.end < :max')
+                ->setParameter('max', $max);
+        }
+
+        $qb->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()
@@ -59,5 +65,54 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         return $qb
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function findReservedBefore(\DateTime $max)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.start < :max')
+            ->andWhere('s.lastShifter is not null')
+            ->setParameter('max', $max);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findReservedAt(\DateTime $date)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $datePlusOne = clone $date;
+        $datePlusOne->modify('+1 day');
+
+        $qb
+            ->where('s.start >= :date')
+            ->andwhere('s.start < :datePlusOne')
+            ->andWhere('s.lastShifter is not null')
+            ->setParameter('date', $date)
+            ->setParameter('datePlusOne',$datePlusOne );
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findFirstShiftWithUserNotInitialized()
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->join('s.shifter', "ben")
+            ->join('ben.user', "user")
+            ->where('user.firstShiftDate is NULL')
+            ->addOrderBy('user.id', 'ASC')
+            ->addOrderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 }

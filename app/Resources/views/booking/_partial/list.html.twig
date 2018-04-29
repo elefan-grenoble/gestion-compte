@@ -1,0 +1,56 @@
+</div> <!-- end div.section -->
+</div> <!-- end div.container -->
+<div style="padding: 5px;">
+    <ul class="collapsible" data-collapsible="expandable">
+        {% set current_cycle = 1 %}
+        {% if beneficiary is not defined %}
+            {% set beneficiary = null %}
+        {% endif %}
+        {% for bucketsByjob in bucketsByDay %}
+        <li>
+            <div class="collapsible-header {% if (not app.user or app.user.remainingToBook(current_cycle, true) > 0) %}active {% else %}not-allowed {% endif %}"><i class="material-icons">{% if (not app.user or app.user.remainingToBook(current_cycle, true) > 0) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}</div>
+            <div class="collapsible-body">
+                {% for buckets in bucketsByjob %}
+                    <div class="row" style="display: flex;min-height: 40px;">
+                        <div class="col s12">
+                            <div style="position: relative">
+                                {% set lignes = {} %}
+                                {% for bucket in buckets %}
+                                    {#compute lines #}
+                                    {% set l = 0 %}
+                                    {% set break = false %}
+                                    {% for i in 0..100 if not break %}
+                                        {% if lignes[i~'_'] is not defined %}
+                                            {% set l = i %}
+                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                            {% set break = true %}
+                                        {% else %}
+                                            {% if lignes[i~'_'] < bucket.start %}
+                                                {% set l = i %}
+                                                {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                                {% set break = true %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    {# / compute lines #}
+                                    {% if bucket.isBookable(beneficiary) or not beneficiary %}
+                                        {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
+                                    {% else %}
+                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </li>
+        {% if app.user and (( app.user.endOfCycle(current_cycle) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') )) %}
+                {% set current_cycle = current_cycle + 1 %}
+            </ul>
+            <ul class="collapsible" data-collapsible="expandable">
+        {% endif %}
+        {% endfor %}
+</div>
+<div class="container">
+    <div class="section">

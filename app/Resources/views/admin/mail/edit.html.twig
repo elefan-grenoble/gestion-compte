@@ -21,7 +21,8 @@
             {{ form_label(form.message) }}
         </div>
         <div class="tips right small">
-            prénom : <input value="{{ '{{' }} user.firstname {{ '}}' }}"/>
+            prénom : <input value="{{ '{{' }} beneficiary.firstname {{ '}}' }}"/>
+            dernier créneau + 28 jour: <input value="{{ '{{' }} beneficiary.bookedShifts.last.start  | date_modify('+28 day') | date('d m Y à H:i') {{ '}}' }}"/>
         </div>
     </div>
 
@@ -35,7 +36,7 @@
         jQuery(function() {
             $.ajax({
                 type: 'GET',
-                url: '{{ path('mail_get_users') }}',
+                url: '{{ path('mail_get_beneficiaries') }}',
                 success: function(response) {
                     var userArray = response;
                     var dataUsers = {};
@@ -45,10 +46,11 @@
                     $('.chips').material_chip({
                         placeholder: 'Destinataires',
                         data: [
-                            {% for t in to %}
+                            {% for user in to %}
+                                {% for beneficiary in user.beneficiaries %}
                             {
-                            tag: "{{ t.autocompleteLabel }}",
-                        },{% endfor %} ],
+                            tag: "{{ beneficiary.autocompleteLabel }}",
+                        },{% endfor %}{% endfor %} ],
                         autocompleteOptions: {
                             data: dataUsers,
                             limit: Infinity,

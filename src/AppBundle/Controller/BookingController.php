@@ -84,6 +84,7 @@ class BookingController extends Controller
             }
 
             $bucketsByDay = array();
+            $dismissedShifts = array();
             foreach ($shifts as $shift) {
                 $day = $shift->getStart()->format("d m Y");
                 $job = $shift->getJob()->getId();
@@ -99,10 +100,15 @@ class BookingController extends Controller
                     $bucketsByDay[$day][$job][$interval] = $bucket;
                 }
                 $bucketsByDay[$day][$job][$interval]->addShift($shift);
+                //dismissed
+                if ($shift->getIsDismissed()){
+                    $dismissedShifts[] = $shift;
+                }
             }
 
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
+                'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository('AppBundle:Job')->findAll()
@@ -135,59 +141,82 @@ class BookingController extends Controller
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
                 'attr' => array( 'class' => 'datepicker')])
-            ->add('filter', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn')))
+            ->add('to', TextType::class, [
+                'label' => 'Jusqu\'à',
+                'required' => false,
+                'data' => '',
+                'attr' => array( 'class' => 'datepicker')])
+            ->add('action', HiddenType::class,array())
+            ->add('filter', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'filtrer')))
+            ->add('booker', SubmitType::class, array('label' => 'Voir les booker','attr' => array('class' => 'btn','value' => 'booker')))
             ->getForm();
         $form->handleRequest($request);
 
         $from = $defaultFrom;
+        $to = null;
         if ($form->isSubmitted() && $form->isValid()) {
            $dateStr = $form->get('from')->getData();
            $from = new DateTime($dateStr);
+           $to = $form->get('to')->getData();
+           if ($to)
+               $to = new DateTime($to);
         }
 
         $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
         $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
 
-        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from);
+        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from,$to);
 
-        $hours = array();
-        for ($i = 6; $i < 22; $i++) { //todo put this in conf
-            $hours[] = $i;
+        $action = $form->get('action')->getData();
+
+        if ($action == "booker"){
+            $mm = array();
+            foreach ($shifts as $shift) {
+                if ($shift->getBooker()){
+                    $mm[] = $shift->getBooker()->getUser()->getMemberNumber();
+                }
+            }
+            return $this->redirectToRoute('user_index',array('membernumber'=>implode(',',$mm)));
+        }else{
+            $hours = array();
+            for ($i = 6; $i < 22; $i++) { //todo put this in conf
+                $hours[] = $i;
+            }
+
+            $bucketsByDay = array();
+            foreach ($shifts as $shift) {
+                $day = $shift->getStart()->format("d m Y");
+                $job = $shift->getJob()->getId();
+                $interval = $shift->getIntervalCode();
+                if (!isset($bucketsByDay[$day])) {
+                    $bucketsByDay[$day] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job])) {
+                    $bucketsByDay[$day][$job] = array();
+                }
+                if (!isset($bucketsByDay[$day][$job][$interval])) {
+                    $bucket = new ShiftBucket();
+                    $bucketsByDay[$day][$job][$interval] = $bucket;
+                }
+                $bucketsByDay[$day][$job][$interval]->addShift($shift);
+            }
+
+            $delete_bucket_form = $this->createFormBuilder()
+                ->setAction($this->generateUrl('delete_bucket'))
+                ->setMethod('DELETE')
+                ->add('shift_id',HiddenType::class)
+                ->getForm();
+
+            return $this->render('admin/booking/index.html.twig', [
+                'form'=> $form->createView(),
+                'bucketsByDay' => $bucketsByDay,
+                'hours' => $hours,
+                'jobs' => $jobs,
+                'delete_bucket_form' => $delete_bucket_form->createView(),
+                'beneficiaries' => $beneficiaries
+            ]);
         }
-
-        $bucketsByDay = array();
-        foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
-            $job = $shift->getJob()->getId();
-            $interval = $shift->getIntervalCode();
-            if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job])) {
-                $bucketsByDay[$day][$job] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job][$interval])) {
-                $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$job][$interval] = $bucket;
-            }
-            $bucketsByDay[$day][$job][$interval]->addShift($shift);
-        }
-
-        $delete_bucket_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket'))
-            ->setMethod('DELETE')
-            ->add('shift_id',HiddenType::class)
-            ->getForm();
-
-        return $this->render('admin/booking/index.html.twig', [
-            'form'=> $form->createView(),
-            'bucketsByDay' => $bucketsByDay,
-            'hours' => $hours,
-            'jobs' => $jobs,
-            'delete_bucket_form' => $delete_bucket_form->createView(),
-            'beneficiaries' => $beneficiaries
-        ]);
     }
 
     /**
@@ -223,7 +252,7 @@ class BookingController extends Controller
                             ->setBody(
                                 $this->renderView(
                                     'emails/deleted_shift.html.twig',
-                                    array('shift' => $shift)
+                                    array('shift' => $s)
                                 ),
                                 'text/html'
                             );
@@ -249,15 +278,10 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
     {
-        $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if ($shift->getShifter() && !$shift->getIsDismissed()) {
-            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return $this->redirectToRoute("booking");   
+        if (!$this->isGranted('book', $shift)){
+            $session = new Session();
+            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
+            return $this->redirectToRoute("booking");
         }
 
         $beneficiaryId = $request->get("beneficiaryId");
@@ -274,8 +298,17 @@ class BookingController extends Controller
         $shift->setIsDismissed(false);
         $shift->setDismissedReason(null);
         $shift->setDismissedTime(null);
-
+        $shift->setLastShifter(null);
         $em->persist($shift);
+
+        $user = $beneficiary->getUser();
+        if ($user->getFirstShiftDate() == null) {
+            $firstDate = clone($shift->getStart());
+            $firstDate->setTime(0, 0, 0);
+            $user->setFirstShiftDate($firstDate);
+            $em->persist($user);
+        }
+
         $em->flush();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -302,15 +335,10 @@ class BookingController extends Controller
      */
     public function dismissShiftAction(Request $request, Shift $shift)
     {
-        $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
-            throw $this->createAccessDeniedException();
-        }
-
-        if (!$current_app_user->getBeneficiaries()->contains($shift->getShifter())) {
-            $session->getFlashBag()->add('error', 'Oups, ce créneau ne vous appartient pas !');
-            return $this->redirectToRoute('booking');
+        if (!$this->isGranted('dismiss', $shift)){
+            $session = new Session();
+            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
+            return $this->redirectToRoute("booking");
         }
 
         $em = $this->getDoctrine()->getManager();
@@ -322,6 +350,108 @@ class BookingController extends Controller
 
         $em->persist($shift);
         $em->flush();
+
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Undismiss a shift
+     *
+     * @Route("/undismiss_shift/", name="undismiss_shift")
+     * @Method("POST")
+     */
+    public function undismissShift(Request $request){
+
+        $session = new Session();
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('undismiss_shift'))
+            ->setMethod('POST')
+            ->add('shift_id',HiddenType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid() ) {
+            $em = $this->getDoctrine()->getManager();
+            $shift_id = $form->get('shift_id')->getData();
+            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
+            if ($shift){
+                $shift->setIsDismissed(false);
+                $shift->setDismissedTime(null);
+                $shift->setDismissedReason(null);
+                $em->persist($shift);
+                $em->flush();
+            } else {
+                $session->getFlashBag()->add('xarning',"shift not found");
+            }
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Accept a reserved shift
+     *
+     * @Route("/shift/{id}/accept/", name="accept_reserved_shift")
+     * @Method("GET")
+     */
+    public function acceptReservedShift(Request $request,Shift $shift){
+
+        $session = new Session();
+
+        if (!$this->isGranted('accept', $shift)){
+            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
+            return $this->redirectToRoute("homepage");
+        }
+
+        if ($shift->getId()){
+            if ($shift->getLastShifter()){
+                $shift->setBooker($shift->getLastShifter());
+                $shift->setShifter($shift->getLastShifter());
+                $shift->setBookedTime(new DateTime('now'));
+                $shift->setLastShifter(null);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+                $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
+            }else{
+                $session->getFlashBag()->add('error',"Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
+        } else {
+            $session->getFlashBag()->add('error',"shift not found");
+        }
+
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Reject a reserved shift
+     *
+     * @Route("/shift/{id}/reject/", name="reject_reserved_shift")
+     * @Method("GET")
+     */
+    public function rejectReservedShift(Request $request,Shift $shift){
+
+        $session = new Session();
+
+        if (!$this->isGranted('reject', $shift)){
+            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
+            return $this->redirectToRoute("homepage");
+        }
+
+        if ($shift->getId()) {
+            if ($shift->getLastShifter()){
+                $shift->setLastShifter(null);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+                $session->getFlashBag()->add('success', "Créneau libéré");
+                $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
+            }else{
+                $session->getFlashBag()->add('error',"Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
+        }else{
+            $session->getFlashBag()->add('error',"shift not found");
+        }
 
         return $this->redirectToRoute('homepage');
     }
@@ -342,15 +472,11 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking_admin");
         }
 
-        $re = '/.*\(([0-9]+)\)/';
         $str = $request->get('beneficiary');
-        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-        if (count($matches) == 1){
-            $beneficiaryId = $matches[0][1];
+        $em = $this->getDoctrine()->getManager();
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
 
-            $em = $this->getDoctrine()->getManager();
-
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+        if ($beneficiary){
 
             if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (".$shift->getRole()->getName().")");
@@ -365,8 +491,18 @@ class BookingController extends Controller
             $shift->setIsDismissed(false);
             $shift->setDismissedReason(null);
             $shift->setDismissedTime(null);
+            $shift->setLastShifter(null);
 
             $em->persist($shift);
+
+            $user = $beneficiary->getUser();
+            if ($user->getFirstShiftDate() == null) {
+                $firstDate = clone($shift->getStart());
+                $firstDate->setTime(0, 0, 0);
+                $user->setFirstShiftDate($firstDate);
+                $em->persist($user);
+            }
+
             $em->flush();
 
             $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))

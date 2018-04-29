@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ShiftGenerateCommand extends ContainerAwareCommand
 {
@@ -45,11 +46,16 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $count = 0;
         $count2 = 0;
 
+        $reservedShifts = array();
+
+        $router = $this->getContainer()->get('router');
+
         foreach ( $period as $date ) {
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
             ////////////////////////
             $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
             $em = $this->getContainer()->get('doctrine')->getManager();
+            $mailer = $this->getContainer()->get('mailer');
             $periodRepository = $em->getRepository('AppBundle:Period');
             $qb = $periodRepository
                 ->createQueryBuilder('p');
@@ -64,23 +70,61 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 $end = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i'));
                 $shift->setEnd($end);
 
-                foreach ($period->getPositions() as $position){
+                foreach ($period->getPositions() as $position) {
+
+                    $lastStart = $this->lastCycleDate($start);
+                    $lastEnd = $this->lastCycleDate($end);
+
+                    $last_cycle_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                    $last_cycle_shifts =  array_filter($last_cycle_shifts, function($shift) {return $shift->getShifter();});
+
                     $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
-                    $count2+= count($existing_shifts);
-                    for ($i=0;$i<$position->getNbOfShifter()-count($existing_shifts);$i++){
+                    $count2 += count($existing_shifts);
+                    for ($i=0; $i<$position->getNbOfShifter()-count($existing_shifts); $i++){
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
                         $current_shift->setRole($position->getRole());
+
+                        if ($i < count($last_cycle_shifts)) {
+                            $shifter = $last_cycle_shifts[$i]->getShifter();
+                            $current_shift->setLastShifter($shifter);
+                            $reservedShifts[] = $current_shift;
+                        }
+
                         $em->persist($current_shift);
                         $count++;
                     }
                 }
             }
             $em->flush();
+            foreach ($reservedShifts as $shift){
+                $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau dans 28 jours'))
+                    ->setFrom('creneaux@lelefan.org')
+                    ->setTo($shift->getLastShifter()->getEmail())
+                    ->setBody(
+                        $this->getContainer()->get('twig')->render(
+                            'emails/shift_reserved.html.twig',
+                            array('shift' => $shift,
+                                'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                                'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                            )
+                        ),
+                        'text/html'
+                    );
+                $mailer->send($mail);
+            }
+
         }
         $message = $count.' créneau'.(($count>1) ? 'x':'').' généré'.(($count>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
         $message = $count2.' créneau'.(($count2>1) ? 'x':'').' existe'.(($count2>1) ? 'nt':'');
         $output->writeln('<fg=cyan;>>>></><fg=red;> '.$message.' déjà </>');
+    }
+
+    protected function lastCycleDate(\DateTime $date)
+    {
+        $lastCycleDate = clone($date);
+        $lastCycleDate->modify("-28 days");
+        return $lastCycleDate;
     }
 }
