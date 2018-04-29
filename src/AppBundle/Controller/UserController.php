@@ -716,9 +716,9 @@ class UserController extends Controller
         $deleteForm = $this->createDeleteForm($user);
 
         $free_shift_forms = array();
-        for($cycle=1;$cycle<3;$cycle++) //cycle in 1..2
+        for($cycle=0;$cycle<2;$cycle++) //cycle in 0..1
         {
-            foreach ($user->getFutureShiftsOfCycle($cycle) as $shift){
+            foreach ($user->getShiftsOfCycle($cycle) as $shift){
                 $free_shift_forms[$shift->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
                     ->setMethod('DELETE')

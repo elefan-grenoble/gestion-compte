@@ -26,11 +26,11 @@
             <h5>Créneaux</h5>
             {% set firstShiftDate = user.firstShiftDate %}
             <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
-            {% set currentShifts = user.getFutureShiftsOfCycle(1) %}
-            {% set nextShifts = user.getFutureShiftsOfCycle(2) %}
+            {% set currentShifts = user.getShiftsOfCycle() %}
+            {% set nextShifts = user.getShiftsOfCycle(1) %}
             <div class="col m12">
                 <div class="row">
-                    <h6>Cycle en cours (du {{ user.startOfCycle(1)|date_fr_long }} au {{ user.endOfCycle(1)|date_fr_long }})</h6>
+                    <h6>Cycle en cours (du {{ user.startOfCycle | date_fr_long }} au {{ user.endOfCycle | date_fr_long }})</h6>
                     {% if currentShifts|length == 0 %}
                         Pas de créneau
                     {% endif %}
@@ -41,7 +41,7 @@
                     {% endfor %}
                 </div>
                 <div class="row">
-                    <h6>Prochain cycle (du {{ user.startOfCycle(2)|date_fr_long }} au {{ user.endOfCycle(2)|date_fr_long }})</h6>
+                    <h6>Prochain cycle (du {{ user.startOfCycle(1) | date_fr_long }} au {{ user.endOfCycle(1) | date_fr_long }})</h6>
                     {% if nextShifts|length == 0 %}
                         Pas de créneau
                     {% endif %}
