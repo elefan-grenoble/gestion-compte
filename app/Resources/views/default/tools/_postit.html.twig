@@ -1,33 +1,114 @@
-<div class="col s6 m4 l3">
-    <div class="postit-container">
+
+    <div class="postit-container" id="postit{{ note.id }}">
         <div class="postit">
             <span class="info">
                 {{ note.author.firstname }} le {{ note.createdAt | date('d/m/Y à H:i') }}
             </span>
-            <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger action"><i class="material-icons tiny">settings</i></a>
-            <p class="black-text">
-                {{ note.text }}
-            </p>
+            <a href="#post-it_children{{ note.id }}" class="black-text modal-trigger replies"><i class="material-icons tiny">reply</i>{% if note.children | length %}({{ note.children | length }}){% endif %}</a>
+            <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger settings"><i class="material-icons tiny">settings</i></a>
+            <div class="content black-text">
+                <p>{{ note.textWithBr  | markdown | raw }}</p>
+            </div>
             {#<img src="{{ gravatar(note.author.email) }}" alt="" class="circle responsive-img" width="30px">#}
         </div>
     </div>
-</div>
-<div id="post-it_edit{{ note.id }}" class="modal">
+
+{% if note.children | length  %}
+    <div id="post-it_children{{ note.id }}" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4>Réponses</h4>
+            {% for child in note.children %}
+            <h6>
+                <i class="material-icons tiny">reply</i>
+                {{ child.author.firstname }} le {{ child.createdAt | date('d/m/Y à H:i') }}
+                {% if is_granted('delete',child) %}
+                <a href="#!" class="red-text right" onclick="document.getElementById('form-note-delete-{{ child.id }}').submit();">
+                    <i class="material-icons">close</i>
+                </a>
+                {% endif %}
+            </h6>
+            <div class="content black-text">
+                <p>
+                    {{ child.textWithBr  | markdown | raw }}
+                </p>
+            </div>
+                {{ form_start(notes_delete_form[child.id], {'attr': {'id': 'form-note-delete-'~child.id }}) }}
+                {{ form_widget(notes_delete_form[child.id]) }}
+                {{ form_end(notes_delete_form[child.id]) }}
+            {% endfor %}
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new-note-form-child-'~note.id ,'class':'reply'}}) }}
+            <div class="input-field text col s12">
+                <div class="errors">
+                {{ form_errors(new_notes_form[note.id].text) }}
+                </div>
+                <div class="input-field">
+                {{ form_widget(new_notes_form[note.id].text) }}
+                {{ form_label(new_notes_form[note.id].text) }}
+                </div>
+            </div>
+            {{ form_end(new_notes_form[note.id]) }}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new-note-form-child-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+        </div>
+    </div>
+    {% else %}
+        <div id="post-it_children{{ note.id }}" class="modal modal-fixed-footer">
+            <div class="modal-content">
+                <h4>
+                    Ajouter une réponse
+                </h4>
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new-note-form-'~note.id ,'class':'reply'}}) }}
+            <div class="input-field text col s12">
+                <div class="errors">
+                    {{ form_errors(new_notes_form[note.id].text) }}
+                </div>
+                <div class="input-field">
+                    {{ form_widget(new_notes_form[note.id].text) }}
+                    {{ form_label(new_notes_form[note.id].text) }}
+                </div>
+            </div>
+            {{ form_end(new_notes_form[note.id]) }}
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new-note-form-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+            </div>
+        </div>
+{% endif %}
+
+
+<div id="post-it_edit{{ note.id }}" class="modal modal-fixed-footer post-it_edit">
 
     <div class="modal-content">
-        <h4>Editer le post-it</h4>
-        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id }}) }}
-        {{ form_widget(notes_form[note.id]) }}
+        <h4>Editer ce post-it</h4>
+        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id,'class': 'edit-post-it' }}) }}
+        <div class="input-field text col s12">
+            <div class="errors">
+                {{ form_errors(notes_form[note.id].text) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(notes_form[note.id].text) }}
+                {{ form_label(notes_form[note.id].text) }}
+            </div>
+        </div>
         {{ form_end(notes_form[note.id]) }}
 
+
+
+        {% if is_granted('delete',note) %}
         {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form-note-delete-'~note.id }}) }}
         {{ form_widget(notes_delete_form[note.id]) }}
         {{ form_end(notes_delete_form[note.id]) }}
+        {% endif %}
     </div>
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
-        <a href="#!" class="modal-action modal-close waves-effect waves-green btn red" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
-        <a href="#!" class="modal-action modal-close waves-effect waves-green btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+        {% if is_granted('delete',note) %}
+            <a href="#!" class="modal-action modal-close waves-effect waves-red btn red" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
+        {% endif %}
     </div>
 
 </div>
