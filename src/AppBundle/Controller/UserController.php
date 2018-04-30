@@ -779,18 +779,6 @@ class UserController extends Controller
 
         $deleteForm = $this->createDeleteForm($user);
 
-        $free_shift_forms = array();
-        for($cycle=0;$cycle<2;$cycle++) //cycle in 0..1
-        {
-            foreach ($user->getShiftsOfCycle($cycle) as $shift){
-                $free_shift_forms[$shift->getId()] = $this->createFormBuilder()
-                    ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
-                    ->setMethod('DELETE')
-                    ->getForm()
-                    ->createView();
-            }
-        }
-
         $note = new Note();
         $note_form = $this->createForm('AppBundle\Form\NoteType', $note,array(
             'action' => $this->generateUrl('ambassador_new_note',array("username"=>$user->getUsername())),
@@ -826,29 +814,25 @@ class UserController extends Controller
     /**
      * free a shift.
      *
-     * @Route("/{user}/free_shift/{shift}", name="free_shift")
-     * @Method("DELETE")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Route("/free_shift/{id}", name="free_shift")
+     * @Method("POST")
      */
-    public function freeShiftAction(Request $request, User $user,Shift $shift)
+    public function freeShiftAction(Request $request, Shift $shift)
     {
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('free_shift', array('user'=> $user->getId(),'shift' => $shift->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-        $form->handleRequest($request);
+        $this->denyAccessUnlessGranted('free', $shift);
 
         $session = new Session();
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift->free();
-            $em->persist($shift);
-            $em->flush();
 
-            $session->getFlashBag()->add('success',"Le shift a bien été libéré");
-        }
+        $owner = $shift->getBooker()->getUser();
 
-        return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
+        $em = $this->getDoctrine()->getManager();
+        $shift->free();
+        $em->persist($shift);
+        $em->flush();
+
+        $session->getFlashBag()->add('success',"Le shift a bien été libéré");
+
+        return $this->redirectToRoute('user_show', array('username' => $owner->getUsername()));
 
     }
 
