@@ -7,6 +7,7 @@
 {% else %}
     <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
 {% endif %}
+    <a href="{{ path('user_show',{'username' : user.username}) }}"><i class="material-icons">person</i> {{ user.autocompleteLabel }}</a> <i class="material-icons">chevron_right</i>
     <i class="material-icons">edit</i><span>Edition fiche membre</span>
 {% endblock %}
 
@@ -71,7 +72,7 @@
             </div>
         </li>
     </ul>
-    {% else %}
+    {% elseif (user != app.user ) %}
     <ul class="collapsible" data-collapsible="accordion">
         <li>
             {% if not user.lastRegistration %}
@@ -111,13 +112,11 @@
         </ul>
     {#{% else %}#}
     {% endif %}
-    {% if user.notes | length %}
-        <h4>Note{% if user.notes | length > 1 %}s{% endif %} à propos de ce membre</h4>
-        {%  for note in user.notes %}
-            {% include "ambassador/phone/_note.html.twig" with { note: note } %}
-        {% endfor %}
-    {% endif %}
-
-
+    <form action="{{ path('user_show',{'username':user.username}) }}" method="get" class="left">
+        {% if not is_granted("ROLE_ADMIN") and token is defined %}
+            <input type="hidden" value="{{ token }}" name="token">
+        {% endif %}
+        <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
+    </form>
 
 {% endblock %}

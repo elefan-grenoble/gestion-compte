@@ -96,7 +96,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "DESC"})
+     * @OrderBy({"created_at" = "ASC"})
      */
     private $notes;
 
@@ -657,6 +657,7 @@ class User extends BaseUser
                     $currentCycleCount = intval($diff->format('%a') / 28);
                 }else{
                     $firstDate = new DateTime('now');
+                    $currentCycleCount = 0;
                 }
                 $this->_startOfCycle[0] = clone($firstDate);
                 if ($firstDate < $now) {
@@ -665,7 +666,7 @@ class User extends BaseUser
             }
             if ($cycleOffset != 0 ){
                 $this->_startOfCycle[$cycleOffset] = clone($this->_startOfCycle[0]);
-                $this->_startOfCycle[$cycleOffset]->modify("+".(28*$cycleOffset)."days");
+                $this->_startOfCycle[$cycleOffset]->modify((($cycleOffset>0)?"+":"").(28*$cycleOffset)." days");
             }
         }
 

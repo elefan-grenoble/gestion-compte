@@ -49,6 +49,17 @@ class Note
     private $subject;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Note")
+     * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
+     */
+    private $parent;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="parent",cascade={"persist", "remove"})
+     */
+    private $children;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
@@ -88,6 +99,11 @@ class Note
     public function getText()
     {
         return $this->text;
+    }
+
+    public function getTextWithBr()
+    {
+        return nl2br($this->getText());
     }
 
     /**
@@ -160,5 +176,70 @@ class Note
     public function getSubject()
     {
         return $this->subject;
+    }
+
+    /**
+     * Set parent
+     *
+     * @param \AppBundle\Entity\Note $parent
+     *
+     * @return Note
+     */
+    public function setParent(\AppBundle\Entity\Note $parent = null)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * Get parent
+     *
+     * @return \AppBundle\Entity\Note
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add child
+     *
+     * @param \AppBundle\Entity\Note $child
+     *
+     * @return Note
+     */
+    public function addChild(\AppBundle\Entity\Note $child)
+    {
+        $this->children[] = $child;
+
+        return $this;
+    }
+
+    /**
+     * Remove child
+     *
+     * @param \AppBundle\Entity\Note $child
+     */
+    public function removeChild(\AppBundle\Entity\Note $child)
+    {
+        $this->children->removeElement($child);
+    }
+
+    /**
+     * Get children
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildren()
+    {
+        return $this->children;
     }
 }

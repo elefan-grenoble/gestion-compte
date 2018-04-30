@@ -43,6 +43,18 @@ class AmbassadorController extends Controller
         $session = new Session();
         $lastYear = new \DateTime('last year');
         $form = $this->createFormBuilder()
+            ->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => true,'data' => 1,'choices'  => array(
+                'fermé' => 2,
+                'ouvert' => 1,
+            )))
+            ->add('enabled', ChoiceType::class, array('label' => 'activé','required' => false,'choices'  => array(
+                'activé' => 2,
+                'Non activé' => 1,
+            )))
+            ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => true,'data' => 1,'choices'  => array(
+                'Non gelé' => 1,
+                'gelé' => 2,
+            )))
             ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
             ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
             ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
@@ -70,14 +82,25 @@ class AmbassadorController extends Controller
             ->leftJoin("o.registrations", "r")->addSelect("r");
 
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
-        $qb = $qb->andWhere('o.withdrawn = 0');
-        $qb = $qb->andWhere('o.frozen = 0');
 
         $page = 1;
         $order = 'ASC';
         $sort = 'o.member_number';
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($form->get('withdrawn')->getData() > 0){
+                $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                    ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+            }
+            if ($form->get('enabled')->getData() > 0){
+                $qb = $qb->andWhere('o.enabled = :enabled')
+                    ->setParameter('enabled', $form->get('enabled')->getData()-1);
+            }
+            if ($form->get('frozen')->getData() > 0){
+                $qb = $qb->andWhere('o.frozen = :frozen')
+                    ->setParameter('frozen', $form->get('frozen')->getData()-1);
+            }
 
             if ($form->get('page')->getData() > 0){
                 $page = $form->get('page')->getData();
@@ -109,7 +132,6 @@ class AmbassadorController extends Controller
                 $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
                         ->setParameter('lastregistrationdatelt', $date);
             }else{
-                $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
                 $date = $lastYear->format('Y-m-d') ;
                 $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
                     ->setParameter('lastregistrationdatelt', $date);
@@ -141,6 +163,8 @@ class AmbassadorController extends Controller
         }else{
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
+            $qb = $qb->andWhere('o.withdrawn = 0');
+            $qb = $qb->andWhere('o.frozen = 0');
             $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
                     ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
         }
@@ -173,18 +197,22 @@ class AmbassadorController extends Controller
      */
     public function showAction(User $user)
     {
-        $this->denyAccessUnlessGranted('view', $user);
+        return $this->redirectToRoute('user_show', array('username'=>$user->getUsername()));
+    }
 
-        $note = new Note();
-        $form = $this->createForm('AppBundle\Form\NoteType', $note,array(
-            'action' => $this->generateUrl('ambassador_new_note',array("username"=>$user->getUsername())),
-            'method' => 'POST',
-        ));
-
-        return $this->render('ambassador/phone/show.html.twig', array(
-            'user' => $user,
-            'note_form' => $form->createView()
-        ));
+    /**
+     * Creates a form to delete a note entity.
+     *
+     * @param Note $note the note entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createNoteDeleteForm(Note $note)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     /**
