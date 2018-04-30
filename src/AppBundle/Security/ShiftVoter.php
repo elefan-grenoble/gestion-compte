@@ -12,6 +12,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class ShiftVoter extends Voter
 {
     const BOOK = 'book';
+    const FREE = 'free';
     const DISMISS = 'dismiss';
     const REJECT = 'reject';
     const ACCEPT = 'accept';
@@ -27,7 +28,7 @@ class ShiftVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::BOOK,self::DISMISS,self::REJECT,self::ACCEPT))) {
+        if (!in_array($attribute, array(self::BOOK,self::DISMISS,self::REJECT,self::FREE,self::ACCEPT))) {
             return false;
         }
 
@@ -66,6 +67,11 @@ class ShiftVoter extends Voter
                     return true;
                 }
                 return $this->canBook($shift, $user);
+            case self::FREE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                    return true;
+                }
+                return false;
             case self::DISMISS:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;

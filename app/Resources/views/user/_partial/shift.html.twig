@@ -8,9 +8,10 @@
         {% endif %}
     </div>
     <div class="card-action">
-        {{ form_start(free_shift_forms[shift.id]) }}
-        {{ form_widget(free_shift_forms[shift.id]) }}
+        {% if is_granted('free',shift) %}
+        <form action="{{ path('free_shift', {'id' : shift.id }) }}" method="Post">
             <button type="submit" class="btn red"><i class="material-icons left">delete</i>Libérer</button>
-        {{ form_end(free_shift_forms[shift.id]) }}
+        </form>
+        {% endif %}
     </div>
 </div>
