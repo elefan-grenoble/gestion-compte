@@ -23,10 +23,10 @@
                         class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
                 <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
                     ]</a>{% endif %}</h4>
-            <p>Mon cycle actuel commence le <b>{{ app.user.startOfCycle(1)|date_fr_long }}</b> et termine
-                le <b>{{ app.user.endOfCycle(1)|date_fr_long }}</b></p>
+            <p>Mon cycle actuel commence le <b>{{ app.user.startOfCycle |date_fr_long }}</b> et termine
+                le <b>{{ app.user.endOfCycle |date_fr_long }}</b></p>
             <p>Nombre d'heures de bénévolat restantes à planifier
-                : {{ app.user.remainingToBook(1, true)|duration_from_minutes }}</p>
+                : {{ app.user.remainingToBook(0, true)|duration_from_minutes }}</p>
         </div>
         <div class="row">
             <ul class="collapsible" data-collapsible="accordion" id="legend">
