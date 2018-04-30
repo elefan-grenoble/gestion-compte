@@ -807,7 +807,6 @@ class UserController extends Controller
             'notes_delete_form' => $notes_delete_form,
             'new_notes_form' => $new_notes_form,
             'delete_form' => $deleteForm->createView(),
-            'free_shift_forms' => $free_shift_forms,
         ));
     }
 

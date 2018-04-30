@@ -104,6 +104,9 @@ class NoteVoter extends Voter
 
     private function canDelete(Note $note, User $user)
     {
+        if ($note->getAuthor() === $user){
+            return true;
+        }
         if ($note->getSubject() === $user){
             return true;
         }
