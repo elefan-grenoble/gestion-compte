@@ -5,7 +5,7 @@
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
         </p>
     </div>
-    <div class="card-reveal">
+    <div class="card-reveal black-text">
         <span class="card-title">{{ shift.start|date_fr_long }}<i class="material-icons right">close</i></span>
         <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
