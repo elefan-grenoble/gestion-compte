@@ -1,5 +1,15 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    {% if is_granted("ROLE_ADMIN") %}
+        <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
+    {% else %}
+        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+    {% endif %}
+    <i class="material-icons">person</i> {{ user.autocompleteLabel }}
+{% endblock %}
+
 {% block content %}
     <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img">
     <h4 class="">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h4>
@@ -9,86 +19,145 @@
         {% endfor %}
     </div>
     {% if user.notes | length %}
+        <h5>Note{% if user.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
         <div class="row">
-            <h5>Note(s) à propos de ce membre</h5>
             {%  for note in user.notes %}
-                {% include "ambassador/phone/_note.html.twig" with { note: note } %}
+                {% if not note.parent %}
+                    <div class="col s12 m6 offset-m2 l6">
+                        {% include "user/_partial/note.html.twig" with { note: note } %}
+                    </div>
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}
 
-    {% if is_granted("ROLE_ADMIN") %}
-        <div class="row">
-            <h5>Actions admin</h5>
-            <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer</a>
-        </div>
-        <div class="row">
-            <h5>Créneaux</h5>
-            {% set firstShiftDate = user.firstShiftDate %}
-            <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
-            {% set currentShifts = user.getShiftsOfCycle() %}
-            {% set nextShifts = user.getShiftsOfCycle(1) %}
-            <div class="col m12">
-                <div class="row">
-                    <h6>Cycle en cours (du {{ user.startOfCycle | date_fr_long }} au {{ user.endOfCycle | date_fr_long }})</h6>
-                    {% if currentShifts|length == 0 %}
-                        Pas de créneau
-                    {% endif %}
-                    {% for shift in currentShifts %}
-                        <div class="col m4 s6">
-                            {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+    <ul class="collapsible">
+        {% if is_granted("create",note) %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">add</i>Ajouter une note</div>
+            <div class="collapsible-body">
+                    {{ form_start(note_form) }}
+                    <div class="input-field text col s12">
+                        <div class="errors">
+                            {{ form_errors(note_form.text) }}
                         </div>
-                    {% endfor %}
+                        <div class="input-field">
+                            {{ form_widget(note_form.text) }}
+                            {{ form_label(note_form.text) }}
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn waves-effect waves-light">Ajouter une note</button>
+                    </div>
+                    {{ form_end(note_form) }}
+            </div>
+        </li>
+        {% endif %}
+        {% if is_granted("ROLE_ADMIN") %}
+            <li>
+                <div class="collapsible-header"><i class="material-icons">person</i>Actions admin</div>
+                <div class="collapsible-body">
+                    <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">edit</i>Editer le membre</a>
                 </div>
-                <div class="row">
-                    <h6>Prochain cycle (du {{ user.startOfCycle(1) | date_fr_long }} au {{ user.endOfCycle(1) | date_fr_long }})</h6>
-                    {% if nextShifts|length == 0 %}
-                        Pas de créneau
-                    {% endif %}
-                    {% for shift in nextShifts %}
-                        <div class="col m4 s6">
-                            {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
-                        </div>
-                    {% endfor %}
+            </li>
+        {% endif %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">date_range</i>Créneaux</div>
+            <div class="collapsible-body">
+                {% set firstShiftDate = user.firstShiftDate %}
+                <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
+                {% set previousShifts = user.getShiftsOfCycle(-1) %}
+                {% set currentShifts = user.getShiftsOfCycle() %}
+                {% set nextShifts = user.getShiftsOfCycle(1) %}
+                <div class="col m12">
+                    <div class="row">
+                        <h6>Cycle précédent (du {{ user.startOfCycle(-1) | date_fr_long }} au {{ user.endOfCycle(-1) | date_fr_long }})</h6>
+                        {% if previousShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in previousShifts %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        <h6>Cycle en cours (du {{ user.startOfCycle | date_fr_long }} au {{ user.endOfCycle | date_fr_long }})</h6>
+                        {% if currentShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in currentShifts %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        <h6>Prochain cycle (du {{ user.startOfCycle(1) | date_fr_long }} au {{ user.endOfCycle(1) | date_fr_long }})</h6>
+                        {% if nextShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in nextShifts %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-        </div>
-    {% endif %}
-    {% if is_granted("ROLE_SUPER_ADMIN") %}
-        <h5>Actions super admin</h5>
-        {{ form_start(delete_form) }}
-        {{ form_widget(delete_form) }}
-        <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
-        {{ form_end(delete_form) }}
-        <h6>Recorded registrations</h6>
-        <ul class="collapsible" data-collapsible="accordion">
-            {% for registration in user.recordedRegistrations %}
-                <li>
-                    <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
-                            <i class="material-icons tiny">credit_card</i>
-                        {% else %}
-                            <i class="material-icons tiny">attach_money</i>
-                        {% endif %}
-                        {{ registration.date | date('d F Y') }} {{ registration.date | date('H:i') }} {{ registration.amount }}
-                        {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
-                           € en CARTE CREDIT
-                        {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
-                            CAIRN{#TODO PUT THIS VALUE IN CONF#}
-                        {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
-                           € en ESPECE
-                        {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
-                            € en CHEQUE
-                        {% endif %}
-                        {% if registration.user  %}
-                        pour #<a href="{{ path("user_edit",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp;
-                            {% if registration.user.mainBeneficiary %}
-                                {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
-                            {% endif %}
-                            </div>
-                        {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        </li>
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+            <li>
+                <div class="collapsible-header"><i class="material-icons">person</i>Actions super admin</div>
+                <div class="collapsible-body">
+                    {{ form_start(delete_form) }}
+                    {{ form_widget(delete_form) }}
+                    <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
+                    {{ form_end(delete_form) }}
+                    <h6>Recorded registrations</h6>
+                    <ul class="collapsible" data-collapsible="accordion">
+                        {% for registration in user.recordedRegistrations %}
+                            <li>
+                                <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                                        <i class="material-icons tiny">credit_card</i>
+                                    {% else %}
+                                        <i class="material-icons tiny">attach_money</i>
+                                    {% endif %}
+                                    {{ registration.date | date('d F Y') }} {{ registration.date | date('H:i') }} {{ registration.amount }}
+                                    {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                                        € en CARTE CREDIT
+                                    {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
+                                        CAIRN{#TODO PUT THIS VALUE IN CONF#}
+                                    {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
+                                        € en ESPECE
+                                    {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
+                                        € en CHEQUE
+                                    {% endif %}
+                                    {% if registration.user  %}
+                                    pour #<a href="{{ path("user_edit",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp;
+                                    {% if registration.user.mainBeneficiary %}
+                                        {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </li>
+        {% endif %}
+    </ul>
 
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        div.note strong{
+            font-weight: bold;
+        }
+        div.replies{
+            padding-left: 15px;
+        }
+    </style>
 {% endblock %}

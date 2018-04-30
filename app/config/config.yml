@@ -98,7 +98,7 @@ assetic:
         - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
       output: js/jquery.js
 materialize:
-  version: 0.100.2
+  version: 1.0.0-beta
 ornicar_gravatar:
   rating: g
   size: 80
