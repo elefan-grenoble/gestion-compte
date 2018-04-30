@@ -62,23 +62,51 @@
                 </div>
             </li>
         {% endif %}
-        {% if is_granted("ROLE_ADMIN") %}
-            <li>
-                <div class="collapsible-header"><i class="material-icons">event</i>Créneaux</div>
-                <div class="collapsible-body">
-                    {% for cycle in 1..2 %}
-                        {% for shift in user.getFutureShiftsOfCycle(cycle) %}
-                            {% if  cycle > 1 and loop.index == 1 and ( app.user.endOfCycle(cycle-1) | date('Ymd') ) < (shift.start | date('Ymd') ) %}
-                                <hr class="col s12">
-                            {% endif %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">date_range</i>Créneaux</div>
+            <div class="collapsible-body">
+                {% set firstShiftDate = user.firstShiftDate %}
+                <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
+                {% set previousShifts = user.getShiftsOfCycle(-1) %}
+                {% set currentShifts = user.getShiftsOfCycle() %}
+                {% set nextShifts = user.getShiftsOfCycle(1) %}
+                <div class="col m12">
+                    <div class="row">
+                        <h6>Cycle précédent (du {{ user.startOfCycle(-1) | date_fr_long }} au {{ user.endOfCycle(-1) | date_fr_long }})</h6>
+                        {% if previousShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in previousShifts %}
                             <div class="col m4 s6">
                                 {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
                             </div>
                         {% endfor %}
-                    {% endfor %}
+                    </div>
+                    <div class="row">
+                        <h6>Cycle en cours (du {{ user.startOfCycle | date_fr_long }} au {{ user.endOfCycle | date_fr_long }})</h6>
+                        {% if currentShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in currentShifts %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row">
+                        <h6>Prochain cycle (du {{ user.startOfCycle(1) | date_fr_long }} au {{ user.endOfCycle(1) | date_fr_long }})</h6>
+                        {% if nextShifts|length == 0 %}
+                            Pas de créneau
+                        {% endif %}
+                        {% for shift in nextShifts %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-            </li>
-        {% endif %}
+            </div>
+        </li>
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <li>
                 <div class="collapsible-header"><i class="material-icons">person</i>Actions super admin</div>
