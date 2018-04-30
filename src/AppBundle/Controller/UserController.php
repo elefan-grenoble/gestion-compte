@@ -10,6 +10,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
+use AppBundle\Form\NoteType;
 use AppBundle\Form\UserType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -72,16 +73,59 @@ class UserController extends Controller
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject"=>null));
         $notes_form = array();
         $notes_delete_form = array();
+        $new_notes_form = array();
         foreach ($notes as $n){
             $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n,array('action'=>$this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+
+            $response_note = clone $note;
+            $response_note->setParent($n);
+            $response_note_form = $this->createForm(NoteType::class, $response_note,
+                array('action' => $this->generateUrl('note_reply', array('id' => $n->getId()))));
+
+            $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
         return $this->render('default/tools/office_tools.html.twig', array(
             'note_form' => $note_form->createView(),
             'notes_form' => $notes_form,
             'notes_delete_form' => $notes_delete_form,
+            'new_notes_form' => $new_notes_form,
             'notes' => $notes
         ));
+    }
+
+    /**
+     * reply to a note
+     *
+     * @Route("/note/{id}/reply", name="note_reply")
+     * @Method({"POST"})
+     */
+    public function noteReplyAction(Request $request, Note $note)
+    {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->denyAccessUnlessGranted('access_tools',$current_app_user);
+
+        $new_note = new Note();
+        $new_note->setParent($note);
+        $new_note->setAuthor($current_app_user);
+        $new_note->setCreatedAt(new \DateTime());
+        $new_note->setSubject($note->getSubject());
+
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $new_note);
+        $note_form->handleRequest($request);
+
+        if ($note_form->isSubmitted() && $note_form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($new_note);
+            $em->flush();
+            if ($new_note->getSubject()){
+                $session->getFlashBag()->add('success','réponse enregistrée');
+                return $this->redirectToShow($note->getSubject(),$session,$current_app_user);
+            }
+            $session->getFlashBag()->add('success','Post-it réponse enregistré');
+        }
+        return $this->redirectToRoute('user_office_tools');
     }
 
     /**
@@ -93,7 +137,7 @@ class UserController extends Controller
     public function noteEditAction(Request $request, Note $note)
     {
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $this->denyAccessUnlessGranted('access_tools',$current_app_user);
+        $this->denyAccessUnlessGranted('edit', $note);
 
         $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
         $note_form->handleRequest($request);
@@ -105,7 +149,7 @@ class UserController extends Controller
             $em->flush();
             if ($note->getSubject()){
                 $session->getFlashBag()->add('success','note éditée');
-                return $this->redirectToRoute('user_show',array('username'=>$note->getSubject()->getUsername()));
+                return $this->redirectToShow($note->getSubject(),$session,$current_app_user);
             }
             $session->getFlashBag()->add('success','Post-it édité');
         }
@@ -135,9 +179,15 @@ class UserController extends Controller
      */
     public function deleteNoteAction(Request $request, Note $note)
     {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $this->denyAccessUnlessGranted('delete', $note);
+
         $form = $this->createNoteDeleteForm($note);
         $form->handleRequest($request);
         $session = new Session();
+
+        $user = $note->getSubject();
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($note);
@@ -145,6 +195,9 @@ class UserController extends Controller
             $session->getFlashBag()->add('success',"la note a bien été supprimée");
         }
 
+        if ($user){
+            return $this->redirectToShow($user,$session,$current_app_user);
+        }
         return $this->redirectToRoute('user_office_tools');
     }
 
@@ -457,6 +510,9 @@ class UserController extends Controller
             return $this->redirectToEdit($user,$session,$current_app_user);
         }
 
+        $note = new Note();
+        $noteForm = $this->createForm('AppBundle\Form\NoteType',$note);
+
         $beneficiary = new Beneficiary();
         $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType',$beneficiary);
         $beneficiaryForm->handleRequest($request);
@@ -585,6 +641,7 @@ class UserController extends Controller
             'edit_form' => $editForm->createView(),
             'new_registration_form' => $registrationForm->createView(),
             'new_beneficiary_form' => $beneficiaryForm->createView(),
+            'new_note_form' => $noteForm->createView(),
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'registration_forms' => $registrationForms
         ));
@@ -596,6 +653,13 @@ class UserController extends Controller
             return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
         else
             return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+    }
+    private function redirectToShow($user,$session,$current_app_user)
+    {
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
+        else
+            return $this->redirectToRoute('user_show', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
     }
 
     /**
@@ -715,9 +779,35 @@ class UserController extends Controller
 
         $deleteForm = $this->createDeleteForm($user);
 
+        $note = new Note();
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $note,array(
+            'action' => $this->generateUrl('ambassador_new_note',array("username"=>$user->getUsername())),
+            'method' => 'POST',
+        ));
+        $notes_form = array();
+        $notes_delete_form = array();
+        $new_notes_form = array();
+        foreach ($user->getNotes() as $n){
+            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n,array('action'=>$this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+
+            $response_note = clone $note;
+            $response_note->setParent($n);
+            $response_note_form = $this->createForm(NoteType::class, $response_note,
+                array('action' => $this->generateUrl('note_reply', array('id' => $n->getId()))));
+
+            $new_notes_form[$n->getId()] = $response_note_form->createView();
+        }
+
         return $this->render('user/show.html.twig', array(
             'user' => $user,
-            'delete_form' => $deleteForm->createView()
+            'note' => $note,
+            'note_form' => $note_form->createView(),
+            'notes_form' => $notes_form,
+            'notes_delete_form' => $notes_delete_form,
+            'new_notes_form' => $new_notes_form,
+            'delete_form' => $deleteForm->createView(),
+            'free_shift_forms' => $free_shift_forms,
         ));
     }
 

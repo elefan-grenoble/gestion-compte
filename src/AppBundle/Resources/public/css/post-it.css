@@ -1,0 +1,53 @@
+.postit-container {
+  position: relative;
+  background: url('/bundles/app/img/post-it.svg');
+  background-size: cover;
+}
+.postit-container:after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+.postit {
+  padding-left: 16px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.postit div.content {
+  font-family: 'Coming Soon', cursive;
+  transform: rotate(1deg);
+  font-size: 12px;
+  height: 200px;
+  overflow-y: scroll;
+}
+.postit div.content p strong {
+  font-weight: bold;
+}
+.postit .info {
+  font-family: "Raleway", sans-serif;
+  display: block;
+  margin-top: 5px;
+  padding: 3px;
+}
+.postit > .info {
+  transform: rotate(1deg);
+}
+.postit .settings {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+  opacity: 0.5;
+}
+.postit .settings:hover {
+  opacity: 1;
+}
+.postit .replies {
+  position: absolute;
+  bottom: 0;
+  right: 30px;
+  opacity: 0.5;
+}
+.postit .replies:hover {
+  opacity: 1;
+}
