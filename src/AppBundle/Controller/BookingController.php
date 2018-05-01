@@ -20,6 +20,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use AppBundle\Entity\TimeLog;
+use Doctrine\ORM\EntityManager;
 
 /**
  * User controller.
@@ -309,6 +311,8 @@ class BookingController extends Controller
             $em->persist($user);
         }
 
+        $this->createShiftLog($em, $shift, $user);
+
         $em->flush();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -503,6 +507,8 @@ class BookingController extends Controller
                 $em->persist($user);
             }
 
+            $this->createShiftLog($em, $shift, $user);
+
             $em->flush();
 
             $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -523,6 +529,17 @@ class BookingController extends Controller
         }
 
 
+    }
+
+    private function createShiftLog(EntityManager $em, Shift $shift, User $user)
+    {
+        $log = new TimeLog();
+        $log->setUser($user);
+        $log->setTime($shift->getDuration());
+        $log->setShift($shift);
+        $log->setDate($shift->getStart());
+        $log->setDescription("Créneau réservé");
+        $em->persist($log);
     }
 
 }
