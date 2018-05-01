@@ -7,7 +7,6 @@ use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -29,7 +28,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $users = $em->getRepository('AppBundle:User')->findAll();
         foreach ($users as $user) {
 
-            $lastCycleShifts = $user->getShiftsOfCycle(0, true);
+            $lastCycleShifts = $user->getShiftsOfCycle(-1, true);
             foreach ($lastCycleShifts as $shift) {
                 $this->createShiftLog($em, $shift, $user);
                 $countShiftLogs++;
@@ -37,7 +36,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
 
             $this->createCurrentCycleBeginningLog($em, $user);
 
-            $currentCycleShifts = $user->getShiftsOfCycle(1, true);
+            $currentCycleShifts = $user->getShiftsOfCycle(0, true);
             foreach ($currentCycleShifts as $shift) {
                 $this->createShiftLog($em, $shift, $user);
                 $countShiftLogs++;
@@ -64,7 +63,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
 
     private function createCurrentCycleBeginningLog(EntityManager $em, User $user)
     {
-        $date = $user->startOfCycle(1);
+        $date = $user->startOfCycle(0);
         $log = new TimeLog();
         $log->setUser($user);
         $log->setTime(-180);
