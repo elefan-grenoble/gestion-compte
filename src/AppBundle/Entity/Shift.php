@@ -96,7 +96,7 @@ class Shift
     private $job;
 
     /**
-     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     private $timeLogs;
 
