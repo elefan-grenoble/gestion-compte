@@ -58,7 +58,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
      */
     private $lastRegistration;
 
@@ -75,15 +75,15 @@ class User extends BaseUser
 
     /**
      * One User has One Main Beneficiary.
-     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist"})
-     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $mainBeneficiary;
 
     /**
      * One User has One Address.
      * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
-     * @ORM\JoinColumn(name="address_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      */
     private $address;
 
@@ -96,7 +96,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "DESC"})
+     * @OrderBy({"created_at" = "ASC"})
      */
     private $notes;
 
@@ -118,6 +118,13 @@ class User extends BaseUser
      */
     private $firstShiftDate;
 
+    // array of date
+    private $_startOfCycle;
+    private $_endOfCycle;
+
+    /**
+     * User constructor.
+     */
     public function __construct()
     {
         parent::__construct();
@@ -551,10 +558,10 @@ class User extends BaseUser
     /**
      * Get total shift duration for current cycle
      */
-    public function getCycleShiftsDuration($cycleIndex, $excludeDismissed = false)
+    public function getCycleShiftsDuration($cycleOffset = 0, $excludeDismissed = false)
     {
         $duration = 0;
-        foreach ($this->getShiftsOfCycle($cycleIndex, $excludeDismissed) as $shift) {
+        foreach ($this->getShiftsOfCycle($cycleOffset, $excludeDismissed) as $shift) {
             $duration += $shift->getDuration();
         }
         return $duration;
@@ -611,13 +618,13 @@ class User extends BaseUser
 
     /**
      * Get shifts of a specific cycle
-     * @param $cycleIndex index of the cycle (1 for current cycle)
+     * @param $cycleOffset to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
      */
-    public function getShiftsOfCycle($cycleIndex, $excludeDismissed = false)
+    public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false)
     {
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
-            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
-                $shift->getEnd() < $this->endOfCycle($cycleIndex);
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleOffset) {
+            return $shift->getStart() > $this->startOfCycle($cycleOffset) &&
+                $shift->getEnd() < $this->endOfCycle($cycleOffset);
         });
     }
 
@@ -625,58 +632,60 @@ class User extends BaseUser
      * Get start date of current cycle
      * IMPORTANT : time are reset, only date are kept
      */
-    public function startOfCycle($cycleIndex)
+    public function startOfCycle($cycleOffset = 0)
     {
-        $firstDate = $this->getFirstShiftDate();
-        $modFirst = null;
-        $now = new DateTime('now');
-        $now->setTime(0, 0, 0);
-        if ($firstDate) {
-            $diff = $firstDate->diff($now);
-            $modFirst = $diff->format('%a') % 28;
-        }
-        $startCurrCycle = null;
-        if ($modFirst) {
-            /* Exception if first cycle in the future */
-            if ($firstDate < $now) {
-                $startCurrCycle = $now;
-                $startCurrCycle->modify("-".$modFirst." days");
+        if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[$cycleOffset])) {
+            if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[0])){
+                if (!isset($this->_startOfCycle)) {
+                    $this->_startOfCycle = array();
+                }
+                $firstDate = $this->getFirstShiftDate();
+                $modFirst = null;
+                $now = new DateTime('now');
+                $now->setTime(0, 0, 0);
+                if ($firstDate) {
+                    $diff = $firstDate->diff($now);
+                    $currentCycleCount = intval($diff->format('%a') / 28);
+                }else{
+                    $firstDate = new DateTime('now');
+                    $currentCycleCount = 0;
+                }
+                $this->_startOfCycle[0] = clone($firstDate);
+                if ($firstDate < $now) {
+                    $this->_startOfCycle[0]->modify("+" . (28 * $currentCycleCount) . " days");
+                }
             }
-            else {
-                $startCurrCycle = clone($firstDate);
+            if ($cycleOffset != 0 ){
+                $this->_startOfCycle[$cycleOffset] = clone($this->_startOfCycle[0]);
+                $this->_startOfCycle[$cycleOffset]->modify((($cycleOffset>0)?"+":"").(28*$cycleOffset)." days");
             }
-        } else {
-            $startCurrCycle = $now;
         }
 
-        for ($i = 1; $i < $cycleIndex; $i++) {
-            $startCurrCycle->modify("+28 days");
-        }
-
-        return $startCurrCycle;
+        return $this->_startOfCycle[$cycleOffset];
     }
 
     /**
      * Get end date of current cycle
      */
-    public function endOfCycle($cycleIndex)
+    public function endOfCycle($cycleOffset = 0)
     {
-        $endCurrCycle = clone($this->startOfCycle($cycleIndex));
-        $endCurrCycle->modify("+27 days");
-        $endCurrCycle->setTime(23, 59, 59);
+        if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[$cycleOffset])) {
+            if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[0])) {
+                if (!isset($this->_endOfCycle)) {
+                    $this->_endOfCycle = array();
+                }
+                $this->_endOfCycle[0] = clone($this->startOfCycle());
+                $this->_endOfCycle[0]->modify("+27 days");
+                $this->_endOfCycle[0]->setTime(23, 59, 59);
+            }
 
-        return $endCurrCycle;
-    }
+            if ($cycleOffset != 0 ){
+                $this->_endOfCycle[$cycleOffset] = clone($this->_endOfCycle[0]);
+                $this->_endOfCycle[$cycleOffset]->modify("+".(28*$cycleOffset)."days");
+            }
+        }
 
-    /**
-     * Get all shifts in the future for this cycle
-     */
-    public function getFutureShiftsOfCycle($cycleIndex, $excludeDismissed = false)
-    {
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleIndex) {
-            return $shift->getStart() > $this->startOfCycle($cycleIndex) &&
-                $shift->getEnd() < $this->endOfCycle($cycleIndex);
-        });
+        return $this->_endOfCycle[$cycleOffset];
     }
 
     /**
@@ -701,7 +710,7 @@ class User extends BaseUser
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
         if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
-    	    return $this->remainingToBook(1) > 0 || $this->remainingToBook(2) > 0 ;
+    	    return $this->remainingToBook() > 0 || $this->remainingToBook(1) > 0 ;
         else{
             if ($beneficiary->getUser() != $this){
                 return false;
@@ -712,8 +721,8 @@ class User extends BaseUser
             if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
                 return false;
             }
-            return ($shift->getStart() > $this->endOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
-            && ($shift->getStart() < $this->startOfCycle(2) || $shift->getDuration() <= $this->remainingToBook(2))
+            return ($shift->getStart() > $this->endOfCycle() || $shift->getDuration() <= $this->remainingToBook())
+            && ($shift->getStart() < $this->startOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
             && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
             && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
         }
@@ -731,8 +740,8 @@ class User extends BaseUser
     /**
      * Get remaining time to book
      */
-    public function remainingToBook($cycleIndex, $excludeDismissed = false) {
-        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleIndex, $excludeDismissed));
+    public function remainingToBook($cycleOffset = 0, $excludeDismissed = false) {
+        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleOffset, $excludeDismissed));
     }
 
     /**

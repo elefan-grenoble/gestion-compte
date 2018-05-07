@@ -140,7 +140,6 @@ class TaskController extends Controller
      *
      * @Route("/{id}", name="task_delete")
      * @Method({"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Task $task)
     {

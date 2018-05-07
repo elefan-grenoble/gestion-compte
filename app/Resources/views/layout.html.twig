@@ -18,13 +18,19 @@
                 <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">Espace membre @ L'éléfàn</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            {#{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |#}
-                            <small>{{ app.user.username }}</small>
-                            <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
-                                    {#{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}#}
+                            <!-- Dropdown Trigger -->
+                            <li>
+                                <a class="dropdown-button" href="#!" data-activates="services">Services<i class="material-icons right">arrow_drop_down</i></a>
+                                <!-- Dropdown Structure -->
+                                <ul id="services" class="dropdown-content">
+                                    <li><a href="https://wiki.lelefan.org/">wiki</a></li>
+                                    <li><a href="https://barrissement.lelefan.org/">mattermost</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons small right">settings</i>
+                                    <small>{{ app.user.username }}</small>
                                 </a></li>
-                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons small">settings</i>
-                                    {#{{ app.user.username }}#}
+                            <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small right">exit_to_app</i>
                                 </a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
@@ -83,7 +89,7 @@
         <footer class="page-footer">
             <div class="footer-copyright">
                 <div class="container">
-                    © 2017 Copyright L'éléfàn
+                    © {{ 'now'|date('Y') }} Copyright L'éléfàn
                     <a class="grey-text text-lighten-4 right" href="https://lelefan.org">lelefan.org</a>
                 </div>
             </div>
@@ -104,6 +110,7 @@
                 });
                 $('.modal').modal();
                 $('.tooltipped').tooltip();
+                $(".dropdown-button").dropdown();
             });
             //todo put this in a file
         </script>

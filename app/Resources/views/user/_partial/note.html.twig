@@ -1,0 +1,95 @@
+
+    <div class="card-panel {% if note.parent %}grey lighten-4{% else %}grey lighten-5{% endif %} z-depth-1 note">
+        <div class="row valign-wrapper" style="margin-bottom: 0;">
+            <div class="col s2">
+                <img src="{{ gravatar(note.author.email) }}" alt="" class="circle responsive-img"> <!-- notice the "circle" class -->
+            </div>
+            <div class="col s10">
+                {% if is_granted("edit",note) or is_granted("delete",note) %}
+                    <a class="modal-trigger right grey-text" href="#modal{{ note.id }}"><i class="material-icons">settings</i></a>
+                {% endif %}
+                {% if is_granted("create",note) %}
+                    <a class="modal-trigger right grey-text" href="#modal-reply{{ note.id }}"><i class="material-icons">reply</i></a>
+                {% endif %}
+                <strong class="black-text">
+                    {{ note.author.username }} le {{ note.createdAt | date('d M Y à H:i') }}
+                </strong>
+              <p class="black-text">
+                  {{ note.text }}
+              </p>
+            </div>
+        </div>
+        {% if note.children | length  %}
+        <div class="row">
+            <div class="col s12">
+                {% for child in note.children %}
+                    {% include "user/_partial/note.html.twig" with { note: child } %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+<!-- Modal for reply -->
+<div id="modal-reply{{ note.id }}" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        {% if is_granted("create",note) %}
+            <h4>Répondre à cette note</h4>
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'form-note-reply-'~note.id,'class': 'edit-post-it' }}) }}
+            <div class="input-field text col s12">
+                <div class="errors">
+                    {{ form_errors(new_notes_form[note.id].text) }}
+                </div>
+                <div class="input-field">
+                    {{ form_widget(new_notes_form[note.id].text) }}
+                    {{ form_label(new_notes_form[note.id].text) }}
+                </div>
+            </div>
+            {{ form_end(new_notes_form[note.id]) }}
+        {% endif %}
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
+        {% if is_granted("create",note) %}
+            <a href="#!" class="modal-action modal-close green waves-effect waves-green btn" onclick="document.getElementById('form-note-reply-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+        {% endif %}
+    </div>
+</div>
+<!-- Modal for edit and delete -->
+<div id="modal{{ note.id }}" class="modal modal-fixed-footer">
+    <div class="modal-content">
+        {% if is_granted("edit",note) %}
+        <h4>Editer la note</h4>
+        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id,'class': 'edit-post-it' }}) }}
+        <div class="input-field text col s12">
+            <div class="errors">
+                {{ form_errors(notes_form[note.id].text) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(notes_form[note.id].text) }}
+                {{ form_label(notes_form[note.id].text) }}
+            </div>
+        </div>
+        {{ form_end(notes_form[note.id]) }}
+        {% else %}
+            <h4>{{ note.author.username }} le {{ note.createdAt | date('d M Y à H:i') }}</h4>
+            <p>
+                {{ note.text }}
+            </p>
+        {% endif %}
+    </div>
+    {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form-note-delete-'~note.id }}) }}
+    {{ form_widget(notes_delete_form[note.id]) }}
+    {{ form_end(notes_delete_form[note.id]) }}
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
+        {% if is_granted("delete",note) %}
+            <a href="#!" class="modal-action modal-close red waves-effect waves-red btn" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
+        {% endif %}
+        {% if is_granted("edit",note) %}
+            <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+        {% endif %}
+    </div>
+</div>
+
+

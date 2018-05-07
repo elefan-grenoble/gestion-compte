@@ -43,7 +43,7 @@ class CommissionType extends AbstractType
 
         $builder
             ->add('name',TextType::class,array('constraints' => array( new NotBlank()), 'label'=>'Nom'))
-            ->add('description',TextareaType::class,array('constraints' => array( new Length(array('min'=>0,'max'=>255))), 'label'=>'Description'))
+            ->add('description',TextareaType::class,array('label'=>'Description'))
             ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'));
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {

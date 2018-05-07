@@ -23,11 +23,15 @@
                     {% endfor %}
                 </div>
 
-                {% include "booking/home_booked_shifts.html.twig" %}
+                {% if app.user.memberNumber > 0 %}
+                    {% include "booking/home_booked_shifts.html.twig" %}
+                {% else %}
+                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
+                {% endif %}
 
                 <h5>Construire</h5>
                 {% if is_granted("access_tools",app.user)  %}
-                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
 
