@@ -25,14 +25,14 @@ class Note
     /**
      * @var string
      *
-     * @ORM\Column(name="text", type="string")
+     * @ORM\Column(name="text", type="text")
      */
     private $text;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="text")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $created_at;
 
