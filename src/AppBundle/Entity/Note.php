@@ -32,7 +32,7 @@ class Note
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime")
+     * @ORM\Column(name="created_at", type="text")
      */
     private $created_at;
 
