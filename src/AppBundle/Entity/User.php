@@ -1006,4 +1006,15 @@ class User extends BaseUser
     {
         return $this->timeLogs;
     }
+
+    public function getTimeCount()
+    {
+        $sum = function($carry, TimeLog $log)
+        {
+            $carry += $log->getTime();
+            return $carry;
+        };
+        $logs = $this->getTimeLogs();
+        return array_reduce($logs->toArray(), $sum, 0);
+    }
 }

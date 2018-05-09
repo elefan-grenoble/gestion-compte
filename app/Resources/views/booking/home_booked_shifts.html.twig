@@ -5,6 +5,9 @@
     {% endfor %}
 {% endif %}
 
+<h5>Mon compteur de bénévolat</h5>
+<p>Compteur: {{ app.user.timeCount }}</p>
+
 <h5>Mes créneaux à venir</h5>
 <p>Mon cycle actuel commence le {{ app.user.startOfCycle | date_fr_long }} et termine le {{ app.user.endOfCycle |date_fr_long }}</p>
 <p>{% if (app.user.remainingToBook(0, true) | duration_from_minutes == 0) %}
