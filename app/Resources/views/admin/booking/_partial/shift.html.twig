@@ -27,15 +27,17 @@
                 <ul style="font-size: 9px; padding-left: 20px;">
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.shifts() %}
-                        {% if shift.shifter and shiftercount < 3 %}{# is booked #}
-                            <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
-                                        data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
-                                    &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
-                                {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
-                            </li>
-                            {% set shiftercount = shiftercount + 1 %}
+                        {% if (shift.shifter) %}{# is booked #}
+                            {% if (shiftercount < 3) or ((shiftercount == 3) and (bucket.shifts|length == 3)) %}
+                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
+                                            data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
+                                        &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
+                                    {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
+                                </li>
+                                {% set shiftercount = shiftercount + 1 %}
+                            {% endif %}
                         {% endif %}
-                        {% if shiftercount == 3 %}
+                        {% if shiftercount == 3 and (bucket.shifts() | length) > 3 %}
                             <li>( ... )</li>
                             {% set shiftercount = shiftercount + 1 %}
                         {% endif %}
@@ -43,9 +45,9 @@
                 </ul>
             </div>
             {% if (shiftercount == 0) %}
-                <span class="badge red white-text">fermeture</span>
+                <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
             {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
-                <span class="badge orange white-text">fermeture</span>
+                <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
             {% endif %}
         </div>
     </a>
