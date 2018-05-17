@@ -51,12 +51,14 @@
             <ul class="collapsible" data-collapsible="expandable">
         {% endif %}
         {% endfor %}
+                {% if (bucketsByDay | length) > 7 %}
                 <li>
                     <div class="collapsible-header active"><i class="material-icons">event_busy</i> et après ?</div>
                     <div class="collapsible-body">
                         Seuls les 27 prochains jours sont ouverts à la réservation, si tu veux voir plus loin, reviens un peu plus tard :)
                     </div>
                 </li>
+                {% endif %}
             </ul>
 </div>
 <div class="container">

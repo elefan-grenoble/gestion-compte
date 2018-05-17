@@ -1,4 +1,7 @@
-<div
+{% set nbShifts = bucket.shiftsCount() %}
+{% set nbBookableShifts = bucket.bookableShiftsCount() %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+<div class="tooltipped" data-tooltip="{{ bucket.sortedShifts.first.job.name }} - {% if nbBookableShifts == 0 %}complet{% else %}inaccessible pour {{ beneficiary.firstname }}{% endif %}"
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
         data-length="{{ (100/(end-start+1)) }}"
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
@@ -6,11 +9,14 @@
                 top: {{ line*10 }}px;">
     <div class="z-depth-1 grey lighten-3" style="height:40px;position: relative; cursor: not-allowed">
 
-        <div class="shift-block">
-            {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
+        <div class="shift-block grey-text text-lighten-1">
+            <i class="material-icons tiny">lock</i>{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
+            {% if nbBookableShifts == 0 %}- <i class="material-icons tiny">check</i>complet{% endif %}
         </div>
         <div class="shift-block">
-
+            {% for shift in bucket.sortedShifts %}
+                    <span><i class="material-icons shifter grey-text text-lighten-1">{% if shift.role and shift.shifter %}account_circle{% else %}{% if shift.shifter %}person{% else %}person_outline{% endif %}{% endif %}</i></span>
+            {% endfor %}
         </div>
     </div>
 </div>
