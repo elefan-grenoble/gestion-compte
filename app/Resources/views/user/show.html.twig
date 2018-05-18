@@ -67,6 +67,7 @@
             <div class="collapsible-body">
                 {% set firstShiftDate = user.firstShiftDate %}
                 <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
+                <p>Restant à réserver: {{ user.remainingToBook(0, true) | duration_from_minutes }}</p>
                 {% set previousShifts = user.getShiftsOfCycle(-1) %}
                 {% set currentShifts = user.getShiftsOfCycle() %}
                 {% set nextShifts = user.getShiftsOfCycle(1) %}
