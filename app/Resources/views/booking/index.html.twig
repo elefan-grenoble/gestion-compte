@@ -57,14 +57,21 @@
                                     <div style="padding: 3px;margin:5px"
                                          class="z-depth-1 lighten-5 valign-wrapper">
                                         <p>Aucun bénévole inscrit</p>
-                                        <span class="badge red white-text">fermeture</span>
+                                        <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
                                 <div class="col s4">
                                     <div style="padding: 3px;margin:5px"
                                          class="z-depth-1 lighten-5 valign-wrapper">
-                                        <p>Pas assez de bénévoles inscrits</p>
-                                        <span class="badge orange white-text">fermeture</span>
+                                        <p>Pas assez de bénévoles inscrits pour ouvrir</p>
+                                        <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                                    </div>
+                                </div>
+                                <div class="col s4">
+                                    <div style="padding: 3px;margin:5px;cursor: not-allowed"
+                                         class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1">
+                                        <i class="material-icons tiny">lock</i>
+                                        <p class="black-text">Créneau complet ou inaccessible pour {{ beneficiary.firstname }} <small>(quota d'heures dépassé ou formation insuffisante)</small></p>
                                     </div>
                                 </div>
                             </li>
