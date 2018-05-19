@@ -1,4 +1,5 @@
 <div
+        {% set nbShifter = bucket.shifterCount() %}
         {% set nbShifts = bucket.shiftsCount() %}
         {% set nbBookableShifts = bucket.bookableShiftsCount() %}
         {% set nbBookedShifts = nbShifts - nbBookableShifts %}
@@ -15,6 +16,14 @@
              style="position: relative">
             <div class="shift-block">
                 {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
+                {% if (nbShifter == 0) %}
+                    <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                {% elseif (nbShifter < nbShifts/2) %}
+                    <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                {% endif %}
+                {% if nbBookableShifts == 0 %}
+                    <span class="green-text"><i class="material-icons tiny">check</i>&nbsp;complet</span>
+                {% endif %}
             </div>
             <div class="shift-block">
                 {% for shift in bucket.sortedShifts %}
@@ -22,11 +31,6 @@
                 {% endfor %}
                 {% if firstBookableShift and firstBookableShift.isDismissed %}
                     <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
-                {% endif %}
-                {% if (nbBookedShifts == 0) %}
-                    <span class="badge red white-text">fermeture</span>
-                {% elseif (nbBookedShifts < nbShifts/2) %}
-                    <span class="badge orange white-text">fermeture</span>
                 {% endif %}
             </div>
         </div>

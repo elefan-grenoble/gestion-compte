@@ -40,7 +40,7 @@
     <div class="row">
         {% for note in notes %}
             {% if not note.parent %}
-                <div class="col s6 m4 l3">
+                <div class="col s12 m6 l4 xl3">
                     {% include "default/tools/_postit.html.twig" with { note: note } %}
                 </div>
             {% endif %}
