@@ -6,16 +6,12 @@
 {% endif %}
 
 <h5>Mon compteur de bénévolat</h5>
-<p>Compteur: {{ app.user.timeCount }}</p>
+
+{% include "booking/_partial/time_counter.html.twig" with { user: app.user  } %}
+
+<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
 
 <h5>Mes créneaux à venir</h5>
-<p>Mon cycle actuel commence le {{ app.user.startOfCycle | date_fr_long }} et termine le {{ app.user.endOfCycle |date_fr_long }}</p>
-<p>{% if (app.user.remainingToBook(0, true) | duration_from_minutes == 0) %}
-       <i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !
-    {% else %}
-        Tu as encore <b>{{ app.user.remainingToBook(0, true) | duration_from_minutes }}</b> de bénévolat à planifier pour ce cycle
-    {% endif %}
-</p>
 
 <div class="row">
 {% for cycle in 0..1 %}
@@ -30,8 +26,6 @@
     {% endfor %}
 {% endfor %}
 </div>
-
-<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
 
 {% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris par un autre bénévole</h5>{% endif %}
 

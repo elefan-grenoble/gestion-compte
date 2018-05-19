@@ -721,21 +721,21 @@ class User extends BaseUser
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
         if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
-    	    return $this->remainingToBook() > 0 || $this->remainingToBook(1) > 0 ;
-        else{
-            if ($beneficiary->getUser() != $this){
+            return $this->getTimeCount() < 180;
+        else {
+            if ($beneficiary->getUser()->getId() != $this->getId()) {
                 return false;
             }
             if ($shift->getShifter() && !$shift->getIsDismissed()) {
                 return false;
             }
-            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) {
                 return false;
             }
-            return ($shift->getStart() > $this->endOfCycle() || $shift->getDuration() <= $this->remainingToBook())
-            && ($shift->getStart() < $this->startOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
-            && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
-            && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
+            if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) {
+                return false;
+            }
+            return ($shift->getDuration() + $this->getTimeCount()) <= 180;
         }
     }
 
@@ -746,13 +746,6 @@ class User extends BaseUser
     public function shiftTimeByCycle()
     {
         return 60 * 3;
-    }
-
-    /**
-     * Get remaining time to book
-     */
-    public function remainingToBook($cycleOffset = 0, $excludeDismissed = false) {
-        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleOffset, $excludeDismissed));
     }
 
     /**

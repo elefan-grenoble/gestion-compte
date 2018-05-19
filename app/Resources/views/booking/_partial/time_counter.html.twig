@@ -1,0 +1,10 @@
+<p>Compteur: {{ user.timeCount }} minutes</p>
+{% set counter = ((user.timeCount + 540) / 720) * 100 %}
+{% set counter = 80 %}
+<div class="time-counter">
+    <div style="width: {{ counter }}%">
+        <span>{{ counter }}%</span>
+    </div>
+</div>
+
+<p>Mon cycle actuel se termine le {{ user.endOfCycle |date_fr_long }}</p>
