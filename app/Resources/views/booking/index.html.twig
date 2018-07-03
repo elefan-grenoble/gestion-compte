@@ -25,8 +25,6 @@
                     ]</a>{% endif %}</h4>
             <p>Mon cycle actuel commence le <b>{{ app.user.startOfCycle |date_fr_long }}</b> et termine
                 le <b>{{ app.user.endOfCycle |date_fr_long }}</b></p>
-            <p>Nombre d'heures de bénévolat restantes à planifier
-                : {{ app.user.remainingToBook(0, true)|duration_from_minutes }}</p>
         </div>
         <div class="row">
             <ul class="collapsible" data-collapsible="accordion" id="legend">
