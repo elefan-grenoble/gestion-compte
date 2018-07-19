@@ -29,26 +29,19 @@ class CycleStartCommand extends ContainerAwareCommand
         $home_url = $router->generate('homepage',array(),UrlGeneratorInterface::ABSOLUTE_URL);
 
         foreach ($users as $user) {
-
             $this->createCycleBeginningLog($em, $user);
-
-            if ($user->remainingToBook(1) > 0) {
-
-                $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
-                    ->setFrom('creneaux@lelefan.org')
-                    ->setTo($user->getEmail())
-                    ->setBody(
-                        $this->getContainer()->get('twig')->render(
-                            'emails/cycle_start.html.twig',
-                            array('user' => $user,'home_url' => $home_url)
-                        ),
-                        'text/html'
-                    );
-
-                $mailer->send($mail);
-
-                $count++;
-            }
+            $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
+                ->setFrom('creneaux@lelefan.org')
+                ->setTo($user->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('twig')->render(
+                        'emails/cycle_start.html.twig',
+                        array('user' => $user,'home_url' => $home_url)
+                    ),
+                    'text/html'
+                );
+            $mailer->send($mail);
+            $count++;
         }
         $em->flush();
         $message = $count . ' email' . (($count > 1) ? 's' : '') . ' envoyé' . (($count > 1) ? 's' : '');
