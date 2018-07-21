@@ -92,7 +92,12 @@ class AppExtension extends \Twig_Extension
 
     public function duration_from_minutes(int $minutes)
     {
-        return gmdate("G\hi", $minutes * 60);
+        $formatted = gmdate("G\hi", abs($minutes) * 60);
+        if ($minutes < 0) {
+            return "-".$formatted;
+        } else {
+            return $formatted;
+        }
     }
 
     public function jsonDecode($str) {
