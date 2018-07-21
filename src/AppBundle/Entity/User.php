@@ -123,6 +123,11 @@ class User extends BaseUser
     private $_endOfCycle;
 
     /**
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="user",cascade={"persist", "remove"})
+     */
+    private $timeLogs;
+
+    /**
      * User constructor.
      */
     public function __construct()
@@ -618,7 +623,9 @@ class User extends BaseUser
 
     /**
      * Get shifts of a specific cycle
-     * @param $cycleOffset to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
+     * @param $cycleOffset int to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
+     * @param bool $excludeDismissed
+     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
      */
     public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false)
     {
@@ -631,6 +638,8 @@ class User extends BaseUser
     /**
      * Get start date of current cycle
      * IMPORTANT : time are reset, only date are kept
+     * @param int $cycleIndex
+     * @return DateTime|null
      */
     public function startOfCycle($cycleOffset = 0)
     {
@@ -666,6 +675,8 @@ class User extends BaseUser
 
     /**
      * Get end date of current cycle
+     * @param int $cycleIndex
+     * @return DateTime|null
      */
     public function endOfCycle($cycleOffset = 0)
     {
@@ -710,22 +721,32 @@ class User extends BaseUser
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
         if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
-    	    return $this->remainingToBook() > 0 || $this->remainingToBook(1) > 0 ;
-        else{
-            if ($beneficiary->getUser() != $this){
+            return $this->getTimeCount() < $this->getMaxTimeCount();
+        else {
+            if ($beneficiary->getUser()->getId() != $this->getId()) {
                 return false;
             }
             if ($shift->getShifter() && !$shift->getIsDismissed()) {
                 return false;
             }
-            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())){
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) {
                 return false;
             }
-            return ($shift->getStart() > $this->endOfCycle() || $shift->getDuration() <= $this->remainingToBook())
-            && ($shift->getStart() < $this->startOfCycle(1) || $shift->getDuration() <= $this->remainingToBook(1))
-            && (($shift->getIsDismissed() && $shift->getBooker()->getId() != $beneficiary->getId()) || !$shift->getShifter())
-            && ((!$shift->getLastShifter() || $beneficiary->getId() == $shift->getLastShifter()->getId()));
+            if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) {
+                return false;
+            }
+            return ($shift->getDuration() + $this->getTimeCount()) <= 180;
         }
+    }
+
+    /**
+     * Max time count for a user
+     *
+     * @return Integer
+     */
+    public function getMaxTimeCount()
+    {
+        return 180;
     }
 
     /**
@@ -735,13 +756,6 @@ class User extends BaseUser
     public function shiftTimeByCycle()
     {
         return 60 * 3;
-    }
-
-    /**
-     * Get remaining time to book
-     */
-    public function remainingToBook($cycleOffset = 0, $excludeDismissed = false) {
-        return max(0, $this->shiftTimeByCycle() - $this->getCycleShiftsDuration($cycleOffset, $excludeDismissed));
     }
 
     /**
@@ -960,5 +974,50 @@ class User extends BaseUser
     public function getFirstShiftDate()
     {
         return $this->firstShiftDate;
+    }
+
+    /**
+     * Add timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     *
+     * @return User
+     */
+    public function addTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs[] = $timeLog;
+
+        return $this;
+    }
+
+    /**
+     * Remove timeLog
+     *
+     * @param \AppBundle\Entity\TimeLog $timeLog
+     */
+    public function removeTimeLog(\AppBundle\Entity\TimeLog $timeLog)
+    {
+        $this->timeLogs->removeElement($timeLog);
+    }
+
+    /**
+     * Get timeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getTimeLogs()
+    {
+        return $this->timeLogs;
+    }
+
+    public function getTimeCount()
+    {
+        $sum = function($carry, TimeLog $log)
+        {
+            $carry += $log->getTime();
+            return $carry;
+        };
+        $logs = $this->getTimeLogs();
+        return array_reduce($logs->toArray(), $sum, 0);
     }
 }

@@ -810,30 +810,6 @@ class UserController extends Controller
         ));
     }
 
-    /**
-     * free a shift.
-     *
-     * @Route("/free_shift/{id}", name="free_shift")
-     * @Method("POST")
-     */
-    public function freeShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted('free', $shift);
-
-        $session = new Session();
-
-        $owner = $shift->getBooker()->getUser();
-
-        $em = $this->getDoctrine()->getManager();
-        $shift->free();
-        $em->persist($shift);
-        $em->flush();
-
-        $session->getFlashBag()->add('success',"Le shift a bien été libéré");
-
-        return $this->redirectToRoute('user_show', array('username' => $owner->getUsername()));
-
-    }
 
     /**
      * Deletes a user entity.

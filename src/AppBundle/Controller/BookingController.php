@@ -20,6 +20,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use AppBundle\Entity\TimeLog;
+use Doctrine\ORM\EntityManager;
 
 /**
  * User controller.
@@ -309,6 +311,8 @@ class BookingController extends Controller
             $em->persist($user);
         }
 
+        $this->createShiftLog($em, $shift, $user);
+
         $em->flush();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -341,6 +345,8 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking");
         }
 
+        $user = $shift->getShifter()->getUser();
+
         $em = $this->getDoctrine()->getManager();
 
         $shift->setIsDismissed(true);
@@ -349,6 +355,9 @@ class BookingController extends Controller
         $shift->setShifter($shift->getBooker());
 
         $em->persist($shift);
+
+        $this->deleteShiftLogs($shift, $user);
+
         $em->flush();
 
         return $this->redirectToRoute('homepage');
@@ -379,6 +388,9 @@ class BookingController extends Controller
                 $shift->setIsDismissed(false);
                 $shift->setDismissedTime(null);
                 $shift->setDismissedReason(null);
+
+                $this->createShiftLog($em, $shift, $shift->getShifter()->getUser());
+
                 $em->persist($shift);
                 $em->flush();
             } else {
@@ -503,6 +515,8 @@ class BookingController extends Controller
                 $em->persist($user);
             }
 
+            $this->createShiftLog($em, $shift, $user);
+
             $em->flush();
 
             $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -523,6 +537,55 @@ class BookingController extends Controller
         }
 
 
+    }
+
+    /**
+     * free a shift.
+     *
+     * @Route("/free_shift/{id}", name="free_shift")
+     * @Method("POST")
+     */
+    public function freeShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted('free', $shift);
+
+        $session = new Session();
+
+        $owner = $shift->getBooker()->getUser();
+
+        $em = $this->getDoctrine()->getManager();
+        $shift->free();
+
+        $this->deleteShiftLogs($shift, $owner);
+
+        $em->persist($shift);
+        $em->flush();
+
+        $session->getFlashBag()->add('success',"Le shift a bien été libéré");
+
+        return $this->redirectToRoute('user_show', array('username' => $owner->getUsername()));
+
+    }
+
+    private function deleteShiftLogs(Shift $shift, User $user)
+    {
+        $logs = $shift->getTimeLogs();
+        foreach ($logs as $log) {
+            if ($log->getUser()->getId() == $user->getId()) {
+                $shift->removeTimeLog($log);
+            }
+        }
+    }
+
+    private function createShiftLog(EntityManager $em, Shift $shift, User $user)
+    {
+        $log = new TimeLog();
+        $log->setUser($user);
+        $log->setTime($shift->getDuration());
+        $log->setShift($shift);
+        $log->setDate($shift->getStart());
+        $log->setDescription("Créneau réservé");
+        $em->persist($log);
     }
 
 }

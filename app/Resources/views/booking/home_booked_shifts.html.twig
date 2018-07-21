@@ -5,30 +5,31 @@
     {% endfor %}
 {% endif %}
 
-<h5>Mes créneaux à venir</h5>
-<p>Mon cycle actuel commence le {{ app.user.startOfCycle | date_fr_long }} et termine le {{ app.user.endOfCycle |date_fr_long }}</p>
-<p>{% if (app.user.remainingToBook(0, true) | duration_from_minutes == 0) %}
-       <i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !
+<h5>Mon bénévolat</h5>
+
+{% if  app.user.timeCount < 0 %}
+    <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.</p>
+{% else %}
+    {% if  app.user.timeCount < app.user.maxTimeCount %}
+        <p><i class="material-icons">warning</i> Penses à réserver tes créneaux. Tu as encore {{ (app.user.maxTimeCount - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
     {% else %}
-        Tu as encore <b>{{ app.user.remainingToBook(0, true) | duration_from_minutes }}</b> de bénévolat à planifier pour ce cycle
+        <p><i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !</p>
     {% endif %}
-</p>
+{% endif %}
+
+<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
+
+<p>Mon cycle actuel se termine le {{ app.user.endOfCycle |date_fr_long }}</p>
 
 <div class="row">
 {% for cycle in 0..1 %}
-    {% set parentloop = loop %}
     {% for shift in app.user.getShiftsOfCycle(cycle) %}
-        <div class="col m6 s12 {% if (app.user.getShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">
+        <div class="col m6 s12">
             {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
         </div>
-        {% if  loop.first and not parentloop.first %}
-            <hr class="col s12" data-cycle="{{ cycle }}">
-        {% endif %}
     {% endfor %}
 {% endfor %}
 </div>
-
-<a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau {% if (app.user.remainingToBook(1)|duration_from_minutes == 0) and app.user.canBook() %} pour le cycle suivant {% endif %}</a>
 
 {% if (app.user.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris par un autre bénévole</h5>{% endif %}
 
