@@ -5,24 +5,28 @@
     {% endfor %}
 {% endif %}
 
-<h5>Mon compteur de bénévolat</h5>
+<h5>Mon bénévolat</h5>
 
-{% include "booking/_partial/time_counter.html.twig" with { user: app.user  } %}
+{% if  app.user.timeCount < 0 %}
+    <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.</p>
+{% else %}
+    {% if  app.user.timeCount < app.user.maxTimeCount %}
+        <p><i class="material-icons">warning</i> Penses à réserver tes créneaux. Tu as encore {{ (app.user.maxTimeCount - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
+    {% else %}
+        <p><i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !</p>
+    {% endif %}
+{% endif %}
 
 <a href="{{ path("booking") }}" class="btn teal" {% if (not app.user.canBook()) %}disabled{% endif %}>Je réserve un créneau</a>
 
-<h5>Mes créneaux à venir</h5>
+<p>Mon cycle actuel se termine le {{ app.user.endOfCycle |date_fr_long }}</p>
 
 <div class="row">
 {% for cycle in 0..1 %}
-    {% set parentloop = loop %}
     {% for shift in app.user.getShiftsOfCycle(cycle) %}
-        <div class="col m6 s12 {% if (app.user.getShiftsOfCycle(cycle) | length) < 2 %}push-m3{% endif %}">
+        <div class="col m6 s12">
             {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
         </div>
-        {% if  loop.first and not parentloop.first %}
-            <hr class="col s12" data-cycle="{{ cycle }}">
-        {% endif %}
     {% endfor %}
 {% endfor %}
 </div>

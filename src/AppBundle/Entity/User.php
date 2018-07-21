@@ -721,7 +721,7 @@ class User extends BaseUser
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
     {
         if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
-            return $this->getTimeCount() < 180;
+            return $this->getTimeCount() < $this->getMaxTimeCount();
         else {
             if ($beneficiary->getUser()->getId() != $this->getId()) {
                 return false;
@@ -737,6 +737,16 @@ class User extends BaseUser
             }
             return ($shift->getDuration() + $this->getTimeCount()) <= 180;
         }
+    }
+
+    /**
+     * Max time count for a user
+     *
+     * @return Integer
+     */
+    public function getMaxTimeCount()
+    {
+        return 180;
     }
 
     /**
