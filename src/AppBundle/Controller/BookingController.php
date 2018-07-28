@@ -417,11 +417,13 @@ class BookingController extends Controller
 
         if ($shift->getId()){
             if ($shift->getLastShifter()){
-                $shift->setBooker($shift->getLastShifter());
-                $shift->setShifter($shift->getLastShifter());
+                $user = $shift->getLastShifter();
+                $shift->setBooker($user);
+                $shift->setShifter($user);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setLastShifter(null);
                 $em = $this->getDoctrine()->getManager();
+                $this->createShiftLog($em, $shift, $user);
                 $em->persist($shift);
                 $em->flush();
                 $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
