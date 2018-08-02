@@ -7,6 +7,9 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Doctrine\ORM\EntityManager;
+use AppBundle\Entity\User;
+use AppBundle\Entity\TimeLog;
 
 class CycleStartCommand extends ContainerAwareCommand
 {
