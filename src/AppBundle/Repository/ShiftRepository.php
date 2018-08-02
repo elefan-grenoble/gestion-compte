@@ -115,4 +115,26 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findFreeAt(\DateTime $date, $job)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $datePlusOne = clone $date;
+        $datePlusOne->modify('+1 day');
+
+        $qb
+            ->where('s.shifter is null')
+            ->orWhere('s.isDismissed = 1')
+            ->andwhere('s.job = :job')
+            ->andwhere('s.start >= :date')
+            ->andwhere('s.start < :datePlusOne')
+            ->setParameter('job', $job)
+            ->setParameter('date', $date)
+            ->setParameter('datePlusOne',$datePlusOne );
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
