@@ -31,7 +31,6 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             return;
         }
         $date->setTime(0, 0);
-        $output->writeln('<fg=cyan;>' . $date->format('d M Y') . '</>');
         $em = $this->getContainer()->get('doctrine')->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findFreeAt($date, $job);
 
@@ -52,7 +51,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
 
             if (count($bucket->getShifts()) > 2) {
                 $hasIssue = true;
-                $issue = $issue . ' - ' . count($bucket->getShifts()) . ' personne(s) manquante(s)';
+                $issue = $issue . ' - ' . count($bucket->getShifts()) . ' personnes manquantes';
             }
 
             if ($this->hasQualifiedShift($bucket)) {
@@ -66,9 +65,13 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         }
 
         if (count($issues) > 0) {
-            foreach ($issues as $issue) {
-                $output->writeln($issue);
-            }
+            $subject = '[ELEFAN] Alertes de remplissage pour le '. $date->format('d M Y');
+            $body = implode("\n", $issues);
+            $reminder = (new \Swift_Message($subject))
+                ->setFrom('creneaux@lelefan.org')
+                ->setTo('deshayeb@gmail.com')
+                ->setBody($body);
+            $mailer->send($reminder);
         }
     }
 
