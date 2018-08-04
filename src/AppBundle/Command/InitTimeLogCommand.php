@@ -26,6 +26,8 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $countCycleBeginning = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $users = $em->getRepository('AppBundle:User')->findAll();
+        $cutDay = new \DateTime('now');
+        $cutDay = $cutDay->modify("-28 days");
         foreach ($users as $user) {
 
             $lastCycleShifts = $user->getShiftsOfCycle(-1, true);
@@ -34,7 +36,10 @@ class InitTimeLogCommand extends ContainerAwareCommand
                 $countShiftLogs++;
             }
 
-            $this->createCurrentCycleBeginningLog($em, $user);
+            $registrations = $user->getRegistrations();
+            if (count($registrations) != 1 || $registrations[0]->getDate() < $cutDay) {
+                $this->createCurrentCycleBeginningLog($em, $user);
+            }
 
             $currentCycleShifts = $user->getShiftsOfCycle(0, true);
             foreach ($currentCycleShifts as $shift) {
