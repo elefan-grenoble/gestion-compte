@@ -16,7 +16,7 @@ class ShiftAlert
 
     public function __construct(ShiftBucket $bucket)
     {
-        $this->$bucket = $bucket;
+        $this->bucket = $bucket;
         $this->issues = array();
     }
 
