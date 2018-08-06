@@ -61,6 +61,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             }
 
             if ($hasIssue) {
+                $output->writeln(count($alert->issues));
                 $alerts[] = $alert;
             }
         }
