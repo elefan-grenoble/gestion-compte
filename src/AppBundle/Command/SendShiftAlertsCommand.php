@@ -47,16 +47,16 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         $issues = array();
         foreach ($buckets as $bucket) {
             $hasIssue = false;
-            $issue = 'Créneau de '.$bucket->getStart()->format('H\hi').' à '.$bucket->getEnd()->format('H\hi');
+            $issue = "<strong>Créneau de ".$bucket->getStart()->format('H\hi')." à ".$bucket->getEnd()->format('H\hi')."</strong>"."\n";
 
             if (count($bucket->getShifts()) > 2) {
                 $hasIssue = true;
-                $issue = $issue . ' - ' . count($bucket->getShifts()) . ' personnes manquantes';
+                $issue = $issue.count($bucket->getShifts()).' personnes manquantes.'."\n";
             }
 
             if ($this->hasQualifiedShift($bucket)) {
                 $hasIssue = true;
-                $issue = $issue . ' - bénévole qualifié manquant';
+                $issue = $issue . 'Bénévole qualifié manquant'."\n";
             }
 
             if ($hasIssue) {
