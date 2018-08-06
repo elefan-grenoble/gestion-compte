@@ -51,17 +51,14 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             $alert = new ShiftAlert($bucket);
 
             if (count($bucket->getShifts()) > 2) {
-                $hasIssue = true;
                 $alert->addIssue(count($bucket->getShifts()).' personnes manquantes.');
             }
 
             if ($this->hasQualifiedShift($bucket)) {
-                $hasIssue = true;
                 $alert->addIssue( 'Bénévole qualifié manquant');
             }
 
-            if ($hasIssue) {
-                $output->writeln(count($alert->issues));
+            if (count($alert->issues) > 0) {
                 $alerts[] = $alert;
             }
         }

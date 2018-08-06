@@ -22,7 +22,7 @@ class ShiftAlert
 
     public function addIssue($issue)
     {
-        $issues[] = $issue;
+        $this->issues[] = $issue;
     }
 
     /**
