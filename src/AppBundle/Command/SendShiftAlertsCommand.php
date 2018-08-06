@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Entity\ShiftAlert;
 
 class SendShiftAlertsCommand extends ContainerAwareCommand
 {
@@ -44,34 +45,41 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             $buckets[$interval]->addShift($shift);
         }
 
-        $issues = array();
+        $alerts = array();
         foreach ($buckets as $bucket) {
             $hasIssue = false;
-            $issue = "<strong>Créneau de ".$bucket->getStart()->format('H\hi')." à ".$bucket->getEnd()->format('H\hi')."</strong>"."\n";
+            $alert = new ShiftAlert($bucket);
 
             if (count($bucket->getShifts()) > 2) {
                 $hasIssue = true;
-                $issue = $issue.count($bucket->getShifts()).' personnes manquantes.'."\n";
+                $alert->addIssue(count($bucket->getShifts()).' personnes manquantes.');
             }
 
             if ($this->hasQualifiedShift($bucket)) {
                 $hasIssue = true;
-                $issue = $issue . 'Bénévole qualifié manquant'."\n";
+                $alert->addIssue( 'Bénévole qualifié manquant');
             }
 
             if ($hasIssue) {
-                $issues[] = $issue;
+                $alerts[] = $alert;
             }
         }
 
-        if (count($issues) > 0) {
-            $subject = '[ELEFAN] Alertes de remplissage pour le '. $date->format('d M Y');
-            $body = implode("\n", $issues);
-            $reminder = (new \Swift_Message($subject))
+        if (count($alerts) > 0) {
+            setlocale(LC_TIME, 'fr_FR.UTF8');
+            $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
+            $subject = '[ELEFAN] Alertes de remplissage pour le '. $dateFormatted;
+            $email = (new \Swift_Message($subject))
                 ->setFrom('creneaux@lelefan.org')
                 ->setTo('deshayeb@gmail.com')
-                ->setBody($body);
-            $mailer->send($reminder);
+                ->setBody(
+                    $this->getContainer()->get('twig')->render(
+                        'emails/shift_alerts.html.twig',
+                        array('alerts' => $alerts)
+                    ),
+                    'text/html'
+                );
+            $mailer->send($email);
         }
     }
 
