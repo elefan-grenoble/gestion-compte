@@ -32,7 +32,7 @@ class CycleStartCommand extends ContainerAwareCommand
         $home_url = $router->generate('homepage',array(),UrlGeneratorInterface::ABSOLUTE_URL);
 
         $today = new \DateTime('now');
-        $today->setTime(0, 0, 0, 0);
+        $today->setTime(0, 0, 0);
 
         foreach ($users as $user) {
             if ($user->getFirstShiftDate() < $today) {

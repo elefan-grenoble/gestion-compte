@@ -27,7 +27,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
         $users = $em->getRepository('AppBundle:User')->findAll();
         $today = new \DateTime('now');
-        $today->setTime(0, 0, 0, 0);
+        $today->setTime(0, 0, 0);
         foreach ($users as $user) {
             if ($user->getFirstShiftDate()) {
 
