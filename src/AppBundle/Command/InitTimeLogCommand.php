@@ -26,29 +26,24 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $countCycleBeginning = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $users = $em->getRepository('AppBundle:User')->findAll();
-        $cutDay = new \DateTime('now');
-        $cutDay = $cutDay->modify("-28 days");
+        $today = new \DateTime('now');
+        $today->setTime(0, 0, 0, 0);
         foreach ($users as $user) {
+            if ($user->getFirstShiftDate()) {
 
-            $lastCycleShifts = $user->getShiftsOfCycle(-1, true);
-            foreach ($lastCycleShifts as $shift) {
-                $this->createShiftLog($em, $shift, $user);
-                $countShiftLogs++;
+                $lastCycleShifts = $user->getShiftsOfCycle(-1, true)->toArray();
+                $currentCycleShifts = $user->getShiftsOfCycle(0, true)->toArray();
+                $shifts = array_merge($lastCycleShifts, $currentCycleShifts);
+                foreach ($shifts as $shift) {
+                    $this->createShiftLog($em, $shift, $user);
+                    $countShiftLogs++;
+                }
+
+                if ($user->getFirstShiftDate() < $today) {
+                    $this->createCurrentCycleBeginningLog($em, $user);
+                    $countCycleBeginning++;
+                }
             }
-
-            $registrations = $user->getRegistrations();
-            if (count($registrations) != 1 || $registrations[0]->getDate() < $cutDay) {
-                $this->createCurrentCycleBeginningLog($em, $user);
-            }
-
-            $currentCycleShifts = $user->getShiftsOfCycle(0, true);
-            foreach ($currentCycleShifts as $shift) {
-                $this->createShiftLog($em, $shift, $user);
-                $countShiftLogs++;
-            }
-
-            $countCycleBeginning++;
-
         }
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
