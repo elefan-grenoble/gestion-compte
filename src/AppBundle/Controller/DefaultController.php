@@ -91,15 +91,15 @@ class DefaultController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
-        $last_code = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'));
-        if (!$last_code){
-            $last_code = new Code();
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
+        if (!$codes){
+            $codes[] = new Code();
         }
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
             'undismiss_shift_form' => $undismiss_shift_form->createView(),
             'events' => $futur_events,
-            'last_code' => $last_code
+            'codes' => $codes
         ]);
     }
 

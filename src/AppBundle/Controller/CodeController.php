@@ -22,24 +22,31 @@ class CodeController extends Controller
 {
 
     /**
-     * Lists all tasks.
+     * Lists all codes.
      *
      * @Route("/", name="codes_list")
      * @Method("GET")
      */
     public function listAction(Request $request){
+        $session = new Session();
 
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
-        $this->denyAccessUnlessGranted('view',new Code());
 
         $em = $this->getDoctrine()->getManager();
 
         if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')){
-            $codes = $em->getRepository('AppBundle:Code')->findAll();
+            $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
         }else{
-            $codes = $em->getRepository('AppBundle:Code')->findAll();
+            $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'),10);
         }
+
+        if (!count($codes)){
+            $session->getFlashBag()->add('warning', 'aucun code à lire');
+            return $this->redirectToRoute('homepage');
+
+        }
+
+        $this->denyAccessUnlessGranted('view',$codes[0]);
 
         return $this->render('default/code/list.html.twig', array(
             'codes' => $codes,
@@ -76,7 +83,7 @@ class CodeController extends Controller
 
             $session->getFlashBag()->add('success', 'Le nouveau code a bien été créé !');
 
-            return $this->redirectToRoute('homepage');
+            return $this->redirectToRoute('codes_list');
 
         }elseif ($form->isSubmitted()){
             foreach ($this->getErrorMessages($form) as $key => $errors){
@@ -84,66 +91,73 @@ class CodeController extends Controller
                     $session->getFlashBag()->add('error', $key." : ".$error);
             }
         }
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
         return $this->render('default/code/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+            'form' => $form->createView(),
+            'codes' => $codes
+
+    ));
 
     }
 
     /**
-     * add new task.
      *
-     * @Route("/edit/{id}", name="task_edit")
-     * @Method({"GET","POST"})
+     * @Route("/close/{id}", name="code_close")
+     * @Method({"GET"})
      */
     public function editAction(Request $request,Code $code){
         $session = new Session();
 
-        $this->denyAccessUnlessGranted('edit',$code);
+        $this->denyAccessUnlessGranted('close',$code);
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\CodeType', $code);
-        $form->get('due_date')->setData($code->getDueDate()->format('Y-m-d'));
-        $form->get('created_at')->setData($code->getCreatedAt()->format('Y-m-d'));
 
-        $form->handleRequest($request);
+        $code->setClosed(true);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        $em->persist($code);
+        $em->flush();
 
-            $date = $form->get('due_date')->getData();
-            $new_date = new \DateTime($date);
-            $code->setDueDate($new_date);
+        $session->getFlashBag()->add('success', 'Le code a bien été marqué fermé !');
 
-            $date = $form->get('created_at')->getData();
-            $new_date = new \DateTime($date);
-            $code->setCreatedAt($new_date);
+        return $this->redirectToRoute('codes_list');
 
+    }
+
+    /**
+     * close all codes.
+     *
+     * @Route("/close_all", name="code_done")
+     * @Method("GET")
+     */
+    public function closeAllAction(Request $request){
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $em = $this->getDoctrine()->getManager();
+
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
+
+        $this->denyAccessUnlessGranted('view',$codes[0]);
+
+        $em = $this->getDoctrine()->getManager();
+
+        foreach ($codes as $code){
+            $code->setClosed(true);
             $em->persist($code);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'La tache a bien été éditée !');
-
-            return $this->redirectToRoute('tasks_list');
-
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
         }
-        return $this->render('default/task/edit.html.twig', array(
-            'task' => $code,
-            'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($code)->createView()
-        ));
 
+        $em->flush();
+
+        $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
+
+        return $this->redirectToRoute('homepage');
     }
 
 
     /**
-     * task delete
+     * code delete
      *
-     * @Route("/{id}", name="task_delete")
+     * @Route("/{id}", name="code_delete")
      * @Method({"DELETE"})
      */
     public function removeAction(Request $request,Code $code)
@@ -158,7 +172,7 @@ class CodeController extends Controller
             $em->flush();
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
         }
-        return $this->redirectToRoute('tasks_list');
+        return $this->redirectToRoute('codes_list');
     }
 
     /**
@@ -167,7 +181,7 @@ class CodeController extends Controller
      */
     protected function getDeleteForm(Code $code){
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('task_delete', array('id' => $code->getId())))
+            ->setAction($this->generateUrl('code_delete', array('id' => $code->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }
