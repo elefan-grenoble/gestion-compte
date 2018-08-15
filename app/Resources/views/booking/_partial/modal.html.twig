@@ -15,7 +15,7 @@
                                 Ce créneau n'est <b>pas</b> qualifié. {{ beneficiary.firstname }} a
                                 le{% if beneficiary.roles | length > 1 %}s{% endif %} role{% if beneficiary.roles | length > 1 %}s{% endif %}
                                 {% for role in beneficiary.roles  %}{% if loop.last and loop.index > 1 %} et {% endif %}<i>{{ role.name }}</i>{% if not loop.last %}, {% endif %}{% endfor %}.<br>
-                                Ses compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
+                                Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                             </span>
                         </div>
                     </div>

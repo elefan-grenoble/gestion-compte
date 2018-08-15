@@ -58,7 +58,7 @@ class TaskType extends AbstractType
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => true,
-                    'label'=>'Commission(s)'
+                    'label'=>'Commission(s) / College(s)'
                 ));
             }
 
@@ -87,7 +87,7 @@ class TaskType extends AbstractType
                     $beneficiaries = new ArrayCollection($collection);
                     $form->add('owners',EntityType::class, array(
                         'class' => Beneficiary::class,
-                        'label' => 'Référents',
+                        'label' => 'Personne(s) ressource(s)',
                         'choice_label'     => 'display_name',
                         'choices' => $beneficiaries,
                         'multiple'     => true,
