@@ -125,7 +125,7 @@ class ShiftBucket
         return $this->shifts->first()->getDuration();
     }
 
-    public function canBookInterval(Beneficiary $beneficiary)
+    public function canBookInterval(Beneficiary $beneficiary) // check if none of the shifts belong to the beneficiary ?
     {
         return !$beneficiary->getShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
