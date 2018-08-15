@@ -1,0 +1,78 @@
+{% extends 'layout.html.twig' %}
+{% block content %}
+    {% if codes | length == 1%}
+        <h4 class="">Code en cours de validité</h4>
+        <div class="row">
+            <div class="col s12">
+                <div class="card-panel">
+                    <h5><i class="material-icons left">vpn_key</i>{{ codes|first.value }}</h5>
+                    entré à {{ codes|first.createdAt | date('H:m:i') }} le {{ codes|first.createdAt | date_fr_long }} par {{ codes|first.getRegistrar }}
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <h4 class="">Liste des codes {% if not is_granted("ROLE_ADMIN") %}en cours{% endif %}</h4>
+        <table>
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Créé le</th>
+                <th>Membre</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for code in codes %}
+                {% if is_granted("view",code)  %}
+                    <tr>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                <b>{{ code.value }}</b>
+                                {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>{% if code.closed %}<del>{% endif %}
+                                {{ code.getRegistrar }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}
+                                inactif
+                            {% else %}
+                                <a href="{{ path("code_close",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                <b>XXXX</b>
+                                {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>{% if code.closed %}<del>{% endif %}
+                                {{ code.getRegistrar }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td class="red-text">
+                            {% if code.closed %}
+                                inactif
+                            {% else %}
+                                accès intedit
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+
+    {% if is_granted('create',code) %}
+        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn teal lighten-2"><i class="material-icons left">add</i>Ajouter un code</a>
+    {% endif %}
+    <a href="{{ path("code_done") }}" class="waves-effect waves-light btn light-green"><i class="material-icons left">check</i>OK j'ai récupéré les clefs !</a>
+{% endblock %}
