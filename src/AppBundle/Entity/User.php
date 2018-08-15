@@ -715,27 +715,36 @@ class User extends BaseUser
      *
      * @param \AppBundle\Entity\Beneficiary $beneficiary
      * @param \AppBundle\Entity\Shift $shift
+     * @param $current_cycle index of cycle
      *
      * @return Boolean
      */
-    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null)
+    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 0)
     {
-        if (!$beneficiary || !$shift) // in general, not for a specific beneficiary and shift
-            return $this->getTimeCount() < $this->getMaxTimeCount();
+        if (!$beneficiary && !$shift) // in general, not for a specific beneficiary and shift
+            return $this->getTimeCount() < $this->shiftTimeByCycle()*($current_cycle+1); //Can book ?
         else {
-            if ($beneficiary->getUser()->getId() != $this->getId()) {
+            if ($shift->getIsPast()){ // Do not book old
                 return false;
             }
-            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+            if ($beneficiary->getUser()->getId() != $this->getId()) { // Book only for me
                 return false;
             }
-            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) {
+            if ($shift->getShifter() && !$shift->getIsDismissed()) { // Do not book already booked
                 return false;
             }
-            if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) {
+            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) { // Do not book shift i do not know how to handle (role)
                 return false;
             }
-            return ($shift->getDuration() + $this->getTimeCount()) <= 180;
+            if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
+                return false;
+            }
+            if (($shift->getStart() > $this->endOfCycle($current_cycle)) && ($shift->getStart() < $this->endOfCycle($current_cycle+1)))
+                $current_cycle = 1;
+            else // more than 1 cycle away
+                return false;
+
+            return (($shift->getDuration() + $this->getTimeCount()) <= ($current_cycle+1)*$this->shiftTimeByCycle());
         }
     }
 
@@ -744,6 +753,7 @@ class User extends BaseUser
      *
      * @return Integer
      */
+    // TODO Valeur à mettre dans une conf
     public function getMaxTimeCount()
     {
         return 180;
