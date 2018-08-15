@@ -739,10 +739,12 @@ class User extends BaseUser
             if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
                 return false;
             }
-            if (($shift->getStart() > $this->endOfCycle($current_cycle)) && ($shift->getStart() < $this->endOfCycle($current_cycle+1)))
-                $current_cycle = 1;
-            else // more than 1 cycle away
-                return false;
+            if ($shift->getStart() > $this->endOfCycle($current_cycle)){
+                if ($shift->getStart() < $this->endOfCycle($current_cycle+1))
+                    $current_cycle = 1;
+                else // more than 1 cycle away
+                    return false;
+            }
 
             return (($shift->getDuration() + $this->getTimeCount()) <= ($current_cycle+1)*$this->shiftTimeByCycle());
         }
