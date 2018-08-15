@@ -71,6 +71,9 @@ class CodeVoter extends Voter
                 }
                 return $this->canAdd($code, $user);
             case self::EDIT:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                    return true;
+                }
             case self::DELETE:
                 if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
                     return true;
@@ -84,7 +87,7 @@ class CodeVoter extends Voter
     private function canAdd(Code $code, User $user)
     {
         if ($user->getCommissions()){ // si l'utilisateur fait parti d'une comm
-            //return true;
+            return true;
         }
         $shifts = $user->getShiftsOfCycle(0);
         $y = new \DateTime('Yesterday');
@@ -105,6 +108,11 @@ class CodeVoter extends Voter
 
     private function canView(Code $code, User $user)
     {
+        return true;
+        if ($code->getRegistrar() === $user){
+            return true;
+        }
+
         $shifts = $user->getShiftsOfCycle(0);
         $y = new \DateTime('Yesterday');
         $y->setTime(23,59,59);
@@ -112,12 +120,9 @@ class CodeVoter extends Voter
         $n->add(new \DateInterval("P15M")); //TODO put in conf
         foreach ($shifts as $shift){
             if (($shift->getStart() < $n) && $shift->getStart() > $y && ($shift->getEnd() > $n)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
-                return true;
+                if ($code->setCreatedAt() > $shift->getBookedTime()) // code crée après la réservation du créneau
+                    return true;
             }
-        }
-
-        if ($code->getRegistrar() === $user){
-            return true;
         }
 
         return false;

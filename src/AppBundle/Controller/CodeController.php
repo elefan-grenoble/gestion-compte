@@ -7,6 +7,7 @@ use AppBundle\Entity\Code;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -30,7 +31,7 @@ class CodeController extends Controller
 
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $this->denyAccessUnlessGranted('view_codes_for_keys',$current_app_user);
+        $this->denyAccessUnlessGranted('view',new Code());
 
         $em = $this->getDoctrine()->getManager();
 
@@ -70,16 +71,12 @@ class CodeController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $date = $form->get('due_date')->getData();
-            $new_date = new \DateTime($date);
-            $code->setDueDate($new_date);
-
             $em->persist($code);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La nouvelle tache a bien été créée !');
+            $session->getFlashBag()->add('success', 'Le nouveau code a bien été créé !');
 
-            return $this->redirectToRoute('task_edit',array('id'=>$code->getId()));
+            return $this->redirectToRoute('homepage');
 
         }elseif ($form->isSubmitted()){
             foreach ($this->getErrorMessages($form) as $key => $errors){
@@ -87,7 +84,7 @@ class CodeController extends Controller
                     $session->getFlashBag()->add('error', $key." : ".$error);
             }
         }
-        return $this->render('default/task/new.html.twig', array(
+        return $this->render('default/code/new.html.twig', array(
             'form' => $form->createView()
         ));
 
@@ -173,6 +170,27 @@ class CodeController extends Controller
             ->setAction($this->generateUrl('task_delete', array('id' => $code->getId())))
             ->setMethod('DELETE')
             ->getForm();
+    }
+
+    private function getErrorMessages(Form $form) {
+        $errors = array();
+
+        foreach ($form->getErrors() as $key => $error) {
+            if ($form->isRoot()) {
+                $errors['#'][] = $error->getMessage();
+            } else {
+                $errors[] = $error->getMessage();
+            }
+        }
+
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $key = (isset($child->getConfig()->getOptions()['label'])) ? $child->getConfig()->getOptions()['label'] : $child->getName();
+                $errors[$key] = $this->getErrorMessages($child);
+            }
+        }
+
+        return $errors;
     }
 
 }
