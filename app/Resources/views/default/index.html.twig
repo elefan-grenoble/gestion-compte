@@ -34,6 +34,15 @@
                     <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
                 {% endif %}
                 <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
+                {% if is_granted("view",codes | first) or is_granted("create",codes | first)  %}
+                    <br>
+                {% endif %}
+                {% if is_granted("view",codes | first)  %}
+                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} coffre à clefs</a>
+                {% endif %}
+                {% if is_granted("create",codes | first)  %}
+                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Nouveau code coffre</a>
+                {% endif %}
 
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
