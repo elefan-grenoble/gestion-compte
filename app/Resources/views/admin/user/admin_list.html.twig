@@ -15,14 +15,15 @@
         <tbody>
         {% for admin in admins %}
             <tr>
-                <td>{{ - admin.membernumber }}</td>
+                <td><a href="{{ path('user_show', { 'username': admin.username }) }}">{{ admin.membernumber }}</a></td>
                 <td>{{ admin.username }}</td>
                 <td>{{ admin.email }}</td>
                 <td>
-                    <a href="{{ path('user_edit', { 'username': admin.username }) }}" class="btn waves-effect waves-light">editer</a>
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
-                    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                    <a href="{{ path('user_edit', { 'username': admin.username }) }}" class="teal btn-floating"><i class="material-icons left">edit</i></a>
+                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
+                    <button type="submit" class="btn-floating waves-effect waves-light red"><i class="material-icons left">close</i></button>
                     {{ form_end(delete_forms[admin.id]) }}
                 </td>
             </tr>

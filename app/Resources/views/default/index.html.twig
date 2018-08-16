@@ -23,7 +23,7 @@
                     {% endfor %}
                 </div>
 
-                {% if app.user.memberNumber > 0 %}{# not admin ? #}
+                {% if app.user.memberNumber > 0 %}{# not only admin ? #}
                     {% include "booking/home_booked_shifts.html.twig" %}
                 {% else %}
                     <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
@@ -44,10 +44,16 @@
                     <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Nouveau code coffre</a>
                 {% endif %}
 
+                {% if is_granted("ROLE_USER_MANAGER") %}
+                    <h5>Gérer les membres</h5>
+                    <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
+                {% endif %}
+
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
-                    <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Gérer les adhérents</a>
-                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
+                    {% if app.user.memberNumber > 0 %}
+                        <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
+                    {% endif %}
                     <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
                 {% endif %}
             </div>

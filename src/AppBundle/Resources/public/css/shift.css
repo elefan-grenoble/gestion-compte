@@ -26,6 +26,14 @@
 .shift-bucket:hover {
   z-index: 999;
 }
+.admin-shift-warning {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  opacity: 0.6;
+  text-align: right;
+  font-size: small;
+}
 /*
  * Time counter
  */

@@ -29,7 +29,7 @@
         <div class="row">
             <ul class="collapsible" data-collapsible="accordion" id="legend">
                 <li>
-                    <div class="collapsible-header {% if not frontend_cookie or not frontend_cookie.booking or not frontend_cookie.booking.legend_closed %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-header {% if frontend_cookie is defined and frontend_cookie.booking is defined and frontend_cookie.booking.legend_closed is defined and frontend_cookie.booking.legend_closed %}{% else %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
                     <div class="collapsible-body">
                         <ul>
                             <li>

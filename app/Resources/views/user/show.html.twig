@@ -12,7 +12,17 @@
 
 {% block content %}
     <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img">
-    <h4 class="">#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}</h4>
+    <h4 class="">
+        {% if user.withdrawn %}<del>{% endif %}
+            #{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}
+        {% if user.withdrawn %}</del>{% endif %}
+        {% if user.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
+        {% for role in user.roles %}
+            {% if role != "ROLE_USER" %}
+                <span class="badge purple-text small">{{ role }}</span>
+            {% endif %}
+        {% endfor %}
+    </h4>
     <div class="row">
         {% for beneficiary in user.beneficiaries %}
             {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary } %}
@@ -31,10 +41,10 @@
         </div>
     {% endif %}
 
-    <ul class="collapsible">
+    <ul class="collapsible" data-collapsible="expandable">
         {% if is_granted("create",note) %}
-        <li>
-            <div class="collapsible-header"><i class="material-icons">add</i>Ajouter une note</div>
+        <li id="note">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}"><i class="material-icons">add</i>Ajouter une note</div>
             <div class="collapsible-body">
                     {{ form_start(note_form) }}
                     <div class="input-field text col s12">
@@ -53,21 +63,71 @@
             </div>
         </li>
         {% endif %}
-        {% if is_granted("ROLE_ADMIN") %}
-            <li>
-                <div class="collapsible-header"><i class="material-icons">person</i>Actions admin</div>
+        {% if is_granted("ROLE_USER_MANAGER") %}
+            <li id="actions">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">person</i>Actions</div>
                 <div class="collapsible-body">
-                    <a href="{{ path("user_edit",{"username":user.username}) }}" class="waves-effect waves-light btn">
-                        <i class="material-icons left">edit</i>Editer le membre</a>
+                    {% if is_granted("edit",user) %}
+                        <form action="{{ path('user_edit_firewall') }}" method="POST">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <div>
+                                <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
+                            </div>
+                        </form>
+                    {% endif %}
+                    {% if is_granted("freeze",user) %}
+                        {% if not user.frozen %}
+                            <a href="{{ path("user_freeze",{"id":user.id}) }}" class="waves-effect waves-light btn deep-purple">
+                                <i class="material-icons left">notifications_paused</i>Geler le compte</a>
+                        {% else %}
+                            <a href="{{ path("user_unfreeze",{"id":user.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
+                                <i class="material-icons left">notifications_active</i>Dégeler le compte</a>
+                        {% endif %}
+                    {% endif %}
+                    {% if is_granted("close",user) %}
+                        {% if not user.withdrawn %}
+                        <a href="{{ path("user_close",{"id":user.id}) }}" class="waves-effect waves-light btn red">
+                            <i class="material-icons left">close</i>Fermer le compte</a>
+                        {% else %}
+                            <a href="{{ path("user_open",{"id":user.id}) }}" class="waves-effect waves-light btn teal">
+                                <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
+                        {% endif %}
+                    {% endif %}
                 </div>
             </li>
         {% endif %}
-        <li>
-            <div class="collapsible-header"><i class="material-icons">date_range</i>Créneaux</div>
+        <li id="shifts">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}"><i class="material-icons">date_range</i>Créneaux</div>
             <div class="collapsible-body">
                 {% set firstShiftDate = user.firstShiftDate %}
-                <p>Date du premier créneau: {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
-                <p>Compteur: {{ user.timeCount | duration_from_minutes }}</p>
+                <table class="striped">
+                    <thead>
+                    <tr>
+                        <th>Date du log</th>
+                        <th>Temps</th>
+                        <th>Motif</th>
+                        <th>Créneau associé</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for timeLog in user.timeLogs %}
+                        <tr>
+                            <td>{{ timeLog.date | date_fr_full }}</td>
+                            <td>{{ timeLog.time | duration_from_minutes}}</td>
+                            <td>{{ timeLog.description }}</td>
+                            <td>{{ timeLog.shift }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <th>TOTAL EN COURS</th>
+                        <td><b>{{ user.timeCount | duration_from_minutes }}</b></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+
                 {% set previousShifts = user.getShiftsOfCycle(-1) %}
                 {% set currentShifts = user.getShiftsOfCycle() %}
                 {% set nextShifts = user.getShiftsOfCycle(1) %}
@@ -105,17 +165,36 @@
                             </div>
                         {% endfor %}
                     </div>
+
                 </div>
+
+                <p>Date du tout premier créneau : {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
+
             </div>
         </li>
         {% if is_granted("ROLE_SUPER_ADMIN") %}
-            <li>
-                <div class="collapsible-header"><i class="material-icons">person</i>Actions super admin</div>
+            <li id="super">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.super_open is defined and frontend_cookie.user_show.super_open %}active{% endif %}"><i class="material-icons">person</i>Actions super admin</div>
                 <div class="collapsible-body">
                     {{ form_start(delete_form) }}
                     {{ form_widget(delete_form) }}
                     <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
                     {{ form_end(delete_form) }}
+
+                    <h6>Roles</h6>
+
+                    {% if user.hasRole('ROLE_ADMIN') %}
+                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_downward</i>supprimer le role ADMIN</a>
+                    {% else %}
+                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un ADMIN</a>
+                    {% endif %}
+
+                    {% if user.hasRole('ROLE_USER_MANAGER') %}
+                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_downward</i>supprimer le role USER_MANAGER</a>
+                    {% else %}
+                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un USER_MANAGER</a>
+                    {% endif %}
+
                     <h6>Recorded registrations</h6>
                     <ul class="collapsible" data-collapsible="accordion">
                         {% for registration in user.recordedRegistrations %}
@@ -150,6 +229,43 @@
         {% endif %}
     </ul>
 
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    function init(){
+        var data_raw = Cookies.get("frontend");
+        var data = undefined;
+        if (data_raw)
+            data = JSON.parse(data_raw);
+        if (!data)
+            data = {};
+        if (!data.user_show)
+            data.user_show = {};
+        return data;
+    }
+    $('#note .collapsible-header').on('click',function () {
+        var data = init();
+        data.user_show.note_open = ! $(this).hasClass("active");
+        Cookies.set("frontend",data);
+    });
+    $('#actions .collapsible-header').on('click',function () {
+        var data = init();
+        data.user_show.actions_open = ! $(this).hasClass("active");
+        Cookies.set("frontend",data);
+    });
+    $('#shifts .collapsible-header').on('click',function () {
+        var data = init();
+        data.user_show.shifts_open = ! $(this).hasClass("active");
+        Cookies.set("frontend",data);
+    });
+    $('#super .collapsible-header').on('click',function () {
+        var data = init();
+        data.user_show.super_open = ! $(this).hasClass("active");
+        Cookies.set("frontend",data);
+    });
+
+</script>
 {% endblock %}
 
 {% block stylesheets %}

@@ -28,26 +28,25 @@
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.shifts() %}
                         {% if (shift.shifter) %}{# is booked #}
-                            {% if (shiftercount < 3) or ((shiftercount == 3) and (bucket.shifts|length == 3)) %}
+                            {% if (shiftercount < 3) %}
                                 <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
                                             data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
                                         &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
                                     {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                                 </li>
                                 {% set shiftercount = shiftercount + 1 %}
+                            {% elseif shiftercount == 3 %}
+                                <li>( ... )</li>
+                                {% set shiftercount = shiftercount + 1 %}
                             {% endif %}
-                        {% endif %}
-                        {% if shiftercount == 3 and (bucket.shifts() | length) > 3 %}
-                            <li>( ... )</li>
-                            {% set shiftercount = shiftercount + 1 %}
                         {% endif %}
                     {% endfor %}
                 </ul>
             </div>
             {% if (shiftercount == 0) %}
-                <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                <span class="red-text red lighten-5 truncate admin-shift-warning" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
             {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
-                <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                <span class="orange-text orange lighten-4 truncate admin-shift-warnin" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
             {% endif %}
         </div>
     </a>
@@ -66,6 +65,7 @@
                         {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
                             <a href="{{ path("user_show",{'username':shift.shifter.user.username}) }}">#{{ shift.shifter.user.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                             {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.roles | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                     </li>

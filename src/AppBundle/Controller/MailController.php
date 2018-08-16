@@ -19,7 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * Email controller.
  *
  * @Route("admin/mail")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("has_role('ROLE_USER_MANAGER')")
  */
 class MailController extends Controller
 {

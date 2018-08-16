@@ -113,7 +113,7 @@ class CodeVoter extends Voter
         if (!$code->getId())
             return false;
 
-        if ($code->getRegistrar() === $user){
+        if ($code->getRegistrar() === $user){ // my code
             return true;
         }
 

@@ -40,7 +40,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * User controller.
  *
  * @Route("admin")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("has_role('ROLE_USER_MANAGER')")
  */
 class AdminController extends Controller
 {
@@ -49,6 +49,7 @@ class AdminController extends Controller
      *
      * @Route("/", name="admin")
      * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
@@ -64,6 +65,7 @@ class AdminController extends Controller
      * @return Response
      * @Route("/users", name="user_index")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
      */
     public function usersAction(Request $request,SearchUserFormHelper $formHelper)
     {
@@ -145,22 +147,24 @@ class AdminController extends Controller
     }
 
     /**
-     * Lists all user entities.
+     * Lists all users whit ROLE_ADMIN.
      *
      * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/admin_users", name="admins_list")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function adminUsersAction(Request $request,SearchUserFormHelper $formHelper)
     {
         $em = $this->getDoctrine()->getManager();
-        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('u')
-            ->andWhere('u.member_number <= 0')
-            ->orderBy('u.member_number', 'DESC')
-            ->getQuery();
-
-        $admins =  $qb->execute();
+//        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('u')
+//            ->andWhere('u.member_number <= 0')
+//            ->orderBy('u.member_number', 'DESC')
+//            ->getQuery();
+//
+//        $admins =  $qb->execute();
+        $admins = $em->getRepository("AppBundle:User")->findByRole('ROLE_ADMIN');
         $delete_forms = array();
         foreach ($admins as $admin){
             $delete_forms[$admin->getId()] = $this->createFormBuilder()
@@ -180,6 +184,7 @@ class AdminController extends Controller
      *
      * @Route("/registrations", name="admin_registrations")
      * @Method("GET")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function registrationsAction(Request $request)
     {

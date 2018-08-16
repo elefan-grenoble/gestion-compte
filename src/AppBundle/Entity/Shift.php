@@ -105,6 +105,12 @@ class Shift
         $this->isDismissed = false;
     }
 
+    public function __toString()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B de %R", $this->getStart()->getTimestamp()).' à '.strftime("%R", $this->getEnd()->getTimestamp()).' ['.$this->getShifter().']';
+    }
+
     /**
      * Get id
      *

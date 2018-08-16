@@ -96,7 +96,7 @@
             {% endif %}
         {% endfor %}
     </div>
-    {% if user.beneficiaries|length < 4 %}{#todo put this value in conf#}
+    {% if user.beneficiaries|length < 2 %}{#todo put this value in conf#}
         <ul class="collapsible" data-collapsible="accordion">
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
@@ -116,7 +116,7 @@
         {% if not is_granted("ROLE_ADMIN") and token is defined %}
             <input type="hidden" value="{{ token }}" name="token">
         {% endif %}
-        <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
+        <button type="submit" class="btn btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
     </form>
 
 {% endblock %}
