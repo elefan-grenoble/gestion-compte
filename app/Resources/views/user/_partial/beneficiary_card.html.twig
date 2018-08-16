@@ -6,6 +6,9 @@
                 <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
                 {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
+                {% if beneficiary.user.withdrawn %}<span class="red white-text badge"> fermé </span>{% endif %}
+                {% if beneficiary.user.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
+                {% if beneficiary.user.frozen %}<span class="deep-purple white-text badge"> gelé </span>{% endif %}
                 {% if beneficiary.canViewUserData %}<i class="material-icons">face</i>{% endif %}</span>
             <div class="row">
                 <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}</div>
