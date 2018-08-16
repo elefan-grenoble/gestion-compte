@@ -15,6 +15,10 @@ class UserVoter extends Voter
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
+    const CLOSE = 'close';
+    const FREEZE = 'freeze';
+    const ROLE_REMOVE = 'role_remove';
+    const ROLE_ADD = 'role_add';
     const ANNOTATE = 'annotate';
 
     private $decisionManager;
@@ -29,7 +33,7 @@ class UserVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
+        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
             return false;
         }
 
@@ -58,6 +62,10 @@ class UserVoter extends Voter
         if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
             return true;
         }
+        // on user ROLE_USER_MANAGER can do anything! The power!
+        if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+            return true;
+        }
 
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
@@ -67,6 +75,10 @@ class UserVoter extends Voter
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $user);
+            case self::CLOSE:
+            case self::FREEZE:
+            case self::ROLE_ADD:
+            case self::ROLE_REMOVE:
             case self::EDIT:
                 return $this->canEdit($subject, $user);
         }
@@ -80,7 +92,7 @@ class UserVoter extends Voter
         if ($this->canEdit($subject, $user)) {
             return true;
         }
-        if ($user->getMainBeneficiary()->canViewUserData()){ //todo check also other Beneficiary ?
+        if ($user->getMainBeneficiary()->canViewUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
             return true;
         }
         return false;
@@ -93,7 +105,7 @@ class UserVoter extends Voter
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
 
         if ($this->isLocationOk()){
-            if ($user->getMainBeneficiary()->canEditUserData()){ //todo check also other Beneficiary ?
+            if ($user->getMainBeneficiary()->canEditUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
                 return true;
             }
             if ($subject->getId()){
