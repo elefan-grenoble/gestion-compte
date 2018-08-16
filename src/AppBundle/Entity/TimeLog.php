@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TimeLog
 {
+    const DESC_BOOKING = "Créneau réservé";
     /**
      * @var int
      *
