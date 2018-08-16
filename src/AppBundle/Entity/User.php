@@ -124,6 +124,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="user",cascade={"persist", "remove"})
+     * @OrderBy({"date" = "DESC"})
      */
     private $timeLogs;
 
@@ -468,6 +469,17 @@ class User extends BaseUser
             $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
         }
         return new ArrayCollection($commissions);
+    }
+
+    public function getOwnedCommissions(){
+        return $this->getCommissions()->filter(function($commission) {
+            $r = false;
+            foreach ($commission->getOwners() as $owner){
+                if ($this->getBeneficiaries()->contains($owner))
+                    return true;
+            }
+            return false;
+        });
     }
 
     /**
