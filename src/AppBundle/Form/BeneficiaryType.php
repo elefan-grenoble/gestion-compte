@@ -46,7 +46,7 @@ class BeneficiaryType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
+            if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'choice_label'     => 'name',
@@ -60,6 +60,15 @@ class BeneficiaryType extends AbstractType
                     'multiple'     => true,
                     'required' => false,
                     'label'=>'Role(s)'
+                ));
+            }else if(count($user->getOwnedCommissions())){
+                $form->add('commissions',EntityType::class, array(
+                    'class' => 'AppBundle:Commission',
+                    'choices' => $user->getOwnedCommissions(),
+                    'choice_label'     => 'name',
+                    'multiple'     => true,
+                    'required' => true,
+                    'label'=>'Commission(s) / College(s)'
                 ));
             }
         });
