@@ -18,18 +18,24 @@
                 <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">Espace membre @ L'éléfàn</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            <!-- Dropdown Trigger -->
                             <li>
-                                <a class="dropdown-button" href="#!" data-activates="services">Services<i class="material-icons right">arrow_drop_down</i></a>
-                                <!-- Dropdown Structure -->
-                                <ul id="services" class="dropdown-content">
-                                    <li><a href="https://wiki.lelefan.org/">wiki</a></li>
-                                    <li><a href="https://barrissement.lelefan.org/">mattermost</a></li>
-                                </ul>
+                                <a href="https://wiki.lelefan.org/">
+                                    <i class="material-icons left">description</i>
+                                    <small>wiki</small>
+                                </a>
                             </li>
-                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons small right">settings</i>
+                            <li>
+                                <a href="https://barrissement.lelefan.org/">
+                                    <i class="material-icons left">chat</i>
+                                    <small>mattermost</small>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ path('fos_user_profile_edit') }}">
+                                    <i class="material-icons small left">settings</i>
                                     <small>{{ app.user.username }}</small>
-                                </a></li>
+                                </a>
+                            </li>
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small right">exit_to_app</i>
                                 </a></li>
                         {% else %}

@@ -1,5 +1,5 @@
-<div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% else %}cyan darken-4{% endif %}">
-    <div class="card-content white-text">
+<div class="card {% if (shift.getIsDismissed()) %}orange darken-4{% elseif shift.isPast %}grey lighten-2{% else %}cyan darken-4{% endif %}">
+    <div class="card-content{% if not shift.isPast %} white-text{% endif %}">
         <span class="card-title">{{ shift.start|date_fr_long }}</span>
         <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
@@ -10,7 +10,11 @@
     <div class="card-action">
         {% if is_granted('free',shift) %}
         <form action="{{ path('free_shift', {'id' : shift.id }) }}" method="Post">
-            <button type="submit" class="btn red"><i class="material-icons left">delete</i>Libérer</button>
+            {% if shift.isPast %}
+                <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
+            {% else %}
+                <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
+            {% endif %}
         </form>
         {% endif %}
     </div>

@@ -248,7 +248,7 @@
                     <td>
                         {% for beneficiary in user.beneficiaries %}
                             {% for role in beneficiary.roles %}
-                                <div class="chip">
+                                <div class="chip truncate">
                                     {{ role.name }}
                                 </div>
                             {% endfor %}
@@ -257,13 +257,16 @@
                     <td>
                         {% for beneficiary in user.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
-                                <div class="chip">
+                                <div class="chip truncate">
                                     {{ commission.name }}
                                 </div>
                             {% endfor %}
                         {% endfor %}
                     </td>
-                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
+                    <td>
+                        <a class="btn-floating blue-grey left" href="{{ path('user_show', { 'username': user.username }) }}"><i class="material-icons left">search</a>
+                        <a class="btn-floating left" href="{{ path('user_edit', { 'username': user.username }) }}"><i class="material-icons left">edit</a>
+                    </td>
                 </tr>
             {% else %}
                 <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >

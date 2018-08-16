@@ -71,6 +71,6 @@
     {% endfor %}
 </ul>
     {% if is_granted('create',task) %}
-        <a href="{{ path("task_new") }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Ajouter une nouvelle tache</a>
+        <a href="{{ path("task_new") }}" class="waves-effect waves-teal btn"><i class="material-icons left">add</i>Ajouter une nouvelle tache</a>
     {% endif %}
 {% endblock %}
