@@ -663,6 +663,122 @@ class UserController extends Controller
     }
 
     /**
+     * close user
+     *
+     * @Route("/close/{id}", name="user_close")
+     * @Method({"GET"})
+     */
+    public function closeAction(User $user){
+        $this->denyAccessUnlessGranted('close',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $user->setWithdrawn(true);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte fermé');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
+     * open user
+     *
+     * @Route("/open/{id}", name="user_open")
+     * @Method({"GET"})
+     */
+    public function openAction(User $user){
+        $this->denyAccessUnlessGranted('close',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $user->setWithdrawn(false);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte fermé');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
+     * close user
+     *
+     * @Route("/freeze/{id}", name="user_freeze")
+     * @Method({"GET"})
+     */
+    public function freezeAction(User $user){
+        $this->denyAccessUnlessGranted('freeze',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $user->setFrozen(true);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte gelé');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
+     * close user
+     *
+     * @Route("/unfreeze/{id}", name="user_unfreeze")
+     * @Method({"GET"})
+     */
+    public function unfreezeAction(User $user){
+        $this->denyAccessUnlessGranted('freeze',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $user->setFrozen(false);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte dégelé');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
+     * remove role of user
+     *
+     * @Route("/removeRole/{id}/{role}", name="user_remove_role")
+     * @Method({"GET"})
+     */
+    public function removeRoleAction(User $user,$role){
+        $this->denyAccessUnlessGranted('role_remove',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        if (!$user->hasRole($role)) {
+            $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le role '.$role);
+            return $this->redirectToShow($user,$session,$current_app_user);
+        }
+        $user->removeRole($role);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Le Role '.$role.' a bien été retiré');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
+     * add role of user
+     *
+     * @Route("/addRole/{id}/{role}", name="user_add_role")
+     * @Method({"GET"})
+     */
+    public function addRoleAction(User $user,$role){
+        $this->denyAccessUnlessGranted('role_add',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        if ($user->hasRole($role)) {
+            $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le role '.$role);
+            return $this->redirectToShow($user,$session,$current_app_user);
+        }
+        $user->addRole($role);
+        $em->persist($user);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Le Role '.$role.' a bien été ajouté');
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
      * remove client from user
      *
      * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
