@@ -48,6 +48,9 @@
                     <h5>Gérer les membres</h5>
                     <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
                 {% endif %}
+                {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                    <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Voir les adhésions</a>
+                {% endif %}
 
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
