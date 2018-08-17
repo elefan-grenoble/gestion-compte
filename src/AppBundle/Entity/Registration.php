@@ -17,6 +17,7 @@ class Registration
     const TYPE_CHECK = 2;
     const TYPE_LOCAL = 3;
     const TYPE_CREDIT_CARD = 4;
+    const TYPE_HELLOASSO = 6;
     const TYPE_DEFAULT = 5;
     /**
      * @var int

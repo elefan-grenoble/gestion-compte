@@ -195,6 +195,12 @@
                         <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un USER_MANAGER</a>
                     {% endif %}
 
+                    {% if user.hasRole('ROLE_FINANCE_MANAGER') %}
+                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_downward</i>supprimer le role FINANCE_MANAGER</a>
+                    {% else %}
+                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un FINANCE_MANAGER</a>
+                    {% endif %}
+
                     <h6>Recorded registrations</h6>
                     <ul class="collapsible" data-collapsible="accordion">
                         {% for registration in user.recordedRegistrations %}

@@ -184,7 +184,7 @@ class AdminController extends Controller
      *
      * @Route("/registrations", name="admin_registrations")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
     {
