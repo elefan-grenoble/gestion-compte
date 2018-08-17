@@ -10,8 +10,8 @@
 {% if  app.user.timeCount < 0 %}
     <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.</p>
 {% else %}
-    {% if  app.user.timeCount < app.user.maxTimeCount %}
-        <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as encore {{ (app.user.maxTimeCount - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
+    {% if  app.user.timeCount < app.user.shiftTimeByCycle %}
+        <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as encore {{ (app.user.shiftTimeByCycle - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
     {% else %}
         <p><i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !</p>
     {% endif %}

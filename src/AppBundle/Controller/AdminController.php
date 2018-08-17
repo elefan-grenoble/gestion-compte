@@ -219,7 +219,7 @@ class AdminController extends Controller
         $form = $this->getRegistrationDeleteForm($registration);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            if (count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()){
+            if ($registration->getUser() && count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()){
                 $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
             }else{
                 $em = $this->getDoctrine()->getManager();
@@ -281,7 +281,35 @@ class AdminController extends Controller
     }
 
     /**
-     * Registrations correction
+     * Helloasso notifications list
+     *
+     * @Route("/helloassoNotifications", name="admin_helloasso_notifications")
+     * @Method("GET")
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function helloassoNotificationsAction(Request $request)
+    {
+        if (!($page = $request->get('page')))
+            $page = 1;
+        $limit = 50;
+        $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\HelloassoNotification', 'n')
+            ->select('count(n.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+        $notifications = $this->getDoctrine()->getManager()
+            ->getRepository('AppBundle:HelloassoNotification')
+            ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
+//        $delete_forms = array();
+//        foreach ($registrations as $registration){
+//            $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
+//        }
+        return $this->render('admin/helloasso_notifications.html.twig',array('notifications'=>$notifications,/*'delete_forms'=>$delete_forms,*/'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * status correction
      *
      * @Route("/status_fix", name="admin_status_fix")
      * @Method("GET")

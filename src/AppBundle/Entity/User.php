@@ -763,23 +763,17 @@ class User extends BaseUser
     }
 
     /**
-     * Max time count for a user
-     *
-     * @return Integer
-     */
-    // TODO Valeur à mettre dans une conf
-    public function getMaxTimeCount()
-    {
-        return 180;
-    }
-
-    /**
      * Get total shift time for a cycle
      */
     // TODO Valeur à mettre dans une conf
     public function shiftTimeByCycle()
     {
         return 60 * 3;
+    }
+
+    public function isUptodate()
+    {
+        return ($this->getRemainder()->format("%R%a") >= 0);
     }
 
     /**

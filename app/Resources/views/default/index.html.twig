@@ -23,33 +23,39 @@
                     {% endfor %}
                 </div>
 
-                {% if app.user.memberNumber > 0 %}{# not only admin ? #}
-                    {% include "booking/home_booked_shifts.html.twig" %}
+                {% if app.user.uptodate or is_granted("ROLE_ADMIN") %}
+                    {% if app.user.memberNumber > 0 %}{# not only admin ? #}
+                        {% include "booking/home_booked_shifts.html.twig" %}
+                    {% else %}
+                        <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
+                    {% endif %}
+
+                    <h5>Construire</h5>
+                    {% if is_granted("access_tools",app.user)  %}
+                        <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                    {% endif %}
+                    <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
+                    {% if is_granted("view",codes | first) or is_granted("create",codes | first)  %}
+                        <br>
+                    {% endif %}
+                    {% if is_granted("view",codes | first)  %}
+                        <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} coffre à clefs</a>
+                    {% endif %}
+                    {% if is_granted("create",codes | first)  %}
+                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Nouveau code coffre</a>
+                    {% endif %}
+
+                    {% if is_granted("ROLE_USER_MANAGER") %}
+                        <h5>Gérer les membres</h5>
+                        <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
+                    {% endif %}
+                    {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                        <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Voir les adhésions</a>
+                        <a href="{{ path("admin_helloasso_notifications") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">settings_ethernet</i>Notifications helloasso</a>
+                    {% endif %}
                 {% else %}
-                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
-                {% endif %}
-
-                <h5>Construire</h5>
-                {% if is_granted("access_tools",app.user)  %}
-                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
-                {% endif %}
-                <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
-                {% if is_granted("view",codes | first) or is_granted("create",codes | first)  %}
-                    <br>
-                {% endif %}
-                {% if is_granted("view",codes | first)  %}
-                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} coffre à clefs</a>
-                {% endif %}
-                {% if is_granted("create",codes | first)  %}
-                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Nouveau code coffre</a>
-                {% endif %}
-
-                {% if is_granted("ROLE_USER_MANAGER") %}
-                    <h5>Gérer les membres</h5>
-                    <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
-                {% endif %}
-                {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                    <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Voir les adhésions</a>
+                    <p>Ton adhésion a expirée le {{ "now"|date_modify((app.user.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
+                    <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% endif %}
 
                 {% if is_granted("ROLE_ADMIN") %}

@@ -49,6 +49,7 @@ class BeneficiaryType extends AbstractType
             if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
+                    'placeholder' => '--- Commissions ---',
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => false,
@@ -56,6 +57,7 @@ class BeneficiaryType extends AbstractType
                 ));
                 $form->add('roles',EntityType::class, array(
                     'class' => 'AppBundle:Role',
+                    'placeholder' => '--- Roles ---',
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => false,
@@ -64,6 +66,7 @@ class BeneficiaryType extends AbstractType
             }else if(count($user->getOwnedCommissions())){
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
+                    'placeholder' => '--- Commissions ---',
                     'choices' => $user->getOwnedCommissions(),
                     'choice_label'     => 'name',
                     'multiple'     => true,

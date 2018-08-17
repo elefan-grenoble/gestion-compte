@@ -1,0 +1,39 @@
+{% extends 'layout.html.twig' %}
+
+{% block beforecontainer %}
+{% endblock %}
+{% block aftercontainer %}
+    <br>
+    <br>
+    <br>
+    <div class="center-align">
+        <a href="https://www.helloasso.com" target="_blank">{% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
+                <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
+            {% endimage %}</a>
+    </div>
+    <br>
+    <br>
+{% endblock %}
+
+{% block content %}
+    <div class="section">
+        <div class="container">
+            <br><br>
+            <h3 class="header center orange-text">Ré-adhérer !</h3>
+            <p> Pour ré-adhérer en ligne, nous allons te rediriger vers <a href="{{ helloasso_registration_campaign_url }}" target="_blank">helloasso.com</a> <br>
+            Ce site met a disposition des associations comme la notre, gratuitement, des outils de paiement en ligne. <br>
+                Pour se financer, il propose aux usagers ( toi ) de faire un don. <br>
+                Note que ce don est <b>facultatif</b> et qu'il <b>ne revient pas à {{ project_name }}</b>. <br>
+                Pour que l'opération soit enregistrée automatiquement ici, merci d'utiliser ton adresse <b>{{ app.user.email }}</b>.
+            </p>
+            <div class="center-align">
+                <a href="{{ helloasso_registration_campaign_url }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>OK, je ré-adhére sur helloasso.com </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+{% block javascripts %}
+{% endblock %}

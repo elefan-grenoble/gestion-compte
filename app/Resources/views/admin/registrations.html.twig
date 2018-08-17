@@ -94,7 +94,7 @@
                         {% endif %}
                     </div>
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        {% if(registration.user.registrations | length) > 1 %}
+                        {#{% if registration.user and (registration.user.registrations | length) > 1 %}#}
                         <div class="collapsible-body">
 
                             {{ form_start(delete_forms[registration.id]) }}
@@ -104,7 +104,7 @@
                             </div>
                             {{ form_end(delete_forms[registration.id]) }}
                         </div>
-                        {% endif %}
+                        {#{% endif %}#}
                     {% endif %}
                 </li>
 

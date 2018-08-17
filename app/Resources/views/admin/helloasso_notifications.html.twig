@@ -1,0 +1,65 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h4 class="">Liste des dernières notifications helloasso</h4>
+
+    {% if is_granted("ROLE_FINANCE_MANAGER") %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>#</th>
+                    <th>helloasso_id</th>
+                    <th>helloasso date</th>
+                    <th>received date</th>
+                    <th>amount</th>
+                    <th>url</th>
+                    <th>payer_first_name</th>
+                    <th>payer_last_name</th>
+                    <th>membre</th>
+                    <th>receipt</th>
+                    <th>tax_receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notification in notifications %}
+                    <tr class="{% if notification.registration and notification.registration.user  %}teal{% else %}red{% endif %} lighten-5">
+                        <td><i class="material-icons">{% if notification.registration and notification.registration.user  %}person_pin{% else %}help{% endif %}</i></td>
+                        <td>{{ notification.id }}</td>
+                        <td>{{ notification.notificationId }}</td>
+                        <td>{{ notification.date | date('Y-m-d H:i:s') }}</td>
+                        <td>{{ notification.createdAt | date('Y-m-d H:i:s') }}</td>
+                        <td>{{ notification.amount }}€</td>
+                        <td class="{% if notification.url != helloasso_registration_campaign_url  %}red-text{% endif %}">{{ notification.url }}</td>
+                        <td>{{ notification.payerFirstName }}</td>
+                        <td>{{ notification.payerLastName }}</td>
+                        <td>{% if notification.registration and notification.registration.user %}<a href="{{ path('user_show', { 'username': notification.registration.user.username }) }}">{{ notification.registration.user }}</a>{% endif %}</td>
+                        <td> <a href="{{ notification.urlReceipt }}" class="btn-floating teal"><i class="material-icons left">receipt</i></a></td>
+                        <td> <a href="{{ notification.urlTaxReceipt }}" class="btn-floating blue-grey"><i class="material-icons left">receipt</i></a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+        </ul>
+                        <br>
+        <ul class="pagination">
+            <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{% if(page==1) %}#!{% else %}{{ path("admin_helloasso_notifications",{'page':page-1}) }}{% endif %}">
+                    <i class="material-icons">chevron_left</i>
+                </a>
+            </li>
+            {% for i in range(1,nb_of_pages) %}
+            <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("admin_helloasso_notifications",{'page':i}) }}">{{ i }}</a></li>
+            {% endfor %}
+            <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_helloasso_notifications",{'page':page+1}) }}{% endif %}">
+                    <i class="material-icons">chevron_right</i>
+                </a>
+            </li>
+        </ul>
+    {% endif %}
+
+{% endblock %}

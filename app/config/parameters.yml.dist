@@ -28,3 +28,12 @@ parameters:
     router.request_context.host: membres.lelefan.local
     router.request_context.scheme: https
     router.request_context.base_url:
+
+    site_name: Espace membre @ La Louve
+    project_name: La Louve
+    project_url: https://cooplalouve.fr/
+    project_url_display: cooplalouve.fr
+    main_color: #51CAE9
+    helloasso_registration_campaign_url: https://www.helloasso.com/
+    helloasso_api_key:
+    helloasso_api_password:
