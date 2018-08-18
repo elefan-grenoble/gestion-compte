@@ -28,3 +28,6 @@ parameters:
     router.request_context.host: membres.lelefan.local
     router.request_context.scheme: https
     router.request_context.base_url:
+
+    shift_duration_by_cycle: 180
+    shift_mailer_user: ~

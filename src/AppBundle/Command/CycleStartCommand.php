@@ -25,7 +25,7 @@ class CycleStartCommand extends ContainerAwareCommand
     {
         $mailer = $this->getContainer()->get('mailer');
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('AppBundle:User')->findWithNewCycleStarting();
+        $users_with_cycle_starting_today = $em->getRepository('AppBundle:User')->findWithNewCycleStarting();
         $count = 0;
 
         $router = $this->getContainer()->get('router');
@@ -34,34 +34,59 @@ class CycleStartCommand extends ContainerAwareCommand
         $today = new \DateTime('now');
         $today->setTime(0, 0, 0);
 
-        foreach ($users as $user) {
+        foreach ($users_with_cycle_starting_today as $user) {
             if ($user->getFirstShiftDate() < $today) {
-                $this->createCycleBeginningLog($em, $user);
-                $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
-                    ->setFrom('creneaux@lelefan.org')
-                    ->setTo($user->getEmail())
-                    ->setBody(
-                        $this->getContainer()->get('twig')->render(
-                            'emails/cycle_start.html.twig',
-                            array('user' => $user, 'home_url' => $home_url)
-                        ),
-                        'text/html'
-                    );
-                $mailer->send($mail);
-                $count++;
+                $this->createCycleBeginningLog($user); //cycle start, -3h
+                if ($user->getCycleShiftsDuration()<$this->getContainer()->getParameter('due_duration_by_cycle')){ //only if user still have to book
+                    $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
+                        ->setFrom($this->getContainer()->getParameter('shift_mailer_user'))
+                        ->setTo($user->getEmail())
+                        ->setBody(
+                            $this->getContainer()->get('twig')->render(
+                                'emails/cycle_start.html.twig',
+                                array('user' => $user, 'home_url' => $home_url)
+                            ),
+                            'text/html'
+                        );
+                    $mailer->send($mail);
+                    $count++;
+                }
             }
         }
+
+        $users_with_half_cycle = $em->getRepository('AppBundle:User')->findWithHalfCyclePast();
+
+        foreach ($users_with_half_cycle as $user) {
+            if ($user->getFirstShiftDate() < $today) {
+                if ($user->getCycleShiftsDuration()<$this->getContainer()->getParameter('due_duration_by_cycle')) { //only if user still have to book
+                    $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
+                        ->setFrom($this->getContainer()->getParameter('shift_mailer_user'))
+                        ->setTo($user->getEmail())
+                        ->setBody(
+                            $this->getContainer()->get('twig')->render(
+                                'emails/cycle_half.html.twig',
+                                array('user' => $user, 'home_url' => $home_url)
+                            ),
+                            'text/html'
+                        );
+                    $mailer->send($mail);
+                    $count++;
+                }
+            }
+        }
+
         $em->flush();
         $message = $count . ' email' . (($count > 1) ? 's' : '') . ' envoyé' . (($count > 1) ? 's' : '');
         $output->writeln($message);
     }
 
-    private function createCycleBeginningLog(EntityManager $em, User $user)
+    private function createCycleBeginningLog(User $user)
     {
+        $em = $this->getContainer()->get('doctrine')->getManager();
         $date = $user->startOfCycle(0);
         $log = new TimeLog();
         $log->setUser($user);
-        $log->setTime(-180);
+        $log->setTime(-1*$this->getContainer()->getParameter('due_duration_by_cycle'));
         $log->setDate($date);
         $log->setDescription("Début de cycle");
         $em->persist($log);
