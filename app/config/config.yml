@@ -40,6 +40,8 @@ framework:
 twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
+  globals:
+    due_duration_by_cycle: '%due_duration_by_cycle%'
 
 # Doctrine Configuration
 doctrine:

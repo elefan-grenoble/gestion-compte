@@ -27,6 +27,23 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findWithHalfCyclePast()
+    {
+        $qb = $this->createQueryBuilder('u');
+
+        $qb
+            ->where('u.withdrawn = 0')
+            ->andWhere('u.frozen = 0')
+            ->andWhere('u.firstShiftDate is not NULL')
+            ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 14) = 0')
+            ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
+            ->setParameter('now', new \Datetime('now'));
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
     /**
      * @param string $role
      *
