@@ -1,5 +1,9 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}
+    evenements
+{% endblock %}
+
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
@@ -22,12 +26,14 @@
                         <div class="left">
                             <a href="{{ path("event_edit",{'id':event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
                         </div>
+                        {% if event.needProxy %}
                         <div class="left">
                             <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
                         </div>
                         <div class="left">
                             <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons left">list</i>Emargement</a>
                         </div>
+                        {% endif %}
                         <div>
                             &nbsp;
                         </div>

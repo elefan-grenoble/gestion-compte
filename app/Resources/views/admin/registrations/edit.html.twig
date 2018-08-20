@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h4 class="">editer adhésions / ré-adhésions</h4>
+
+    {% if is_granted("ROLE_FINANCE_MANAGER") %}
+        {{ form_start(edit_form) }}
+        {% include "user/_partial/registration_form.html.twig" with { form: edit_form } %}
+        {{ form_end(edit_form) }}
+    {% endif %}
+
+{% endblock %}

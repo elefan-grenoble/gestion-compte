@@ -238,3 +238,11 @@ textarea.materialize-textarea:focus:not([readonly]) {
 form .errors ul li {
   color: darkred;
 }
+.event {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  max-height: 250px;
+}
+.event img {
+  max-width: 100%;
+}

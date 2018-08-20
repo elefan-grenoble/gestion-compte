@@ -1,7 +1,10 @@
 <div class="col s12 m12">
-    <div class="card-panel white center">
+    <div class="card-panel white center event">
         <h5>{{ event.title }}</h5>
-        <h6><i>{{ event.date | date('d M H:i') }}</i></h6>
+        <h6><i>{{ event.date | date_fr_long }} {{ event.date | date('H:i') }}</i></h6>
+        <div>
+            {{ event.description | markdown | raw }}
+        </div>
         {% if event.needProxy %}
             {% if not app.user.lastRegistration %}
                 <b>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</b>
@@ -27,7 +30,7 @@
                             {% if proxy.giver %}
                                 <li>Procuration pour <b>{{ proxy.owner.firstname }}</b> de la part de&nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b></li>
                             {% else %}
-                                <li><b>{{ proxy.owner.firstname }}</b> accepte une procuration.</li>
+                                <li><b>{{ proxy.owner.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy.id}) }}" class="red-text">X</a></li>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -40,6 +43,9 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
+        {% endif %}
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <a href="{{ path("event_edit",{'id':event.id}) }}" class="btn-floating teal left"><i class="material-icons">edit</i></a>
         {% endif %}
     </div>
 </div>
