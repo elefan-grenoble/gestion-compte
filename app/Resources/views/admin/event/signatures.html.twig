@@ -147,7 +147,7 @@
                 </tr>
                     {% endif %}
                         {% if index < 22 %}
-                            <tr class="{% if loop.index is divisibleby(2) %}odd{% else %}even{% endif %}" >
+                            <tr class="{% if loop.index is divisible by(2) %}odd{% else %}even{% endif %}" >
                                 <td class="index">{{ loop.index }}</td>
                                 <td {% if beneficiary.lastname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
                                 <td {% if beneficiary.firstname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
@@ -167,7 +167,7 @@
                             </tr>
                             {% set index = index + 1 %}
                             {% if ((event.proxiesByOwner(beneficiary) | length) > 0) and (event.proxiesByOwner(beneficiary).first.giver) %}
-                                <tr class="{% if loop.index is divisibleby(2) %}odd{% else %}even{% endif %}">
+                                <tr class="{% if loop.index is divisible by(2) %}odd{% else %}even{% endif %}">
                                     <td class="smaller">Procuration</td>
                                     <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.lastname }}</td>
                                     <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.firstname }}</td>

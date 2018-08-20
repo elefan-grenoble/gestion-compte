@@ -1,5 +1,10 @@
 {% extends 'layout.html.twig' %}
 
+
+{% block title %}
+    procurations {% if event %}pour {{ event.title }}{% endif %}
+{% endblock %}
+
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
@@ -8,10 +13,11 @@
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des procurations en cours</h4>
+    <h4 class="">Liste des procurations en cours <small>({{ proxies | length }})</small></h4>
     {% if event %}
     <h5>{{ event.title }}</h5>
     {% endif %}
+
     <ul class="collapsible popout" data-collapsible="accordion">
         {% for proxy in proxies %}
             <li>
