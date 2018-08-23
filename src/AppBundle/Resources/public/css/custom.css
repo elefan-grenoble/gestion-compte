@@ -246,3 +246,6 @@ form .errors ul li {
 .event img {
   max-width: 100%;
 }
+strong {
+  font-weight: bold;
+}

@@ -51,6 +51,13 @@ class User extends BaseUser
     private $frozen;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="frozen_change", type="boolean", nullable=true, options={"default" : 0})
+     */
+    private $frozen_change;
+
+    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -241,6 +248,17 @@ class User extends BaseUser
     }
 
     /**
+     * Get beneficiaries who can still book
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBeneficiariesWhoCanBook(Shift $shift = null,$current_cycle = 0)
+    {
+        return $this->beneficiaries->filter(function ($beneficiary) use ($shift,$current_cycle){
+            return $this->canBook($beneficiary,$shift,$current_cycle);
+        });
+    }
+    /**
      * Set address
      *
      * @param \AppBundle\Entity\Address $address
@@ -405,6 +423,9 @@ class User extends BaseUser
     {
         $this->withdrawn = $withdrawn;
 
+        if ($withdrawn)
+            $this->setEnabled(false);
+
         return $this;
     }
 
@@ -504,6 +525,31 @@ class User extends BaseUser
     public function getFrozen()
     {
         return $this->frozen;
+    }
+
+
+    /**
+     * Set frozen_change
+     *
+     * @param boolean $frozen_change
+     *
+     * @return User
+     */
+    public function setFrozenChange($frozen_change)
+    {
+        $this->frozen_change = $frozen_change;
+
+        return $this;
+    }
+
+    /**
+     * Get frozen_change
+     *
+     * @return boolean
+     */
+    public function getFrozenChange()
+    {
+        return $this->frozen_change;
     }
 
     /**
@@ -731,15 +777,54 @@ class User extends BaseUser
      *
      * @return Boolean
      */
-    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 0)
+    //todo put this in shift voter ones there no more beneficiary but only users and membership
+    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 'undefined')
     {
+        if ($shift && $current_cycle == 'undefined'){ //cycle can be computed
+            for ($cycle = 0; $cycle < 3; $cycle++){
+                if ($shift->getStart() > $this->endOfCycle($cycle-1)){
+                    if ($shift->getStart() < $this->endOfCycle($cycle)){
+                        $current_cycle = $cycle;
+                        break;
+                    }
+                }
+            }
+        }else if( $current_cycle == 'undefined'){
+            $current_cycle = 0; //default
+        }
+        if ($current_cycle > 1){
+            return false;
+        }
+        if ($this->getFrozen()){
+            if (!$current_cycle) //cannot book when frozen
+                return false;
+            if ($current_cycle > 0 && !$this->getFrozenChange()) //cannot book for next cycle if frozen
+                return false;
+        }
+
         if (!$beneficiary && !$shift) // in general, not for a specific beneficiary and shift
             return $this->getTimeCount() < $this->shiftTimeByCycle()*($current_cycle+1); //Can book ?
         else {
-            if ($shift->getIsPast()){ // Do not book old
-                return false;
+            $beneficiary_counter = 0;
+            if ($beneficiary){
+                if ($beneficiary->getUser()->getId() != $this->getId()) { // Book only for me
+                    return false;
+                }
+                $beneficiary_shift = $this->getShiftsOfCycle($current_cycle,true)->filter(function ($shift) use ($beneficiary) {
+                    return ($shift->getShifter() == $beneficiary);
+                });
+                foreach ($beneficiary_shift as $s){
+                    $beneficiary_counter += $s->getDuration();
+                }
+                if ($beneficiary_counter >= $this->getDueDurationByCycle()){ //Beneficiary is already ok
+                    return false;
+                }
             }
-            if ($beneficiary->getUser()->getId() != $this->getId()) { // Book only for me
+            if (!$shift){ // Ok because beneficiary defined and still have time left to book
+                return true;
+            }
+            //$shift and $beneficiary are defined bellow
+            if ($shift->getIsPast()){ // Do not book old
                 return false;
             }
             if ($shift->getShifter() && !$shift->getIsDismissed()) { // Do not book already booked
@@ -751,14 +836,7 @@ class User extends BaseUser
             if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
                 return false;
             }
-            if ($shift->getStart() > $this->endOfCycle($current_cycle)){
-                if ($shift->getStart() < $this->endOfCycle($current_cycle+1))
-                    $current_cycle = 1;
-                else // more than 1 cycle away
-                    return false;
-            }
-
-            return (($shift->getDuration() + $this->getTimeCount()) <= ($current_cycle+1)*$this->shiftTimeByCycle());
+            return (($shift->getDuration() + $beneficiary_counter) <= ($current_cycle+1)*$this->getDueDurationByCycle()) ;
         }
     }
 
@@ -768,9 +846,9 @@ class User extends BaseUser
      * @return Integer
      */
     // TODO Valeur à mettre dans une conf
-    public function getMaxTimeCount()
+    public function getDueDurationByCycle()
     {
-        return 180;
+        return 60 * 3;
     }
 
     /**
@@ -779,7 +857,8 @@ class User extends BaseUser
     // TODO Valeur à mettre dans une conf
     public function shiftTimeByCycle()
     {
-        return 60 * 3;
+        $nbOfBeneficiaries = count($this->getBeneficiaries());
+        return 60 * 3 * $nbOfBeneficiaries;
     }
 
     /**
@@ -1034,14 +1113,19 @@ class User extends BaseUser
         return $this->timeLogs;
     }
 
-    public function getTimeCount()
+    public function getTimeCount($before = null)
     {
         $sum = function($carry, TimeLog $log)
         {
             $carry += $log->getTime();
             return $carry;
         };
-        $logs = $this->getTimeLogs();
+        if ($before)
+            $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
+                return ($log->getDate() <= $before);
+            });
+        else
+            $logs = $this->getTimeLogs();
         return array_reduce($logs->toArray(), $sum, 0);
     }
 }
