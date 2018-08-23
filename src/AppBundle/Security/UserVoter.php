@@ -17,6 +17,7 @@ class UserVoter extends Voter
     const EDIT = 'edit';
     const CLOSE = 'close';
     const FREEZE = 'freeze';
+    const FREEZE_CHANGE = 'freeze_change';
     const ROLE_REMOVE = 'role_remove';
     const ROLE_ADD = 'role_add';
     const ANNOTATE = 'annotate';
@@ -33,7 +34,7 @@ class UserVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
+        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
             return false;
         }
 
@@ -75,8 +76,12 @@ class UserVoter extends Voter
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $user);
-            case self::CLOSE:
+            case self::FREEZE_CHANGE:
+                if ($subject === $user){
+                    return true;
+                }
             case self::FREEZE:
+            case self::CLOSE:
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
             case self::EDIT:

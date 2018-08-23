@@ -137,7 +137,8 @@ class CodeController extends Controller
 
         $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
 
-        $this->denyAccessUnlessGranted('view',$codes[0]);
+        if (!$current_app_user->hasRole('ROLE_SUPER_ADMIN'))
+            $this->denyAccessUnlessGranted('view',$codes[0]);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -148,7 +149,7 @@ class CodeController extends Controller
 
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
+        $session->getFlashBag()->add('success', 'Bien enregistré, merci ! Pense à remettre le code à 0000 si il n\'y a plus de clefs à l\'intérieur');
 
         return $this->redirectToRoute('homepage');
     }
@@ -170,7 +171,7 @@ class CodeController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($code);
             $em->flush();
-            $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
+            $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');
         }
         return $this->redirectToRoute('codes_list');
     }

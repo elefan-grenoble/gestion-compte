@@ -8,6 +8,7 @@ use AppBundle\Entity\Client;
 use AppBundle\Entity\Note;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
@@ -692,6 +693,7 @@ class UserController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $em = $this->getDoctrine()->getManager();
         $user->setWithdrawn(false);
+        $user->setEnabled(true);
         $em->persist($user);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte fermé');
@@ -699,7 +701,7 @@ class UserController extends Controller
     }
 
     /**
-     * close user
+     * freeze user
      *
      * @Route("/freeze/{id}", name="user_freeze")
      * @Method({"GET"})
@@ -710,6 +712,7 @@ class UserController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $em = $this->getDoctrine()->getManager();
         $user->setFrozen(true);
+        $user->setFrozenChange(false);
         $em->persist($user);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte gelé');
@@ -717,9 +720,9 @@ class UserController extends Controller
     }
 
     /**
-     * close user
+     * unfreeze user
      *
-     * @Route("/unfreeze/{id}", name="user_unfreeze")
+     * @Route("/{id}/unfreeze/", name="user_unfreeze")
      * @Method({"GET"})
      */
     public function unfreezeAction(User $user){
@@ -728,6 +731,7 @@ class UserController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $em = $this->getDoctrine()->getManager();
         $user->setFrozen(false);
+        $user->setFrozenChange(false);
         $em->persist($user);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte dégelé');
@@ -735,9 +739,59 @@ class UserController extends Controller
     }
 
     /**
+     * ask freeze status change for user
+     *
+     * @Route("/{id}/freeze_change/}", name="user_freeze_change")
+     * @Method({"GET"})
+     */
+    public function freezeChangeAction(User $user){
+        $this->denyAccessUnlessGranted('freeze_change',$user);
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $user->setFrozenChange(!$user->getFrozenChange());
+        $em->persist($user);
+        $em->flush();
+        if (!$user->getFrozen()){
+            $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
+        }else {
+            $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
+        }
+        if ($user === $current_app_user){
+            return $this->redirectToRoute("fos_user_profile_edit");
+        }else{
+            return $this->redirectToShow($user,$session,$current_app_user);
+        }
+    }
+
+
+    /**
+     * close user
+     *
+     * @Route("/{id}/timelog_delete/{timelog_id}", name="user_timelog_delete")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function timelogDeleteAction(User $user,$timelog_id){
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $em = $this->getDoctrine()->getManager();
+        $timeLog = $this->getDoctrine()->getManager()->getRepository('AppBundle:TimeLog')->find($timelog_id);
+        if ($timeLog->getUser() === $user){
+            $em->remove($timeLog);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Time log supprimé');
+        }else{
+            $session->getFlashBag()->add('error', $timeLog->getUser().'<>'.$user);
+            $session->getFlashBag()->add('error', $timeLog->getId());
+        }
+        return $this->redirectToShow($user,$session,$current_app_user);
+    }
+
+    /**
      * remove role of user
      *
-     * @Route("/removeRole/{id}/{role}", name="user_remove_role")
+     * @Route("/{id}/removeRole/{role}", name="user_remove_role")
      * @Method({"GET"})
      */
     public function removeRoleAction(User $user,$role){
@@ -759,7 +813,7 @@ class UserController extends Controller
     /**
      * add role of user
      *
-     * @Route("/addRole/{id}/{role}", name="user_add_role")
+     * @Route("/{id}/addRole/{role}", name="user_add_role")
      * @Method({"GET"})
      */
     public function addRoleAction(User $user,$role){
@@ -891,6 +945,9 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
+        if ($user->getMemberNumber() <=0){
+            return $this->redirectToRoute("homepage");
+        }
         $this->denyAccessUnlessGranted('view', $user);
 
         $deleteForm = $this->createDeleteForm($user);

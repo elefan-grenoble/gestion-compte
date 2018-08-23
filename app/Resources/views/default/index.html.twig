@@ -52,6 +52,10 @@
                     <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Voir les adhésions</a>
                 {% endif %}
 
+                {% if app.user.ownedCommissions | length %}
+                    <a href="{{ path("commission_edit",{'id': app.user.ownedCommissions | first.id }) }}" class="waves-effect waves-light btn blue-grey">Gérer la commission {{ app.user.ownedCommissions | first.name }}</a>
+                {% endif %}
+
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     {% if app.user.memberNumber > 0 %}
