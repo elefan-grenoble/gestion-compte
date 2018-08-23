@@ -16,15 +16,25 @@
 
     {{ form_start(form) }}
     <div class="row">
-        <div class="input-field name col s6">
-            <div class="errors">
-                {{ form_errors(form.name) }}
+        {% if form.owners is defined %}
+            <div class="input-field name col s6">
+                <div class="errors">
+                    {{ form_errors(form.name) }}
+                </div>
+                <div class="input-field">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name) }}
+                </div>
             </div>
-            <div class="input-field">
-                {{ form_label(form.name) }}
-                {{ form_widget(form.name) }}
+        {% else %}
+            <div class="input-field name col s6">
+                <div class="input-field">
+                    <label for="">Nom</label>
+                    <input type="text" value="{{ commission.name }}" disabled>
+                </div>
             </div>
-        </div>
+
+        {% endif %}
         <div class="input-field email col s6">
             <div class="errors">
                 {{ form_errors(form.email) }}
@@ -43,6 +53,7 @@
                 {{ form_widget(form.description) }}
             </div>
         </div>
+        {% if form.owners is defined %}
         <div class="input-field owners col s12">
             <div class="errors">
                 {{ form_errors(form.owners) }}
@@ -52,19 +63,55 @@
                 {{ form_widget(form.owners) }}
             </div>
         </div>
+        {% else %}
+            Référents : {{ commission.owners | join(',') }}
+        {% endif %}
     </div>
     <div>
-        <button type="submit" class="btn waves-effect waves-light">Enregistrer</button>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
     {{ form_end(form) }}
 
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+        <button type="submit" class="btn waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
     </div>
     {{ form_end(delete_form) }}
+    {% endif %}
 
+    <a href="#users" class="btn waves-effect waves-light modal-trigger blue"><i class="material-icons left">people</i>gérer les membres de la commission</a>
+    <div id="users" class="modal">
+        <div class="modal-content">
+            <h5><i class="material-icons left small">people</i>membres de la commission</h5>
+            <table>
+                <tbody>
+                {% for beneficiary in commission.beneficiaries %}
+                    <tr>
+                        <td>{{ beneficiary }}</td>
+                        <td>
+                            {{ form_start(remove_beneficiary_form) }}
+                            <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                            <div>
+                                <a href="#" onclick="$(this).closest('form').submit(); return false;" class="red-text">X</a>
+                            </div>
+                            {{ form_end(remove_beneficiary_form) }}
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {{ form_start(add_form) }}
+            {{ form_widget(add_form) }}
+            <div>
+                <button type="submit" class="btn waves-effect waves-light blue"><i class="material-icons left">add</i>ajouter</button>
+            </div>
+            {{ form_end(add_form) }}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
