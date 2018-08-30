@@ -322,16 +322,14 @@ class DefaultController extends Controller
         $json = json_decode(curl_exec($curl));
         curl_close($curl);
 
-//        if (!$json){
-//            return $this->json(array('success' => false, "message"=> "no response from API"));
-//        }
-//        if (!method_exists($json,'email')){
-//            return $this->json(array('success' => false, "message"=> $json->message, "code"=>$json->code));
-//        }
-//        //$paymentID = $json->id_payment;
-//        $email = $json->email;
-
-        $email = 'lea.galloy@gmail.com';
+        if (!$json){
+            return $this->json(array('success' => false, "message"=> "no response from API"));
+        }
+        if (!method_exists($json,'email')){
+            return $this->json(array('success' => false, "message"=> $json->message, "code"=>$json->code));
+        }
+        //$paymentID = $json->id_payment;
+        $email = $json->email;
 
         $user = $em->getRepository('AppBundle:user')->findOneBy(array('email'=>$email));
 
