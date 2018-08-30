@@ -7,6 +7,10 @@
                 {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
                 {% if beneficiary.user.withdrawn %}<span class="red white-text badge"> fermé </span>{% endif %}
+                {% if beneficiary.user.frozenChange %}
+                    {% if beneficiary.user.frozen %}<span class="deep-purple white-text badge"> Dégel à la fin du cycle</span>
+                    {% else %}<span class="deep-purple white-text badge"> Gel à la fin du cycle</span>{% endif %}
+                {% endif %}
                 {% if beneficiary.user.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
                 {% if beneficiary.user.frozen %}<span class="deep-purple white-text badge"> gelé </span>{% endif %}
                 {% if beneficiary.canViewUserData %}<i class="material-icons">face</i>{% endif %}</span>

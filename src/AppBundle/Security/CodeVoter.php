@@ -121,10 +121,10 @@ class CodeVoter extends Voter
         $y = new \DateTime('Yesterday');
         $y->setTime(23,59,59);
         $n = new \DateTime();
-        $n->add(new \DateInterval("P15M")); //TODO put in conf
+        $n->add(new \DateInterval("PT15M")); //TODO put in conf
         foreach ($shifts as $shift){
             if (($shift->getStart() < $n) && $shift->getStart() > $y && ($shift->getEnd() > $n)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
-                if ($code->setCreatedAt() > $shift->getBookedTime()) // code crée après la réservation du créneau
+                if ($code->getCreatedAt() > $shift->getBookedTime()) // code crée après la réservation du créneau
                     return true;
             }
         }

@@ -151,6 +151,9 @@ class Beneficiary
     }
 
     public function getDisplayName(){
+        if (!$this->getUser()){
+            return $this->getFirstname().' '.$this->getLastname();
+        }
         return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
     }
 

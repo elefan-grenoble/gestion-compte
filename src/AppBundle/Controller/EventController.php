@@ -73,7 +73,6 @@ class EventController extends Controller
         foreach ($proxies as $proxy){
             $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
         }
-        $em = $this->getDoctrine()->getManager();
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
             'delete_forms' => $delete_forms,
@@ -303,7 +302,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/give", name="event_proxy_give")
      * @Method({"GET", "POST"})
      */
-    public function newProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
+    public function giveProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -317,12 +316,19 @@ class EventController extends Controller
         foreach ($current_app_user->getBeneficiaries() as $b){
             $beneficiaries_ids[] = $b;
         }
-        $received_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
-            array("owner"=>$beneficiaries_ids)
+        $received_proxy = $em->getRepository('AppBundle:Proxy')->findBy(
+            array("owner"=>$beneficiaries_ids,"event"=>$event)
         );
         if ($received_proxy){
-            $session->getFlashBag()->add('error', 'Oups, '.$received_proxy->getGiver().' a donné une procuration à '.$received_proxy->getOwner().', il compte dessus !');
-            return $this->redirectToRoute('homepage');
+            foreach ($received_proxy as $rp){
+                if ($rp->getGiver()){ //someone give a proxy
+                    $session->getFlashBag()->add('error', 'Oups, '.$rp->getGiver().' a donné une procuration à '.$rp->getOwner().', il compte dessus !');
+                    return $this->redirectToRoute('homepage');
+                }else{ //no-one give a proxy, lets remove the waiting one
+                    $em->remove($rp);
+                    //$em->flush();
+                }
+            }
         }
         if ($current_app_user->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
@@ -365,6 +371,20 @@ class EventController extends Controller
             if ($beneficiary && $beneficiary->getUser()->getMemberNumber() == $request->get("member_number")){
 
                 $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>null,"owner"=>$beneficiary));
+
+                if (!$proxy){
+                    $other_beneficiaries_ids = array();
+                    foreach ($beneficiary->getUser()->getBeneficiaries() as $b){
+                        if ($b != $beneficiary)
+                            $beneficiaries_ids[] = $b;
+                    }
+                    $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
+                        array("owner"=>$beneficiaries_ids,"event"=>$event,"giver"=>null)
+                    );
+                    if ($proxy){
+                        $session->getFlashBag()->add('notice', $beneficiary->getFirstName().' partage son adhéstion #'.$beneficiary->getUser()->getMemberNumber().' avec '.$proxy->getOwner()->getFirstname().' qui accepte de prendre une procuration pour cet événement !');
+                    }
+                }
                 if (!$proxy){
                     $proxy = new Proxy();
                     $proxy->setEvent($event);
@@ -447,6 +467,24 @@ class EventController extends Controller
         }
         $session->getFlashBag()->add('error',"oups, quelque chose c'est mal passé");
         return $this->redirectToRoute("event_proxy_give",array('id'=>$event->getId()));
+    }
+
+    /**
+     * Proxy take
+     *
+     * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove")
+     * @Method({"GET"})
+     */
+    public function removeProxyLiteAction(Event $event,Proxy $proxy,Request $request){
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if ($proxy->getEvent() === $event && $proxy->getOwner()->getUser() == $current_app_user){
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($proxy);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Ok, bien reçu');
+        }
+        return $this->redirectToRoute('homepage');
     }
 
     /**

@@ -33,7 +33,7 @@
                             <li>
                                 <a href="{{ path('fos_user_profile_edit') }}">
                                     <i class="material-icons small left">settings</i>
-                                    <small>{{ app.user.username }}</small>
+                                    <small>{{ app.user.firstname }}</small>
                                 </a>
                             </li>
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small right">exit_to_app</i>
@@ -50,7 +50,7 @@
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
                             <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
-                                    {{ app.user.username }}</a></li>
+                                    {{ app.user.firstname }}</a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}
@@ -60,29 +60,45 @@
             </nav>
         </header>
         <main>
-            {% block beforecontainer %}{% endblock %}
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                {% if app.user.frozen %}
+                    <div class="wrapper blue lighten-5">
+                        <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
+                        {% if not app.user.frozenChange %}
+                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_edit') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
+                        {% else %}
+                            Dégel programmé.
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endif %}
+            {% set _breadcrumps = block('breadcrumps') %}
+            {% if _breadcrumps is not empty %}
             <div class="wrapper breadcrumbs blue-grey lighten-5">
                 <div class="col s12">
                     {% block breadcrumps %}
                     {% endblock breadcrumps %}
                 </div>
             </div>
+            {% endif %}
+            {% if app.request.hasPreviousSession %}
+                {% for type, messages in app.session.flashBag.all %}
+                    {% for message in messages %}
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="card-panel teal {{ type }} lighten-1">
+                                    <span class="white-text">{{ message|trans({}, 'FOSUserBundle')|raw }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+            {% block beforecontainer %}{% endblock %}
             <div class="container">
                 <div class="section">
-                    {% if app.request.hasPreviousSession %}
-                        {% for type, messages in app.session.flashBag.all %}
-                            {% for message in messages %}
-                                <div class="row">
-                                    <div class="col s12">
-                                        <div class="card-panel teal {{ type }}">
-                                            <span class="white-text">{{ message|trans({}, 'FOSUserBundle') }}</span>
-                                        </div>
-                                    </div>
-                                </div>
 
-                            {% endfor %}
-                        {% endfor %}
-                    {% endif %}
                     {% block fos_user_content %}
                     {% endblock fos_user_content %}
                     {% block content %}{% endblock %}

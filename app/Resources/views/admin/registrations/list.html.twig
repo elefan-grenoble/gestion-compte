@@ -93,18 +93,25 @@
                             {% endif %}
                         {% endif %}
                     </div>
-                    {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        {#{% if registration.user and (registration.user.registrations | length) > 1 %}#}
-                        <div class="collapsible-body">
 
-                            {{ form_start(delete_forms[registration.id]) }}
-                            {{ form_widget(delete_forms[registration.id]) }}
-                            <div>
-                                <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-                            </div>
-                            {{ form_end(delete_forms[registration.id]) }}
+                    {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                        <div class="collapsible-body">
+                            {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                                {{ form_start(edit_forms[registration.id]) }}
+                                {% include "user/_partial/registration_form.html.twig" with { form: edit_forms[registration.id] } %}
+                                {{ form_end(edit_forms[registration.id]) }}
+                            {% endif %}
+                            {% if(registration.user.registrations | length) > 1 %}
+                                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                                    {{ form_start(delete_forms[registration.id]) }}
+                                    {{ form_widget(delete_forms[registration.id]) }}
+                                    <div>
+                                        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                                    </div>
+                                    {{ form_end(delete_forms[registration.id]) }}
+                                {% endif %}
+                            {% endif %}
                         </div>
-                        {#{% endif %}#}
                     {% endif %}
                 </li>
 

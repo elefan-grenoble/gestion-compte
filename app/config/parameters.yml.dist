@@ -37,3 +37,6 @@ parameters:
     helloasso_registration_campaign_url: https://www.helloasso.com/
     helloasso_api_key:
     helloasso_api_password:
+
+    due_duration_by_cycle: 180
+    shift_mailer_user: ~

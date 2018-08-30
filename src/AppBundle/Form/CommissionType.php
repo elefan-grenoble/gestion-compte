@@ -40,22 +40,26 @@ class CommissionType extends AbstractType
                 'cannot be used without an authenticated user!'
             );
         }
-
+        if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')) {
+            $builder
+                ->add('name', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom'));
+        }
         $builder
-            ->add('name',TextType::class,array('constraints' => array( new NotBlank()), 'label'=>'Nom'))
             ->add('description',TextareaType::class,array('label'=>'Description'))
             ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'));
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
             $commission = $event->getData();
-            $form->add('owners',EntityType::class, array(
-                'class' => Beneficiary::class,
-                'choice_label'     => 'display_name',
-                'choices' => $commission->getBeneficiaries(),
-                'multiple'     => true,
-                'required' => false
-            ));
+            if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')) {
+                $form->add('owners', EntityType::class, array(
+                    'class' => Beneficiary::class,
+                    'choice_label' => 'display_name',
+                    'choices' => $commission->getBeneficiaries(),
+                    'multiple' => true,
+                    'required' => false
+                ));
+            }
         });
     }
     

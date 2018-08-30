@@ -55,25 +55,45 @@ class RegistrationType extends AbstractType
                 'years' => range(2016, date('Y')),'disabled' => !($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))))
                 ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
 
-            if ($registration && !$registration->getRegistrar() && ($user->hasRole('ROLE_SUPER_ADMIN'))){
+            if (!$user->hasRole('ROLE_SUPER_ADMIN')){
+                if ($registration){
+                    if (!$registration->getRegistrar()){
+                        $form->add('registrar',EntityType::class,array(
+                            'label' => 'Enregistré par',
+                            'class' => 'AppBundle:User',
+                            'query_builder' => function (EntityRepository $er) {
+                                return $er->createQueryBuilder('u')
+                                    ->orderBy('u.username', 'ASC');
+                            },
+                            'choice_label' => 'username',
+                        ));
+                    }else{
+                        $form->add('registrar',EntityType::class,array(
+                            'label' => 'Enregistré par',
+                            'class' => 'AppBundle:User',
+                            'query_builder' => function (EntityRepository $er) use ($registration) {
+                                return $er->createQueryBuilder('u')
+                                    ->where(':uid = u.id')
+                                    ->setParameter('uid', $registration->getRegistrar()->getId())
+                                    ->orderBy('u.username', 'ASC');
+                            },
+                            'choice_label' => 'username',
+                            'attr'=>array('disabled' => true)
+                        ));
+                    }
+                }
+            }else{
                 $form->add('registrar',EntityType::class,array(
                     'label' => 'Enregistré par',
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
-                        ->orderBy('u.username', 'ASC');
+                            ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',
                     'data' => $registration->getRegistrar()
                 ));
-            }else{
-                $form->add('registrar',EntityType::class,array(
-                    'label' => 'Enregistré par',
-                    'class' => 'AppBundle:User',
-                    'choice_label' => 'username',
-                    'attr'=>array('disabled' => true)));
             }
-
 
 
             $form->add('mode', ChoiceType::class, array('choices'  => array(

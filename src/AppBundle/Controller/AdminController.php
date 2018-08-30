@@ -183,14 +183,15 @@ class AdminController extends Controller
      * Registrations list
      *
      * @Route("/registrations", name="admin_registrations")
-     * @Method("GET")
+     * @Method({"POST","GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
     {
+        $session = new Session();
         if (!($page = $request->get('page')))
             $page = 1;
-        $limit = 50;
+        $limit = 25;
         $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\Registration', 'u')
             ->select('count(u.id)')
             ->getQuery()
@@ -201,16 +202,58 @@ class AdminController extends Controller
             ->getRepository('AppBundle:Registration')
             ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
         $delete_forms = array();
+        $edit_forms = array();
         foreach ($registrations as $registration){
             $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
+            $form = $this->get('form.factory')->createNamed('registration_edit_'.$registration->getId(),'AppBundle\Form\RegistrationType', $registration);
+
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($registration);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
+                //recreate the form with new data
+                $form = $this->get('form.factory')->createNamed('registration_edit_'.$registration->getId(),'AppBundle\Form\RegistrationType', $registration);
+            }
+
+            $edit_forms[$registration->getId()] = $form->createView();
         }
-        return $this->render('admin/registrations.html.twig',array('registrations'=>$registrations,'delete_forms'=>$delete_forms,'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+        return $this->render('admin/registrations/list.html.twig',
+            array(
+                'registrations'=>$registrations,
+                'delete_forms'=>$delete_forms,
+                'edit_forms'=>$edit_forms,
+                'page'=>$page,
+                'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * edit registration
+     *
+     * @Route("/registration/{id}/edit", name="admin_registration_edit")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function editRegistrationAction(Request $request,Registration $registration){
+        $session = new Session();
+        $edit_form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+        $edit_form->handleRequest($request);
+        if ($edit_form->isSubmitted() && $edit_form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($registration);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
+            return $this->redirectToRoute("admin_registrations");
+        }
+        return $this->render('admin/registrations/edit.html.twig', array('edit_form'=>$edit_form->createView()));
+
     }
 
     /**
      * remove registration
      *
-     * @Route("/remove_registration/{id}", name="admin_registration_remove")
+     * @Route("/registration/{id}/remove", name="admin_registration_remove")
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
@@ -468,6 +511,8 @@ class AdminController extends Controller
      * @Route("/importcsv", name="user_import_csv")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * DEPRECATED
+     * TODO: Mettre à jour avec un format simple
      */
     public function csvImportAction(Request $request)
     {

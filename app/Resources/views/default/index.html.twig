@@ -58,6 +58,10 @@
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% endif %}
 
+                {% if app.user.ownedCommissions | length %}
+                    <a href="{{ path("commission_edit",{'id': app.user.ownedCommissions | first.id }) }}" class="waves-effect waves-light btn blue-grey">Gérer la commission {{ app.user.ownedCommissions | first.name }}</a>
+                {% endif %}
+
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
                     {% if app.user.memberNumber > 0 %}

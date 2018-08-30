@@ -7,7 +7,7 @@ Espace adhérent l'éléfàn
 * yuml.me code:
 https://yuml.me/edit/5c392db4
 
-Nouveau schema (pour les utilisateurs et bénéficiaires) :
+TODO Nouveau schema (pour les utilisateurs et bénéficiaires) :
 
 ![modele V2](http://yuml.me/463ff905.svg)
 http://yuml.me/edit/463ff905
@@ -25,24 +25,22 @@ http://yuml.me/edit/463ff905
 
 ### Installation
 
+* Create a mysql database ``mysql -e "CREATE DATABASE my_db_name;"``
 * ``git clone https://github.com/elefan-grenoble/gestion-compte.git``
 * ``cd gestion-compte``
 * ``composer install`` (utiliser le nom de la base précédemment créée)
 * ``bin/console doctrine:schema:create``
-* add ``127.0.0.1 membres.lelefan.local`` to your _/etc/hosts_ file
+* add ``127.0.0.1 membres.lelefan.local`` to your _/etc/hosts_ file (/!\important, le login ne fonctionnera pas sinon)
 * ``php bin/console server:start``
 * visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
 
-### Installation du mailcatcher
+### Installation de mailcatcher, pour récupérer les mails envoyé en DEV
 
 * https://mailcatcher.me/
 * sudo apt-get install unzip ruby-full build-essential
 * unzip mailcatcher-master.zip
 * sudo gem install mailcatcher
 * mailcatcher
-
-#### Configuration du serveur symfony pour envoi des mails
-Modifications des fichiers config.yml et parameters.yml, ajout du champ mailer_port = 1025
 
 ### Créer un utilisateur
 
@@ -75,6 +73,19 @@ Dans l'admin panel :
 - Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
 
 La génération de créneaux peut être automatisée via une tâche cron.
+
+## crontab
+
+<pre>
+#generate shifts in 27 days (same weekday as yesterday)
+55 5 * * * php YOUR_INSTALL_DIR_ABSOLUTE_PATH/bin/console app:shift:generate $(date -d "+27 days" +\%Y-\%m-\%d)
+#free pre-booked shifts
+55 5 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:free $(date -d "+21 days" +\%Y-\%m-\%d)
+#send reminder 2 days before shift
+0 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:reminder $(date -d "+2 days" +\%Y-\%m-\%d)
+#execute routine for cycle_end/cycle_start, everyday
+5 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:user:cycle_start
+</pre>
 
 ### Cheatsheet
 

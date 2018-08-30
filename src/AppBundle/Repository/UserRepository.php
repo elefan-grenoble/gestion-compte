@@ -11,8 +11,12 @@ namespace AppBundle\Repository;
 class UserRepository extends \Doctrine\ORM\EntityRepository
 {
 
-    public function findWithNewCycleStarting()
+    public function findWithNewCycleStarting($date =  null)
     {
+        if (!($date)){
+            $date = new \Datetime('now');
+        }
+
         $qb = $this->createQueryBuilder('u');
 
         $qb
@@ -20,7 +24,42 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere('u.frozen = 0')
             ->andWhere('u.firstShiftDate is not NULL')
             ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0')
-            ->setParameter('now', new \Datetime('now'));
+            ->setParameter('now',$date);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findWithHalfCyclePast($date =  null)
+    {
+        if (!($date)){
+            $date = new \Datetime('now');
+        }
+        $qb = $this->createQueryBuilder('u');
+
+        $qb
+            ->where('u.withdrawn = 0')
+            ->andWhere('u.frozen = 0')
+            ->andWhere('u.firstShiftDate is not NULL')
+            ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 14) = 0')
+            ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
+            ->setParameter('now', $date);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function wantToUnfreeze()
+    {
+
+        $qb = $this->createQueryBuilder('u');
+
+        $qb
+            ->where('u.withdrawn = 0')
+            ->andWhere('u.frozen = 1')
+            ->andWhere('u.frozen_change = 1');
 
         return $qb
             ->getQuery()

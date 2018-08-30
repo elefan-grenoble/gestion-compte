@@ -8,6 +8,7 @@ use AppBundle\Entity\HelloassoNotification;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
+use AppBundle\Twig\Extension\AppExtension;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -32,14 +33,44 @@ class DefaultController extends Controller
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+            if ($current_app_user->getWithdrawn()){
+                $this->container->get('security.token_storage')->setToken(null);
+                $this->container->get('session')->invalidate();
+                $session->getFlashBag()->add('error', 'Compte fermé !');
+                return $this->redirectToRoute('homepage');
+            }
             $remainder = $current_app_user->getRemainder();
-            if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
-                if (intval($remainder->format("%R%a"))<0)
-                    $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
-                elseif (intval($remainder->format("%R%a"))<$this->container->getParameter('remainder_warning_delay'))
-                    $session->getFlashBag()->add('warning', 'Ton adhésion expire dans '.$remainder->format('%a jours').'...');
-            }else{
-                $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
+            if ($current_app_user->getMemberNumber()>0) { //member only
+                if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
+                    if (intval($remainder->format("%R%a"))<0)
+                        $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
+                    elseif (intval($remainder->format("%R%a"))<15) //todo put this in conf
+                        $session->getFlashBag()->add('warning', 'Ton adhésion expire dans '.$remainder->format('%a jours').'...');
+                }else{
+                    $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
+                }
+                $dayAfterEndOfCycle = clone $current_app_user->endOfCycle();
+                $dayAfterEndOfCycle->modify('+1 day');
+                if ($current_app_user->getFrozenChange() && !$current_app_user->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('warning',
+                        'Comme demandé, ton compte sera gelé dans '.
+                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                         $this->get('router')->generate('fos_user_profile_edit')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
+                if ($current_app_user->getFrozenChange() && $current_app_user->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('notice',
+                        'Comme demandé, ton compte sera dégelé dans '.
+                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        $this->get('router')->generate('fos_user_profile_edit')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
             }
         }else{
             $today = strtotime('today');
@@ -326,5 +357,5 @@ class DefaultController extends Controller
         return $this->json(array('success' => true));
 
     }
-    
+
 }

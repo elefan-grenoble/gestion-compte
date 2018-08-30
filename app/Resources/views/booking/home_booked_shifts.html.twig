@@ -7,13 +7,24 @@
 
 <h5>Mon bénévolat</h5>
 
-{% if  app.user.timeCount < 0 %}
-    <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.</p>
-{% else %}
-    {% if  app.user.timeCount < app.user.shiftTimeByCycle %}
-        <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as encore {{ (app.user.shiftTimeByCycle - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
+{% if not app.user.frozen %}
+    {% if  app.user.timeCount < 0 %}
+        <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.</p>
     {% else %}
-        <p><i class="material-icons">stars</i> Bravo ! Tous tes créneaux ont été planifiés sur le cycle actuel !</p>
+        {% if  app.user.timeCount < due_duration_by_cycle %}
+            <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as encore {{ (due_duration_by_cycle - app.user.timeCount) | duration_from_minutes }} à réserver.</p>
+        {% elseif app.user.timeCount(app.user.endOfCycle) < app.user.shiftTimeByCycle %}
+            <p>Bravo ! {% if app.user.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }} ont été planifiées sur le cycle actuel.
+                <br>
+                {% if app.user.beneficiariesWhoCanBook | length > 1 %}
+                    {% for b in app.user.beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}
+                    peuvent
+                {% else %}
+                    {{ (app.user.beneficiariesWhoCanBook | first).firstname }} peux
+                {% endif %} encore effectuer {{ (app.user.shiftTimeByCycle - app.user.timeCount(app.user.endOfCycle)) | duration_from_minutes }}.</p>
+        {% else %}
+            <p><i class="material-icons">stars</i> Bravo ! Tous {% if app.user.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été planifiés sur le cycle actuel !</p>
+        {% endif %}
     {% endif %}
 {% endif %}
 
