@@ -348,7 +348,13 @@ class AdminController extends Controller
 //        foreach ($registrations as $registration){
 //            $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
 //        }
-        return $this->render('admin/helloasso_notifications.html.twig',array('notifications'=>$notifications,/*'delete_forms'=>$delete_forms,*/'page'=>$page,'nb_of_pages'=>$nb_of_pages));
+
+        return $this->render(
+            'admin/helloasso_notifications.html.twig',
+            array('notifications'=>$notifications,
+                /*'delete_forms'=>$delete_forms,*/
+                'page'=>$page,
+                'nb_of_pages'=>$nb_of_pages));
     }
 
     /**

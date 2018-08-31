@@ -48,7 +48,7 @@ twig:
       project_url: "%project_url%"
       project_url_display: "%project_url_display%"
       helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
-      due_duration_by_cycle: '%due_duration_by_cycle%
+      due_duration_by_cycle: '%due_duration_by_cycle%'
 # Doctrine Configuration
 doctrine:
   dbal:
