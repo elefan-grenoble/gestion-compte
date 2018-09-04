@@ -31,8 +31,22 @@ class ApiController extends Controller
         return new JsonResponse(array('user'=>array(
                 'email' => $current_app_user->getEmail(),
                 'username' => $current_app_user->getUserName(),
-                'identifier' => $current_app_user->getId()
         )));
+    }
+
+    /**
+     * @Route("/oauth/nextcloud_user", name="api_nextcloud_user")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     */
+    public function nextcloudUserAction()
+    {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        return new JsonResponse(array(
+            'email' => $current_app_user->getEmail(),
+            'displayName' => $current_app_user->getFirstName() . ' ' . $current_app_user->getLastName(),
+            'identifier' => $current_app_user->getUserName()
+        ));
     }
 
     /**
