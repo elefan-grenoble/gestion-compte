@@ -35,7 +35,7 @@ class CodeType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('value',IntegerType::class,array('label'=>'valeur','constraints' => array(
+        $builder->add('value',TextType::class,array('label'=>'valeur','constraints' => array(
             new NotBlank(),
             new Regex(array(
                     'pattern' => '/^[0-9]\d*$/',

@@ -14,8 +14,8 @@
     </head>
     <body>
         <header>
-            <nav class="main-navigation" role="navigation">
-                <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">Espace membre @ L'éléfàn</a>
+            <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+                <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">{{ site_name }}</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             <li>
@@ -108,11 +108,11 @@
             {% block aftercontainer %}{% endblock %}
 
         </main>
-        <footer class="page-footer">
+        <footer class="page-footer" style="background-color: {{ main_color }}">
             <div class="footer-copyright">
                 <div class="container">
-                    © {{ 'now'|date('Y') }} Copyright L'éléfàn
-                    <a class="grey-text text-lighten-4 right" href="https://lelefan.org">lelefan.org</a>
+                    © {{ 'now'|date('Y') }} Copyright {{ project_name }}
+                    <a class="grey-text text-lighten-4 right" href="{{ project_url }}">{{ project_url_display }}</a>
                 </div>
             </div>
         </footer>

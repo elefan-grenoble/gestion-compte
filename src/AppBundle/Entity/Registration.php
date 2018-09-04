@@ -69,6 +69,11 @@ class Registration
      */
     private $registrar;
 
+    /**
+     * @ORM\OneToOne(targetEntity="HelloassoNotification", mappedBy="registration")
+     */
+    private $helloassoNotification;
+
     private $is_new;
 
     /**
@@ -272,5 +277,29 @@ class Registration
     public function getUpdatedAt()
     {
         return $this->updated_at;
+    }
+
+    /**
+     * Set helloassoNotification.
+     *
+     * @param \AppBundle\Entity\HelloassoNotification|null $helloassoNotification
+     *
+     * @return Registration
+     */
+    public function setHelloassoNotification(\AppBundle\Entity\HelloassoNotification $helloassoNotification = null)
+    {
+        $this->helloassoNotification = $helloassoNotification;
+
+        return $this;
+    }
+
+    /**
+     * Get helloassoNotification.
+     *
+     * @return \AppBundle\Entity\HelloassoNotification|null
+     */
+    public function getHelloassoNotification()
+    {
+        return $this->helloassoNotification;
     }
 }

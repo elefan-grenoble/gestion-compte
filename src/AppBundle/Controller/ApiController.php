@@ -30,7 +30,8 @@ class ApiController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         return new JsonResponse(array('user'=>array(
                 'email' => $current_app_user->getEmail(),
-                'username' => $current_app_user->getUserName()
+                'username' => $current_app_user->getUserName(),
+                'identifier' => $current_app_user->getId()
         )));
     }
 
