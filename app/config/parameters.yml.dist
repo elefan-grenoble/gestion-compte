@@ -25,9 +25,18 @@ parameters:
     secret: ThisTokenIsNotSoSecretChangeIt
 
     #router https://symfony.com/doc/3.4/console/request_context.html
-    router.request_context.host: membres.lelefan.local
+    router.request_context.host: membres.localcoop.local
     router.request_context.scheme: https
     router.request_context.base_url:
+
+    site_name: Espace membre @ MyLocalCoop
+    project_name: My Local Coop
+    project_url: https://localcoop.local/
+    project_url_display: localcoop.local
+    main_color: #51CAE9
+    helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
+    helloasso_api_key:
+    helloasso_api_password:
 
     due_duration_by_cycle: 180
     shift_mailer_user: ~

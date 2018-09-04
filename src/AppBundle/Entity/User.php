@@ -861,6 +861,11 @@ class User extends BaseUser
         return 60 * 3 * $nbOfBeneficiaries;
     }
 
+    public function isUptodate()
+    {
+        return ($this->getRemainder()->format("%R%a") >= 0);
+    }
+
     /**
      * Add note
      *

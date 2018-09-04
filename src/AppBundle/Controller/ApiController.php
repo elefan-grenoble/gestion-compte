@@ -31,7 +31,7 @@ class ApiController extends Controller
         return new JsonResponse(array('user'=>array(
                 'email' => $current_app_user->getEmail(),
                 'username' => $current_app_user->getUserName(),
-                'identifier' => $current_app_user->getUserName()
+                'identifier' => $current_app_user->getId()
         )));
     }
 

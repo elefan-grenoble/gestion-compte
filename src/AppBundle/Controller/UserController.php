@@ -832,6 +832,23 @@ class UserController extends Controller
         return $this->redirectToShow($user,$session,$current_app_user);
     }
 
+
+    /**
+     * self_register
+     *
+     * @Route("/self_register", name="user_self_register")
+     * @Method({"GET"})
+     */
+    public function selfRegistrationAction(){
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if (!$current_app_user->canRegister()) {
+            $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
+            return $this->redirectToRoute('homepage');
+        }
+        return $this->render('user/self_register.html.twig');
+    }
+
     /**
      * remove client from user
      *

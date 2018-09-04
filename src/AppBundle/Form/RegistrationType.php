@@ -91,6 +91,7 @@ class RegistrationType extends AbstractType
                             ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',
+                    'data' => $registration->getRegistrar()
                 ));
             }
 

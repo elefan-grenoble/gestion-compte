@@ -8,6 +8,7 @@ imports:
 parameters:
   locale: fr
   registration_period: '15 days ago'
+  remainder_warning_delay: '15'
 
 framework:
   #esi: ~
@@ -41,8 +42,13 @@ twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
   globals:
-    due_duration_by_cycle: '%due_duration_by_cycle%'
-
+      site_name: "%site_name%"
+      main_color: "%main_color%"
+      project_name: "%project_name%"
+      project_url: "%project_url%"
+      project_url_display: "%project_url_display%"
+      helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
+      due_duration_by_cycle: '%due_duration_by_cycle%'
 # Doctrine Configuration
 doctrine:
   dbal:
