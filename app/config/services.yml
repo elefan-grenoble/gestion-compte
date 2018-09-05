@@ -28,7 +28,10 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
-
+    AppBundle\Helper\:
+        resource: '../../src/AppBundle/Helper'
+        arguments: ['@service_container']
+        tags: ['controller.service_arguments']
     app.form.registration:
         class: AppBundle\Form\RegistrationType
         tags:
@@ -44,12 +47,10 @@ services:
             tags:
                 - { name: kernel.event_listener, event: fos_oauth_server.pre_authorization_process, method: onPreAuthorizationProcess }
                 - { name: kernel.event_listener, event: fos_oauth_server.post_authorization_process, method: onPostAuthorizationProcess }
-#
-#    kernel.listener.createUser:
-#        class: Acme\AppBundle\EventListener\CreateUserEventListener
-#        tags:
-#            - { name: kernel.event_listener, event: createUser, method: askAffectationAdv }
-#    kernel.listener.changePassword:
-#        class: Acme\AppBundle\EventListener\ChangeUserEventListener
-#        tags:
-#            - { name: kernel.event_listener, event: changePassword, method: changePassword }
+    helloasso_event_listener:
+            class:  AppBundle\EventListener\HelloassoEventListener
+            arguments:
+                $entityManager: "@doctrine.orm.entity_manager"
+                $container: "@service_container"
+            tags:
+                - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
