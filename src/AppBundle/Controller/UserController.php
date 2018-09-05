@@ -988,11 +988,24 @@ class UserController extends Controller
 
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
+        $newReg = new Registration();
+        $remainder = $user->getRemainder();
+        if ( ! $remainder->invert ){ //still some days
+            $date = clone $user->getLastRegistration()->getDate();
+            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+        }
+        else { //register now !
+            $newReg->setDate(new DateTime('now'));
+        }
+        $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
+        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        $registrationForm->add('is_new',HiddenType::class,array('attr'=>array('value'=>'1')));
 
         return $this->render('user/show.html.twig', array(
             'user' => $user,
             'note' => $note,
             'note_form' => $note_form->createView(),
+            'new_registration_form' => $registrationForm->createView(),
             'notes_form' => $notes_form,
             'notes_delete_form' => $notes_delete_form,
             'new_notes_form' => $new_notes_form,

@@ -4,11 +4,15 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Code;
-use AppBundle\Entity\HelloassoNotification;
+use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
+use AppBundle\Event\HelloassoEvent;
 use AppBundle\Twig\Extension\AppExtension;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -261,96 +265,38 @@ class DefaultController extends Controller
      * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
      * https://github.com/Mailforgood/HelloAsso.Api.Doc/blob/master/HelloAsso.Api.Samples/php/helloasso_stat.php
      */
-    public function helloassoNotify(Request $request){
+    public function helloassoNotify(Request $request,LoggerInterface $logger){
 
-        $notification['id'] = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-        $notification['date'] = \DateTime::createFromFormat(\DateTime::ATOM,filter_input(INPUT_POST, 'date'));
-        $notification['amount'] = filter_input(INPUT_POST, 'amount');
-        $notification['amount'] = str_replace(',', '.', $notification['amount']);
-        $notification['url'] = filter_input(INPUT_POST, 'url', FILTER_VALIDATE_URL);
-        $notification['payer_first_name'] = filter_input(INPUT_POST, 'payer_first_name');
-        $notification['payer_last_name'] = filter_input(INPUT_POST, 'payer_last_name');
-        $notification['url_receipt'] = filter_input(INPUT_POST, 'url_receipt', FILTER_VALIDATE_URL);
-        $notification['url_tax_receipt'] = filter_input(INPUT_POST, 'url_tax_receipt', FILTER_VALIDATE_URL);
+        $logger->debug('helloasso notify',$_POST);
 
-        if (!$notification['id']){ //missing notification id
+        $paymentId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+
+        if (!$paymentId){ //missing notification id
+            $logger->error("missing notification id");
             return $this->json(array('success' => false, "message"=> "missing notification id"));
         }
 
+        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/'.$paymentId);
+
         $em = $this->getDoctrine()->getManager();
-        $exist = $em->getRepository('AppBundle:HelloassoNotification')->findOneBy(array('notificationId'=>$notification['id']));
+        $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
 
         if ($exist){ //notification already exist
+            $logger->error("notification already exist");
             return $this->json(array('success' => false, "message"=> "notification already exist"));
         }
 
-        $notif = new HelloassoNotification();
-        $notif->setNotificationId($notification['id']);
-        $notif->setDate($notification['date']);
-        $notif->setAmount($notification['amount']);
-        $notif->setUrl($notification['url']);
-        $notif->setPayerFirstName($notification['payer_first_name']);
-        $notif->setPayerLastName($notification['payer_last_name']);
-        $notif->setUrlReceipt($notification['url_receipt']);
-        $notif->setUrlTaxReceipt($notification['url_tax_receipt']);
-        $notif->setContent(print_r($_POST,true)); //full
+        $payment = new HelloassoPayment();
+        $payment->fromActionObj($payment_json);
 
-        $em->persist($notif);
+        $em->persist($payment);
         $em->flush();
 
-
-        foreach ($notification as $key => $value) { //missing values ?
-            if (!$value) {
-                return $this->json(array('success' => false, "message"=> "value missing for ".$key));
-            }
-        }
-
-        if ($notification['url'] != $this->container->getParameter('helloasso_registration_campaign_url')){ //another campain ?
-            return $this->json(array('success' => false, "message"=> "notifications from this campaign are not handle"));
-        }
-
-        /* Recherche des détails du paiement via reqûete API HelloAsso */
-        $actionID = str_pad($notif->getNotificationId(), 11, '0', STR_PAD_LEFT);
-        $actionID .= '3'; //un '3' n'est pas présent dans la notification HelloAsso mais
-
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-        curl_setopt($curl, CURLOPT_USERPWD, $this->container->getParameter('helloasso_api_key') . ":" . $this->container->getParameter('helloasso_api_password'));
-//        curl_setopt($curl, CURLOPT_URL, "https://api.helloasso.com/v3/payments/"..".json");
-        curl_setopt($curl, CURLOPT_URL, "https://api.helloasso.com/v3/actions/" . $actionID . ".json");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-        $json = json_decode(curl_exec($curl));
-        curl_close($curl);
-
-        if (!$json){
-            return $this->json(array('success' => false, "message"=> "no response from API"));
-        }
-        if (!method_exists($json,'email')){
-            return $this->json(array('success' => false, "message"=> $json->message, "code"=>$json->code));
-        }
-        //$paymentID = $json->id_payment;
-        $email = $json->email;
-
-        $user = $em->getRepository('AppBundle:user')->findOneBy(array('email'=>$email));
-
-        if (!$user){
-            return $this->json(array('success' => false, "message"=> "user not found"));
-        }
-        if (!$user->canRegister()){
-            return $this->json(array('success' => false, "message"=> "user cannot register yet"));
-        }
-
-        $registration = new Registration();
-        $registration->setAmount($notif->getAmount());
-        $registration->setDate(new \DateTime('now'));
-        $registration->setHelloassoNotification($notif);
-        $registration->setMode(Registration::TYPE_HELLOASSO);
-        $registration->setUser($user);
-
-        $em->persist($registration);
-        $notif->setRegistration($registration);
-        $user->addRegistration($registration);
-        $em->flush();
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(
+            HelloassoEvent::PAYMENT_AFTER_SAVE,
+            new HelloassoEvent($payment)
+        );
 
         return $this->json(array('success' => true));
 

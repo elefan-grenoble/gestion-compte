@@ -70,9 +70,9 @@ class Registration
     private $registrar;
 
     /**
-     * @ORM\OneToOne(targetEntity="HelloassoNotification", mappedBy="registration")
+     * @ORM\OneToOne(targetEntity="HelloassoPayment", mappedBy="registration")
      */
-    private $helloassoNotification;
+    private $helloassoPayment;
 
     private $is_new;
 
@@ -280,26 +280,26 @@ class Registration
     }
 
     /**
-     * Set helloassoNotification.
+     * Set helloassoPayment.
      *
-     * @param \AppBundle\Entity\HelloassoNotification|null $helloassoNotification
+     * @param \AppBundle\Entity\HelloassoPayment|null $helloassoPayment
      *
      * @return Registration
      */
-    public function setHelloassoNotification(\AppBundle\Entity\HelloassoNotification $helloassoNotification = null)
+    public function setHelloassoPayment(\AppBundle\Entity\HelloassoPayment $helloassoPayment = null)
     {
-        $this->helloassoNotification = $helloassoNotification;
+        $this->helloassoPayment = $helloassoPayment;
 
         return $this;
     }
 
     /**
-     * Get helloassoNotification.
+     * Get helloassoPayment.
      *
-     * @return \AppBundle\Entity\HelloassoNotification|null
+     * @return \AppBundle\Entity\HelloassoPayment|null
      */
-    public function getHelloassoNotification()
+    public function getHelloassoPayment()
     {
-        return $this->helloassoNotification;
+        return $this->helloassoPayment;
     }
 }

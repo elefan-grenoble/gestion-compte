@@ -5,9 +5,11 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
+use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Role;
 use AppBundle\Entity\User;
+use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
 use AppBundle\Service\SearchUserFormHelper;
@@ -16,6 +18,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -324,37 +327,157 @@ class AdminController extends Controller
     }
 
     /**
-     * Helloasso notifications list
+     * Helloasso payments list
      *
-     * @Route("/helloassoNotifications", name="admin_helloasso_notifications")
+     * @Route("/helloassoPayments", name="helloasso_payments")
      * @Method("GET")
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoNotificationsAction(Request $request)
+    public function helloassoPaymentsAction(Request $request)
     {
         if (!($page = $request->get('page')))
             $page = 1;
         $limit = 50;
-        $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\HelloassoNotification', 'n')
+        $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\HelloassoPayment', 'n')
             ->select('count(n.id)')
             ->getQuery()
             ->getSingleScalarResult();
         $nb_of_pages = intval($max/$limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-        $notifications = $this->getDoctrine()->getManager()
-            ->getRepository('AppBundle:HelloassoNotification')
+        if ($max > 0)
+            $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+        $payments = $this->getDoctrine()->getManager()
+            ->getRepository('AppBundle:HelloassoPayment')
             ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
-//        $delete_forms = array();
-//        foreach ($registrations as $registration){
-//            $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
-//        }
+        $delete_forms = array();
+        foreach ($payments as $payment){
+            $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
+        }
+
+        //todo: save this somewhere ?
+        $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
+        $campaigns = array();
+        foreach ($campaigns_json->resources as $c){
+            $campaigns[intval($c->id)] = $c;
+        }
 
         return $this->render(
-            'admin/helloasso_notifications.html.twig',
-            array('notifications'=>$notifications,
-                /*'delete_forms'=>$delete_forms,*/
+            'admin/helloasso/payments.html.twig',
+            array('payments'=>$payments,
+                'campaigns' => $campaigns,
+                'delete_forms' => $delete_forms,
                 'page'=>$page,
                 'nb_of_pages'=>$nb_of_pages));
+    }
+
+    /**
+     * Helloasso browser
+     *
+     * @Route("/helloassoBrowser", name="helloasso_browser")
+     * @Method("GET")
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function helloassoBrowserAction(Request $request)
+    {
+        if (!($page = $request->get('page')))
+            $page = 1;
+
+        if (!($campaignId = $request->get('campaign'))){
+            $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
+            $campaigns = $campaigns_json->resources;
+            return $this->render(
+                'admin/helloasso/browser.html.twig',
+                array('campaigns'=>$campaigns));
+        }else{
+            $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
+            $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$campaignId);
+            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$campaignId.'/payments',array('page'=>$page));
+            $page = $payments_json->pagination->page;
+            $nb_of_pages = $payments_json->pagination->max_page;
+            $results_per_page = $payments_json->pagination->results_per_page;
+            return $this->render(
+                'admin/helloasso/browser.html.twig',
+                array('payments'=>$payments_json->resources,
+                    'page'=>$page,
+                    'campaign'=>$campaign_json,
+                    'nb_of_pages'=>$nb_of_pages));
+        }
+
+    }
+
+    /**
+     * Helloasso manual paiement add
+     *
+     * @Route("/helloassoManualPaimentAdd/", name="helloasso_manual_paiement_add")
+     * @Method("POST")
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function helloassoManualPaimentAddAction(Request $request)
+    {
+        $session = new Session();
+        if (!($paiementId = $request->get('paiementId'))){
+            $session->getFlashBag()->add('error','missing paiment id');
+            return $this->redirectToRoute('helloasso_browser');
+        }else {
+            $paiement_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $paiementId);
+
+            $em = $this->getDoctrine()->getManager();
+            $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $paiement_json->id));
+
+            if ($exist) {
+                $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
+                return $this->redirectToRoute('helloasso_browser',array('campaign'=>$exist->getCampaignId()));
+            }
+            $action_json = null;
+            $dispatcher = $this->get('event_dispatcher');
+            foreach ($paiement_json->actions as $action){
+                $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
+                $payment = new HelloassoPayment();
+                $payment->fromActionObj($action_json);
+                $em->persist($payment);
+                $em->flush();
+                $dispatcher->dispatch(
+                    HelloassoEvent::PAYMENT_AFTER_SAVE,
+                    new HelloassoEvent($payment)
+                );
+            }
+            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
+            return $this->redirectToRoute('helloasso_browser',array('campaign'=>$action_json->id_campaign));
+        }
+    }
+
+    /**
+     * remove payment
+     *
+     * @Route("/helloasso/{id}", name="helloasso_payment_remove")
+     * @Method({"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function removePaymentAction(Request $request,HelloassoPayment $payment){
+        $session = new Session();
+        $form = $this->getPaymentDeleteForm($payment);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+                if ($payment->getRegistration()){
+                    $session->getFlashBag()->add('error', 'ce paiement est lié à une adhésion');
+                    return $this->redirectToRoute('helloasso_payments');
+                }
+                $em->remove($payment);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'Le paiement a bien été supprimé !');
+        }
+        return $this->redirectToRoute('helloasso_payments');
+    }
+
+    /**
+     * @param HelloassoPayment $payment
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getPaymentDeleteForm(HelloassoPayment $payment){
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('helloasso_payment_remove', array('id' => $payment->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     /**

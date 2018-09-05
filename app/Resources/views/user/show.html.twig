@@ -42,6 +42,57 @@
     {% endif %}
 
     <ul class="collapsible" data-collapsible="expandable">
+        <li id="registration">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
+                <i class="material-icons">card_membership</i>Adhésions
+            </div>
+            <div class="collapsible-body">
+
+            <ul class="collapsible" data-collapsible="accordion">
+                {% for registration in user.registrations %}
+                    <li>
+                        <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
+                                <i class="material-icons tiny">credit_card</i>
+                            {% else %}
+                                <i class="material-icons tiny">attach_money</i>
+                            {% endif %}
+                            {{ registration.date | date('d F Y') }}
+                            {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}<span class="badge right">Helloasso</span>{% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            {% if user.canRegister and user != app.user %}
+                <ul class="collapsible" data-collapsible="accordion">
+                    <li>
+                        {% if not user.lastRegistration %}
+                            <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
+                        {% else %}
+                            <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
+                        {% endif %}
+                        <div class="collapsible-body new_registration_form">
+                            {{ form_start(new_registration_form) }}
+                            {% include "user/_partial/registration_form.html.twig" with { form: new_registration_form } %}
+                            {{ form_end(new_registration_form) }}
+                        </div>
+                    </li>
+                </ul>
+            {% elseif (user != app.user ) %}
+                <ul class="collapsible" data-collapsible="accordion">
+                    <li>
+                        {% if not user.lastRegistration %}
+                            <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
+                        {% else %}
+                            <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
+                        {% endif %}
+                        <div class="collapsible-body new_registration_form">
+                            Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ user.remainder | date('%a') }} jours.
+                        </div>
+                    </li>
+                </ul>
+            {% endif %}
+            </div>
+        </li>
         {% if is_granted("create",note) %}
         <li id="note">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}"><i class="material-icons">add</i>Ajouter une note</div>
@@ -293,6 +344,11 @@
             data.user_show = {};
         return data;
     }
+    $('#registration .collapsible-header').on('click',function () {
+        var data = init();
+        data.user_show.registration_open = ! $(this).hasClass("active");
+        Cookies.set("frontend",data);
+    });
     $('#note .collapsible-header').on('click',function () {
         var data = init();
         data.user_show.note_open = ! $(this).hasClass("active");

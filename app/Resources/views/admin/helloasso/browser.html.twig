@@ -1,0 +1,88 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('helloasso_payments') }}">Helloasso</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('helloasso_browser') }}">campagnes</a>
+    {% if campaigns is not defined and campaign is defined  %}
+        <i class="material-icons">chevron_right</i>
+        <strong>{{ campaign.name }}</strong>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if is_granted("ROLE_FINANCE_MANAGER") %}
+        <h4 class="">Mes campagnes Helloasso</h4>
+        {% if campaigns is defined and campaigns | length %}
+        <div class="row">
+            {% for campaign in campaigns %}
+            <div class="col s12 m6 l6 xl4">
+                {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign } %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <h5>campagne : <strong>{{ campaign.name }}</strong></h5>
+            {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign, no_link: true } %}
+            <table>
+                <thead>
+                <tr>
+                    <th>id</th>
+                    <th>date</th>
+                    <th>amount</th>
+                    <th>type</th>
+                    <th>payer_first_name</th>
+                    <th>payer_last_name</th>
+                    <th>payer_address</th>
+                    <th>payer_zip_code</th>
+                    <th>payer_city</th>
+                    <th>payer_country</th>
+                    <th>payer_email</th>
+                    <th>status</th>
+                    <th>actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>{{ payment.id }}</td>
+                        <td>{{ payment.date }}</td>
+                        <td>{{ payment.amount }}</td>
+                        <td>{{ payment.type }}</td>
+                        <td>{{ payment.payer_first_name }}</td>
+                        <td>{{ payment.payer_last_name }}</td>
+                        <td>{{ payment.payer_address }}</td>
+                        <td>{{ payment.payer_zip_code }}</td>
+                        <td>{{ payment.payer_city }}</td>
+                        <td>{{ payment.payer_country }}</td>
+                        <td>{{ payment.payer_email }}</td>
+                        <td>{{ payment.status }}</td>
+                        <td>
+                            <form action="{{ path("helloasso_manual_paiement_add",{paiementId : payment.id }) }}" method="post">
+                                <input type="hidden" name="paiementId" value="{{ payment.id }}">
+                                <button class="btn red" type="submit" ><i class="material-icons">save</i></button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                </tbody>
+            </table>
+            <ul class="pagination">
+                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_browser",{'page':page-1}) }}{% endif %}">
+                        <i class="material-icons">chevron_left</i>
+                    </a>
+                </li>
+                {% for i in range(1,nb_of_pages) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_browser",{'page':i}) }}">{{ i }}</a></li>
+                {% endfor %}
+                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_browser",{'page':page+1}) }}{% endif %}">
+                        <i class="material-icons">chevron_right</i>
+                    </a>
+                </li>
+            </ul>
+        {% endif %}
+    {% endif %}
+{% endblock %}
