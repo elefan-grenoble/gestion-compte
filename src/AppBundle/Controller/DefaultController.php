@@ -286,17 +286,19 @@ class DefaultController extends Controller
             return $this->json(array('success' => false, "message"=> "notification already exist"));
         }
 
-        $payment = new HelloassoPayment();
-        $payment->fromActionObj($payment_json);
-
-        $em->persist($payment);
-        $em->flush();
-
+        $action_json = null;
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(
-            HelloassoEvent::PAYMENT_AFTER_SAVE,
-            new HelloassoEvent($payment)
-        );
+        foreach ($payment_json->actions as $action){
+            $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
+            $payment = new HelloassoPayment();
+            $payment->fromActionObj($action_json);
+            $em->persist($payment);
+            $em->flush();
+            $dispatcher->dispatch(
+                HelloassoEvent::PAYMENT_AFTER_SAVE,
+                new HelloassoEvent($payment)
+            );
+        }
 
         return $this->json(array('success' => true));
 
