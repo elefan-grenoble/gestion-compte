@@ -265,14 +265,15 @@ class DefaultController extends Controller
      * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
      * https://github.com/Mailforgood/HelloAsso.Api.Doc/blob/master/HelloAsso.Api.Samples/php/helloasso_stat.php
      */
-    public function helloassoNotify(Request $request,LoggerInterface $logger){
+    public function helloassoNotify(Request $request){
 
-        $logger->debug('helloasso notify',$_POST);
+        $logger = $this->get('logger');
+        $logger->info('helloasso notify',$_POST);
 
         $paymentId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$paymentId){ //missing notification id
-            $logger->error("missing notification id");
+            $logger->info("missing notification id");
             return $this->json(array('success' => false, "message"=> "missing notification id"));
         }
 
@@ -282,7 +283,7 @@ class DefaultController extends Controller
         $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
 
         if ($exist){ //notification already exist
-            $logger->error("notification already exist");
+            $logger->info("notification already exist");
             return $this->json(array('success' => false, "message"=> "notification already exist"));
         }
 
