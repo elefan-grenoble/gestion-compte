@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    {% if is_granted("ROLE_ADMIN") %}
+        <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
+    {% else %}
+        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+    {% endif %}
+    <i class="material-icons">person</i><a href="{{ path('user_show',{'username':card.beneficiary.user.username}) }}">{{ card.beneficiary.user.autocompleteLabel }}</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">membership</i> badge #{{ card.number }} pour {{ card.beneficiary.firstname }}
+{% endblock %}
+
+{% block content %}
+    <table width="300px">
+        <tr width="100px">
+            <td>{{ qr | raw }}</td>
+            <td>{{ code | raw }}<br>
+                Adhésion #{{ card.beneficiary.user.memberNumber }}
+                <br>
+                Badge numéro {{ card.number }}
+                </td>
+        </tr>
+        <tr>
+            <td>{{ card.beneficiary.firstname | capitalize }} {{ card.beneficiary.lastname | upper }}</td>
+        </tr>
+    </table>
+{% endblock %}

@@ -181,6 +181,18 @@
                                 <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
                         {% endif %}
                     {% endif %}
+                    <h4>Badges</h4>
+                    <ul>
+                    {% for beneficiary in user.beneficiaries %}
+                        {% if beneficiary.getEnabledSwipeCards | length == 0 %}
+                            <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
+                        {% else %}
+                            {% for badge in beneficiary.getEnabledSwipeCards %}
+                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}">voir badge #{{ badge.number }} de {{ beneficiary.firstname }}</a></li>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    </ul>
                 </div>
             </li>
         {% endif %}
@@ -274,6 +286,8 @@
                     {{ form_widget(delete_form) }}
                     <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
                     {{ form_end(delete_form) }}
+
+                    <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.username }}</a>
 
                     <h6>Roles</h6>
 

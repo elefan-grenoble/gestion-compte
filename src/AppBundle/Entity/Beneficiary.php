@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 
 
 /**
@@ -70,6 +71,12 @@ class Beneficiary
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter",cascade={"remove"})
      */
     private $reservedShifts;
+
+    /**
+     * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary",cascade={"remove"})
+     * @OrderBy({"number" = "DESC"})
+     */
+    private $swipe_cards;
 
     /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
@@ -600,5 +607,48 @@ class Beneficiary
     public function getReservedShifts()
     {
         return $this->reservedShifts;
+    }
+
+    /**
+     * Add swipeCard.
+     *
+     * @param \AppBundle\Entity\SwipeCard $swipeCard
+     *
+     * @return Beneficiary
+     */
+    public function addSwipeCard(\AppBundle\Entity\SwipeCard $swipeCard)
+    {
+        $this->swipe_cards[] = $swipeCard;
+
+        return $this;
+    }
+
+    /**
+     * Remove swipeCard.
+     *
+     * @param \AppBundle\Entity\SwipeCard $swipeCard
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeSwipeCard(\AppBundle\Entity\SwipeCard $swipeCard)
+    {
+        return $this->swipe_cards->removeElement($swipeCard);
+    }
+
+    /**
+     * Get swipeCards.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSwipeCards()
+    {
+        return $this->swipe_cards;
+    }
+
+    public function getEnabledSwipeCards()
+    {
+        return $this->swipe_cards->filter(function ($card) {
+            return $card->getEnable();
+        });
     }
 }
