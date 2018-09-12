@@ -29,7 +29,7 @@ framework:
     # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id
     handler_id: session.handler.native_file
     name: MEMBRESSID
-    cookie_domain: ".lelefan.org"
+    cookie_domain: "%router.request_context.host%"
     save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
   fragments: ~
   http_method_override: true
