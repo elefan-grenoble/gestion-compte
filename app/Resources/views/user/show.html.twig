@@ -181,6 +181,9 @@
                                 <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
                         {% endif %}
                     {% endif %}
+                    {% if is_granted("ROLE_ADMIN") %}
+                    <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.username }}</a>
+                    {% endif %}
                 </div>
             </li>
         {% endif %}
