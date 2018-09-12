@@ -53,7 +53,7 @@ class EventType extends AbstractType
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
                 ))
-                ->add('description',TextareaType::class,array('constraints' => array( new Length(array('min'=>0,'max'=>255))), 'label'=>'Description','required' => false));
+                ->add('description',TextareaType::class,array('constraints' => array( new Length(array('min'=>0,'max'=>1000))), 'label'=>'Description','required' => false));
 
             if ($userData && $userData->getId()){
                 $form->add('need_proxy', CheckboxType::class,array('required' => false,'label'=>'Utilise des procurations (AG, ...)'));
