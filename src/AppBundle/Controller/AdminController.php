@@ -30,6 +30,8 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -148,6 +150,27 @@ class AdminController extends Controller
             'nb_of_pages'=>$nb_of_pages
         ));
     }
+
+    /**
+     * Login as.
+     *
+     * @param User $user
+     * @param Request $request
+     * @return Response
+     * @Route("/login_as/{id}", name="login_as")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function loginAsAction(Request $request,User $user){
+        $session = new Session();
+        $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
+        $this->get("security.token_storage")->setToken($token);
+        $event = new InteractiveLoginEvent($request, $token);
+        $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+        $session->getFlashBag()->add('success', 'Tu es maintenant connecté avec le compte de <b>'.$user.'</b>, soit prudent !');
+        return $this->redirectToRoute('homepage');
+    }
+
 
     /**
      * Lists all users whit ROLE_ADMIN.
