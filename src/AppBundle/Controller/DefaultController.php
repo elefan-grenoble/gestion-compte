@@ -270,14 +270,30 @@ class DefaultController extends Controller
         $logger = $this->get('logger');
         $logger->info('helloasso notify',$_POST);
 
-        $paymentId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+        $actionId = $_POST['action_id'];
 
-        if (!$paymentId){ //missing notification id
-            $logger->info("missing notification id");
-            return $this->json(array('success' => false, "message"=> "missing notification id"));
+        if (!$actionId){ //missing notification id
+            $logger->info("missing action id");
+            return $this->json(array('success' => false, "message"=> "missing action id in POST content"));
         }
 
-        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/'.$paymentId);
+        $actionId = str_pad($actionId, 12, '0', STR_PAD_LEFT);
+
+        $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/'.$actionId);
+
+        if (!isset($action_json->id)){
+            if(isset($action_json->code)){
+                return $this->json(array('success' => false, "code"=>$action_json->code, "message"=> $action_json->message));
+            }
+            return $this->json(array('success' => false, "message"=> "wrong api response"));
+        }
+        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/'.$action_json->id_payment);
+        if (!isset($payment_json->id)){
+            if(isset($payment_json->code)){
+                return $this->json(array('success' => false, "code"=>$payment_json->code, "message"=> $payment_json->message));
+            }
+            return $this->json(array('success' => false, "message"=> "wrong api response"));
+        }
 
         $em = $this->getDoctrine()->getManager();
         $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
@@ -287,14 +303,25 @@ class DefaultController extends Controller
             return $this->json(array('success' => false, "message"=> "notification already exist"));
         }
 
+        $payments = array();
         $action_json = null;
         $dispatcher = $this->get('event_dispatcher');
         foreach ($payment_json->actions as $action){
             $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-            $payment = new HelloassoPayment();
-            $payment->fromActionObj($action_json);
+            $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
+            if ($payment){ //payment already exist (created from a previous actions in THIS loop)
+                $amount = $action_json->amount;
+                $amount = str_replace(',', '.', $amount);
+                $payment->setAmount($payment->getAmount()+$amount);
+            }else{
+                $payment = new HelloassoPayment();
+                $payment->fromActionObj($action_json);
+            }
             $em->persist($payment);
             $em->flush();
+            $payments[$payment->getId()] = $payment;
+        }
+        foreach ($payments as $payment){
             $dispatcher->dispatch(
                 HelloassoEvent::PAYMENT_AFTER_SAVE,
                 new HelloassoEvent($payment)

@@ -441,28 +441,41 @@ class AdminController extends Controller
             $session->getFlashBag()->add('error','missing paiment id');
             return $this->redirectToRoute('helloasso_browser');
         }else {
-            $paiement_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $paiementId);
+            $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $paiementId);
 
             $em = $this->getDoctrine()->getManager();
-            $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $paiement_json->id));
+            $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
 
             if ($exist) {
                 $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
                 return $this->redirectToRoute('helloasso_browser',array('campaign'=>$exist->getCampaignId()));
             }
+
+            $payments = array();
             $action_json = null;
             $dispatcher = $this->get('event_dispatcher');
-            foreach ($paiement_json->actions as $action){
+            foreach ($payment_json->actions as $action){
                 $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-                $payment = new HelloassoPayment();
-                $payment->fromActionObj($action_json);
+                $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
+                if ($payment){ //payment already exist (created from a previous actions in THIS loop)
+                    $amount = $action_json->amount;
+                    $amount = str_replace(',', '.', $amount);
+                    $payment->setAmount($payment->getAmount()+$amount);
+                }else{
+                    $payment = new HelloassoPayment();
+                    $payment->fromActionObj($action_json);
+                }
                 $em->persist($payment);
                 $em->flush();
+                $payments[$payment->getId()] = $payment;
+            }
+            foreach ($payments as $payment){
                 $dispatcher->dispatch(
                     HelloassoEvent::PAYMENT_AFTER_SAVE,
                     new HelloassoEvent($payment)
                 );
             }
+
             $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
             return $this->redirectToRoute('helloasso_browser',array('campaign'=>$action_json->id_campaign));
         }
