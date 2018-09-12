@@ -49,6 +49,7 @@ twig:
       project_url_display: "%project_url_display%"
       helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
       due_duration_by_cycle: '%due_duration_by_cycle%'
+      support_email: '%transactional_mailer_user%'
 # Doctrine Configuration
 doctrine:
   dbal:
