@@ -68,8 +68,8 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
             $subject = '[ELEFAN] Alertes de remplissage pour le '. $dateFormatted;
             $email = (new \Swift_Message($subject))
-                ->setFrom('creneaux@lelefan.org')
-                ->setTo('deshayeb@gmail.com')
+                ->setFrom('noreply@lelefan.org')
+                ->setTo('creneaux@lelefan.org')
                 ->setBody(
                     $this->getContainer()->get('twig')->render(
                         'emails/shift_alerts.html.twig',
