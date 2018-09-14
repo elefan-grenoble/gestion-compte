@@ -118,7 +118,7 @@ class SwipeCardController extends Controller
             return false;
         }
         $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($beneficiary);
-        if (!$lastCard->getDisabledAt()){ //last card is not active
+        if ($lastCard && !$lastCard->getDisabledAt()){ //last card is not active
             return false;
         }
 
