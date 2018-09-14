@@ -1,0 +1,61 @@
+<style>
+    .qr img{
+        width: 25mm;
+    }
+    .bc img{
+        width: 30mm;
+        margin-left: 5mm;
+        margin-right: 5mm;
+    }
+    .bc{
+        text-align: right;
+    }
+    table,thead,tbody,tfoot,tr,th,td {
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-width: 0;
+        border-collapse: inherit;
+        border-spacing: 0;
+        border-color: inherit;
+        -webkit-border-horizontal-spacing: 0;
+        -webkit-border-vertical-spacing: 0;
+    }
+    td.info{
+        text-align: center;
+    }
+</style>
+{% set bindex = 0   %}
+<page backtop="2mm" backright="0mm" backbottom="0mm" backleft="0mm">
+    <table style="width: 210mm;">
+        <tbody style="width: 100%">
+        {% if line > 1 %}
+            {% for letter in 2..line %}
+                <tr>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        <tr style="width: 100%">
+            {% if column > 1 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+            {% if column > 2 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+            {% set card = beneficiary.SwipeCards.first   %}
+            {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+            {% set bindex = bindex + 1   %}
+            {% if bindex is divisible by(3) %}
+        </tr><tr>
+            {% endif %}
+
+            {% if bindex < 3 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+        </tr>
+        </tbody>
+    </table>
+</page>

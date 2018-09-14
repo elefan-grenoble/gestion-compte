@@ -1,0 +1,41 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    {% if is_granted("ROLE_ADMIN") %}
+        <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
+    {% else %}
+        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+    {% endif %}
+    <i class="material-icons">person</i><a href="{{ path('user_show',{'username':card.beneficiary.user.username}) }}">{{ card.beneficiary.user.autocompleteLabel }}</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">membership</i> badge #{{ card.number }} pour {{ card.beneficiary.firstname }}
+{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col s4 z-depth-2">
+            {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6">
+            Auto login url : <a href="{{ absolute_url(path("swipe_in",{"code": card.code | vigenere_encode})) }}">{{ absolute_url(path("swipe_in",{"code":card.code | vigenere_encode})) }}</a>
+        </div><div class="col s6">
+            code : {{ card.code }}
+        </div>
+    </div>
+    <form action="{{ path("swipe_print") }}" method="post">
+        <div class="row">
+            <div class="input-field col s6">
+                <input type="text" name="line" value="1">
+                <label for="line">index de ligne (1-8)</label>
+            </div>
+            <div class="input-field col s6">
+                <input type="text" name="column" value="1">
+                <label for="line">index de colonne (1-3)</label>
+            </div>
+            <input type="hidden" name="beneficiary_id" value="{{ card.beneficiary.id }}">
+        </div>
+        <input type="submit" class="btn" value="print !">
+    </form>
+{% endblock %}

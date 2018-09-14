@@ -140,6 +140,8 @@ class CodeVoter extends Voter
     //\AppBundle\Security\UserVoter::isLocationOk DUPLICATED
     private function isLocationOk(){
         $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        return (isset($ip) and in_array($ip,array('127.0.0.1','78.209.62.101','193.33.56.47'))); //todo put this in conf
+        $ips = $this->container->getParameter('place_local_ip_address');
+        $ips = explode(',',$ips);
+        return (isset($ip) and in_array($ip,$ips));
     }
 }

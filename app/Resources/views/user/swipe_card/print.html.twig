@@ -1,0 +1,59 @@
+<style>
+    .qr img{
+        width: 25mm;
+    }
+    .bc img{
+        width: 30mm;
+        margin-left: 5mm;
+        margin-right: 5mm;
+    }
+    .bc{
+        text-align: right;
+    }
+    table,thead,tbody,tfoot,tr,th,td {
+        margin: 0;
+        padding: 0;
+        border: none;
+        border-width: 0;
+        border-collapse: inherit;
+        border-spacing: 0;
+        border-color: inherit;
+        -webkit-border-horizontal-spacing: 0;
+        -webkit-border-vertical-spacing: 0;
+    }
+    td.info{
+        text-align: center;
+    }
+</style>
+{% set bindex = 0   %}
+<page backtop="2mm" backright="0mm" backbottom="0mm" backleft="0mm">
+    <table style="width: 210mm;">
+        <tbody style="width: 100%">
+        <tr style="width: 100%">
+            {% for user in users %}
+                {% for beneficiary in user.beneficiaries %}
+                    {% set card = beneficiary.SwipeCards.first   %}
+                    {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+                    {% set bindex = bindex + 1   %}
+                    {% if bindex is divisible by(3) %}
+        </tr><tr>
+                    {% endif %}
+                    {% if bindex is divisible by(24) %}
+        </tr>
+        </tbody>
+    </table>
+</page>
+<page backtop="2mm" backright="0mm" backbottom="0mm" backleft="0mm">
+    <table style="width: 210mm;">
+        <tbody>
+        <tr>
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+            {% if bindex < 3 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+        </tr>
+        </tbody>
+    </table>
+</page>

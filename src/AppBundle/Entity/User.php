@@ -777,10 +777,10 @@ class User extends BaseUser
      *
      * @return Boolean
      */
-    //todo put this in shift voter ones there no more beneficiary but only users and membership
+    //todo put this in shift voter ones there is no more beneficiary but only users and membership
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 'undefined')
     {
-        if ($shift && $current_cycle == 'undefined'){ //cycle can be computed
+        if ($shift && $current_cycle == 'undefined'){ //cycle index can be computed using shift
             for ($cycle = 0; $cycle < 3; $cycle++){
                 if ($shift->getStart() > $this->endOfCycle($cycle-1)){
                     if ($shift->getStart() < $this->endOfCycle($cycle)){
@@ -792,7 +792,7 @@ class User extends BaseUser
         }else if( $current_cycle == 'undefined'){
             $current_cycle = 0; //default
         }
-        if ($current_cycle > 1){
+        if ($current_cycle > 1){ //do not book more than on cycle away
             return false;
         }
         if ($this->getFrozen()){
@@ -807,16 +807,19 @@ class User extends BaseUser
         else {
             $beneficiary_counter = 0;
             if ($beneficiary){
-                if ($beneficiary->getUser()->getId() != $this->getId()) { // Book only for me
+                if ($beneficiary->getUser()->getId() != $this->getId()) { // beneficiary and user must match
                     return false;
                 }
+                //compute beneficiary booked time
                 $beneficiary_shift = $this->getShiftsOfCycle($current_cycle,true)->filter(function ($shift) use ($beneficiary) {
                     return ($shift->getShifter() == $beneficiary);
                 });
                 foreach ($beneficiary_shift as $s){
                     $beneficiary_counter += $s->getDuration();
                 }
-                if ($beneficiary_counter >= $this->getDueDurationByCycle()){ //Beneficiary is already ok
+                //check if beneficiary booked time is ok
+                //if timecount <=0 : some shift to catchup, can book more than what's due
+                if ($this->getTimeCount($this->endOfCycle($current_cycle)) > 0 && $beneficiary_counter >= $this->getDueDurationByCycle()){ //Beneficiary is already ok
                     return false;
                 }
             }
@@ -836,7 +839,8 @@ class User extends BaseUser
             if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
                 return false;
             }
-            return (($shift->getDuration() + $beneficiary_counter) <= ($current_cycle+1)*$this->getDueDurationByCycle()) ;
+            // duration of cycle + what beneficiary already booked + user counter (may be < 0) should be <= what's can be booked for this cycle
+            return (($shift->getDuration() + $beneficiary_counter) + $this->getTimeCount($this->endOfCycle($current_cycle)) <= ($current_cycle+1)*$this->getDueDurationByCycle()) ;
         }
     }
 

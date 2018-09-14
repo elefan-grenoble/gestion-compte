@@ -9,6 +9,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * Service
  *
  * @ORM\Table(name="service")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ServiceRepository")
  * @Vich\Uploadable
  */
@@ -40,7 +41,7 @@ class Service
     /**
      * @var string
      *
-     * @ORM\Column(name="url", type="string", length=255)
+     * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
 
@@ -54,7 +55,7 @@ class Service
     private $logoFile;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      *
      * @var string
      */
@@ -78,6 +79,14 @@ class Service
      * @ORM\OneToMany(targetEntity="Client", mappedBy="service",cascade={"persist", "remove"})
      */
     private $clients;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * Get id

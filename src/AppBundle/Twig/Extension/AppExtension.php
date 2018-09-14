@@ -1,12 +1,25 @@
 <?php
 namespace AppBundle\Twig\Extension;
 
+use AppBundle\Entity\SwipeCard;
+use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
+use CodeItNow\BarcodeBundle\Utils\QrCode;
 use DateInterval;
 use AppBundle\Entity\Task;
 use Michelf\Markdown;
+use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
 
 class AppExtension extends \Twig_Extension
 {
+
+    private $container;
+
+    public function __construct(Container $container) {
+        $this->container = $container;
+    }
+
     public function getFilters()
     {
         return array(
@@ -17,6 +30,10 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
             new \Twig_SimpleFilter('date_fr_full',array($this, 'date_fr_full')),
             new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
+            new \Twig_SimpleFilter('qr',array($this, 'qr')),
+            new \Twig_SimpleFilter('barcode',array($this, 'barcode')),
+            new \Twig_SimpleFilter('vigenere_encode',array($this, 'vigenere_encode')),
+            new \Twig_SimpleFilter('vigenere_decode',array($this, 'vigenere_decode')),
         );
     }
 
@@ -102,5 +119,40 @@ class AppExtension extends \Twig_Extension
 
     public function jsonDecode($str) {
         return json_decode($str);
+    }
+
+    public function qr($text) {
+        $qrCode = new QrCode();
+        try {
+            $qrCode
+                ->setText($text)
+                ->setSize(200)
+                ->setPadding(0)
+                ->setErrorCorrection('high')
+                ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+                ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+                ->setImageType(QrCode::IMAGE_TYPE_PNG);
+        } catch (\Exception $exception){
+            die($exception);
+        }
+        return '<img src="data:'.$qrCode->getContentType().';base64,'.$qrCode->generate().'" />';
+    }
+
+    public function barcode($text){
+        $barcode = new BarcodeGenerator();
+        $barcode->setText($text);
+        $barcode->setType(BarcodeGenerator::Code128);
+        $barcode->setScale(2);
+        $barcode->setThickness(25);
+        $barcode->setFontSize(10);
+        return '<img src="data:image/png;base64,'.$barcode->generate().'" />';
+    }
+
+    public function vigenere_encode($text){
+        return $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($text);
+    }
+
+    public function vigenere_decode($text){
+        return $this->container->get('AppBundle\Helper\SwipeCard')->vigenereDecode($text);
     }
 }

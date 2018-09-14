@@ -15,8 +15,32 @@
             <div class="container center">
                 <div class="section no-pad-bot">
                     <h3 class="header">Bonjour {{ app.user.firstname }}</h3>
-                    <p class="col s12">Bienvenue sur ton espace personnel à l'éléfàn</p>
+                    <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
                 </div>
+                {% for beneficiary in app.user.beneficiaries %}
+                    {% if beneficiary.SwipeCards | length and not beneficiary.SwipeCards.first.Enable and not beneficiary.SwipeCards.first.DisabledAt %}
+                        {% set card = beneficiary.SwipeCards.first %}
+                        <div class="row">
+                            <div class="col s12 m12">
+                                <div class="card-panel white center">
+                                    <h5>Nouveau badge pour {{ beneficiary.firstname }}</h5>
+                                    <form action="{{ path('active_swipe')}}" method="post">
+                                        <input type="hidden" name="card_id" value="{{ card.id }}">
+                                        <div class="row">
+                                            <div class="input-field col s6">
+                                                <input type="text" name="code" placeholder="Code du badge à 8 chiffres" />
+                                                <label for="code">Code du badge</label>
+                                            </div>
+                                            <div class="col s6">
+                                                <button type="submit" class="waves-effect waves-light btn green">Activer le badge</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
                 <div class="row">
                     {% for event in events %}
                         {% include "default/event/_event.html.twig" with { event: event } %}
@@ -73,7 +97,7 @@
         {% else %}
             <div class="container">
                 <br><br>
-                <h3 class="header center orange-text">Mon compte à l'éléfàn</h3>
+                <h3 class="header center orange-text">Mon compte à {{ project_name }}</h3>
                 <div class="row center">
                     <p class="col s12 light">Bienvenue sur l'espace membre</p>
                 </div>
@@ -101,7 +125,32 @@
         jQuery(function () {
             $(".collapsible .modal-trigger").on('click',function (e) {
                 e.preventDefault();
-            })
+            });
+
+            var barcode="";
+            var barcode_submit_url="{{ path('check') }}";
+            $(document).keypress(function(e) {
+                var code = (e.keyCode ? e.keyCode : e.which);
+                console.log(code);
+                if(code==13 || code==9)// Enter or tab key hit
+                {
+                    if (barcode.length){
+                        var form = $('<form action="' + barcode_submit_url + '" method="post">' +
+                            '<input type="text" name="swipe_code" value="' + barcode + '" />' +
+                            '</form>');
+                        $('body').append(form);
+                        form.submit();
+                    }
+                    barcode="";
+                }
+                else
+                {
+                    if (code <= 122) { //0-9, a-z, A-Z
+                        barcode = barcode + String.fromCharCode(code);
+                    }
+                }
+            });
+
         })
     </script>
 {% endblock %}

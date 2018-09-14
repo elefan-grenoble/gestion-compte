@@ -410,7 +410,7 @@ class BookingController extends Controller
 
         $session = new Session();
 
-        if (!$this->isGranted('accept', $shift)){
+        if (!$shift->getId() || !$this->isGranted('accept', $shift)){
             $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
             return $this->redirectToRoute("homepage");
         }
@@ -553,19 +553,19 @@ class BookingController extends Controller
 
         $session = new Session();
 
-        $owner = $shift->getBooker()->getUser();
+        $shifter = $shift->getShifter()->getUser();
 
         $em = $this->getDoctrine()->getManager();
         $shift->free();
 
-        $this->deleteShiftLogs($shift, $owner);
+        $this->deleteShiftLogs($shift, $shifter);
 
         $em->persist($shift);
         $em->flush();
 
         $session->getFlashBag()->add('success',"Le shift a bien été libéré");
 
-        return $this->redirectToRoute('user_show', array('username' => $owner->getUsername()));
+        return $this->redirectToRoute('user_show', array('username' => $shifter->getUsername()));
 
     }
 

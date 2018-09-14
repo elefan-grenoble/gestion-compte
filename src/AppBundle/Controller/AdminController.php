@@ -137,6 +137,10 @@ class AdminController extends Controller
             return $this->redirectToRoute('mail_edit', [
                 'request' => $request
             ], 307);
+        }else if($action === "swipe") {
+            return $this->redirectToRoute('swipe_print', [
+                'request' => $request
+            ], 307);
         }else{
             $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
             $users = new Paginator($qb->getQuery());
@@ -173,7 +177,7 @@ class AdminController extends Controller
 
 
     /**
-     * Lists all users whit ROLE_ADMIN.
+     * Lists all users with ROLE_ADMIN.
      *
      * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response

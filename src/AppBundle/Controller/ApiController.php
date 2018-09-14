@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use http\Env\Response;
 use OAuth2\OAuth2;
 use Ornicar\GravatarBundle\GravatarApi;
 use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
@@ -20,6 +21,25 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class ApiController extends Controller
 {
 
+    protected function getUser(){
+        $user = $this->get('security.token_storage')->getToken()->getUser();
+        if ($user->isWithdrawn() || !$user->getEnabled()){ // user inactif
+            return new JsonResponse(array('user'=>false,'message'=>'User not found'));
+        }
+        return $user;
+    }
+
+    /**
+     * @Route("/swipe/in", name="api_swipe_in")
+     * @Method({"POST"})
+     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     */
+    public function swipeInAction(){
+        return new JsonResponse(array(
+            'success' => true
+        ));
+    }
+
     /**
      * @Route("/oauth/user", name="api_user")
      * @Method({"GET"})
@@ -27,7 +47,10 @@ class ApiController extends Controller
      */
     public function userAction()
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
+        if (get_class($current_app_user) === "JsonResponse"){
+            return $current_app_user;
+        }
         return new JsonResponse(array('user'=>array(
                 'email' => $current_app_user->getEmail(),
                 'username' => $current_app_user->getUserName(),
@@ -41,7 +64,10 @@ class ApiController extends Controller
      */
     public function nextcloudUserAction()
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
+        if (get_class($current_app_user) === "JsonResponse"){
+            return $current_app_user;
+        }
         return new JsonResponse(array(
             'email' => $current_app_user->getEmail(),
             'displayName' => $current_app_user->getFirstName() . ' ' . $current_app_user->getLastName(),
@@ -58,7 +84,10 @@ class ApiController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
+        if (get_class($current_app_user) === "JsonResponse"){
+            return $current_app_user;
+        }
         $gravatar_helper = new GravatarHelper(new GravatarApi());
         return new JsonResponse(array(
             'id' => $current_app_user->getMemberNumber(),
