@@ -12,17 +12,30 @@
 {% endblock %}
 
 {% block content %}
-    <table width="300px">
-        <tr width="100px">
-            <td>{{ qr | raw }}</td>
-            <td>{{ code | raw }}<br>
-                Adhésion #{{ card.beneficiary.user.memberNumber }}
-                <br>
-                Badge numéro {{ card.number }}
-                </td>
-        </tr>
-        <tr>
-            <td>{{ card.beneficiary.firstname | capitalize }} {{ card.beneficiary.lastname | upper }}</td>
-        </tr>
-    </table>
+    <div class="row">
+        <div class="col s4 z-depth-2">
+            {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6">
+            Auto login url : <a href="{{ absolute_url(path("swipe_in",{"code": card.code | vigenere_encode})) }}">{{ absolute_url(path("swipe_in",{"code":card.code | vigenere_encode})) }}</a>
+        </div><div class="col s6">
+            code : {{ card.code }}
+        </div>
+    </div>
+    <form action="{{ path("swipe_print") }}" method="post">
+        <div class="row">
+            <div class="input-field col s6">
+                <input type="text" name="line" value="1">
+                <label for="line">index de ligne (1-8)</label>
+            </div>
+            <div class="input-field col s6">
+                <input type="text" name="column" value="1">
+                <label for="line">index de colonne (1-3)</label>
+            </div>
+            <input type="hidden" name="beneficiary_id" value="{{ card.beneficiary.id }}">
+        </div>
+        <input type="submit" class="btn" value="print !">
+    </form>
 {% endblock %}

@@ -21,7 +21,7 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 /**
  * User controller.
  *
- * @Route("swipe")
+ * @Route("sw") //keep it short for qr size
  */
 class SwipeCardController extends Controller
 {
@@ -36,16 +36,22 @@ class SwipeCardController extends Controller
      * @Method({"GET"})
      */
     public function swipeInAction(Request $request, $code){
+        $session = new Session();
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable($code);
         if (!$card){
-            throw $this->createAccessDeniedException("ce badge n'est pas actif ou n'existe pas");
+            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'existe pas");
+            $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array("code"=>$code));
+            if ($card && !$card->getEnable() && !$card->getDisabledAt())
+                $session->getFlashBag()->add("warning","Si c'est le tiens, active le sur ton espace membre");
+        }else{
+            $user = $card->getBeneficiary()->getUser();
+            $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
+            $this->get("security.token_storage")->setToken($token);
+            $event = new InteractiveLoginEvent($request, $token);
+            $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
         }
-        $user = $card->getBeneficiary()->getUser();
-        $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
-        $this->get("security.token_storage")->setToken($token);
-        $event = new InteractiveLoginEvent($request, $token);
-        $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
         return $this->redirectToRoute('homepage');
     }
     /**
@@ -68,6 +74,43 @@ class SwipeCardController extends Controller
         }
     }
 
+    /**
+     * activate Swipe Card
+     *
+     * @param SwipeCard $card
+     * @return Response
+     * @Route("/active/", name="active_swipe")
+     * @Method({"POST"})
+     */
+    public function activeSwipeCardAction(Request $request){
+        $session = new Session();
+        $code = intval($request->get("code"));
+        $card_id = intval($request->get("card_id"));
+        $em = $this->getDoctrine()->getManager();
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('id'=>$card_id));
+        if (!$card || !$card->getId()){
+            $session->getFlashBag()->add('error','Badge non trouvé avec ce numéro');
+            return $this->redirectToRoute('homepage');
+        }else{
+            $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+            if (!$current_app_user->getBeneficiaries()->contains($card->getBeneficiary())){
+                $session->getFlashBag()->add('error','Ce badge ne t\'appartient pas !');
+                return $this->redirectToRoute('homepage');
+            }else{
+                if ($card->getCode()!=$code){
+                    $session->getFlashBag()->add('error','Le code ne correspond pas !');
+                    return $this->redirectToRoute('homepage');
+                }else {
+                    $card->setEnable(1);
+                    $em->persist($card);
+                    $em->flush();
+                    $session->getFlashBag()->add('success','Le badge #'.$card->getNumber().' a bien été activé !');
+                    return $this->redirectToRoute('homepage');
+                }
+            }
+        }
+    }
+
     private function generateSwipeCard(Beneficiary $beneficiary, $flush = true){
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable(null,$beneficiary);
@@ -75,18 +118,21 @@ class SwipeCardController extends Controller
             return false;
         }
         $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($beneficiary);
+        if (!$lastCard->getDisabledAt()){ //last card is not active
+            return false;
+        }
 
         $card = new SwipeCard();
         $code = null;
         $exist = true;
         while ($exist){
-            $code = $card->generateCode();
+            $code = $this->get('AppBundle\Helper\SwipeCard')->generateCode();
             $exist = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
         }
         $card->setCode($code);
         $card->setBeneficiary($beneficiary);
         $card->setNumber($lastCard ? $lastCard->getNumber() + 1 : 1 );
-        $card->setEnable(1); // actif
+        $card->setEnable(0); // default is not enable
         $beneficiary->addSwipeCard($card);
         $em->persist($beneficiary);
         $em->persist($card);
@@ -127,6 +173,22 @@ class SwipeCardController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $qb = $formHelper->processSearchFormData($form,$qb);
             $users = $qb->getQuery()->getResult();
+        }elseif ($request->get('beneficiary_id')&&$request->get('column')&&$request->get('line')){
+            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id'=>intval($request->get('beneficiary_id'))));
+            if ($beneficiary->getId()){
+                $this->generateSwipeCard($beneficiary);
+                $em->flush();
+                $template = $this->renderView('user/swipe_card/printone.html.twig',[
+                    'beneficiary' => $beneficiary,
+                    'line' => intval($request->get('line')),
+                    'column' => intval($request->get('column'))
+                ]);
+                $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
+                $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
+                return $html2pdf->generatePdf($template,'badges');
+            }else{
+                return $this->redirectToRoute('homepage');
+            }
         }else{
             throw $this->createAccessDeniedException();
         }

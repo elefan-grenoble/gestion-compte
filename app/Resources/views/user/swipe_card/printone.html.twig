@@ -29,27 +29,29 @@
 <page backtop="2mm" backright="0mm" backbottom="0mm" backleft="0mm">
     <table style="width: 210mm;">
         <tbody style="width: 100%">
-        <tr style="width: 100%">
-            {% for user in users %}
-                {% for beneficiary in user.beneficiaries %}
-                    {% set card = beneficiary.SwipeCards.first   %}
-                    {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
-                    {% set bindex = bindex + 1   %}
-                    {% if bindex is divisible by(3) %}
-        </tr><tr>
-                    {% endif %}
-                    {% if bindex is divisible by(24) %}
-        </tr>
-        </tbody>
-    </table>
-</page>
-<page backtop="2mm" backright="0mm" backbottom="0mm" backleft="0mm">
-    <table style="width: 210mm;">
-        <tbody>
-        <tr>
-                    {% endif %}
-                {% endfor %}
+        {% if line > 1 %}
+            {% for letter in 2..line %}
+                <tr>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                    <td style="width: 70mm;height: 36mm;"></td>
+                </tr>
             {% endfor %}
+        {% endif %}
+        <tr style="width: 100%">
+            {% if column > 1 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+            {% if column > 2 %}
+                <td style="width: 70mm;height: 36mm;"></td>
+            {% endif %}
+            {% set card = beneficiary.SwipeCards.first   %}
+            {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+            {% set bindex = bindex + 1   %}
+            {% if bindex is divisible by(3) %}
+        </tr><tr>
+            {% endif %}
+
             {% if bindex < 3 %}
                 <td style="width: 70mm;height: 36mm;"></td>
             {% endif %}

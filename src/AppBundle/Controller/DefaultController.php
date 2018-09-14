@@ -141,6 +141,31 @@ class DefaultController extends Controller
     }
 
     /**
+     * @Route("/check", name="check")
+     * @Method({"POST","GET"})
+     */
+    public function checkAction(Request $request){
+        $session = new Session();
+        $code = $request->get('swipe_code');
+        if (!$code){
+            return $this->redirectToRoute('homepage');
+        }
+        $em = $this->getDoctrine()->getManager();
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code,'enable'=>1));
+        if (!$card){
+            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'existe pas");
+        }else{
+            $beneficiary = $card->getBeneficiary();
+            return $this->render('user/check.html.twig', [
+                'beneficiary' => $beneficiary,
+                'counter' => $beneficiary->getUser()->getTimeCount($beneficiary->getUser()->endOfCycle(0))
+            ]);
+        }
+
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
      * @Route("/find_me", name="find_me")
      */
     public function activeUserAccountAction(Request $request){

@@ -181,20 +181,21 @@
                                 <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
                         {% endif %}
                     {% endif %}
-                    <h4>Badges</h4>
+                    <h5>Badges</h5>
                     <ul>
                     {% for beneficiary in user.beneficiaries %}
-                        {% if beneficiary.getEnabledSwipeCards | length == 0 %}
+                        {% if (beneficiary.getEnabledSwipeCards | length == 0) and beneficiary.SwipeCards.first.DisabledAt %}
                             <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
                         {% else %}
-                            {% for badge in beneficiary.getEnabledSwipeCards %}
-                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}">voir badge #{{ badge.number }} de {{ beneficiary.firstname }}</a></li>
+                            {% for badge in beneficiary.getSwipeCards %}
+                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}">voir badge #{{ badge.number }} de {{ beneficiary.firstname }} </a></li>
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
                     </ul>
                     {% if is_granted("ROLE_ADMIN") %}
-                    <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.username }}</a>
+                        <h5>login as</h5>
+                        <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.firstname }}</a>
                     {% endif %}
                 </div>
             </li>
@@ -228,8 +229,14 @@
                         </tr>
                     {% endfor %}
                     <tr>
-                        <th>TOTAL EN COURS</th>
+                        <th>TOTAL</th>
                         <td><b>{{ user.timeCount | duration_from_minutes }}</b></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>TOTAL CYCLE EN COURS</th>
+                        <td><b>{{ user.timeCount(user.endOfCycle(0)) | duration_from_minutes }}</b></td>
                         <td></td>
                         <td></td>
                     </tr>

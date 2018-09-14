@@ -41,7 +41,7 @@ class ServiceType extends AbstractType
 
             $form->add('name',TextType::class,array('label'=>'nom','required' => true,))
                 ->add('description',TextType::class,array('label'=>'Description'))
-                ->add('url',TextType::class,array('label'=>'Adresse web'));
+                ->add('url',TextType::class,array('label'=>'Adresse web','required' => false));
             $form->add('logoFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,

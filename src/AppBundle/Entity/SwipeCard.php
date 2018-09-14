@@ -8,11 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
  * SwipeCard
  *
  * @ORM\Table(name="swipe_card")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\SwipeCardRepository")
  */
 class SwipeCard
 {
-    const PADLENGTH = 10;
     /**
      * @var int
      *
@@ -21,6 +21,20 @@ class SwipeCard
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $created_at;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="disabled_at", type="datetime", nullable=true)
+     */
+    private $disabled_at;
 
     /**
      * @var int
@@ -49,6 +63,14 @@ class SwipeCard
      */
     private $beneficiary;
 
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->created_at = new \DateTime();
+        $this->disabled_at = null;
+    }
 
     /**
      * Get id.
@@ -119,6 +141,10 @@ class SwipeCard
     {
         $this->enable = $enable;
 
+        if (!$enable){
+            $this->setDisabledAt(new \DateTime('now'));
+        }
+
         return $this;
     }
 
@@ -129,6 +155,8 @@ class SwipeCard
      */
     public function getEnable()
     {
+        if ($this->getDisabledAt()) //forever
+            return false;
         return $this->enable;
     }
 
@@ -156,10 +184,52 @@ class SwipeCard
         return $this->beneficiary;
     }
 
-    static public function generateCode(){
-        $code = rand(0,pow(10,self::PADLENGTH));
-        $code = str_pad($code, self::PADLENGTH, '0', STR_PAD_LEFT);
-        return $code;
+
+    /**
+     * Set createdAt.
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return SwipeCard
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->created_at = $createdAt;
+
+        return $this;
     }
 
+    /**
+     * Get createdAt.
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    /**
+     * Set disabledAt.
+     *
+     * @param \DateTime $disabledAt
+     *
+     * @return SwipeCard
+     */
+    public function setDisabledAt($disabledAt)
+    {
+        $this->disabled_at = $disabledAt;
+
+        return $this;
+    }
+
+    /**
+     * Get disabledAt.
+     *
+     * @return \DateTime
+     */
+    public function getDisabledAt()
+    {
+        return $this->disabled_at;
+    }
 }

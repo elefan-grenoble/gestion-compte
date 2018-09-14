@@ -42,6 +42,8 @@ class SwipeCardRepository extends \Doctrine\ORM\EntityRepository
 
         $qb->orderBy('s.number','DESC');
 
+        $qb->setMaxResults(1);
+
         return $qb
             ->getQuery()
             ->getOneOrNullResult();

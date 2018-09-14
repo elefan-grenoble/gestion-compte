@@ -1,0 +1,22 @@
+{% set code = card.code  %}
+{% set encoded_code = code | vigenere_encode  %}
+<td style="width: 70mm;height: 36mm; overflow: hidden;">
+    <table style="width: 100%">
+        <tbody style="width: 100%">
+        <tr style="width: 100%">
+            <td class="qr">{{ absolute_url(path("swipe_in",{"code":encoded_code})) | qr | raw }}</td>
+            <td class="bc" >{{ code | barcode | raw }}
+                <br>
+                Adhésion <strong>#{{ card.beneficiary.user.memberNumber }}</strong> [B{{ card.number }}]
+                <br>
+                <strong>{{ project_url_display }}</strong>
+            </td>
+        </tr>
+        <tr style="height: 6mm;width: 100%">
+            <td colspan="2" class="info">
+                <span>{{ card.beneficiary.firstname | capitalize }} {{ card.beneficiary.lastname | upper }}</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</td>
