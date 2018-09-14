@@ -163,7 +163,7 @@ class AdminController extends Controller
      * @return Response
      * @Route("/login_as/{id}", name="login_as")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function loginAsAction(Request $request,User $user){
         $session = new Session();
@@ -174,6 +174,7 @@ class AdminController extends Controller
         $session->getFlashBag()->add('success', 'Tu es maintenant connecté avec le compte de <b>'.$user.'</b>, soit prudent !');
         return $this->redirectToRoute('homepage');
     }
+
 
     /**
      * Lists all users with ROLE_ADMIN.

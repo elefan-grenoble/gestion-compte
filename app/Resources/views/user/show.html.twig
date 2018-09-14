@@ -193,6 +193,9 @@
                         {% endif %}
                     {% endfor %}
                     </ul>
+                    {% if is_granted("ROLE_ADMIN") %}
+                    <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.username }}</a>
+                    {% endif %}
                 </div>
             </li>
         {% endif %}
@@ -286,8 +289,6 @@
                     {{ form_widget(delete_form) }}
                     <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
                     {{ form_end(delete_form) }}
-
-                    <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.username }}</a>
 
                     <h6>Roles</h6>
 
