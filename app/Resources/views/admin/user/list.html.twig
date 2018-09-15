@@ -170,44 +170,34 @@
         </li>
     </ul>
 
-    <table class="striped">
+    <table class="highlight">
         <thead>
             <tr>
-                <th class="hide-on-small-only" data-col="o.withdrawn">Fermé</th>
-                <th class="hide-on-small-only" data-col="o.enabled">Activé</th>
-                <th class="hide-on-small-only" data-col="o.frozen">Gelé</th>
+                <th class="hide-on-med-and-down">Etat</th>
                 <th data-col="o.member_number">#</th>
                 <th data-col="o.username">username</th>
                 <th data-col="b.firstname">prénom</th>
                 <th data-col="b.lastname">nom</th>
                 <th data-col="b.email">email</th>
-                <th data-col="r.date">Adhésion(s)</th>
-                <th data-col="lr.date">Dernière Adhésion</th>
-                <th>Role(s)</th>
-                <th>Commission(s)</th>
-                <th></th>
+                <th class="hide-on-small-and-down" data-col="r.date">Adhésion(s)</th>
+                <th class="hide-on-med-and-down">Role(s)</th>
+                <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
         </thead>
         <tbody>
         {% for user in users %}
             {% if user.mainBeneficiary %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td class="hide-on-small-only">
-                        {% if user.withdrawn %}
-                            <i class="material-icons">check</i>
+                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
+                    <td class="hide-on-med-and-down">
+                        {% if not user.withdrawn %}
+                            {% if not user.isEnabled %}
+                                <i class="material-icons">phonelink_off</i>
+                            {% endif %}
+                            {% if user.frozen %}
+                                <i class="material-icons">notifications_paused</i>
+                            {% endif %}
                         {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-small-only">
-                        {% if user.isEnabled %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-small-only">
-                        {% if user.frozen %}
-                            <i class="material-icons">check</i>
-                        {% else %}
+                                <i class="material-icons">do_not_disturb</i>
                         {% endif %}
                     </td>
                     <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
@@ -228,7 +218,7 @@
                             {{ beneficiary.email }}<br/>
                         {% endfor %}
                     </td>
-                    <td>
+                    <td class="hide-on-small-and-down">
                         {% for registration in user.registrations %}
                             {% if user.lastregistration %}
                                 {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
@@ -241,12 +231,7 @@
                             {% endif %}
                         {% endfor %}
                     </td>
-                    <td>
-                        {% if user.lastregistration %}
-                            {{ user.lastregistration.date | date('d F Y') }}
-                        {% endif %}
-                    </td>
-                    <td>
+                    <td class="hide-on-med-and-down">
                         {% for beneficiary in user.beneficiaries %}
                             {% for role in beneficiary.roles %}
                                 <div class="chip truncate">
@@ -255,7 +240,7 @@
                             {% endfor %}
                         {% endfor %}
                     </td>
-                    <td>
+                    <td class="hide-on-med-and-down">
                         {% for beneficiary in user.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
                                 <div class="chip truncate">
@@ -264,26 +249,22 @@
                             {% endfor %}
                         {% endfor %}
                     </td>
-                    <td>
-                        <a class="btn-floating blue-grey left" href="{{ path('user_show', { 'username': user.username }) }}"><i class="material-icons left">search</a>
-                        <a class="btn-floating left" href="{{ path('user_edit', { 'username': user.username }) }}"><i class="material-icons left">edit</a>
-                    </td>
                 </tr>
             {% else %}
                 <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td class="hide-on-small-only">
+                    <td class="hide-on-med-and-down">
                         {% if user.withdrawn %}
                             <i class="material-icons">check</i>
                         {% else %}
                         {% endif %}
                     </td>
-                    <td class="hide-on-small-only">
+                    <td class="hide-on-med-and-down">
                         {% if user.isEnabled %}
                             <i class="material-icons">check</i>
                         {% else %}
                         {% endif %}
                     </td>
-                    <td class="hide-on-small-only">
+                    <td class="hide-on-med-and-down">
                         {% if user.frozen %}
                             <i class="material-icons">check</i>
                         {% else %}
@@ -321,9 +302,43 @@
                 <i class="material-icons">chevron_left</i>
             </a>
         </li>
-        {% for i in range(1,nb_of_pages) %}
-            <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
-        {% endfor %}
+        {% if nb_of_pages < 10 %}
+            {% for i in range(1,nb_of_pages) %}
+                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+            {% endfor %}
+        {% else %}
+            {% if page <= 3 %}
+                {% for i in range(1,page+1) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                {% endfor %}
+                <li>...</li>
+                {% for i in range(nb_of_pages-1,nb_of_pages) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                {% endfor %}
+            {% else %}
+                {% if nb_of_pages - page <= 3 %}
+                    {% for i in range(1,2) %}
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                    <li>...</li>
+                    {% for i in range(page-1,nb_of_pages) %}
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                {% else %}
+                    {% for i in range(1,2) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                    <li>...</li>
+                    {% for i in range(page-1,page+1) %}
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                    <li>...</li>
+                    {% for i in range(nb_of_pages-1,nb_of_pages) %}
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% endfor %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
         <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
             <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("user_index",{'page':page+1}) }}{% endif %}" data-page="{{ page+1}}">
                 <i class="material-icons">chevron_right</i>
@@ -341,6 +356,22 @@
         }
         th.active{
             color: #51CAE9;
+        }
+        tr.withdrawn{
+            background: rgba(255, 50, 0, 0.2);
+        }
+        tr.frozen{
+            background-color: rgba(0, 138, 255, 0.1);
+            background-image: url({% image '@AppBundle/Resources/public/img/snowflakes.svg' %}{{ asset_url }}{% endimage %});
+            background-position: top right;
+            background-repeat: no-repeat;
+            background-size: contain;
+        }
+        tr.frozen td{
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        tbody tr{
+            cursor: pointer;
         }
     </style>
 {% endblock %}
@@ -370,6 +401,12 @@
                 selectYears: 2, // Creates a dropdown of 15 years to control year,
                 close: 'Ok',
                 closeOnSelect: true // Close upon selecting a date,
+            });
+            $('tr').click(function () {
+               var url = $(this).data('url');
+               if (url){
+                   window.location = url;
+               }
             });
             $('[type=submit]').click(function(e){
                 e.preventDefault();

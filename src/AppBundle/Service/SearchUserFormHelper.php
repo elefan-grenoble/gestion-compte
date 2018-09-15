@@ -28,7 +28,7 @@ class SearchUserFormHelper {
                 'Non gelé' => 1,
             )));
 
-        if ($params && $params['membernumber'])
+        if ($params && isset($params['membernumber']) && $params['membernumber'])
             $formBuilder->add('membernumber', TextType::class, array('label' => '# =','required' => false, 'attr' => array('value' => $params['membernumber'])));
         else
             $formBuilder->add('membernumber', TextType::class, array('label' => '# =','required' => false));

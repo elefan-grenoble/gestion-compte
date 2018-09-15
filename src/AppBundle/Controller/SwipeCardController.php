@@ -29,6 +29,7 @@ class SwipeCardController extends Controller
 
     /**
      * Swipe Card login
+     * used to connect to the app using qr
      *
      * @param String $code
      * @param Request $request
@@ -61,6 +62,7 @@ class SwipeCardController extends Controller
      * @param Beneficiary $beneficiary
      * @return Response
      * @Route("/generate/{id}", name="generate_swipe")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
     public function generateSwipeCardAction(Beneficiary $beneficiary){
@@ -81,6 +83,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response
      * @Route("/active/", name="active_swipe")
+     * @Security("has_role('ROLE_USER')")
      * @Method({"POST"})
      */
     public function activeSwipeCardAction(Request $request){
@@ -148,6 +151,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response A Response instance
      * @Route("/{id}/show", name="swipe_show")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
     public function showAction(SwipeCard $card){
@@ -162,6 +166,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response A Response instance
      * @Route("/{id}/qr.png", name="swipe_qr")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
     public function qrAction(SwipeCard $card){
@@ -195,6 +200,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response A Response instance
      * @Route("/{id}/br.png", name="swipe_br")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
     public function brAction(SwipeCard $card){
@@ -225,6 +231,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response A Response instance
      * @Route("/print", name="swipe_print")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"POST"})
      */
     public function printAction(Request $request, SearchUserFormHelper $formHelper){

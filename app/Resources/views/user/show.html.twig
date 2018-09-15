@@ -403,5 +403,10 @@
         div.replies{
             padding-left: 15px;
         }
+        {% if user.withdrawn %}
+            body{
+                background: rgba(255, 50, 0, 0.2);
+            }
+        {% endif %}
     </style>
 {% endblock %}
