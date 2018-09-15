@@ -163,13 +163,18 @@ class SwipeCardController extends Controller
     /**
      * Swipe Card QR Code
      *
-     * @param SwipeCard $card
+     * @param String $code
      * @return Response A Response instance
-     * @Route("/{id}/qr.png", name="swipe_qr")
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Route("/{code}/qr.png", name="swipe_qr")
      * @Method({"GET"})
      */
-    public function qrAction(SwipeCard $card){
+    public function qrAction(Request $request, $code){
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $em = $this->getDoctrine()->getManager();
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        if (!$card){
+            throw $this->createAccessDeniedException();
+        }
         $qrCode = new QrCode();
         try {
             $qrCode
@@ -197,13 +202,18 @@ class SwipeCardController extends Controller
     /**
      * Swipe Card QR Code
      *
-     * @param SwipeCard $card
+     * @param String $code
      * @return Response A Response instance
-     * @Route("/{id}/br.png", name="swipe_br")
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Route("/{code}/br.png", name="swipe_br")
      * @Method({"GET"})
      */
-    public function brAction(SwipeCard $card){
+    public function brAction(Request $request, $code){
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $em = $this->getDoctrine()->getManager();
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        if (!$card){
+            throw $this->createAccessDeniedException();
+        }
         $barcode = new BarcodeGenerator();
         try {
             $barcode->setText($card->getCode());
