@@ -4,8 +4,8 @@
     <table style="width: 100%">
         <tbody style="width: 100%">
         <tr style="width: 100%">
-            <td class="qr">{{ absolute_url(path("swipe_in",{"code":encoded_code})) | qr | raw }}</td>
-            <td class="bc" >{{ code | barcode | raw }}
+            <td class="qr"><img src="{{ absolute_url(path('swipe_qr',{'id':card.id})) }}" alt="qr"></td>
+            <td class="bc" ><img src="{{ absolute_url(path('swipe_br',{'id':card.id})) }}" alt="barecode">
                 <br>
                 Adhésion <strong>#{{ card.beneficiary.user.memberNumber }}</strong> [B{{ card.number }}]
                 <br>

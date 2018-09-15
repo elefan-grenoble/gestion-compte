@@ -10,6 +10,7 @@ use CodeItNow\BarcodeBundle\Utils\QrCode;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -155,6 +156,68 @@ class SwipeCardController extends Controller
         ]);
     }
 
+    /**
+     * Swipe Card QR Code
+     *
+     * @param SwipeCard $card
+     * @return Response A Response instance
+     * @Route("/{id}/qr.png", name="swipe_qr")
+     * @Method({"GET"})
+     */
+    public function qrAction(SwipeCard $card){
+        $qrCode = new QrCode();
+        try {
+            $qrCode
+                ->setText($this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL))
+                ->setSize(200)
+                ->setPadding(0)
+                ->setErrorCorrection('high')
+                ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+                ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+                ->setImageType(QrCode::IMAGE_TYPE_PNG);
+            $content = base64_decode($qrCode->generate());
+            $response = new Response();
+            $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'qr.png');
+            $response->headers->set('Content-Disposition', $disposition);
+            $response->headers->set("Content-length",strlen($content));
+            $response->headers->set('Content-Type', $qrCode->getContentType());
+            $response->setContent($content);
+
+            return $response;
+        } catch (\Exception $exception){
+            die($exception);
+        }
+    }
+
+    /**
+     * Swipe Card QR Code
+     *
+     * @param SwipeCard $card
+     * @return Response A Response instance
+     * @Route("/{id}/br.png", name="swipe_br")
+     * @Method({"GET"})
+     */
+    public function brAction(SwipeCard $card){
+        $barcode = new BarcodeGenerator();
+        try {
+            $barcode->setText($card->getCode());
+            $barcode->setType(BarcodeGenerator::Code128);
+            $barcode->setScale(2);
+            $barcode->setThickness(25);
+            $barcode->setFontSize(10);
+            $content = base64_decode($barcode->generate());
+            $response = new Response();
+            $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'br.png');
+            $response->headers->set('Content-Disposition', $disposition);
+            $response->headers->set("Content-length",strlen($content));
+            $response->headers->set('Content-Type', 'image/png');
+            $response->setContent($content);
+
+            return $response;
+        } catch (\Exception $exception){
+            die($exception);
+        }
+    }
 
     /**
      * print Swipe Card
