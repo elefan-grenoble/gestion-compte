@@ -21,6 +21,9 @@ security:
             csrf_token_generator: security.csrf.token_manager
         logout:       true
         anonymous:    true
+        switch_user:
+            role: ROLE_ADMIN
+            parameter: _login_as
       oauth_token:
         pattern:    ^/oauth/v2/token
         security:   false

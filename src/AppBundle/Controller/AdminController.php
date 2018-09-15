@@ -155,26 +155,6 @@ class AdminController extends Controller
         ));
     }
 
-    /**
-     * Login as.
-     *
-     * @param User $user
-     * @param Request $request
-     * @return Response
-     * @Route("/login_as/{id}", name="login_as")
-     * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function loginAsAction(Request $request,User $user){
-        $session = new Session();
-        $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
-        $this->get("security.token_storage")->setToken($token);
-        $event = new InteractiveLoginEvent($request, $token);
-        $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
-        $session->getFlashBag()->add('success', 'Tu es maintenant connecté avec le compte de <b>'.$user.'</b>, soit prudent !');
-        return $this->redirectToRoute('homepage');
-    }
-
 
     /**
      * Lists all users with ROLE_ADMIN.

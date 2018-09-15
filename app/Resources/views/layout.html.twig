@@ -14,6 +14,20 @@
     </head>
     <body>
         <header>
+            {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+                <div class="navbar-fixed">
+                    <nav class="impersonate">
+                        <div class="brand-logo">{% image '@AppBundle/Resources/public/img/emoticons/072-ninja.svg' %}<img height="30px" class="emoticon" src="{{ asset_url }}" alt="ninja mode" />{% endimage %}</div>
+                        <div class="nav-wrapper">
+                            <ul class="right">
+                                <li>
+                                    <a href="{{ path('user_show', {'username': app.user.username,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            {% endif %}
             <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
                 <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">{{ site_name }}</a>
                     <ul class="right hide-on-med-and-down">

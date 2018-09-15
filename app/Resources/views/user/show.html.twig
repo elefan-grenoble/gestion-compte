@@ -184,18 +184,18 @@
                     <h5>Badges</h5>
                     <ul>
                     {% for beneficiary in user.beneficiaries %}
-                        {% if (beneficiary.getEnabledSwipeCards | length == 0) and beneficiary.SwipeCards.first.DisabledAt %}
-                            <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
+                        {% if (beneficiary.getEnabledSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
+                            <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
                         {% else %}
                             {% for badge in beneficiary.getSwipeCards %}
-                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}">voir badge #{{ badge.number }} de {{ beneficiary.firstname }} </a></li>
+                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}" class="btn light-blue darken-4">voir badge #{{ badge.number }} de {{ beneficiary.firstname }} </a></li>
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
                     </ul>
                     {% if is_granted("ROLE_ADMIN") %}
                         <h5>login as</h5>
-                        <a href="{{ path('login_as', { 'id': user.id }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.firstname }}</a>
+                        <a href="{{ path('homepage', {'_login_as':  user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.firstname }}</a>
                     {% endif %}
                 </div>
             </li>

@@ -40,6 +40,12 @@ main {
 .main-navigation {
   background-color: #51CAE9;
 }
+.impersonate {
+  background: black;
+}
+.impersonate .brand-logo {
+  margin-left: 10px;
+}
 footer.page-footer {
   background-color: #51CAE9;
 }
