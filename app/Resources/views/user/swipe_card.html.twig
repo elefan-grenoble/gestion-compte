@@ -13,29 +13,83 @@
 
 {% block content %}
     <div class="row">
-        <div class="col s4 z-depth-2">
+        <div class="col s12 m8 l8 xl6 z-depth-2">
             {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
         </div>
     </div>
     <div class="row">
+        {% if is_granted("ROLE_ADMIN") %}
         <div class="col s6">
             Auto login url : <a href="{{ absolute_url(path("swipe_in",{"code": card.code | vigenere_encode})) }}">{{ absolute_url(path("swipe_in",{"code":card.code | vigenere_encode})) }}</a>
-        </div><div class="col s6">
+        </div>
+        {% endif %}
+        <div class="col s6">
             code : {{ card.code }}
         </div>
     </div>
-    <form action="{{ path("swipe_print") }}" method="post">
-        <div class="row">
-            <div class="input-field col s6">
-                <input type="text" name="line" value="1">
-                <label for="line">index de ligne (1-8)</label>
+    <ul class="collapsible">
+
+        <li>
+            <div class="collapsible-header"><i class="material-icons">print</i>imprimer</div>
+            <div class="collapsible-body">
+                <p>Séléctionnez la postition</p>
+                <form action="{{ path("swipe_print") }}" method="post">
+                    <div class="row">
+                        <div class="col s12 m6 push-m3">
+                            <table id="print_position">
+                                <tbody>
+                                {% for l in 1..8 %}
+                                    <tr>
+                                        {% for c in 1..3 %}
+                                            <td><a href="#!" data-column="{{ c }}" data-line="{{ l }}" class=""></a></td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="line" value="1">
+                    <input type="hidden" name="column" value="1">
+                    <input type="hidden" name="beneficiary_id" value="{{ card.beneficiary.id }}">
+                    <input type="submit" class="btn" value="Pdf">
+                </form>
             </div>
-            <div class="input-field col s6">
-                <input type="text" name="column" value="1">
-                <label for="line">index de colonne (1-3)</label>
-            </div>
-            <input type="hidden" name="beneficiary_id" value="{{ card.beneficiary.id }}">
-        </div>
-        <input type="submit" class="btn" value="print !">
-    </form>
+        </li>
+    </ul>
+
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        #print_position,#print_position td{
+            border: 1px solid darkgrey;
+            padding: 0;
+        }
+        #print_position a{
+            display: block;
+            width: 100%;
+            height: 40px;
+        }
+        #print_position a:hover{
+            background: #bbdefb;/* blue lighten-4;*/
+        }
+    </style>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery(function () {
+            $('#print_position a').click(function (e) {
+                e.preventDefault();
+                $('#print_position a').removeClass('blue lighten-1');
+                $(this).addClass('blue lighten-1');
+                $("input[name='line']").val($(this).data('line'));
+                $("input[name='column']").val($(this).data('column'));
+            });
+            $('#print_position a:first').click();
+        });
+    </script>
 {% endblock %}
