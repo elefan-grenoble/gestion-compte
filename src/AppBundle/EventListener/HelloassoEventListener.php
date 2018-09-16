@@ -23,9 +23,9 @@ class HelloassoEventListener
         $payment = $event->getPayment();
         $campaign = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$payment->getCampaignId());
         if ($campaign->url == $this->container->getParameter('helloasso_registration_campaign_url')){ //good campaign
-            $user = $this->_em->getRepository('AppBundle:user')->findOneBy(array('email'=>$payment->getEmail()));
-            if ($user){
-                if (!$user->canRegister()){
+            $beneficiary = $this->_em->getRepository('AppBundle:Beneficiary')->findOneBy(array('email'=>$payment->getEmail()));
+            if ($beneficiary){
+                if (!$beneficiary->getUser()->canRegister()){
                     //throw new \LogicException('user cannot register yet');
                 }else{
                     $registration = new Registration();
@@ -33,11 +33,11 @@ class HelloassoEventListener
                     $registration->setDate(new \DateTime('now'));
                     $registration->setHelloassoPayment($payment);
                     $registration->setMode(Registration::TYPE_HELLOASSO);
-                    $registration->setUser($user);
+                    $registration->setUser($beneficiary->getUser());
 
                     $this->_em->persist($registration);
                     $payment->setRegistration($registration);
-                    $user->addRegistration($registration);
+                    $beneficiary->getUser()->addRegistration($registration);
                     $this->_em->flush();
                 }
             }else{
