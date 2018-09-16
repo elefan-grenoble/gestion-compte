@@ -184,7 +184,7 @@
                     <h5>Badges</h5>
                     <ul>
                     {% for beneficiary in user.beneficiaries %}
-                        {% if (beneficiary.getEnabledSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
+                        {% if (beneficiary.getSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
                             <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
                         {% else %}
                             {% for badge in beneficiary.getSwipeCards %}
