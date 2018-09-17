@@ -1,7 +1,7 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    <h1>Liste des membres ({{ nb_of_result }})</h1>
+    <h3 class="center-align">Liste des membres ({{ nb_of_result }})</h3>
 
     <ul class="collapsible" data-collapsible="accordion">
         <li>
@@ -169,7 +169,8 @@
             </div>
         </li>
     </ul>
-
+    </div> <!-- end div.section -->
+    </div> <!-- end div.container -->
     <table class="highlight">
         <thead>
             <tr>
@@ -251,50 +252,15 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td class="hide-on-med-and-down">
-                        {% if user.withdrawn %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-med-and-down">
-                        {% if user.isEnabled %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td class="hide-on-med-and-down">
-                        {% if user.frozen %}
-                            <i class="material-icons">check</i>
-                        {% else %}
-                        {% endif %}
-                    </td>
-                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>{{ user.username }}</td>
-
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                        {% if user.lastRegistration %}
-                            {{ user.lastRegistration.date | date('d F Y') }}
-                        {% endif %}
-                    </td>
-                    <td>
-                    </td>
-                    <td>
-                    </td>
-                    <td><a href="{{ path('user_edit', { 'username': user.username }) }}">edit</a></td>
+                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
+                    <td colspan="9">{{ user }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
         </tbody>
     </table>
-
+<div class="container">
+    <div class="section">
     {% if nb_of_pages > 1 %}
     <ul class="pagination">
         <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
