@@ -44,7 +44,7 @@ class ApiController extends Controller
     /**
      * @Route("/oauth/user", name="api_user")
      * @Method({"GET"})
-     *
+     * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
     public function userAction()
     {
