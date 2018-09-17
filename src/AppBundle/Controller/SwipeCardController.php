@@ -46,7 +46,7 @@ class SwipeCardController extends Controller
             $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'existe pas");
             $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
-                $session->getFlashBag()->add("warning","Si c'est le tiens, active le sur ton espace membre");
+                $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
         }else{
             $user = $card->getBeneficiary()->getUser();
             $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
@@ -75,6 +75,10 @@ class SwipeCardController extends Controller
             $session->getFlashBag()->add('success','Le badge #'.$result->getNumber().' a bien été généré');
             return $this->redirectToRoute('swipe_show',array('id'=>$result->getId()));
         }
+    }
+
+    public function homepageAction(){
+        return $this->render('user/swipe_card/homepage.html.twig');
     }
 
     /**
