@@ -126,6 +126,20 @@
                             </div>
                         </form>
                     {% endif %}
+                    {% if not user.isEnabled %}
+                        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+
+                        {% else %}
+                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                <input type="hidden" name="username" value="{{ user.username }}" />
+                                Envoyer le lien de connexion sur {{ user.email }} ?
+                                <br>
+                                <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
+                                    <i class="material-icons left">devices</i> Activer le compte
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
                     {% if is_granted("freeze_change",user) %}
                         {% if not user.frozen %}
                             {% if user.frozenChange %}
@@ -199,6 +213,25 @@
                     {% endif %}
                 </div>
             </li>
+        {% elseif %}
+            <li id="actions">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">person</i>Actions</div>
+                <div class="collapsible-body">
+                    {% if not user.isEnabled %}
+                        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+
+                        {% else %}
+                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                                <input type="hidden" name="username" value="{{ user.username }}" />
+                                    Envoyer le lien de connexion sur {{ user.email }} ?
+                                    <br>
+                                    <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
+                                    <i class="material-icons left">devices</i> Activer le compte
+                                    </button>
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
         {% endif %}
         <li id="shifts">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}"><i class="material-icons">date_range</i>Créneaux</div>
