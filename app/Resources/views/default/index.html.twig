@@ -112,12 +112,12 @@
             $(".collapsible .modal-trigger").on('click',function (e) {
                 e.preventDefault();
             });
-
+            {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             var barcode="";
             var barcode_submit_url="{{ path('check') }}";
             $(document).keypress(function(e) {
                 var code = (e.keyCode ? e.keyCode : e.which);
-                console.log(code);
+                //console.log(code);
                 if(code==13 || code==9)// Enter or tab key hit
                 {
                     if (barcode.length){
@@ -136,6 +136,7 @@
                     }
                 }
             });
+            {% endif %}
 
         })
     </script>
