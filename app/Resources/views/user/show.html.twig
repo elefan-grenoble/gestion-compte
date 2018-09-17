@@ -11,8 +11,9 @@
 {% endblock %}
 
 {% block content %}
-    <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img">
-    <h4 class="">
+    <h4 class="center-align">
+        <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img"><br>
+
         {% if user.withdrawn %}<del>{% endif %}
             #{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}
         {% if user.withdrawn %}</del>{% endif %}
@@ -116,7 +117,7 @@
         {% endif %}
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="actions">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">person</i>Actions</div>
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
                 <div class="collapsible-body">
                     {% if is_granted("edit",user) %}
                         <form action="{{ path('user_edit_firewall') }}" method="POST">
@@ -213,13 +214,13 @@
                     {% endif %}
                 </div>
             </li>
-        {% elseif %}
+        {% else %}
             <li id="actions">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">person</i>Actions</div>
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
                 <div class="collapsible-body">
                     {% if not user.isEnabled %}
                         {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
-
+                            <p>Cet utilisateur n'a pas renseigné son email, son compte ne peux pas être activé.</p>
                         {% else %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
@@ -230,6 +231,14 @@
                                     </button>
                             </form>
                         {% endif %}
+                    {% endif %}
+                    {% if is_granted("edit",user) %}
+                        <form action="{{ path('user_edit_firewall') }}" method="POST">
+                            <input type="hidden" name="username" value="{{ user.username }}" />
+                            <div>
+                                <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
+                            </div>
+                        </form>
                     {% endif %}
                 </div>
         {% endif %}

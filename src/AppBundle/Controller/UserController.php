@@ -450,7 +450,7 @@ class UserController extends Controller
 
             if ($user&&($this->isGranted('view',$user) || ($email&&($user->getEmail()==$email)))){
                 $session->set('token_key',uniqid());
-                return $this->redirectToRoute('user_edit',array(
+                return $this->redirectToRoute('user_show',array(
                     'username'=>$user->getUsername(),
                     'token'=>$user->getTmpToken($session->get('token_key').$this->get('security.token_storage')
                             ->getToken()->getUser()->getUsername())));

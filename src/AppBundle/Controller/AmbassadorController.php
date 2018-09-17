@@ -83,7 +83,9 @@ class AmbassadorController extends Controller
 
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
 
-        $page = 1;
+        $page = $request->get('page');
+        if (!intval($page))
+            $page = 1;
         $order = 'ASC';
         $sort = 'o.member_number';
 

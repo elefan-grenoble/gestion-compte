@@ -98,11 +98,5 @@
         </ul>
     {#{% else %}#}
     {% endif %}
-    <form action="{{ path('user_show',{'username':user.username}) }}" method="get" class="left">
-        {% if not is_granted("ROLE_ADMIN") and token is defined %}
-            <input type="hidden" value="{{ token }}" name="token">
-        {% endif %}
-        <button type="submit" class="btn btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
-    </form>
 
 {% endblock %}
