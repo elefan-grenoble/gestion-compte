@@ -1,0 +1,72 @@
+<div class="row">
+    <div class="col s6">
+        <div class="errors">
+            {{ form_errors(form.name) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.name) }}
+            {{ form_label(form.name) }}
+        </div>
+    </div>
+    <div class="col s6">
+        <div class="errors">
+            {{ form_errors(form.url) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.url) }}
+            {{ form_label(form.url) }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s9">
+        <div class="errors">
+            {{ form_errors(form.slug) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.slug) }}
+            {{ form_label(form.slug) }}
+        </div>
+    </div>
+    <div class="col s3">
+        <div class="errors">
+            {{ form_errors(form.icon) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.icon) }}
+            {{ form_label(form.icon) }}
+        </div>
+        <a href="https://material.io/tools/icons/?icon=extension&style=baseline">?</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col s9">
+        <div class="errors">
+            {{ form_errors(form.description) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.description) }}
+            {{ form_label(form.description) }}
+        </div>
+    </div>
+    <div class="col s3">
+        <div class="errors">
+            {{ form_errors(form.public) }}
+        </div>
+        <div class="">
+            {{ form_widget(form.public) }}
+            {{ form_label(form.public) }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        <div class="errors">
+            {{ form_errors(form.logoFile) }}
+        </div>
+        <div class="">
+            {{ form_widget(form.logoFile) }}
+            {{ form_label(form.logoFile) }}
+        </div>
+    </div>
+</div>

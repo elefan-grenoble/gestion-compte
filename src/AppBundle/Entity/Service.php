@@ -41,6 +41,27 @@ class Service
     /**
      * @var string
      *
+     * @ORM\Column(name="icon", type="string", length=255)
+     */
+    private $icon;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="slug", type="string", length=255)
+     */
+    private $slug;
+
+    /**
+     * @var boolean
+     *
+     * @ORM\Column(name="public", type="boolean", unique=false, options={"default" : 0},nullable=true)
+     */
+    private $public;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
@@ -340,5 +361,77 @@ class Service
     public function getUpdatedAt()
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * Set public.
+     *
+     * @param bool|null $public
+     *
+     * @return Service
+     */
+    public function setPublic($public = null)
+    {
+        $this->public = $public;
+
+        return $this;
+    }
+
+    /**
+     * Get public.
+     *
+     * @return bool|null
+     */
+    public function getPublic()
+    {
+        return $this->public;
+    }
+
+    /**
+     * Set icon.
+     *
+     * @param string $icon
+     *
+     * @return Service
+     */
+    public function setIcon($icon)
+    {
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    /**
+     * Get icon.
+     *
+     * @return string
+     */
+    public function getIcon()
+    {
+        return $this->icon;
+    }
+
+    /**
+     * Set slug.
+     *
+     * @param string $slug
+     *
+     * @return Service
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug.
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
     }
 }

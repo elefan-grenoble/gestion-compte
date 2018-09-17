@@ -5,6 +5,7 @@ namespace AppBundle\Form;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -41,12 +42,15 @@ class ServiceType extends AbstractType
 
             $form->add('name',TextType::class,array('label'=>'nom','required' => true,))
                 ->add('description',TextType::class,array('label'=>'Description'))
+                ->add('slug',TextType::class,array('label'=>'nom court','required' => true))
+                ->add('icon',TextType::class,array('label'=>'Icon name','required' => false))
                 ->add('url',TextType::class,array('label'=>'Adresse web','required' => false));
             $form->add('logoFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,
                 'download_link' => true,
             ));
+            $form->add('public',CheckboxType::class,array('required' => false,'label'=>'Visible sur le menu ?'));
         });
 
     }

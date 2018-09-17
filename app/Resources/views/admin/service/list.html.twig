@@ -3,7 +3,7 @@
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>services
+    <i class="material-icons">extension</i>services
 {% endblock %}
 
 {% block content %}
@@ -13,9 +13,11 @@
         <thead>
         <tr>
             <th>logo</th>
+            <th>icon</th>
             <th>Service</th>
             <th>Description</th>
             <th>Url</th>
+            <th>Publique</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -28,10 +30,15 @@
                     <img src="{{ asset(vich_uploader_asset(service, 'logoFile')) | imagine_filter('service_logo') }}" />
                     {% endif %}
                 </td>
+                <td>{% if service.icon %}
+                        <i class="material-icons small left">{{ service.Icon }}</i>
+                    {% endif %}
+                </td>
                 <td>{{ service.name }}</td>
                 <td>{{ service.description }}</td>
                 <td><a href="{{ service.url }}">{{ service.url }}</a></td>
-                <td><a href="{{ path("service_edit",{'id':service.id}) }}">editer</a></td>
+                <td>{% if service.public %}<i class="material-icons">check</i>{% endif %}</td>
+                <td><a href="{{ path("service_edit",{'id':service.id}) }}" class="btn-floating"><i class="material-icons left">edit</i></a></td>
             </tr>
         {% endfor %}
         </tbody>

@@ -42,6 +42,21 @@ class ServiceController extends Controller
     }
 
     /**
+     * Lists all services.
+     *
+     * @Route("/navlist", name="nav_list_services")
+     * @Method("GET")
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function navlistAction(){
+        $em = $this->getDoctrine()->getManager();
+        $services = $em->getRepository('AppBundle:Service')->findBy(array('public'=>1));
+        return $this->render('admin/service/navlist.html.twig', array(
+            'services' => $services
+        ));
+    }
+
+    /**
      * add new services.
      *
      * @Route("/new", name="service_new")
