@@ -20,20 +20,6 @@
         <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
     </div>
     {{ form_end(edit_form) }}
-    {% if not user.isEnabled %}
-        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
-
-            {% else %}
-                <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                    <input type="hidden" name="username" value="{{ user.username }}" />
-                    <div>
-                        Envoyer le lien de connexion sur {{ user.email }} ?
-                        <br>
-                        <input type="submit" name="submit" value="Activer le compte" class="btn-large waves-effect waves-light light-green" />
-                    </div>
-                </form>
-        {% endif %}
-    {% endif %}
 
     <h4>Adhésions</h4>
 
