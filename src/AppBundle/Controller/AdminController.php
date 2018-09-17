@@ -16,6 +16,8 @@ use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
+use Ornicar\GravatarBundle\GravatarApi;
+use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -28,6 +30,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -61,7 +64,43 @@ class AdminController extends Controller
         return $this->render('admin/index.html.twig');
     }
 
+    /**
+     * @Route("/search", name="search")
+     * @Method("POST")
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function searchAction(Request $request)
+    {
+        if ($request->isXMLHttpRequest()) {
+            $key = $request->get('key');
+            $return = array();
 
+            $em = $this->getDoctrine()->getManager();
+
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->createQueryBuilder('b')
+                ->where('b.email LIKE :email')
+                ->orWhere('b.lastname LIKE :lastname')
+                ->orWhere('b.firstname LIKE :firstname')
+                ->setParameter('email', '%'.$key.'%')
+                ->setParameter('lastname', '%'.$key.'%')
+                ->setParameter('firstname', '%'.$key.'%')
+                ->getQuery()
+                ->setMaxResults(5)
+                ->getResult();
+
+            foreach ($beneficiaries as $beneficiary){
+                $return[] = array(
+                    'name'=>$beneficiary->getAutocompleteLabelFull(),
+                    'icon'=>null,
+                    'username'=>$beneficiary->getUser()->getUsername(),
+                    'id'=>$beneficiary->getId()
+                );
+            }
+            return new JsonResponse(array('count'=>count($return),'data' => array_values($return)));
+        }
+
+        return new Response('This is not ajax!', 400);
+    }
 
     /**
      * Lists all user entities.
@@ -168,12 +207,7 @@ class AdminController extends Controller
     public function adminUsersAction(Request $request,SearchUserFormHelper $formHelper)
     {
         $em = $this->getDoctrine()->getManager();
-//        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('u')
-//            ->andWhere('u.member_number <= 0')
-//            ->orderBy('u.member_number', 'DESC')
-//            ->getQuery();
-//
-//        $admins =  $qb->execute();
+
         $admins = $em->getRepository("AppBundle:User")->findByRole('ROLE_ADMIN');
         $delete_forms = array();
         foreach ($admins as $admin){

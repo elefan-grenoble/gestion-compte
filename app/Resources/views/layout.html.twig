@@ -7,6 +7,14 @@
         <title>{% block title %}{{ site_name }}{% endblock %}</title>
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize.min.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
+        <style>
+            #quick_search_nav{
+                display: none;
+                position: fixed;
+                top: 0;
+                z-index: 1000;
+            }
+        </style>
         {% block stylesheets %}{% endblock %}
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?190420181847">
         <link rel="stylesheet" href="{{ asset('bundles/app/css/shift.css') }}?190420181847">
@@ -29,21 +37,12 @@
                 </div>
             {% endif %}
             <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
-                <div class="nav-wrapper container"><a id="logo-container" href="{{ path('homepage') }}" class="brand-logo">{{ site_name }}</a>
+                <div class="nav-wrapper container">
+                    <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">{{ site_name }}</a>
+                    <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
                     <ul class="right hide-on-med-and-down">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            <li>
-                                <a href="https://wiki.lelefan.org/">
-                                    <i class="material-icons left">description</i>
-                                    <small>wiki</small>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="https://barrissement.lelefan.org/">
-                                    <i class="material-icons left">chat</i>
-                                    <small>mattermost</small>
-                                </a>
-                            </li>
+                            {{ render(controller("AppBundle:Service:navlist")) }}
                             <li>
                                 <a href="{{ path('fos_user_profile_edit') }}">
                                     <i class="material-icons small left">settings</i>
@@ -59,12 +58,25 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            {#{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }} |#}
+                            <li><div class="user-view center-align">
+                                    <div class="background">
+                                        {% image '@AppBundle/Resources/public/img/dumbo-in-the-air.jpg' %}
+                                            <img class="responsive-img" src="{{ asset_url }}" alt="" style="position: absolute;bottom: -46px;left: 0;" />
+                                        {% endimage %}
+                                    </div>
+                                    <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
+                                    <a href="#name"><span class="white-text name">{{ app.user }}</span></a>
+                                </div>
+                            </li>
+                            <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
+                                    Accueil
+                                </a></li>
+                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
+                                    Mon profil ({{ app.user.username}})</a></li>
+                            {{ render(controller("AppBundle:Service:navlist")) }}
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
-                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
-                                    {{ app.user.firstname }}</a></li>
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}
@@ -130,6 +142,19 @@
                 </div>
             </div>
         </footer>
+        {% if is_granted('ROLE_ADMIN') %}
+            <nav id="quick_search_nav" class="white">
+                <div class="nav-wrapper">
+                    <form id="quick_search_form" action="" method="post">
+                        <div class="input-field">
+                            <input id="quick_search" type="search" autocomplete="false">
+                            <label class="label-icon" for="search"><i class="material-icons left">search</i></label>
+                            <i class="material-icons" id="quick_search_close">close</i>
+                        </div>
+                    </form>
+                </div>
+            </nav>
+        {% endif %}
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
         <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
@@ -138,7 +163,7 @@
                 $('select').material_select();
                 $('.button-collapse').sideNav({
                     menuWidth: 300, // Default is 300
-                    edge: 'right', // Choose the horizontal origin
+                    edge: 'left', // Choose the horizontal origin
                     closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
                     draggable: true, // Choose whether you can drag to open on touch screens,
                     onOpen: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
@@ -149,6 +174,66 @@
                 $(".dropdown-button").dropdown();
             });
             //todo put this in a file
+            $(document).ready(function() {
+                $('.main-navigation').click(function (e) {
+                    if ($(e.target).is(':not(a)')){
+                        $('#quick_search_nav').slideToggle($('#quick_search_nav').is(':visible'));
+                        $('#quick_search').val('');
+                        $('#quick_search').focus();
+                    }
+                });
+                var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
+                $('#quick_search_form').submit(function (e) {e.preventDefault()});
+                $('#quick_search_close').click(function () {
+                    $('#quick_search_nav').slideUp();
+                });
+                $('#quick_search').keyup(function () {
+                    if ($(this).val().length > 3){
+                        $.ajax({
+                            type: "POST",
+                            url: "{{ path('search') }}",
+                            data: {
+                                key: $(this).val()
+                            },
+                            dataType: "json",
+                            success: function(response) {
+                                // console.log(response.data);
+                                if (response && response.count > 0){
+                                    var beneficiaries = response.data;
+                                    var dataBeneficiaries = {};
+                                    var dataUsernames = {};
+                                    for (var i = 0; i < beneficiaries.length; i++) {
+                                        dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
+                                        dataUsernames[beneficiaries[i].id] = beneficiaries[i].username;
+                                    }
+                                    $('#quick_search').autocomplete('destroy');
+                                    $('#quick_search').autocomplete({
+                                        data: dataBeneficiaries,
+                                        limit: 5,
+                                        onAutocomplete: function(val) {
+                                            $('#quick_search_nav').slideUp();
+                                            console.log(val);
+                                            const regex = /\(([0-9]*)\)/gm;
+                                            let m;
+
+                                            if ((m = regex.exec(val)) !== null) {
+                                                var beneficiary_id = m[1];
+                                                var username = dataUsernames[beneficiary_id];
+                                                var res = show_user_template_url.replace("-USERNAME-", username);
+                                                window.location = res;
+                                            }
+                                        },
+                                        minLength: 3,
+                                    });
+                                }else{
+                                    console.log("no results for '"+$(this).val()+"'");
+                                }
+                            }
+                        });
+                    }
+                });
+
+            })
         </script>
         {% block javascripts %}{% endblock %}
     </body>
