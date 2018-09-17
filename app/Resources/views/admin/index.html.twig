@@ -8,37 +8,36 @@
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
         {% if is_granted("ROLE_ADMIN") %}
-                <br><br>
-                <h3 class="header center">Bonjour {{ app.user.firstname }}</h3>
-                <div class="row center">
-                    <p class="col s12">Admin panel</p>
-                </div>
+                <h4 class="row center">
+                    <i class="material-icons large">settings</i><br>
+                    Admin
+                </h4>
                 <h6>Membres</h6>
                 <a href="{{ path("user_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
-                <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
                 <a href="{{ path("admin_commissions") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commissions</a>
                 <a href="{{ path("admin_roles") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les roles</a>
+                <h6>Finances</h6>
+                <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
+                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">settings_ethernet</i>Paiements helloasso</a>
                 <h6>Divers</h6>
-                <a href="{{ path("event_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les événements</a>
-                <h5>Créneaux</h5>
-                <a href="{{ path("period") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>Semaine type</a>
-                <a href="{{ path("job_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">person</i>Postes de bénévolat</a>
+                <a href="{{ path("event_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">event</i>Gérer les événements</a>
+                <h6>Créneaux</h6>
+                <a href="{{ path("period") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>la semaine type</a>
+                <a href="{{ path("period") }}" class="waves-effect waves-light btn disabled"><i class="material-icons left">date_range</i>les exceptions</a>
+                <a href="{{ path("job_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">person</i>les postes de bénévolat</a>
 
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>
-            <h6>Corrections</h6>
-            <a href="{{ path("admin_registrations_fix") }}" class="waves-effect waves-light btn"><i class="material-icons left">local_hospital</i>Corriger les adhésions</a>
-            <a href="{{ path("admin_status_fix") }}" class="waves-effect waves-light btn"><i class="material-icons left">local_hospital</i>Corriger l'état des comptes</a>
-            <a href="{{ path("admin_phone_fix") }}" class="waves-effect waves-light btn"><i class="material-icons left">local_hospital</i>Corriger les téléphones</a>
             <h6>Membres</h6>
-            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn">Importer des adhérents en CSV</a>
+            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn disabled">Importer des adhérents en CSV</a>
             <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>export emails as csv</a>
-            <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">add</i>Ajouter un admin</a>
-            <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>List des utilisateurs admin</a>
+            <h6>Admins</h6>
+            <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">add</i>Ajouter un admin</a>
+            <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">list</i>List des utilisateurs admin</a>
             <h6>Divers</h6>
             <a href="{{ path("admin_clients") }}" class="waves-effect waves-light btn"><i class="material-icons left">vpn_key</i>Gérer les clients Oauth</a>
-            <a href="{{ path("admin_services") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les services</a>
+            <a href="{{ path("admin_services") }}" class="waves-effect waves-light btn"><i class="material-icons left">extension</i>Gérer les services</a>
         {% endif %}
         </div>
 
