@@ -23,10 +23,11 @@ class ApiController extends Controller
 
     protected function getUser(){
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        if ($user->isWithdrawn() || !$user->getEnabled()){ // user inactif
-            return new JsonResponse(array('user'=>false,'message'=>'User not found'));
+        if ($user->isWithdrawn() || !$user->isEnabled()){ // user inactif
+            return array('user'=>false,'message'=>'User not found');
+        }else{
+            return array('user'=>$user);
         }
-        return $user;
     }
 
     /**
@@ -43,17 +44,17 @@ class ApiController extends Controller
     /**
      * @Route("/oauth/user", name="api_user")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     *
      */
     public function userAction()
     {
-        $current_app_user = $this->getUser();
-        if (get_class($current_app_user) === "JsonResponse"){
-            return $current_app_user;
+        $response = $this->getUser();
+        if (!$response['user']){
+            return new JsonResponse($response);
         }
         return new JsonResponse(array('user'=>array(
-                'email' => $current_app_user->getEmail(),
-                'username' => $current_app_user->getUserName(),
+                'email' => $response['user']->getEmail(),
+                'username' => $response['user']->getUserName(),
         )));
     }
 
@@ -64,14 +65,14 @@ class ApiController extends Controller
      */
     public function nextcloudUserAction()
     {
-        $current_app_user = $this->getUser();
-        if (get_class($current_app_user) === "JsonResponse"){
-            return $current_app_user;
+        $response = $this->getUser();
+        if (!$response['user']){
+            return new JsonResponse($response);
         }
         return new JsonResponse(array(
-            'email' => $current_app_user->getEmail(),
-            'displayName' => $current_app_user->getFirstName() . ' ' . $current_app_user->getLastName(),
-            'identifier' => $current_app_user->getUserName()
+            'email' => $response['user']->getEmail(),
+            'displayName' => $response['user']->getFirstName() . ' ' . $response['user']->getLastName(),
+            'identifier' => $response['user']->getUserName()
         ));
     }
 
@@ -84,10 +85,11 @@ class ApiController extends Controller
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        $current_app_user = $this->getUser();
-        if (get_class($current_app_user) === "JsonResponse"){
-            return $current_app_user;
+        $response = $this->getUser();
+        if (!$response['user']){
+            return new JsonResponse($response);
         }
+        $current_app_user = $response['user'];
         $gravatar_helper = new GravatarHelper(new GravatarApi());
         return new JsonResponse(array(
             'id' => $current_app_user->getMemberNumber(),
