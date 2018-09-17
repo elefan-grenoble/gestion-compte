@@ -72,7 +72,7 @@
                 <p class="center-align">Tout roule, passe un bon moment à {{ project_name }} ! {% image '@AppBundle/Resources/public/img/emoticons/015-smile-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":)" />{% endimage %}</p>
             {% endif %}
             {% if counter < 0 %}
-                <p class="center-align">Oups, {% if more_than_one %}vous êtes{% else %}tu es{% endif %} en retard ! il {% if more_than_one %}vous{% else %}te{% endif %} reste {{ (due_duration_by_cycle - counter) | duration_from_minutes }} à reserver !! </p>
+                <p class="center-align">Oups, {% if more_than_one %}vous êtes{% else %}tu es{% endif %} en retard ! il {% if more_than_one %}vous{% else %}te{% endif %} reste {{ (due_duration_by_cycle - counter) | duration_from_minutes }} à réserver !! </p>
             {% endif %}
         {% else %}
             {% if counter < -3*due_duration_by_cycle %}
