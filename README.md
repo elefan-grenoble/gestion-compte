@@ -34,6 +34,13 @@ http://yuml.me/edit/463ff905
 * ``php bin/console server:start``
 * visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
 
+#### En Prod
+Pour nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et barecode en 404 
+<pre>location ~* ^/sw/(.*)/(qr|br)\.png$ {
+		rewrite ^/sw/(.*)/(qr|br)\.png$ /app.php/sw/$1/$2.png last;
+	}
+</pre>
+
 ### Installation de mailcatcher, pour récupérer les mails envoyé en DEV
 
 * https://mailcatcher.me/
