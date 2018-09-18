@@ -11,22 +11,18 @@
         <div class="z-depth-1 {{ bucket.first.job.color }} lighten-5 black-text "
              style="position: relative;height: 60px;">
             <div style="height:2px; width: 100%;position: absolute;">
-                {% for shifter in 1..nbBookableShifts %}
-                    {% if loop.index <= nbBookableShifts %}
-                        <div class="green lighten-3 left"
-                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% else %}
-                        <div class="grey lighten-3 left"
-                             style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% endif %}
-                {% endfor %}
+                {% if nbBookableShifts < nbShifts %}
+                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                        <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
+                    {% endfor %}
+                {% endif %}
             </div>
             <div >
                 <div style="position: absolute;width:60px;height: 60px;top: 0;left: 2px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
                         &nbsp;{{ bucket.end|date('G\\hi') }}</div>
                 <ul style="font-size: 9px; padding-left: 20px;">
                     {% set shiftercount = 0 %}
-                    {% for shift in bucket.shifts() %}
+                    {% for shift in bucket.sortedShifts() %}
                         {% if (shift.shifter) %}{# is booked #}
                             {% if (shiftercount < 3) %}
                                 <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
@@ -58,7 +54,7 @@
         <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
         remplissage {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)
         <ul class="collapsible" data-collapsible="accordion">
-            {% for shift in bucket.shifts() %}
+            {% for shift in bucket.sortedShifts() %}
                 {% if shift.shifter %}{# is booked #}
                     <li>
                         <div class="collapsible-header">

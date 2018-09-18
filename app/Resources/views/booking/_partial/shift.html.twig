@@ -9,28 +9,56 @@
         style="width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;" class="shift-bucket">
+    <div style="height:2px; width: 100%;position: absolute;top:-2px;">
+        {% if nbBookableShifts < nbShifts %}
+            {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
+            {% endfor %}
+        {% endif %}
+    </div>
     <a href="#{% if firstBookableShift %}book{{ firstBookableShift.id }}{% endif %}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100"
        data-tooltip="{{ bucket.sortedShifts.first.job.name }}">
         <div class="z-depth-1 {{ bucket.sortedShifts.first.job.color }} lighten-5 black-text"
              style="position: relative">
             <div class="shift-block">
-                {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
+                <span class="small hide-on-med-and-up" style="font-size: 10px">
+                    {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
+                    {% if bucket.end|date('i') == '00' %}{{ bucket.end|date('G\\h') }}{% else %}{{ bucket.end|date('G\\hi') }}{% endif %}
+                </span>
+                <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span><br>
                 {% if (nbShifter == 0) %}
-                    <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                    <span class="red-text"><i class="material-icons tiny">warning</i><span class="hide-on-small-and-down">&nbsp;sous-effectif</span></span>
                 {% elseif (nbShifter < nbShifts/2) %}
-                    <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+                    <span class="orange-text"><i class="material-icons tiny">warning</i><span class="hide-on-small-and-down">&nbsp;sous-effectif</span></span>
                 {% endif %}
                 {% if nbBookableShifts == 0 %}
                     <span class="green-text"><i class="material-icons tiny">check</i>&nbsp;complet</span>
                 {% endif %}
             </div>
             <div class="shift-block">
+                <div class="hide-on-med-and-down">
                 {% for shift in bucket.sortedShifts %}
-                    <span><i class="material-icons shifter {% if (app.user and not app.user.canBook(beneficiary,shift)) or (not app.user and shift.shifter) %}grey-text {% else %}{% if (app.user)%}green{% else %}red{% endif %}-text {% endif %}">{% if shift.role %}account_circle{% else %}person{% endif %}</i></span>
+                    {% if shift.isDismissed %}
+                        {% set class = "red-text" %}
+                    {% elseif (shift.shifter) %}
+                        {% set class = "green-text" %}
+                    {% elseif (app.user and not app.user.canBook(beneficiary,shift)) %}
+                        {% set class = "grey-text text-lighten-2" %}
+                    {% else %}
+                        {% set class = "grey-text text-darken-2" %}
+                    {% endif %}
+                    <span class="{{ class }}">
+                        {% if not shift.role %}
+                            <i class="material-icons shifter">{% if shift.shifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
+                        {% else %}
+                            <i class="material-icons shifter">account_circle</i>
+                        {% endif %}
+                    </span>
                 {% endfor %}
+                </div>
                 {% if firstBookableShift and firstBookableShift.isDismissed %}
-                    <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
+                    <span style="position:absolute; top:0;right:50%;opacity:0.5;" class="blue-text"><i class="material-icons">star</i></span>
                 {% endif %}
             </div>
         </div>

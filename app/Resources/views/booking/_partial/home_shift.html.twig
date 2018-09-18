@@ -7,24 +7,12 @@
     </div>
     {% if (shift.getIsUpcoming()) %}
         <div class="card-action">
-            <a href="#contact{{ shift.id }}" class="modal-trigger pulse"><i class="material-icons right">more</i></a><span>à venir</span>
+            <a href="#contact{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>à venir</span>
         </div>
     {% elseif (shift.getIsCurrent()) %}
         <div class="card-action">
-            <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger pulse"><i class="material-icons right">more</i></a><span>créneau en cours</span>
+            <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>créneau en cours</span>
         </div>
-        <!-- Tap Target Structure -->
-        <div class="tap-target" data-target="more{{ shift.id }}">
-            <div class="tap-target-content">
-                <h5>Title</h5>
-                <p>A bunch of text</p>
-            </div>
-        </div>
-        <script>
-            function toto(){
-                $('.tap-target').tapTarget();
-            }
-        </script>
     {% elseif (shift.getIsPast()) %}
         <div class="card-action">
             <i class="material-icons tiny">check</i><span>effectué</span>
@@ -32,17 +20,17 @@
     {% else %}
         {% if (shift.getIsDismissed() ) %}
             <div class="card-action">
-                <a href="#undismiss{{ shift.id }}" class="modal-trigger btn green truncate">reprendre mon créneau</a>
+                <a href="#undismiss{{ shift.id }}" class="modal-trigger btn-flat green truncate white-text">reprendre<span class="hide-on-med-and-down"> mon créneau</span></a>
             </div>
             <div id="undismiss{{ shift.id }}" class="modal black-text">
                 <div class="modal-content">
-                    <h4>Confirmation</h4>
+                    <h5>Confirmation</h5>
                 </div>
                 <div class="modal-footer">
                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
                     <a href="#"
                        class="modal-action modal-close waves-effect waves-green btn teal"
-                       onclick="$('#form_shift_id').val({{ shift.id }});$('#undismiss_shift').submit();">Oui, je reprends mon créneau</a>
+                       onclick="$('#form_shift_id').val({{ shift.id }});$('#undismiss_shift').submit();">Oui, je reprends<span class="hide-on-med-and-down"> mon créneau</span></a>
                 </div>
             </div>
 
@@ -52,12 +40,12 @@
 
         {% else %}
             <div class="card-action">
-                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red">Annuler ?!</a>
+                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text">Annuler ?!</a>
             </div>
             <div id="dismiss{{ shift.id }}" class="modal black-text">
                 <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
                     <div class="modal-content">
-                        <h4>Je ne peux pas faire mon créneau</h4>
+                        <h5>Je ne peux pas faire mon créneau</h5>
                         <p>Attention! En vous désistant d'un créneau réservé, vous devrez attendre qu'un autre membre le reprenne
                             pour pouvoir vous inscrire de nouveau.</p>
                         <div class="input-field">

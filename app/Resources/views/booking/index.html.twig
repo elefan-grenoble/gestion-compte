@@ -36,17 +36,17 @@
                     <div class="collapsible-body">
                         <ul>
                             <li>
-                                <i class="material-icons tiny">star_border</i> Créneau à reprendre, aide un bénévole en galère !
+                                <span class="blue-text"><i class="material-icons">star</i></span><i class="material-icons tiny red-text">radio_button_checked</i> Créneau annulé, à reprendre : aide un bénévole en galère !
                             </li>
-                            <li>
-                                <i class="material-icons tiny green-text">person</i>/<i class="material-icons tiny grey-text">person</i> Place disponible / indisponible
+                            <li class="hide-on-med-and-down">
+                                <i class="material-icons tiny grey-text text-darken-2">radio_button_unchecked</i>/<i class="material-icons tiny green-text">radio_button_checked</i> Place disponible / indisponible
                             </li>
-                            <li>
-                                <i class="material-icons tiny green-text">account_circle</i>/<i class="material-icons tiny grey-text">account_circle</i> Place à rôle (ressource, ambassadeur...) disponible / indisponible
+                            <li class="hide-on-med-and-down">
+                                <i class="material-icons tiny grey-text text-darken-2">account_circle</i>/<i class="material-icons tiny green-text">account_circle</i> Place à rôle (ressource, ambassadeur...) disponible / indisponible
                             </li>
                             <li class="row">
                                 {% for job in jobs %}
-                                <div class="col s4">
+                                <div class="col s12 m4">
                                     <div style="padding: 3px;margin:5px"
                                      class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
                                     <p>{{ job.name }}</p></div>
@@ -54,21 +54,21 @@
                                 {% endfor %}
                             </li>
                             <li class="row">
-                                <div class="col s4">
+                                <div class="col s12 m4">
                                     <div style="padding: 3px;margin:5px"
                                          class="z-depth-1 lighten-5 valign-wrapper">
                                         <p>Aucun bénévole inscrit</p>
                                         <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
-                                <div class="col s4">
+                                <div class="col s12 m4">
                                     <div style="padding: 3px;margin:5px"
                                          class="z-depth-1 lighten-5 valign-wrapper">
                                         <p>Pas assez de bénévoles inscrits pour ouvrir</p>
                                         <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
-                                <div class="col s4">
+                                <div class="col s12 m4">
                                     <div style="padding: 3px;margin:5px;cursor: not-allowed"
                                          class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1">
                                         <i class="material-icons tiny">lock</i>

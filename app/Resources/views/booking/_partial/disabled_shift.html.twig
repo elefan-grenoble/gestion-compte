@@ -10,13 +10,25 @@
     <div class="z-depth-1 grey lighten-3" style="height:40px;position: relative; cursor: not-allowed">
 
         <div class="shift-block grey-text text-lighten-1">
-            <i class="material-icons tiny">lock</i>{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
-            {% if nbBookableShifts == 0 %}- <i class="material-icons tiny">check</i>complet{% endif %}
+            <i class="material-icons tiny">lock</i><span class="small hide-on-med-and-up" style="font-size: 10px">
+                    {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
+                {% if bucket.end|date('i') == '00' %}{{ bucket.end|date('G\\h') }}{% else %}{{ bucket.end|date('G\\hi') }}{% endif %}
+                </span>
+            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span><br>
+            {% if nbBookableShifts == 0 %}<i class="material-icons tiny">check</i>complet{% endif %}
         </div>
         <div class="shift-block">
-            {% for shift in bucket.sortedShifts %}
-                    <span><i class="material-icons shifter grey-text text-lighten-1">{% if shift.role and shift.shifter %}account_circle{% else %}{% if shift.shifter %}person{% else %}person_outline{% endif %}{% endif %}</i></span>
-            {% endfor %}
+            <div class="hide-on-med-and-down">
+                {% for shift in bucket.sortedShifts %}
+                    <span class="grey-text">
+                        {% if not shift.role %}
+                            <i class="material-icons shifter">{% if shift.shifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
+                        {% else %}
+                            <i class="material-icons shifter">{% if shift.shifter %}account_circle{% else %}person_outline{% endif %}</i>
+                        {% endif %}
+                    </span>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>

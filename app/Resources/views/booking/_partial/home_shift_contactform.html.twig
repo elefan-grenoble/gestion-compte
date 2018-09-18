@@ -8,7 +8,7 @@
         <p>Tu partages ton créneau {{ shift.start|date('H:i') }} - {{ shift.end|date('H:i') }} avec</p>
         <div class="list">
         {% for shift in coShifts %}
-            <div class="chip blue-grey lighten-4">
+            <div class="chip {% if shift.isDismissed %}red{% else %}blue-grey{% endif %} lighten-4">
                 <a href="#!" class="black-text"
                    data-chip="{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}"
                    data-id="{{ shift.shifter.id }}">{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
