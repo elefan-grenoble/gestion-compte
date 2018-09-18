@@ -35,10 +35,11 @@
 <div class="row">
 {% for cycle in 0..1 %}
     {% for shift in app.user.getShiftsOfCycle(cycle) %}
-        <div class="col m6 s12">
+        <div class="col m6 s12 {% if app.user.getShiftsOfCycle(cycle) | length == 1 %}push-m3{% endif %}">
             {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
         </div>
     {% endfor %}
+</div><div class="row">
 {% endfor %}
 </div>
 

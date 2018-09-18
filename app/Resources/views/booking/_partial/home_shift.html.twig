@@ -1,17 +1,31 @@
-<div class="card sticky-action {% if (shift.getIsDismissed()) %}orange lighten-2{% elseif (shift.getIsPast()) %} {% else %} cyan darken-4 white-text{% endif %}">
+<div class="card sticky-action {% if (shift.getIsDismissed()) %}orange lighten-2{% elseif (shift.getIsCurrent()) %} deep-purple white-text {% elseif (shift.getIsPast()) %} {% else %} cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         <span class="card-title activator">{{ shift.start|date_fr_long }}</span>
         <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
         </p>
     </div>
-    <div class="card-reveal black-text">
-        <span class="card-title">Informations<i class="material-icons right">close</i></span>
-        {% if (shift.getIsDismissed()) %}
-            <p>Créneau annulé, en attente de repreneur</p>
-        {% endif %}
-    </div>
-    {% if (shift.getIsPast()) %}
+    {% if (shift.getIsUpcoming()) %}
+        <div class="card-action">
+            <a href="#contact{{ shift.id }}" class="modal-trigger pulse"><i class="material-icons right">more</i></a><span>à venir</span>
+        </div>
+    {% elseif (shift.getIsCurrent()) %}
+        <div class="card-action">
+            <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger pulse"><i class="material-icons right">more</i></a><span>créneau en cours</span>
+        </div>
+        <!-- Tap Target Structure -->
+        <div class="tap-target" data-target="more{{ shift.id }}">
+            <div class="tap-target-content">
+                <h5>Title</h5>
+                <p>A bunch of text</p>
+            </div>
+        </div>
+        <script>
+            function toto(){
+                $('.tap-target').tapTarget();
+            }
+        </script>
+    {% elseif (shift.getIsPast()) %}
         <div class="card-action">
             <i class="material-icons tiny">check</i><span>effectué</span>
         </div>
@@ -38,7 +52,7 @@
 
         {% else %}
             <div class="card-action">
-                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn red">Annuler ?!</a>
+                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red">Annuler ?!</a>
             </div>
             <div id="dismiss{{ shift.id }}" class="modal black-text">
                 <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
@@ -62,3 +76,6 @@
     {% endif %}
 
 </div>
+{% if (shift.getIsUpcoming() or shift.getIsCurrent()) %}
+    {{ render(controller("AppBundle:Default:shiftContactForm",{'shift':shift})) }}
+{% endif %}

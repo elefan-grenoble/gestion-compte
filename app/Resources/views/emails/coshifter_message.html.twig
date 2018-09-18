@@ -1,0 +1,5 @@
+Bonjour,<br />
+<strong>{{ from.firstname }}</strong> vous a envoyé un message à propos du créneau {{ shift.job.name }} du {{ shift.start | date('d-m-Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}<br />
+<blockquote>
+    {{ message }}
+</blockquote>

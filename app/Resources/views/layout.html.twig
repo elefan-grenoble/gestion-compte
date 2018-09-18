@@ -60,12 +60,18 @@
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             <li><div class="user-view center-align">
                                     <div class="background">
+                                        {% if app.user.frozen %}
+                                        {% image '@AppBundle/Resources/public/img/frozen.png' %}
+                                            <img class="responsive-img" src="{{ asset_url }}" alt="" />
+                                        {% endimage %}
+                                        {% else %}
                                         {% image '@AppBundle/Resources/public/img/dumbo-in-the-air.jpg' %}
                                             <img class="responsive-img" src="{{ asset_url }}" alt="" style="position: absolute;bottom: -46px;left: 0;" />
                                         {% endimage %}
+                                        {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
-                                    <a href="#name"><span class="white-text name">{{ app.user }}</span></a>
+                                    <a href="#name"><span class="{% if not app.user.frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
                                 </div>
                             </li>
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
@@ -147,7 +153,7 @@
                 <div class="nav-wrapper">
                     <form id="quick_search_form" action="" method="post">
                         <div class="input-field">
-                            <input id="quick_search" type="search" autocomplete="false">
+                            <input id="quick_search" type="search" autocomplete="off">
                             <label class="label-icon" for="search"><i class="material-icons left">search</i></label>
                             <i class="material-icons" id="quick_search_close">close</i>
                         </div>
@@ -181,6 +187,9 @@
                         $('#quick_search_nav').slideToggle($('#quick_search_nav').is(':visible'));
                         $('#quick_search').val('');
                         $('#quick_search').focus();
+                        $('#quick_search').one('focusout',function () {
+                            $('#quick_search_nav').slideUp();
+                        });
                     }
                 });
                 var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
@@ -210,7 +219,7 @@
                                     //$('#quick_search').autocomplete('destroy');
                                     $('#quick_search').autocomplete({
                                         data: dataBeneficiaries,
-                                        limit: 5,
+                                        limit: 3,
                                         onAutocomplete: function(val) {
                                             $('#quick_search_nav').slideUp();
                                             console.log(val);
