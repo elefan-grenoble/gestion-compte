@@ -14,8 +14,7 @@
                     {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
                 {% if bucket.end|date('i') == '00' %}{{ bucket.end|date('G\\h') }}{% else %}{{ bucket.end|date('G\\hi') }}{% endif %}
                 </span>
-            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span><br>
-            {% if nbBookableShifts == 0 %}<i class="material-icons tiny">check</i>complet{% endif %}
+            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span>{% if nbBookableShifts == 0 %}<i class="material-icons tiny">check</i>complet{% endif %}
         </div>
         <div class="shift-block">
             <div class="hide-on-med-and-down">
