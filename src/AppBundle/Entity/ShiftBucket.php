@@ -35,10 +35,23 @@ class ShiftBucket
     {
         if (!$beneficiary){
             if (!$a->getRole()){
-                if (!$b->getRole())
-                    return 0;
-                else
+                if (!$b->getRole()) {
+                    if (!$a->getShifter()) {
+                        if (!$b->getShifter()) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    } else {
+                        if (!$b->getShifter()) {
+                            return -1;
+                        } else {
+                            return $a->getBookedTime() < $b->getBookedTime();
+                        }
+                    }
+                }else {
                     return 1;
+                }
             }else{
                 if (!$b->getRole())
                     return -1;
