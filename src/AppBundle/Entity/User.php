@@ -839,8 +839,8 @@ class User extends BaseUser
             if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
                 return false;
             }
-            // duration of shift + what beneficiary already booked for cycle + user counter at start of cycle (may be < 0) should be <= what's can we book for this cycle
-            return ($shift->getDuration() + $beneficiary_counter + $this->getTimeCount($this->startOfCycle($current_cycle)) <= ($current_cycle+1)*$this->getDueDurationByCycle()) ;
+            // duration of shift + what beneficiary already booked for cycle + user counter at start of cycle (may be < 0) minus due should be <= what's can we book for this cycle
+            return ($shift->getDuration() + $beneficiary_counter + $this->getTimeCount($this->startOfCycle($current_cycle)) - $this->getDueDurationByCycle() <= ($current_cycle+1)*$this->getDueDurationByCycle()) ;
         }
     }
 
@@ -1131,7 +1131,7 @@ class User extends BaseUser
         };
         if ($before)
             $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
-                return ($log->getDate() <= $before);
+                return ($log->getDate() < $before);
             });
         else
             $logs = $this->getTimeLogs();
