@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Event\ShiftBookedEvent;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -278,7 +279,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    public function bookShiftAction(Request $request, Shift $shift)
     {
         if (!$this->isGranted('book', $shift)){
             $session = new Session();
@@ -311,22 +312,10 @@ class BookingController extends Controller
             $em->persist($user);
         }
 
-        $this->createShiftLog($em, $shift, $user);
-
         $em->flush();
 
-        $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-            ->setFrom('membres@lelefan.org')
-            ->setTo('creneaux@lelefan.org')
-            ->setReplyTo($beneficiary->getEmail())
-            ->setBody(
-                $this->renderView(
-                    'emails/new_booking.html.twig',
-                    array('shift' => $shift)
-                ),
-                'text/html'
-            );
-        $mailer->send($archive);
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift));
 
         return $this->redirectToRoute('homepage');
     }
