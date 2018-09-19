@@ -63,5 +63,15 @@ services:
             class:  AppBundle\EventListener\TimeLogEventListener
             arguments:
                 $entityManager: "@doctrine.orm.entity_manager"
+                $logger: "@logger"
+            tags:
+                - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+                - { name: kernel.event_listener, event: shift.dismissed, method: onShiftDismissed }
+                - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+    emailing_event_listener:
+            class:  AppBundle\EventListener\EmailingEventListener
+            arguments:
+                $mailer: "@mailer"
+                $container: "@service_container"
             tags:
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }

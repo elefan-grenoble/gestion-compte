@@ -10,8 +10,9 @@ class ShiftBookedEvent extends Event
     const NAME = 'shift.booked';
 
     private $shift;
+    private $fromAdmin;
 
-    public function __construct(Shift $shift)
+    public function __construct(Shift $shift, bool $fromAdmin)
     {
         $this->shift = $shift;
     }
@@ -19,6 +20,11 @@ class ShiftBookedEvent extends Event
     public function getShift()
     {
         return $this->shift;
+    }
+
+    public function isFromAdmin()
+    {
+        return $this->fromAdmin;
     }
 
 }
