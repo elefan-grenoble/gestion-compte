@@ -2,6 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDismissedEvent;
+use AppBundle\Event\ShiftFreedEvent;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -20,7 +23,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use AppBundle\Entity\TimeLog;
 use Doctrine\ORM\EntityManager;
 
 /**
@@ -278,7 +280,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    public function bookShiftAction(Request $request, Shift $shift)
     {
         if (!$this->isGranted('book', $shift)){
             $session = new Session();
@@ -311,22 +313,10 @@ class BookingController extends Controller
             $em->persist($user);
         }
 
-        $this->createShiftLog($em, $shift, $user);
-
         $em->flush();
 
-        $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-            ->setFrom('membres@lelefan.org')
-            ->setTo('creneaux@lelefan.org')
-            ->setReplyTo($beneficiary->getEmail())
-            ->setBody(
-                $this->renderView(
-                    'emails/new_booking.html.twig',
-                    array('shift' => $shift)
-                ),
-                'text/html'
-            );
-        $mailer->send($archive);
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
         return $this->redirectToRoute('homepage');
     }
@@ -355,10 +345,10 @@ class BookingController extends Controller
         $shift->setShifter($shift->getBooker());
 
         $em->persist($shift);
-
-        $this->deleteShiftLogs($shift, $user);
-
         $em->flush();
+
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $user));
 
         return $this->redirectToRoute('homepage');
     }
@@ -388,11 +378,12 @@ class BookingController extends Controller
                 $shift->setIsDismissed(false);
                 $shift->setDismissedTime(null);
                 $shift->setDismissedReason(null);
-
-                $this->createShiftLog($em, $shift, $shift->getShifter()->getUser());
-
                 $em->persist($shift);
                 $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+
             } else {
                 $session->getFlashBag()->add('xarning',"shift not found");
             }
@@ -423,9 +414,12 @@ class BookingController extends Controller
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setLastShifter(null);
                 $em = $this->getDoctrine()->getManager();
-                $this->createShiftLog($em, $shift, $beneficiary->getUser());
                 $em->persist($shift);
                 $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+
                 $session->getFlashBag()->add('success',"Créneau réservé ! Merci ".$shift->getShifter()->getFirstname());
             }else{
                 $session->getFlashBag()->add('error',"Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
@@ -477,7 +471,7 @@ class BookingController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method("POST")
      */
-    public function bookShiftAdminAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    public function bookShiftAdminAction(Request $request, Shift $shift)
     {
         $session = new Session();
 
@@ -517,22 +511,10 @@ class BookingController extends Controller
                 $em->persist($user);
             }
 
-            $this->createShiftLog($em, $shift, $user);
-
             $em->flush();
 
-            $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-                ->setFrom('membres@lelefan.org')
-                ->setTo('creneaux@lelefan.org')
-                ->setReplyTo($beneficiary->getEmail())
-                ->setBody(
-                    $this->renderView(
-                        'emails/new_booking.html.twig',
-                        array('shift' => $shift)
-                    ),
-                    'text/html'
-                );
-            $mailer->send($archive);
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
 
             $session->getFlashBag()->add("success", "Créneau réservé avec succès pour ".$shift->getShifter());
             return $this->redirectToRoute('booking_admin');
@@ -553,41 +535,20 @@ class BookingController extends Controller
 
         $session = new Session();
 
-        $shifter = $shift->getShifter()->getUser();
+        $user = $shift->getShifter()->getUser();
 
         $em = $this->getDoctrine()->getManager();
         $shift->free();
-
-        $this->deleteShiftLogs($shift, $shifter);
-
         $em->persist($shift);
         $em->flush();
 
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $user));
+
         $session->getFlashBag()->add('success',"Le shift a bien été libéré");
 
-        return $this->redirectToRoute('user_show', array('username' => $shifter->getUsername()));
+        return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
 
-    }
-
-    private function deleteShiftLogs(Shift $shift, User $user)
-    {
-        $logs = $shift->getTimeLogs();
-        foreach ($logs as $log) {
-            if ($log->getUser()->getId() == $user->getId()) {
-                $shift->removeTimeLog($log);
-            }
-        }
-    }
-
-    private function createShiftLog(EntityManager $em, Shift $shift, User $user)
-    {
-        $log = new TimeLog();
-        $log->setUser($user);
-        $log->setTime($shift->getDuration());
-        $log->setShift($shift);
-        $log->setDate($shift->getStart());
-        $log->setDescription(TimeLog::DESC_BOOKING);
-        $em->persist($log);
     }
 
 }
