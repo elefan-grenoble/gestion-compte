@@ -80,6 +80,11 @@ class DefaultController extends Controller
                 }
             }
         }else{
+            //TMP to remove in a few weeks (set on 22 sept 2018)
+            // document.cookie = "MEMBRESSID=;domain=.lelefan.org; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+            unset($_COOKIE['MEMBRESSID']);
+            setcookie ( 'MEMBRESSID','', time() - 3600, '/', '.lelefan.org' );
+
             $today = strtotime('today');
             $from = new \DateTime();
             $from->setTimestamp($today);
