@@ -5,13 +5,12 @@ namespace AppBundle\EventListener;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
-use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Container;
 
 class TimeLogEventListener
@@ -62,11 +61,11 @@ class TimeLogEventListener
     }
 
     /**
-     * @param MemberCycleStartEvent $event
+     * @param MemberCycleEndEvent $event
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function onMemberCycleStart(MemberCycleStartEvent $event)
+    public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
         $this->logger->info("Time Log Listener: onMemberCycleStart");
         $this->createCycleBeginningLog($event->getUser(), $event->getDate());

@@ -2,7 +2,7 @@
 // src/AppBundle/Command/CycleStartCommand.php
 namespace AppBundle\Command;
 
-use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\MemberCycleEndEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -43,14 +43,14 @@ class CycleStartCommand extends ContainerAwareCommand
         $count = 0;
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($users_with_cycle_starting_today as $user) {
+            if (!$user->getFrozen()) {
+                $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($user, $date));
+                $count++;
+            }
             if ($user->getFrozenChange()) {
                 $user->setFrozen(!$user->getFrozen());
                 $user->setFrozenChange(false);
                 $em->persist($user);
-            }
-            if (!$user->getFrozen()) {
-                $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($user, $date));
-                $count++;
             }
         }
         $em->flush();

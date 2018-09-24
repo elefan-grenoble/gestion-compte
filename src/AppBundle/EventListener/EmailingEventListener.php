@@ -2,8 +2,8 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
-use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
@@ -49,10 +49,10 @@ class EmailingEventListener
 
 
     /**
-     * @param MemberCycleStartEvent $event
+     * @param MemberCycleEndEvent $event
      * @throws \Exception
      */
-    public function onMemberCycleStart(MemberCycleStartEvent $event)
+    public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 

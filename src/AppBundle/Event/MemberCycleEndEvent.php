@@ -2,13 +2,12 @@
 
 namespace AppBundle\Event;
 
-use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Symfony\Component\EventDispatcher\Event;
 
-class MemberCycleStartEvent extends Event
+class MemberCycleEndEvent extends Event
 {
-    const NAME = 'member.cycle.start';
+    const NAME = 'member.cycle.end';
 
     private $user;
     private $date;
