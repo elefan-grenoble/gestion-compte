@@ -2,22 +2,22 @@
 // src/AppBundle/Command/CycleStartCommand.php
 namespace AppBundle\Command;
 
-use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\MemberCycleHalfEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CycleStartCommand extends ContainerAwareCommand
+class CycleHalfCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         $this
-            ->setName('app:user:cycle_start')
-            ->setDescription('Freeze/unfreeze members and create cycle start events')
+            ->setName('app:user:cycle_half')
+            ->setDescription('Generate events on member half of cycle')
             //usefull for tests
             ->addOption('date', 'date', InputOption::VALUE_OPTIONAL, 'Date to execute (format yyyy-mm-dd. default is today)', '')
-            ->setHelp('This command allows you to send emails to member with a cycle starting today and with shift remaining to book');
+            ->setHelp('This command allows you to generate events for the members on the middle of their cycle');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -39,21 +39,15 @@ class CycleStartCommand extends ContainerAwareCommand
         $output->writeln('<fg=green;>cycle start command for ' . $date->format('Y-m-d') . '</>');
 
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $users_with_cycle_starting_today = $em->getRepository('AppBundle:User')->findWithNewCycleStarting($date);
         $count = 0;
         $dispatcher = $this->getContainer()->get('event_dispatcher');
-        foreach ($users_with_cycle_starting_today as $user) {
-            if ($user->getFrozenChange()) {
-                $user->setFrozen(!$user->getFrozen());
-                $user->setFrozenChange(false);
-                $em->persist($user);
-            }
-            if (!$user->getFrozen()) {
-                $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($user, $date));
-                $count++;
-            }
+        $users_with_half_cycle = $em->getRepository('AppBundle:User')->findWithHalfCyclePast($date);
+
+        foreach ($users_with_half_cycle as $user) {
+            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($user, $date));
+            $count++;
         }
-        $em->flush();
+
         $message = $count . ' event(s) created';
         $output->writeln($message);
     }
