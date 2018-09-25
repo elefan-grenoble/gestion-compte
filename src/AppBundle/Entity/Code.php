@@ -25,7 +25,7 @@ class Code
     /**
      * @var string
      *
-     * @ORM\Column(name="title", type="string", length=255)
+     * @ORM\Column(name="value", type="string", length=255, nullable=true)
      */
     private $value;
 
@@ -69,7 +69,9 @@ class Code
      */
     public function setValue($value)
     {
-        $this->value = intval($value);
+        if ($value){
+            $this->value = str_pad(intval($value), 4, '0', STR_PAD_LEFT);;
+        }
 
         return $this;
     }

@@ -1,27 +1,49 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    <h4 class="">Nouveau code coffre à clefs extérieur</h4>
-    {% if codes | length %}
-    <div class="row">
-        <div class="col s12">
-            <div class="card-panel red">
-                <span class="white-text">
-                    <i class="material-icons">warning</i>
-                    Aucun membre n'a confirmé avoir utilisé le dernier code pour récupérer les clefs. Es-tu certain de vouloir entrer un nouveau code ?
-                </span>
-            </div>
+    <h4 class="row center">
+        <i class="material-icons large">vpn_key</i><br>
+        Dépose clefs
+    </h4>
+    <h5 class="center">dans le boîtier extérieur</h5>
+
+    <br>
+    <br>
+    {% if not code is defined %}
+    <div class="row center">
+        <a class="btn-large modal-trigger" href="#smartphone"><i class="material-icons medium left">phone_android</i>J'ai un smartphone</a>
+        <a class="btn-large modal-trigger" href="#lowtech"><i class="material-icons medium left">phonelink_erase</i>Je n'ai pas de smartphone</a>
+    </div>
+
+    <div id="lowtech" class="modal">
+        <div class="modal-content">
+            <h4>Depuis cette machine</h4>
+            <p>Avec cette étape, tu va créer un nouveau code boîtier à mettre en place. <br> Note bien les informations qui vont s'afficher, tu n'y aura <strong>plus accès</strong> une fois à l'éxtérieur.</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close red-text btn-flat">Annuler</a>
+            <a href="{{ path('code_new',{'smartphone':false}) }}" class="waves-effect waves-green btn-flat green white-text">Je génére le nouveau code</a>
         </div>
     </div>
+
+    <div id="smartphone" class="modal">
+        <div class="modal-content">
+            <h4>Avec un smartphone</h4>
+            <p>Tu va créer le nouveau code depuis ton téléphone une fois à l'extérieur.</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close red-text btn-flat">Annuler</a>
+            <a href="{{ path('code_new',{'smartphone':true}) }}" class="waves-effect waves-green btn-flat green white-text">lancer la procédure</a>
+        </div>
+    </div>
+    {% else %}
+        {% if not code.value %}
+            <strong>Smartphone</strong>
+            {{ code.value }}
+        {% else %}
+            <strong>Machine</strong>
+            {{ code.value }}
+        {% endif %}
     {% endif %}
-    {{ form_start(form) }}
-    <div class="input-field">
-        {{ form_widget(form.value) }}
-        {{ form_label(form.value) }}
-    </div>
-    {{ form_widget(form) }}
-    <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Créer un nouveau code</button>
-    </div>
-    {{ form_end(form) }}
+
 {% endblock %}

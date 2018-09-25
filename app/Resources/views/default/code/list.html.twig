@@ -72,7 +72,6 @@
 
 
     {% if is_granted('create',code) %}
-        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn teal lighten-2"><i class="material-icons left">add</i>Ajouter un code</a>
+        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn teal lighten-2"><i class="material-icons left">add</i>Déposer un nouveau jeu de clefs</a>
     {% endif %}
-    <a href="{{ path("code_done") }}" class="waves-effect waves-light btn light-green"><i class="material-icons left">check</i>OK j'ai récupéré les clefs !</a>
 {% endblock %}

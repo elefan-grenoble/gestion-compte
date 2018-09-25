@@ -65,38 +65,33 @@ class CodeController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $code = new Code();
-
         $this->denyAccessUnlessGranted('create',$code);
 
-        $em = $this->getDoctrine()->getManager();
-
-        $code->setRegistrar($current_app_user);
-        $code->setCreatedAt(new \DateTime('now'));
-
-        $form = $this->createForm('AppBundle\Form\CodeType', $code);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em->persist($code);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'Le nouveau code a bien été créé !');
-
-            return $this->redirectToRoute('codes_list');
-
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
+        if ($request->get('smartphone') === null){
+            return $this->render('default/code/new.html.twig');
         }
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
-        return $this->render('default/code/new.html.twig', array(
-            'form' => $form->createView(),
-            'codes' => $codes
 
-    ));
+        if ($request->get('smartphone') == '0'){
+            $value = rand(0,999);
+            $code->setValue($value);
+        }else{
+            $code->setValue(null);
+        }
+
+        $code->setClosed(false);
+        $code->setCreatedAt(new \DateTime('now'));
+        $code->setRegistrar($current_app_user);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($code);
+        $em->flush();
+
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
+
+        return $this->render('default/code/new.html.twig', array(
+            'code' => $code,
+            'codes' => $codes,
+        ));
 
     }
 
