@@ -39,13 +39,16 @@ class CycleStartCommand extends ContainerAwareCommand
         $output->writeln('<fg=green;>cycle start command for ' . $date->format('Y-m-d') . '</>');
 
         $em = $this->getContainer()->get('doctrine')->getManager();
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
+
         $users_with_cycle_starting_today = $em->getRepository('AppBundle:User')->findWithNewCycleStarting($date);
         $count = 0;
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($users_with_cycle_starting_today as $user) {
             if (!$user->getFrozen()) {
                 $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($user, $date));
                 $count++;
+                $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $user->getMemberNumber();
+                $output->writeln($message);
             }
             if ($user->getFrozenChange()) {
                 $user->setFrozen(!$user->getFrozen());
