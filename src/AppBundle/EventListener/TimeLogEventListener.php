@@ -5,22 +5,27 @@ namespace AppBundle\EventListener;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Container;
 
 class TimeLogEventListener
 {
-    protected $_em;
-    protected $_logger;
+    protected $em;
+    protected $logger;
+    protected $container;
+    protected $due_duration_by_cycle;
 
-    public function __construct(EntityManager $entityManager, Logger $logger)
+    public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
-        $this->_em = $entityManager;
-        $this->_logger = $logger;
+        $this->em = $entityManager;
+        $this->logger = $logger;
+        $this->container = $container;
+        $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
     }
 
     /**
@@ -30,7 +35,7 @@ class TimeLogEventListener
      */
     public function onShiftBooked(ShiftBookedEvent $event)
     {
-        $this->_logger->info("Time Log Listener: onShiftBooked");
+        $this->logger->info("Time Log Listener: onShiftBooked");
         $shift = $event->getShift();
         $this->createShiftLog($shift);
     }
@@ -41,7 +46,7 @@ class TimeLogEventListener
      */
     public function onShiftFreed(ShiftFreedEvent $event)
     {
-        $this->_logger->info("Time Log Listener: onShiftFreed");
+        $this->logger->info("Time Log Listener: onShiftFreed");
         $this->deleteShiftLogs($event->getShift(), $event->getUser());
     }
 
@@ -51,8 +56,19 @@ class TimeLogEventListener
      */
     public function onShiftDismissed(ShiftDismissedEvent $event)
     {
-        $this->_logger->info("Time Log Listener: onShiftDismissed");
+        $this->logger->info("Time Log Listener: onShiftDismissed");
         $this->deleteShiftLogs($event->getShift(), $event->getUser());
+    }
+
+    /**
+     * @param MemberCycleEndEvent $event
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function onMemberCycleEnd(MemberCycleEndEvent $event)
+    {
+        $this->logger->info("Time Log Listener: onMemberCycleStart");
+        $this->createCycleBeginningLog($event->getUser(), $event->getDate());
     }
 
     /**
@@ -68,8 +84,8 @@ class TimeLogEventListener
         $log->setShift($shift);
         $log->setDate($shift->getStart());
         $log->setDescription(TimeLog::DESC_BOOKING);
-        $this->_em->persist($log);
-        $this->_em->flush();
+        $this->em->persist($log);
+        $this->em->flush();
     }
 
     /**
@@ -82,10 +98,37 @@ class TimeLogEventListener
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
             if ($log->getUser()->getId() == $user->getId()) {
-                $this->_em->remove($log);
+                $this->em->remove($log);
             }
         }
-        $this->_em->flush();
+        $this->em->flush();
+    }
+
+    /**
+     * @param User $user
+     * @param \DateTime $date
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createCycleBeginningLog(User $user, \DateTime $date)
+    {
+        $log = new TimeLog();
+        $log->setUser($user);
+        $log->setTime(-1 * $this->due_duration_by_cycle);
+        $log->setDate($date);
+        $log->setDescription("Début de cycle");
+        $this->em->persist($log);
+
+        $counter_today = $user->getTimeCount($date);
+        if ($counter_today > $this->due_duration_by_cycle) { //surbook
+            $log = new TimeLog();
+            $log->setUser($user);
+            $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
+            $log->setDate($date);
+            $log->setDescription("Régulation du bénévolat facultatif");
+            $this->em->persist($log);
+        }
+        $this->em->flush();
     }
 
 }
