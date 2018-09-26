@@ -163,89 +163,14 @@
         {% endif %}
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
         <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
+        <script src="{{ asset('bundles/app/js/app.js') }}"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
-        <script>
-            $(document).ready(function() {
-                $('select').material_select();
-                $('.button-collapse').sideNav({
-                    menuWidth: 300, // Default is 300
-                    edge: 'left', // Choose the horizontal origin
-                    closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-                    draggable: true, // Choose whether you can drag to open on touch screens,
-                    onOpen: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
-                    onClose: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
-                });
-                $('.modal').modal();
-                $('.tooltipped').tooltip();
-                $(".dropdown-button").dropdown();
-            });
-            //todo put this in a file
-            {% if is_granted('ROLE_ADMIN') %}
-            $(document).ready(function() {
-                $('.main-navigation').click(function (e) {
-                    if ($(e.target).is(':not(a)')){
-                        $('#quick_search_nav').slideToggle($('#quick_search_nav').is(':visible'));
-                        $('#quick_search').val('');
-                        $('#quick_search').focus();
-                        $('#quick_search').one('focusout',function () {
-                            $('#quick_search_nav').slideUp();
-                        });
-                    }
-                });
+        {% if is_granted('ROLE_ADMIN') %}
+            <script>
                 var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
-                $('#quick_search_form').submit(function (e) {e.preventDefault()});
-                $('#quick_search_close').click(function () {
-                    $('#quick_search_nav').slideUp();
-                });
-                $('#quick_search').keyup(function () {
-                    if ($(this).val().length > 1){
-                        $.ajax({
-                            type: "POST",
-                            url: "{{ path('search') }}",
-                            data: {
-                                key: $(this).val()
-                            },
-                            dataType: "json",
-                            success: function(response) {
-                                // console.log(response.data);
-                                if (response && response.count > 0){
-                                    var beneficiaries = response.data;
-                                    var dataBeneficiaries = {};
-                                    var dataUsernames = {};
-                                    for (var i = 0; i < beneficiaries.length; i++) {
-                                        dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
-                                        dataUsernames[beneficiaries[i].id] = beneficiaries[i].username;
-                                    }
-                                    //$('#quick_search').autocomplete('destroy');
-                                    $('#quick_search').autocomplete({
-                                        data: dataBeneficiaries,
-                                        limit: 3,
-                                        onAutocomplete: function(val) {
-                                            $('#quick_search_nav').slideUp();
-                                            console.log(val);
-                                            const regex = /\(([0-9]*)\)/gm;
-                                            let m;
-
-                                            if ((m = regex.exec(val)) !== null) {
-                                                var beneficiary_id = m[1];
-                                                var username = dataUsernames[beneficiary_id];
-                                                var res = show_user_template_url.replace("-USERNAME-", username);
-                                                window.location = res;
-                                            }
-                                        },
-                                        minLength: 3,
-                                    });
-                                }else{
-                                    console.log("no results for '"+$(this).val()+"'");
-                                }
-                            }
-                        });
-                    }
-                });
-
-            })
-            {% endif %}
-        </script>
+            </script>
+            <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
+        {% endif %}
         {% block javascripts %}{% endblock %}
     </body>
 </html>
