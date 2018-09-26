@@ -117,31 +117,9 @@
         }, 10000);//10sec
 
         //can scan another barcode
-        var barcode="";
         var barcode_submit_url="{{ path('check') }}";
-        $(document).keypress(function(e) {
-            var code = (e.keyCode ? e.keyCode : e.which);
-            console.log(code);
-            if(code==13 || code==9)// Enter or tab key hit
-            {
-                if (barcode.length){
-                    var form = $('<form action="' + barcode_submit_url + '" method="post">' +
-                        '<input type="text" name="swipe_code" value="' + barcode + '" />' +
-                        '</form>');
-                    $('body').append(form);
-                    form.submit();
-                }
-                barcode="";
-            }
-            else
-            {
-                if (code <= 122) { //0-9, a-z, A-Z
-
-                    barcode = barcode + String.fromCharCode(code);
-                }
-            }
-        });
     </script>
+    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
 {% endblock %}
 
 {% block stylesheets %}
