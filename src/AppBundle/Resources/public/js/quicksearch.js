@@ -17,7 +17,7 @@ $(document).ready(function() {
         if ($(this).val().length > 1){
             $.ajax({
                 type: "POST",
-                url: "{{ path('search') }}",
+                url: search_url,
                 data: {
                     key: $(this).val()
                 },

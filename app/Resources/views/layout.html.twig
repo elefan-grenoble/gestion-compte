@@ -167,6 +167,7 @@
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
         {% if is_granted('ROLE_ADMIN') %}
             <script>
+                var search_url = "{{ path('search') }}";
                 var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
             </script>
             <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
