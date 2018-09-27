@@ -44,6 +44,20 @@ class Commission
     private $email;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="next_meeting_desc", type="string", length=255, nullable=true)
+     */
+    private $next_meeting_desc;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="next_meeting_date", type="datetime", nullable=true)
+     */
+    private $next_meeting_date = null;
+
+    /**
      * Many Commissions have Many Beneficiary.
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
      */
@@ -252,5 +266,53 @@ class Commission
     public function getTasks()
     {
         return $this->tasks;
+    }
+
+    /**
+     * Set nextMeetingDesc.
+     *
+     * @param string $nextMeetingDesc
+     *
+     * @return Commission
+     */
+    public function setNextMeetingDesc($nextMeetingDesc)
+    {
+        $this->next_meeting_desc = $nextMeetingDesc;
+
+        return $this;
+    }
+
+    /**
+     * Get nextMeetingDesc.
+     *
+     * @return string
+     */
+    public function getNextMeetingDesc()
+    {
+        return $this->next_meeting_desc;
+    }
+
+    /**
+     * Set nextMeetingDate.
+     *
+     * @param \DateTime $nextMeetingDate
+     *
+     * @return Commission
+     */
+    public function setNextMeetingDate($nextMeetingDate)
+    {
+        $this->next_meeting_date = $nextMeetingDate;
+
+        return $this;
+    }
+
+    /**
+     * Get nextMeetingDate.
+     *
+     * @return \DateTime
+     */
+    public function getNextMeetingDate()
+    {
+        return $this->next_meeting_date;
     }
 }
