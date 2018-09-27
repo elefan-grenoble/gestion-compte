@@ -8,7 +8,7 @@
             <div class="collapsible-body">
                 {% if commission.nextMeetingDate %}
                 <div class="card-panel teal white-text">
-                    <strong>{{ commission.nextMeetingDesc  }}</strong> {{ commission.nextMeetingDate | date_fr_full }}
+                    <strong>{{ commission.nextMeetingDesc  }}</strong> {{ commission.nextMeetingDate | date_fr_full }} à {{ commission.nextMeetingDate | date('H:i') }}
                 </div>
                 {% endif %}
                 <table>
