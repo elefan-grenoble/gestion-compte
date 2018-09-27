@@ -585,7 +585,7 @@ class UserController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Enregistrement effectuée');
-            return $this->redirectToEdit($user,$session,$current_app_user);
+            return $this->redirectToShow($user,$session,$current_app_user);
         }
 
         $registrationForms = array();
@@ -933,6 +933,7 @@ class UserController extends Controller
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted('edit', $beneficiary->getUser());
 
@@ -962,6 +963,8 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
         if ($user->getMemberNumber() <=0){
             return $this->redirectToRoute("homepage");
         }
@@ -998,7 +1001,13 @@ class UserController extends Controller
             $newReg->setDate(new DateTime('now'));
         }
         $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
-        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            $action = $this->generateUrl('user_edit', array('username' => $user->getUsername()));
+        else
+            $action = $this->generateUrl('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$current_app_user->getUsername())));
+
+
+        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg,array('action'=>$action));
         $registrationForm->add('is_new',HiddenType::class,array('attr'=>array('value'=>'1')));
 
         return $this->render('user/show.html.twig', array(
