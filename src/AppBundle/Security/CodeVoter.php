@@ -100,7 +100,6 @@ class CodeVoter extends Voter
 
     private function canView(Code $code, User $user)
     {
-        return true;
         if (!$code->getId())
             return false;
 

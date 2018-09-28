@@ -163,6 +163,7 @@ class CodeController extends Controller
 
         foreach ($codes as $code){
             if ($code->getRegistrar() != $current_app_user){
+                //todo add check voter "can view'
                 $code->setClosed(true);
                 $em->persist($code);
             }
