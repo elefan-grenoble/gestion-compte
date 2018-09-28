@@ -48,10 +48,20 @@
                         <br>
                     {% endif %}
                     {% if is_granted("view",codes | first)  %}
-                        <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} coffre à clefs</a>
-                    {% endif %}
-                    {% if is_granted("create",codes | first)  %}
-                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                        {% if (codes | first).registrar == app.user %}
+                            {% if codes | length > 1 %}
+                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Changer code boîtier à clefs</a>
+                            {% else %}
+                                {% if is_granted("create",codes | first)  %}
+                                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} boîtier à clefs</a>
+                            {% if is_granted("create",codes | first)  %}
+                                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
 
                     {% if is_granted("ROLE_USER_MANAGER") %}

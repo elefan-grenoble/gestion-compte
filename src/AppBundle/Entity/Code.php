@@ -39,7 +39,7 @@ class Code
     /**
      * @var bool
      *
-     * @ORM\Column(name="closed", type="boolean", nullable=true, options={"default" : 0})
+     * @ORM\Column(name="closed", type="boolean", nullable=false, options={"default" : 0})
      */
     private $closed;
 

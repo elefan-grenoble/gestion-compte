@@ -62,6 +62,7 @@ class CodeVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::VIEW:
+                return $this->canView($code, $user);
             case self::CLOSE:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;
@@ -99,6 +100,7 @@ class CodeVoter extends Voter
 
     private function canView(Code $code, User $user)
     {
+        return true;
         if (!$code->getId())
             return false;
 

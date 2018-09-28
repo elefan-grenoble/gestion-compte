@@ -132,7 +132,7 @@ class DefaultController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
         if (!$codes){
             $codes[] = new Code();
         }

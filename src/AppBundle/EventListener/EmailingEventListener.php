@@ -2,6 +2,7 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\ShiftBookedEvent;
@@ -34,8 +35,8 @@ class EmailingEventListener
         $shift = $event->getShift();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-            ->setFrom('membres@lelefan.org')
-            ->setTo('creneaux@lelefan.org')
+            ->setFrom($this->container->getParameter('transactional_mailer_user'))
+            ->setTo($this->container->getParameter('shift_mailer_user'))
             ->setReplyTo($shift->getShifter()->getEmail())
             ->setBody(
                 $this->renderView(
@@ -107,6 +108,31 @@ class EmailingEventListener
         }
     }
 
+    /**
+     * @param CodeNewEvent $event
+     * @throws \Exception
+     */
+    public function onCodeNew(CodeNewEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onCodeNew");
+        $code = $event->getCode();
+        $old_codes = $event->getOldCodes();
+        $display = $event->getDisplay();
+
+        if (!$display) { //use smartphone
+            $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
+                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setTo($code->getRegistrar()->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/new_code.html.twig',
+                        array('code' => $code,'codes' => $old_codes)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($notify);
+        }
+    }
 
     /**
      * Returns a rendered view.
