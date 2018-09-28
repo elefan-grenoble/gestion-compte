@@ -64,8 +64,8 @@ class User extends BaseUser
     private $registrations;
 
     /**
-     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $lastRegistration;
 

@@ -64,14 +64,19 @@ services:
             arguments:
                 $entityManager: "@doctrine.orm.entity_manager"
                 $logger: "@logger"
+                $container: "@service_container"
             tags:
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
                 - { name: kernel.event_listener, event: shift.dismissed, method: onShiftDismissed }
                 - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+                - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
     emailing_event_listener:
             class:  AppBundle\EventListener\EmailingEventListener
             arguments:
                 $mailer: "@mailer"
+                $logger: "@logger"
                 $container: "@service_container"
             tags:
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+                - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
+                - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }

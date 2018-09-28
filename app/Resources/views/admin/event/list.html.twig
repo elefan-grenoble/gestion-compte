@@ -15,9 +15,17 @@
     <div class="row">
         {% for event in events %}
             <div class="col s12 m6">
-                <div class="card blue-grey darken-1">
-                    <div class="card-content white-text">
+                <div class="card blue-grey darken-1 small">
+                    {% if event.img %}
+                    <div class="card-image">
+                        <img src="{{ event|img('imgFile','card') }}" />
                         <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="card-content white-text">
+                        {% if not event.img %}
+                            <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
+                        {% endif %}
                         <i>{{ event.date | date('d F Y H:i') }}</i>
                         {{ event.description | markdown | raw }}
                     </div>
