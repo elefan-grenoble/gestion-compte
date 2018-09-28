@@ -58,6 +58,12 @@ class Beneficiary
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id",onDelete="CASCADE")
+     */
+    private $membership;
+
+    /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
      */
     private $shifts;
@@ -653,5 +659,21 @@ class Beneficiary
         return $this->swipe_cards->filter(function ($card) {
             return $card->getEnable();
         });
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMembership()
+    {
+        return $this->membership;
+    }
+
+    /**
+     * @param mixed $membership
+     */
+    public function setMembership($membership)
+    {
+        $this->membership = $membership;
     }
 }

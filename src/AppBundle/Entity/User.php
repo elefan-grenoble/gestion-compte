@@ -88,6 +88,13 @@ class User extends BaseUser
     private $mainBeneficiary;
 
     /**
+     * Beneficiary's user.
+     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $beneficiary;
+
+    /**
      * One User has One Address.
      * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
@@ -1144,5 +1151,21 @@ class User extends BaseUser
         else
             $logs = $this->getTimeLogs();
         return array_reduce($logs->toArray(), $sum, 0);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBeneficiary()
+    {
+        return $this->beneficiary;
+    }
+
+    /**
+     * @param mixed $beneficiary
+     */
+    public function setBeneficiary($beneficiary)
+    {
+        $this->beneficiary = $beneficiary;
     }
 }
