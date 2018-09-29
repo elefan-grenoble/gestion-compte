@@ -44,12 +44,6 @@ class TimeLog
     private $description;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="timeLogs")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
-     */
-    private $user;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="timeLogs")
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
      */
@@ -141,30 +135,6 @@ class TimeLog
     public function getDescription()
     {
         return $this->description;
-    }
-
-    /**
-     * Set user
-     *
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return TimeLog
-     */
-    public function setUser(\AppBundle\Entity\User $user)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getUser()
-    {
-        return $this->user;
     }
 
     /**
