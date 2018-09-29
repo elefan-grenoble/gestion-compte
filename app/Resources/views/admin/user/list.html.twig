@@ -201,30 +201,30 @@
                                 <i class="material-icons">do_not_disturb</i>
                         {% endif %}
                     </td>
-                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>{{ user.username }}</td>
+                    <td><a href="{{ path('user_show', { 'username': member.mainBeneficiary.user.username }) }}">{{ member.memberNumber }}</a></td>
+                    <td>{{ member.mainBeneficiary.user.username }}</td>
 
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.firstname }}<br/>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.lastname }}<br/>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.email }}<br/>
                         {% endfor %}
                     </td>
                     <td class="hide-on-small-and-down">
-                        {% for registration in user.registrations %}
-                            {% if user.lastregistration %}
-                                {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
+                        {% for registration in member.registrations %}
+                            {% if member.lastregistration %}
+                                {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
                                 {{ registration.date | date('d/m/Y') }}
-                                {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
+                                {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
                                 <br/>
                             {% else %}
                                 {{ registration.date | date('d/m/Y') }}
@@ -233,7 +233,7 @@
                         {% endfor %}
                     </td>
                     <td class="hide-on-med-and-down">
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {% for role in beneficiary.roles %}
                                 <div class="chip truncate">
                                     {{ role.name }}
@@ -242,7 +242,7 @@
                         {% endfor %}
                     </td>
                     <td class="hide-on-med-and-down">
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
                                 <div class="chip truncate">
                                     {{ commission.name }}
@@ -252,8 +252,8 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
-                    <td colspan="9">{{ user }}</td>
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': member.mainBeneficiary.user.username }) }}" >
+                    <td colspan="9">{{ member.mainBeneficiary.user }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
