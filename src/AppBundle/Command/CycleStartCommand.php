@@ -41,19 +41,19 @@ class CycleStartCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
         $dispatcher = $this->getContainer()->get('event_dispatcher');
 
-        $users_with_cycle_starting_today = $em->getRepository('AppBundle:User')->findWithNewCycleStarting($date);
+        $members_with_cycle_starting_today = $em->getRepository('AppBundle:Membership')->findWithNewCycleStarting($date);
         $count = 0;
-        foreach ($users_with_cycle_starting_today as $user) {
-            if (!$user->getFrozen()) {
-                $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($user, $date));
+        foreach ($members_with_cycle_starting_today as $member) {
+            if (!$member->getFrozen()) {
+                $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
                 $count++;
-                $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $user->getMemberNumber();
+                $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $member->getMemberNumber();
                 $output->writeln($message);
             }
-            if ($user->getFrozenChange()) {
-                $user->setFrozen(!$user->getFrozen());
-                $user->setFrozenChange(false);
-                $em->persist($user);
+            if ($member->getFrozenChange()) {
+                $member->setFrozen(!$member->getFrozen());
+                $member->setFrozenChange(false);
+                $em->persist($member);
             }
         }
         $em->flush();

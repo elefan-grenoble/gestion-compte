@@ -35,9 +35,9 @@ class DoctorCommand extends ContainerAwareCommand
             $counter = 0;
             $debug = array();
             $em = $this->getContainer()->get('doctrine')->getManager();
-            $users = $em->getRepository('AppBundle:User')->findAll();
-            foreach ($users as $user){
-                foreach ($user->getBeneficiaries() as $beneficiary){
+            $members = $em->getRepository('AppBundle:Membership')->findAll();
+            foreach ($members as $member){
+                foreach ($member->getBeneficiaries() as $beneficiary){
                     $phone = $beneficiary->getPhone();
                     if ($phone){
                         //space ?
@@ -94,14 +94,14 @@ class DoctorCommand extends ContainerAwareCommand
         if ($fix_status) {
             $counter = 0;
             $em = $this->getContainer()->get('doctrine')->getManager();
-            $users = $em->getRepository('AppBundle:User')->findAll();
-            foreach ($users as $user) {
-                if (($user->getFrozen() === null)||($user->getWithdrawn() === null)){
-                    if ($user->getFrozen() === null)
-                        $user->setFrozen(false);
-                    if ($user->getWithdrawn() === null)
-                        $user->setWithdrawn(false);
-                    $em->persist($user);
+            $members = $em->getRepository('AppBundle:Membership')->findAll();
+            foreach ($members as $member) {
+                if (($member->getFrozen() === null)||($member->getWithdrawn() === null)){
+                    if ($member->getFrozen() === null)
+                        $member->setFrozen(false);
+                    if ($member->getWithdrawn() === null)
+                        $member->setWithdrawn(false);
+                    $em->persist($member);
                     $counter++;
                 }
             }
@@ -113,14 +113,14 @@ class DoctorCommand extends ContainerAwareCommand
         if ($fix_registration) {
             $counter = 0;
             $em = $this->getContainer()->get('doctrine')->getManager();
-            $users = $em->getRepository('AppBundle:User')->findAll();
-            foreach ($users as $user) {
-                if ($user->getRegistrations()->count() && $user->getRegistrations()->first())
-                    $user->setLastRegistration($user->getRegistrations()->first());
+            $members = $em->getRepository('AppBundle:Membership')->findAll();
+            foreach ($members as $member) {
+                if ($member->getRegistrations()->count() && $member->getRegistrations()->first())
+                    $member->setLastRegistration($member->getRegistrations()->first());
                 else
-                    $user->setLastRegistration();
-                $em->persist($user);
-                foreach ($user->getRegistrations() as $registration) {
+                    $member->setLastRegistration();
+                $em->persist($member);
+                foreach ($member->getRegistrations() as $registration) {
                     if ($registration->getCreatedAt()->format('Y') < 0) {
                         $registration->setCreatedAt($registration->getDate());
                         $counter++;
