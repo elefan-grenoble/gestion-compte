@@ -11,28 +11,29 @@
 {% endblock %}
 
 {% block content %}
+    {% set member = user.beneficiary.membership %}
     <h4 class="center-align">
-        <img src="{{ gravatar(user.email) }}" alt="{{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" class="circle responsive-img"><br>
+        <img src="{{ gravatar(user.email) }}" alt="{{ user.beneficiary.firstname }} {{ user.beneficiary.lastname }}" class="circle responsive-img"><br>
 
-        {% if user.withdrawn %}<del>{% endif %}
-            #{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}
-        {% if user.withdrawn %}</del>{% endif %}
-        {% if user.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
-        {% for role in user.roles %}
+        {% if member.withdrawn %}<del>{% endif %}
+            #{{ member.memberNumber }} {{ user.beneficiary.firstname }} {{ user.beneficiary.lastname }}
+        {% if member.withdrawn %}</del>{% endif %}
+        {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
+        {% for role in member.roles %}
             {% if role != "ROLE_USER" %}
                 <span class="badge purple-text small">{{ role }}</span>
             {% endif %}
         {% endfor %}
     </h4>
     <div class="row">
-        {% for beneficiary in user.beneficiaries %}
+        {% for beneficiary in member.beneficiaries %}
             {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary } %}
         {% endfor %}
     </div>
-    {% if user.notes | length %}
-        <h5>Note{% if user.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
+    {% if member.notes | length %}
+        <h5>Note{% if member.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
         <div class="row">
-            {%  for note in user.notes %}
+            {%  for note in member.notes %}
                 {% if not note.parent %}
                     <div class="col s12 m6 offset-m2 l6">
                         {% include "user/_partial/note.html.twig" with { note: note } %}
@@ -50,7 +51,7 @@
             <div class="collapsible-body">
 
             <ul class="collapsible" data-collapsible="accordion">
-                {% for registration in user.registrations %}
+                {% for registration in member.registrations %}
                     <li>
                         <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
                                 <i class="material-icons tiny">credit_card</i>
@@ -63,10 +64,10 @@
                     </li>
                 {% endfor %}
             </ul>
-            {% if user.canRegister and user != app.user %}
+            {% if member.canRegister and user != app.user %}
                 <ul class="collapsible" data-collapsible="accordion">
                     <li>
-                        {% if not user.lastRegistration %}
+                        {% if not member.lastRegistration %}
                             <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
                         {% else %}
                             <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
@@ -81,7 +82,7 @@
             {% elseif (user != app.user ) %}
                 <ul class="collapsible" data-collapsible="accordion">
                     <li>
-                        {% if not user.lastRegistration %}
+                        {% if not member.lastRegistration %}
                             <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
                         {% else %}
                             <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
