@@ -154,11 +154,11 @@ class AdminController extends Controller
 
         $qb = $qb->orderBy($sort, $order);
         if ($action == "csv"){
-            $users = $qb->getQuery()->getResult();
+            $members = $qb->getQuery()->getResult();
             $return = '';
             $d = ','; // this is the default but i like to be explicit
-            foreach($users as $user) {
-                foreach ($user->getBeneficiaries() as $beneficiary)
+            foreach($members as $member) {
+                foreach ($member->getBeneficiaries() as $beneficiary)
                     $return .=
                         $beneficiary->getUser()->getMemberNumber().$d.
                         $beneficiary->getFirstname().$d.
@@ -182,11 +182,11 @@ class AdminController extends Controller
             ], 307);
         }else{
             $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-            $users = new Paginator($qb->getQuery());
+            $members = new Paginator($qb->getQuery());
         }
 
         return $this->render('admin/user/list.html.twig', array(
-            'users' => $users,
+            'members' => $members,
             'form' => $form->createView(),
             'nb_of_result' => $max,
             'page'=>$page,

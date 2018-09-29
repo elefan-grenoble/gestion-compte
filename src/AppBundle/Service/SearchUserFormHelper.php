@@ -95,7 +95,7 @@ class SearchUserFormHelper {
     }
 
     public function initSearchQuery($doctrineManager){
-        $qb = $doctrineManager->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");

@@ -14,7 +14,7 @@
         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             <div class="container center">
                 <div class="section no-pad-bot">
-                    <h3 class="header">Bonjour {{ app.user.firstname }}</h3>
+                    <h3 class="header">Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}{% else %}{{ app.user.username }}{% endif %}</h3>
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         <p class="col s12">
                             <span class="orange-text">&lt;warning&gt;</span>
@@ -33,7 +33,7 @@
                 </div>
 
                 {% if app.user.uptodate or is_granted("ROLE_ADMIN") %}
-                    {% if app.user.memberNumber > 0 %}{# not only admin ? #}
+                    {% if app.user.beneficiary %}{# not only admin ? #}
                         {% include "booking/home_booked_shifts.html.twig" %}
                     {% else %}
                         <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
@@ -68,13 +68,13 @@
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% endif %}
 
-                {% if app.user.ownedCommissions | length %}
-                    <a href="{{ path("commission_edit",{'id': app.user.ownedCommissions | first.id }) }}" class="waves-effect waves-light btn blue-grey">Gérer la commission {{ app.user.ownedCommissions | first.name }}</a>
+                {% if app.user.beneficiary and app.user.beneficiary.commissions | length %}
+                    <a href="{{ path("commission_edit",{'id': app.user.beneficiary.commissions | first.id }) }}" class="waves-effect waves-light btn blue-grey">Gérer la commission {{ app.user.beneficiary.commissions | first.name }}</a>
                 {% endif %}
 
                 {% if is_granted("ROLE_ADMIN") %}
                     <h5>Actions admin</h5>
-                    {% if app.user.memberNumber > 0 %}
+                    {% if app.user.beneficiary %}
                         <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
                     {% endif %}
                     <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>

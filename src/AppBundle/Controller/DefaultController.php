@@ -40,14 +40,42 @@ class DefaultController extends Controller
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            if ($current_app_user->getWithdrawn()){
-                $this->container->get('security.token_storage')->setToken(null);
-                $this->container->get('session')->invalidate();
-                $session->getFlashBag()->add('error', 'Compte fermé !');
-                return $this->redirectToRoute('homepage');
-            }
+
             $remainder = $current_app_user->getRemainder();
-            if ($current_app_user->getMemberNumber()>0) { //member only
+            if ($current_app_user->getBeneficiary() != null) { //member only
+
+                $membership = $current_app_user->getBeneficiary()->getMembership();
+
+                if ($membership->getWithdrawn()){
+                    $this->container->get('security.token_storage')->setToken(null);
+                    $this->container->get('session')->invalidate();
+                    $session->getFlashBag()->add('error', 'Compte fermé !');
+                    return $this->redirectToRoute('homepage');
+                }
+
+                $dayAfterEndOfCycle = clone $membership->endOfCycle();
+                $dayAfterEndOfCycle->modify('+1 day');
+                if ($membership->getFrozenChange() && !$membership->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('warning',
+                        'Comme demandé, ton compte sera gelé dans '.
+                        date_diff($now, $membership->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        $this->get('router')->generate('fos_user_profile_edit')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
+                if ($membership->getFrozenChange() && $membership->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('notice',
+                        'Comme demandé, ton compte sera dégelé dans '.
+                        date_diff($now, $membership->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        $this->get('router')->generate('fos_user_profile_edit')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
+
                 if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
                     if (intval($remainder->format("%R%a"))<0)
                         $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
@@ -56,30 +84,8 @@ class DefaultController extends Controller
                 }else{
                     $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
                 }
-                $dayAfterEndOfCycle = clone $current_app_user->endOfCycle();
-                $dayAfterEndOfCycle->modify('+1 day');
-                if ($current_app_user->getFrozenChange() && !$current_app_user->getFrozen()){
-                    $now = new \DateTime('now');
-                    $session->getFlashBag()->add('warning',
-                        'Comme demandé, ton compte sera gelé dans '.
-                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                         $this->get('router')->generate('fos_user_profile_edit')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
-                }
-                if ($current_app_user->getFrozenChange() && $current_app_user->getFrozen()){
-                    $now = new \DateTime('now');
-                    $session->getFlashBag()->add('notice',
-                        'Comme demandé, ton compte sera dégelé dans '.
-                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                        $this->get('router')->generate('fos_user_profile_edit')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
-                }
             }
-        }else{
+        } else {
 
             $today = strtotime('today');
             $from = new \DateTime();
@@ -89,7 +95,7 @@ class DefaultController extends Controller
 //            $to->setTimestamp($nextMonday);
             $to = new \DateTime();
             $to->modify('+7 days');
-            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from,$to);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf

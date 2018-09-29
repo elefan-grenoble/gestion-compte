@@ -6,7 +6,6 @@ use DateTime;
 use AppBundle\Repository\RegistrationRepository;
 use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
-use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
@@ -58,7 +57,7 @@ class Membership
     private $frozen_change;
 
     /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="membership",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
     private $registrations;
@@ -76,12 +75,12 @@ class Membership
     private $recordedRegistrations;
 
     /**
-     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="membership", cascade={"persist", "remove"})
      */
     private $beneficiaries;
 
     /**
-     * One User has One Main Beneficiary.
+     * One Membership has One Main Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -121,13 +120,13 @@ class Membership
     private $_endOfCycle;
 
     /**
-     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="user",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
     private $timeLogs;
 
     /**
-     * User constructor.
+     * Membership constructor.
      */
     public function __construct()
     {
@@ -141,12 +140,11 @@ class Membership
      *
      * @param integer $memberNumber
      *
-     * @return User
+     * @return Membership
      */
     public function setMemberNumber($memberNumber)
     {
         $this->member_number = $memberNumber;
-
         return $this;
     }
 
@@ -165,7 +163,7 @@ class Membership
      *
      * @param \AppBundle\Entity\Registration $registration
      *
-     * @return User
+     * @return Membership
      */
     public function addRegistration(\AppBundle\Entity\Registration $registration)
     {
@@ -209,12 +207,11 @@ class Membership
      *
      * @param \AppBundle\Entity\Beneficiary $beneficiary
      *
-     * @return User
+     * @return Membership
      */
     public function addBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
     {
         $this->beneficiaries[] = $beneficiary;
-
         return $this;
     }
 
@@ -255,7 +252,7 @@ class Membership
         if ($mainBeneficiary)
             return $mainBeneficiary->getFirstname();
         else
-            return $this->getUsername();
+            return '';
 
     }
 
@@ -328,37 +325,12 @@ class Membership
         return $return;
     }
 
-    static function makeUsername($firstname,$lastname,$extra = ''){
-        $lastname = preg_replace('/[-\/]+/', ' ', $lastname);
-        $ln = explode(' ',$lastname);
-//        if (in_array(strtolower($ln[0]),array('la','du','de'))&&count($ln>1))
-        if (strlen($ln[0])<3&&count($ln)>1)
-            $ln = $ln[0].$ln[1];
-        else
-            $ln = $ln[0];
-        $username = strtolower(substr(explode(' ',$firstname)[0],0,1).$ln);
-        $username = preg_replace('/[^a-z0-9]/', '', $username);
-        $username .= $extra;
-        return $username;
-    }
-
-    static function randomPassword() {
-        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
-        $pass = array(); //remember to declare $pass as an array
-        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
-        for ($i = 0; $i < 8; $i++) {
-            $n = rand(0, $alphaLength);
-            $pass[] = $alphabet[$n];
-        }
-        return implode($pass); //turn the array into a string
-    }
-
     /**
      * Set mainBeneficiary
      *
      * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
      *
-     * @return User
+     * @return Membership
      */
     public function setMainBeneficiary(\AppBundle\Entity\Beneficiary $mainBeneficiary = null)
     {
@@ -389,7 +361,7 @@ class Membership
      *
      * @param boolean $withdrawn
      *
-     * @return User
+     * @return Membership
      */
     public function setWithdrawn($withdrawn)
     {
@@ -427,7 +399,7 @@ class Membership
      *
      * @param \AppBundle\Entity\Registration $recordedRegistration
      *
-     * @return User
+     * @return Membership
      */
     public function addRecordedRegistration(\AppBundle\Entity\Registration $recordedRegistration)
     {
@@ -480,7 +452,7 @@ class Membership
      *
      * @param boolean $frozen
      *
-     * @return User
+     * @return Membership
      */
     public function setFrozen($frozen)
     {
@@ -505,12 +477,11 @@ class Membership
      *
      * @param boolean $frozen_change
      *
-     * @return User
+     * @return Membership
      */
     public function setFrozenChange($frozen_change)
     {
         $this->frozen_change = $frozen_change;
-
         return $this;
     }
 
@@ -529,7 +500,7 @@ class Membership
      *
      * @param \AppBundle\Entity\Registration $lastRegistration
      *
-     * @return User
+     * @return Membership
      */
     public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
     {
@@ -781,7 +752,7 @@ class Membership
     }
 
     /**
-     * Max time count for a user
+     * Max time count for a membership
      *
      * @return Integer
      */
@@ -811,12 +782,11 @@ class Membership
      *
      * @param \AppBundle\Entity\Note $note
      *
-     * @return User
+     * @return Membership
      */
     public function addNote(\AppBundle\Entity\Note $note)
     {
         $this->notes[] = $note;
-
         return $this;
     }
 
@@ -845,12 +815,11 @@ class Membership
      *
      * @param \AppBundle\Entity\Note $annotation
      *
-     * @return User
+     * @return Membership
      */
     public function addAnnotation(\AppBundle\Entity\Note $annotation)
     {
         $this->annotations[] = $annotation;
-
         return $this;
     }
 
@@ -920,12 +889,11 @@ class Membership
      *
      * @param \AppBundle\Entity\Proxy $receivedProxy
      *
-     * @return User
+     * @return Membership
      */
     public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
     {
         $this->received_proxys[] = $receivedProxy;
-
         return $this;
     }
 
@@ -964,12 +932,11 @@ class Membership
      *
      * @param \AppBundle\Entity\Proxy $givenProxy
      *
-     * @return User
+     * @return Membership
      */
     public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
     {
         $this->given_proxies[] = $givenProxy;
-
         return $this;
     }
 
@@ -1000,13 +967,12 @@ class Membership
             return '#'.$this->getMemberNumber().' '.$this->getUsername();
     }
 
-
     /**
      * Set firstShiftDate
      *
      * @param \DateTime $firstShiftDate
      *
-     * @return User
+     * @return Membership
      */
     public function setFirstShiftDate($firstShiftDate)
     {
@@ -1029,12 +995,11 @@ class Membership
      *
      * @param \AppBundle\Entity\TimeLog $timeLog
      *
-     * @return User
+     * @return Membership
      */
     public function addTimeLog(\AppBundle\Entity\TimeLog $timeLog)
     {
         $this->timeLogs[] = $timeLog;
-
         return $this;
     }
 

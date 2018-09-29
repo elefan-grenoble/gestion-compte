@@ -186,15 +186,15 @@
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
-            {% if user.mainBeneficiary %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
+        {% for member in members %}
+            {% if member.mainBeneficiary %}
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': member.mainBeneficiary.autocompleteLabel }) }}" >
                     <td class="hide-on-med-and-down">
-                        {% if not user.withdrawn %}
-                            {% if not user.isEnabled %}
+                        {% if not member.withdrawn %}
+                            {% if not member.mainBeneficiary.user.isEnabled %}
                                 <i class="material-icons">phonelink_off</i>
                             {% endif %}
-                            {% if user.frozen %}
+                            {% if member.frozen %}
                                 <i class="material-icons">notifications_paused</i>
                             {% endif %}
                         {% else %}

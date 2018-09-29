@@ -19,8 +19,10 @@ ALTER TABLE fos_user ADD CONSTRAINT FK_957A64796986CF73 FOREIGN KEY (last_regist
 CREATE UNIQUE INDEX UNIQ_957A6479ECCAAFA0 ON fos_user (beneficiary_id);
 UPDATE fos_user SET beneficiary_id = main_beneficiary_id;
 
--- Other
-ALTER TABLE commission DROP next_meeting_desc, DROP next_meeting_date;
-ALTER TABLE event DROP updated_at, DROP img, DROP img_size;
+ALTER TABLE fos_user DROP FOREIGN KEY FK_957A647962C6E4EA;
+DROP INDEX UNIQ_957A647962C6E4EA ON fos_user;
+ALTER TABLE fos_user DROP main_beneficiary_id;
+
+
 
 

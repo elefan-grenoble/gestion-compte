@@ -81,13 +81,6 @@ class User extends BaseUser
     private $beneficiaries;
 
     /**
-     * One User has One Main Beneficiary.
-     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
-     */
-    private $mainBeneficiary;
-
-    /**
      * Beneficiary's user.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
@@ -290,18 +283,18 @@ class User extends BaseUser
     }
 
     public function getFirstname() {
-        $mainBeneficiary = $this->getMainBeneficiary();
-        if ($mainBeneficiary)
-            return $mainBeneficiary->getFirstname();
+        $beneficiary = $this->getBeneficiary();
+        if ($beneficiary)
+            return $beneficiary->getFirstname();
         else
             return $this->getUsername();
 
     }
 
     public function getLastname() {
-        $mainBeneficiary = $this->getMainBeneficiary();
-        if ($mainBeneficiary)
-            return $mainBeneficiary->getLastname();
+        $beneficiary = $this->getBeneficiary();
+        if ($beneficiary)
+            return $beneficiary->getLastname();
         else
             return '';
     }
@@ -386,37 +379,6 @@ class User extends BaseUser
             $pass[] = $alphabet[$n];
         }
         return implode($pass); //turn the array into a string
-    }
-
-    /**
-     * Set mainBeneficiary
-     *
-     * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
-     *
-     * @return User
-     */
-    public function setMainBeneficiary(\AppBundle\Entity\Beneficiary $mainBeneficiary = null)
-    {
-        if ($mainBeneficiary)
-            $this->addBeneficiary($mainBeneficiary);
-
-        $this->mainBeneficiary = $mainBeneficiary;
-
-        return $this;
-    }
-
-    /**
-     * Get mainBeneficiary
-     *
-     * @return \AppBundle\Entity\Beneficiary
-     */
-    public function getMainBeneficiary()
-    {
-        if (!$this->mainBeneficiary){
-            if ($this->getBeneficiaries()->count())
-                $this->setMainBeneficiary($this->getBeneficiaries()->first());
-        }
-        return $this->mainBeneficiary;
     }
 
     /**
@@ -1073,7 +1035,7 @@ class User extends BaseUser
     }
 
     public function getAutocompleteLabel(){
-        if ($this->getMainBeneficiary())
+        if ($this->getBeneficiary())
             return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
         else
             return '#'.$this->getMemberNumber().' '.$this->getUsername();
