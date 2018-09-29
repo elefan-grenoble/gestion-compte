@@ -291,7 +291,7 @@ class Beneficiary
 
     public function isMain()
     {
-        return $this === $this->getUser()->getMainBeneficiary();
+        return $this === $this->getMembership()->getMainBeneficiary();
     }
     /**
      * Constructor

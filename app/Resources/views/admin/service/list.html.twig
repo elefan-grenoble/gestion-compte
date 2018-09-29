@@ -27,7 +27,7 @@
             <tr>
                 <td>
                     {% if service.logo %}
-                    <img src="{{ asset(vich_uploader_asset(service, 'logoFile')) | imagine_filter('service_logo') }}" />
+                    <img src="{{ service|img('logoFile','service_logo') }}" />
                     {% endif %}
                 </td>
                 <td>{% if service.icon %}

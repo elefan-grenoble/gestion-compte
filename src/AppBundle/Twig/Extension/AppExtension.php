@@ -2,6 +2,7 @@
 namespace AppBundle\Twig\Extension;
 
 use AppBundle\Entity\SwipeCard;
+use AppBundle\Service\Picture\BasePathPicture;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
 use DateInterval;
@@ -15,9 +16,11 @@ class AppExtension extends \Twig_Extension
 {
 
     private $container;
+    private $basePathPicture;
 
-    public function __construct(Container $container) {
+    public function __construct(Container $container, BasePathPicture $basePathPicture) {
         $this->container = $container;
+        $this->basePathPicture = $basePathPicture;
     }
 
     public function getFilters()
@@ -34,7 +37,13 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('barcode',array($this, 'barcode')),
             new \Twig_SimpleFilter('vigenere_encode',array($this, 'vigenere_encode')),
             new \Twig_SimpleFilter('vigenere_decode',array($this, 'vigenere_decode')),
+            new \Twig_SimpleFilter('img',array($this, 'imgFilter')),
         );
+    }
+
+    public function imgFilter( $entity,$fileField, $filter)
+    {
+        return $this->basePathPicture->getPicturePath($entity,$fileField, $filter);
     }
 
     public function markdown($markdown)

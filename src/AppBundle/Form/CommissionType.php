@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Beneficiary;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\AbstractType;
@@ -47,6 +48,14 @@ class CommissionType extends AbstractType
         $builder
             ->add('description',TextareaType::class,array('label'=>'Description'))
             ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'));
+
+        $builder->add('next_meeting_date',DateTimeType::class,array('required' => false,
+            'input'  => 'datetime',
+            'date_widget' => 'single_text',
+            'time_widget' => 'single_text',
+            'label' => 'Date & heure de la prochaine réunion',
+        ));
+        $builder->add('next_meeting_desc', TextType::class, array('required' => false, 'label' => 'Libelé de la prochaine réunion'));
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();

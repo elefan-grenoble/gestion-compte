@@ -29,4 +29,12 @@ UPDATE time_log SET membership_id = user_id;
 ALTER TABLE time_log ADD CONSTRAINT FK_55BE03AF1FB354CD FOREIGN KEY (membership_id) REFERENCES membership (id) ON DELETE CASCADE;
 CREATE INDEX IDX_55BE03AF1FB354CD ON time_log (membership_id);
 
+-- Migrate registrations
+ALTER TABLE registration ADD membership_id INT DEFAULT NULL;
+UPDATE registration SET membership_id = user_id;
+ALTER TABLE registration ADD CONSTRAINT FK_62A8A7A71FB354CD FOREIGN KEY (membership_id) REFERENCES membership (id) ON DELETE CASCADE;
+CREATE INDEX IDX_62A8A7A71FB354CD ON registration (membership_id);
+ALTER TABLE fos_user DROP FOREIGN KEY FK_957A64796986CF73;
+ALTER TABLE fos_user ADD CONSTRAINT FK_957A64796986CF73 FOREIGN KEY (last_registration_id) REFERENCES registration (id) ON DELETE SET NULL;
+
 

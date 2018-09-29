@@ -64,6 +64,12 @@ class Registration
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations",)
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
+     */
+    private $membership;
+
+    /**
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -301,5 +307,21 @@ class Registration
     public function getHelloassoPayment()
     {
         return $this->helloassoPayment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMembership()
+    {
+        return $this->membership;
+    }
+
+    /**
+     * @param mixed $membership
+     */
+    public function setMembership($membership)
+    {
+        $this->membership = $membership;
     }
 }

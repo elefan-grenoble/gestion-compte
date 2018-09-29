@@ -53,6 +53,32 @@
                 {{ form_widget(form.description) }}
             </div>
         </div>
+    </div>
+    <div class="card-panel teal lighten-5">
+        <div class="row">
+            <div class="input-field description col s6">
+                <div class="errors">
+                    {{ form_errors(form.next_meeting_desc) }}
+                </div>
+                <div class="input-field">
+                    {{ form_label(form.next_meeting_desc) }}
+                    {{ form_widget(form.next_meeting_desc) }}
+                </div>
+            </div>
+            <div class="input-field description col s6">
+                <div class="errors">
+                    {{ form_errors(form.next_meeting_date) }}
+                </div>
+                <div>
+                    {{ form_label(form.next_meeting_date) }}
+                </div>
+                <div class="input-field">
+                    {{ form_widget(form.next_meeting_date) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
         {% if form.owners is defined %}
         <div class="input-field owners col s12">
             <div class="errors">
@@ -120,6 +146,43 @@
     <script>
         new Editor({
             element: document.getElementById('appbundle_commission_description'),
+        })
+        jQuery.extend( jQuery.fn.pickadate.defaults, {
+            monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd',
+            labelMonthNext:"Mois suivant",
+            labelMonthPrev:"Mois précédent",
+            labelMonthSelect:"Sélectionner un mois",
+            labelYearSelect:"Sélectionner une année"
+        });
+
+        jQuery(function(){
+            $('#appbundle_commission_next_meeting_date_date').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 2, // Creates a dropdown of 15 years to control year,
+                close: 'Ok',
+                closeOnSelect: true // Close upon selecting a date,
+            });
+            $('#appbundle_commission_next_meeting_date_time').pickatime({
+                twelvehour: false, // Use AM/PM or 24-hour format
+                donetext: 'OK', // text for done-button
+                cleartext: 'Effacer', // text for clear-button
+                canceltext: 'Fermer', // Text for cancel-button
+                autoclose: true, // automatic close timepicker
+                ampmclickable: false, // make AM PM clickable
+            });
+        });
+
+        new Editor({
+            element: document.getElementById('appbundle_event_description'),
         })
     </script>
 {% endblock %}

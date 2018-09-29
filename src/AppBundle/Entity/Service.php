@@ -104,7 +104,7 @@ class Service
     /**
      * @ORM\PrePersist
      */
-    public function setCreatedAtValue()
+    public function setUpdatedAtValue()
     {
         $this->updatedAt = new \DateTime();
     }
