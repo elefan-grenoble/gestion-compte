@@ -56,21 +56,21 @@ class EmailingEventListener
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 
-        $user = $event->getMembership();
+        $membership = $event->getMembership();
         $date = $event->getDate();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        // user wont be frozen for this cycle && not a fresh new user && user still have to book
-        if (!$user->getFrozenChange() && $user->getFirstShiftDate() < $date && $user->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
+        // member wont be frozen for this cycle && not a fresh new member && member still have to book
+        if (!$membership->getFrozenChange() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
             $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($user->getEmail())
+                ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->container->get('twig')->render(
                         'emails/cycle_start.html.twig',
-                        array('user' => $user, 'home_url' => $home_url)
+                        array('membership' => $membership, 'home_url' => $home_url)
                     ),
                     'text/html'
                 );
@@ -86,20 +86,20 @@ class EmailingEventListener
     {
         $this->logger->info("Emailing Listener: onMemberCycleHalf");
 
-        $user = $event->getUser();
+        $membership = $event->getMembership();
         $date = $event->getDate();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        if ($user->getFirstShiftDate() < $date && $user->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if user still have to book
+        if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($user->getEmail())
+                ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/cycle_half.html.twig',
-                        array('user' => $user, 'home_url' => $home_url)
+                        array('membership' => $membership, 'home_url' => $home_url)
                     ),
                     'text/html'
                 );

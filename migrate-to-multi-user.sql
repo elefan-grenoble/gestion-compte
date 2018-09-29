@@ -23,6 +23,10 @@ ALTER TABLE fos_user DROP FOREIGN KEY FK_957A647962C6E4EA;
 DROP INDEX UNIQ_957A647962C6E4EA ON fos_user;
 ALTER TABLE fos_user DROP main_beneficiary_id;
 
-
+-- Migrate time_logs
+ALTER TABLE time_log ADD membership_id INT NOT NULL;
+UPDATE time_log SET membership_id = user_id;
+ALTER TABLE time_log ADD CONSTRAINT FK_55BE03AF1FB354CD FOREIGN KEY (membership_id) REFERENCES membership (id) ON DELETE CASCADE;
+CREATE INDEX IDX_55BE03AF1FB354CD ON time_log (membership_id);
 
 

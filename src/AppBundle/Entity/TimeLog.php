@@ -50,6 +50,12 @@ class TimeLog
     private $user;
 
     /**
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="timeLogs")
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
+     */
+    private $membership;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="timeLogs")
      * @ORM\JoinColumn(name="shift_id", referencedColumnName="id", onDelete="CASCADE")
      */
@@ -183,5 +189,21 @@ class TimeLog
     public function getShift()
     {
         return $this->shift;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMembership()
+    {
+        return $this->membership;
+    }
+
+    /**
+     * @param mixed $membership
+     */
+    public function setMembership($membership)
+    {
+        $this->membership = $membership;
     }
 }

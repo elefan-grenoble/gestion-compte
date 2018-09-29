@@ -2,9 +2,9 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
-use AppBundle\Entity\User;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
@@ -57,7 +57,7 @@ class TimeLogEventListener
     public function onShiftDismissed(ShiftDismissedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftDismissed");
-        $this->deleteShiftLogs($event->getShift(), $event->getUser());
+        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
 
     /**
@@ -79,7 +79,7 @@ class TimeLogEventListener
     private function createShiftLog(Shift $shift)
     {
         $log = new TimeLog();
-        $log->setUser($shift->getShifter()->getUser());
+        $log->setMembership($shift->getShifter()->getMembership());
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setDate($shift->getStart());
@@ -90,14 +90,14 @@ class TimeLogEventListener
 
     /**
      * @param Shift $shift
-     * @param User $user
+     * @param Membership $membership
      * @throws \Doctrine\ORM\ORMException
      */
-    private function deleteShiftLogs(Shift $shift, User $user)
+    private function deleteShiftLogs(Shift $shift, Membership $membership)
     {
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
-            if ($log->getUser()->getId() == $user->getId()) {
+            if ($log->getMembership()->getId() == $membership->getId()) {
                 $this->em->remove($log);
             }
         }
@@ -105,24 +105,24 @@ class TimeLogEventListener
     }
 
     /**
-     * @param User $user
+     * @param Membership $membership
      * @param \DateTime $date
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createCycleBeginningLog(User $user, \DateTime $date)
+    private function createCycleBeginningLog(Membership $membership, \DateTime $date)
     {
         $log = new TimeLog();
-        $log->setUser($user);
+        $log->setMembership($membership);
         $log->setTime(-1 * $this->due_duration_by_cycle);
         $log->setDate($date);
         $log->setDescription("Début de cycle");
         $this->em->persist($log);
 
-        $counter_today = $user->getTimeCount($date);
+        $counter_today = $membership->getTimeCount($date);
         if ($counter_today > $this->due_duration_by_cycle) { //surbook
             $log = new TimeLog();
-            $log->setUser($user);
+            $log->setMembership($membership);
             $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
             $log->setDate($date);
             $log->setDescription("Régulation du bénévolat facultatif");
