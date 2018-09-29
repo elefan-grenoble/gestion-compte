@@ -9,6 +9,7 @@ parameters:
   locale: fr
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
+  images_tmp_dir: '%kernel.project_dir%/web/tmp'
 
 framework:
   #esi: ~
@@ -50,6 +51,7 @@ twig:
       helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
       due_duration_by_cycle: '%due_duration_by_cycle%'
       support_email: '%transactional_mailer_user%'
+      images_tmp_dir: '%images_tmp_dir%'
 # Doctrine Configuration
 doctrine:
   dbal:

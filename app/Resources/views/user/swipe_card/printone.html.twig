@@ -46,7 +46,7 @@
                 <td style="width: 70mm;height: 36mm;"></td>
             {% endif %}
             {% set card = beneficiary.SwipeCards.first   %}
-            {% include "user/swipe_card/_swipe.html.twig" with { card: card  } %}
+            {% include "user/swipe_card/_swipe_print.html.twig" with { card: card  } %}
             {% set bindex = bindex + 1   %}
             {% if bindex is divisible by(3) %}
         </tr><tr>

@@ -2,6 +2,8 @@
 
 namespace AppBundle\Entity;
 
+use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
+use CodeItNow\BarcodeBundle\Utils\QrCode;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -231,5 +233,16 @@ class SwipeCard
     public function getDisabledAt()
     {
         return $this->disabled_at;
+    }
+
+    public function getBarcode()
+    {
+        $barcode = new BarcodeGenerator();
+        $barcode->setText($this->getCode());
+        $barcode->setType(BarcodeGenerator::Code128);
+        $barcode->setScale(2);
+        $barcode->setThickness(25);
+        $barcode->setFontSize(10);
+        return $barcode->generate();
     }
 }
