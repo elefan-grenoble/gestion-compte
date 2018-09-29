@@ -56,7 +56,7 @@ class EmailingEventListener
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 
-        $user = $event->getUser();
+        $user = $event->getMembership();
         $date = $event->getDate();
 
         $router = $this->container->get('router');

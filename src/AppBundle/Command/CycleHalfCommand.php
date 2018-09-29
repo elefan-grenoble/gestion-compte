@@ -40,11 +40,11 @@ class CycleHalfCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
         $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $users_with_half_cycle = $em->getRepository('AppBundle:User')->findWithHalfCyclePast($date);
+        $members_with_half_cycle = $em->getRepository('AppBundle:Membership')->findWithHalfCyclePast($date);
         $count = 0;
-        foreach ($users_with_half_cycle as $user) {
-            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($user, $date));
-            $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $user->getMemberNumber();
+        foreach ($members_with_half_cycle as $member) {
+            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date));
+            $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
             $count++;
         }

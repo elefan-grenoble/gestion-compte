@@ -151,12 +151,12 @@
                                 <td class="index">{{ loop.index }}</td>
                                 <td {% if beneficiary.lastname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
                                 <td {% if beneficiary.firstname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
-                                <td>#{{ beneficiary.user.memberNumber }}</td>
+                                <td>#{{ beneficiary.membership.memberNumber }}</td>
                                 <td class="date">{{ beneficiary.user.lastRegistration.date | date('d-m-Y') }}</td>
                                 {% if not beneficiary.isMain %}
                                     <td colspan="2" class="warning">Beneficiaire de <b>{{ beneficiary.user.mainBeneficiary.lastname }}&nbsp;{{ beneficiary.user.mainBeneficiary.firstname }}</b></td>
                                 {% elseif (event.proxiesByGiver(beneficiary.user) | length > 0) %}
-                                    <td colspan="2" class="warning">Procuration donnée à {{ event.proxiesByGiver(beneficiary.user).first.owner.lastname }}&nbsp;                                {{ event.proxiesByGiver(beneficiary.user).first.owner.firstname }}&nbsp;{{ event.proxiesByGiver(beneficiary.user).first.owner.user.memberNumber }}</td>
+                                    <td colspan="2" class="warning">Procuration donnée à {{ event.proxiesByGiver(beneficiary.user).first.owner.lastname }}&nbsp;                                {{ event.proxiesByGiver(beneficiary.user).first.owner.firstname }}&nbsp;{{ event.proxiesByGiver(beneficiary.user).first.owner.membership.memberNumber }}</td>
                                 {% elseif ( beneficiary.user.lastRegistration.date < event.minDateOfLastRegistration) %}
                                     <td colspan="2" class="wrong">Adhésion expirée</td>
                                 {% else %}

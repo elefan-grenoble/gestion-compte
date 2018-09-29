@@ -47,7 +47,7 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
-        $this->deleteShiftLogs($event->getShift(), $event->getUser());
+        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
 
     /**
@@ -68,7 +68,7 @@ class TimeLogEventListener
     public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
         $this->logger->info("Time Log Listener: onMemberCycleStart");
-        $this->createCycleBeginningLog($event->getUser(), $event->getDate());
+        $this->createCycleBeginningLog($event->getMembership(), $event->getDate());
     }
 
     /**
