@@ -2,7 +2,8 @@
 
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a>
+    <i class="material-icons">chevron_right</i>
     <i class="material-icons">list</i><span>Liste des retardataires</span>
 {% endblock %}
 
@@ -20,17 +21,12 @@
                         <h5>Compte</h5>
                         <div>
                             <div class="row">
-                                <div class="col s4">
+                                <div class="col s6">
                                     ouvert/fermé :
                                     {{ form_widget(form.withdrawn) }}
                                     {{ form_label(form.withdrawn) }}
                                 </div>
-                                <div class="col s4">
-                                    activé :
-                                    {{ form_widget(form.enabled) }}
-                                    {{ form_label(form.enabled) }}
-                                </div>
-                                <div class="col s4">
+                                <div class="col s6">
                                     gelé :
                                     {{ form_widget(form.frozen) }}
                                     {{ form_label(form.frozen) }}
@@ -109,50 +105,53 @@
         </tr>
         </thead>
         <tbody>
-        {% for user in users %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %}" >
-                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>
-                        {% for beneficiary in user.beneficiaries %}
-                            {{ beneficiary.firstname }}<br/>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for beneficiary in user.beneficiaries %}
-                            {{ beneficiary.lastname }}<br/>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% for registration in user.registrations %}
-                            {% if user.lastregistration %}
-                                {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                                {{ registration.date | date('d/m/Y') }}
-                                {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                                <br/>
-                            {% else %}
-                                {{ registration.date | date('d/m/Y') }}
-                                /!\ need fix
-                            {% endif %}
-                        {% endfor %}
-                        {% if user.lastregistration %}
-                            {% set difference = user.lastregistration.date.diff(date('now')) %}
-                            {% set m = difference.m %}
-                            {% set y = difference.y %}
-                            {% if y > 0 or m > 12 %}
-                                <strong class="red-text">dépassé de {{ difference.days - 365 }} jours</strong>
-                            {% endif %}
+        {% for member in members %}
+            <tr class="{% if member.withdrawn %}withdrawn{% endif %}">
+                <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a></td>
+                <td>
+                    {% for beneficiary in member.beneficiaries %}
+                        {{ beneficiary.firstname }}<br/>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for beneficiary in member.beneficiaries %}
+                        {{ beneficiary.lastname }}<br/>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% for registration in member.registrations %}
+                        {% if member.lastregistration %}
+                            {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
+                            {{ registration.date | date('d/m/Y') }}
+                            {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
+                            <br/>
+                        {% else %}
+                            {{ registration.date | date('d/m/Y') }}
+                            /!\ need fix
                         {% endif %}
-                    </td>
-                    <td>
-                        <blockquote class="truncate">
-                            {% for note in user.notes %}
-                                <i>{{ note.createdAt | date('d/m H:i') }} : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text  }}
-                                <br>
-                            {% endfor %}
-                        </blockquote>
-                    </td>
-                    <td><i class="material-icons">phone</i><a href="{{ path('ambassador_phone_show', { 'username': user.username }) }}" class="">Appeler</a></td>
-                </tr>
+                    {% endfor %}
+                    {% if member.lastregistration %}
+                        {% set difference = member.lastregistration.date.diff(date('now')) %}
+                        {% set m = difference.m %}
+                        {% set y = difference.y %}
+                        {% if y > 0 or m > 12 %}
+                            <strong class="red-text">dépassé de {{ difference.days - 365 }} jours</strong>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    <blockquote class="truncate">
+                        {% for note in member.notes %}
+                            <i>{{ note.createdAt | date('d/m H:i') }}
+                            : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}
+                            <br>
+                        {% endfor %}
+                    </blockquote>
+                </td>
+                <td><i class="material-icons">phone</i><a
+                            href="{{ path('ambassador_phone_show', { 'member_number': member.memberNumber }) }}"
+                            class="">Appeler</a></td>
+            </tr>
         {% endfor %}
         </tbody>
     </table>
@@ -160,15 +159,18 @@
     {% if nb_of_pages > 1 %}
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page-1}) }}{% endif %}" data-page="{{ page-1 }}">
+                <a href="{% if(page==1) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page-1}) }}{% endif %}"
+                   data-page="{{ page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("ambassador_phone_list",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                            href="{{ path("ambassador_phone_list",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page+1}) }}{% endif %}" data-page="{{ page+1}}">
+                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page+1}) }}{% endif %}"
+                   data-page="{{ page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </li>
@@ -179,10 +181,11 @@
 
 {% block stylesheets %}
     <style>
-        td strong{
+        td strong {
             /*font-weight: 600;*/
         }
-        th.active{
+
+        th.active {
             color: #51CAE9;
         }
     </style>
@@ -190,36 +193,36 @@
 
 {% block javascripts %}
     <script>
-        jQuery.extend( jQuery.fn.pickadate.defaults, {
-            monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
-            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
-            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
-            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+        jQuery.extend(jQuery.fn.pickadate.defaults, {
+            monthsFull: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+            monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+            weekdaysFull: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+            weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
             today: 'Aujourd\'hui',
             clear: 'Effacer',
             close: 'Fermer',
             firstDay: 1,
             format: 'yyyy-mm-dd',
             formatSubmit: 'yyyy-mm-dd',
-            labelMonthNext:"Mois suivant",
-            labelMonthPrev:"Mois précédent",
-            labelMonthSelect:"Sélectionner un mois",
-            labelYearSelect:"Sélectionner une année"
+            labelMonthNext: "Mois suivant",
+            labelMonthPrev: "Mois précédent",
+            labelMonthSelect: "Sélectionner un mois",
+            labelYearSelect: "Sélectionner une année"
         });
 
-        jQuery(function(){
+        jQuery(function () {
             $('.datepicker').pickadate({
                 selectMonths: true, // Creates a dropdown to control month
                 selectYears: 2, // Creates a dropdown of 15 years to control year,
                 close: 'Ok',
                 closeOnSelect: true // Close upon selecting a date,
             });
-            $('[type=submit]').click(function(e){
+            $('[type=submit]').click(function (e) {
                 e.preventDefault();
                 $('#form_action').val($(this).val());
                 $('form[name=form]').submit();
             });
-            $('.pagination li:not(.disabled) a').click(function(e){
+            $('.pagination li:not(.disabled) a').click(function (e) {
                 e.preventDefault();
                 $('#form_page').val($(this).attr('data-page'));
                 $('form[name=form]').submit();
@@ -227,18 +230,18 @@
             // $('select').on('change', function() {
             //     $('form[name=form]').submit();
             // });
-            $('th[data-col]').click(function(e){
+            $('th[data-col]').click(function (e) {
                 e.preventDefault();
-                if ($('#form_sort').val() === $(this).attr('data-col')){
+                if ($('#form_sort').val() === $(this).attr('data-col')) {
                     $('#form_dir').val(($('#form_dir').val() === 'ASC') ? 'DESC' : 'ASC');
-                }else{
+                } else {
                     $('#form_sort').val($(this).attr('data-col'));
                 }
                 $('th[data-col]').removeClass('active');
                 $(this).addClass('active');
                 $('form[name=form]').submit();
             });
-            $('th[data-col="'+$('#form_sort').val()+'"]').addClass('active');
+            $('th[data-col="' + $('#form_sort').val() + '"]').addClass('active');
         });
     </script>
 {% endblock %}

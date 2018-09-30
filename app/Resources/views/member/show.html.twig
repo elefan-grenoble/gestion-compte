@@ -132,8 +132,8 @@
 
                         {% else %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                <input type="hidden" name="username" value="{{ user.username }}" />
-                                Envoyer le lien de connexion sur {{ user.email }} ?
+                                <input type="hidden" name="username" value="{{ member.mainBeneficiary.user.username }}" />
+                                Envoyer le lien de connexion sur {{ member.mainBeneficiary.user.email }} ?
                                 <br>
                                 <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
                                     <i class="material-icons left">devices</i> Activer le compte

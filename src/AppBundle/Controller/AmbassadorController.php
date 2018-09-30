@@ -48,10 +48,6 @@ class AmbassadorController extends Controller
                 'fermé' => 2,
                 'ouvert' => 1,
             )))
-            ->add('enabled', ChoiceType::class, array('label' => 'activé','required' => false,'choices'  => array(
-                'activé' => 2,
-                'Non activé' => 1,
-            )))
             ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => true,'data' => 1,'choices'  => array(
                 'Non gelé' => 1,
                 'gelé' => 2,
@@ -77,7 +73,7 @@ class AmbassadorController extends Controller
 
         $action = $form->get('action')->getData();
 
-        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");
@@ -95,10 +91,6 @@ class AmbassadorController extends Controller
             if ($form->get('withdrawn')->getData() > 0){
                 $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                     ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
-            }
-            if ($form->get('enabled')->getData() > 0){
-                $qb = $qb->andWhere('o.enabled = :enabled')
-                    ->setParameter('enabled', $form->get('enabled')->getData()-1);
             }
             if ($form->get('frozen')->getData() > 0){
                 $qb = $qb->andWhere('o.frozen = :frozen')
@@ -180,10 +172,10 @@ class AmbassadorController extends Controller
 
         $qb = $qb->orderBy($sort, $order);
         $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-        $users = new Paginator($qb->getQuery());
+        $members = new Paginator($qb->getQuery());
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'users' => $users,
+            'members' => $members,
             'form' => $form->createView(),
             'nb_of_result' => $max,
             'page'=>$page,
@@ -202,7 +194,7 @@ class AmbassadorController extends Controller
      */
     public function showAction(Membership $member)
     {
-        return $this->redirectToRoute('user_show', array('member_number'=>$member->getMemberNumber()));
+        return $this->redirectToRoute('member_show', array('member_number'=>$member->getMemberNumber()));
     }
 
     /**
