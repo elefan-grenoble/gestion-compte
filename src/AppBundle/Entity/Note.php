@@ -43,8 +43,8 @@ class Note
     private $author;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="Membership")
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id")
      */
     private $subject;
 
@@ -157,21 +157,20 @@ class Note
     /**
      * Set subject
      *
-     * @param \AppBundle\Entity\User $subject
+     * @param \AppBundle\Entity\Membership $subject
      *
      * @return Note
      */
-    public function setSubject(\AppBundle\Entity\User $subject = null)
+    public function setSubject(\AppBundle\Entity\Membership $subject = null)
     {
         $this->subject = $subject;
-
         return $this;
     }
 
     /**
      * Get subject
      *
-     * @return \AppBundle\Entity\User
+     * @return \AppBundle\Entity\Membership
      */
     public function getSubject()
     {

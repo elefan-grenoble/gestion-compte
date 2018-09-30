@@ -41,4 +41,8 @@ CREATE INDEX IDX_62A8A7A71FB354CD ON registration (membership_id);
 ALTER TABLE fos_user DROP FOREIGN KEY FK_957A64796986CF73;
 ALTER TABLE fos_user ADD CONSTRAINT FK_957A64796986CF73 FOREIGN KEY (last_registration_id) REFERENCES registration (id) ON DELETE SET NULL;
 
-
+-- Migrate notes
+ALTER TABLE note ADD membership_id INT DEFAULT NULL;
+UPDATE note SET membership_id = user_id;
+ALTER TABLE note ADD CONSTRAINT FK_CFBDFA141FB354CD FOREIGN KEY (membership_id) REFERENCES membership (id);
+CREATE INDEX IDX_CFBDFA141FB354CD ON note (membership_id);

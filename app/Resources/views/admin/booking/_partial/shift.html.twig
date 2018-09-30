@@ -59,7 +59,7 @@
                     <li>
                         <div class="collapsible-header">
                         {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
-                            <a href="{{ path("user_show",{'username':shift.shifter.user.username}) }}">#{{ shift.shifter.membership.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                            <a href="{{ path("member_show",{'member_number':shift.shifter.membership.memberNumber}) }}">#{{ shift.shifter.membership.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                             {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
                             {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.roles | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}

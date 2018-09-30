@@ -93,12 +93,6 @@ class Membership
     private $notes;
 
     /**
-     * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "DESC"})
-     */
-    private $annotations;
-
-    /**
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
      */
     private $received_proxies;
@@ -818,39 +812,6 @@ class Membership
     public function getNotes()
     {
         return $this->notes;
-    }
-
-    /**
-     * Add annotation
-     *
-     * @param \AppBundle\Entity\Note $annotation
-     *
-     * @return Membership
-     */
-    public function addAnnotation(\AppBundle\Entity\Note $annotation)
-    {
-        $this->annotations[] = $annotation;
-        return $this;
-    }
-
-    /**
-     * Remove annotation
-     *
-     * @param \AppBundle\Entity\Note $annotation
-     */
-    public function removeAnnotation(\AppBundle\Entity\Note $annotation)
-    {
-        $this->annotations->removeElement($annotation);
-    }
-
-    /**
-     * Get annotations
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getAnnotations()
-    {
-        return $this->annotations;
     }
 
     /**

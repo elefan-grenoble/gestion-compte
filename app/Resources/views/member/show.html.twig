@@ -7,19 +7,18 @@
     {% else %}
         <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
     {% endif %}
-    <i class="material-icons">person</i> {{ user.autocompleteLabel }}
+    <i class="material-icons">person</i> {{ member.autocompleteLabel }}
 {% endblock %}
 
 {% block content %}
-    {% set member = user.beneficiary.membership %}
     <h4 class="center-align">
-        <img src="{{ gravatar(user.email) }}" alt="{{ user.beneficiary.firstname }} {{ user.beneficiary.lastname }}" class="circle responsive-img"><br>
+        <img src="{{ gravatar(member.mainBeneficiary.email) }}" alt="{{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}" class="circle responsive-img"><br>
 
         {% if member.withdrawn %}<del>{% endif %}
-            #{{ member.memberNumber }} {{ user.beneficiary.firstname }} {{ user.beneficiary.lastname }}
+            #{{ member.memberNumber }} {{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}
         {% if member.withdrawn %}</del>{% endif %}
         {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
-        {% for role in user.roles %}
+        {% for role in member.mainBeneficiary.user.roles %}
             {% if role != "ROLE_USER" %}
                 <span class="badge purple-text small">{{ role }}</span>
             {% endif %}
@@ -64,7 +63,7 @@
                     </li>
                 {% endfor %}
             </ul>
-            {% if member.canRegister and user != app.user %}
+            {% if member.canRegister and member.mainBeneficiary.user != app.user %}
                 <ul class="collapsible" data-collapsible="accordion">
                     <li>
                         {% if not member.lastRegistration %}
@@ -79,7 +78,7 @@
                         </div>
                     </li>
                 </ul>
-            {% elseif (user != app.user ) %}
+            {% elseif (member.mainBeneficiary.user != app.user ) %}
                 <ul class="collapsible" data-collapsible="accordion">
                     <li>
                         {% if not member.lastRegistration %}
@@ -88,7 +87,7 @@
                             <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
                         {% endif %}
                         <div class="collapsible-body new_registration_form">
-                            Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ user.remainder | date('%a') }} jours.
+                            Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ member.remainder | date('%a') }} jours.
                         </div>
                     </li>
                 </ul>
@@ -120,16 +119,16 @@
             <li id="actions">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
                 <div class="collapsible-body white">
-                    {% if is_granted("edit",user) %}
-                        <form action="{{ path('user_edit_firewall') }}" method="POST">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
+                    {% if is_granted("edit",member) %}
+                        <form action="{{ path('member_edit_firewall') }}" method="POST">
+                            <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
                             <div>
                                 <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
                             </div>
                         </form>
                     {% endif %}
-                    {% if not user.isEnabled %}
-                        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                    {% if not member.mainBeneficiary.user.isEnabled %}
+                        {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
 
                         {% else %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
@@ -142,21 +141,21 @@
                             </form>
                         {% endif %}
                     {% endif %}
-                    {% if is_granted("freeze_change",user) %}
+                    {% if is_granted("freeze_change",member) %}
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
-                            <a href="{{ path("user_freeze_change",{"id":user.id}) }}" class="waves-effect waves-light btn orange">
+                            <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
                                 <i class="material-icons left">cancel</i>annuler la demande de gel du compte</a>
                             {% else %}
-                                <a href="{{ path("user_freeze_change",{"id":user.id}) }}" class="waves-effect waves-light btn deep-purple">
+                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
                                 <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
                             {% endif %}
                         {% else %}
-                            <a href="{{ path("user_freeze_change",{"id":user.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
+                            <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
                                 <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle</a>
                         {% endif %}
                     {% endif %}
-                    {% if is_granted("freeze",user) %}
+                    {% if is_granted("freeze",member) %}
                         {% if not member.frozen %}
                             <a href="#pause" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement</a>
@@ -168,7 +167,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn-large waves-effect waves-light btn orange" href="{{ path('user_freeze',{ 'id' : user.id }) }}"><i class="material-icons left">check</i>Je sais ce que je fais !</a>
+                                    <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_freeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce que je fais !</a>
                                 </div>
                             </div>
                         {% else %}
@@ -182,24 +181,24 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn-large waves-effect waves-light btn orange" href="{{ path('user_unfreeze',{ 'id' : user.id }) }}"><i class="material-icons left">check</i>Je sais ce que je fais !</a>
+                                    <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_unfreeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce que je fais !</a>
                                 </div>
                             </div>
                         {% endif %}
                         <br>
                     {% endif %}
-                    {% if is_granted("close",user) %}
+                    {% if is_granted("close",member) %}
                         {% if not member.withdrawn %}
-                        <a href="{{ path("user_close",{"id":user.id}) }}" class="waves-effect waves-light btn red">
+                        <a href="{{ path("member_close",{"id":member.id}) }}" class="waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte</a>
                         {% else %}
-                            <a href="{{ path("user_open",{"id":user.id}) }}" class="waves-effect waves-light btn teal">
+                            <a href="{{ path("member_open",{"id":member.id}) }}" class="waves-effect waves-light btn teal">
                                 <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
                         {% endif %}
                     {% endif %}
                     <h5>Badges</h5>
                     <ul>
-                    {% for beneficiary in user.beneficiaries %}
+                    {% for beneficiary in member.beneficiaries %}
                         {% if (beneficiary.getSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
                             <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
                         {% else %}
@@ -211,7 +210,7 @@
                     </ul>
                     {% if is_granted("ROLE_ADMIN") %}
                         <h5>login as</h5>
-                        <a href="{{ path('homepage', {'_login_as':  user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ user.firstname }}</a>
+                        <a href="{{ path('homepage', {'_login_as':  member.mainBeneficiary.user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ member.mainBeneficiary.user.firstname }}</a>
                     {% endif %}
                 </div>
             </li>
@@ -219,13 +218,13 @@
             <li id="actions">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
                 <div class="collapsible-body white">
-                    {% if not user.isEnabled %}
-                        {% if user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                    {% if not member.mainBeneficiary.user.isEnabled %}
+                        {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
                             <p>Cet utilisateur n'a pas renseigné son email, son compte ne peux pas être activé.</p>
                         {% else %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                <input type="hidden" name="username" value="{{ user.username }}" />
-                                    Envoyer le lien de connexion sur {{ user.email }} ?
+                                <input type="hidden" name="username" value="{{ member.mainBeneficiary.user.username }}" />
+                                    Envoyer le lien de connexion sur {{ member.mainBeneficiary.user.email }} ?
                                     <br>
                                     <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
                                     <i class="material-icons left">devices</i> Activer le compte
@@ -233,9 +232,9 @@
                             </form>
                         {% endif %}
                     {% endif %}
-                    {% if is_granted("edit",user) %}
-                        <form action="{{ path('user_edit_firewall') }}" method="POST">
-                            <input type="hidden" name="username" value="{{ user.username }}" />
+                    {% if is_granted("edit",member) %}
+                        <form action="{{ path('member_edit_firewall') }}" method="POST">
+                            <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
                             <div>
                                 <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
                             </div>
@@ -266,7 +265,7 @@
                             <td>{{ timeLog.shift }}</td>
                             <td>
                                 {% if is_granted("ROLE_ADMIN") %}
-                                <a href="{{ path('user_timelog_delete',{ "id":user.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
+                                <a href="{{ path('member_timelog_delete',{ "id":member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -342,27 +341,27 @@
 
                     <h6>Roles</h6>
 
-                    {% if user.hasRole('ROLE_ADMIN') %}
-                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_downward</i>supprimer le role ADMIN</a>
+                    {% if member.mainBeneficiary.user.hasRole('ROLE_ADMIN') %}
+                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_downward</i>supprimer le role ADMIN</a>
                     {% else %}
-                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un ADMIN</a>
+                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }} un ADMIN</a>
                     {% endif %}
 
-                    {% if user.hasRole('ROLE_USER_MANAGER') %}
-                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_downward</i>supprimer le role USER_MANAGER</a>
+                    {% if member.mainBeneficiary.user.hasRole('ROLE_USER_MANAGER') %}
+                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_downward</i>supprimer le role USER_MANAGER</a>
                     {% else %}
-                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un USER_MANAGER</a>
+                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}" class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }} un USER_MANAGER</a>
                     {% endif %}
 
-                    {% if user.hasRole('ROLE_FINANCE_MANAGER') %}
-                        <a href="{{ path('user_remove_role', { 'id': user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_downward</i>supprimer le role FINANCE_MANAGER</a>
+                    {% if member.mainBeneficiary.user.hasRole('ROLE_FINANCE_MANAGER') %}
+                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_downward</i>supprimer le role FINANCE_MANAGER</a>
                     {% else %}
-                        <a href="{{ path('user_add_role', { 'id': user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_upward</i>Faire de {{ user.firstname }} un FINANCE_MANAGER</a>
+                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}" class="btn deep-green"><i class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }} un FINANCE_MANAGER</a>
                     {% endif %}
 
                     <h6>Recorded registrations</h6>
                     <ul class="collapsible" data-collapsible="accordion">
-                        {% for registration in user.recordedRegistrations %}
+                        {% for registration in member.mainBeneficiary.user.recordedRegistrations %}
                             <li>
                                 <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                                         <i class="material-icons tiny">credit_card</i>
@@ -446,7 +445,7 @@
         div.replies{
             padding-left: 15px;
         }
-        {% if user.beneficiary.membership.withdrawn %}
+        {% if member.withdrawn %}
             body{
                 background: rgba(255, 50, 0, 0.2);
             }

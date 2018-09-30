@@ -1,0 +1,621 @@
+<?php
+
+namespace AppBundle\Controller;
+
+use AppBundle\Entity\Address;
+use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Client;
+use AppBundle\Entity\Membership;
+use AppBundle\Entity\Note;
+use AppBundle\Entity\Registration;
+use AppBundle\Entity\Shift;
+use AppBundle\Entity\TimeLog;
+use AppBundle\Entity\User;
+use AppBundle\Form\BeneficiaryType;
+use AppBundle\Form\NoteType;
+use AppBundle\Form\UserType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use DateTime;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Twig\Sandbox\SecurityError;
+
+/**
+ * User controller.
+ *
+ * @Route("member")
+ */
+class MembershipController extends Controller
+{
+    private $_current_app_user;
+
+    /**
+     * @return User mixed
+     */
+    public function getCurrentAppUser()
+    {
+        if (!$this->_current_app_user) {
+            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        }
+        return $this->_current_app_user;
+    }
+
+    /**
+     * Finds and displays a membership entity.
+     *
+     * @Route("/show/{member_number}", name="member_show")
+     * @Method("GET")
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function showAction(Membership $member)
+    {
+        $session = new Session();
+        if ($member->getMemberNumber() <= 0) {
+            return $this->redirectToRoute("homepage");
+        }
+        $this->denyAccessUnlessGranted('view', $member);
+
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+
+        $deleteForm = $this->createDeleteForm($member);
+
+        $note = new Note();
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $note, array(
+            'action' => $this->generateUrl('ambassador_new_note', array("member_number" => $member->getMemberNumber())),
+            'method' => 'POST',
+        ));
+        $notes_form = array();
+        $notes_delete_form = array();
+        $new_notes_form = array();
+        foreach ($member->getNotes() as $n) {
+            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+
+            $response_note = clone $note;
+            $response_note->setParent($n);
+            $response_note_form = $this->createForm(NoteType::class, $response_note,
+                array('action' => $this->generateUrl('note_reply', array('id' => $n->getId()))));
+
+            $new_notes_form[$n->getId()] = $response_note_form->createView();
+        }
+        $newReg = new Registration();
+        $remainder = $member->getRemainder();
+        if (!$remainder->invert) { //still some days
+            $date = clone $member->getLastRegistration()->getDate();
+            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+        } else { //register now !
+            $newReg->setDate(new DateTime('now'));
+        }
+        $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            $action = $this->generateUrl('member_edit', array('member_number' => $member->getMemberNumber()));
+        else
+            $action = $this->generateUrl('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+
+
+        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg, array('action' => $action));
+        $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
+
+        $deleteBeneficiaryForms = array();
+        foreach ($member->getBeneficiaries() as $beneficiary) {
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
+                    ->setMethod('DELETE')->getForm()->createView();
+            else
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_delete', array(
+                        'id' => $beneficiary->getId(),
+                        'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
+                    )))
+                    ->setMethod('DELETE')->getForm()->createView();
+        }
+
+        return $this->render('member/show.html.twig', array(
+            'member' => $member,
+            'note' => $note,
+            'note_form' => $note_form->createView(),
+            'new_registration_form' => $registrationForm->createView(),
+            'notes_form' => $notes_form,
+            'notes_delete_form' => $notes_delete_form,
+            'new_notes_form' => $new_notes_form,
+            'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'delete_form' => $deleteForm->createView(),
+        ));
+    }
+
+    /**
+     * Displays a form to edit an existing user entity.
+     *
+     * @Route("/edit/{member_number}/", name="member_edit")
+     * @Method({"GET", "POST"})
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function editAction(Request $request, Membership $member)
+    {
+        $session = new Session();
+        $this->denyAccessUnlessGranted('edit', $member);
+
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+
+        $re = '/(membres\+.*[0-9]+@lelefan\.org)/i';
+        $email = $user->getEmail();
+        preg_match($re, $email, $matches, PREG_OFFSET_CAPTURE, 0);
+        if (count($matches)) {
+            $session->getFlashBag()->add('warning',
+                'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
+            if ($member->getMainBeneficiary())
+                $member->getMainBeneficiary()->setEmail('');
+        }
+
+        $editForm = $this->createForm('AppBundle\Form\UserType', $user);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $email = $editForm->get('mainBeneficiary')->get('email')->getData();
+            $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $email));
+            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email" => $email));
+            if ($email != $user->getEmail()) {
+                if (!$otherBeneficiary && !$otherUser) {
+                    $user->setEmail($email);
+                    $em->persist($user);
+                    $session->getFlashBag()->add('warning', 'l\'email principal a changé');
+                } else {
+                    $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
+                }
+            }
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+
+            return $this->redirectToShow($user);
+        }
+
+        $note = new Note();
+        $noteForm = $this->createForm('AppBundle\Form\NoteType', $note);
+
+        $beneficiary = new Beneficiary();
+        $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
+        $beneficiaryForm->handleRequest($request);
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
+
+            if (count($user->getBeneficiaries()) < 4) { //todo put this in conf
+
+                $beneficiary->setUser($user);
+                $user->addBeneficiary($beneficiary);
+
+                $em = $this->getDoctrine()->getManager();
+                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getEmail()));
+                $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email" => $beneficiary->getEmail()));
+                if (!$otherUser && !$otherBeneficiary) {
+                    $em->persist($beneficiary);
+                    $em->flush();
+
+                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                } else {
+                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
+                }
+            } else {
+                $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
+            }
+            return $this->redirectToEdit($user);
+        } elseif ($beneficiaryForm->isSubmitted()) {
+            foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors) {
+                foreach ($errors as $error)
+                    $session->getFlashBag()->add('error', $key . " : " . $error);
+            }
+        }
+
+        $newReg = new Registration();
+        $remainder = $user->getRemainder();
+        if (!$remainder->invert) { //still some days
+            $date = clone $user->getLastRegistration()->getDate();
+            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+        } else { //register now !
+            $newReg->setDate(new DateTime('now'));
+        }
+        $newReg->setRegistrar($this->getCurrentAppUser());
+        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
+        $registrationForm->handleRequest($request);
+        if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
+            $amount = floatval($registrationForm->get('amount')->getData());
+            if ($amount <= 0) {
+                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
+                return $this->redirectToEdit($user);
+            }
+
+            if ($this->getCurrentAppUser()->getId() == $user->getId()) {
+                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
+                return $this->redirectToEdit($user);
+            }
+            $newReg->setRegistrar($this->getCurrentAppUser());
+
+            $date = $registrationForm->get('date')->getData();
+            if (!$user->canRegister($date)) {
+                $session->getFlashBag()->add('warning', 'l\'adhésion précédente du est encore valable à cette date !');
+                return $this->redirectToEdit($user);
+            }
+            $newReg->setUser($user);
+            $user->addRegistration($newReg);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($newReg);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Enregistrement effectuée');
+            return $this->redirectToShow($user);
+        }
+
+        $registrationForms = array();
+        foreach ($user->getRegistrations() as $registration) {
+            $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $registrationForms[$registration->getId()] = $form->createView();
+        }
+
+        $id = $request->request->get("registration_id");
+        if ($id) {
+            $em = $this->getDoctrine()->getManager();
+            $registration = $em->getRepository('AppBundle:Registration')->find($id);
+            if ($registration) {
+                $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {
+                    if ($this->getCurrentAppUser()->getId() == $user->getId()) {
+                        $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
+                        return $this->redirectToEdit($user);
+                    }
+                    $em->persist($registration);
+                    $em->flush();
+                    $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+                    return $this->redirectToShow($user);
+                }
+            }
+        }
+
+        $deleteBeneficiaryForms = array();
+        foreach ($user->getBeneficiaries() as $beneficiary) {
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
+                    ->setMethod('DELETE')->getForm()->createView();
+            else
+                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_delete', array(
+                        'id' => $beneficiary->getId(),
+                        'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
+                    )))
+                    ->setMethod('DELETE')->getForm()->createView();
+        }
+
+        if ($user->isWithdrawn())
+            $session->getFlashBag()->add('warning', 'Ce compte est fermé');
+
+        return $this->render('user/edit.html.twig', array(
+            'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername()),
+            'user' => $user,
+            'edit_form' => $editForm->createView(),
+            'new_registration_form' => $registrationForm->createView(),
+            'new_beneficiary_form' => $beneficiaryForm->createView(),
+            'new_note_form' => $noteForm->createView(),
+            'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'registration_forms' => $registrationForms
+        ));
+    }
+
+    /**
+     * Displays a form to edit an existing member entity.
+     *
+     * @Route("/edit/firewall", name="member_edit_firewall")
+     * @Method({"GET", "POST"})
+     */
+    public function editFirewallAction(Request $request)
+    {
+        $session = new Session();
+        $username = $request->request->get('username');
+        if ($username){
+            $em = $this->getDoctrine()->getManager();
+            $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            if ($this->isGranted('view', $user)){
+                return $this->redirectToEdit($user);
+            }
+            $form = $this->createFormBuilder()
+                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent','disabled' => true,'attr' => array( 'value'=>$user->getMemberNumber())))
+                ->add('username', HiddenType::class, array('attr' => array( 'value'=>$user->getUsername())))
+                ->add('email', EmailType::class, array('label' => 'Courriel complet','attr' => array('placeholder' => $user->getAnonymousEmail())))
+                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de '.$user->getFirstname(),'attr' => array('class' => 'btn')))
+                ->getForm();
+        }else{
+            if ($this->isGranted('view', new User())){
+                $form = $this->createFormBuilder()
+                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('email', HiddenType::class, array('label' => 'email'))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->getForm();
+            }else{
+                $form = $this->createFormBuilder()
+                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('email', EmailType::class, array('label' => 'email'))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->getForm();
+            }
+
+        }
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $member_number = $form->get('member_number')->getData();
+            $username = $form->get('username')->getData();
+            $email = $form->get('email')->getData();
+
+            $em = $this->getDoctrine()->getManager();
+            $user = null;
+            if ($username)
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            else if($member_number)
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
+
+            if ($user&&($this->isGranted('view',$user) || ($email&&($user->getEmail()==$email)))){
+                $session->set('token_key',uniqid());
+                return $this->redirectToShow($user);
+            }
+            if ($email)
+                $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
+            if (!$user)
+                $session->getFlashBag()->add('error', 'membre non trouvé');
+        }
+
+        return $this->render('user/edit_firewall.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Close member
+     *
+     * @Route("/{id}/close/", name="member_close")
+     * @Method({"GET"})
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function closeAction(Membership $member)
+    {
+        $this->denyAccessUnlessGranted('close', $member);
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $member->setWithdrawn(true);
+        $em->persist($member);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte fermé');
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * Open member
+     *
+     * @Route("/{id}/open/", name="member_open")
+     * @Method({"GET"})
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function openAction(Membership $member)
+    {
+        $this->denyAccessUnlessGranted('open', $member);
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $member->setWithdrawn(false);
+        $em->persist($member);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte reouvert');
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * freeze user
+     *
+     * @Route("/{id}/freeze/", name="member_freeze")
+     * @Method({"GET"})
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function freezeAction(Membership $member)
+    {
+        $this->denyAccessUnlessGranted('freeze', $member);
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $member->setFrozen(true);
+        $member->setFrozenChange(false);
+        $em->persist($member);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte gelé');
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * Unfreeze member
+     *
+     * @Route("/{id}/unfreeze/", name="member_unfreeze")
+     * @Method({"GET"})
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function unfreezeAction(Membership $member)
+    {
+        $this->denyAccessUnlessGranted('freeze', $member);
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $member->setFrozen(false);
+        $member->setFrozenChange(false);
+        $em->persist($member);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Compte dégelé');
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * Ask freeze status change for user
+     *
+     * @Route("/{id}/freeze_change/}", name="member_freeze_change")
+     * @Method({"GET"})
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function freezeChangeAction(Membership $member)
+    {
+        $this->denyAccessUnlessGranted('freeze_change', $member);
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $member->setFrozenChange(!$member->getFrozenChange());
+        $em->persist($member);
+        $em->flush();
+        if (!$member->getFrozen()) {
+            $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
+        } else {
+            $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
+        }
+        if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
+            return $this->redirectToRoute("fos_user_profile_edit");
+        } else {
+            return $this->redirectToShow($member);
+        }
+    }
+
+    /**
+     * Delete time log
+     *
+     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     * @param Membership $member
+     * @param $timelog_id
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function timelogDeleteAction(Membership $member, $timelog_id)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $timeLog = $this->getDoctrine()->getManager()->getRepository('AppBundle:TimeLog')->find($timelog_id);
+        if ($timeLog->getMembership() === $member) {
+            $em->remove($timeLog);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Time log supprimé');
+        } else {
+            $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
+            $session->getFlashBag()->add('error', $timeLog->getId());
+        }
+        return $this->redirectToShow($member);
+    }
+
+
+    /**
+     * Deletes a member entity.
+     *
+     * @Route("/delete/{id}", name="member_delete")
+     * @Method("DELETE")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function deleteAction(Request $request, Membership $member)
+    {
+        $form = $this->createDeleteForm($member);
+        $form->handleRequest($request);
+
+        $session = new Session();
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            if (count($member->getBeneficiaries())) { //admin do not have any Beneficiary
+                $em->remove($member->getMainBeneficiary());
+                foreach ($member->getBeneficiaries() as $beneficiary) {
+                    $em->remove($beneficiary);
+                }
+            }
+            $em->remove($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', "Le membre a bien été supprimé");
+        }
+
+        return $this->redirectToRoute('user_index');
+    }
+
+    /**
+     * Creates a form to delete a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_delete', array('id' => $member->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    private function getErrorMessages(Form $form)
+    {
+        $errors = array();
+
+        foreach ($form->getErrors() as $key => $error) {
+            if ($form->isRoot()) {
+                $errors['#'][] = $error->getMessage();
+            } else {
+                $errors[] = $error->getMessage();
+            }
+        }
+
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $key = (isset($child->getConfig()->getOptions()['label'])) ? $child->getConfig()->getOptions()['label'] : $child->getName();
+                $errors[$key] = $this->getErrorMessages($child);
+            }
+        }
+
+        return $errors;
+    }
+
+    private function redirectToEdit(Membership $member)
+    {
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+        $session = new Session();
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber()));
+        else
+            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+    }
+
+    private function redirectToShow(Membership $member)
+    {
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+        $session = new Session();
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
+        else
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+    }
+}

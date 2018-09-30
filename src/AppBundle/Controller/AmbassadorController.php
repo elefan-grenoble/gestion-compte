@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Note;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
@@ -192,14 +193,16 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * display a user phones.
+     * display a member phones.
      *
-     * @Route("/phone/{username}", name="ambassador_phone_show")
+     * @Route("/phone/{member_number}", name="ambassador_phone_show")
      * @Method("GET")
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function showAction(User $user)
+    public function showAction(Membership $member)
     {
-        return $this->redirectToRoute('user_show', array('username'=>$user->getUsername()));
+        return $this->redirectToRoute('user_show', array('member_number'=>$member->getMemberNumber()));
     }
 
     /**
@@ -219,19 +222,22 @@ class AmbassadorController extends Controller
 
     /**
      *
-     * @Route("/note/{username}", name="ambassador_new_note")
+     * @Route("/note/{member_number}", name="ambassador_new_note")
      * @Method("POST")
+     * @param Membership $member
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function newNoteAction(User $user,Request $request){
+    public function newNoteAction(Membership $member, Request $request){
 
-        $this->denyAccessUnlessGranted('annotate', $user);
+        $this->denyAccessUnlessGranted('annotate', $member);
         $session = new Session();
         $note = new Note();
         $form = $this->createForm('AppBundle\Form\NoteType', $note);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()){
 
-            $note->setSubject($user);
+            $note->setSubject($member);
             $note->setAuthor($this->get('security.token_storage')->getToken()->getUser());
 
             $em = $this->getDoctrine()->getManager();
@@ -243,6 +249,6 @@ class AmbassadorController extends Controller
             $session->getFlashBag()->add('error','oups');
         }
 
-        return $this->redirectToRoute("ambassador_phone_show", array('username'=>$user->getUsername()));
+        return $this->redirectToRoute("ambassador_phone_show", array('member_number'=>$member->getMemberNumber()));
     }
 }

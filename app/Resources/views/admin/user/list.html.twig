@@ -188,7 +188,7 @@
         <tbody>
         {% for member in members %}
             {% if member.mainBeneficiary %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': member.mainBeneficiary.autocompleteLabel }) }}" >
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td class="hide-on-med-and-down">
                         {% if not member.withdrawn %}
                             {% if not member.mainBeneficiary.user.isEnabled %}
@@ -201,7 +201,7 @@
                                 <i class="material-icons">do_not_disturb</i>
                         {% endif %}
                     </td>
-                    <td><a href="{{ path('user_show', { 'username': member.mainBeneficiary.user.username }) }}">{{ member.memberNumber }}</a></td>
+                    <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a></td>
                     <td>{{ member.mainBeneficiary.user.username }}</td>
 
                     <td>
@@ -252,7 +252,7 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': member.mainBeneficiary.user.username }) }}" >
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td colspan="9">{{ member.mainBeneficiary.user }}</td>
                 </tr>
             {% endif %}
