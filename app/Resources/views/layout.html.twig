@@ -58,9 +58,10 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                            {% set frozen = app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li><div class="user-view center-align">
                                     <div class="background">
-                                        {% if app.user.frozen %}
+                                        {% if frozen %}
                                         {% image '@AppBundle/Resources/public/img/frozen.png' %}
                                             <img class="responsive-img" src="{{ asset_url }}" alt="" />
                                         {% endimage %}
@@ -71,7 +72,7 @@
                                         {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
-                                    <a href="#name"><span class="{% if not app.user.frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
+                                    <a href="#name"><span class="{% if not frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
                                 </div>
                             </li>
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
@@ -93,10 +94,11 @@
         </header>
         <main>
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                {% if app.user.frozen %}
+                {% set frozen = app.user.beneficiary and app.user.beneficiary.membership.frozen %}
+                {% if frozen %}
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
-                        {% if not app.user.frozenChange %}
+                        {% if not app.user.beneficiary.membership.frozenChange %}
                             Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_edit') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
                         {% else %}
                             Dégel programmé.

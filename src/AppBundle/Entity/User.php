@@ -44,20 +44,6 @@ class User extends BaseUser
     private $withdrawn;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="frozen", type="boolean", nullable=true, options={"default" : 0})
-     */
-    private $frozen;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="frozen_change", type="boolean", nullable=true, options={"default" : 0})
-     */
-    private $frozen_change;
-
-    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -464,55 +450,6 @@ class User extends BaseUser
             }
             return false;
         });
-    }
-
-    /**
-     * Set frozen
-     *
-     * @param boolean $frozen
-     *
-     * @return User
-     */
-    public function setFrozen($frozen)
-    {
-        $this->frozen = $frozen;
-
-        return $this;
-    }
-
-    /**
-     * Get frozen
-     *
-     * @return boolean
-     */
-    public function getFrozen()
-    {
-        return $this->frozen;
-    }
-
-
-    /**
-     * Set frozen_change
-     *
-     * @param boolean $frozen_change
-     *
-     * @return User
-     */
-    public function setFrozenChange($frozen_change)
-    {
-        $this->frozen_change = $frozen_change;
-
-        return $this;
-    }
-
-    /**
-     * Get frozen_change
-     *
-     * @return boolean
-     */
-    public function getFrozenChange()
-    {
-        return $this->frozen_change;
     }
 
     /**
