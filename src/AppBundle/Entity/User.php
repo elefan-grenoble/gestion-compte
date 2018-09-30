@@ -115,51 +115,6 @@ class User extends BaseUser
     }
 
     /**
-     * Add beneficiary
-     *
-     * @param \AppBundle\Entity\Beneficiary $beneficiary
-     *
-     * @return User
-     */
-    public function addBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
-    {
-        $this->beneficiaries[] = $beneficiary;
-
-        return $this;
-    }
-
-    /**
-     * Remove beneficiary
-     *
-     * @param \AppBundle\Entity\Beneficiary $beneficiary
-     */
-    public function removeBeneficiary(\AppBundle\Entity\Beneficiary $beneficiary)
-    {
-        $this->beneficiaries->removeElement($beneficiary);
-    }
-
-    /**
-     * Get beneficiaries
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBeneficiaries()
-    {
-        return $this->beneficiaries;
-    }
-
-    /**
-     * Get beneficiaries who can still book
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBeneficiariesWhoCanBook(Shift $shift = null,$current_cycle = 0)
-    {
-        return $this->beneficiaries->filter(function ($beneficiary) use ($shift,$current_cycle){
-            return $this->canBook($beneficiary,$shift,$current_cycle);
-        });
-    }
-    /**
      * Set address
      *
      * @param \AppBundle\Entity\Address $address
@@ -333,28 +288,6 @@ class User extends BaseUser
             }
             return false;
         });
-    }
-
-    /**
-     * Set lastRegistration
-     *
-     * @param \AppBundle\Entity\Registration $lastRegistration
-     *
-     * @return User
-     */
-    public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
-    {
-        $this->lastRegistration = $lastRegistration;
-        return $this;
-    }
-    /**
-     * Get lastRegistration
-     *
-     * @return \AppBundle\Entity\Registration
-     */
-    public function getLastRegistration()
-    {
-        return $this->lastRegistration;
     }
 
     /**
