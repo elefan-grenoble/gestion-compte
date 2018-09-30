@@ -37,13 +37,6 @@ class User extends BaseUser
     protected $member_number;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="withdrawn", type="boolean", nullable=true, options={"default" : 0})
-     */
-    private $withdrawn;
-
-    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -104,16 +97,6 @@ class User extends BaseUser
      */
     private $given_proxies;
 
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="first_shift_date", type="date", nullable=true)
-     */
-    private $firstShiftDate;
-
-    // array of date
-    private $_startOfCycle;
-    private $_endOfCycle;
 
     /**
      * User constructor.
@@ -360,44 +343,6 @@ class User extends BaseUser
         }
         return implode($pass); //turn the array into a string
     }
-
-    /**
-     * Set withdrawn
-     *
-     * @param boolean $withdrawn
-     *
-     * @return User
-     */
-    public function setWithdrawn($withdrawn)
-    {
-        $this->withdrawn = $withdrawn;
-
-        if ($withdrawn)
-            $this->setEnabled(false);
-
-        return $this;
-    }
-
-    /**
-     * Get isWithdrawn
-     *
-     * @return boolean
-     */
-    public function isWithdrawn()
-    {
-        return $this->withdrawn;
-    }
-
-    /**
-     * Get withdrawn
-     *
-     * @return boolean
-     */
-    public function getWithdrawn()
-    {
-        return $this->withdrawn;
-    }
-
 
     /**
      * Add recordedRegistration

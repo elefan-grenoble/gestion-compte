@@ -189,7 +189,7 @@
                         <br>
                     {% endif %}
                     {% if is_granted("close",user) %}
-                        {% if not user.withdrawn %}
+                        {% if not member.withdrawn %}
                         <a href="{{ path("user_close",{"id":user.id}) }}" class="waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte</a>
                         {% else %}
@@ -446,7 +446,7 @@
         div.replies{
             padding-left: 15px;
         }
-        {% if user.withdrawn %}
+        {% if user.beneficiary.membership.withdrawn %}
             body{
                 background: rgba(255, 50, 0, 0.2);
             }
