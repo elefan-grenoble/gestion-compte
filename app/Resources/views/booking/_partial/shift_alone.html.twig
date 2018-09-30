@@ -2,7 +2,7 @@
     <div class="card-content">
         <b>{{ shift.start|date_fr_long }}</b><br>
         {{ shift.start|date('G\\hi') }} - {{ shift.end|date('G\\hi') }}
-        <span><i class="material-icons shifter {% if (app.user and not app.user.canBook(beneficiary,shift)) or (not app.user and shift.shifter) %}grey-text {% else %}{% if (app.user)%}green{% else %}red{% endif %}-text {% endif %}">{% if shift.role %}account_circle{% else %}person{% endif %}</i></span>
+        <span><i class="material-icons shifter {% if (app.user and not beneficiary.membership.canBook(beneficiary,shift)) or (not app.user and shift.shifter) %}grey-text {% else %}{% if (app.user)%}green{% else %}red{% endif %}-text {% endif %}">{% if shift.role %}account_circle{% else %}person{% endif %}</i></span>
         {% if shift.isDismissed %}
             <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
         {% endif %}

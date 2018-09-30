@@ -17,7 +17,7 @@
             {% if  member.timeCount < due_duration_by_cycle %}
                 <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as
                     encore {{ (due_duration_by_cycle - member.timeCount) | duration_from_minutes }} à réserver.</p>
-            {% elseif member.timeCount(app.user.endOfCycle) < member.shiftTimeByCycle %}
+            {% elseif member.timeCount(member.endOfCycle) < member.shiftTimeByCycle %}
                 <p>Bravo
                     ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.
@@ -28,7 +28,7 @@
                     {% else %}
                         {{ (member.beneficiariesWhoCanBook | first).firstname }} peut
                     {% endif %} encore
-                    effectuer {{ (member.shiftTimeByCycle - member.timeCount(app.user.endOfCycle)) | duration_from_minutes }}
+                    effectuer {{ (member.shiftTimeByCycle - member.timeCount(member.endOfCycle)) | duration_from_minutes }}
                     .</p>
             {% else %}
                 <p><i class="material-icons">stars</i> Bravo !

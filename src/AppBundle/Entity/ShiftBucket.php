@@ -152,11 +152,11 @@ class ShiftBucket
                 return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
             });
         } else {
-            $user = $beneficiary->getUser();
+            $member = $beneficiary->getMembership();
             if ($this->canBookInterval($beneficiary))
             {
-                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($user, $beneficiary) {
-                    return $user->canBook($beneficiary,$shift);
+                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($member, $beneficiary) {
+                    return $member->canBook($beneficiary,$shift);
                 });
             }
             else

@@ -136,6 +136,16 @@ class Membership
     }
 
     /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set memberNumber
      *
      * @param integer $memberNumber

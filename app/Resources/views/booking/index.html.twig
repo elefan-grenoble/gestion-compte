@@ -23,11 +23,11 @@
                         class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
                 <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
                     ]</a>{% endif %}</h4>
-            {% if not app.user.canBook(beneficiary) %}
+            {% if not beneficiary.membership.canBook(beneficiary) %}
                 <span class="red-text">NB: {{ beneficiary.firstname }} ne peut plus réserver de créneau sur le cycle actuel</span>
             {% endif %}
-            <p>Mon cycle actuel commence le <b>{{ app.user.startOfCycle |date_fr_long }}</b> et termine
-                le <b>{{ app.user.endOfCycle |date_fr_long }}</b></p>
+            <p>Mon cycle actuel commence le <b>{{ beneficiary.membership.startOfCycle |date_fr_long }}</b> et termine
+                le <b>{{ beneficiary.membership.endOfCycle |date_fr_long }}</b></p>
         </div>
         <div class="row">
             <ul class="collapsible" data-collapsible="accordion" id="legend">
@@ -88,7 +88,7 @@
                     <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
                     <div class="collapsible-body row">
                         {% for shift in dismissedShifts %}
-                            {% if app.user.canBook(beneficiary,shift) %}
+                            {% if beneficiary.membership.canBook(beneficiary,shift) %}
                             <div class="col s6 m3">
                                 {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
                             </div>
