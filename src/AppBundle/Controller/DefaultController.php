@@ -41,10 +41,10 @@ class DefaultController extends Controller
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-            $remainder = $current_app_user->getRemainder();
             if ($current_app_user->getBeneficiary() != null) { //member only
 
                 $membership = $current_app_user->getBeneficiary()->getMembership();
+                $remainder = $membership->getRemainder();
 
                 if ($membership->getWithdrawn()){
                     $this->container->get('security.token_storage')->setToken(null);
