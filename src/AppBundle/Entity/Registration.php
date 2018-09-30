@@ -56,13 +56,6 @@ class Registration
      */
     private $mode;
 
-
-    /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="registrations",)
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
-     */
-    private $user;
-
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations",)
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
@@ -177,30 +170,6 @@ class Registration
     public function getMode()
     {
         return $this->mode;
-    }
-
-    /**
-     * Set user
-     *
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return Registration
-     */
-    public function setUser(\AppBundle\Entity\User $user = null)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getUser()
-    {
-        return $this->user;
     }
 
     /**

@@ -29,7 +29,7 @@
                         <div class="nav-wrapper">
                             <ul class="right">
                                 <li>
-                                    <a href="{{ path('user_show', {'username': app.user.username,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                                    <a href="{{ path('member_show', {'member_number': app.user.beneficiary.membership.memberNumber,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
                                 </li>
                             </ul>
                         </div>

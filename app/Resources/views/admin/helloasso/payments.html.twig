@@ -33,7 +33,7 @@
                         <td><span class="{% if campaigns[payment.campaignId].url != helloasso_registration_campaign_url  %}red-text{% else %}green-text{% endif %}">{{ campaigns[payment.campaignId].name }}</span></td>
                         <td>{{ payment.payerFirstName }}</td>
                         <td>{{ payment.payerLastName }}</td>
-                        <td>{% if payment.registration and payment.registration.user %}<a href="{{ path('user_show', { 'username': payment.registration.user.username }) }}">{{ payment.registration.user }}</a>{% endif %}</td>
+                        <td>{% if payment.registration and payment.registration.membership %}<a href="{{ path('member_show', { 'member_number': payment.registration.membership.memberNumber }) }}">{{ payment.registration.membership }}</a>{% endif %}</td>
                         <td>{% if not payment.registration %}
                                 {{ form_start(delete_forms[payment.id]) }}
                                 {{ form_widget(delete_forms[payment.id]) }}
