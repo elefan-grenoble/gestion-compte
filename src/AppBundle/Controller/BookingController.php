@@ -42,7 +42,7 @@ class BookingController extends Controller
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $mode = null;
-        if ($current_app_user->getBeneficiaries()->count()<1){
+        if ($current_app_user->getBeneficiary() == null){
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         }else{
@@ -53,6 +53,8 @@ class BookingController extends Controller
             }
         }
 
+        $beneficiaries = $current_app_user->getBeneficiary()->getMembership()->getBeneficiaries();
+
         $beneficiaryForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking'))
             ->setMethod('POST')
@@ -60,7 +62,7 @@ class BookingController extends Controller
                 'label' => 'Réserver un créneau pour',
                 'required' => true,
                 'class' => 'AppBundle:Beneficiary',
-                'choices' => $current_app_user->getBeneficiaries(),
+                'choices' =>  $beneficiaries,
                 'choice_label' => 'firstname',
                 'multiple' => false,
             ))
@@ -69,14 +71,14 @@ class BookingController extends Controller
         $beneficiaryForm->handleRequest($request);
 
         //beneficiary selected, or only one beneficiary
-        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $current_app_user->getBeneficiaries()->count()==1 ) {
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $beneficiaries->count() == 1 ) {
 
             $em = $this->getDoctrine()->getManager();
-            if ($current_app_user->getBeneficiaries()->count() > 1){
+            if ($beneficiaries->count() > 1){
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
                 $roles = $beneficiary->getRoles();
             }else {
-                $beneficiary = $current_app_user->getBeneficiaries()->first();
+                $beneficiary = $beneficiaries->first();
                 $roles = $beneficiary->getRoles();
             }
 
@@ -178,7 +180,7 @@ class BookingController extends Controller
             $mm = array();
             foreach ($shifts as $shift) {
                 if ($shift->getBooker()){
-                    $mm[] = $shift->getBooker()->getUser()->getMemberNumber();
+                    $mm[] = $shift->getBooker()->getMembership()->getMemberNumber();
                 }
             }
             return $this->redirectToRoute('user_index',array('membernumber'=>implode(',',$mm)));
@@ -305,12 +307,12 @@ class BookingController extends Controller
         $shift->setLastShifter(null);
         $em->persist($shift);
 
-        $user = $beneficiary->getUser();
-        if ($user->getFirstShiftDate() == null) {
+        $member = $beneficiary->getMembership();
+        if ($member->getFirstShiftDate() == null) {
             $firstDate = clone($shift->getStart());
             $firstDate->setTime(0, 0, 0);
-            $user->setFirstShiftDate($firstDate);
-            $em->persist($user);
+            $member->setFirstShiftDate($firstDate);
+            $em->persist($member);
         }
 
         $em->flush();
@@ -335,7 +337,7 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking");
         }
 
-        $user = $shift->getShifter()->getUser();
+        $membership = $shift->getShifter()->getMembership();
 
         $em = $this->getDoctrine()->getManager();
 
@@ -348,7 +350,7 @@ class BookingController extends Controller
         $em->flush();
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $user));
+        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $membership));
 
         return $this->redirectToRoute('homepage');
     }
@@ -503,12 +505,12 @@ class BookingController extends Controller
 
             $em->persist($shift);
 
-            $user = $beneficiary->getUser();
-            if ($user->getFirstShiftDate() == null) {
+            $member = $beneficiary->getMembership();
+            if ($member->getFirstShiftDate() == null) {
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
-                $user->setFirstShiftDate($firstDate);
-                $em->persist($user);
+                $member->setFirstShiftDate($firstDate);
+                $em->persist($member);
             }
 
             $em->flush();
@@ -519,8 +521,6 @@ class BookingController extends Controller
             $session->getFlashBag()->add("success", "Créneau réservé avec succès pour ".$shift->getShifter());
             return $this->redirectToRoute('booking_admin');
         }
-
-
     }
 
     /**
@@ -535,7 +535,7 @@ class BookingController extends Controller
 
         $session = new Session();
 
-        $user = $shift->getShifter()->getUser();
+        $membership = $shift->getShifter()->getMembership();
 
         $em = $this->getDoctrine()->getManager();
         $shift->free();
@@ -543,11 +543,11 @@ class BookingController extends Controller
         $em->flush();
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $user));
+        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
 
         $session->getFlashBag()->add('success',"Le shift a bien été libéré");
 
-        return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
+        return $this->redirectToRoute('user_show', array('username' => $shift->getShifter()->getUser()->getUsername()));
 
     }
 
