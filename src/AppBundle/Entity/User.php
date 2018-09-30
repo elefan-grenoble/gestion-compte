@@ -36,17 +36,6 @@ class User extends BaseUser
      */
     protected $member_number;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="user",cascade={"persist", "remove"})
-     * @OrderBy({"date" = "DESC"})
-     */
-    private $registrations;
-
-    /**
-     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="SET NULL")
-     */
-    private $lastRegistration;
 
     /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
@@ -98,7 +87,6 @@ class User extends BaseUser
     public function __construct()
     {
         parent::__construct();
-        $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
     }
 
@@ -124,50 +112,6 @@ class User extends BaseUser
     public function getMemberNumber()
     {
         return $this->member_number;
-    }
-
-    /**
-     * Add registration
-     *
-     * @param \AppBundle\Entity\Registration $registration
-     *
-     * @return User
-     */
-    public function addRegistration(\AppBundle\Entity\Registration $registration)
-    {
-        $this->registrations[] = $registration;
-
-        if (!$this->getLastRegistration() || $registration->getDate() > $this->getLastRegistration()->getDate()){
-            $this->setLastRegistration($registration);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Remove registration
-     *
-     * @param \AppBundle\Entity\Registration $registration
-     */
-    public function removeRegistration(\AppBundle\Entity\Registration $registration)
-    {
-        $this->registrations->removeElement($registration);
-
-        if ($this->getLastRegistration() === $registration){
-            if ($this->getRegistrations()->count()){
-                $this->setLastRegistration($this->getRegistrations()->first());
-            }
-        }
-    }
-
-    /**
-     * Get registrations
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRegistrations()
-    {
-        return $this->registrations;
     }
 
     /**
