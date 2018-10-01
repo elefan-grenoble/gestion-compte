@@ -71,11 +71,3 @@ ALTER TABLE registration DROP user_id;
 ALTER TABLE note DROP FOREIGN KEY FK_CFBDFA14A76ED395;
 DROP INDEX IDX_CFBDFA14A76ED395 ON note;
 ALTER TABLE note DROP user_id;
-
-
--- TODO remove (code dev)
-ALTER TABLE code ADD value VARCHAR(255) DEFAULT NULL;
-ALTER TABLE code DROP title;
-ALTER TABLE code CHANGE closed closed TINYINT(1) DEFAULT '0';
-UPDATE code set closed = 0 where closed is null;
-ALTER TABLE code CHANGE closed closed TINYINT(1) DEFAULT '0' NOT NULL;

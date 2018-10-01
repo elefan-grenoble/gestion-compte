@@ -96,29 +96,25 @@ class TaskVoter extends Voter
 
     private function canEdit(Task $task, User $user)
     {
-        foreach ($user->getBeneficiaries() as $beneficiary){
-            if ($task->getOwners()->contains($beneficiary)){
+            if ($task->getOwners()->contains($user->getBeneficiary())){
                 return true;
             }
             foreach ($task->getCommissions() as $commission ){
-                if ($commission->getBeneficiaries()->contains($beneficiary)){
+                if ($commission->getBeneficiaries()->contains($user->getBeneficiary())){
                     return true;
                 }
             }
-        }
         return false;
     }
 
     private function canDelete(Task $task, User $user)
     {
-        foreach ($user->getBeneficiaries() as $beneficiary){
-            if ($task->getOwners()->contains($beneficiary)){
+        if ($task->getOwners()->contains($user->getBeneficiary())){
+            return true;
+        }
+        foreach ($task->getCommissions() as $commission ){
+            if ($commission->getOwners()->contains($user->getBeneficiary())){
                 return true;
-            }
-            foreach ($task->getCommissions() as $commission ){
-                if ($commission->getOwners()->contains($beneficiary)){
-                    return true;
-                }
             }
         }
         return false;

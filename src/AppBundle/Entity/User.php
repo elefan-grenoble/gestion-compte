@@ -241,11 +241,7 @@ class User extends BaseUser
     }
 
     public function getCommissions(){
-        $commissions = array();
-        foreach ($this->getBeneficiaries() as $beneficiary){
-            $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
-        }
-        return new ArrayCollection($commissions);
+        return $this->getBeneficiary()->getCommissions();
     }
 
     public function getOwnedCommissions(){
