@@ -420,7 +420,7 @@ class User extends BaseUser
     }
 
     /**
-     * @return mixed
+     * @return Beneficiary
      */
     public function getBeneficiary()
     {

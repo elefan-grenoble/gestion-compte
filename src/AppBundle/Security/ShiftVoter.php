@@ -2,6 +2,7 @@
 // src/AppBundle/Security/ShiftVoter.php
 namespace AppBundle\Security;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -92,18 +93,74 @@ class ShiftVoter extends Voter
         throw new \LogicException('This code should not be reached!');
     }
 
-    private function canBook(Shift $shift, User $user)
+    private function canBook(Shift $shift, User $user, $current_cycle = 0)
     {
-        if ($user->isWithdrawn())
+        $ms = $user->getBeneficiary()->getMembership();
+        if ($ms->isWithdrawn())
             return false;
-        if ($user->getFrozen())
-            return false;
-        foreach ($user->getBeneficiaries() as $beneficiary){
-            $bool = $user->canBook($beneficiary,$shift);
-            if ($bool)
-                return true;
+
+        if ($shift && $current_cycle == 'undefined'){ //cycle index can be computed using shift
+            for ($cycle = 0; $cycle < 3; $cycle++){
+                if ($shift->getStart() > $ms->endOfCycle($cycle-1)){
+                    if ($shift->getStart() < $ms->endOfCycle($cycle)){
+                        $current_cycle = $cycle;
+                        break;
+                    }
+                }
+            }
+        }else if( $current_cycle == 'undefined'){
+            $current_cycle = 0; //default
         }
-        return false;
+        if ($current_cycle > 1){ //do not book more than on cycle away
+            return false;
+        }
+
+        if ($ms->getFrozen()){
+            if (!$current_cycle) //cannot book when frozen
+                return false;
+            if ($current_cycle > 0 && !$ms->getFrozenChange()) //cannot book for next cycle if frozen
+                return false;
+        }
+
+
+        $beneficiary_counter = 0;
+        //compute beneficiary booked time
+        //todo add a custom query for this two lines
+        $beneficiary_shift = $user->getBeneficiary()->getShifts();
+        $beneficiary_shift_for_current_cycle = $beneficiary_shift->filter(function (Shift $shift) use ($ms,$current_cycle) {
+            return ($shift->getStart() > $ms->startOfCycle($current_cycle) && $shift->getEnd() < $ms->endOfCycle($current_cycle)); //dismissed or free
+        });
+        foreach ($beneficiary_shift_for_current_cycle as $s){
+            $beneficiary_counter += $s->getDuration();
+        }
+        //check if beneficiary booked time is ok
+        //if timecount <=0 : some shift to catchup, can book more than what's due
+        if ($ms->getTimeCount($ms->endOfCycle($current_cycle)) > 0 && $beneficiary_counter >= $this->container->getParameter('due_duration_by_cycle')){ //Beneficiary is already ok
+            return false;
+        }
+        if ($shift->getIsPast()){ // Do not book old
+            return false;
+        }
+        if ($shift->getShifter() && !$shift->getIsDismissed()) { // Do not book already booked
+            return false;
+        }
+        if ($shift->getRole() && !$user->getBeneficiary()->getRoles()->contains($shift->getRole())) { // Do not book shift i do not know how to handle (role)
+            return false;
+        }
+        if ($shift->getLastShifter() && $user->getBeneficiary() != $shift->getLastShifter()) { // Do not book pre-booked shift
+            return false;
+        }
+        //time count at start of cycle (before decrease)
+        $timecount = $ms->getTimeCount($ms->startOfCycle($current_cycle));
+        //time count at start of cycle  (after decrease)
+        if ($timecount > $this->container->getParameter('due_duration_by_cycle')){
+            $timecount = 0;
+        }else{
+            $timecount -= $this->container->getParameter('due_duration_by_cycle');
+        }
+        // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what's can we book for this cycle
+        return ($shift->getDuration() + $beneficiary_counter + $timecount <= ($current_cycle+1)*$this->container->getParameter('due_duration_by_cycle')) ;
+
     }
 
     private function canDismiss(Shift $shift, User $user)
@@ -117,7 +174,7 @@ class ShiftVoter extends Voter
         if ($shift->getIsPast()) {
             return false;
         }
-        if ($user->getBeneficiaries()->contains($shift->getShifter())) {
+        if ($user->getBeneficiary() === $shift->getShifter()) {
             return true;
         }
         return false;
@@ -126,7 +183,7 @@ class ShiftVoter extends Voter
     private function canReject(Shift $shift, User $user = null)
     {
         if ($user instanceof User) {  // the user is logged in
-            return $user->getBeneficiaries()->contains($shift->getLastShifter());
+            return $user->getBeneficiary() === $shift->getLastShifter();
         } // the user is not logged in
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
         if ($shift->getId()){
