@@ -21,10 +21,10 @@
                 {{ event.description | markdown | raw }}
             </div>
             {% if event.needProxy %}
-                {% if not app.user.lastRegistration %}
+                {% if not app.user.beneficiary or not app.user.beneficiary.membership.lastRegistration %}
                     <b>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</b>
                 {% else %}
-                    {% if app.user.lastRegistration.date < event.minDateOfLastRegistration %}
+                    {% if app.user.beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration %}
                         <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br>Penses à mettre à jour ton adhésion pour participer ! :)
                     {% else %}
@@ -41,7 +41,7 @@
                                 {% endif %}
                             {% endif %}
 
-                            {% if proxy.owner in app.user.beneficiaries %}
+                            {% if proxy.owner in app.user.beneficiary.membership.beneficiaries %}
                                 {% if proxy.giver %}
                                     <li>Procuration pour <b>{{ proxy.owner.firstname }}</b> de la part de&nbsp;<b>{{ proxy.giver.firstname }} {{ proxy.giver.lastname }}</b></li>
                                 {% else %}

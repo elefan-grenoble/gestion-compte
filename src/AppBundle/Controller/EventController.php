@@ -503,7 +503,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
-        if ($current_app_user->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
+        if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                 $event->getMinDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Penses à mettre à jour ton adhésion pour participer !');
