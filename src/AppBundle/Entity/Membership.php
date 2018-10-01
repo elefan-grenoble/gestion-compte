@@ -93,11 +93,6 @@ class Membership
     private $notes;
 
     /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
-     */
-    private $received_proxies;
-
-    /**
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner",cascade={"persist", "remove"})
      */
     private $given_proxies;
@@ -853,49 +848,6 @@ class Membership
         $expire = clone $this->getLastRegistration()->getDate();
         $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
         return date_diff($date,$expire);
-    }
-
-    /**
-     * Add receivedProxy
-     *
-     * @param \AppBundle\Entity\Proxy $receivedProxy
-     *
-     * @return Membership
-     */
-    public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
-    {
-        $this->received_proxys[] = $receivedProxy;
-        return $this;
-    }
-
-    /**
-     * Remove receivedProxy
-     *
-     * @param \AppBundle\Entity\Proxy $receivedProxy
-     */
-    public function removeReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
-    {
-        $this->received_proxys->removeElement($receivedProxy);
-    }
-
-    /**
-     * Get receivedProxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReceivedProxys()
-    {
-        return $this->received_proxys;
-    }
-
-    /**
-     * Get receivedProxies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReceivedProxies()
-    {
-        return $this->received_proxies;
     }
 
     /**

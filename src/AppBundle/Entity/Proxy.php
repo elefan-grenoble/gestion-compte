@@ -41,7 +41,7 @@ class Proxy
     private $owner;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="given_proxies")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="given_proxies")
      * @ORM\JoinColumn(name="giver", referencedColumnName="id", onDelete="CASCADE")
      */
     private $giver;
