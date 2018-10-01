@@ -481,4 +481,52 @@ class Shift
     {
         return $this->timeLogs;
     }
+
+    public function isBookable(Beneficiary $beneficiary = null){
+
+        if ($this->getIsPast()){ // Do not book old
+            return false;
+        }
+        if ($this->getShifter() && !$this->getIsDismissed()) { // Do not book already booked
+            return false;
+        }
+        if ($this->getLastShifter() && $beneficiary != $this->getLastShifter()) { // Do not book pre-booked shift
+            return false;
+        }
+        if (!$beneficiary){
+            return true;
+        }
+        if ($this->getRole() && !$beneficiary->getRoles()->contains($this->getRole())) { // Do not book shift i do not know how to handle (role)
+            return false;
+        }
+
+        $member = $beneficiary->getMembership();
+        if ($member->isWithdrawn())
+            return false;
+
+        $current_cycle = $this->getCycleIndex($member);
+
+        if ($member->getFrozen()){
+            if (!$current_cycle) //current cycle : cannot book when frozen
+                return false;
+            if ($current_cycle > 0 && !$member->getFrozenChange()) //next cycle : cannot book if frozen
+                return false;
+        }
+
+        return $beneficiary->canBook($this->getDuration(),$current_cycle);
+    }
+
+    //todo use formula ?
+    public function getCycleIndex(Membership $membership){
+        $current_cycle = 0;
+        for ($cycle = 1; $cycle < 3; $cycle++){
+            if ($this->getStart() > $membership->endOfCycle($cycle-1)){
+                if ($this->getStart() < $membership->endOfCycle($cycle)){
+                    $current_cycle = $cycle;
+                    break;
+                }
+            }
+        }
+        return $current_cycle;
+    }
 }

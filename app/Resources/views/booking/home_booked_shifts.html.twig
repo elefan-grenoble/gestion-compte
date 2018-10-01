@@ -39,7 +39,7 @@
     {% endif %}
 
     <a href="{{ path("booking") }}" class="btn teal"
-       {% if (not member.canBook(null,null,0)) and (not member.canBook(null,null,1)) %}disabled{% endif %}>Je
+       {% if app.user.beneficiary.canBook() %}disabled{% endif %}>Je
         réserve un créneau</a>
 
     <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>

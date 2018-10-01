@@ -88,7 +88,7 @@
                     <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
                     <div class="collapsible-body row">
                         {% for shift in dismissedShifts %}
-                            {% if beneficiary.membership.canBook(beneficiary,shift) %}
+                            {% if shift.isBookable(beneficiary) %}
                             <div class="col s6 m3">
                                 {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
                             </div>

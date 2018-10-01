@@ -155,8 +155,8 @@ class ShiftBucket
             $member = $beneficiary->getMembership();
             if ($this->canBookInterval($beneficiary))
             {
-                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($member, $beneficiary) {
-                    return $member->canBook($beneficiary,$shift);
+                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($beneficiary) {
+                    return $shift->isBookable($beneficiary);
                 });
             }
             else

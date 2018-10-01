@@ -32,6 +32,11 @@ use Doctrine\ORM\EntityManager;
  */
 class BookingController extends Controller
 {
+
+    public function homepageAction(){
+        return $this->render('booking/home_booked_shifts.html.twig');
+    }
+
     /**
      * @Route("/", name="booking")
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")

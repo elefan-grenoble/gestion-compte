@@ -122,6 +122,8 @@ class Beneficiary
      */
     private $received_proxies;
 
+    private $_counters = [];
+
     /**
      * Get id
      *
@@ -698,5 +700,48 @@ class Beneficiary
     public function setAddress($address)
     {
         $this->address = $address;
+    }
+
+    public function canBook($duration = 90,$cycle = 0){
+
+        $member = $this->getMembership();
+        $beneficiary_counter = $this->getTimeCount($cycle);
+
+        //check if beneficiary booked time is ok
+        //if timecount <=0 : some shift to catchup, can book more than what's due
+        if ($member->getTimeCount($member->endOfCycle($cycle)) > 0 && $beneficiary_counter >= $this->_getDueDurationByCycle()){ //Beneficiary is already ok
+            return false;
+        }
+
+        //time count at start of cycle (before decrease)
+        $timeCounter = $member->getTimeCount($member->startOfCycle($cycle));
+        //time count at start of cycle  (after decrease)
+        if ($timeCounter > $this->_getDueDurationByCycle()){
+            $timeCounter = 0;
+        }else{
+            $timeCounter -= $this->_getDueDurationByCycle();
+        }
+        // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what can membership book for this cycle
+        return ($duration + $beneficiary_counter + $timeCounter <= ($cycle + 1) * $this->_getDueDurationByCycle());
+
+    }
+
+    public function getTimeCount($cycle = 0){
+        if (!isset($this->_counters[$cycle])){
+            $this->_counters[$cycle] = 0;
+            $member = $this->getMembership();
+            //todo add a custom query for this
+            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member,$cycle) {
+                return ($shift->getStart() > $member->startOfCycle($cycle) && $shift->getEnd() < $member->endOfCycle($cycle));
+            });
+            foreach ($beneficiary_shift_for_current_cycle as $s){
+                $this->_counters[$cycle] += $s->getDuration();
+            }
+        }
+        return $this->_counters[$cycle];
+    }
+
+    private function _getDueDurationByCycle(){
+        return 180; //todo return form parameters $this->container->getParameter('due_duration_by_cycle')
     }
 }
