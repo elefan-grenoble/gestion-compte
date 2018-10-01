@@ -25,6 +25,9 @@
                 <a href="{{ path("period") }}" class="waves-effect waves-light btn"><i class="material-icons left">date_range</i>la semaine type</a>
                 <a href="{{ path("period") }}" class="waves-effect waves-light btn disabled"><i class="material-icons left">date_range</i>les exceptions</a>
                 <a href="{{ path("job_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">person</i>les postes de bénévolat</a>
+                <h6>Boîtier cles</h6>
+                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code(s)</a>
+                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
 
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}

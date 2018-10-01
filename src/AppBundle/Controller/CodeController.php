@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Code;
 use AppBundle\Event\CodeNewEvent;
+use AppBundle\Security\CodeVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -12,6 +13,8 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
@@ -27,6 +30,7 @@ class CodeController extends Controller
      *
      * @Route("/", name="codes_list")
      * @Method("GET")
+     * @Security("has_role('ROLE_USER')")
      */
     public function listAction(Request $request){
         $session = new Session();
@@ -44,14 +48,12 @@ class CodeController extends Controller
         if (!count($codes)){
             $session->getFlashBag()->add('warning', 'aucun code à lire');
             return $this->redirectToRoute('homepage');
-
         }
 
         $this->denyAccessUnlessGranted('view',$codes[0]);
 
         return $this->render('default/code/list.html.twig', array(
-            'codes' => $codes,
-            'code' => new Code(),
+            'codes' => $codes
         ));
     }
 
@@ -60,18 +62,20 @@ class CodeController extends Controller
      *
      * @Route("/new", name="code_new")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function newAction(Request $request){
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $code = new Code();
-        $this->denyAccessUnlessGranted('create',$code);
-
         $em = $this->getDoctrine()->getManager();
 
         $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
+
+        foreach ($old_codes as $code){
+            $this->denyAccessUnlessGranted('view',$code);
+        }
 
         if (count($my_open_codes)){
             if (count($old_codes) > 1){
@@ -99,6 +103,7 @@ class CodeController extends Controller
         $display = ($request->get('smartphone') == '0');
 
         $value = rand(0,9999);//code aléatoire à 4 chiffres
+        $code = new Code();
         $code->setValue($value);
 
         $code->setClosed(false);
@@ -129,6 +134,7 @@ class CodeController extends Controller
      *
      * @Route("/close/{id}", name="code_close")
      * @Method({"GET"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function editAction(Request $request,Code $code){
         $session = new Session();
@@ -154,21 +160,49 @@ class CodeController extends Controller
      * @Route("/close_all", name="code_change_done")
      * @Method("GET")
      */
-    public function closeAllButMyAction(Request $request){
+    public function closeAllButMineAction(Request $request){
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $securityContext = $this->container->get('security.authorization_checker');
 
         $em = $this->getDoctrine()->getManager();
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
+        $logged_out = false;
+        $previousToken = null;
 
+        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        }else{
+            $token = $request->get('token');
+            $username = explode(',',$this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($token))[0];
+            $current_app_user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
+            if ($current_app_user){
+                $previousToken = $this->get("security.token_storage")->getToken();
+                $logged_out = true;
+                $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
+                $this->get("security.token_storage")->setToken($token);
+            }else{
+                //mute
+                return $this->redirectToRoute('homepage');
+            }
+        }
+
+        $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
+        $myLastCode = $my_open_codes[0];
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
         foreach ($codes as $code){
-            if ($code->getRegistrar() != $current_app_user){
-                //todo add check voter "can view'
-                $code->setClosed(true);
-                $em->persist($code);
+            if ($myLastCode->getCreatedAt()>$code->getCreatedAt()){ // only older than mine
+                if ($code->getRegistrar() != $current_app_user){ // not mine
+                    if ($securityContext->isGranted(CodeVoter::VIEW, $code)) { //only the ones I can see
+                        $code->setClosed(true);
+                        $em->persist($code);
+                    }
+                }
             }
         }
         $em->flush();
+
+        if ($logged_out){
+            $this->get("security.token_storage")->setToken($previousToken);
+        }
 
         $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
 

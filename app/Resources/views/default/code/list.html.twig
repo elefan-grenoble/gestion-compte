@@ -1,7 +1,7 @@
 {% extends 'layout.html.twig' %}
 {% block content %}
     {% include "default/code/_list.html.twig" with { codes: codes } %}
-    {% if is_granted('create',code) %}
+    {% if is_granted('create',codes | first) %}
         <a href="{{ path("code_new") }}" class="waves-effect waves-light btn teal lighten-2"><i class="material-icons left">add</i>Déposer un nouveau jeu de clefs</a>
     {% endif %}
 {% endblock %}
