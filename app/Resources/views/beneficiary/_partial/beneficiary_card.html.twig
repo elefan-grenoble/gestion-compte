@@ -38,12 +38,17 @@
                     {% if beneficiary.roles | length %}
                         <div class="col s12 truncate"><i
                                     class="material-icons tiny">assignment_ind</i>&nbsp;{% for role in beneficiary.roles %}
-                            <div class="chip">{{ role.name }}</div>{% endfor %}</div>
+                            <div class="chip red-text">{{ role.name }}</div>{% endfor %}</div>
                     {% endif %}
                     {% if beneficiary.commissions | length %}
                         <div class="col s12 truncate"><i
                                     class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}
-                            <div class="chip">{{ commission.name }}</div>{% endfor %}</div>
+                            <div class="chip blue-text">{{ commission.name }}</div>{% endfor %}</div>
+                    {% endif %}
+                    {% if beneficiary.user and beneficiary.user.roles | length %}
+                        <div class="col s12 truncate"><i
+                                    class="material-icons tiny">settings</i>&nbsp;{% for role in beneficiary.user.roles %}
+                            <div class="chip purple-text">{{ role }}</div>{% endfor %}</div>
                     {% endif %}
                 </div>
                 {% if is_granted("edit", beneficiary.membership) %}

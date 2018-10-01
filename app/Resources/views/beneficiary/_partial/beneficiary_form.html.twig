@@ -35,6 +35,42 @@
             {{ form_label(form.phone) }}
         </div>
     </div>
+    <div class="input-field street1 col s6">
+        <div class="errors">
+            {{ form_errors(form.address.street1) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.address.street1) }}
+            {{ form_label(form.address.street1) }}
+        </div>
+    </div>
+    <div class="input-field street2 col s6">
+        <div class="errors">
+            {{ form_errors(form.address.street2) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.address.street2) }}
+            {{ form_label(form.address.street2) }}
+        </div>
+    </div>
+    <div class="input-field zipcode col s6">
+        <div class="errors">
+            {{ form_errors(form.address.zipcode) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.address.zipcode) }}
+            {{ form_label(form.address.zipcode) }}
+        </div>
+    </div>
+    <div class="input-field city col s6">
+        <div class="errors">
+            {{ form_errors(form.address.city) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.address.city) }}
+            {{ form_label(form.address.city) }}
+        </div>
+    </div>
     <div class="checkboxes col s6">
         {% if form.children.roles is defined %}
             {{ form_widget(form.roles) }}

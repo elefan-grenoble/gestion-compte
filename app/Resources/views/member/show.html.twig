@@ -13,18 +13,11 @@
 {% endblock %}
 
 {% block content %}
-    <h4 class="center-align">
-        <img src="{{ gravatar(member.mainBeneficiary.email) }}" alt="{{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}" class="circle responsive-img"><br>
-
+    <h4>
         {% if member.withdrawn %}<del>{% endif %}
-            #{{ member.memberNumber }} {{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}
+            #{{ member.memberNumber }}
         {% if member.withdrawn %}</del>{% endif %}
         {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
-        {% for role in member.mainBeneficiary.user.roles %}
-            {% if role != "ROLE_USER" %}
-                <span class="badge purple-text small">{{ role }}</span>
-            {% endif %}
-        {% endfor %}
     </h4>
     <div class="row">
         {% for beneficiary in member.beneficiaries %}

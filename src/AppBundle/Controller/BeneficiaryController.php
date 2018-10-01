@@ -64,8 +64,8 @@ class BeneficiaryController extends Controller
     public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
         $session = new Session();
-        $user = $beneficiary->getUser();
-        $this->denyAccessUnlessGranted('edit', $user);
+        $member = $beneficiary->getMembership();
+        $this->denyAccessUnlessGranted('edit', $member);
 
         $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
         $editForm->handleRequest($request);
@@ -81,7 +81,7 @@ class BeneficiaryController extends Controller
                 $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
             }
 
-            return $this->redirectToEdit($user);
+            return $this->redirectToShow($member);
         }
 
         return $this->render('beneficiary/edit_beneficiary.html.twig', array(
@@ -141,20 +141,24 @@ class BeneficiaryController extends Controller
         return $errors;
     }
 
-    private function redirectToEdit($user)
+
+    private function redirectToEdit(Membership $member)
     {
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername()));
+            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('user_edit', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
-    private function redirectToShow($user)
+
+    private function redirectToShow(Membership $member)
     {
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('user_show', array('username' => $user->getUsername()));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('user_show', array('username' => $user->getUsername(),'token' => $user->getTmpToken($session->get('token_key').$this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 }
