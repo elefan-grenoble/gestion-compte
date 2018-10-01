@@ -13,6 +13,7 @@ use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\UserType;
 use AppBundle\Service\SearchUserFormHelper;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use OAuth2\OAuth2;
@@ -77,15 +78,12 @@ class AdminController extends Controller
 
             $em = $this->getDoctrine()->getManager();
 
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->createQueryBuilder('b')
-                ->where('b.email LIKE :email')
-                ->orWhere('b.lastname LIKE :lastname')
-                ->orWhere('b.firstname LIKE :firstname')
-                ->setParameter('email', '%'.$key.'%')
-                ->setParameter('lastname', '%'.$key.'%')
-                ->setParameter('firstname', '%'.$key.'%')
-                ->getQuery()
-                ->setMaxResults(5)
+            $rsm = new ResultSetMappingBuilder($em);
+            $rsm->addRootEntityFromClassMetadata('AppBundle:Beneficiary', 'b');
+
+            $query = $em->createNativeQuery('SELECT * FROM beneficiary WHERE LOWER(CONCAT_WS(email,lastname,firstname)) LIKE :key', $rsm);
+
+            $beneficiaries = $query->setParameter('key', '%'.$key.'%')
                 ->getResult();
 
             foreach ($beneficiaries as $beneficiary){

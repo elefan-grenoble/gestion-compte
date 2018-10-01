@@ -164,6 +164,19 @@ class SwipeCardController extends Controller
         ]);
     }
 
+    private function _getQr($url){
+        $qrCode = new QrCode();
+        $qrCode
+                ->setText($url)
+                ->setSize(200)
+                ->setPadding(0)
+                ->setErrorCorrection('high')
+                ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
+                ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
+                ->setImageType(QrCode::IMAGE_TYPE_PNG);
+        return $qrCode->generate();
+    }
+
     /**
      * Swipe Card QR Code
      *
@@ -179,28 +192,17 @@ class SwipeCardController extends Controller
         if (!$card){
             throw $this->createAccessDeniedException();
         }
-        $qrCode = new QrCode();
-        try {
-            $qrCode
-                ->setText($this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL))
-                ->setSize(200)
-                ->setPadding(0)
-                ->setErrorCorrection('high')
-                ->setForegroundColor(array('r' => 0, 'g' => 0, 'b' => 0, 'a' => 0))
-                ->setBackgroundColor(array('r' => 255, 'g' => 255, 'b' => 255, 'a' => 0))
-                ->setImageType(QrCode::IMAGE_TYPE_PNG);
-            $content = base64_decode($qrCode->generate());
-            $response = new Response();
-            $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'qr.png');
-            $response->headers->set('Content-Disposition', $disposition);
-            $response->headers->set("Content-length",strlen($content));
-            $response->headers->set('Content-Type', $qrCode->getContentType());
-            $response->setContent($content);
 
-            return $response;
-        } catch (\Exception $exception){
-            die($exception);
-        }
+        $url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
+        $content = base64_decode($this->_getQr($url));
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'qr.png');
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set("Content-length",strlen($content));
+        $response->headers->set('Content-Type', 'image/png');
+        $response->setContent($content);
+
+        return $response;
     }
 
     /**
@@ -218,25 +220,15 @@ class SwipeCardController extends Controller
         if (!$card){
             throw $this->createAccessDeniedException();
         }
-        $barcode = new BarcodeGenerator();
-        try {
-            $barcode->setText($card->getCode());
-            $barcode->setType(BarcodeGenerator::Code128);
-            $barcode->setScale(2);
-            $barcode->setThickness(25);
-            $barcode->setFontSize(10);
-            $content = base64_decode($barcode->generate());
-            $response = new Response();
-            $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT,'br.png');
-            $response->headers->set('Content-Disposition', $disposition);
-            $response->headers->set("Content-length",strlen($content));
-            $response->headers->set('Content-Type', 'image/png');
-            $response->setContent($content);
+        $content = base64_decode($card->getBarcode());
+        $response = new Response();
+        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'br.png');
+        $response->headers->set('Content-Disposition', $disposition);
+        $response->headers->set("Content-length",strlen($content));
+        $response->headers->set('Content-Type', 'image/png');
+        $response->setContent($content);
 
-            return $response;
-        } catch (\Exception $exception){
-            die($exception);
-        }
+        return $response;
     }
 
     /**
@@ -261,7 +253,14 @@ class SwipeCardController extends Controller
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id'=>intval($request->get('beneficiary_id'))));
             if ($beneficiary->getId()){
                 $this->generateSwipeCard($beneficiary);
-                $em->flush();
+                $card = $beneficiary->getSwipeCards()->first();
+                $barcodeImg = $card->getBarcode();
+                $qr_swipein_url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
+                $qrImg = $this->_getQr($qr_swipein_url);
+                if (!is_dir($this->getParameter('images_tmp_dir')))
+                    mkdir($this->getParameter('images_tmp_dir'));
+                file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png',base64_decode($barcodeImg));
+                file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png',base64_decode($qrImg));
                 $template = $this->renderView('user/swipe_card/printone.html.twig',[
                     'beneficiary' => $beneficiary,
                     'line' => intval($request->get('line')),
@@ -269,7 +268,10 @@ class SwipeCardController extends Controller
                 ]);
                 $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
                 $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
-                return $html2pdf->generatePdf($template,'badges');
+                $response = $html2pdf->generatePdf($template,'badge_'.$beneficiary->getId());
+                unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png');
+                unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png');
+                return $response;
             }else{
                 return $this->redirectToRoute('homepage');
             }
@@ -280,6 +282,14 @@ class SwipeCardController extends Controller
             foreach ($users as $user){
                 foreach ($user->getBeneficiaries() as $beneficiary){
                     $this->generateSwipeCard($beneficiary,false);
+                    $card = $beneficiary->getSwipeCards()->first();
+                    $barcodeImg = $card->getBarcode();
+                    $qr_swipein_url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
+                    $qrImg = $this->_getQr($qr_swipein_url);
+                    if (!is_dir($this->getParameter('images_tmp_dir')))
+                        mkdir($this->getParameter('images_tmp_dir'));
+                    file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png',base64_decode($barcodeImg));
+                    file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png',base64_decode($qrImg));
                 }
             }
             $em->flush();
@@ -288,7 +298,15 @@ class SwipeCardController extends Controller
             ]);
             $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
             $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
-            return $html2pdf->generatePdf($template,'badges');
+            $response = $html2pdf->generatePdf($template,'badges');
+            foreach ($users as $user){
+                foreach ($user->getBeneficiaries() as $beneficiary){
+                    $card = $beneficiary->getSwipeCards()->first();
+                    unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png');
+                    unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png');
+                }
+            }
+            return $response;
             }
         return $this->redirectToRoute('homepage');
     }

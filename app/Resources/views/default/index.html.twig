@@ -47,25 +47,28 @@
                             class="material-icons left">date_range</i>Gérer les créneaux</a>
             {% endif %}
 
-            <h5>Construire</h5>
-            {% if is_granted("access_tools",app.user) %}
-                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i
-                            class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
-            {% endif %}
-            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i
-                        class="material-icons left">list</i>Taches en cours</a>
-            {% if is_granted("view",codes | first) or is_granted("create",codes | first) %}
-                <br>
-            {% endif %}
-            {% if is_granted("view",codes | first) %}
-                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i
-                            class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1 %}s{% endif %}
-                    coffre à clefs</a>
-            {% endif %}
-            {% if is_granted("create",codes | first) %}
-                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i
-                            class="material-icons left">vpn_key</i>Nouveau code coffre</a>
-            {% endif %}
+                    <h5>Construire</h5>
+                    {% if is_granted("access_tools",app.user)  %}
+                        <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
+                    {% endif %}
+                    <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
+                    {% if is_granted("view",codes | first) or is_granted("create",codes | first)  %}
+                        <br>
+                    {% endif %}
+                    {% if is_granted("view",codes | first)  %}
+                        {% if (codes | first).registrar == app.user %}
+                            {% if codes | length > 1 %}
+                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Changer code boîtier à clefs</a>
+                            {% else %}
+                                {% if is_granted("create",codes | first)  %}
+                                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}<a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} boîtier à clefs</a>
+                    {%  if is_granted("create",codes | first)  %}
+                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                    {% endif %}{% endif %}
+                    {% endif %}
 
             {% if is_granted("ROLE_USER_MANAGER") %}
                 <h5>Gérer les membres</h5>
@@ -130,31 +133,15 @@
             $(".collapsible .modal-trigger").on('click', function (e) {
                 e.preventDefault();
             });
-            {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            var barcode = "";
-            var barcode_submit_url = "{{ path('check') }}";
-            $(document).keypress(function (e) {
-                var code = (e.keyCode ? e.keyCode : e.which);
-                //console.log(code);
-                if (code == 13 || code == 9)// Enter or tab key hit
-                {
-                    if (barcode.length) {
-                        var form = $('<form action="' + barcode_submit_url + '" method="post">' +
-                            '<input type="text" name="swipe_code" value="' + barcode + '" />' +
-                            '</form>');
-                        $('body').append(form);
-                        form.submit();
-                    }
-                    barcode = "";
-                }
-                else {
-                    if (code <= 122) { //0-9, a-z, A-Z
-                        barcode = barcode + String.fromCharCode(code);
-                    }
-                }
-            });
+        })    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+
+            var barcode_submit_url="{{ path('check') }}";
+
             {% endif %}
 
-        })
+
     </script>
+    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+    {% endif %}
 {% endblock %}

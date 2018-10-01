@@ -62,6 +62,7 @@ class CodeVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::VIEW:
+                return $this->canView($code, $user);
             case self::CLOSE:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;
@@ -88,18 +89,7 @@ class CodeVoter extends Voter
 
     private function canAdd(Code $code, User $user)
     {
-        if ($user->getCommissions()){ // si l'utilisateur fait parti d'une comm
-            return true;
-        }
-        $shifts = $user->getShiftsOfCycle(0);
-        $y = new \DateTime('Yesterday');
-        $y->setTime(23,59,59);
-        $n = new \DateTime();
-        foreach ($shifts as $shift){
-            if (($shift->getStart() < $n) && $shift->getStart() > $y){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé
-                return true;
-            }
-        }
+
         if ($this->isLocationOk()){ // si l'utilisateur est physiquement à l'épicerie
             return true;
         }

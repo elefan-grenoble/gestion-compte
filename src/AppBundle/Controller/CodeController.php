@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\Code;
+use AppBundle\Event\CodeNewEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -37,7 +38,7 @@ class CodeController extends Controller
         if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')){
             $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
         }else{
-            $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'),10);
+            $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);
         }
 
         if (!count($codes)){
@@ -65,38 +66,62 @@ class CodeController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $code = new Code();
-
         $this->denyAccessUnlessGranted('create',$code);
 
         $em = $this->getDoctrine()->getManager();
 
-        $code->setRegistrar($current_app_user);
-        $code->setCreatedAt(new \DateTime('now'));
+        $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
+        $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
 
-        $form = $this->createForm('AppBundle\Form\CodeType', $code);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $em->persist($code);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'Le nouveau code a bien été créé !');
-
-            return $this->redirectToRoute('codes_list');
-
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
+        if (count($my_open_codes)){
+            if (count($old_codes) > 1){
+                return $this->render('default/code/new.html.twig', array(
+                    'display' =>  true,
+                    'code' => $my_open_codes[0],
+                    'old_codes' => $old_codes,
+                ));
+            }else{
+                return $this->render('default/code/new.html.twig', array(
+                    'display' =>  true,
+                    'code' => $my_open_codes[0],
+                    'old_codes' => $my_open_codes,
+                ));
             }
-        }
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
-        return $this->render('default/code/new.html.twig', array(
-            'form' => $form->createView(),
-            'codes' => $codes
 
-    ));
+        }
+
+        //no code open for this user
+
+        if ($request->get('smartphone') === null){ //first visit
+            return $this->render('default/code/new.html.twig');
+        }
+
+        $display = ($request->get('smartphone') == '0');
+
+        $value = rand(0,9999);//code aléatoire à 4 chiffres
+        $code->setValue($value);
+
+        $code->setClosed(false);
+        $code->setCreatedAt(new \DateTime('now'));
+        $code->setRegistrar($current_app_user);
+
+        $em->persist($code);
+        $em->flush();
+
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $display,$old_codes));
+
+        if ($request->get('smartphone') == '1'){ //send by email
+            $session->getFlashBag()->add('success','Consulte ton espace membre ou tes emails depuis ton smartphone pour ouvrir le coffre, changer le code et déposer les clefs');
+            return $this->redirectToRoute('homepage');
+        }else{
+            return $this->render('default/code/new.html.twig', array(
+                'display' =>  $display,
+                'no_smartphone' => true,
+                'code' => $code,
+                'old_codes' => $old_codes,
+            ));
+        }
 
     }
 
@@ -126,30 +151,26 @@ class CodeController extends Controller
     /**
      * close all codes.
      *
-     * @Route("/close_all", name="code_done")
+     * @Route("/close_all", name="code_change_done")
      * @Method("GET")
      */
-    public function closeAllAction(Request $request){
+    public function closeAllButMyAction(Request $request){
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $em = $this->getDoctrine()->getManager();
-
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>null),array('createdAt'=>'DESC'));
-
-        if (!$current_app_user->hasRole('ROLE_SUPER_ADMIN'))
-            $this->denyAccessUnlessGranted('view',$codes[0]);
-
-        $em = $this->getDoctrine()->getManager();
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
 
         foreach ($codes as $code){
-            $code->setClosed(true);
-            $em->persist($code);
+            if ($code->getRegistrar() != $current_app_user){
+                //todo add check voter "can view'
+                $code->setClosed(true);
+                $em->persist($code);
+            }
         }
-
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Bien enregistré, merci ! Pense à remettre le code à 0000 si il n\'y a plus de clefs à l\'intérieur');
+        $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
 
         return $this->redirectToRoute('homepage');
     }

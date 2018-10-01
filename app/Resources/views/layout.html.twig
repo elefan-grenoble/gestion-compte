@@ -29,7 +29,7 @@
                         <div class="nav-wrapper">
                             <ul class="right">
                                 <li>
-                                    <a href="{{ path('member_show', {'member_number': app.user.beneficiary.membership.memberNumber,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                                    <a href="{{ path('user_show', {'username': app.user.username,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
                                 </li>
                             </ul>
                         </div>
@@ -58,10 +58,9 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                            {% set frozen = app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li><div class="user-view center-align">
                                     <div class="background">
-                                        {% if frozen %}
+                                        {% if app.user.frozen %}
                                         {% image '@AppBundle/Resources/public/img/frozen.png' %}
                                             <img class="responsive-img" src="{{ asset_url }}" alt="" />
                                         {% endimage %}
@@ -72,7 +71,7 @@
                                         {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
-                                    <a href="#name"><span class="{% if not frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
+                                    <a href="#name"><span class="{% if not app.user.frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
                                 </div>
                             </li>
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
@@ -94,11 +93,10 @@
         </header>
         <main>
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                {% set frozen = app.user.beneficiary and app.user.beneficiary.membership.frozen %}
-                {% if frozen %}
+                {% if app.user.frozen %}
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
-                        {% if not app.user.beneficiary.membership.frozenChange %}
+                        {% if not app.user.frozenChange %}
                             Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_edit') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
                         {% else %}
                             Dégel programmé.
@@ -165,89 +163,15 @@
         {% endif %}
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
         <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
+        <script src="{{ asset('bundles/app/js/app.js') }}"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
-        <script>
-            $(document).ready(function() {
-                $('select').material_select();
-                $('.button-collapse').sideNav({
-                    menuWidth: 300, // Default is 300
-                    edge: 'left', // Choose the horizontal origin
-                    closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-                    draggable: true, // Choose whether you can drag to open on touch screens,
-                    onOpen: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
-                    onClose: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
-                });
-                $('.modal').modal();
-                $('.tooltipped').tooltip();
-                $(".dropdown-button").dropdown();
-            });
-            //todo put this in a file
-            {% if is_granted('ROLE_ADMIN') %}
-            $(document).ready(function() {
-                $('.main-navigation').click(function (e) {
-                    if ($(e.target).is(':not(a)')){
-                        $('#quick_search_nav').slideToggle($('#quick_search_nav').is(':visible'));
-                        $('#quick_search').val('');
-                        $('#quick_search').focus();
-                        $('#quick_search').one('focusout',function () {
-                            $('#quick_search_nav').slideUp();
-                        });
-                    }
-                });
-                var show_user_template_url = "{{ path('member_show',{'member_number':'-MEMBER_NUMBER-'}) }}";
-                $('#quick_search_form').submit(function (e) {e.preventDefault()});
-                $('#quick_search_close').click(function () {
-                    $('#quick_search_nav').slideUp();
-                });
-                $('#quick_search').keyup(function () {
-                    if ($(this).val().length > 1){
-                        $.ajax({
-                            type: "POST",
-                            url: "{{ path('search') }}",
-                            data: {
-                                key: $(this).val()
-                            },
-                            dataType: "json",
-                            success: function(response) {
-                                // console.log(response.data);
-                                if (response && response.count > 0){
-                                    var beneficiaries = response.data;
-                                    var dataBeneficiaries = {};
-                                    var dataUsernames = {};
-                                    for (var i = 0; i < beneficiaries.length; i++) {
-                                        dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
-                                        dataUsernames[beneficiaries[i].id] = beneficiaries[i].username;
-                                    }
-                                    //$('#quick_search').autocomplete('destroy');
-                                    $('#quick_search').autocomplete({
-                                        data: dataBeneficiaries,
-                                        limit: 3,
-                                        onAutocomplete: function(val) {
-                                            $('#quick_search_nav').slideUp();
-                                            console.log(val);
-                                            const regex = /\(([0-9]*)\)/gm;
-                                            let m;
-
-                                            if ((m = regex.exec(val)) !== null) {
-                                                var beneficiary_id = m[1];
-                                                var username = dataUsernames[beneficiary_id];
-                                                var res = show_user_template_url.replace("-MEMBER_NUMBER-", username);
-                                                window.location = res;
-                                            }
-                                        },
-                                        minLength: 3,
-                                    });
-                                }else{
-                                    console.log("no results for '"+$(this).val()+"'");
-                                }
-                            }
-                        });
-                    }
-                });
-
-            })
-            {% endif %}
-        </script>
+        {% if is_granted('ROLE_ADMIN') %}
+            <script>
+                var search_url = "{{ path('search') }}";
+                var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
+            </script>
+            <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
+        {% endif %}
         {% block javascripts %}{% endblock %}
     </body>
 </html>
