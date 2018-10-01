@@ -91,7 +91,7 @@ class AdminController extends Controller
                     $return[] = array(
                         'name'=>$beneficiary->getAutocompleteLabelFull(),
                         'icon'=>null,
-                        'username'=>$beneficiary->getUser()->getUsername(),
+                        'member_number'=>$beneficiary->getMembership()->getMemberNumber(),
                         'id'=>$beneficiary->getId()
                     );
                 }
