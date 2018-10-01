@@ -36,7 +36,7 @@ $(document).ready(function() {
                         //$('#quick_search').autocomplete('destroy');
                         $('#quick_search').autocomplete({
                             data: dataBeneficiaries,
-                            limit: 3,
+                            limit: 5,
                             onAutocomplete: function(val) {
                                 $('#quick_search_nav').slideUp();
                                 console.log(val);

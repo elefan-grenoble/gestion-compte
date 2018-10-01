@@ -584,11 +584,11 @@ class Beneficiary
     }
 
     public function getAutocompleteLabel(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
+        return '#'.$this->getMembership()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
     }
 
     public function getAutocompleteLabelFull(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' '.$this->getEmail().' ('. $this->getId() .')';
+        return '#'.$this->getMembership()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' '.$this->getEmail().' ('. $this->getId() .')';
     }
 
     /**

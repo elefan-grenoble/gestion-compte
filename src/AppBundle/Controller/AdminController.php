@@ -87,12 +87,14 @@ class AdminController extends Controller
                 ->getResult();
 
             foreach ($beneficiaries as $beneficiary){
-                $return[] = array(
-                    'name'=>$beneficiary->getAutocompleteLabelFull(),
-                    'icon'=>null,
-                    'username'=>$beneficiary->getUser()->getUsername(),
-                    'id'=>$beneficiary->getId()
-                );
+                if ($beneficiary->getUser()){
+                    $return[] = array(
+                        'name'=>$beneficiary->getAutocompleteLabelFull(),
+                        'icon'=>null,
+                        'username'=>$beneficiary->getUser()->getUsername(),
+                        'id'=>$beneficiary->getId()
+                    );
+                }
             }
             return new JsonResponse(array('count'=>count($return),'data' => array_values($return)));
         }
