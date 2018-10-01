@@ -167,7 +167,7 @@ class MembershipController extends Controller
                 $member->getMainBeneficiary()->setEmail('');
         }
 
-        $editForm = $this->createForm('AppBundle\Form\UserType', $user);
+        $editForm = $this->createForm('AppBundle\Form\MemberType', $member);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
@@ -187,7 +187,7 @@ class MembershipController extends Controller
             $em->flush();
             $session->getFlashBag()->add('success', 'Mise à jour effectuée');
 
-            return $this->redirectToShow($user);
+            return $this->redirectToShow($member);
         }
 
         $note = new Note();
@@ -198,10 +198,10 @@ class MembershipController extends Controller
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
 
-            if (count($user->getBeneficiaries()) < 4) { //todo put this in conf
+            if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
 
                 $beneficiary->setUser($user);
-                $user->addBeneficiary($beneficiary);
+                $member->addBeneficiary($beneficiary);
 
                 $em = $this->getDoctrine()->getManager();
                 $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getEmail()));
@@ -226,9 +226,9 @@ class MembershipController extends Controller
         }
 
         $newReg = new Registration();
-        $remainder = $user->getRemainder();
+        $remainder = $member->getRemainder();
         if (!$remainder->invert) { //still some days
-            $date = clone $user->getLastRegistration()->getDate();
+            $date = clone $member->getLastRegistration()->getDate();
             $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
@@ -241,19 +241,19 @@ class MembershipController extends Controller
             $amount = floatval($registrationForm->get('amount')->getData());
             if ($amount <= 0) {
                 $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
-                return $this->redirectToEdit($user);
+                return $this->redirectToEdit($member);
             }
 
             if ($this->getCurrentAppUser()->getId() == $user->getId()) {
                 $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
-                return $this->redirectToEdit($user);
+                return $this->redirectToEdit($member);
             }
             $newReg->setRegistrar($this->getCurrentAppUser());
 
             $date = $registrationForm->get('date')->getData();
             if (!$user->canRegister($date)) {
                 $session->getFlashBag()->add('warning', 'l\'adhésion précédente du est encore valable à cette date !');
-                return $this->redirectToEdit($user);
+                return $this->redirectToEdit($member);
             }
             $newReg->setUser($user);
             $user->addRegistration($newReg);
@@ -263,11 +263,11 @@ class MembershipController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Enregistrement effectuée');
-            return $this->redirectToShow($user);
+            return $this->redirectToShow($member);
         }
 
         $registrationForms = array();
-        foreach ($user->getRegistrations() as $registration) {
+        foreach ($member->getRegistrations() as $registration) {
             $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
             $registrationForms[$registration->getId()] = $form->createView();
         }
@@ -282,18 +282,18 @@ class MembershipController extends Controller
                 if ($form->isSubmitted() && $form->isValid()) {
                     if ($this->getCurrentAppUser()->getId() == $user->getId()) {
                         $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
-                        return $this->redirectToEdit($user);
+                        return $this->redirectToEdit($member);
                     }
                     $em->persist($registration);
                     $em->flush();
                     $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-                    return $this->redirectToShow($user);
+                    return $this->redirectToShow($member);
                 }
             }
         }
 
         $deleteBeneficiaryForms = array();
-        foreach ($user->getBeneficiaries() as $beneficiary) {
+        foreach ($member->getBeneficiaries() as $beneficiary) {
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
@@ -307,12 +307,12 @@ class MembershipController extends Controller
                     ->setMethod('DELETE')->getForm()->createView();
         }
 
-        if ($user->isWithdrawn())
+        if ($member->isWithdrawn())
             $session->getFlashBag()->add('warning', 'Ce compte est fermé');
 
-        return $this->render('user/edit.html.twig', array(
+        return $this->render('member/edit.html.twig', array(
             'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername()),
-            'user' => $user,
+            'member' => $member,
             'edit_form' => $editForm->createView(),
             'new_registration_form' => $registrationForm->createView(),
             'new_beneficiary_form' => $beneficiaryForm->createView(),
@@ -331,12 +331,12 @@ class MembershipController extends Controller
     public function editFirewallAction(Request $request)
     {
         $session = new Session();
-        $username = $request->request->get('username');
-        if ($username){
+        $memberNumber = $request->request->get('member_number');
+        if ($memberNumber){
             $em = $this->getDoctrine()->getManager();
-            $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
-            if ($this->isGranted('view', $user)){
-                return $this->redirectToEdit($user);
+            $member = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number'=>$memberNumber));
+            if ($this->isGranted('view', $member)){
+                return $this->redirectToEdit($member);
             }
             $form = $this->createFormBuilder()
                 ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent','disabled' => true,'attr' => array( 'value'=>$user->getMemberNumber())))
