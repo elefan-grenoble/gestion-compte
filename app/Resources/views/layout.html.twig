@@ -29,7 +29,7 @@
                         <div class="nav-wrapper">
                             <ul class="right">
                                 <li>
-                                    <a href="{{ path('user_show', {'username': app.user.username,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                                    <a href="{{ path('member_show', {'member_number': app.user.beneficiary.membership.memberNumber,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
                                 </li>
                             </ul>
                         </div>
@@ -58,9 +58,10 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                            {% set frozen =  app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li><div class="user-view center-align">
                                     <div class="background">
-                                        {% if app.user.frozen %}
+                                        {% if  frozen %}
                                         {% image '@AppBundle/Resources/public/img/frozen.png' %}
                                             <img class="responsive-img" src="{{ asset_url }}" alt="" />
                                         {% endimage %}
@@ -71,7 +72,7 @@
                                         {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
-                                    <a href="#name"><span class="{% if not app.user.frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
+                                    <a href="#name"><span class="{% if not frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
                                 </div>
                             </li>
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
@@ -93,7 +94,7 @@
         </header>
         <main>
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                {% if app.user.frozen %}
+                {% if frozen %}
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
                         {% if not app.user.frozenChange %}
@@ -168,7 +169,7 @@
         {% if is_granted('ROLE_ADMIN') %}
             <script>
                 var search_url = "{{ path('search') }}";
-                var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
+                var show_user_template_url = "{{ path('member_show',{'member_number':'-USERNAME-'}) }}";
             </script>
             <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
         {% endif %}
