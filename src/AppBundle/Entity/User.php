@@ -56,13 +56,6 @@ class User extends BaseUser
     private $beneficiary;
 
     /**
-     * One User has One Address.
-     * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
-     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
-     */
-    private $address;
-
-    /**
      * Many Users have Many clients.
      * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
      * @ORM\JoinTable(name="users_clients")
@@ -112,30 +105,6 @@ class User extends BaseUser
     public function getMemberNumber()
     {
         return $this->member_number;
-    }
-
-    /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Address $address
-     *
-     * @return User
-     */
-    public function setAddress(\AppBundle\Entity\Address $address = null)
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Address
-     */
-    public function getAddress()
-    {
-        return $this->address;
     }
 
     public function getFirstname() {

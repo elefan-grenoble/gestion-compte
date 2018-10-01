@@ -52,7 +52,14 @@ class Beneficiary
     private $phone;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="beneficiaries")
+     * One Beneficiary has One Address.
+     * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
+     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     */
+    private $address;
+
+    /**
+     * @ORM\OneToOne(targetEntity="User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",onDelete="CASCADE")
      */
     private $user;
@@ -675,5 +682,21 @@ class Beneficiary
     public function setMembership($membership)
     {
         $this->membership = $membership;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param mixed $address
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
     }
 }

@@ -19,10 +19,6 @@ ALTER TABLE fos_user ADD CONSTRAINT FK_957A64796986CF73 FOREIGN KEY (last_regist
 CREATE UNIQUE INDEX UNIQ_957A6479ECCAAFA0 ON fos_user (beneficiary_id);
 UPDATE fos_user SET beneficiary_id = main_beneficiary_id;
 
-ALTER TABLE fos_user DROP FOREIGN KEY FK_957A647962C6E4EA;
-DROP INDEX UNIQ_957A647962C6E4EA ON fos_user;
-ALTER TABLE fos_user DROP main_beneficiary_id;
-
 -- Migrate time_logs
 ALTER TABLE time_log ADD membership_id INT NOT NULL;
 UPDATE time_log SET membership_id = user_id;
@@ -46,3 +42,18 @@ ALTER TABLE note ADD membership_id INT DEFAULT NULL;
 UPDATE note SET membership_id = user_id;
 ALTER TABLE note ADD CONSTRAINT FK_CFBDFA141FB354CD FOREIGN KEY (membership_id) REFERENCES membership (id);
 CREATE INDEX IDX_CFBDFA141FB354CD ON note (membership_id);
+
+-- beneficiary/user relationship / OneToMany to ManyToOne
+UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.user_id = NULL WHERE b.id != u.main_beneficiary_id;
+ALTER TABLE beneficiary DROP INDEX IDX_7ABF446AA76ED395, ADD UNIQUE INDEX UNIQ_7ABF446AA76ED395 (user_id);
+
+-- Migrate address
+ALTER TABLE beneficiary ADD address_id INT DEFAULT NULL;
+UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.address_id = u.address_id;
+ALTER TABLE beneficiary ADD CONSTRAINT FK_7ABF446AF5B7AF75 FOREIGN KEY (address_id) REFERENCES address (id);
+CREATE UNIQUE INDEX UNIQ_7ABF446AF5B7AF75 ON beneficiary (address_id);
+
+-- Migrate proxies
+
+
+-- Drop old columns

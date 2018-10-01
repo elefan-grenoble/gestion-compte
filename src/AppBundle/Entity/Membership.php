@@ -739,7 +739,7 @@ class Membership
             if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) { // Do not book shift i do not know how to handle (role)
                 return false;
             }
-            if ($shift->getLastShifter() && $beneficiary->getUser()->getId() != $shift->getLastShifter()->getUser()->getId()) { // Do not book pre-booked shift
+            if ($shift->getLastShifter() && $beneficiary->getMembership()->getId() != $shift->getLastShifter()->getMembership()->getId()) { // Do not book pre-booked shift
                 return false;
             }
             //time count at start of cycle (before decrease)
