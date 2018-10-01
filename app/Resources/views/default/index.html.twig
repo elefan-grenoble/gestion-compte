@@ -26,7 +26,7 @@
                     <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
                 {% endif %}
             </div>
-            {{ render(controller("AppBundle:SwipeCard:homepage")) }}
+
             <div class="row">
                 {% for event in events %}
                     {% include "default/event/_event.html.twig" with { event: event } %}
@@ -41,6 +41,7 @@
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
                                 class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% endif %}
+                {{ render(controller("AppBundle:SwipeCard:homepage")) }}
                 {% include "booking/home_booked_shifts.html.twig" %}
             {% else %}
                 <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i
