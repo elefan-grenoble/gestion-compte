@@ -35,6 +35,7 @@ use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Twig\Sandbox\SecurityError;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * User controller.
@@ -564,6 +565,63 @@ class MembershipController extends Controller
     }
 
     /**
+     * Join two members
+     *
+     * @Route("/join", name="member_join")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function joinAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
+            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes','attr' => array('class' => 'btn')))
+            ->getForm();
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $re = '/#([0-9]+).*/';
+            $str = $form->get('from_text')->getData()."\n".$form->get('dest_text')->getData();
+            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+            if (count($matches)>=2){
+                $fromMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number"=>$matches[0][1]));
+                if ($fromMember){
+                    $destMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number"=>$matches[1][1]));
+                    if ($destMember){
+                        foreach ($fromMember->getBeneficiaries() as $beneficiary){
+                            $destMember->addBeneficiary($beneficiary); //in
+                            $fromMember->removeBeneficiary($beneficiary); //out
+                            $beneficiary->setMembership($destMember);
+                            $em->persist($beneficiary);
+                        }
+                        $em->persist($destMember);
+                        $em->flush();
+                        $fromMember->setMainBeneficiary(null);
+                        $em->remove($fromMember);
+                        $em->flush();
+
+                        $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
+
+                        return $this->redirectToRoute('user_show',array('username'=>$destMember->getUsername()));
+                    }else{
+                        $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
+                    }
+                }else{
+                    $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
+                }
+            }
+
+        }
+
+        $members = $em->getRepository('AppBundle:Membership')->findAll(); //todo exclude closed
+        return $this->render('admin/member/join.html.twig',array('form'=>$form->createView(),'members'=>$members));
+    }
+
+    /**
      * Creates a form to delete a member entity.
      *
      * @param Membership $member
@@ -575,6 +633,35 @@ class MembershipController extends Controller
             ->setAction($this->generateUrl('member_delete', array('id' => $member->getId())))
             ->setMethod('DELETE')
             ->getForm();
+    }
+
+    /**
+     * Export all emails of members (including beneficiary)
+     *
+     * @Route("/emails_csv", name="admin_emails_csv")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function exportEmails(Request $request){
+        $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
+        $return = '';
+        if($beneficiaries) {
+            $d = ','; // this is the default but i like to be explicit
+            $e = '"'; // this is the default but i like to be explicit
+            foreach($beneficiaries as $beneficiary) {
+                if (!$beneficiary->getMembership()->isWithdrawn()){
+                    $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+                    if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                        $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+                    }
+                }
+            }
+        }
+        return new Response($return, 200, array(
+            'Content-Encoding: UTF-8',
+            'Content-Type' => 'application/force-download; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+        ));
     }
 
     private function getErrorMessages(Form $form)

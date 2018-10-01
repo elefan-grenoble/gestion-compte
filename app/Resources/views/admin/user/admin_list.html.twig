@@ -25,8 +25,11 @@
                 <td>
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
-                    <a href="{{ path('user_edit', { 'username': admin.username }) }}" class="teal btn-floating"><i
-                                class="material-icons left">edit</i></a>
+                    {% if admin.beneficiary %}
+                        <a href="{{ path('member_edit', { 'member_number': admin.beneficiary.membership.memberNumber }) }}"
+                           class="teal btn-floating"><i
+                                    class="material-icons left">edit</i></a>
+                    {% endif %}
                     <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
                        class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
                     <button type="submit" class="btn-floating waves-effect waves-light red"><i
