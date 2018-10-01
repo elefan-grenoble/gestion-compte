@@ -89,9 +89,13 @@ class CodeVoter extends Voter
 
     private function canAdd(Code $code, User $user)
     {
-
-        if ($this->isLocationOk()){ // si l'utilisateur est physiquement à l'épicerie
-            return true;
+        $now = new \DateTime('now');
+        if ($this->canView($code, $user)){ //can add only if last code can be seen
+            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d')!=($now->format('Y m d'))){ // on ne change pas son propre code
+                if ($this->isLocationOk()){ // et si l'utilisateur est physiquement à l'épicerie
+                    return true;
+                }
+            }
         }
 
         return false;
@@ -110,10 +114,12 @@ class CodeVoter extends Voter
         $shifts = $user->getShiftsOfCycle(0);
         $y = new \DateTime('Yesterday');
         $y->setTime(23,59,59);
-        $n = new \DateTime();
-        $n->add(new \DateInterval("PT15M")); //TODO put in conf
+        $sometimeago = new \DateTime();
+        $insometime = new \DateTime();
+        $sometimeago->sub(new \DateInterval("PT3H")); //TODO put in conf
+        $insometime->add(new \DateInterval("PT15M")); //TODO put in conf
         foreach ($shifts as $shift){
-            if (($shift->getStart() < $n) && $shift->getStart() > $y && ($shift->getEnd() > $n)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
+            if (($shift->getStart() < $insometime) && $shift->getStart() > $y && ($shift->getEnd() > $sometimeago)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
                 if ($code->getCreatedAt() > $shift->getBookedTime()) // code crée après la réservation du créneau
                     return true;
             }

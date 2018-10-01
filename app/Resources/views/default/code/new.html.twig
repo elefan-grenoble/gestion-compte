@@ -19,12 +19,12 @@
 
     <div id="lowtech" class="modal">
         <div class="modal-content">
-            <h4>Depuis cette machine</h4>
-            <p>Avec cette étape, tu va créer un nouveau code boîtier à mettre en place. <br> <strong>Note bien</strong> les informations qui vont s'afficher, tu n'y aura <strong>plus accès</strong> une fois à l'éxtérieur.</p>
+            <h4 class="center-align">Depuis cet ordinateur</h4>
+            <p>Avec cette étape, tu va générer un <strong>nouveau code boîtier</strong> à mettre en place. <br> <strong>Note bien</strong> les informations qui vont s'afficher, tu n'y auras <strong>plus accès</strong> une fois à l'éxtérieur.</p>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-close red-text btn-flat">Annuler</a>
-            <a href="{{ path('code_new',{'smartphone':false}) }}" class="waves-effect waves-green btn-flat green white-text">Je génére le nouveau code</a>
+            <a href="{{ path('code_new',{'smartphone':false}) }}" class="waves-effect waves-green btn-flat green white-text">OK : Je génére le nouveau code</a>
         </div>
     </div>
 
@@ -41,15 +41,19 @@
     {% else %}
         {% if display %}
             <div class="row">
-                {% set old_code_count = 0 %}
                 <div class="col s6">
                     {%  if old_codes | length > 0 %}
                         {% for c in old_codes %}
                             {% if is_granted("view",c) and c != code %}
-                                {% set old_code_count = 1 + old_code_count %}
                                 <div class="card-panel">
                                     <h4>Ancien code</h4>
                                     <h5><i class="material-icons left">vpn_key</i>{{ c.value }}</h5>
+                                    entré à {{ c.createdAt | date('H:m:i') }} le {{ c.createdAt | date_fr_long }} par {{ c.getRegistrar }}
+                                </div>
+                            {% elseif c != code %}
+                                <div class="card-panel">
+                                    <h4>Ancien code (invisible)</h4>
+                                    <h5><i class="material-icons left">vpn_key</i>XXXX</h5>
                                     entré à {{ c.createdAt | date('H:m:i') }} le {{ c.createdAt | date_fr_long }} par {{ c.getRegistrar }}
                                 </div>
                             {% endif %}
@@ -62,10 +66,10 @@
                         </div>
                     {% endif %}
                 </div>
-                {% if old_code_count == 0 %}
+                {% if old_codes | length == 1 and old_codes | first == code %}
                     </div><div class="row">
                 {% endif %}
-                <div class="col s6{% if old_code_count == 0 %} push-s3{% endif %}">
+                <div class="col s6{% if old_codes | length == 1 and old_codes | first == code %} push-s3{% endif %}">
                     <div class="card-panel green lighten-5">
                         <h4>Mon nouveau code</h4>
                         <h5><i class="material-icons left">vpn_key</i>{{ code.value }}</h5>
@@ -73,7 +77,6 @@
                     </div>
                 </div>
             </div>
-            {%  if old_code_count != 0 %}
             <div class="center-align">
                 {% if no_smartphone is defined %}
                     <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>J'ai noté merci !</a>
@@ -81,7 +84,6 @@
                     <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>Changement de code effectué !</a>
                 {% endif %}
             </div>
-            {% endif %}
         {% endif %}
     {% endif %}
 
