@@ -84,8 +84,8 @@ class BeneficiaryController extends Controller
             return $this->redirectToEdit($user);
         }
 
-        return $this->render('user/edit_beneficiary.html.twig', array(
-            'user' => $beneficiary->getUser(),
+        return $this->render('beneficiary/edit_beneficiary.html.twig', array(
+            'beneficiary' => $beneficiary,
             'edit_form' => $editForm->createView(),
         ));
     }

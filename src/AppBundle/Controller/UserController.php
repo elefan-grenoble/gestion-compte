@@ -478,68 +478,6 @@ class UserController extends Controller
     }
 
     /**
-     * Displays a form to edit an existing user entity.
-     *
-     * @Route("/beneficiary/{id}/edit", name="beneficiary_edit")
-     * @Method({"GET", "POST"})
-     */
-    public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
-    {
-        $session = new Session();
-        $user = $beneficiary->getUser();
-        $this->denyAccessUnlessGranted('edit', $user);
-
-        $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $otherUser = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$beneficiary->getEmail()));
-            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$beneficiary->getEmail()));
-            if ((!$otherUser && !$otherBeneficiary) || ($otherBeneficiary->getId() == $beneficiary->getId())){
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            }else{
-                $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
-            }
-
-            return $this->redirectToEdit($user);
-        }
-
-        return $this->render('user/edit_beneficiary.html.twig', array(
-            'user' => $beneficiary->getUser(),
-            'edit_form' => $editForm->createView(),
-        ));
-    }
-
-    /**
-     * Deletes a beneficiary entity.
-     *
-     * @Route("/beneficiary/{id}", name="beneficiary_delete")
-     * @Method("DELETE")
-     */
-    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
-    {
-        $user = $beneficiary->getUser();
-
-        $this->denyAccessUnlessGranted('edit', $user);
-
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($beneficiary);
-            $em->flush();
-        }
-
-        return $this->redirectToShow($user);
-    }
-
-    /**
      * Deletes a user entity.
      *
      * @Route("/delete/{id}", name="user_delete")

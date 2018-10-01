@@ -1,0 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i
+        class="material-icons">chevron_right</i>
+    <i class="material-icons">person</i><a
+        href="{{ path('member_show', { 'member_number': beneficiary.membership.memberNumber }) }}">{{ beneficiary.membership.autocompleteLabel }}</a>
+    <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i><span>Editer bénéficiaire</span>
+{% endblock %}
+
+{% block content %}
+    <h3>&Eacute;diter un beneficiaire</h3>
+    {{ form_start(edit_form) }}
+    {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: edit_form } %}
+    <div class="col s3">
+        <input type="submit" class="btn waves-effect" value="Modifier"/>
+    </div>
+    {{ form_end(edit_form) }}
+{% endblock %}
