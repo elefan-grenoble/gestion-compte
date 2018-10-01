@@ -20,7 +20,7 @@ $(document).ready(function() {
                 type: "POST",
                 url: search_url,
                 data: {
-                    key: val.substring(0,val.length-1)
+                    key: val,
                 },
                 dataType: "json",
                 success: function(response) {
