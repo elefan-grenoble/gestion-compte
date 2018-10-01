@@ -1,10 +1,11 @@
 {% if beneficiary %}
-<div class="col s12 m6 l6 xl6">
-    <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue-grey lighten-1{% endif %}">
-        <div class="card-content white-text">
+    <div class="col s12 m6 l6 xl6">
+        <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue-grey lighten-1{% endif %}">
+            <div class="card-content white-text">
             <span class="card-title">
-                <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
-                {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper}}
+                <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}"
+                     class="circle responsive-img">
+                {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
                 {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
                 {% if beneficiary.membership.withdrawn %}<span class="red white-text badge"> fermé </span>{% endif %}
                 {% if beneficiary.membership.frozenChange %}
@@ -12,34 +13,55 @@
                     {% else %}<span class="deep-purple white-text badge"> Gel à la fin du cycle</span>{% endif %}
                 {% endif %}
                 {% if beneficiary.membership.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
-                {% if beneficiary.membership.frozen %}<span class="deep-purple white-text badge"> gelé </span>{% endif %}
+                {% if beneficiary.membership.frozen %}<span
+                        class="deep-purple white-text badge"> gelé </span>{% endif %}
                 {% if beneficiary.canViewUserData %}<i class="material-icons">face</i>{% endif %}</span>
-            <div class="row">
-                <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}</div>
-                {% if phone_only is not defined %}
-                <div class="col s12 truncate"><i class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}</div>
-                {% endif %}
-                {% if beneficiary.roles | length %}
-                <div class="col s12 truncate"><i class="material-icons tiny">assignment_ind</i>&nbsp;{% for role in beneficiary.roles %}<div class="chip">{{ role.name }}</div>{% endfor %}</div>
-                {% endif %}
-                {% if beneficiary.commissions | length %}
-                <div class="col s12 truncate"><i class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}<div class="chip">{{ commission.name }}</div>{% endfor %}</div>
-                {% endif %}
-            </div>
-            {% if not beneficiary.isMain and is_granted("edit",beneficiary.user) %}
+                <div class="row">
+                    <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}
+                    </div>
+                    {% if phone_only is not defined %}
+                        <div class="col s12 truncate"><i
+                                    class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}</div>
+                        {% if beneficiary.address %}
+                            <div class="col s12 truncate"><i
+                                        class="material-icons tiny">location_on</i>
+                                &nbsp;{{ beneficiary.address.street1 }}
+                                {% if beneficiary.address.street2 %}
+                                    &nbsp;{{ beneficiary.address.street2 }}
+                                {% endif %}
+                                &nbsp;{{ beneficiary.address.zipCode }}
+                                &nbsp;{{ beneficiary.address.city }}
+                                </span>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                    {% if beneficiary.roles | length %}
+                        <div class="col s12 truncate"><i
+                                    class="material-icons tiny">assignment_ind</i>&nbsp;{% for role in beneficiary.roles %}
+                            <div class="chip">{{ role.name }}</div>{% endfor %}</div>
+                    {% endif %}
+                    {% if beneficiary.commissions | length %}
+                        <div class="col s12 truncate"><i
+                                    class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}
+                            <div class="chip">{{ commission.name }}</div>{% endfor %}</div>
+                    {% endif %}
+                </div>
+                {% if is_granted("edit", beneficiary.membership) %}
                     <form action="{{ path('beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
                         {% if not is_granted("ROLE_ADMIN") and token is defined %}
                             <input type="hidden" value="{{ token }}" name="token">
                         {% endif %}
-                        <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons">mode_edit</i></button>
+                        <button type="submit" class="btn btn-floating waves-effect waves-light"><i
+                                    class="material-icons">mode_edit</i></button>
                     </form>
                     {% if delete_form is defined %}
                         {{ form_start(delete_form) }}
-                        <button type="submit" class="btn btn-floating waves-effect waves-light red"><i class="material-icons">remove</i></button>
+                        <button type="submit" class="btn btn-floating waves-effect waves-light red"><i
+                                    class="material-icons">remove</i></button>
                         {{ form_end(delete_form) }}
                     {% endif %}
-            {% endif %}
+                {% endif %}
+            </div>
         </div>
     </div>
-</div>
 {% endif %}

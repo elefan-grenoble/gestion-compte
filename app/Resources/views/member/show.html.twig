@@ -28,7 +28,7 @@
     </h4>
     <div class="row">
         {% for beneficiary in member.beneficiaries %}
-            {% include "user/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
+            {% include "beneficiary/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
         {% endfor %}
     </div>
     {% if member.notes | length %}
