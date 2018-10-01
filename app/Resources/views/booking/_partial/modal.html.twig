@@ -24,7 +24,7 @@
             {% if bucket.firstBookable(beneficiary).isDismissed %}
                 <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
             {% endif %}
-            {% if user.beneficiaries | length < 1 %}
+            {% if beneficiary.membership.beneficiaries | length < 1 %}
                 <p>Vous n'avez pas de bénéficiares</p>
             {% else %}
                 <p><label>Nombre de places restantes : </label>{{ nbBookableShifts }}/{{ nbShifts }}</p>
@@ -42,7 +42,7 @@
         <div class="modal-footer">
             <a href="#!"
                class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Annuler</a>
-            {% if user.beneficiaries | length >= 1 %}
+            {% if beneficiary.membership.beneficiaries | length >= 1 %}
                 <button class="modal-action modal-close waves-effect waves-green btn teal">Confirmer</button>
             {% endif %}
         </div>

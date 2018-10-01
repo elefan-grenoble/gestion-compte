@@ -20,7 +20,7 @@
     {% else %}
         <div class="row center">
             <h4 class="header">Créneaux disponibles pour <span
-                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (app.user.beneficiaries | length > 1) %}
+                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (beneficiary.membership.beneficiaries | length > 1) %}
                 <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
                     ]</a>{% endif %}</h4>
             {% if not beneficiary.membership.canBook(beneficiary) %}
