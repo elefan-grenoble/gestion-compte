@@ -11,23 +11,20 @@
     <div class="row">
         {% for commission in commissions %}
             <div class="col s12 m6">
-                <div class="card blue-grey darken-1">
+                <div class="card blue-grey darken-2 small">
                     <div class="card-content white-text">
-                        <span class="card-title">{{ commission.name }}</span>
+                        <span class="card-title">{{ commission.name }} <span class="chip right deep-purple lighten-5">x{{ commission.beneficiaries | length }}<i class="material-icons tiny left">person</i></span></span>
                         {{ commission.description | markdown | raw }}
-                        <p>{{ commission.email | email_encode | raw }}</p>
-                        <p><i class="material-icons">group</i> membres : {{ commission.beneficiaries | length }}</p>
-                        <ul>
-                            {% for owner in commission.owners %}
-                                <a class="chip" href="{{ path("user_show",{username:owner.user.username}) }}">
-                                    <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
-                                    {{ owner.displayname }}
-                                </a>
-                            {% endfor %}
-                        </ul>
                     </div>
                     <div class="card-action">
-                        <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+                        <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i></a>
+                        <a href="mailto:{{ commission.email | email_encode | raw }}"><i class="material-icons left">email</i></a>
+                        {% for owner in commission.owners %}
+                            <a class="chip black-text" href="{{ path("user_show",{username:owner.user.username}) }}" style="font-size: 9px;">
+                                <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                {{ owner.firstname }}
+                            </a>
+                        {% endfor %}
                     </div>
                 </div>
             </div>

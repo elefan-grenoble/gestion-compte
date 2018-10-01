@@ -27,7 +27,7 @@
                 {% endif %}
             </div>
             {% if not beneficiary.isMain and is_granted("edit",beneficiary.user) %}
-                    <form action="{{ path('user_edit_beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
+                    <form action="{{ path('beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
                         {% if not is_granted("ROLE_ADMIN") and token is defined %}
                             <input type="hidden" value="{{ token }}" name="token">
                         {% endif %}
@@ -35,7 +35,7 @@
                     </form>
                     {% if delete_form is defined %}
                         {{ form_start(delete_form) }}
-                        <button type="submit" href="{{ path('user_edit_beneficiary_delete',{'id':beneficiary.id}) }}" class="btn btn-floating waves-effect waves-light red"><i class="material-icons">remove</i></button>
+                        <button type="submit" class="btn btn-floating waves-effect waves-light red"><i class="material-icons">remove</i></button>
                         {{ form_end(delete_form) }}
                     {% endif %}
             {% endif %}

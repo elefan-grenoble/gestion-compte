@@ -575,7 +575,7 @@ class AdminController extends Controller
 
                         $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
 
-                        return $this->redirectToRoute('user_edit',array('username'=>$destUser->getUsername()));
+                        return $this->redirectToRoute('user_show',array('username'=>$destUser->getUsername()));
                     }else{
                         $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
                     }

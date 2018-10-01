@@ -22,7 +22,6 @@
         </div>
         <div class="tips right small">
             prénom : <input value="{{ '{{' }} beneficiary.firstname {{ '}}' }}"/>
-            dernier créneau + 28 jour: <input value="{{ '{{' }} beneficiary.bookedShifts.last.start  | date_modify('+28 day') | date('d m Y à H:i') {{ '}}' }}"/>
         </div>
     </div>
 
