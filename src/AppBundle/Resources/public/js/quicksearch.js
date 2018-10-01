@@ -14,12 +14,13 @@ $(document).ready(function() {
         $('#quick_search_nav').slideUp();
     });
     $('#quick_search').keyup(function () {
+        var val = $(this).val();
         if ($(this).val().length > 1){
             $.ajax({
                 type: "POST",
                 url: search_url,
                 data: {
-                    key: $(this).val()
+                    key: val.substring(0,val.length-1)
                 },
                 dataType: "json",
                 success: function(response) {
