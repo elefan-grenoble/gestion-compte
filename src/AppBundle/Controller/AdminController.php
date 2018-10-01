@@ -210,7 +210,7 @@ class AdminController extends Controller
         $delete_forms = array();
         foreach ($admins as $admin){
             $delete_forms[$admin->getId()] = $this->createFormBuilder()
-                ->setAction($this->generateUrl('user_delete', array('username' => $admin->getUsername())))
+                ->setAction($this->generateUrl('user_delete', array('id' => $admin->getId())))
                 ->setMethod('DELETE')
                 ->getForm()->createView();
         }
@@ -501,93 +501,6 @@ class AdminController extends Controller
             ->setMethod('DELETE')
             ->getForm();
     }
-
-    /**
-     * export all emails of members (including beneficiary)
-     *
-     * @Route("/emails_csv", name="admin_emails_csv")
-     * @Method({"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     */
-    public function exportEmails(Request $request){
-        $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
-        $return = '';
-        if($beneficiaries) {
-            $d = ','; // this is the default but i like to be explicit
-            $e = '"'; // this is the default but i like to be explicit
-            foreach($beneficiaries as $beneficiary) {
-                if (!$beneficiary->getUser()->isWithdrawn()){
-                    $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-                    if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
-                        $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
-                    }
-                }
-            }
-        }
-        return new Response($return, 200, array(
-            'Content-Encoding: UTF-8',
-            'Content-Type' => 'application/force-download; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
-        ));
-    }
-
-    /**
-     * Join two user
-     *
-     * @Route("/join", name="user_join")
-     * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function joinAction(Request $request)
-    {
-        $form = $this->createFormBuilder()
-            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
-            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
-            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes','attr' => array('class' => 'btn')))
-            ->getForm();
-        $form->handleRequest($request);
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
-            $re = '/#([0-9]+).*/';
-            $str = $form->get('from_text')->getData()."\n".$form->get('dest_text')->getData();
-            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-            if (count($matches)>=2){
-                $fromUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[0][1]));
-                if ($fromUser){
-                    $destUser = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$matches[1][1]));
-                    if ($destUser){
-                        foreach ($fromUser->getBeneficiaries() as $beneficiary){
-                            $destUser->addBeneficiary($beneficiary); //in
-                            $fromUser->removeBeneficiary($beneficiary); //out
-                            $beneficiary->setUser($destUser);
-                            $em->persist($beneficiary);
-                        }
-                        $em->persist($destUser);
-                        $em->flush();
-                        $fromUser->setMainBeneficiary(null);
-                        $em->remove($fromUser);
-                        $em->flush();
-
-                        $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
-
-                        return $this->redirectToRoute('user_show',array('username'=>$destUser->getUsername()));
-                    }else{
-                        $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
-                    }
-                }else{
-                    $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
-                }
-            }
-
-        }
-
-        $users = $em->getRepository('AppBundle:User')->findAll(); //todo exclude closed
-        return $this->render('admin/user/join.html.twig',array('form'=>$form->createView(),'users'=>$users));
-    }
-
 
     /**
      * Import from CSV

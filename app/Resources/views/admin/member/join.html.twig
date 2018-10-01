@@ -1,0 +1,50 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3>Joindre deux comptes</h3>
+    <p class="red-text"><i class="material-icons">warning</i>Attention, le compte choisi en première position va être <b>détruit</b> et les bénéficiaires ajoutés au compte choisi en deuxième
+        <br>
+        <b>Cette opération ne peut pas être annulée.</b>
+    </p>
+    {{ form_start(form) }}
+
+        <div class="row">
+            <div class="col s12">
+                <div class="row">
+                    <div class="input-field col m6 s12">
+                        <i class="material-icons prefix">person</i>
+                        {{ form_widget(form.from_text) }}
+                        {{ form_label(form.from_text) }}
+                    </div>
+                    <div class="input-field col m6 s12">
+                        <i class="material-icons prefix">person</i>
+                        {{ form_widget(form.dest_text) }}
+                        {{ form_label(form.dest_text) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ form_widget(form.join) }}
+    {{ form_end(form) }}
+
+{% endblock %}
+{% block javascripts %}
+    <script>
+        jQuery(function ($) {
+            $('input[name="form[from_text]"],input[name="form[dest_text]"]').autocomplete({
+                data: {
+            {% for member in members %}
+                {% if member.mainBeneficiary %}
+                    "#{{ member.memberNumber }} {{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}" : null,
+                {% endif %}
+            {% endfor %}
+                },
+                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
+                onAutocomplete: function(val) {
+                    // Callback function when value is autcompleted.
+                },
+                minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
+            });
+        })
+    </script>
+{% endblock %}
