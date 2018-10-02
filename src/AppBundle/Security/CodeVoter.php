@@ -62,6 +62,9 @@ class CodeVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::VIEW:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                    return true;
+                }
                 return $this->canView($code, $user);
             case self::CLOSE:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
