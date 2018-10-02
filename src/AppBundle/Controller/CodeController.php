@@ -37,6 +37,9 @@ class CodeController extends Controller
 
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        $logger = $this->get('logger');
+        $logger->info('CODE : codes_list',array('username'=>$current_app_user->getUsername()));
+
         $em = $this->getDoctrine()->getManager();
 
         if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')){
@@ -77,7 +80,10 @@ class CodeController extends Controller
             $this->denyAccessUnlessGranted('view',$code);
         }
 
+        $logger = $this->get('logger');
+
         if (count($my_open_codes)){
+            $logger->info('CODE : code_new make change screen',array('username'=>$current_app_user->getUsername()));
             if (count($old_codes) > 1){
                 return $this->render('default/code/new.html.twig', array(
                     'display' =>  true,
@@ -97,6 +103,7 @@ class CodeController extends Controller
         //no code open for this user
 
         if ($request->get('smartphone') === null){ //first visit
+            $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
             return $this->render('default/code/new.html.twig');
         }
 
@@ -112,6 +119,8 @@ class CodeController extends Controller
 
         $em->persist($code);
         $em->flush();
+
+        $logger->info('CODE : code_new created',array('username'=>$current_app_user->getUsername()));
 
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $display,$old_codes));
@@ -168,8 +177,11 @@ class CodeController extends Controller
         $logged_out = false;
         $previousToken = null;
 
+        $logger = $this->get('logger');
+
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+            $logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
         }else{
             $token = $request->get('token');
             $username = explode(',',$this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($token))[0];
@@ -179,6 +191,7 @@ class CodeController extends Controller
                 $logged_out = true;
                 $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
                 $this->get("security.token_storage")->setToken($token);
+                $logger->info('CODE : confirm code change (logged out)',array('username'=>$current_app_user->getUsername()));
             }else{
                 //mute
                 return $this->redirectToRoute('homepage');
