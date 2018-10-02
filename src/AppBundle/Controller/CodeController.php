@@ -37,6 +37,9 @@ class CodeController extends Controller
 
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        $logger = $this->get('logger');
+        $logger->info('CODE : '.$current_app_user->getUsername().' codes_list');
+
         $em = $this->getDoctrine()->getManager();
 
         if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')){
@@ -77,7 +80,11 @@ class CodeController extends Controller
             $this->denyAccessUnlessGranted('view',$code);
         }
 
+        $logger = $this->get('logger');
+        $logger->info('CODE : '.$current_app_user->getUsername().' code_new');
+
         if (count($my_open_codes)){
+            $logger->info('CODE : '.$current_app_user->getUsername().' code_new confirm screen');
             if (count($old_codes) > 1){
                 return $this->render('default/code/new.html.twig', array(
                     'display' =>  true,
@@ -97,8 +104,11 @@ class CodeController extends Controller
         //no code open for this user
 
         if ($request->get('smartphone') === null){ //first visit
+            $logger->info('CODE : '.$current_app_user->getUsername().' code_new create screen');
             return $this->render('default/code/new.html.twig');
         }
+
+        $logger->info('CODE : '.$current_app_user->getUsername().' code_new created');
 
         $display = ($request->get('smartphone') == '0');
 
@@ -168,8 +178,11 @@ class CodeController extends Controller
         $logged_out = false;
         $previousToken = null;
 
+        $logger = $this->get('logger');
+
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+            $logger->info('CODE : '.$current_app_user->getUsername().' confirm code change (logged in)');
         }else{
             $token = $request->get('token');
             $username = explode(',',$this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($token))[0];
@@ -179,6 +192,7 @@ class CodeController extends Controller
                 $logged_out = true;
                 $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
                 $this->get("security.token_storage")->setToken($token);
+                $logger->info('CODE : '.$current_app_user->getUsername().' confirm code change (logged out)');
             }else{
                 //mute
                 return $this->redirectToRoute('homepage');
