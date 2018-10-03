@@ -79,7 +79,7 @@
                             {{ registration.registrar.username }}
                         {% endif %}
                         &nbsp;&agrave;&nbsp;{% if is_granted("ROLE_SUPER_ADMIN") %}
-                        {% if(registration.user.registrations | length) > 1 %}
+                        {% if(registration.membership.registrations | length) > 1 %}
                             <div class="collapsible-body">
 
                                 {{ form_start(delete_forms[registration.id]) }}
@@ -113,7 +113,7 @@
                             {% include "user/_partial/registration_form.html.twig" with { form: edit_forms[registration.id] } %}
                             {{ form_end(edit_forms[registration.id]) }}
                         {% endif %}
-                        {% if(registration.user.registrations | length) > 1 %}
+                        {% if(registration.membership.registrations | length) > 1 %}
                             {% if is_granted("ROLE_SUPER_ADMIN") %}
                                 {{ form_start(delete_forms[registration.id]) }}
                                 {{ form_widget(delete_forms[registration.id]) }}
