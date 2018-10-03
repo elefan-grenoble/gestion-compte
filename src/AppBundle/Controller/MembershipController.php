@@ -616,6 +616,58 @@ class MembershipController extends Controller
     }
 
     /**
+     * Lists all user entities.
+     *
+     * @Route("/office_tools", name="user_office_tools")
+     * @Method({"GET","POST"})
+     */
+    public function officeToolsAction(Request $request)
+    {
+        $this->denyAccessUnlessGranted('access_tools',$this->getCurrentAppUser());
+        $note = new Note();
+        $note->setAuthor($this->getCurrentAppUser());
+        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($note_form->isSubmitted() && $note_form->isValid()) {
+            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject"=>null,"author"=>$this->getCurrentAppUser(),"text"=>$note->getText()));
+            $session = new Session();
+            if ($existing_note){
+                $session->getFlashBag()->add('error','Ce post-it existe déjà');
+            }else{
+                $em->persist($note);
+                $em->flush();
+                $session->getFlashBag()->add('success','Post-it ajouté');
+            }
+        }
+
+        $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject"=>null));
+        $notes_form = array();
+        $notes_delete_form = array();
+        $new_notes_form = array();
+        foreach ($notes as $n){
+            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n,array('action'=>$this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+
+            $response_note = clone $note;
+            $response_note->setParent($n);
+            $response_note_form = $this->createForm(NoteType::class, $response_note,
+                array('action' => $this->generateUrl('note_reply', array('id' => $n->getId()))));
+
+            $new_notes_form[$n->getId()] = $response_note_form->createView();
+        }
+        return $this->render('default/tools/office_tools.html.twig', array(
+            'note_form' => $note_form->createView(),
+            'notes_form' => $notes_form,
+            'notes_delete_form' => $notes_delete_form,
+            'new_notes_form' => $new_notes_form,
+            'notes' => $notes
+        ));
+    }
+
+    /**
      * Creates a form to delete a member entity.
      *
      * @param Membership $member
@@ -625,6 +677,21 @@ class MembershipController extends Controller
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('member_delete', array('id' => $member->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to delete a note entity.
+     *
+     * @param Note $note the note entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createNoteDeleteForm(Note $note)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }
