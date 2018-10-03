@@ -333,32 +333,32 @@ class MembershipController extends Controller
     {
         $session = new Session();
         $memberNumber = $request->request->get('member_number');
-        if ($memberNumber){
+        if ($memberNumber) {
             $em = $this->getDoctrine()->getManager();
-            $member = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number'=>$memberNumber));
-            if ($this->isGranted('view', $member)){
+            $member = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $memberNumber));
+            if ($this->isGranted('view', $member)) {
                 return $this->redirectToEdit($member);
             }
             $form = $this->createFormBuilder()
-                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent','disabled' => true,'attr' => array( 'value'=>$user->getMemberNumber())))
-                ->add('username', HiddenType::class, array('attr' => array( 'value'=>$user->getUsername())))
-                ->add('email', EmailType::class, array('label' => 'Courriel complet','attr' => array('placeholder' => $user->getAnonymousEmail())))
-                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de '.$user->getFirstname(),'attr' => array('class' => 'btn')))
+                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true, 'attr' => array('value' => $user->getMemberNumber())))
+                ->add('username', HiddenType::class, array('attr' => array('value' => $user->getUsername())))
+                ->add('email', EmailType::class, array('label' => 'Courriel complet', 'attr' => array('placeholder' => $user->getAnonymousEmail())))
+                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de ' . $user->getFirstname(), 'attr' => array('class' => 'btn')))
                 ->getForm();
-        }else{
-            if ($this->isGranted('view', new User())){
+        } else {
+            if ($this->isGranted('view', new User())) {
                 $form = $this->createFormBuilder()
                     ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
-                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('username', HiddenType::class, array('attr' => array('value' => '')))
                     ->add('email', HiddenType::class, array('label' => 'email'))
-                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                     ->getForm();
-            }else{
+            } else {
                 $form = $this->createFormBuilder()
                     ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
-                    ->add('username', HiddenType::class, array('attr' => array( 'value'=>'')))
+                    ->add('username', HiddenType::class, array('attr' => array('value' => '')))
                     ->add('email', EmailType::class, array('label' => 'email'))
-                    ->add('edit', SubmitType::class, array('label' => 'Editer','attr' => array('class' => 'btn')))
+                    ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                     ->getForm();
             }
 
@@ -375,12 +375,12 @@ class MembershipController extends Controller
             $em = $this->getDoctrine()->getManager();
             $user = null;
             if ($username)
-                $user = $em->getRepository('AppBundle:User')->findOneBy(array('username'=>$username));
-            else if($member_number)
-                $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('username' => $username));
+            else if ($member_number)
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number' => $member_number));
 
-            if ($user&&($this->isGranted('view',$user) || ($email&&($user->getEmail()==$email)))){
-                $session->set('token_key',uniqid());
+            if ($user && ($this->isGranted('view', $user) || ($email && ($user->getEmail() == $email)))) {
+                $session->set('token_key', uniqid());
                 return $this->redirectToShow($user);
             }
             if ($email)
@@ -549,12 +549,6 @@ class MembershipController extends Controller
         $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            if (count($member->getBeneficiaries())) { //admin do not have any Beneficiary
-                $em->remove($member->getMainBeneficiary());
-                foreach ($member->getBeneficiaries() as $beneficiary) {
-                    $em->remove($beneficiary);
-                }
-            }
             $em->remove($member);
             $em->flush();
 
@@ -576,7 +570,7 @@ class MembershipController extends Controller
         $form = $this->createFormBuilder()
             ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
             ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
-            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes','attr' => array('class' => 'btn')))
+            ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);
 
@@ -585,14 +579,14 @@ class MembershipController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $session = new Session();
             $re = '/#([0-9]+).*/';
-            $str = $form->get('from_text')->getData()."\n".$form->get('dest_text')->getData();
+            $str = $form->get('from_text')->getData() . "\n" . $form->get('dest_text')->getData();
             preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-            if (count($matches)>=2){
-                $fromMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number"=>$matches[0][1]));
-                if ($fromMember){
-                    $destMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number"=>$matches[1][1]));
-                    if ($destMember){
-                        foreach ($fromMember->getBeneficiaries() as $beneficiary){
+            if (count($matches) >= 2) {
+                $fromMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[0][1]));
+                if ($fromMember) {
+                    $destMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[1][1]));
+                    if ($destMember) {
+                        foreach ($fromMember->getBeneficiaries() as $beneficiary) {
                             $destMember->addBeneficiary($beneficiary); //in
                             $fromMember->removeBeneficiary($beneficiary); //out
                             $beneficiary->setMembership($destMember);
@@ -606,11 +600,11 @@ class MembershipController extends Controller
 
                         $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
 
-                        return $this->redirectToRoute('user_show',array('username'=>$destMember->getUsername()));
-                    }else{
+                        return $this->redirectToRoute('user_show', array('username' => $destMember->getUsername()));
+                    } else {
                         $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
                     }
-                }else{
+                } else {
                     $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
                 }
             }
@@ -618,7 +612,7 @@ class MembershipController extends Controller
         }
 
         $members = $em->getRepository('AppBundle:Membership')->findAll(); //todo exclude closed
-        return $this->render('admin/member/join.html.twig',array('form'=>$form->createView(),'members'=>$members));
+        return $this->render('admin/member/join.html.twig', array('form' => $form->createView(), 'members' => $members));
     }
 
     /**
@@ -642,17 +636,18 @@ class MembershipController extends Controller
      * @Method({"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function exportEmails(Request $request){
+    public function exportEmails(Request $request)
+    {
         $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
         $return = '';
-        if($beneficiaries) {
+        if ($beneficiaries) {
             $d = ','; // this is the default but i like to be explicit
             $e = '"'; // this is the default but i like to be explicit
-            foreach($beneficiaries as $beneficiary) {
-                if (!$beneficiary->getMembership()->isWithdrawn()){
+            foreach ($beneficiaries as $beneficiary) {
+                if (!$beneficiary->getMembership()->isWithdrawn()) {
                     $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-                    if (!count($matches)&&filter_var($beneficiary->getEmail(),FILTER_VALIDATE_EMAIL)) { //was not a temp mail
-                        $return .= $beneficiary->getFirstname().$d.$beneficiary->getLastname().$d.$beneficiary->getEmail()."\n";
+                    if (!count($matches) && filter_var($beneficiary->getEmail(), FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                        $return .= $beneficiary->getFirstname() . $d . $beneficiary->getLastname() . $d . $beneficiary->getEmail() . "\n";
                     }
                 }
             }
@@ -660,7 +655,7 @@ class MembershipController extends Controller
         return new Response($return, 200, array(
             'Content-Encoding: UTF-8',
             'Content-Type' => 'application/force-download; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+            'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
         ));
     }
 

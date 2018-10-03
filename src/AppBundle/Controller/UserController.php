@@ -291,47 +291,6 @@ class UserController extends Controller
     }
 
     /**
-     * Deletes a user entity.
-     *
-     * @Route("/delete/{id}", name="user_delete")
-     * @Method("DELETE")
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     * @param Request $request
-     * @param User $user
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function deleteAction(Request $request, User $user)
-    {
-        $form = $this->createDeleteForm($user);
-        $form->handleRequest($request);
-
-        $session = new Session();
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($user);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', "L'utilisateur a bien été supprimé");
-        }
-
-        return $this->redirectToRoute('user_index');
-    }
-
-    /**
-     * Creates a form to delete a user entity.
-     *
-     * @param User $user
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(User $user)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('user_delete', array('id' => $user->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-    }
-
-    /**
      * Creates a new user entity.
      *
      * @Route("/new", name="user_new")

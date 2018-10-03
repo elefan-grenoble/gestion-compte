@@ -101,9 +101,9 @@ class BeneficiaryController extends Controller
      */
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
-        $user = $beneficiary->getUser();
+        $member = $beneficiary->getMembership();
 
-        $this->denyAccessUnlessGranted('edit', $user);
+        $this->denyAccessUnlessGranted('edit', $member);
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
@@ -117,7 +117,7 @@ class BeneficiaryController extends Controller
             $em->flush();
         }
 
-        return $this->redirectToShow($user);
+        return $this->redirectToShow($member);
     }
 
     private function getErrorMessages(Form $form) {

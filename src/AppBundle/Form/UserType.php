@@ -40,26 +40,6 @@ class UserType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
-                $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
-            }else{
-                $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
-            }
-
-            if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
-                if ($userData && $userData->getId()) { //in not new
-                    $form->add('withdrawn', CheckboxType::class, array('label' => 'Compte fermé', 'required' => false));
-                    $form->add('frozen', CheckboxType::class, array('label' => 'Compte gelé', 'required' => false));
-                }
-            }
-
-            $form->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
-            $form->add('address', AddressType::class,array('label'=>' '));
-
-            if ($userData && !$userData->getId()){
-                $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
-            }
-
         });
     }
 
