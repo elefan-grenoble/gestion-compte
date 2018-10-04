@@ -2,7 +2,7 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Role;
+use AppBundle\Entity\Formation;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -13,23 +13,23 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * User controller.
  *
- * @Route("admin/roles")
+ * @Route("admin/formations")
  * @Security("has_role('ROLE_ADMIN')")
  */
-class RoleController extends Controller
+class FormationController extends Controller
 {
 
     /**
-     * Roles list
+     * Formations list
      *
-     * @Route("/", name="admin_roles")
+     * @Route("/", name="admin_formations")
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
     {
-        $roles = $this->getDoctrine()->getManager()->getRepository('AppBundle:Role')->findAll();
-        return $this->render('admin/role/list.html.twig',array('roles'=>$roles));
+        $formations = $this->getDoctrine()->getManager()->getRepository('AppBundle:Formation')->findAll();
+        return $this->render('admin/role/list.html.twig',array('formations'=>$formations));
     }
 
     /**
@@ -43,25 +43,25 @@ class RoleController extends Controller
     {
         $session = new Session();
 
-        $role = new Role();
+        $formation = new Formation();
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\RoleType', $role);
+        $form = $this->createForm('AppBundle\Form\FormationType', $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $em->persist($role);
+            $em->persist($formation);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le nouveau role a bien été créé !');
 
-            return $this->redirectToRoute('admin_roles');
+            return $this->redirectToRoute('admin_formations');
 
         }
 
         return $this->render('admin/role/new.html.twig', array(
-            'role' => $role,
+            'role' => $formation,
             'form' => $form->createView(),
         ));
     }
@@ -73,29 +73,29 @@ class RoleController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Role $role)
+    public function editAction(Request $request,Formation $formation)
     {
         $session = new Session();
 
-        $form = $this->createForm('AppBundle\Form\RoleType', $role);
+        $form = $this->createForm('AppBundle\Form\FormationType', $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
             $em = $this->getDoctrine()->getManager();
-            $em->persist($role);
+            $em->persist($formation);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le role a bien été édité !');
 
-            return $this->redirectToRoute('admin_roles');
+            return $this->redirectToRoute('admin_formations');
 
         }
 
         return $this->render('admin/role/edit.html.twig', array(
-            'role' => $role,
+            'role' => $formation,
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($role)->createView(),
+            'delete_form' => $this->getDeleteForm($formation)->createView(),
         ));
     }
 
@@ -106,27 +106,27 @@ class RoleController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Role $role)
+    public function removeAction(Request $request,Formation $formation)
     {
         $session = new Session();
-        $form = $this->getDeleteForm($role);
+        $form = $this->getDeleteForm($formation);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $em->remove($role);
+            $em->remove($formation);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le role a bien été supprimée !');
         }
-        return $this->redirectToRoute('admin_roles');
+        return $this->redirectToRoute('admin_formations');
     }
 
     /**
-     * @param Role $role
+     * @param Formation $formation
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Role $role){
+    protected function getDeleteForm(Formation $formation){
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('role_delete', array('id' => $role->getId())))
+            ->setAction($this->generateUrl('role_delete', array('id' => $formation->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }

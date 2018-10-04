@@ -27,7 +27,7 @@ class PeriodPositionType extends AbstractType
             ->add('role',EntityType::class, array(
                 'label'=>'Rôle necessaire',
                 'choice_label' => 'name',
-                'class' => Role::class,
+                'class' => Formation::class,
                 'multiple' => false,
                 'required' => false
             ));

@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 
@@ -111,11 +112,11 @@ class Beneficiary
     private $tasks;
 
     /**
-     * Many Beneficiary have Many Roles.
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="beneficiaries")
-     * @ORM\JoinTable(name="beneficiaries_roles")
+     * Many Beneficiary have Many Formations.
+     * @ORM\ManyToMany(targetEntity="Formation", inversedBy="beneficiaries")
+     * @ORM\JoinTable(name="beneficiaries_formations")
      */
-    private $roles;
+    private $formations;
 
     /**
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
@@ -269,35 +270,6 @@ class Beneficiary
         return $this->user;
     }
 
-    /**
-     * Get hasViewUserDataRights
-     *
-     * @return boolean
-     */
-    public function canViewUserData()
-    {
-        foreach ($this->getRoles() as $role){
-            if ($role->hasViewUserDataRights())
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get hasViewUserDataRights
-     *
-     * @return boolean
-     */
-    public function canEditUserData()
-    {
-        foreach ($this->getRoles() as $role){
-            if ($role->hasEditUserDataRights())
-                return true;
-        }
-        return false;
-    }
-
-
     public function isMain()
     {
         return $this === $this->getMembership()->getMainBeneficiary();
@@ -307,10 +279,10 @@ class Beneficiary
      */
     public function __construct()
     {
-        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->booked_shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->commissions = new ArrayCollection();
+        $this->formations = new ArrayCollection();
+        $this->shifts = new ArrayCollection();
+        $this->booked_shifts = new ArrayCollection();
     }
 
     /**
@@ -348,37 +320,37 @@ class Beneficiary
     }
 
     /**
-     * Add role
+     * Add formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation $formation
      *
      * @return Beneficiary
      */
-    public function addRole(\AppBundle\Entity\Role $role)
+    public function addRole(\AppBundle\Entity\Formation $formation)
     {
-        $this->roles[] = $role;
+        $this->formations[] = $formation;
 
         return $this;
     }
 
     /**
-     * Remove role
+     * Remove formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation $formation
      */
-    public function removeRole(\AppBundle\Entity\Role $role)
+    public function removeRole(\AppBundle\Entity\Formation $formation)
     {
-        $this->roles->removeElement($role);
+        $this->formations->removeElement($formation);
     }
 
     /**
-     * Get roles
+     * Get formations
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getRoles()
+    public function getFormations()
     {
-        return $this->roles;
+        return $this->formations;
     }
 
     /**
