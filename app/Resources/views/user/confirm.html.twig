@@ -10,18 +10,20 @@
 {% endblock %}
 
 {% block content %}
+    {% set beneficiary = user.beneficiary %}
+    {% set member = beneficiary.membership %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
             <br>
             {% if user %}
-            <h3 class="header center">Adhérent #{{ user.memberNumber }} trouvé !</h3>
+            <h3 class="header center">Adhérent #{{ member.memberNumber }} trouvé !</h3>
             <div class="row center">
-                {% if user.isWithdrawn %}
+                {% if member.isWithdrawn %}
                     Ce compte est fermé <i class="material-icons">visibility_off</i>
                 {% else %}
                     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
                             <br>
                             Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
@@ -72,7 +74,7 @@
                         {% endif %}
                     {% else %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ user.memberNumber }} <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
                             <br>
                             Il est lié à l'adresse courriel {{ user.anonymousEmail }}
                             <br>
@@ -92,11 +94,11 @@
                                 </div>
                             </div>
                         {% else %}
-                            Bonjour <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> !
-                            {% if not user.lastRegistration %}
+                            Bonjour <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            {% if not member.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peut pas être activé.</div>
                             {% else %}
-                                {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                                {% if beneficiary.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
                                     <br>
                                     Oups, on ne connait pas ton adresse courriel !<br>
                                     Pour utiliser l'espace membre elle est necessaire. <br>

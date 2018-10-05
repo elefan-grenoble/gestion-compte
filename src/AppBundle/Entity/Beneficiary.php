@@ -41,13 +41,6 @@ class Beneficiary
     /**
      * @var string
      *
-     * @ORM\Column(name="email", type="string", length=255, unique=true)
-     */
-    private $email;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="phone", type="string", length=255, nullable=true)
      */
     private $phone;
@@ -207,7 +200,7 @@ class Beneficiary
      */
     public function setEmail($email)
     {
-        $this->email = $email;
+        $this->getUser()->setEmail($email);
 
         return $this;
     }
@@ -219,7 +212,7 @@ class Beneficiary
      */
     public function getEmail()
     {
-        return $this->email;
+        return $this->getUser()->getEmail();
     }
 
     /**

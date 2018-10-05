@@ -189,7 +189,8 @@ class DefaultController extends Controller
         if ($form->handleRequest($request)->isValid()) {
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
-            $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
+            $ms = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number'=>$member_number));
+            $user = $ms->getMainBeneficiary()->getUser();
 
             return $this->render('user/confirm.html.twig', array(
                 'user' => $user,
