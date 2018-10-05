@@ -17,7 +17,9 @@
             <tr>
                 <td>
                     {% if admin.beneficiary %}
-                        <a href="{{ path('member_show', { 'member_number': admin.beneficiary.membership.memberNumber }) }}">{{ admin.beneficiary.membership.memberNumber }}</a>
+                        <a href="{{ path('member_show', { 'member_number': admin.beneficiary.membership.memberNumber }) }}">
+                            {{ admin.beneficiary.membership.memberNumber }}
+                        </a>
                     {% endif %}
                 </td>
                 <td>{{ admin.username }}</td>
@@ -26,14 +28,13 @@
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
                     {% if admin.beneficiary %}
-                        <a href="{{ path('member_edit', { 'member_number': admin.beneficiary.membership.memberNumber }) }}"
-                           class="teal btn-floating"><i
-                                    class="material-icons left">edit</i></a>
+                        <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
+                           class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
+
+                    {% else %}
+                        <button type="submit" class="btn-floating waves-effect waves-light red"><i
+                                    class="material-icons left">close</i></button>
                     {% endif %}
-                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
-                       class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
-                    <button type="submit" class="btn-floating waves-effect waves-light red"><i
-                                class="material-icons left">close</i></button>
                     {{ form_end(delete_forms[admin.id]) }}
                 </td>
             </tr>
