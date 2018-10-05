@@ -412,12 +412,6 @@ class User extends BaseUser
         return $this->given_proxies;
     }
 
-    public function getAutocompleteLabel(){
-        if ($this->getBeneficiary())
-            return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
-        else
-            return '#'.$this->getMemberNumber().' '.$this->getUsername();
-    }
 
     /**
      * @return Beneficiary
