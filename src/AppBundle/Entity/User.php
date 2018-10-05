@@ -18,7 +18,6 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  * @ORM\Table(name="fos_user")
- * @UniqueEntity("member_number")
  */
 class User extends BaseUser
 {
@@ -42,11 +41,6 @@ class User extends BaseUser
      * @OrderBy({"date" = "DESC"})
      */
     private $recordedRegistrations;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist", "remove"})
-     */
-    private $beneficiaries;
 
     /**
      * Beneficiary's user.
@@ -80,7 +74,6 @@ class User extends BaseUser
     public function __construct()
     {
         parent::__construct();
-        $this->beneficiaries = new ArrayCollection();
     }
 
     /**
@@ -107,7 +100,8 @@ class User extends BaseUser
         return $this->member_number;
     }
 
-    public function getFirstname() {
+    public function getFirstname()
+    {
         $beneficiary = $this->getBeneficiary();
         if ($beneficiary)
             return $beneficiary->getFirstname();
@@ -116,7 +110,8 @@ class User extends BaseUser
 
     }
 
-    public function getLastname() {
+    public function getLastname()
+    {
         $beneficiary = $this->getBeneficiary();
         if ($beneficiary)
             return $beneficiary->getLastname();
@@ -126,76 +121,81 @@ class User extends BaseUser
 
     public function __toString()
     {
-        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+        return $this->getUsername();
     }
 
-    public function getTmpToken($key = ''){
-        return md5($this->getEmail().$this->getLastname().$this->getPassword().$key.date('d'));
+    public function getTmpToken($key = '')
+    {
+        return md5($this->getEmail() . $this->getLastname() . $this->getPassword() . $key . date('d'));
     }
 
-    public  function getAnonymousEmail(){
+    public function getAnonymousEmail()
+    {
         $email = $this->getEmail();
-        $splited = explode("@",$email);
+        $splited = explode("@", $email);
         $return = '';
-        foreach ($splited as $part){
-            $splited_part = explode(".",$part);
-            foreach ($splited_part as $mini_part){
-                $first_char = substr($mini_part,0,1);
-                $last_char = substr($mini_part,strlen($mini_part)-1,1);
-                $center = substr($mini_part,1,strlen($mini_part)-2);
-                if (strlen($center)>0)
-                    $return .= $first_char.preg_replace('/./','_',$center).$last_char;
-                elseif(strlen($mini_part)>1)
-                    $return .= $first_char.$last_char;
+        foreach ($splited as $part) {
+            $splited_part = explode(".", $part);
+            foreach ($splited_part as $mini_part) {
+                $first_char = substr($mini_part, 0, 1);
+                $last_char = substr($mini_part, strlen($mini_part) - 1, 1);
+                $center = substr($mini_part, 1, strlen($mini_part) - 2);
+                if (strlen($center) > 0)
+                    $return .= $first_char . preg_replace('/./', '_', $center) . $last_char;
+                elseif (strlen($mini_part) > 1)
+                    $return .= $first_char . $last_char;
                 else
                     $return .= $first_char;
                 $return .= '.';
             }
-            $return = substr($return,0,strlen($return)-1);
+            $return = substr($return, 0, strlen($return) - 1);
             $return .= '@';
         }
-        $return = substr($return,0,strlen($return)-1);
-        return preg_replace('/_{3}_*/','___',$return);
+        $return = substr($return, 0, strlen($return) - 1);
+        return preg_replace('/_{3}_*/', '___', $return);
     }
 
-    public  function getAnonymousLastname(){
+    public function getAnonymousLastname()
+    {
         $lastname = $this->getLastname();
-        $splited = explode(" ",$lastname);
+        $splited = explode(" ", $lastname);
         $return = '';
-        foreach ($splited as $part){
-            $splited_part = explode("-",$part);
-            foreach ($splited_part as $mini_part){
-                $first_char = substr($mini_part,0,1);
-                $last_char = substr($mini_part,strlen($mini_part)-1,1);
-                $center = substr($mini_part,1,strlen($mini_part)-2);
-                if (strlen($center)>0)
-                    $return .= $first_char.preg_replace('/./','*',$center).$last_char;
+        foreach ($splited as $part) {
+            $splited_part = explode("-", $part);
+            foreach ($splited_part as $mini_part) {
+                $first_char = substr($mini_part, 0, 1);
+                $last_char = substr($mini_part, strlen($mini_part) - 1, 1);
+                $center = substr($mini_part, 1, strlen($mini_part) - 2);
+                if (strlen($center) > 0)
+                    $return .= $first_char . preg_replace('/./', '*', $center) . $last_char;
                 else
-                    $return .= $first_char.$last_char;
+                    $return .= $first_char . $last_char;
                 $return .= '-';
             }
-            $return = substr($return,0,strlen($return)-1);
+            $return = substr($return, 0, strlen($return) - 1);
             $return .= ' ';
         }
-        $return = substr($return,0,strlen($return)-1);
+        $return = substr($return, 0, strlen($return) - 1);
         return $return;
     }
 
-    static function makeUsername($firstname,$lastname,$extra = ''){
+    static function makeUsername($firstname, $lastname, $extra = '')
+    {
         $lastname = preg_replace('/[-\/]+/', ' ', $lastname);
-        $ln = explode(' ',$lastname);
+        $ln = explode(' ', $lastname);
 //        if (in_array(strtolower($ln[0]),array('la','du','de'))&&count($ln>1))
-        if (strlen($ln[0])<3&&count($ln)>1)
-            $ln = $ln[0].$ln[1];
+        if (strlen($ln[0]) < 3 && count($ln) > 1)
+            $ln = $ln[0] . $ln[1];
         else
             $ln = $ln[0];
-        $username = strtolower(substr(explode(' ',$firstname)[0],0,1).$ln);
+        $username = strtolower(substr(explode(' ', $firstname)[0], 0, 1) . $ln);
         $username = preg_replace('/[^a-z0-9]/', '', $username);
         $username .= $extra;
         return $username;
     }
 
-    static function randomPassword() {
+    static function randomPassword()
+    {
         $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
@@ -240,15 +240,21 @@ class User extends BaseUser
         return $this->recordedRegistrations;
     }
 
-    public function getCommissions(){
-        return $this->getBeneficiary()->getCommissions();
+    public function getCommissions()
+    {
+        if ($this->getBeneficiary()) {
+            return $this->getBeneficiary()->getCommissions();
+        } else {
+            return new ArrayCollection();
+        }
     }
 
-    public function getOwnedCommissions(){
-        return $this->getCommissions()->filter(function($commission) {
+    public function getOwnedCommissions()
+    {
+        return $this->getCommissions()->filter(function ($commission) {
             $r = false;
-            foreach ($commission->getOwners() as $owner){
-                if ($this->getBeneficiaries()->contains($owner))
+            foreach ($commission->getOwners() as $owner) {
+                if ($this->getBeneficiary()->contains($owner))
                     return true;
             }
             return false;
