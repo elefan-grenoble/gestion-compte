@@ -4,7 +4,7 @@
     <form action="{{ path('shift_book',{'id':bucket.firstBookable(beneficiary).id}) }}" method="post">
         <div class="modal-content">
             <h5>Réserver ce créneau / <span class="{{ bucket.firstBookable(beneficiary).job.color }}-text">{{ bucket.firstBookable(beneficiary).job.name }}</span>
-                {% if bucket.firstBookable(beneficiary).formation %}/ ROLE {{ bucket.firstBookable(beneficiary).formation.name }}{% endif %}</h5>
+                {% if bucket.firstBookable(beneficiary).formation %}/ Formation {{ bucket.firstBookable(beneficiary).formation.name }}{% endif %}</h5>
             <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
             {% if not bucket.firstBookable(beneficiary).formation and beneficiary.formations | length %}
                 <div class="row">
@@ -13,8 +13,8 @@
                             <span class="white-text">
                                 <i class="material-icons">warning</i>
                                 Ce créneau n'est <b>pas</b> qualifié. {{ beneficiary.firstname }} a
-                                le{% if beneficiary.formations | length > 1 %}s{% endif %} role{% if beneficiary.formations | length > 1 %}s{% endif %}
-                                {% for role in beneficiary.formations  %}{% if loop.last and loop.index > 1 %} et {% endif %}<i>{{ role.name }}</i>{% if not loop.last %}, {% endif %}{% endfor %}.<br>
+                                le{% if beneficiary.formations | length > 1 %}s{% endif %} formation{% if beneficiary.formations | length > 1 %}s{% endif %}
+                                {% for formation in beneficiary.formations  %}{% if loop.last and loop.index > 1 %} et {% endif %}<i>{{ formation.name }}</i>{% if not loop.last %}, {% endif %}{% endfor %}.<br>
                                 Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                             </span>
                         </div>

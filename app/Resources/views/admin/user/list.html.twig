@@ -128,15 +128,15 @@
                     </div>
                     <div class="col s12 m4">
                         <div>
-                            <h5>Roles / Commissions</h5>
+                            <h5>Formations / Commissions</h5>
                             <div class="row">
                                 <div class="input-field col s6">
-                                    {{ form_widget(form.roles) }}
-                                    {{ form_label(form.roles) }}
+                                    {{ form_widget(form.formations) }}
+                                    {{ form_label(form.formations) }}
                                 </div>
                                 <div class="col s6 input-field">
-                                    {{ form_widget(form.or_and_exp_roles) }}
-                                    {{ form_label(form.or_and_exp_roles) }}
+                                    {{ form_widget(form.or_and_exp_formations) }}
+                                    {{ form_label(form.or_and_exp_formations) }}
                                 </div>
                             </div>
                             <div class="input-field">
@@ -145,10 +145,10 @@
                             </div>
                         </div>
                         <div>
-                            <h5>!Roles / !Commissions</h5>
+                            <h5>!Formations / !Commissions</h5>
                             <div class="input-field">
-                                {{ form_widget(form.not_roles) }}
-                                {{ form_label(form.not_roles) }}
+                                {{ form_widget(form.not_formations) }}
+                                {{ form_label(form.not_formations) }}
                             </div>
                             <div class="input-field">
                                 {{ form_widget(form.not_commissions) }}
@@ -181,7 +181,7 @@
                 <th data-col="b.lastname">nom</th>
                 <th data-col="b.email">email</th>
                 <th class="hide-on-small-and-down" data-col="r.date">Adhésion(s)</th>
-                <th class="hide-on-med-and-down">Role(s)</th>
+                <th class="hide-on-med-and-down">Formation(s)</th>
                 <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
         </thead>
@@ -234,9 +234,9 @@
                     </td>
                     <td class="hide-on-med-and-down">
                         {% for beneficiary in member.beneficiaries %}
-                            {% for role in beneficiary.roles %}
+                            {% for formation in beneficiary.formations %}
                                 <div class="chip truncate">
-                                    {{ role.name }}
+                                    {{ formation.name }}
                                 </div>
                             {% endfor %}
                         {% endfor %}

@@ -3,11 +3,11 @@
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>roles
+    <i class="material-icons">list</i>formations
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des Roles</h4>
+    <h4 class="">Liste des Formations</h4>
 
     <table class="responsive-table striped">
         <thead>
@@ -19,16 +19,16 @@
         </thead>
 
         <tbody>
-        {% for role in roles %}
+        {% for formation in formations %}
             <tr>
-                <td>{{ role.name }}</td>
-                <td>{{ role.beneficiaries | length }}</td>
-                <td><a href="{{ path("role_edit",{'id':role.id}) }}">editer</a></td>
+                <td>{{ formation.name }}</td>
+                <td>{{ formation.beneficiaries | length }}</td>
+                <td><a href="{{ path("formation_edit",{'id':formation.id}) }}">editer</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
     <br>
-    <a href="{{ path('role_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un role</a>
+    <a href="{{ path('formation_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une formation</a>
 
 {% endblock %}

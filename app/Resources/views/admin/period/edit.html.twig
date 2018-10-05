@@ -16,7 +16,7 @@
     </div>
     {{ form_end(form) }}
 
-    <h5>Roles liés</h5>
+    <h5>Formations liés</h5>
     <ul>
         {% for position in period.positions %}
             <li>
@@ -33,8 +33,8 @@
             {{ form_widget(position_form.nb_of_shifter) }}
         </div>
         <div class="col s6">
-            {{ form_label(position_form.role) }}
-            {{ form_widget(position_form.role) }}
+            {{ form_label(position_form.formation) }}
+            {{ form_widget(position_form.formation) }}
         </div>
         <div class="col s3">
             <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>

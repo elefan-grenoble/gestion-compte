@@ -25,10 +25,10 @@
                     {% for shift in bucket.sortedShifts() %}
                         {% if (shift.shifter) %}{# is booked #}
                             {% if (shiftercount < 3) %}
-                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.role %}<b
-                                            data-role="{{ shift.role.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
-                                        &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.role %}</b>{% endif %}
-                                    {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
+                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.formation %}<b
+                                            data-formation="{{ shift.formation.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
+                                        &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.formation %}</b>{% endif %}
+                                    {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                                 </li>
                                 {% set shiftercount = shiftercount + 1 %}
                             {% elseif shiftercount == 3 %}
@@ -58,17 +58,17 @@
                 {% if shift.shifter %}{# is booked #}
                     <li>
                         <div class="collapsible-header">
-                        {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %}
+                        {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                             <a href="{{ path("member_show",{'member_number':shift.shifter.membership.memberNumber}) }}">#{{ shift.shifter.membership.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                            {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
-                            {% if not shift.role and shift.shifter.roles | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.roles | join(', ') }})</b>{% endif %}
+                            {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                            {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                     </li>
                 {% else %}
                     <li>
                         <div class="collapsible-header">
-                            {% if shift.role %}<b data-role="{{ shift.role.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
                         </div>
                         <div class="collapsible-body">
                             <form action="{{ path('admin_shift_book',{'id': shift.id }) }}" method="post">
