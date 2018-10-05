@@ -114,14 +114,6 @@
             <li id="actions">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
                 <div class="collapsible-body white">
-                    {% if is_granted("edit",member) %}
-                        <form action="{{ path('member_edit_firewall') }}" method="POST">
-                            <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
-                            <div>
-                                <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
-                            </div>
-                        </form>
-                    {% endif %}
                     {% if not member.mainBeneficiary.user.isEnabled %}
                         {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
 
