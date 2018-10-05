@@ -6,6 +6,8 @@ use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -40,6 +42,7 @@ class UserType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
+            $form->add('beneficiary',BeneficiaryType::class);
         });
     }
 

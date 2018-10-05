@@ -140,7 +140,7 @@ class PeriodController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $existingPosition = $em->getRepository('AppBundle:PeriodPosition')->findOneBy(array("role"=>$position->getRole(),"nbOfShifter"=>$position->getNbOfShifter()));
+            $existingPosition = $em->getRepository('AppBundle:PeriodPosition')->findOneBy(array("formation"=>$position->getFormation(),"nbOfShifter"=>$position->getNbOfShifter()));
             if ($existingPosition){
                 $session->getFlashBag()->add('info', 'La position existe déjà');
                 $position = $existingPosition;

@@ -7,7 +7,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Registration;
-use AppBundle\Entity\Role;
+use AppBundle\Entity\Formation;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\BeneficiaryType;

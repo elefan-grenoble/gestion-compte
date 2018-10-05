@@ -44,7 +44,7 @@
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             <li>
-                                <a href="{{ path('fos_user_profile_edit') }}">
+                                <a href="{{ path('fos_user_profile_show') }}">
                                     <i class="material-icons small left">settings</i>
                                     <small>{{ app.user.firstname }}</small>
                                 </a>
@@ -78,7 +78,7 @@
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
                                     Accueil
                                 </a></li>
-                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
+                            <li><a href="{{ path('fos_user_profile_show') }}"><i class="material-icons">settings</i>
                                     Mon profil ({{ app.user.username}})</a></li>
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
@@ -98,7 +98,7 @@
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
                         {% if not app.user.frozenChange %}
-                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_edit') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
+                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
                         {% else %}
                             Dégel programmé.
                         {% endif %}

@@ -64,11 +64,11 @@ class BeneficiaryType extends AbstractType
                     'required' => false,
                     'label'=>'Role(s)'
                 ));
-            }else if(count($user->getOwnedCommissions())){
+            }else if($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions())){
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',
-                    'choices' => $user->getOwnedCommissions(),
+                    'choices' => $user->getBeneficiary()->getOwnedCommissions(),
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => true,

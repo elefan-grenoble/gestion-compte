@@ -319,6 +319,12 @@ class Beneficiary
         return $this->commissions;
     }
 
+    public function getOwnedCommissions(){
+        return $this->commissions->filter(function ($commission) {
+            return $commission->getOwners()->contains($this);
+        });
+    }
+
     /**
      * Add formation
      *

@@ -1,0 +1,76 @@
+{% trans_default_domain 'FOSUserBundle' %}
+<h5 class="center-align">
+    <img src="{{ gravatar(app.user.beneficiary.email,100) }}" alt="{{ app.user.beneficiary.firstname | lower | capitalize }}" class="circle responsive-img"><br>
+    {{ app.user }}
+</h5>
+<ul class="collapsible">
+    {% if app.user.beneficiary %}
+        {% set member = app.user.beneficiary.membership %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">person</i>Mes informations</div>
+            <div class="collapsible-body">
+                {% if app.user.beneficiary %}
+                    {% include "beneficiary/_partial/info.html.twig" with { beneficiary: app.user.beneficiary } %}
+
+                    <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
+
+                {% endif %}
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header"><i class="material-icons">build</i>Actions</div>
+            <div class="collapsible-body">
+                {% include "member/_partial/frozen.html.twig" with { member: member  } %}
+            </div>
+        </li>
+        {% if app.user.beneficiary.getEnabledSwipeCards | length %}
+            <li>
+                <div class="collapsible-header"><i class="material-icons">credit_card</i>Badges</div>
+                <div class="collapsible-body">
+
+                    {% set card = app.user.beneficiary.getEnabledSwipeCards.first %}
+                    {{ app.user.beneficiary.firstname }} : <img
+                            src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode})) }}"
+                            alt="barecode">
+                </div>
+            </li>
+        {% endif %}
+    {% endif %}
+    {% if app.user.clients | length %}
+        <li>
+            <div class="collapsible-header"><i class="material-icons">extension</i>Services</div>
+            <div class="collapsible-body">
+                <table>
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Service</th>
+                        <th>Description</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for client in app.user.clients %}
+                        <tr>
+                            <td>
+                                {% if client.service.logo %}
+                                    <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
+                                         alt="{{ client.service.name }}"
+                                         class="circle responsive-img"
+                                         style="background: white">
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ client.service.url }}" class="">{{ client.service.name }}</a>
+                            </td>
+                            <td>
+                                {{ client.service.description }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </li>
+    {% endif %}
+</ul>

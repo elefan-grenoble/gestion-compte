@@ -108,7 +108,7 @@ class MembershipController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
             $action = $this->generateUrl('member_edit', array('member_number' => $member->getMemberNumber()));
         else
-            $action = $this->generateUrl('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            $action = $this->generateUrl('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
 
 
         $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg, array('action' => $action));

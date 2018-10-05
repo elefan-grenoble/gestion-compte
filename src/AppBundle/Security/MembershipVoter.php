@@ -98,22 +98,18 @@ class MembershipVoter extends Voter
         if ($this->canEdit($subject, $user)) {
             return true;
         }
-        if ($user->getBeneficiary()->canViewUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
-            return true;
-        }
         return false;
     }
 
     private function canEdit(Membership $subject, User $user)
     {
         $session = new Session();
-
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
 
+        if ($user->getBeneficiary() && $subject->getBeneficiaries()->contains($user->getBeneficiary())){ //beneficiaries can edit there own membership
+            return true;
+        }
         if ($this->isLocationOk()){
-            if ($user->getBeneficiary()->canEditUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
-                return true;
-            }
             if ($subject->getId()){
                 if ($token == $subject->getTmpToken($session->get('token_key').$user->getUsername())){
                     return true;

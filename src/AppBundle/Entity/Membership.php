@@ -124,6 +124,10 @@ class Membership
         $this->beneficiaries = new ArrayCollection();
     }
 
+    public function getTmpToken($key = ''){
+        return md5($this->getId().$this->getMemberNumber().$key.date('d'));
+    }
+
     /**
      * Get id
      *
@@ -246,82 +250,9 @@ class Membership
         });
     }
 
-    public function getFirstname() {
-        $mainBeneficiary = $this->getMainBeneficiary();
-        if ($mainBeneficiary)
-            return $mainBeneficiary->getFirstname();
-        else
-            return '';
-
-    }
-
-    public function getLastname() {
-        $mainBeneficiary = $this->getMainBeneficiary();
-        if ($mainBeneficiary)
-            return $mainBeneficiary->getLastname();
-        else
-            return '';
-    }
-
     public function __toString()
     {
-        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
-    }
-
-    public function getEmail() {
-        $this->getMainBeneficiary()->getEmail();
-    }
-
-    public function getTmpToken($key = ''){
-        return md5($this->getEmail().$this->getLastname().$this->getPassword().$key.date('d'));
-    }
-
-    public  function getAnonymousEmail(){
-        $email = $this->getEmail();
-        $splited = explode("@",$email);
-        $return = '';
-        foreach ($splited as $part){
-            $splited_part = explode(".",$part);
-            foreach ($splited_part as $mini_part){
-                $first_char = substr($mini_part,0,1);
-                $last_char = substr($mini_part,strlen($mini_part)-1,1);
-                $center = substr($mini_part,1,strlen($mini_part)-2);
-                if (strlen($center)>0)
-                    $return .= $first_char.preg_replace('/./','_',$center).$last_char;
-                elseif(strlen($mini_part)>1)
-                    $return .= $first_char.$last_char;
-                else
-                    $return .= $first_char;
-                $return .= '.';
-            }
-            $return = substr($return,0,strlen($return)-1);
-            $return .= '@';
-        }
-        $return = substr($return,0,strlen($return)-1);
-        return preg_replace('/_{3}_*/','___',$return);
-    }
-
-    public  function getAnonymousLastname(){
-        $lastname = $this->getLastname();
-        $splited = explode(" ",$lastname);
-        $return = '';
-        foreach ($splited as $part){
-            $splited_part = explode("-",$part);
-            foreach ($splited_part as $mini_part){
-                $first_char = substr($mini_part,0,1);
-                $last_char = substr($mini_part,strlen($mini_part)-1,1);
-                $center = substr($mini_part,1,strlen($mini_part)-2);
-                if (strlen($center)>0)
-                    $return .= $first_char.preg_replace('/./','*',$center).$last_char;
-                else
-                    $return .= $first_char.$last_char;
-                $return .= '-';
-            }
-            $return = substr($return,0,strlen($return)-1);
-            $return .= ' ';
-        }
-        $return = substr($return,0,strlen($return)-1);
-        return $return;
+        return '#'.$this->getMemberNumber();
     }
 
     /**
@@ -815,10 +746,7 @@ class Membership
     }
 
     public function getAutocompleteLabel(){
-        if ($this->getMainBeneficiary())
-            return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
-        else
-            return '#'.$this->getMemberNumber().' '.$this->getUsername();
+        return '#'.$this->getMemberNumber();
     }
 
     /**

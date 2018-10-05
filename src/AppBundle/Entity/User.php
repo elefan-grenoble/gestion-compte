@@ -18,7 +18,6 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  * @ORM\Table(name="fos_user")
- * @UniqueEntity("member_number")
  */
 class User extends BaseUser
 {
@@ -30,23 +29,10 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
-     * @Assert\NotBlank()
-     * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent.", groups={"Registration"})
-     */
-    protected $member_number;
-
-
-    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
     private $recordedRegistrations;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="user",cascade={"persist", "remove"})
-     */
-    private $beneficiaries;
 
     /**
      * Beneficiary's user.
@@ -68,43 +54,20 @@ class User extends BaseUser
      */
     private $annotations;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner",cascade={"persist", "remove"})
-     */
-    private $given_proxies;
-
-
-    /**
-     * User constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-        $this->beneficiaries = new ArrayCollection();
+    public function __get($property) {
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        } elseif (property_exists($this->getBeneficiary(), $property)) {
+            return $this->getBeneficiary()->$property;
+        }
     }
 
-    /**
-     * Set memberNumber
-     *
-     * @param integer $memberNumber
-     *
-     * @return User
-     */
-    public function setMemberNumber($memberNumber)
-    {
-        $this->member_number = $memberNumber;
+    public function __set($property, $value) {
+        if (property_exists($this, $property)) {
+            $this->$property = $value;
+        }
 
         return $this;
-    }
-
-    /**
-     * Get memberNumber
-     *
-     * @return integer
-     */
-    public function getMemberNumber()
-    {
-        return $this->member_number;
     }
 
     public function getFirstname() {
@@ -126,7 +89,7 @@ class User extends BaseUser
 
     public function __toString()
     {
-        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+        return $this->getFirstname().' '.$this->getLastname();
     }
 
     public function getTmpToken($key = ''){
@@ -240,21 +203,6 @@ class User extends BaseUser
         return $this->recordedRegistrations;
     }
 
-    public function getCommissions(){
-        return $this->getBeneficiary()->getCommissions();
-    }
-
-    public function getOwnedCommissions(){
-        return $this->getCommissions()->filter(function($commission) {
-            $r = false;
-            foreach ($commission->getOwners() as $owner){
-                if ($this->getBeneficiaries()->contains($owner))
-                    return true;
-            }
-            return false;
-        });
-    }
-
     /**
      * determine whether the given client (ClientInterface) is allowed by the user, or not.
      * @param ClientInterface $client
@@ -334,89 +282,11 @@ class User extends BaseUser
         return $this->annotations;
     }
 
-    /**
-     * Add receivedProxy
-     *
-     * @param \AppBundle\Entity\Proxy $receivedProxy
-     *
-     * @return User
-     */
-    public function addReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
-    {
-        $this->received_proxys[] = $receivedProxy;
-
-        return $this;
-    }
-
-    /**
-     * Remove receivedProxy
-     *
-     * @param \AppBundle\Entity\Proxy $receivedProxy
-     */
-    public function removeReceivedProxy(\AppBundle\Entity\Proxy $receivedProxy)
-    {
-        $this->received_proxys->removeElement($receivedProxy);
-    }
-
-    /**
-     * Get receivedProxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReceivedProxys()
-    {
-        return $this->received_proxys;
-    }
-
-    /**
-     * Get receivedProxies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getReceivedProxies()
-    {
-        return $this->received_proxies;
-    }
-
-    /**
-     * Add givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     *
-     * @return User
-     */
-    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxies[] = $givenProxy;
-
-        return $this;
-    }
-
-    /**
-     * Remove givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     */
-    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxies->removeElement($givenProxy);
-    }
-
-    /**
-     * Get givenProxies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getGivenProxies()
-    {
-        return $this->given_proxies;
-    }
-
     public function getAutocompleteLabel(){
         if ($this->getBeneficiary())
-            return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+            return '#'.$this->getId().' '.$this->getFirstname().' '.$this->getLastname();
         else
-            return '#'.$this->getMemberNumber().' '.$this->getUsername();
+            return '#'.$this->getId().' '.$this->getUsername();
     }
 
     /**

@@ -81,13 +81,12 @@ class BookingController extends Controller
             $em = $this->getDoctrine()->getManager();
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
-                $roles = $beneficiary->getRoles();
             } else {
                 $beneficiary = $beneficiaries->first();
-                $roles = $beneficiary->getRoles();
             }
+            $formations = $beneficiary->getFormations();
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($roles);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($formations);
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -497,8 +496,8 @@ class BookingController extends Controller
 
         if ($beneficiary) {
 
-            if ($shift->getRole() && !$beneficiary->getRoles()->contains($shift->getRole())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getRole()->getName() . ")");
+            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
                 return $this->redirectToRoute("booking_admin");
             }
 
