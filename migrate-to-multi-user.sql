@@ -18,7 +18,6 @@ ALTER TABLE fos_user ADD CONSTRAINT FK_957A6479ECCAAFA0 FOREIGN KEY (beneficiary
 ALTER TABLE fos_user ADD CONSTRAINT FK_957A64796986CF73 FOREIGN KEY (last_registration_id) REFERENCES registration (id);
 CREATE UNIQUE INDEX UNIQ_957A6479ECCAAFA0 ON fos_user (beneficiary_id);
 UPDATE fos_user SET beneficiary_id = main_beneficiary_id;
-ALTER TABLE fos_user DROP member_number;
 
 -- Migrate time_logs
 ALTER TABLE time_log ADD membership_id INT NOT NULL;
