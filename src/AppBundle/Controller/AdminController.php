@@ -83,20 +83,20 @@ class AdminController extends Controller
 
             $query = $em->createNativeQuery('SELECT * FROM beneficiary WHERE LOWER(CONCAT_WS(email,lastname,firstname)) LIKE :key', $rsm);
 
-            $beneficiaries = $query->setParameter('key', '%'.$key.'%')
+            $beneficiaries = $query->setParameter('key', '%' . $key . '%')
                 ->getResult();
 
-            foreach ($beneficiaries as $beneficiary){
-                if ($beneficiary->getUser()){
+            foreach ($beneficiaries as $beneficiary) {
+                if ($beneficiary->getUser()) {
                     $return[] = array(
-                        'name'=>$beneficiary->getAutocompleteLabelFull(),
-                        'icon'=>null,
-                        'member_number'=>$beneficiary->getMembership()->getMemberNumber(),
-                        'id'=>$beneficiary->getId()
+                        'name' => $beneficiary->getAutocompleteLabelFull(),
+                        'icon' => null,
+                        'member_number' => $beneficiary->getMembership()->getMemberNumber(),
+                        'id' => $beneficiary->getId()
                     );
                 }
             }
-            return new JsonResponse(array('count'=>count($return),'data' => array_values($return)));
+            return new JsonResponse(array('count' => count($return), 'data' => array_values($return)));
         }
 
         return new Response('This is not ajax!', 400);
@@ -105,15 +105,15 @@ class AdminController extends Controller
     /**
      * Lists all user entities.
      *
-     * @param Request $request, SearchUserFormHelper $formHelper
+     * @param Request $request , SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/users", name="user_index")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      */
-    public function usersAction(Request $request,SearchUserFormHelper $formHelper)
+    public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
-        $form = $formHelper->getSearchForm($this->createFormBuilder(),$request->getQueryString());
+        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString());
         $form->handleRequest($request);
 
         $action = $form->get('action')->getData();
@@ -126,62 +126,62 @@ class AdminController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if ($form->get('page')->getData() > 0){
+            if ($form->get('page')->getData() > 0) {
                 $page = $form->get('page')->getData();
             }
-            if ($form->get('sort')->getData()){
+            if ($form->get('sort')->getData()) {
                 $sort = $form->get('sort')->getData();
             }
-            if ($form->get('dir')->getData()){
+            if ($form->get('dir')->getData()) {
                 $order = $form->get('dir')->getData();
             }
 
-            $formHelper->processSearchFormData($form,$qb);
+            $formHelper->processSearchFormData($form, $qb);
 
-        }else{
+        } else {
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
         }
 
-        $formHelper->processSearchQueryData($request->getQueryString(),$qb);
+        $formHelper->processSearchQueryData($request->getQueryString(), $qb);
 
         $limit = 25;
         $qb2 = clone $qb;
         $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
-        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages = intval($max / $limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
 
 
         $qb = $qb->orderBy($sort, $order);
-        if ($action == "csv"){
+        if ($action == "csv") {
             $members = $qb->getQuery()->getResult();
             $return = '';
             $d = ','; // this is the default but i like to be explicit
-            foreach($members as $member) {
+            foreach ($members as $member) {
                 foreach ($member->getBeneficiaries() as $beneficiary)
                     $return .=
-                        $beneficiary->getUser()->getMemberNumber().$d.
-                        $beneficiary->getFirstname().$d.
-                        $beneficiary->getLastname().$d.
-                        $beneficiary->getEmail().$d.
-                        $beneficiary->getPhone().
+                        $beneficiary->getUser()->getMemberNumber() . $d .
+                        $beneficiary->getFirstname() . $d .
+                        $beneficiary->getLastname() . $d .
+                        $beneficiary->getEmail() . $d .
+                        $beneficiary->getPhone() .
                         "\n";
             }
             return new Response($return, 200, array(
                 'Content-Encoding: UTF-8',
                 'Content-Type' => 'application/force-download; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="emails_'.date('dmyhis').'.csv"'
+                'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
             ));
-        }else if($action === "mail") {
+        } else if ($action === "mail") {
             return $this->redirectToRoute('mail_edit', [
                 'request' => $request
             ], 307);
-        }else if($action === "swipe") {
+        } else if ($action === "swipe") {
             return $this->redirectToRoute('swipe_print', [
                 'request' => $request
             ], 307);
-        }else{
-            $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+        } else {
+            $qb = $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
             $members = new Paginator($qb->getQuery());
         }
 
@@ -189,8 +189,8 @@ class AdminController extends Controller
             'members' => $members,
             'form' => $form->createView(),
             'nb_of_result' => $max,
-            'page'=>$page,
-            'nb_of_pages'=>$nb_of_pages
+            'page' => $page,
+            'nb_of_pages' => $nb_of_pages
         ));
     }
 
@@ -198,19 +198,20 @@ class AdminController extends Controller
     /**
      * Lists all users with ROLE_ADMIN.
      *
-     * @param Request $request, SearchUserFormHelper $formHelper
+     * @param Request $request , SearchUserFormHelper $formHelper
+     * @param SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/admin_users", name="admins_list")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function adminUsersAction(Request $request,SearchUserFormHelper $formHelper)
+    public function adminUsersAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $em = $this->getDoctrine()->getManager();
 
         $admins = $em->getRepository("AppBundle:User")->findByRole('ROLE_ADMIN');
         $delete_forms = array();
-        foreach ($admins as $admin){
+        foreach ($admins as $admin) {
             $delete_forms[$admin->getId()] = $this->createFormBuilder()
                 ->setAction($this->generateUrl('user_delete', array('id' => $admin->getId())))
                 ->setMethod('DELETE')
@@ -240,16 +241,16 @@ class AdminController extends Controller
             ->select('count(u.id)')
             ->getQuery()
             ->getSingleScalarResult();
-        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages = intval($max / $limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
         $registrations = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:Registration')
-            ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
+            ->findBy(array(), array('created_at' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
         $delete_forms = array();
         $edit_forms = array();
-        foreach ($registrations as $registration){
+        foreach ($registrations as $registration) {
             $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
-            $form = $this->get('form.factory')->createNamed('registration_edit_'.$registration->getId(),'AppBundle\Form\RegistrationType', $registration);
+            $form = $this->get('form.factory')->createNamed('registration_edit_' . $registration->getId(), 'AppBundle\Form\RegistrationType', $registration);
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
@@ -258,18 +259,18 @@ class AdminController extends Controller
                 $em->flush();
                 $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
                 //recreate the form with new data
-                $form = $this->get('form.factory')->createNamed('registration_edit_'.$registration->getId(),'AppBundle\Form\RegistrationType', $registration);
+                $form = $this->get('form.factory')->createNamed('registration_edit_' . $registration->getId(), 'AppBundle\Form\RegistrationType', $registration);
             }
 
             $edit_forms[$registration->getId()] = $form->createView();
         }
         return $this->render('admin/registrations/list.html.twig',
             array(
-                'registrations'=>$registrations,
-                'delete_forms'=>$delete_forms,
-                'edit_forms'=>$edit_forms,
-                'page'=>$page,
-                'nb_of_pages'=>$nb_of_pages));
+                'registrations' => $registrations,
+                'delete_forms' => $delete_forms,
+                'edit_forms' => $edit_forms,
+                'page' => $page,
+                'nb_of_pages' => $nb_of_pages));
     }
 
     /**
@@ -279,7 +280,8 @@ class AdminController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function editRegistrationAction(Request $request,Registration $registration){
+    public function editRegistrationAction(Request $request, Registration $registration)
+    {
         $session = new Session();
         $edit_form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
         $edit_form->handleRequest($request);
@@ -290,7 +292,7 @@ class AdminController extends Controller
             $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
             return $this->redirectToRoute("admin_registrations");
         }
-        return $this->render('admin/registrations/edit.html.twig', array('edit_form'=>$edit_form->createView()));
+        return $this->render('admin/registrations/edit.html.twig', array('edit_form' => $edit_form->createView()));
 
     }
 
@@ -301,20 +303,21 @@ class AdminController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeRegistrationAction(Request $request,Registration $registration){
+    public function removeRegistrationAction(Request $request, Registration $registration)
+    {
         $session = new Session();
         $form = $this->getRegistrationDeleteForm($registration);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($registration->getUser() && count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()){
+            if ($registration->getUser() && count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()) {
                 $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
-            }else{
+            } else {
                 $em = $this->getDoctrine()->getManager();
-                if ($registration->getUser()){
+                if ($registration->getUser()) {
                     $registration->getUser()->removeRegistration($registration);
                     $em->persist($registration->getUser());
                 }
-                if ($registration->getRegistrar()){
+                if ($registration->getRegistrar()) {
                     $registration->getRegistrar()->removeRecordedRegistration($registration);
                     $em->persist($registration->getRegistrar());
                 }
@@ -330,7 +333,8 @@ class AdminController extends Controller
      * @param Registration $registration
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getRegistrationDeleteForm(Registration $registration){
+    protected function getRegistrationDeleteForm(Registration $registration)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_registration_remove', array('id' => $registration->getId())))
             ->setMethod('DELETE')
@@ -353,31 +357,31 @@ class AdminController extends Controller
             ->select('count(n.id)')
             ->getQuery()
             ->getSingleScalarResult();
-        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages = intval($max / $limit);
         if ($max > 0)
             $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
         $payments = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:HelloassoPayment')
-            ->findBy(array(),array('created_at' => 'DESC','date' => 'DESC'),$limit,($page-1)*$limit);
+            ->findBy(array(), array('created_at' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
         $delete_forms = array();
-        foreach ($payments as $payment){
+        foreach ($payments as $payment) {
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
         }
 
         //todo: save this somewhere ?
         $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
         $campaigns = array();
-        foreach ($campaigns_json->resources as $c){
+        foreach ($campaigns_json->resources as $c) {
             $campaigns[intval($c->id)] = $c;
         }
 
         return $this->render(
             'admin/helloasso/payments.html.twig',
-            array('payments'=>$payments,
+            array('payments' => $payments,
                 'campaigns' => $campaigns,
                 'delete_forms' => $delete_forms,
-                'page'=>$page,
-                'nb_of_pages'=>$nb_of_pages));
+                'page' => $page,
+                'nb_of_pages' => $nb_of_pages));
     }
 
     /**
@@ -392,25 +396,25 @@ class AdminController extends Controller
         if (!($page = $request->get('page')))
             $page = 1;
 
-        if (!($campaignId = $request->get('campaign'))){
+        if (!($campaignId = $request->get('campaign'))) {
             $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
             $campaigns = $campaigns_json->resources;
             return $this->render(
                 'admin/helloasso/browser.html.twig',
-                array('campaigns'=>$campaigns));
-        }else{
+                array('campaigns' => $campaigns));
+        } else {
             $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
-            $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$campaignId);
-            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$campaignId.'/payments',array('page'=>$page));
+            $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId);
+            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $page));
             $page = $payments_json->pagination->page;
             $nb_of_pages = $payments_json->pagination->max_page;
             $results_per_page = $payments_json->pagination->results_per_page;
             return $this->render(
                 'admin/helloasso/browser.html.twig',
-                array('payments'=>$payments_json->resources,
-                    'page'=>$page,
-                    'campaign'=>$campaign_json,
-                    'nb_of_pages'=>$nb_of_pages));
+                array('payments' => $payments_json->resources,
+                    'page' => $page,
+                    'campaign' => $campaign_json,
+                    'nb_of_pages' => $nb_of_pages));
         }
 
     }
@@ -425,10 +429,10 @@ class AdminController extends Controller
     public function helloassoManualPaimentAddAction(Request $request)
     {
         $session = new Session();
-        if (!($paiementId = $request->get('paiementId'))){
-            $session->getFlashBag()->add('error','missing paiment id');
+        if (!($paiementId = $request->get('paiementId'))) {
+            $session->getFlashBag()->add('error', 'missing paiment id');
             return $this->redirectToRoute('helloasso_browser');
-        }else {
+        } else {
             $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $paiementId);
 
             $em = $this->getDoctrine()->getManager();
@@ -436,20 +440,20 @@ class AdminController extends Controller
 
             if ($exist) {
                 $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
-                return $this->redirectToRoute('helloasso_browser',array('campaign'=>$exist->getCampaignId()));
+                return $this->redirectToRoute('helloasso_browser', array('campaign' => $exist->getCampaignId()));
             }
 
             $payments = array();
             $action_json = null;
             $dispatcher = $this->get('event_dispatcher');
-            foreach ($payment_json->actions as $action){
+            foreach ($payment_json->actions as $action) {
                 $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-                $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
-                if ($payment){ //payment already exist (created from a previous actions in THIS loop)
+                $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
+                if ($payment) { //payment already exist (created from a previous actions in THIS loop)
                     $amount = $action_json->amount;
                     $amount = str_replace(',', '.', $amount);
-                    $payment->setAmount($payment->getAmount()+$amount);
-                }else{
+                    $payment->setAmount($payment->getAmount() + $amount);
+                } else {
                     $payment = new HelloassoPayment();
                     $payment->fromActionObj($action_json);
                 }
@@ -457,7 +461,7 @@ class AdminController extends Controller
                 $em->flush();
                 $payments[$payment->getId()] = $payment;
             }
-            foreach ($payments as $payment){
+            foreach ($payments as $payment) {
                 $dispatcher->dispatch(
                     HelloassoEvent::PAYMENT_AFTER_SAVE,
                     new HelloassoEvent($payment)
@@ -465,7 +469,7 @@ class AdminController extends Controller
             }
 
             $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
-            return $this->redirectToRoute('helloasso_browser',array('campaign'=>$action_json->id_campaign));
+            return $this->redirectToRoute('helloasso_browser', array('campaign' => $action_json->id_campaign));
         }
     }
 
@@ -476,19 +480,20 @@ class AdminController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removePaymentAction(Request $request,HelloassoPayment $payment){
+    public function removePaymentAction(Request $request, HelloassoPayment $payment)
+    {
         $session = new Session();
         $form = $this->getPaymentDeleteForm($payment);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-                if ($payment->getRegistration()){
-                    $session->getFlashBag()->add('error', 'ce paiement est lié à une adhésion');
-                    return $this->redirectToRoute('helloasso_payments');
-                }
-                $em->remove($payment);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Le paiement a bien été supprimé !');
+            if ($payment->getRegistration()) {
+                $session->getFlashBag()->add('error', 'ce paiement est lié à une adhésion');
+                return $this->redirectToRoute('helloasso_payments');
+            }
+            $em->remove($payment);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Le paiement a bien été supprimé !');
         }
         return $this->redirectToRoute('helloasso_payments');
     }
@@ -497,7 +502,8 @@ class AdminController extends Controller
      * @param HelloassoPayment $payment
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getPaymentDeleteForm(HelloassoPayment $payment){
+    protected function getPaymentDeleteForm(HelloassoPayment $payment)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('helloasso_payment_remove', array('id' => $payment->getId())))
             ->setMethod('DELETE')
@@ -517,10 +523,10 @@ class AdminController extends Controller
     {
         $form = $this->createFormBuilder()
             ->add('submitFile', FileType::class, array('label' => 'File to Submit'))
-            ->add('delimiter', TextType::class, array('label' => 'delimiter','attr' => array(
+            ->add('delimiter', TextType::class, array('label' => 'delimiter', 'attr' => array(
                 'placeholder' => ',',
-            ),'data'=>','))
-            ->add('persist',CheckboxType::class,array('required'=>false,'label'=>'Sauver en base'))
+            ), 'data' => ','))
+            ->add('persist', CheckboxType::class, array('required' => false, 'label' => 'Sauver en base'))
             ->add('compute', SubmitType::class, array('label' => 'compute'))
             ->getForm();
 
@@ -528,8 +534,8 @@ class AdminController extends Controller
 
             // Get file
             $file = $form->get('submitFile');
-            $delimiter = ($form->get('delimiter'))? $form->get('delimiter')->getData() : ',';
-            $persist = ($form->get('persist'))? $form->get('persist')->getData() : false;
+            $delimiter = ($form->get('delimiter')) ? $form->get('delimiter')->getData() : ',';
+            $persist = ($form->get('persist')) ? $form->get('persist')->getData() : false;
 
             // Your csv file here when you hit submit button
             $data = $file->getData();
@@ -570,23 +576,23 @@ class AdminController extends Controller
                     [19] =>
                     )*/
                     preg_match_all('/^[0-9]+$/', $data[0], $matches, PREG_SET_ORDER, 0);
-                    if (count($data)>11&&isset($data[3])&&isset($data[4])&&count($matches)&&strlen($data[3])>1&&strlen($data[4])>1){ // on ne traite que les colonnes qui commence par un numéro d'adhérent valide (entier)
+                    if (count($data) > 11 && isset($data[3]) && isset($data[4]) && count($matches) && strlen($data[3]) > 1 && strlen($data[4]) > 1) { // on ne traite que les colonnes qui commence par un numéro d'adhérent valide (entier)
                         $member_number = $data[0];
-                        $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number"=>$member_number));
-                        if ($user){
+                        $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number" => $member_number));
+                        if ($user) {
                             $mail = $data[9];
-                            if (isset($data[9])&&filter_var($mail, FILTER_VALIDATE_EMAIL)&&($user->getEmail() != $mail)) {
-                                $user_exist = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
-                                if (!$user_exist){
+                            if (isset($data[9]) && filter_var($mail, FILTER_VALIDATE_EMAIL) && ($user->getEmail() != $mail)) {
+                                $user_exist = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $mail));
+                                if (!$user_exist) {
                                     $user->setEmail($mail);
                                     if ($persist)
                                         $em->persist($user);
-                                    $return[] = array($user,array("error","user with same member number already exist, email updated"));
-                                }else{
-                                    $return[] = array($user,array("error","user with same member number already exist, email change but already in use"));
+                                    $return[] = array($user, array("error", "user with same member number already exist, email updated"));
+                                } else {
+                                    $return[] = array($user, array("error", "user with same member number already exist, email change but already in use"));
                                 }
-                            }else{
-                                $return[] = array($user,array("error","user with same member number already exist"));
+                            } else {
+                                $return[] = array($user, array("error", "user with same member number already exist"));
                             }
                         } else {
                             $mail = $data[9];
@@ -596,29 +602,29 @@ class AdminController extends Controller
                                 new NotBlank()
                             );
                             $error = $validator->validate($mail, $constraints);
-                            if ($error->count()){
-                                $return[] = array($user,array("error","email is not valid (".$mail.")"));
-                            }else{
-                                $user = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$mail));
+                            if ($error->count()) {
+                                $return[] = array($user, array("error", "email is not valid (" . $mail . ")"));
+                            } else {
+                                $user = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $mail));
                                 $already_registred = (isset($emails[$mail])) ? true : false;
-                                if ($user||$already_registred)
-                                    $return[] = array($user,array("error","user with same email already exist"));
+                                if ($user || $already_registred)
+                                    $return[] = array($user, array("error", "user with same email already exist"));
                                 else {
                                     $user = new User();
                                     $firstname = trim(preg_replace('/\s\s+/', ' ', $data[4]));
                                     $lastname = trim(preg_replace('/\s\s+/', ' ', $data[3]));
-                                    $username = User::makeUsername($firstname,$lastname);
+                                    $username = User::makeUsername($firstname, $lastname);
                                     $qb = $em->createQueryBuilder();
                                     $users = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-                                        ->where( $qb->expr()->like('u.username', $qb->expr()->literal($username.'%')) )
+                                        ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
                                         ->getQuery()
                                         ->getResult();
                                     //$users = $em->getRepository('AppBundle:User')->findBy(array("username"=>$username));
-                                    $already_registred = (isset($usernames[$username])) ? $usernames[$username]  : 0;
-                                    if (count($users)||$already_registred){
-                                        $username = User::makeUsername($firstname,$lastname,count($users)+1+$already_registred);
+                                    $already_registred = (isset($usernames[$username])) ? $usernames[$username] : 0;
+                                    if (count($users) || $already_registred) {
+                                        $username = User::makeUsername($firstname, $lastname, count($users) + 1 + $already_registred);
                                     }
-                                    if (strlen($username)>3){
+                                    if (strlen($username) > 3) {
                                         $user->setUsername($username);
                                         $user->setEmail($mail);
                                         $user->setMemberNumber($member_number);
@@ -656,9 +662,9 @@ class AdminController extends Controller
                                         $registration->setDate($date); //Y-m-d H:i:s
                                         $registration->setAmount(intval($data[10]));
                                         $reglement = $data[11];
-                                        if (!$reglement&&strtolower($data[2])=='site')
+                                        if (!$reglement && strtolower($data[2]) == 'site')
                                             $reglement = 'cb';
-                                        switch ($reglement){
+                                        switch ($reglement) {
                                             case 'chq' :
                                             case 'CHQ' :
                                             case 'ch' :
@@ -680,13 +686,13 @@ class AdminController extends Controller
                                         }
                                         $registration->setUser($user);
                                         $user->addRegistration($registration);
-                                        $return[] = array($user,array("check","user added"));
-                                        $usernames[$user->getUsername()] = (isset($usernames[$user->getUsername()])) ? $usernames[$user->getUsername()] +1 : 1;
+                                        $return[] = array($user, array("check", "user added"));
+                                        $usernames[$user->getUsername()] = (isset($usernames[$user->getUsername()])) ? $usernames[$user->getUsername()] + 1 : 1;
                                         $emails[$user->getEmail()] = true;
                                         if ($persist)
                                             $em->persist($user);
-                                    }else{
-                                        $return[] = array($user,array("error","username build to short"));
+                                    } else {
+                                        $return[] = array($user, array("error", "username build to short"));
                                     }
                                 }
                             }
@@ -698,10 +704,10 @@ class AdminController extends Controller
                 $em->flush();
             }
 
-            if ($persist){
+            if ($persist) {
                 $request->getSession()->getFlashBag()->add('notice', 'Le fichier a été traité complétement.');
                 return $this->redirectToRoute('user_index');
-            }else{
+            } else {
                 return $this->render('admin/user/test_import.html.twig', array(
                     'users' => $return,
                 ));
