@@ -20,7 +20,7 @@
             <div class="hide-on-med-and-down">
                 {% for shift in bucket.sortedShifts %}
                     <span class="grey-text">
-                        {% if not shift.role %}
+                        {% if not shift.formation %}
                             <i class="material-icons shifter">{% if shift.shifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
                             <i class="material-icons shifter">{% if shift.shifter %}account_circle{% else %}person_outline{% endif %}</i>

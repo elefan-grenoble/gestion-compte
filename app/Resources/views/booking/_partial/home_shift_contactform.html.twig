@@ -12,7 +12,7 @@
                 <a href="#!" class="black-text"
                    data-chip="{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}"
                    data-id="{{ shift.shifter.id }}">{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
-                {% if shift.Role %}(<strong>{{ shift.role.name }}</strong>){% endif %}
+                {% if shift.formation %}(<strong>{{ shift.formation.name }}</strong>){% endif %}
                 </a>
             </div>
         {% endfor %}
