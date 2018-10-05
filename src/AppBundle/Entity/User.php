@@ -29,14 +29,6 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
-     * @Assert\NotBlank()
-     * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent.", groups={"Registration"})
-     */
-    protected $member_number;
-
-
-    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -74,30 +66,6 @@ class User extends BaseUser
     public function __construct()
     {
         parent::__construct();
-    }
-
-    /**
-     * Set memberNumber
-     *
-     * @param integer $memberNumber
-     *
-     * @return User
-     */
-    public function setMemberNumber($memberNumber)
-    {
-        $this->member_number = $memberNumber;
-
-        return $this;
-    }
-
-    /**
-     * Get memberNumber
-     *
-     * @return integer
-     */
-    public function getMemberNumber()
-    {
-        return $this->member_number;
     }
 
     public function getFirstname()
