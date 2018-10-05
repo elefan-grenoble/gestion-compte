@@ -65,7 +65,7 @@ ALTER TABLE fos_user DROP FOREIGN KEY FK_957A6479F5B7AF75;
 DROP INDEX UNIQ_957A647962C6E4EA ON fos_user;
 DROP INDEX UNIQ_957A6479F5B7AF75 ON fos_user;
 DROP INDEX UNIQ_957A64796986CF73 ON fos_user;
-ALTER TABLE fos_user DROP main_beneficiary_id, DROP address_id, DROP last_registration_id, DROP withdrawn, DROP frozen, DROP first_shift_date, DROP frozen_change DROP member_number;
+ALTER TABLE fos_user DROP main_beneficiary_id, DROP address_id, DROP last_registration_id, DROP withdrawn, DROP frozen, DROP first_shift_date, DROP frozen_change, DROP member_number;
 ALTER TABLE registration DROP FOREIGN KEY FK_62A8A7A7A76ED395;
 DROP INDEX IDX_62A8A7A7A76ED395 ON registration;
 ALTER TABLE registration DROP user_id;
