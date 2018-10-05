@@ -32,8 +32,8 @@
             {% if beneficiaries %}
             <div class="collection">
                 {% for beneficiary in beneficiaries %}
-                    <form action="{{ path(return_path,{'member_number':beneficiary.user.memberNumber,'beneficiary':beneficiary.id}|merge(params)) }}" method="post" class="collection-item">
-                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.user.memberNumber }} {{ beneficiary.user.firstname }} {{ beneficiary.user.lastname | first | upper }}{% if beneficiary.user.lastRegistration %} - {{ beneficiary.user.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                    <form action="{{ path(return_path,{'member_number':beneficiary.memberNumber,'beneficiary':beneficiary.id}|merge(params)) }}" method="post" class="collection-item">
+                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname | first | upper }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
                     </form>
                 {% endfor %}
             </div>
@@ -52,14 +52,4 @@
 
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
-    <script>
-        $(document).ready(function(){
-            $('.parallax').parallax();
-        });
-    </script>
 {% endblock %}

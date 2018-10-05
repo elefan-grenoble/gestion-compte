@@ -192,11 +192,11 @@ class DefaultController extends Controller
             $ms = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number'=>$member_number));
             $user = $ms->getMainBeneficiary()->getUser();
 
-            return $this->render('user/confirm.html.twig', array(
+            return $this->render('user/tools/confirm.html.twig', array(
                 'user' => $user,
             ));
         }
-        return $this->render('user/find_me.html.twig', array(
+        return $this->render('user/tools/find_me.html.twig', array(
             'form' => $form->createView(),
         ));
     }
@@ -261,20 +261,20 @@ class DefaultController extends Controller
             $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
-                ->join('b.user', 'u')
+                ->join('b.membership', 'm')
                 ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
-                ->andWhere("u.withdrawn != 1 or u.withdrawn is NULL" )
-                ->orderBy("u.member_number", 'ASC')
+                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" )
+                ->orderBy("m.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();
-            return $this->render('user/find_user_number.html.twig', array(
+            return $this->render('user/tools/find_user_number.html.twig', array(
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
                 'return_path' => 'confirm',
                 'params' => array()
             ));
         }
-        return $this->render('user/find_user_number.html.twig', array(
+        return $this->render('user/tools/find_user_number.html.twig', array(
             'form' => $form->createView(),
             'beneficiaries' => ''
         ));

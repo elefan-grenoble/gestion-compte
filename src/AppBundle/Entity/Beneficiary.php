@@ -129,6 +129,16 @@ class Beneficiary
     }
 
     /**
+     * Get membernumber
+     *
+     * @return int
+     */
+    public function getMemberNumber()
+    {
+        return $this->getMembership()->getMemberNumber();
+    }
+
+    /**
      * Set lastname
      *
      * @param string $lastname
@@ -642,7 +652,7 @@ class Beneficiary
     }
 
     /**
-     * @return mixed
+     * @return Membership
      */
     public function getMembership()
     {

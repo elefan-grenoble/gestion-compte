@@ -530,7 +530,6 @@ class MembershipController extends Controller
         return $this->redirectToShow($member);
     }
 
-
     /**
      * Deletes a member entity.
      *
