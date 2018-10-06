@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Address;
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Note;
@@ -134,6 +135,39 @@ class UserController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
+    }
+
+    /**
+     * Creates a new user entity.
+     *
+     * @Route("/quick_new", name="user_quick_new")
+     * @Method({"GET", "POST"})
+     */
+    public function quickNewAction(Request $request, \Swift_Mailer $mailer)
+    {
+        $ab = new AnonymousBeneficiary();
+
+        $form = $this->createForm('AppBundle\Form\AnonymousBeneficiaryType', $ab);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $ab->setRegistrar($this->getCurrentAppUser());
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($ab);
+            $em->flush();
+
+            $session = new Session();
+            $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+
+            return $this->redirectToRoute('user_office_tools');
+        }
+
+        return $this->render('user/quick_new.html.twig', array(
+            'anonymous_beneficiary' => $ab,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
