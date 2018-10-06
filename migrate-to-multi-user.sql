@@ -47,6 +47,12 @@ CREATE INDEX IDX_CFBDFA141FB354CD ON note (membership_id);
 UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.user_id = NULL WHERE b.id != u.main_beneficiary_id;
 ALTER TABLE beneficiary DROP INDEX IDX_7ABF446AA76ED395, ADD UNIQUE INDEX UNIQ_7ABF446AA76ED395 (user_id);
 
+-- Move email from beneficiary to user
+
+-- DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
+-- ALTER TABLE beneficiary DROP email;
+
+
 -- Migrate address
 ALTER TABLE beneficiary ADD address_id INT DEFAULT NULL;
 UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.address_id = u.address_id;
@@ -61,10 +67,15 @@ ALTER TABLE proxy ADD CONSTRAINT FK_7372C9BE5DE37FD9 FOREIGN KEY (giver) REFEREN
 ALTER TABLE fos_user DROP FOREIGN KEY FK_957A647962C6E4EA;
 ALTER TABLE fos_user DROP FOREIGN KEY FK_957A64796986CF73;
 ALTER TABLE fos_user DROP FOREIGN KEY FK_957A6479F5B7AF75;
+ALTER TABLE fos_user DROP FOREIGN KEY FK_957A6479ECCAAFA0;
+
 DROP INDEX UNIQ_957A647962C6E4EA ON fos_user;
 DROP INDEX UNIQ_957A6479F5B7AF75 ON fos_user;
 DROP INDEX UNIQ_957A64796986CF73 ON fos_user;
-ALTER TABLE fos_user DROP main_beneficiary_id, DROP address_id, DROP last_registration_id, DROP withdrawn, DROP frozen, DROP first_shift_date, DROP frozen_change, DROP member_number;
+DROP INDEX UNIQ_957A6479ECCAAFA0 ON fos_user;
+
+ALTER TABLE fos_user DROP main_beneficiary_id, DROP address_id, DROP last_registration_id, DROP withdrawn, DROP frozen, DROP first_shift_date, DROP frozen_change, DROP member_number, DROP beneficiary_id;
+
 ALTER TABLE registration DROP FOREIGN KEY FK_62A8A7A7A76ED395;
 DROP INDEX IDX_62A8A7A7A76ED395 ON registration;
 ALTER TABLE registration DROP user_id;

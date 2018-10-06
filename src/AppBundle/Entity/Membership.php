@@ -69,12 +69,6 @@ class Membership
     private $lastRegistration;
 
     /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
-     * @OrderBy({"date" = "DESC"})
-     */
-    private $recordedRegistrations;
-
-    /**
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="membership", cascade={"persist", "remove"})
      */
     private $beneficiaries;
@@ -321,41 +315,6 @@ class Membership
     public function getWithdrawn()
     {
         return $this->withdrawn;
-    }
-
-
-    /**
-     * Add recordedRegistration
-     *
-     * @param \AppBundle\Entity\Registration $recordedRegistration
-     *
-     * @return Membership
-     */
-    public function addRecordedRegistration(\AppBundle\Entity\Registration $recordedRegistration)
-    {
-        $this->recordedRegistrations[] = $recordedRegistration;
-
-        return $this;
-    }
-
-    /**
-     * Remove recordedRegistration
-     *
-     * @param \AppBundle\Entity\Registration $recordedRegistration
-     */
-    public function removeRecordedRegistration(\AppBundle\Entity\Registration $recordedRegistration)
-    {
-        $this->recordedRegistrations->removeElement($recordedRegistration);
-    }
-
-    /**
-     * Get recordedRegistrations
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRecordedRegistrations()
-    {
-        return $this->recordedRegistrations;
     }
 
     public function getCommissions(){

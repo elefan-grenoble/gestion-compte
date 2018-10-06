@@ -36,8 +36,7 @@ class User extends BaseUser
 
     /**
      * Beneficiary's user.
-     * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
-     * @ORM\JoinColumn(name="beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user")
      */
     private $beneficiary;
 

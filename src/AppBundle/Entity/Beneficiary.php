@@ -177,14 +177,11 @@ class Beneficiary
     }
 
     public function getDisplayName(){
-        if (!$this->getUser()){
-            return $this->getFirstname().' '.$this->getLastname();
-        }
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
     }
 
     public function getPublicDisplayName(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
+        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
     }
 
     public function __toString() {
