@@ -48,7 +48,8 @@ UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.user_id = NULL WH
 ALTER TABLE beneficiary DROP INDEX IDX_7ABF446AA76ED395, ADD UNIQUE INDEX UNIQ_7ABF446AA76ED395 (user_id);
 
 -- Move email from beneficiary to user
-
+--INSERT INTO fos_user (username, username_canonical, email, email_canonical, enabled, salt, password, last_login, confirmation_token, password_requested_at, roles)
+--  SELECT email, email, email, email, false, NULL, 'TODO', NULL, NULL, NULL, 'a:0:{}' FROM beneficiary where user_id is NULL and email;
 -- DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
 -- ALTER TABLE beneficiary DROP email;
 
