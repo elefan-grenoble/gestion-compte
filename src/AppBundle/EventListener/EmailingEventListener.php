@@ -6,6 +6,7 @@ use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
@@ -48,6 +49,27 @@ class EmailingEventListener
         $this->mailer->send($archive);
     }
 
+    /**
+     * @param ShiftDeletedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftDeleted(ShiftDeletedEvent $event)
+    {
+        $shift = $event->getShift();
+        if ($shift->getShifter()) { //warn shifter
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
+                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setTo($shift->getShifter()->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/deleted_shift.html.twig',
+                        array('shift' => $shift)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($warn);
+        }
+    }
 
     /**
      * @param MemberCycleEndEvent $event
@@ -120,7 +142,7 @@ class EmailingEventListener
         $display = $event->getDisplay();
 
         $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', array('token'=>$this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername().',code:'.$code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
         if (!$display) { //use smartphone
             $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
@@ -129,7 +151,7 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/new_code.html.twig',
-                        array('code' => $code,'codes' => $old_codes,'changeCodeUrl' => $code_change_done_url)
+                        array('code' => $code, 'codes' => $old_codes, 'changeCodeUrl' => $code_change_done_url)
                     ),
                     'text/html'
                 );

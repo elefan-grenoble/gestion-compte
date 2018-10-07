@@ -7,6 +7,7 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
@@ -49,6 +50,20 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftFreed");
         $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
+
+    /**
+     * @param ShiftDeletedEvent $event
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function onShiftDeleted(ShiftDeletedEvent $event)
+    {
+        $this->logger->info("Time Log Listener: onShiftDeleted");
+        $shift = $event->getShift();
+        if ($shift->getShifter()) {
+            $this->deleteShiftLogs($shift, $shift->getShifter()->getMembership());
+        }
+    }
+
 
     /**
      * @param ShiftDismissedEvent $event

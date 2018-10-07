@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use DateTime;
@@ -33,7 +34,8 @@ use Doctrine\ORM\EntityManager;
 class BookingController extends Controller
 {
 
-    public function homepageAction(){
+    public function homepageAction()
+    {
         return $this->render('booking/home_booked_shifts.html.twig');
     }
 
@@ -256,19 +258,10 @@ class BookingController extends Controller
                 $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
                 $count = 0;
                 foreach ($shifts as $s) {
-                    if ($s->getShifter()) { //warn shifter
-                        $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
-                            ->setFrom('membres@lelefan.org')
-                            ->setTo($s->getShifter()->getEmail())
-                            ->setBody(
-                                $this->renderView(
-                                    'emails/deleted_shift.html.twig',
-                                    array('shift' => $s)
-                                ),
-                                'text/html'
-                            );
-                        $mailer->send($warn);
-                    }
+
+                    $dispatcher = $this->get('event_dispatcher');
+                    $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
+
                     $em->remove($s);
                     $count++;
                 }
