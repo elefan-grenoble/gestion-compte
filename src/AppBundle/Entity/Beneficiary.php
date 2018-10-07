@@ -176,15 +176,18 @@ class Beneficiary
         return $this;
     }
 
-    public function getDisplayName(){
-        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+    public function getDisplayName()
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
-    public function getPublicDisplayName(){
-        return '#'.$this->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
+    public function getPublicDisplayName()
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->getDisplayName();
     }
 
@@ -219,7 +222,11 @@ class Beneficiary
      */
     public function getEmail()
     {
-        return $this->getUser()->getEmail();
+        if ($this->getUser()) {
+            return $this->getUser()->getEmail();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -274,6 +281,7 @@ class Beneficiary
     {
         return $this === $this->getMembership()->getMainBeneficiary();
     }
+
     /**
      * Constructor
      */
@@ -319,7 +327,8 @@ class Beneficiary
         return $this->commissions;
     }
 
-    public function getOwnedCommissions(){
+    public function getOwnedCommissions()
+    {
         return $this->commissions->filter(function ($commission) {
             return $commission->getOwners()->contains($this);
         });
@@ -563,12 +572,14 @@ class Beneficiary
         return $this->received_proxies;
     }
 
-    public function getAutocompleteLabel(){
-        return '#'.$this->getMembership()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
+    public function getAutocompleteLabel()
+    {
+        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' (' . $this->getId() . ')';
     }
 
-    public function getAutocompleteLabelFull(){
-        return '#'.$this->getMembership()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' '.$this->getEmail().' ('. $this->getId() .')';
+    public function getAutocompleteLabelFull()
+    {
+        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
     }
 
     /**
@@ -680,23 +691,24 @@ class Beneficiary
         $this->address = $address;
     }
 
-    public function canBook($duration = 90,$cycle = 0){
+    public function canBook($duration = 90, $cycle = 0)
+    {
 
         $member = $this->getMembership();
         $beneficiary_counter = $this->getTimeCount($cycle);
 
         //check if beneficiary booked time is ok
         //if timecount <=0 : some shift to catchup, can book more than what's due
-        if ($member->getTimeCount($member->endOfCycle($cycle)) > 0 && $beneficiary_counter >= $this->_getDueDurationByCycle()){ //Beneficiary is already ok
+        if ($member->getTimeCount($member->endOfCycle($cycle)) > 0 && $beneficiary_counter >= $this->_getDueDurationByCycle()) { //Beneficiary is already ok
             return false;
         }
 
         //time count at start of cycle (before decrease)
         $timeCounter = $member->getTimeCount($member->startOfCycle($cycle));
         //time count at start of cycle  (after decrease)
-        if ($timeCounter > $this->_getDueDurationByCycle()){
+        if ($timeCounter > $this->_getDueDurationByCycle()) {
             $timeCounter = 0;
-        }else{
+        } else {
             $timeCounter -= $this->_getDueDurationByCycle();
         }
         // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what can membership book for this cycle
@@ -704,22 +716,24 @@ class Beneficiary
 
     }
 
-    public function getTimeCount($cycle = 0){
-        if (!isset($this->_counters[$cycle])){
+    public function getTimeCount($cycle = 0)
+    {
+        if (!isset($this->_counters[$cycle])) {
             $this->_counters[$cycle] = 0;
             $member = $this->getMembership();
             //todo add a custom query for this
-            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member,$cycle) {
+            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member, $cycle) {
                 return ($shift->getStart() > $member->startOfCycle($cycle) && $shift->getEnd() < $member->endOfCycle($cycle));
             });
-            foreach ($beneficiary_shift_for_current_cycle as $s){
+            foreach ($beneficiary_shift_for_current_cycle as $s) {
                 $this->_counters[$cycle] += $s->getDuration();
             }
         }
         return $this->_counters[$cycle];
     }
 
-    private function _getDueDurationByCycle(){
+    private function _getDueDurationByCycle()
+    {
         return 180; //todo return form parameters $this->container->getParameter('due_duration_by_cycle')
     }
 }
