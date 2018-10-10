@@ -129,6 +129,7 @@ UPDATE newuser SET username = REPLACE(username,'ď','d');
 UPDATE newuser SET username = REPLACE(username,'ť','t');
 UPDATE newuser SET username = REPLACE(username,'ň','n');
 UPDATE newuser SET username = REPLACE(username,'ů','u');
+UPDATE newuser SET username = REPLACE(username,"'",'');
 
 INSERT INTO fos_user (username, username_canonical, email, email_canonical, enabled, salt, password, last_login, confirmation_token, password_requested_at, roles)
   SELECT username, username, email, email, false, NULL, SUBSTRING(MD5(RAND()) FROM 1 FOR 12) , NULL, NULL, NULL, 'a:0:{}' FROM newuser;
