@@ -48,10 +48,95 @@ UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.user_id = NULL WH
 ALTER TABLE beneficiary DROP INDEX IDX_7ABF446AA76ED395, ADD UNIQUE INDEX UNIQ_7ABF446AA76ED395 (user_id);
 
 -- Move email from beneficiary to user
---INSERT INTO fos_user (username, username_canonical, email, email_canonical, enabled, salt, password, last_login, confirmation_token, password_requested_at, roles)
---  SELECT email, email, email, email, false, NULL, 'TODO', NULL, NULL, NULL, 'a:0:{}' FROM beneficiary where user_id is NULL and email;
--- DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
--- ALTER TABLE beneficiary DROP email;
+CREATE TABLE `newuser` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `beneficiary_id` int(11) DEFAULT NULL,
+  `username` varchar(180) COLLATE utf8_unicode_ci NOT NULL,
+  `email` varchar(180) COLLATE utf8_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO newuser (beneficiary_id,username,email)
+(SELECT b3.id,LOWER(CONCAT(SUBSTRING(b3.firstname,1,1),b3.lastname,
+            CASE (b3.cnt + b3.cnt2) WHEN 1 THEN '' ELSE (b3.cnt + b3.cnt2) END)),CASE (b3.email_count) WHEN 0 THEN b3.email ELSE CONCAT('membres+b',b3.id,'@lelefan.org') END
+ FROM (
+    SELECT
+        b.id,
+        b.firstname,
+        b.lastname,
+        b.email,
+        (
+            SELECT COUNT(*)
+            FROM beneficiary b2
+            WHERE SUBSTRING(b2.firstname,1,1) = SUBSTRING(b.firstname,1,1)
+            AND b2.lastname = b.lastname AND b2.id <= b.id
+        ) as cnt,
+        (
+            SELECT COUNT(*)
+            FROM fos_user u
+            WHERE LOWER(CONCAT(SUBSTRING(b.firstname,1,1),b.lastname)) = u.username
+        ) as cnt2,
+        (
+            SELECT COUNT(*)
+            FROM fos_user u
+            WHERE b.email = u.email
+        ) as email_count
+    FROM beneficiary b LEFT JOIN fos_user as user ON user.main_beneficiary_id = b.id WHERE user.id IS NULL AND b.email IS NOT NULL) b3);
+UPDATE newuser SET username = LOWER(username);
+
+UPDATE newuser SET username = REPLACE(username,'ž','z');
+UPDATE newuser SET username = REPLACE(username,'à','a');
+UPDATE newuser SET username = REPLACE(username,'á','a');
+UPDATE newuser SET username = REPLACE(username,'â','a');
+UPDATE newuser SET username = REPLACE(username,'ã','a');
+UPDATE newuser SET username = REPLACE(username,'ä','a');
+UPDATE newuser SET username = REPLACE(username,'å','a');
+UPDATE newuser SET username = REPLACE(username,'æ','a');
+UPDATE newuser SET username = REPLACE(username,'ç','c');
+UPDATE newuser SET username = REPLACE(username,'è','e');
+UPDATE newuser SET username = REPLACE(username,'é','e');
+UPDATE newuser SET username = REPLACE(username,'ê','e');
+UPDATE newuser SET username = REPLACE(username,'ë','e');
+UPDATE newuser SET username = REPLACE(username,'ì','i');
+UPDATE newuser SET username = REPLACE(username,'í','i');
+UPDATE newuser SET username = REPLACE(username,'î','i');
+UPDATE newuser SET username = REPLACE(username,'ï','i');
+UPDATE newuser SET username = REPLACE(username,'ð','o');
+UPDATE newuser SET username = REPLACE(username,'ñ','n');
+UPDATE newuser SET username = REPLACE(username,'ò','o');
+UPDATE newuser SET username = REPLACE(username,'ó','o');
+UPDATE newuser SET username = REPLACE(username,'ô','o');
+UPDATE newuser SET username = REPLACE(username,'õ','o');
+UPDATE newuser SET username = REPLACE(username,'ö','o');
+UPDATE newuser SET username = REPLACE(username,'ø','o');
+UPDATE newuser SET username = REPLACE(username,'ù','u');
+UPDATE newuser SET username = REPLACE(username,'ú','u');
+UPDATE newuser SET username = REPLACE(username,'û','u');
+UPDATE newuser SET username = REPLACE(username,'ý','y');
+UPDATE newuser SET username = REPLACE(username,'ý','y');
+UPDATE newuser SET username = REPLACE(username,'þ','b');
+UPDATE newuser SET username = REPLACE(username,'ÿ','y');
+UPDATE newuser SET username = REPLACE(username,'ƒ','f');
+UPDATE newuser SET username = REPLACE(username,'.','');
+UPDATE newuser SET username = REPLACE(username,' ','');
+UPDATE newuser SET username = REPLACE(username,'-','');
+UPDATE newuser SET username = REPLACE(username,'ě','e');
+UPDATE newuser SET username = REPLACE(username,'ž','z');
+UPDATE newuser SET username = REPLACE(username,'š','s');
+UPDATE newuser SET username = REPLACE(username,'č','c');
+UPDATE newuser SET username = REPLACE(username,'ř','r');
+UPDATE newuser SET username = REPLACE(username,'ď','d');
+UPDATE newuser SET username = REPLACE(username,'ť','t');
+UPDATE newuser SET username = REPLACE(username,'ň','n');
+UPDATE newuser SET username = REPLACE(username,'ů','u');
+
+INSERT INTO fos_user (username, username_canonical, email, email_canonical, enabled, salt, password, last_login, confirmation_token, password_requested_at, roles)
+  SELECT username, username, email, email, false, NULL, SUBSTRING(MD5(RAND()) FROM 1 FOR 12) , NULL, NULL, NULL, 'a:0:{}' FROM newuser;
+
+DROP TABLE newuser;
+
+DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
+ALTER TABLE beneficiary DROP email;
 
 
 -- Migrate address
