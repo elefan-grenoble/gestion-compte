@@ -65,6 +65,31 @@ DROP INDEX UNIQ_957A64796986CF73 ON fos_user;
 
 ALTER TABLE fos_user DROP address_id, DROP last_registration_id, DROP withdrawn, DROP frozen, DROP first_shift_date, DROP frozen_change, DROP member_number;
 
+-- Specific links between beneficiaries and users
+-- Sonia SELMI
+update beneficiary set user_id = 1395 where id = 1093;
+-- Clément DREVETON
+update beneficiary set user_id = 104 where id = 103;
+-- Camille ALEZIER
+update beneficiary set user_id = 481 where id = 480;
+-- Perrine DELAISON
+update beneficiary set user_id = 156 where id = 155;
+-- Joséphine BROI
+update beneficiary set user_id = 272 where id = 271;
+-- Pierre JODAR
+update beneficiary set user_id = 548 where id = 547;
+-- Vannina TOMASINI
+update beneficiary set user_id = 739 where id = 738;
+-- Thomas MALAFOSSE
+update beneficiary set user_id = 843 where id = 842;
+-- Julie ZAMORA
+update beneficiary set user_id = 877 where id = 876;
+-- Lucas DELIGEON
+update beneficiary set user_id = 1420 where id = 1633;
+-- Patrick CHERRIER
+update beneficiary set user_id = 51 where id = 50;
+
+
 -- Move email from beneficiary to user
 CREATE TABLE `newuser` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -158,6 +183,8 @@ DROP TABLE newuser;
 
 DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
 ALTER TABLE beneficiary DROP email;
+
+ALTER TABLE beneficiary CHANGE user_id user_id INT NOT NULL;
 
 ALTER TABLE fos_user DROP main_beneficiary_id;
 
