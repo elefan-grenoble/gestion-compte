@@ -53,7 +53,7 @@ class Beneficiary
     private $address;
 
     /**
-     * @ORM\OneToOne(targetEntity="User")
+     * @ORM\OneToOne(targetEntity="User",cascade={"persist"})
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",onDelete="CASCADE",nullable=false)
      */
     private $user;

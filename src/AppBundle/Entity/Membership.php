@@ -257,8 +257,10 @@ class Membership
      */
     public function setMainBeneficiary(\AppBundle\Entity\Beneficiary $mainBeneficiary = null)
     {
-        if ($mainBeneficiary)
+        if ($mainBeneficiary) {
             $this->addBeneficiary($mainBeneficiary);
+            $mainBeneficiary->setMembership($this);
+        }
 
         $this->mainBeneficiary = $mainBeneficiary;
 

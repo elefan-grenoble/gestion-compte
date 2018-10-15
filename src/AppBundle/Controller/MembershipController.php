@@ -611,15 +611,17 @@ class MembershipController extends Controller
                         $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname(), count($members) + 1 + $already_registred);
                     }
 
-                    $user = new User();
-                    $user->setUsername($username);
+                    $member->getMainBeneficiary()->getUser()->setUsername($username);
                     $password = User::randomPassword();
-                    $user->setPassword($password);
+                    $member->getMainBeneficiary()->getUser()->setPassword($password);
 
                     if (!$member->getLastRegistration()->getRegistrar())
                         $member->getLastRegistration()->setRegistrar($this->getCurrentAppUser());
 
-                    $em->persist($user);
+                    $member->setWithdrawn(false);
+                    $member->setFrozen(false);
+                    $member->setFrozenChange(false);
+
                     $em->persist($member);
                     $em->flush();
 

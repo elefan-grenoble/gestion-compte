@@ -50,6 +50,10 @@ class MembershipType extends AbstractType
             }
 
             $form->add('mainBeneficiary', BeneficiaryType::class);
+
+            if ($userData && !$userData->getId()) {
+                $form->add('lastRegistration', RegistrationType::class, array('label' => ' ', 'data_class' => Registration::class));
+            }
         });
     }
 
