@@ -2,17 +2,20 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
-class UserType extends AbstractType
+class MembershipType extends AbstractType
 {
 
     private $tokenStorage;
@@ -39,7 +42,14 @@ class UserType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
             $userData = $event->getData();
-            $form->add('email', EmailType::class, array('constraints' => array(new NotBlank(), new Email()), 'label' => 'Courriel'));
+
+            if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+                $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'));
+            } else {
+                $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true));
+            }
+
+            $form->add('mainBeneficiary', BeneficiaryType::class);
         });
     }
 
@@ -49,7 +59,7 @@ class UserType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\User'
+            'data_class' => 'AppBundle\Entity\Membership'
         ));
     }
 
@@ -58,7 +68,7 @@ class UserType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'appbundle_user';
+        return 'appbundle_membership';
     }
 
 

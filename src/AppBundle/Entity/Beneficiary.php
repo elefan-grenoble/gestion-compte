@@ -341,7 +341,7 @@ class Beneficiary
      *
      * @return Beneficiary
      */
-    public function addRole(\AppBundle\Entity\Formation $formation)
+    public function addFormation(\AppBundle\Entity\Formation $formation)
     {
         $this->formations[] = $formation;
 
@@ -353,7 +353,7 @@ class Beneficiary
      *
      * @param \AppBundle\Entity\Formation $formation
      */
-    public function removeRole(\AppBundle\Entity\Formation $formation)
+    public function removeFormation(\AppBundle\Entity\Formation $formation)
     {
         $this->formations->removeElement($formation);
     }

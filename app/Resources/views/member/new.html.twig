@@ -1,0 +1,19 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i><span>Nouvelle adhésion</span>
+{% endblock %}
+
+{% block content %}
+    <h3>Nouvelle adhésion</h3>
+
+    {{ form_start(form) }}
+    {% include "member/_partial/member_form.html.twig" with { form: form } %}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Adhérer</button>
+    </div>
+    {{ form_end(form) }}
+
+{% endblock %}

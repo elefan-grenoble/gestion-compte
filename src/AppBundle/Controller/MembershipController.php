@@ -11,6 +11,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\UserType;
@@ -558,6 +559,92 @@ class MembershipController extends Controller
     }
 
     /**
+     * Creates a new membership entity.
+     *
+     * @Route("/new", name="member_new")
+     * @Method({"GET", "POST"})
+     * @param Request $request
+     * @return Response
+     */
+    public function newAction(Request $request)
+    {
+        $session = new Session();
+        $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
+        $member = new Membership();
+
+        $em = $this->getDoctrine()->getManager();
+
+        //todo use the first available, not the bigest plus one
+        $members = $em->getRepository('AppBundle:Membership')->findBy(array(), array('member_number' => 'DESC'));
+        $mm = 1;
+        if (count($members) && isset($members[0]))
+            $mm = $members[0]->getMemberNumber() + 1;
+        $member->setMemberNumber($mm);
+
+        $registration = new Registration();
+        $registration->setDate(new DateTime('now'));
+        $registration->setMembership($member);
+        $registration->setRegistrar($this->getCurrentAppUser());
+        $member->addRegistration($registration);
+
+        $form = $this->createForm('AppBundle\Form\MembershipType', $member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $member->getMainBeneficiary()->getUser()->getEmail();
+            if (!filter_var($email, FILTER_SANITIZE_EMAIL) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
+            } else {
+                $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $email));
+                if ($other_user) {
+                    $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! (' . '#' . $other_user->getMemberNumber() . " " . $other_user->getFirstName() . " " . $other_user->getLastName()[0] . ')');
+                } else {
+
+                    $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname());
+                    $qb = $em->createQueryBuilder();
+                    $usernames = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+                        ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
+                        ->getQuery()
+                        ->getResult();
+                    $already_registred = (isset($usernames[$username])) ? $usernames[$username] : 0;
+                    if (count($usernames) || $already_registred) {
+                        $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname(), count($members) + 1 + $already_registred);
+                    }
+
+                    $user = new User();
+                    $user->setUsername($username);
+                    $password = User::randomPassword();
+                    $user->setPassword($password);
+
+                    if (!$member->getLastRegistration()->getRegistrar())
+                        $member->getLastRegistration()->setRegistrar($this->getCurrentAppUser());
+
+                    $em->persist($user);
+                    $em->persist($member);
+                    $em->flush();
+
+                    $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+
+                    $dispatcher = $this->get('event_dispatcher');
+                    $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
+
+                    return $this->redirectToShow($member);
+                }
+            }
+        } elseif ($form->isSubmitted()) {
+            foreach ($this->getErrorMessages($form) as $key => $errors) {
+                foreach ($errors as $error)
+                    $session->getFlashBag()->add('error', $key . " : " . $error);
+            }
+        }
+
+        return $this->render('member/new.html.twig', array(
+            'member' => $member,
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
      * Join two members
      *
      * @Route("/join", name="member_join")
@@ -622,7 +709,7 @@ class MembershipController extends Controller
      */
     public function officeToolsAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('access_tools',$this->getCurrentAppUser());
+        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
         $note = new Note();
         $note->setAuthor($this->getCurrentAppUser());
         $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
@@ -631,23 +718,23 @@ class MembershipController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
-            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject"=>null,"author"=>$this->getCurrentAppUser(),"text"=>$note->getText()));
+            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
             $session = new Session();
-            if ($existing_note){
-                $session->getFlashBag()->add('error','Ce post-it existe déjà');
-            }else{
+            if ($existing_note) {
+                $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+            } else {
                 $em->persist($note);
                 $em->flush();
-                $session->getFlashBag()->add('success','Post-it ajouté');
+                $session->getFlashBag()->add('success', 'Post-it ajouté');
             }
         }
 
-        $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject"=>null));
+        $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
         $notes_form = array();
         $notes_delete_form = array();
         $new_notes_form = array();
-        foreach ($notes as $n){
-            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n,array('action'=>$this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+        foreach ($notes as $n) {
+            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;

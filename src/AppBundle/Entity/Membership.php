@@ -113,7 +113,6 @@ class Membership
      */
     public function __construct()
     {
-        parent::__construct();
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
     }

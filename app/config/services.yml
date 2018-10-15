@@ -83,3 +83,4 @@ services:
                 - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
                 - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
+                - { name: kernel.event_listener, event: member.created, method: onMemberCreated }

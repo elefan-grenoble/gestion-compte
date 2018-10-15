@@ -3,6 +3,7 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Event\CodeNewEvent;
+use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\ShiftBookedEvent;
@@ -25,6 +26,31 @@ class EmailingEventListener
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
+    }
+
+    /**
+     * @param MemberCreatedEvent $event
+     * @throws \Exception
+     */
+    public function onMemberCreated(MemberCreatedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onMemberCreated");
+
+        $beneficiaries = $event->getMembership()->getBeneficiaries();
+
+        foreach ($beneficiaries as $beneficiary) {
+            $welcome = (new \Swift_Message('Bienvenue à l\'éléfàn'))
+                ->setFrom('membres@lelefan.org')
+                ->setTo($beneficiary->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/welcome.html.twig',
+                        array('beneficiary' => $beneficiary)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($welcome);
+        }
     }
 
     /**

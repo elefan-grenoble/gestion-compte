@@ -2,18 +2,14 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\Commission;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class BeneficiaryType extends AbstractType
@@ -39,45 +35,45 @@ class BeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('lastname',TextType::class,array('constraints' => array( new NotBlank()), 'label'=>'Nom de famille'))
-            ->add('firstname',TextType::class,array('constraints' => array( new NotBlank()),'label'=>'Prénom'))
-            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'))
-            ->add('phone',TextType::class,array('constraints' => array(),'label'=>'Téléphone','required' => false))
-            ->add('address', AddressType::class,array('label'=>' '));
+            ->add('lastname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom de famille'))
+            ->add('firstname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Prénom'))
+            ->add('phone', TextType::class, array('constraints' => array(), 'label' => 'Téléphone', 'required' => false))
+            ->add('address', AddressType::class, array('label' => ' '))
+            ->add('user', UserType::class);
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
-                $form->add('commissions',EntityType::class, array(
+            if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+                $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',
-                    'choice_label'     => 'name',
-                    'multiple'     => true,
+                    'choice_label' => 'name',
+                    'multiple' => true,
                     'required' => false,
-                    'label'=>'Commission(s)'
+                    'label' => 'Commission(s)'
                 ));
-                $form->add('roles',EntityType::class, array(
-                    'class' => 'AppBundle:Role',
-                    'placeholder' => '--- Roles ---',
-                    'choice_label'     => 'name',
-                    'multiple'     => true,
+                $form->add('formations', EntityType::class, array(
+                    'class' => 'AppBundle:Formation',
+                    'placeholder' => '--- Formations ---',
+                    'choice_label' => 'name',
+                    'multiple' => true,
                     'required' => false,
-                    'label'=>'Role(s)'
+                    'label' => 'Formation(s)'
                 ));
-            }else if($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions())){
-                $form->add('commissions',EntityType::class, array(
+            } else if ($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions())) {
+                $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',
                     'choices' => $user->getBeneficiary()->getOwnedCommissions(),
-                    'choice_label'     => 'name',
-                    'multiple'     => true,
+                    'choice_label' => 'name',
+                    'multiple' => true,
                     'required' => true,
-                    'label'=>'Commission(s) / College(s)'
+                    'label' => 'Commission(s) / College(s)'
                 ));
             }
         });
     }
-    
+
     /**
      * {@inheritdoc}
      */
