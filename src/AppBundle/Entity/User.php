@@ -29,7 +29,7 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist"})
      * @OrderBy({"date" = "DESC"})
      */
     private $recordedRegistrations;

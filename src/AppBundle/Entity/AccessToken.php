@@ -26,6 +26,7 @@ class AccessToken extends BaseAccessToken
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\User")
+     * @ORM\JoinColumn(nullable=true, onDelete="CASCADE")
      */
     protected $user;
 }
