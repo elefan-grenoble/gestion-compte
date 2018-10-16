@@ -327,8 +327,10 @@ class MembershipController extends Controller
     /**
      * Displays a form to edit an existing member entity.
      *
-     * @Route("/edit/firewall", name="member_edit_firewall")
+     * @Route("/edit", name="member_edit_firewall")
      * @Method({"GET", "POST"})
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
     public function editFirewallAction(Request $request)
     {
