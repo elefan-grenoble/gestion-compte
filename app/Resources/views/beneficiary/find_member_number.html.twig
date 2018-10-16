@@ -32,7 +32,7 @@
             {% if beneficiaries %}
             <div class="collection">
                 {% for beneficiary in beneficiaries %}
-                    <form action="{{ path(return_path,{'member_number':beneficiary.memberNumber,'beneficiary':beneficiary.id}|merge(params)) }}" method="post" class="collection-item">
+                    <form action="{{ path(return_path,{'id':beneficiary.id })}}" method="post" class="collection-item">
                         <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname | first | upper }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
                     </form>
                 {% endfor %}
@@ -40,7 +40,7 @@
             {% elseif not form %}
                 <div class="row center">
                     <p class=" col s12 light">Oups, aucun résultats pour ce prénom !<br>
-                        <a href="{{ path('find_user_number') }}" class="btn">Essayer un autre ?</a>
+                        <a href="{{ path('find_member_number') }}" class="btn">Essayer un autre ?</a>
                     </p>
                 </div>
             {% endif %}

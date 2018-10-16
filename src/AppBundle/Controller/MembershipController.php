@@ -342,23 +342,24 @@ class MembershipController extends Controller
             if ($this->isGranted('view', $member)) {
                 return $this->redirectToEdit($member);
             }
+            $user = $member->getMainBeneficiary()->getUser();
             $form = $this->createFormBuilder()
-                ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true, 'attr' => array('value' => $user->getMemberNumber())))
+                ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true, 'attr' => array('value' => $member->getMemberNumber())))
                 ->add('username', HiddenType::class, array('attr' => array('value' => $user->getUsername())))
                 ->add('email', EmailType::class, array('label' => 'Courriel complet', 'attr' => array('placeholder' => $user->getAnonymousEmail())))
-                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de ' . $user->getFirstname(), 'attr' => array('class' => 'btn')))
+                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de ' . $member->getMainBeneficiary()->getFirstname(), 'attr' => array('class' => 'btn')))
                 ->getForm();
         } else {
             if ($this->isGranted('view', new User())) {
                 $form = $this->createFormBuilder()
-                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                     ->add('username', HiddenType::class, array('attr' => array('value' => '')))
                     ->add('email', HiddenType::class, array('label' => 'email'))
                     ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                     ->getForm();
             } else {
                 $form = $this->createFormBuilder()
-                    ->add('member_number', TextType::class, array('label' => 'Numéro d\'adhérent'))
+                    ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                     ->add('username', HiddenType::class, array('attr' => array('value' => '')))
                     ->add('email', EmailType::class, array('label' => 'email'))
                     ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
@@ -376,19 +377,21 @@ class MembershipController extends Controller
             $email = $form->get('email')->getData();
 
             $em = $this->getDoctrine()->getManager();
-            $user = null;
+            $member = null;
             if ($username)
-                $user = $em->getRepository('AppBundle:User')->findOneBy(array('username' => $username));
-            else if ($member_number)
-                $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number' => $member_number));
-
-            if ($user && ($this->isGranted('view', $user) || ($email && ($user->getEmail() == $email)))) {
-                $session->set('token_key', uniqid());
-                return $this->redirectToShow($user);
+                $member = $em->getRepository('AppBundle:User')->findOneBy(array('username' => $username));
+            else if ($member_number) {
+                $member = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $member_number));
             }
+
+            if ($member && ($this->isGranted('view', $member))) {
+                $session->set('token_key', uniqid());
+                return $this->redirectToShow($member);
+            }
+
             if ($email)
                 $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
-            if (!$user)
+            if (!$member)
                 $session->getFlashBag()->add('error', 'membre non trouvé');
         }
 
@@ -396,6 +399,81 @@ class MembershipController extends Controller
             'form' => $form->createView(),
         ));
     }
+
+    /**
+     * @Route("/{member_number}/set_email", name="set_email")
+     * @Method({"POST"})
+     * @param User $user
+     * @param Request $request
+     * @return Response
+     */
+    public function setEmailAction(User $user, Request $request)
+    {
+        $email = $request->request->get('email');
+        $oldEmail = $user->getEmail();
+        $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
+        if (count($matches) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
+            $user->setEmail($email);
+            $user->getMainBeneficiary()->setEmail($email);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($user);
+            $em->flush();
+            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été entregistré');
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problèmatique');
+        }
+        return $this->render('user/confirm.html.twig', array(
+            'user' => $user,
+        ));
+    }
+
+    /**
+     * @Route("/help_find_user", name="find_user_help")
+     */
+    public function findUserHelpAction(Request $request)
+    {
+
+        return $this->render('default/find_user_number.html.twig');
+    }
+
+    /**
+     * @Route("/find_user", name="find_user")
+     */
+    public function findUserAction(Request $request)
+    {
+        die($request->getName());
+    }
+
+
+    /**
+     * @Route("/find_me", name="find_me")
+     * @param Request $request
+     * @return Response
+     */
+    public function activeUserAccountAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'attr' => array(
+                'placeholder' => '0',
+            )))
+            ->add('find', SubmitType::class, array('label' => 'Activer mon compte'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $member_number = $form->get('member_number')->getData();
+            $em = $this->getDoctrine()->getManager();
+            $ms = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $member_number));
+            $user = $ms->getMainBeneficiary()->getUser();
+
+            return $this->render('user/tools/confirm.html.twig', array(
+                'user' => $user,
+            ));
+        }
+        return $this->render('user/tools/find_me.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
 
     /**
      * Close member

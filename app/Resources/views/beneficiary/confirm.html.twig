@@ -4,14 +4,14 @@
     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
         <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">search</i><a href="{{ path('find_user_number') }}">Recherche numéro d'adhérent</a> <i class="material-icons">chevron_right</i>
+        <i class="material-icons">search</i><a href="{{ path('find_member_number') }}">Recherche numéro d'adhérent</a> <i class="material-icons">chevron_right</i>
         <i class="material-icons">check</i><span>Trouvé</span>
     {% endif %}
 {% endblock %}
 
 {% block content %}
-    {% set beneficiary = user.beneficiary %}
     {% set member = beneficiary.membership %}
+    {% set user = beneficiary.user %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
             <br>
@@ -29,17 +29,17 @@
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
                                 <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
-                                <input type="submit" name="submit" value="Redéfinir le mot de passe" class="btn " />
+                                <input type="submit" name="submit" value="Réinitialiser le mot de passe" class="btn " />
                             </form>
-                            <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                            <form action="{{ path('member_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
                                 <div>
                                     <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
                                 </div>
                             </form>
                         {% else %}
-                            C'est <b>{{ user.firstname }} {{ user.lastname|first|upper }}</b> !
-                            {% if not user.lastRegistration %}
+                            C'est <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            {% if not member.lastRegistration %}
                                 <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour ce compte. <br/>Il ne peux donc pas être activé.</div>
                                 <div class="center-align">
                                     <img class="responsive-img" src="/bundles/app/img/cry.gif" alt="lost" />
@@ -47,7 +47,7 @@
                             {% else %}
                                 {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
                                     <br>
-                                    Oups, on ne connait pas l'adresse courriel de {{ user.firstname }}.<br>
+                                    Oups, on ne connait pas l'adresse courriel de {{ beneficiary.firstname }}.<br>
                                     Pour éditer son profil et <b>saisir une adresse correcte</b> utilise <b class="lighten-4 blue">{{ user.email }}</b>
                                 {% else %}
                                     <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
@@ -62,9 +62,9 @@
                                 {% endif %}
                             {% endif %}
                             {% if is_granted("ROLE_ADMIN") %}
-                                <br><a href="{{ path('user_edit',{'username':user.username}) }}" class="btn green waves-effect" ><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
+                                <br><a href="{{ path('member_edit',{'member_number': member.memberNumber}) }}" class="btn green waves-effect" ><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
                             {% else %}
-                                <form action="{{ path('user_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
+                                <form action="{{ path('member_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
                                     <input type="hidden" name="username" value="{{ user.username }}" />
                                     <div>
                                         <a href="#" class="btn green waves-effect" onclick="$(this).closest('form').submit()"><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
@@ -102,7 +102,7 @@
                                     <br>
                                     Oups, on ne connait pas ton adresse courriel !<br>
                                     Pour utiliser l'espace membre elle est necessaire. <br>
-                                    <form action="{{ path('set_email',{'member_number':user.memberNumber}) }}" method="post">
+                                    <form action="{{ path('set_email',{'member_number':member.memberNumber}) }}" method="post">
                                         <input type="email" name="email" placeholder="mon-email@..." />
                                         <button type="submit" class="btn waves-effect">
                                             Définir mon email
@@ -125,11 +125,11 @@
             </div>
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                     <div class="row center">
-                        <p class=" col s12 light">Ce n'est pas celui que tu cherchais ? <a href="{{ path('find_user_number') }}">Chercher un autre numéro d'adhérent</a></p>
+                        <p class=" col s12 light">Ce n'est pas celui que tu cherchais ? <a href="{{ path('find_member_number') }}">Chercher un autre numéro d'adhérent</a></p>
                     </div>
                 {% else %}
                     <div class="row center">
-                        <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_user_number') }}">Chercher mon numéro d'adhérent</a></p>
+                        <p class=" col s12 light">Ce n'est pas moi ? <a href="{{ path('find_member_number') }}">Chercher mon numéro d'adhérent</a></p>
                     </div>
                 {% endif %}
 
@@ -137,7 +137,7 @@
                 <h2 class="header center orange-text">Oups...</h2>
                 <h5>J'ai grande mémoire mais je n'ai rien trouvé...</h5>
                 <div class="row center">
-                    <p class=" col s12 light"><a href="{{ path('find_user_number') }}" class="btn">Cherchez mon numéro d'adhérent</a></p>
+                    <p class=" col s12 light"><a href="{{ path('find_member_number') }}" class="btn">Cherchez mon numéro d'adhérent</a></p>
                     <p class=" col s12 light"><a href="{{ path('find_user_help') }}">Je ne me trouves pas !</a></p>
                 </div>
             {% endif %}
