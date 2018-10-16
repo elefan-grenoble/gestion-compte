@@ -68,7 +68,7 @@
                 {% else %}
                     <li>
                         <div class="collapsible-header">
-                            {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.role %}</b>&nbsp;({{ shift.role.name }}){% endif %}
+                            {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
                         </div>
                         <div class="collapsible-body">
                             <form action="{{ path('admin_shift_book',{'id': shift.id }) }}" method="post">
