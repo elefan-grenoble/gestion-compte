@@ -38,8 +38,7 @@ class BeneficiaryType extends AbstractType
             ->add('lastname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom de famille'))
             ->add('firstname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Prénom'))
             ->add('phone', TextType::class, array('constraints' => array(), 'label' => 'Téléphone', 'required' => false))
-            ->add('address', AddressType::class, array('label' => ' '))
-            ->add('user', UserType::class);
+            ->add('address', AddressType::class, array('label' => ' '));
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();

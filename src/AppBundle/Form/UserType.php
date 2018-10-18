@@ -38,8 +38,9 @@ class UserType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            $userData = $event->getData();
-            $form->add('email', EmailType::class, array('constraints' => array(new NotBlank(), new Email()), 'label' => 'Courriel'));
+            $form
+                ->add('email', EmailType::class, array('constraints' => array(new NotBlank(), new Email()), 'label' => 'Courriel'))
+                ->add('beneficiary', BeneficiaryType::class);
         });
     }
 
