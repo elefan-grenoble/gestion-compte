@@ -366,7 +366,7 @@
                                         € en CHEQUE
                                     {% endif %}
                                     {% if registration.membership  %}
-                                    pour #<a href="{{ path("member_edit",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
+                                    pour #<a href="{{ path("member_new_registration",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
                                     {% if registration.membership.mainBeneficiary %}
                                         {{ registration.membership.mainBeneficiary.firstname }} {{ registration.membership.mainBeneficiary.lastname }}
                                     {% endif %}

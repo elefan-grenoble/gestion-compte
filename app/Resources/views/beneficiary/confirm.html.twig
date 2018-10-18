@@ -62,7 +62,7 @@
                                 {% endif %}
                             {% endif %}
                             {% if is_granted("ROLE_ADMIN") %}
-                                <br><a href="{{ path('member_edit',{'member_number': member.memberNumber}) }}" class="btn green waves-effect" ><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
+                                <br><a href="{{ path('member_show', {'member_number': member.memberNumber}) }}" class="btn green waves-effect" ><i class="material-icons left">edit</i>Editer la fiche de {{ user.firstname }}</a>
                             {% else %}
                                 <form action="{{ path('member_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
                                     <input type="hidden" name="username" value="{{ user.username }}" />
