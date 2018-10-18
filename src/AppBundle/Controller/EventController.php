@@ -352,7 +352,7 @@ class EventController extends Controller
                 $proxy->setCreatedAt(new \DateTime());
             }
 
-            $proxy->setGiver($current_app_user);
+            $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
             $em->persist($proxy);
             $em->flush();
             $session = new Session();
@@ -392,7 +392,7 @@ class EventController extends Controller
                     $proxy->setOwner($beneficiary);
                 }
                 $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-                $proxy->setGiver($current_app_user);
+                $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
                 $confirm_form = $this->createForm('AppBundle\Form\ProxyType', $proxy);
                 $confirm_form->handleRequest($request);
 
@@ -544,25 +544,34 @@ class EventController extends Controller
     }
 
     public function sendProxyMail(Proxy $proxy,\Swift_Mailer $mailer){
+
+        $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
+
         $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
             ->setFrom('membres@lelefan.org')
-            ->setTo([$proxy->getOwner()->getEmail()=> $proxy->getOwner()->getFirstname().' '.$proxy->getOwner()->getLastname()])
-            ->setReplyTo([$proxy->getGiver()->getEmail()=> $proxy->getGiver()->getFirstname().' '.$proxy->getGiver()->getLastname()])
+            ->setTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
+            ->setReplyTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
             ->setBody(
                 $this->renderView(
                     'emails/proxy_owner.html.twig',
-                    array('proxy' => $proxy)
+                    array(
+                        'proxy' => $proxy,
+                        'giverMainBeneficiary' => $giverMainBeneficiary
+                    )
                 ),
                 'text/html'
             );
         $giver = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] votre procuration'))
             ->setFrom('membres@lelefan.org')
-            ->setTo([$proxy->getGiver()->getEmail()=> $proxy->getGiver()->getFirstname().' '.$proxy->getGiver()->getLastname()])
-            ->setReplyTo([$proxy->getOwner()->getEmail()=> $proxy->getOwner()->getFirstname().' '.$proxy->getOwner()->getLastname()])
+            ->setTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
+            ->setReplyTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
             ->setBody(
                 $this->renderView(
                     'emails/proxy_giver.html.twig',
-                    array('proxy' => $proxy)
+                    array(
+                        'proxy' => $proxy,
+                        'giverMainBeneficiary' => $giverMainBeneficiary
+                    )
                 ),
                 'text/html'
             );

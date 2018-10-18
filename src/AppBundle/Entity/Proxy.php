@@ -132,11 +132,11 @@ class Proxy
     /**
      * Set giver
      *
-     * @param \AppBundle\Entity\User $giver
+     * @param \AppBundle\Entity\Membership $giver
      *
      * @return Proxy
      */
-    public function setGiver(\AppBundle\Entity\User $giver = null)
+    public function setGiver(Membership $giver = null)
     {
         $this->giver = $giver;
 
@@ -146,7 +146,7 @@ class Proxy
     /**
      * Get giver
      *
-     * @return \AppBundle\Entity\User
+     * @return \AppBundle\Entity\Membership
      */
     public function getGiver()
     {

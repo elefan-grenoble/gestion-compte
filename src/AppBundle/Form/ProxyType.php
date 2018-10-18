@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -46,7 +47,15 @@ class ProxyType extends AbstractType
 
             if ($user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('giver',EntityType::class,array(
-                    'class' => User::class,
+                    'class' => Membership::class,
+                    'choice_label' => function (Membership $membership) {
+                        $mainBeneficiary = $membership->getMainBeneficiary();
+                        if ($mainBeneficiary) {
+                            return $mainBeneficiary;
+                        } else {
+                            return $membership->getMemberNumber();
+                        }
+                    },
                     'label'=>'Utilisateur donnant la procuration',
                     'required' => false));
                 $form->add('owner',EntityType::class,array(
