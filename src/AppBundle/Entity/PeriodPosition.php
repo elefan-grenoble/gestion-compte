@@ -31,7 +31,7 @@ class PeriodPosition
     /**
      * One Period has One Formation.
      * @ORM\ManyToOne(targetEntity="Formation")
-     * @ORM\JoinColumn(name="formation_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $formation;
 
