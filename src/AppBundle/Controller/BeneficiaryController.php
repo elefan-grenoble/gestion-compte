@@ -72,12 +72,11 @@ class BeneficiaryController extends Controller
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $otherUser = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$beneficiary->getEmail()));
-            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array("email"=>$beneficiary->getEmail()));
-            if ((!$otherUser && !$otherBeneficiary) || ($otherBeneficiary->getId() == $beneficiary->getId())){
+            $otherUser = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$beneficiary->getUser()->getEmail()));
+            if (!$otherUser || ($otherUser->getBeneficiary()->getId() === $beneficiary->getId())) {
                 $em->flush();
                 $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            }else{
+            } else {
                 $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
             }
 
