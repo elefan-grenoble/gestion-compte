@@ -35,7 +35,7 @@ class FormationController extends Controller
     /**
      * role new
      *
-     * @Route("/new", name="role_new")
+     * @Route("/new", name="formation_new")
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
@@ -69,7 +69,7 @@ class FormationController extends Controller
     /**
      * Comission edit
      *
-     * @Route("/{id}/edit", name="role_edit")
+     * @Route("/{id}/edit", name="formation_edit")
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
@@ -102,7 +102,7 @@ class FormationController extends Controller
     /**
      * Comission edit
      *
-     * @Route("/{id}", name="role_delete")
+     * @Route("/{id}", name="formation_delete")
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
@@ -126,7 +126,7 @@ class FormationController extends Controller
      */
     protected function getDeleteForm(Formation $formation){
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('role_delete', array('id' => $formation->getId())))
+            ->setAction($this->generateUrl('formation_delete', array('id' => $formation->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }

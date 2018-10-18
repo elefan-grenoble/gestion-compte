@@ -14,9 +14,7 @@ class FormationType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name')
-        ->add('has_view_user_data_rights', CheckboxType::class,array('required' => false,'label'=>'Peut consulter les données utilisateurs'))
-        ->add('has_edit_user_data_rights', CheckboxType::class,array('required' => false,'label'=>'Peut editer les données utilisateurs'));
+        $builder->add('name');
     }
     
     /**
