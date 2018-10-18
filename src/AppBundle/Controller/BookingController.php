@@ -36,7 +36,15 @@ class BookingController extends Controller
 
     public function homepageAction()
     {
-        return $this->render('booking/home_booked_shifts.html.twig');
+        $undismissShiftForm = $this->createFormBuilder()
+            ->setAction($this->generateUrl('undismiss_shift'))
+            ->setMethod('POST')
+            ->add('shift_id',HiddenType::class)
+            ->getForm();
+
+        return $this->render('booking/home_booked_shifts.html.twig', [
+            'undismiss_shift_form' => $undismissShiftForm->createView(),
+        ]);
     }
 
     /**

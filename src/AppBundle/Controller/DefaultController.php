@@ -132,19 +132,12 @@ class DefaultController extends Controller
             ->getQuery()
             ->getResult();
 
-        $undismiss_shift_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
-            ->setMethod('POST')
-            ->add('shift_id',HiddenType::class)
-            ->getForm();
-
         $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
         if (!$codes){
             $codes[] = new Code();
         }
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-            'undismiss_shift_form' => $undismiss_shift_form->createView(),
             'events' => $futur_events,
             'codes' => $codes
         ]);
