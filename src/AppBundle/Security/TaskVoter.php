@@ -86,7 +86,7 @@ class TaskVoter extends Voter
         if ($this->canEdit($task,$user)) {
             return true;
         }
-        if ($user->getCommissions()){
+        if ($user->getBeneficiary()->getCommissions()) {
             return true;
         }
 
