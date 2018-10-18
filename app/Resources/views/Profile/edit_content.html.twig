@@ -10,7 +10,7 @@
             <div class="collapsible-header active"><i class="material-icons">edit</i>Mes informations</div>
             <div class="collapsible-body">
                 {{ form_start(form) }}
-                {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary, userForm: form } %}
+                {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary } %}
                 <div>
                     <button type="submit"
                             class="btn-large waves-effect waves-light btn">{{ 'profile.edit.submit'|trans }}</button>

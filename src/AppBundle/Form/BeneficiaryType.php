@@ -4,12 +4,14 @@ namespace AppBundle\Form;
 
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class BeneficiaryType extends AbstractType
@@ -35,6 +37,7 @@ class BeneficiaryType extends AbstractType
         }
 
         $builder
+            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'))
             ->add('lastname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom de famille'))
             ->add('firstname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Prénom'))
             ->add('phone', TextType::class, array('constraints' => array(), 'label' => 'Téléphone', 'required' => false))
