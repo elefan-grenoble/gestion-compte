@@ -64,7 +64,7 @@ class Membership
 
     /**
      * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $lastRegistration;
 
