@@ -16,6 +16,7 @@ class MembershipVoter extends Voter
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
+    const OPEN = 'open';
     const CLOSE = 'close';
     const FREEZE = 'freeze';
     const FREEZE_CHANGE = 'freeze_change';
@@ -35,7 +36,7 @@ class MembershipVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
+        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::OPEN, self::CLOSE, self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
             return false;
         }
 
@@ -82,6 +83,7 @@ class MembershipVoter extends Voter
                     return true;
                 }
             case self::FREEZE:
+            case self::OPEN:
             case self::CLOSE:
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
