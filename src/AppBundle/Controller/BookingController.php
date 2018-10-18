@@ -556,7 +556,7 @@ class BookingController extends Controller
 
         $session->getFlashBag()->add('success', "Le shift a bien été libéré");
 
-        return $this->redirectToRoute('user_show', array('username' => $shift->getShifter()->getUser()->getUsername()));
+        return $this->redirectToRoute('member_show', array('member_number' => $membership->getMemberNumber()));
 
     }
 
