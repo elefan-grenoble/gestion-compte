@@ -854,7 +854,7 @@ class MembershipController extends Controller
 
                         $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
 
-                        return $this->redirectToRoute('user_show', array('username' => $destMember->getUsername()));
+                        return $this->redirectToShow($destMember);
                     } else {
                         $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
                     }
