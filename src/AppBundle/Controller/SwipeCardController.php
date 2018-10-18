@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\SwipeCard;
+use AppBundle\Entity\User;
 use AppBundle\Service\SearchUserFormHelper;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
@@ -100,8 +101,10 @@ class SwipeCardController extends Controller
             $session->getFlashBag()->add('error','Badge non trouvé avec ce numéro');
             return $this->redirectToRoute('homepage');
         }else{
+            /** @var User $current_app_user */
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            if (!$current_app_user->getBeneficiaries()->contains($card->getBeneficiary())){
+            $membership = $current_app_user->getBeneficiary()->getMembership();
+            if (!$membership->getBeneficiaries()->contains($card->getBeneficiary())){
                 $session->getFlashBag()->add('error','Ce badge ne t\'appartient pas !');
                 return $this->redirectToRoute('homepage');
             }else{
