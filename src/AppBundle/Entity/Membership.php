@@ -291,10 +291,6 @@ class Membership
     public function setWithdrawn($withdrawn)
     {
         $this->withdrawn = $withdrawn;
-
-        if ($withdrawn)
-            $this->setEnabled(false);
-
         return $this;
     }
 
