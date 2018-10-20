@@ -77,7 +77,7 @@ class MembershipVoter extends Voter
                 return $this->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
-                return $this->canView($subject, $user);
+                return $this->canView($subject, $token);
             case self::FREEZE_CHANGE:
                 if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject){
                     return true;
@@ -88,36 +88,32 @@ class MembershipVoter extends Voter
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
             case self::EDIT:
-                return $this->canEdit($subject, $user);
+                return $this->canEdit($subject, $token);
         }
 
         throw new \LogicException('This code should not be reached!');
     }
 
-    private function canView(Membership $subject, User $user)
+    private function canView(Membership $subject, TokenInterface $token)
     {
         // if they can edit, they can view
-        if ($this->canEdit($subject, $user)) {
+        if ($this->canEdit($subject, $token)) {
             return true;
         }
+
+        if ($this->decisionManager->decide($token, ['ROLE_USER_VIEWER'])) {
+            return true;
+        }
+
         return false;
     }
 
-    private function canEdit(Membership $subject, User $user)
+    private function canEdit(Membership $subject, TokenInterface $token)
     {
-        $session = new Session();
-        $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
+        $user = $token->getUser();
 
-        if ($user->getBeneficiary() && $subject->getBeneficiaries()->contains($user->getBeneficiary())){ //beneficiaries can edit there own membership
+        if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()){ //beneficiaries can edit there own membership
             return true;
-        }
-        if ($this->isLocationOk()){
-            if ($subject->getId()){
-                if ($token == $subject->getTmpToken($session->get('token_key').$user->getUsername())){
-                    return true;
-                }
-            }
-            return false;
         }
         return false;
 
