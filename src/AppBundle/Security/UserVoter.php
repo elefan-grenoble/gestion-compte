@@ -98,7 +98,7 @@ class UserVoter extends Voter
         if ($this->canEdit($subject, $token)) {
             return true;
         }
-        if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
+        if ($this->decisionManager->decide($token, ['ROLE_USER_VIEWER'])) {
             return true;
         }
         return false;

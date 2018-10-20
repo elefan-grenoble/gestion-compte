@@ -218,7 +218,6 @@ DROP INDEX IDX_2367D496D60322AC ON period_position;
 ALTER TABLE period_position CHANGE role_id formation_id INT DEFAULT NULL;
 ALTER TABLE period_position ADD CONSTRAINT FK_2367D4965200282E FOREIGN KEY (formation_id) REFERENCES formation (id);
 CREATE INDEX IDX_2367D4965200282E ON period_position (formation_id);
-ALTER TABLE formation DROP has_view_user_data_rights, DROP has_edit_user_data_rights;
 DROP INDEX uniq_57698a6a5e237e06 ON formation;
 CREATE UNIQUE INDEX UNIQ_404021BF5E237E06 ON formation (name);
 ALTER TABLE shift DROP FOREIGN KEY FK_A50B3B45D60322AC;
@@ -226,6 +225,13 @@ DROP INDEX IDX_A50B3B45D60322AC ON shift;
 ALTER TABLE shift CHANGE role_id formation_id INT DEFAULT NULL;
 ALTER TABLE shift ADD CONSTRAINT FK_A50B3B455200282E FOREIGN KEY (formation_id) REFERENCES formation (id);
 CREATE INDEX IDX_A50B3B455200282E ON shift (formation_id);
+-- Migrate our old permissions fields to our new group based mechanism
+ALTER TABLE formation ADD roles LONGTEXT NOT NULL COMMENT '(DC2Type:array)';
+UPDATE formation SET roles = 'a:0:{}';
+UPDATE formation SET roles = 'a:1:{i:0;s:16:"ROLE_USER_VIEWER";}' WHERE has_view_user_data_rights = 1;
+UPDATE formation SET roles = 'a:1:{i:0;s:17:"ROLE_USER_MANAGER";}' WHERE has_edit_user_data_rights = 1;
+ALTER TABLE formation CHANGE name name VARCHAR(180) NOT NULL;
+ALTER TABLE formation DROP has_view_user_data_rights, DROP has_edit_user_data_rights;
 
 -- Missing ON DELETE clauses --
 ALTER TABLE task DROP FOREIGN KEY FK_527EDB25D1AA2FC1;

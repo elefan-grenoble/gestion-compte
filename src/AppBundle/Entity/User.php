@@ -53,6 +53,11 @@ class User extends BaseUser
      */
     private $annotations;
 
+    public function getGroups()
+    {
+        return $this->beneficiary->getFormations();
+    }
+
     public function __get($property) {
         if (property_exists($this, $property)) {
             return $this->$property;

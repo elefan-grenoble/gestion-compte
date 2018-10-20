@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use FOS\UserBundle\Model\Group;
 
 /**
  * Formation
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="formation")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\FormationRepository")
  */
-class Formation
+class Formation extends Group
 {
     /**
      * @var int
@@ -19,14 +20,7 @@ class Formation
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=255, unique=true)
-     */
-    private $name;
+    protected $id;
 
     /**
      * Many Formations have Many Beneficiaries.

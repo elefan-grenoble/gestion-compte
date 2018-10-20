@@ -5,7 +5,8 @@ security:
     encoders:
       FOS\UserBundle\Model\UserInterface: bcrypt
     role_hierarchy:
-      ROLE_USER_MANAGER: ROLE_USER
+      ROLE_USER_VIEWER: ROLE_USER
+      ROLE_USER_MANAGER: ROLE_USER_VIEWER
       ROLE_ADMIN: [ ROLE_USER_MANAGER, ROLE_FINANCE_MANAGER ]
       ROLE_SUPER_ADMIN: ROLE_ADMIN
       ROLE_OAUTH_LOGIN: ROLE_USER
