@@ -184,7 +184,9 @@ DROP TABLE newuser;
 DROP INDEX UNIQ_7ABF446AE7927C74 ON beneficiary;
 ALTER TABLE beneficiary DROP email;
 
+SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE beneficiary CHANGE user_id user_id INT NOT NULL;
+SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE fos_user DROP main_beneficiary_id;
 
