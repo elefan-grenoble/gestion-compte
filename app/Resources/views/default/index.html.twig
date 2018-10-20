@@ -37,7 +37,7 @@
             {% if app.user.beneficiary %}{# not only admin ? #}
                 {% if not app.user.beneficiary.membership.uptodate %}
                     <p>Ton adhésion a expirée
-                        le {{ "now"|date_modify((app.user.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
+                        le {{ "now"|date_modify((app.user.beneficiary.membership.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
                                 class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% else %}

@@ -226,7 +226,8 @@ class UserController extends Controller
     public function selfRegistrationAction()
     {
         $session = new Session();
-        if (!$this->getCurrentAppUser()->canRegister()) {
+        $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
+        if (!$membership->canRegister()) {
             $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }
