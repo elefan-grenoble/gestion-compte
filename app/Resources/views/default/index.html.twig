@@ -90,7 +90,7 @@
             {% endif %}
 
 
-            {% if app.user.beneficiary and app.user.beneficiary.commissions | length %}
+            {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
                 <a href="{{ path("commission_edit",{'id': app.user.beneficiary.commissions | first.id }) }}"
                    class="waves-effect waves-light btn blue-grey">Gérer la
                     commission {{ app.user.beneficiary.commissions | first.name }}</a>
