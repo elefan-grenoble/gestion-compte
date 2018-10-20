@@ -11,7 +11,7 @@
                         <button type="submit" class="btn btn-floating waves-effect waves-light"><i
                                     class="material-icons">mode_edit</i></button>
                     </form>
-                    {% if delete_form is defined %}
+                    {% if delete_form is defined and not beneficiary.isMain %}
                         {{ form_start(delete_form) }}
                         <button type="submit" class="btn btn-floating waves-effect waves-light red"><i
                                     class="material-icons">remove</i></button>
