@@ -10,6 +10,9 @@
             <div class="collapsible-header active"><i class="material-icons">edit</i>Mes informations</div>
             <div class="collapsible-body">
                 {{ form_start(form) }}
+                <div class="errors">
+                    {{ form_errors(form) }}
+                </div>
                 {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary } %}
                 <div>
                     <button type="submit"

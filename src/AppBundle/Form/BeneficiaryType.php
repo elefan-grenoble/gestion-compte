@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -37,7 +38,7 @@ class BeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'))
+            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel', 'mapped' => false))
             ->add('lastname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom de famille'))
             ->add('firstname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Prénom'))
             ->add('phone', TextType::class, array('constraints' => array(), 'label' => 'Téléphone', 'required' => false))
@@ -73,6 +74,21 @@ class BeneficiaryType extends AbstractType
                     'label' => 'Commission(s) / College(s)'
                 ));
             }
+        });
+
+        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
+            $beneficiary = $event->getData();
+            if ($beneficiary && $beneficiary->getUser()) {
+                $event->getForm()->get('email')->setData($beneficiary->getUser()->getEmail());
+            }
+        });
+
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+            $beneficiary = $event->getForm()->getData();
+            if (!$beneficiary->getUser()) {
+                $beneficiary->setUser(new User());
+            }
+            $beneficiary->getUser()->setEmail($event->getForm()->get('email')->getData());
         });
     }
 

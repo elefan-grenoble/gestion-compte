@@ -763,7 +763,7 @@ class MembershipController extends Controller
             } else {
                 $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $email));
                 if ($other_user) {
-                    $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! (' . '#' . $other_user->getMemberNumber() . " " . $other_user->getFirstName() . " " . $other_user->getLastName()[0] . ')');
+                    $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! (' . '#' . $other_user->getBeneficiary()->getMemberNumber() . " " . $other_user->getFirstName() . " " . $other_user->getLastName()[0] . ')');
                 } else {
 
                     $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname());
