@@ -197,7 +197,9 @@
                     </ul>
                     {% if is_granted("ROLE_ADMIN") %}
                         <h5>login as</h5>
-                        <a href="{{ path('homepage', {'_login_as':  member.mainBeneficiary.user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ member.mainBeneficiary.user.firstname }}</a>
+                        {% for beneficiary in member.beneficiaries %}
+                            <a href="{{ path('homepage', {'_login_as':  beneficiary.user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ beneficiary.user.firstname }}</a>
+                        {% endfor %}
                     {% endif %}
                 </div>
             </li>
