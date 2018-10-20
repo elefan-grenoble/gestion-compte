@@ -248,10 +248,10 @@ class SwipeCardController extends Controller
         $form = $formHelper->getSearchForm($this->createFormBuilder());
         $form->handleRequest($request);
         $qb = $formHelper->initSearchQuery($em);
-        $users = null;
+        $memberships = null;
         if ($form->isSubmitted() && $form->isValid()) {
             $qb = $formHelper->processSearchFormData($form,$qb);
-            $users = $qb->getQuery()->getResult();
+            $memberships = $qb->getQuery()->getResult();
         }elseif ($request->get('beneficiary_id')&&$request->get('column')&&$request->get('line')){
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id'=>intval($request->get('beneficiary_id'))));
             if ($beneficiary->getId()){
@@ -281,9 +281,11 @@ class SwipeCardController extends Controller
         }else{
             throw $this->createAccessDeniedException();
         }
-        if ($users){
-            foreach ($users as $user){
-                foreach ($user->getBeneficiaries() as $beneficiary){
+        if ($memberships){
+            /** @var User $user */
+            foreach ($memberships as $membership){
+                $beneficiaries = $membership->getBeneficiaries();
+                foreach ($beneficiaries as $beneficiary){
                     $this->generateSwipeCard($beneficiary,false);
                     $card = $beneficiary->getSwipeCards()->first();
                     $barcodeImg = $card->getBarcode();
@@ -297,13 +299,15 @@ class SwipeCardController extends Controller
             }
             $em->flush();
             $template = $this->renderView('user/swipe_card/print.html.twig',[
-                'users' => $users
+                'memberships' => $memberships
             ]);
             $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
             $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
             $response = $html2pdf->generatePdf($template,'badges');
-            foreach ($users as $user){
-                foreach ($user->getBeneficiaries() as $beneficiary){
+            /** @var User $user */
+            foreach ($memberships as $membership){
+                $beneficiaries = $membership->getBeneficiaries();
+                foreach ($beneficiaries as $beneficiary){
                     $card = $beneficiary->getSwipeCards()->first();
                     unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png');
                     unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png');
