@@ -161,7 +161,7 @@ class DefaultController extends Controller
             $beneficiary = $card->getBeneficiary();
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,
-                'counter' => $beneficiary->getUser()->getTimeCount($beneficiary->getUser()->endOfCycle(0))
+                'counter' => $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0))
             ]);
         }
 
