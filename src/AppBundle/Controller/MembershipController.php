@@ -659,7 +659,7 @@ class MembershipController extends Controller
         $member->setFrozenChange(!$member->getFrozenChange());
         $em->persist($member);
         $em->flush();
-        if (!$member->getFrozen()) {
+        if ($member->getFrozenChange()) {
             $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
         } else {
             $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
