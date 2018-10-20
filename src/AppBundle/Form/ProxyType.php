@@ -21,6 +21,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class ProxyType extends AbstractType
 {
+    /**
+     * @var TokenStorageInterface
+     */
     private $tokenStorage;
 
     public function __construct(TokenStorageInterface $tokenStorage)
@@ -34,6 +37,7 @@ class ProxyType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
+        /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$user) {
             throw new \LogicException(
@@ -73,7 +77,7 @@ class ProxyType extends AbstractType
                 }else{
                     $form->add('owner',EntityType::class,array(
                         'class' => Beneficiary::class,
-                        'choices' => $user->getBeneficiaries(),
+                        'choices' => $user->getBeneficiary()->getMembership()->getBeneficiaries(),
                         'label'=>'beneficiaire présent acceptant la procuration'));
                 }
             }

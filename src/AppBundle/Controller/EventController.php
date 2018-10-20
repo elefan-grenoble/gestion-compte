@@ -312,12 +312,16 @@ class EventController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
-        $beneficiaries_ids = array();
-        foreach ($current_app_user->getBeneficiaries() as $b){
-            $beneficiaries_ids[] = $b;
-        }
+        $membership = $current_app_user->getBeneficiary()->getMembership();
+        $beneficiaries = $membership->getBeneficiaries();
+        $beneficiariesId = array_map(function(Beneficiary $beneficiary) {
+            return $beneficiary->getId();
+        }, $beneficiaries->toArray());
         $received_proxy = $em->getRepository('AppBundle:Proxy')->findBy(
-            array("owner"=>$beneficiaries_ids,"event"=>$event)
+            array(
+                "owner" => $beneficiariesId,
+                "event" => $event
+            )
         );
         if ($received_proxy){
             foreach ($received_proxy as $rp){
@@ -330,7 +334,7 @@ class EventController extends Controller
                 }
             }
         }
-        if ($current_app_user->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
+        if ($membership->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                 $event->getMinDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Penses à mettre à jour ton adhésion pour participer !');
@@ -368,24 +372,18 @@ class EventController extends Controller
         if ($request->get("beneficiary") > 0){
             $em = $this->getDoctrine()->getManager();
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($request->get("beneficiary"));
-            if ($beneficiary && $beneficiary->getUser()->getMemberNumber() == $request->get("member_number")){
+            if ($beneficiary){
 
-                $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>null,"owner"=>$beneficiary));
-
-                if (!$proxy){
-                    $other_beneficiaries_ids = array();
-                    foreach ($beneficiary->getUser()->getBeneficiaries() as $b){
-                        if ($b != $beneficiary)
-                            $beneficiaries_ids[] = $b;
-                    }
-                    $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
-                        array("owner"=>$beneficiaries_ids,"event"=>$event,"giver"=>null)
-                    );
-                    if ($proxy){
-                        $session->getFlashBag()->add('notice', $beneficiary->getFirstName().' partage son adhéstion #'.$beneficiary->getUser()->getMemberNumber().' avec '.$proxy->getOwner()->getFirstname().' qui accepte de prendre une procuration pour cet événement !');
-                    }
+                foreach ($beneficiary->getMembership()->getBeneficiaries() as $b){
+                    $beneficiaries_ids[] = $b;
                 }
-                if (!$proxy){
+                $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
+                    array("owner"=>$beneficiaries_ids,"event"=>$event,"giver"=>null)
+                );
+
+                if ($proxy){
+                    $session->getFlashBag()->add('notice', $beneficiary->getUser()->getFirstName().' partage son adhéstion #'.$beneficiary->getMemberNumber().' avec '.$proxy->getOwner()->getUser()->getFirstname().' qui accepte de prendre une procuration pour cet événement !');
+                } else {
                     $proxy = new Proxy();
                     $proxy->setEvent($event);
                     $proxy->setCreatedAt(new \DateTime());
@@ -453,16 +451,17 @@ class EventController extends Controller
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
                 ->join('b.user', 'u')
+                ->join('b.membership', 'm')
                 ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
-                ->andWhere("u.withdrawn != 1 or u.withdrawn is NULL" )
-                ->orderBy("u.member_number", 'ASC')
+                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" )
+                ->orderBy("m.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();
-            return $this->render('user/find_user_number.html.twig', array(
+            return $this->render('beneficiary/find_member_number.html.twig', array(
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
                 'return_path' => 'event_proxy_give',
-                'params' => array('id'=>$event->getId())
+                'event' => $event
             ));
         }
         $session->getFlashBag()->add('error',"oups, quelque chose c'est mal passé");
