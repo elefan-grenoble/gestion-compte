@@ -30,6 +30,8 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
+            ->select('s, f')
+            ->join('s.formation', 'f')
             ->where('s.start > :from')
             ->setParameter('from', $from);
         if ($max){
