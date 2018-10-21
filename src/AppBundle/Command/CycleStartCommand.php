@@ -44,19 +44,11 @@ class CycleStartCommand extends ContainerAwareCommand
         $members_with_cycle_starting_today = $em->getRepository('AppBundle:Membership')->findWithNewCycleStarting($date);
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
-            if (!$member->getFrozen()) {
-                $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
-                $count++;
-                $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $member->getMemberNumber();
-                $output->writeln($message);
-            }
-            if ($member->getFrozenChange()) {
-                $member->setFrozen(!$member->getFrozen());
-                $member->setFrozenChange(false);
-                $em->persist($member);
-            }
+            $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
+            $count++;
+            $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $member->getMemberNumber();
+            $output->writeln($message);
         }
-        $em->flush();
         $message = $count . ' event(s) created';
         $output->writeln($message);
     }

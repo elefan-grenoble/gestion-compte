@@ -82,8 +82,27 @@ class TimeLogEventListener
      */
     public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
-        $this->logger->info("Time Log Listener: onMemberCycleStart");
-        $this->createCycleBeginningLog($event->getMembership(), $event->getDate());
+        $this->logger->info("Time Log Listener: onMemberCycleEnd");
+
+        $member = $event->getMembership();
+        $date = $event->getDate();
+
+        if ($member->getFrozen()) {
+            $this->createFrozenLog($member,$date);
+        } else {
+            $this->createCycleBeginningLog($member, $date);
+        }
+
+        if ($member->getFrozenChange()) {
+            $member->setFrozen(!$member->getFrozen());
+            $member->setFrozenChange(false);
+            $this->em->persist($member);
+        }
+
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        if (!$member->getFrozen()) {
+            $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
+        }
     }
 
     /**
@@ -143,6 +162,23 @@ class TimeLogEventListener
             $log->setDescription("Régulation du bénévolat facultatif");
             $this->em->persist($log);
         }
+        $this->em->flush();
+    }
+
+    /**
+     * @param Membership $membership
+     * @param \DateTime $date
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createFrozenLog(Membership $membership, \DateTime $date)
+    {
+        $log = new TimeLog();
+        $log->setMembership($membership);
+        $log->setTime(-1 * $this->due_duration_by_cycle);
+        $log->setDate($date);
+        $log->setDescription("Début de cycle (compte gelé)");
+        $this->em->persist($log);
         $this->em->flush();
     }
 

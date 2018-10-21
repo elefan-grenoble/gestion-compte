@@ -101,7 +101,7 @@ class EmailingEventListener
      * @param MemberCycleEndEvent $event
      * @throws \Exception
      */
-    public function onMemberCycleEnd(MemberCycleEndEvent $event)
+    public function onMemberCycleStart(MemberCycleEndEvent $event)
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 
@@ -112,7 +112,7 @@ class EmailingEventListener
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
         // member wont be frozen for this cycle && not a fresh new member && member still have to book
-        if (!$membership->getFrozenChange() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
+        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
             $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
                 ->setTo($membership->getMainBeneficiary()->getEmail())
