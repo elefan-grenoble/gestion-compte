@@ -47,13 +47,13 @@ class Beneficiary
 
     /**
      * One Beneficiary has One Address.
-     * @ORM\OneToOne(targetEntity="Address",cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      */
     private $address;
 
     /**
-     * @ORM\OneToOne(targetEntity="User",cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
      */
     private $user;
@@ -100,7 +100,7 @@ class Beneficiary
 
     /**
      * Many Beneficiary have Many Tasks.
-     * @ORM\ManyToMany(targetEntity="Task", inversedBy="owners")
+     * @ORM\ManyToMany(targetEntity="Task", mappedBy="owners")
      */
     private $tasks;
 
@@ -112,7 +112,7 @@ class Beneficiary
     private $formations;
 
     /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner", cascade={"persist", "remove"})
      */
     private $received_proxies;
 

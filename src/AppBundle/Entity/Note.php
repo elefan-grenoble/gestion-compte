@@ -37,25 +37,25 @@ class Note
     private $created_at;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="annotations")
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      */
     private $author;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Membership")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="notes")
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id")
      */
     private $subject;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Note")
+     * @ORM\ManyToOne(targetEntity="Note", inversedBy="children")
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id")
      */
     private $parent;
 
     /**
-     * @ORM\OneToMany(targetEntity="Note", mappedBy="parent",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Note", mappedBy="parent", cascade={"persist", "remove"})
      */
     private $children;
 
