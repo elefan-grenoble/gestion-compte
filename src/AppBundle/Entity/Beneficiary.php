@@ -47,14 +47,14 @@ class Beneficiary
 
     /**
      * One Beneficiary has One Address.
-     * @ORM\OneToOne(targetEntity="Address",cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="Address",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      */
     private $address;
 
     /**
-     * @ORM\OneToOne(targetEntity="User",cascade={"persist"})
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id",onDelete="CASCADE",nullable=false)
+     * @ORM\OneToOne(targetEntity="User",cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
      */
     private $user;
 
