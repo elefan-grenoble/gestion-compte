@@ -145,14 +145,6 @@
                         </form>
                     {% endif %}
                 {% endif %}
-                {% if is_granted("edit",member) %}
-                    <form action="{{ path('member_edit_firewall') }}" method="POST">
-                        <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
-                        <div>
-                            <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
-                        </div>
-                    </form>
-                {% endif %}
 
                 {% if is_granted("ROLE_USER_MANAGER") %}
                     {% if is_granted("freeze_change",member) %}
