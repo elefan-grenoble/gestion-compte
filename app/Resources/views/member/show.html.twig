@@ -37,6 +37,23 @@
         </div>
     {% endif %}
 
+    {% if is_granted("beneficiary_add", member) and member.beneficiaries|length < 2 %}{#todo put this value in conf#}
+        <ul class="collapsible" data-collapsible="accordion">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
+                <div class="collapsible-body new_registration_form">
+                    {{ form_start(new_beneficiary_form) }}
+                    {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: new_beneficiary_form } %}
+                    <div class="col s3">
+                        <button type="submit" class="btn"><i class="material-icons left">add</i>Ajouter</button>
+                    </div>
+                    {{ form_end(new_beneficiary_form) }}
+                </div>
+            </li>
+        </ul>
+        {#{% else %}#}
+    {% endif %}
+
     <ul class="collapsible" data-collapsible="expandable">
         <li id="registration">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">

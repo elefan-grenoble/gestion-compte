@@ -23,11 +23,12 @@ class MembershipVoter extends Voter
     const ROLE_REMOVE = 'role_remove';
     const ROLE_ADD = 'role_add';
     const ANNOTATE = 'annotate';
+    const BENEFICIARY_ADD = 'beneficiary_add';
 
     private $decisionManager;
     private $container;
 
-    public function __construct(ContainerInterface $container,AccessDecisionManagerInterface $decisionManager)
+    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
     {
         $this->container = $container;
         $this->decisionManager = $decisionManager;
@@ -36,7 +37,20 @@ class MembershipVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::OPEN, self::CLOSE, self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
+        if (!in_array($attribute, array(
+                self::VIEW,
+                self::EDIT,
+                self::OPEN,
+                self::CLOSE,
+                self::ROLE_REMOVE,
+                self::ROLE_ADD,
+                self::FREEZE,
+                self::FREEZE_CHANGE,
+                self::CREATE,
+                self::ANNOTATE,
+                self::ACCESS_TOOLS,
+                self::BENEFICIARY_ADD)
+        )) {
             return false;
         }
 
@@ -73,13 +87,14 @@ class MembershipVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::ACCESS_TOOLS:
+            case self::BENEFICIARY_ADD:
             case self::CREATE:
                 return $this->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
             case self::FREEZE_CHANGE:
-                if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject){
+                if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject) {
                     return true;
                 }
             case self::FREEZE:
@@ -112,17 +127,18 @@ class MembershipVoter extends Voter
     {
         $user = $token->getUser();
 
-        if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()){ //beneficiaries can edit there own membership
+        if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership
             return true;
         }
         return false;
 
     }
 
-    private function isLocationOk(){
+    private function isLocationOk()
+    {
         $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
         $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',',$ips);
-        return (isset($ip) and in_array($ip,$ips));
+        $ips = explode(',', $ips);
+        return (isset($ip) and in_array($ip, $ips));
     }
 }

@@ -15,6 +15,7 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\UserType;
+use AppBundle\Security\MembershipVoter;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -130,11 +131,14 @@ class MembershipController extends Controller
                     ->setMethod('DELETE')->getForm()->createView();
         }
 
+        $beneficiaryForm = $this->createNewBeneficiaryForm($member);
+
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
             'note_form' => $note_form->createView(),
             'new_registration_form' => $registrationForm->createView(),
+            'new_beneficiary_form' => $beneficiaryForm->createView(),
             'notes_form' => $notes_form,
             'notes_delete_form' => $notes_delete_form,
             'new_notes_form' => $new_notes_form,
@@ -144,7 +148,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Displays a form to edit an existing user entity.
+     * Add a new registration.
      *
      * @Route("/newRegistration/{member_number}/", name="member_new_registration")
      * @Method({"GET", "POST"})
@@ -229,186 +233,63 @@ class MembershipController extends Controller
         return $this->redirectToShow($member);
     }
 
-//    /**
-//     * Displays a form to edit an existing user entity.
-//     *
-//     * @Route("/edit/{member_number}/", name="member_edit")
-//     * @Method({"GET", "POST"})
-//     * @param Request $request
-//     * @param Membership $member
-//     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
-//     */
-//    public function editAction(Request $request, Membership $member)
-//    {
-//        $session = new Session();
-//        $this->denyAccessUnlessGranted('edit', $member);
-//
-//        $user = $member->getMainBeneficiary()->getUser(); // FIXME
-//
-//        $re = '/(membres\+.*[0-9]+@lelefan\.org)/i';
-//        $email = $user->getEmail();
-//        preg_match($re, $email, $matches, PREG_OFFSET_CAPTURE, 0);
-//        if (count($matches)) {
-//            $session->getFlashBag()->add('warning',
-//                'Oups, on ne connait pas l\'adresse courriel de ce membre. A toi de jouer pour le renseigner !');
-//            if ($member->getMainBeneficiary())
-//                $member->getMainBeneficiary()->setEmail('');
-//        }
-//
-//        $editForm = $this->createForm('AppBundle\Form\MemberType', $member);
-//        $editForm->handleRequest($request);
-//
-//        if ($editForm->isSubmitted() && $editForm->isValid()) {
-//            $em = $this->getDoctrine()->getManager();
-//            $email = $editForm->get('mainBeneficiary')->get('email')->getData();
-//            $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $email));
-//            $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email" => $email));
-//            if ($email != $user->getEmail()) {
-//                if (!$otherBeneficiary && !$otherUser) {
-//                    $user->setEmail($email);
-//                    $em->persist($user);
-//                    $session->getFlashBag()->add('warning', 'l\'email principal a changé');
-//                } else {
-//                    $session->getFlashBag()->add('error', 'cet email est déjà utilisé');
-//                }
-//            }
-//            $em->flush();
-//            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-//
-//            return $this->redirectToShow($member);
-//        }
-//
-//        $note = new Note();
-//        $noteForm = $this->createForm('AppBundle\Form\NoteType', $note);
-//
-//        $beneficiary = new Beneficiary();
-//        $beneficiaryForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
-//        $beneficiaryForm->handleRequest($request);
-//        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
-//
-//            if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
-//
-//                $beneficiary->setUser($user);
-//                $member->addBeneficiary($beneficiary);
-//
-//                $em = $this->getDoctrine()->getManager();
-//                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getEmail()));
-//                $otherBeneficiary = $em->getRepository('AppBundle:Beneficiary')->findBy(array("email" => $beneficiary->getEmail()));
-//                if (!$otherUser && !$otherBeneficiary) {
-//                    $em->persist($beneficiary);
-//                    $em->flush();
-//
-//                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
-//                } else {
-//                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
-//                }
-//            } else {
-//                $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
-//            }
-//            return $this->redirectToEdit($user);
-//        } elseif ($beneficiaryForm->isSubmitted()) {
-//            foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors) {
-//                foreach ($errors as $error)
-//                    $session->getFlashBag()->add('error', $key . " : " . $error);
-//            }
-//        }
-//
-//        $newReg = new Registration();
-//        $remainder = $member->getRemainder();
-//        if (!$remainder->invert) { //still some days
-//            $date = clone $member->getLastRegistration()->getDate();
-//            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
-//        } else { //register now !
-//            $newReg->setDate(new DateTime('now'));
-//        }
-//        $newReg->setRegistrar($this->getCurrentAppUser());
-//        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
-//        $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
-//        $registrationForm->handleRequest($request);
-//        if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
-//            $amount = floatval($registrationForm->get('amount')->getData());
-//            if ($amount <= 0) {
-//                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
-//                return $this->redirectToEdit($member);
-//            }
-//
-//            if ($this->getCurrentAppUser()->getId() == $user->getId()) {
-//                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
-//                return $this->redirectToEdit($member);
-//            }
-//            $newReg->setRegistrar($this->getCurrentAppUser());
-//
-//            $date = $registrationForm->get('date')->getData();
-//            if (!$user->canRegister($date)) {
-//                $session->getFlashBag()->add('warning', 'l\'adhésion précédente du est encore valable à cette date !');
-//                return $this->redirectToEdit($member);
-//            }
-//            $newReg->setUser($user);
-//            $user->addRegistration($newReg);
-//
-//            $em = $this->getDoctrine()->getManager();
-//            $em->persist($newReg);
-//            $em->flush();
-//
-//            $session->getFlashBag()->add('success', 'Enregistrement effectuée');
-//            return $this->redirectToShow($member);
-//        }
-//
-//        $registrationForms = array();
-//        foreach ($member->getRegistrations() as $registration) {
-//            $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
-//            $registrationForms[$registration->getId()] = $form->createView();
-//        }
-//
-//        $id = $request->request->get("registration_id");
-//        if ($id) {
-//            $em = $this->getDoctrine()->getManager();
-//            $registration = $em->getRepository('AppBundle:Registration')->find($id);
-//            if ($registration) {
-//                $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
-//                $form->handleRequest($request);
-//                if ($form->isSubmitted() && $form->isValid()) {
-//                    if ($this->getCurrentAppUser()->getId() == $user->getId()) {
-//                        $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
-//                        return $this->redirectToEdit($member);
-//                    }
-//                    $em->persist($registration);
-//                    $em->flush();
-//                    $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-//                    return $this->redirectToShow($member);
-//                }
-//            }
-//        }
-//
-//        $deleteBeneficiaryForms = array();
-//        foreach ($member->getBeneficiaries() as $beneficiary) {
-//            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-//                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
-//                    ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
-//                    ->setMethod('DELETE')->getForm()->createView();
-//            else
-//                $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
-//                    ->setAction($this->generateUrl('beneficiary_delete', array(
-//                        'id' => $beneficiary->getId(),
-//                        'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
-//                    )))
-//                    ->setMethod('DELETE')->getForm()->createView();
-//        }
-//
-//        if ($member->isWithdrawn())
-//            $session->getFlashBag()->add('warning', 'Ce compte est fermé');
-//
-//        return $this->render('member/edit.html.twig', array(
-//            'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername()),
-//            'member' => $member,
-//            'edit_form' => $editForm->createView(),
-//            'new_registration_form' => $registrationForm->createView(),
-//            'new_beneficiary_form' => $beneficiaryForm->createView(),
-//            'new_note_form' => $noteForm->createView(),
-//            'delete_beneficiary_forms' => $deleteBeneficiaryForms,
-//            'registration_forms' => $registrationForms
-//        ));
-//    }
+    /**
+     * Add a beneficiary.
+     *
+     * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary")
+     * @Method({"GET", "POST"})
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function newBeneficiary(Request $request, Membership $member)
+    {
+        $session = new Session();
+        $this->denyAccessUnlessGranted(MembershipVoter::BENEFICIARY_ADD, $member);
+        $beneficiaryForm = $this->createNewBeneficiaryForm($member);
+        $beneficiaryForm->handleRequest($request);
+        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
+
+            $beneficiary = $beneficiaryForm->getData();
+            if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
+                $beneficiary->setMembership($member);
+                $member->addBeneficiary($beneficiary);
+
+                $em = $this->getDoctrine()->getManager();
+                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getUser()->getEmail()));
+                if (!$otherUser) {
+
+                    $username = $this->generateUsername($beneficiary);
+                    $beneficiary->getUser()->setUsername($username);
+                    $password = User::randomPassword();
+                    $beneficiary->getUser()->setPassword($password);
+
+                    $em->persist($beneficiary);
+                    $em->flush();
+                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                } else {
+                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
+                }
+            } else {
+                $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
+            }
+            return $this->redirectToShow($member);
+        } elseif ($beneficiaryForm->isSubmitted()) {
+            foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors) {
+                foreach ($errors as $error)
+                    $session->getFlashBag()->add('error', $key . " : " . $error);
+            }
+        }
+
+        return $this->redirectToShow($member);
+
+    }
+
+    private function createNewBeneficiaryForm(Membership $member)
+    {
+        $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
+        return $this->createForm('AppBundle\Form\BeneficiaryType', new Beneficiary(), array('action' => $newBeneficiaryAction));
+    }
 
     /**
      * Displays a form to edit an existing member entity.
@@ -724,6 +605,22 @@ class MembershipController extends Controller
         return $this->redirectToRoute('user_index');
     }
 
+    private function generateUsername(Beneficiary $beneficiary)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $username = User::makeUsername($beneficiary->getFirstname(), $beneficiary->getLastname());
+        $qb = $em->createQueryBuilder();
+        $usernames = $qb->select('u')->from('AppBundle\Entity\User', 'u')
+            ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
+            ->getQuery()
+            ->getResult();
+        $already_registred = (isset($usernames[$username])) ? $usernames[$username] : 0;
+        if (count($usernames) || $already_registred) {
+            $username = User::makeUsername($beneficiary->getFirstname(), $beneficiary->getLastname(), $already_registred + 1);
+        }
+        return $username;
+    }
+
     /**
      * Creates a new membership entity.
      *
@@ -766,17 +663,7 @@ class MembershipController extends Controller
                     $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! (' . '#' . $other_user->getBeneficiary()->getMemberNumber() . " " . $other_user->getFirstName() . " " . $other_user->getLastName()[0] . ')');
                 } else {
 
-                    $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname());
-                    $qb = $em->createQueryBuilder();
-                    $usernames = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-                        ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
-                        ->getQuery()
-                        ->getResult();
-                    $already_registred = (isset($usernames[$username])) ? $usernames[$username] : 0;
-                    if (count($usernames) || $already_registred) {
-                        $username = User::makeUsername($member->getMainBeneficiary()->getFirstname(), $member->getMainBeneficiary()->getLastname(), count($members) + 1 + $already_registred);
-                    }
-
+                    $username = $this->generateUsername($member->getMainBeneficiary());
                     $member->getMainBeneficiary()->getUser()->setUsername($username);
                     $password = User::randomPassword();
                     $member->getMainBeneficiary()->getUser()->setPassword($password);
@@ -925,7 +812,7 @@ class MembershipController extends Controller
      * Creates a form to delete a member entity.
      *
      * @param Membership $member
-     * @return \Symfony\Component\Form\Form The form
+     * @return \Symfony\Component\Form\FormInterface
      */
     private function createDeleteForm(Membership $member)
     {

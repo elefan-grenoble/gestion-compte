@@ -2,39 +2,16 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Client;
 use AppBundle\Entity\Membership;
-use AppBundle\Entity\Note;
-use AppBundle\Entity\Registration;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\TimeLog;
-use AppBundle\Entity\User;
-use AppBundle\Form\BeneficiaryType;
-use AppBundle\Form\NoteType;
-use AppBundle\Form\UserType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
-use DateTime;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Twig\Sandbox\SecurityError;
 
 /**
  * Beneficiary controller.
@@ -198,18 +175,6 @@ class BeneficiaryController extends Controller
     public function confirmAction(Beneficiary $beneficiary, Request $request)
     {
         return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
-    }
-
-
-
-    private function redirectToEdit(Membership $member)
-    {
-        $user = $member->getMainBeneficiary()->getUser(); // FIXME
-        $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_edit', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 
     private function redirectToShow(Membership $member)
