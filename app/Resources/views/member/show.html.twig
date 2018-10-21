@@ -127,32 +127,42 @@
             </div>
         </li>
         {% endif %}
-        {% if is_granted("ROLE_USER_MANAGER") %}
-            <li id="actions">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
-                <div class="collapsible-body white">
-                    {% if not member.mainBeneficiary.user.isEnabled %}
-                        {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
 
-                        {% else %}
-                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                <input type="hidden" name="username" value="{{ member.mainBeneficiary.user.username }}" />
-                                Envoyer le lien de connexion sur {{ member.mainBeneficiary.user.email }} ?
-                                <br>
-                                <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
-                                    <i class="material-icons left">devices</i> Activer le compte
-                                </button>
-                            </form>
-                        {% endif %}
+        <li id="actions">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
+            <div class="collapsible-body white">
+                {% if not member.mainBeneficiary.user.isEnabled %}
+                    {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                        <p>Cet utilisateur n'a pas renseigné son email, son compte ne peux pas être activé.</p>
+                    {% else %}
+                        <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
+                            <input type="hidden" name="username" value="{{ member.mainBeneficiary.user.username }}" />
+                            Envoyer le lien de connexion sur {{ member.mainBeneficiary.user.email }} ?
+                            <br>
+                            <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
+                                <i class="material-icons left">devices</i> Activer le compte
+                            </button>
+                        </form>
                     {% endif %}
+                {% endif %}
+                {% if is_granted("edit",member) %}
+                    <form action="{{ path('member_edit_firewall') }}" method="POST">
+                        <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
+                        <div>
+                            <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
+                        </div>
+                    </form>
+                {% endif %}
+
+                {% if is_granted("ROLE_USER_MANAGER") %}
                     {% if is_granted("freeze_change",member) %}
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
-                            <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                <i class="material-icons left">cancel</i>Annuler la demande de gel du compte</a>
+                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                    <i class="material-icons left">cancel</i>Annuler la demande de gel du compte</a>
                             {% else %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
-                                <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
+                                    <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
                             {% endif %}
                         {% else %}
                             {% if member.frozenChange %}
@@ -198,8 +208,8 @@
                     {% endif %}
                     {% if is_granted("close",member) %}
                         {% if not member.withdrawn %}
-                        <a href="{{ path("member_close",{"id":member.id}) }}" class="waves-effect waves-light btn red">
-                            <i class="material-icons left">close</i>Fermer le compte</a>
+                            <a href="{{ path("member_close",{"id":member.id}) }}" class="waves-effect waves-light btn red">
+                                <i class="material-icons left">close</i>Fermer le compte</a>
                         {% else %}
                             <a href="{{ path("member_open",{"id":member.id}) }}" class="waves-effect waves-light btn teal">
                                 <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
@@ -207,15 +217,15 @@
                     {% endif %}
                     <h5>Badges</h5>
                     <ul>
-                    {% for beneficiary in member.beneficiaries %}
-                        {% if (beneficiary.getSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
-                            <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
-                        {% else %}
-                            {% for badge in beneficiary.getSwipeCards %}
-                                <li><a href="{{ path("swipe_show",{"id":badge.id}) }}" class="btn light-blue darken-4">voir badge #{{ badge.number }} de {{ beneficiary.firstname }} </a></li>
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
+                        {% for beneficiary in member.beneficiaries %}
+                            {% if (beneficiary.getSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
+                                <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge pour {{ beneficiary.firstname }}</a></li>
+                            {% else %}
+                                {% for badge in beneficiary.getSwipeCards %}
+                                    <li><a href="{{ path("swipe_show",{"id":badge.id}) }}" class="btn light-blue darken-4">voir badge #{{ badge.number }} de {{ beneficiary.firstname }} </a></li>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
                     </ul>
                     {% if is_granted("ROLE_ADMIN") %}
                         <h5>login as</h5>
@@ -223,36 +233,10 @@
                             <a href="{{ path('homepage', {'_login_as':  beneficiary.user.username }) }}" class="btn deep-purple"><i class="material-icons left">person</i>Se connecter comme {{ beneficiary.user.firstname }}</a>
                         {% endfor %}
                     {% endif %}
-                </div>
-            </li>
-        {% else %}
-            <li id="actions">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.actions_open is defined and frontend_cookie.user_show.actions_open %}active{% endif %}"><i class="material-icons">build</i>Actions</div>
-                <div class="collapsible-body white">
-                    {% if not member.mainBeneficiary.user.isEnabled %}
-                        {% if member.mainBeneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
-                            <p>Cet utilisateur n'a pas renseigné son email, son compte ne peux pas être activé.</p>
-                        {% else %}
-                            <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
-                                <input type="hidden" name="username" value="{{ member.mainBeneficiary.user.username }}" />
-                                    Envoyer le lien de connexion sur {{ member.mainBeneficiary.user.email }} ?
-                                    <br>
-                                    <button type="submit" name="submit" class="btn waves-effect waves-light light-green">
-                                    <i class="material-icons left">devices</i> Activer le compte
-                                    </button>
-                            </form>
-                        {% endif %}
-                    {% endif %}
-                    {% if is_granted("edit",member) %}
-                        <form action="{{ path('member_edit_firewall') }}" method="POST">
-                            <input type="hidden" name="member_number" value="{{ member.memberNumber }}" />
-                            <div>
-                                <a href="#" onclick="$(this).closest('form').submit()" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer la fiche</a>
-                            </div>
-                        </form>
-                    {% endif %}
-                </div>
-        {% endif %}
+                {% endif %}
+            </div>
+        </li>
+
         <li id="shifts">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}"><i class="material-icons">date_range</i>Créneaux</div>
             <div class="collapsible-body white">
