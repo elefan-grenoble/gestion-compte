@@ -62,7 +62,7 @@ class DefaultController extends Controller
                         date_diff($now, $membership->endOfCycle())->format('%a jours').
                         ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
                         " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                        $this->get('router')->generate('fos_user_profile_edit')
+                        $this->get('router')->generate('fos_user_profile_show')
                         ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
                 if ($membership->getFrozenChange() && $membership->getFrozen()){
@@ -72,7 +72,7 @@ class DefaultController extends Controller
                         date_diff($now, $membership->endOfCycle())->format('%a jours').
                         ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
                         " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                        $this->get('router')->generate('fos_user_profile_edit')
+                        $this->get('router')->generate('fos_user_profile_show')
                         ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
 

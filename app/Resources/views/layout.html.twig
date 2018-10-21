@@ -97,7 +97,7 @@
                 {% if frozen %}
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
-                        {% if not app.user.frozenChange %}
+                        {% if not app.user.beneficiary.membership.frozenChange %}
                             Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
                         {% else %}
                             Dégel programmé.

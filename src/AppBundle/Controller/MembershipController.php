@@ -665,7 +665,7 @@ class MembershipController extends Controller
             $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
         }
         if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
-            return $this->redirectToRoute("fos_user_profile_edit");
+            return $this->redirectToRoute("fos_user_profile_show");
         } else {
             return $this->redirectToShow($member);
         }

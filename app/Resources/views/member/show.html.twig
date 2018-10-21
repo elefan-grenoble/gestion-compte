@@ -132,14 +132,19 @@
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
                             <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                <i class="material-icons left">cancel</i>annuler la demande de gel du compte</a>
+                                <i class="material-icons left">cancel</i>Annuler la demande de gel du compte</a>
                             {% else %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
                                 <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
                             {% endif %}
                         {% else %}
-                            <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
-                                <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle</a>
+                            {% if member.frozenChange %}
+                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                    <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte</a>
+                            {% else %}
+                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
+                                    <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle</a>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                     {% if is_granted("freeze",member) %}
