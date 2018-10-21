@@ -87,7 +87,7 @@ class Membership
     private $notes;
 
     /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver", cascade={"persist", "remove"})
      */
     private $given_proxies;
 

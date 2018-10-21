@@ -302,37 +302,21 @@ class MembershipController extends Controller
     public function editFirewallAction(Request $request)
     {
         $session = new Session();
-        $memberNumber = $request->request->get('member_number');
-        if ($memberNumber) {
-            $em = $this->getDoctrine()->getManager();
-            $member = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $memberNumber));
-            if ($this->isGranted('view', $member)) {
-                return $this->redirectToEdit($member);
-            }
-            $user = $member->getMainBeneficiary()->getUser();
+
+        if ($this->isGranted('view', new User())) {
             $form = $this->createFormBuilder()
-                ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true, 'attr' => array('value' => $member->getMemberNumber())))
-                ->add('username', HiddenType::class, array('attr' => array('value' => $user->getUsername())))
-                ->add('email', EmailType::class, array('label' => 'Courriel complet', 'attr' => array('placeholder' => $user->getAnonymousEmail())))
-                ->add('edit', SubmitType::class, array('label' => 'Editer la fiche de ' . $member->getMainBeneficiary()->getFirstname(), 'attr' => array('class' => 'btn')))
+                ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
+                ->add('username', HiddenType::class, array('attr' => array('value' => '')))
+                ->add('email', HiddenType::class, array('label' => 'email'))
+                ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
         } else {
-            if ($this->isGranted('view', new User())) {
-                $form = $this->createFormBuilder()
-                    ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
-                    ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                    ->add('email', HiddenType::class, array('label' => 'email'))
-                    ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
-                    ->getForm();
-            } else {
-                $form = $this->createFormBuilder()
-                    ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
-                    ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                    ->add('email', EmailType::class, array('label' => 'email'))
-                    ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
-                    ->getForm();
-            }
-
+            $form = $this->createFormBuilder()
+                ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
+                ->add('username', HiddenType::class, array('attr' => array('value' => '')))
+                ->add('email', EmailType::class, array('label' => 'email'))
+                ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
+                ->getForm();
         }
 
         $form->handleRequest($request);

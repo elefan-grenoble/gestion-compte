@@ -29,7 +29,7 @@ class Proxy
     private $createdAt;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Event", inversedBy="proxys")
+     * @ORM\ManyToOne(targetEntity="Event", inversedBy="proxies")
      * @ORM\JoinColumn(name="event_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $event;

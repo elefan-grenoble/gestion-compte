@@ -158,14 +158,15 @@ class AdminController extends Controller
             $return = '';
             $d = ','; // this is the default but i like to be explicit
             foreach ($members as $member) {
-                foreach ($member->getBeneficiaries() as $beneficiary)
+                foreach ($member->getBeneficiaries() as $beneficiary) {
                     $return .=
-                        $beneficiary->getUser()->getMemberNumber() . $d .
+                        $beneficiary->getMemberNumber() . $d .
                         $beneficiary->getFirstname() . $d .
                         $beneficiary->getLastname() . $d .
                         $beneficiary->getEmail() . $d .
                         $beneficiary->getPhone() .
                         "\n";
+                }
             }
             return new Response($return, 200, array(
                 'Content-Encoding: UTF-8',

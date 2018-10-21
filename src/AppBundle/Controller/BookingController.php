@@ -182,9 +182,18 @@ class BookingController extends Controller
                 $to = new DateTime($to);
         }
 
+        /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository('AppBundle:Job')->findAll();
-        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
+
+
+        $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
+            ->createQueryBuilder('b')
+            ->select('b, m')
+            ->join('b.user', 'u')
+            ->join('b.membership', 'm')
+        ;
+        $beneficiaries = $beneficiariesQb->getQuery()->getResult();
 
         $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
 

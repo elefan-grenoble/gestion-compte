@@ -63,7 +63,7 @@ class Registration
     private $membership;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="recordedRegistrations")
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
