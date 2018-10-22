@@ -28,6 +28,8 @@ ALTER TABLE time_log DROP user_id;
 -- beneficiary/user relationship / OneToMany to ManyToOne
 UPDATE beneficiary b JOIN fos_user u ON u.id = b.user_id SET b.user_id = NULL WHERE b.id != u.main_beneficiary_id;
 ALTER TABLE beneficiary DROP INDEX IDX_7ABF446AA76ED395, ADD UNIQUE INDEX UNIQ_7ABF446AA76ED395 (user_id);
+ALTER TABLE beneficiary DROP FOREIGN KEY FK_7ABF446AA76ED395;
+ALTER TABLE beneficiary ADD CONSTRAINT FK_7ABF446AA76ED395 FOREIGN KEY (user_id) REFERENCES fos_user (id);
 
 -- Migrate registrations
 ALTER TABLE registration ADD membership_id INT DEFAULT NULL;
