@@ -42,8 +42,16 @@ class BookingController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
+        $membership = $this->getUser()->getBeneficiary();
+
+        // We need to check for the current and the next cycle
+        $canBookCurrent = $membership->canBook(90, 0);
+        $canBookNext = $membership->canBook(90, 1);
+
+
         return $this->render('booking/home_booked_shifts.html.twig', [
             'undismiss_shift_form' => $undismissShiftForm->createView(),
+            'canBook' => $canBookCurrent || $canBookNext
         ]);
     }
 
