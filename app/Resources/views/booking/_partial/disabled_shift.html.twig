@@ -14,16 +14,16 @@
                     {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
                 {% if bucket.end|date('i') == '00' %}{{ bucket.end|date('G\\h') }}{% else %}{{ bucket.end|date('G\\hi') }}{% endif %}
                 </span>
-            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span>{% if nbBookableShifts == 0 %}<i class="material-icons tiny">check</i>complet{% endif %}
+            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span>
         </div>
         <div class="shift-block">
             <div class="hide-on-med-and-down">
                 {% for shift in bucket.sortedShifts %}
-                    <span class="grey-text">
+                    <span class="{% if not shift.lastShifter %}grey-text{% else %}grey-text text-lighten-2{% endif %}">
                         {% if not shift.formation %}
-                            <i class="material-icons shifter">{% if shift.shifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
+                            <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
-                            <i class="material-icons shifter">{% if shift.shifter %}account_circle{% else %}person_outline{% endif %}</i>
+                            <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}account_circle{% else %}person_outline{% endif %}</i>
                         {% endif %}
                     </span>
                 {% endfor %}

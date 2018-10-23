@@ -43,6 +43,8 @@
                         {% set class = "red-text" %}
                     {% elseif (shift.shifter) %}
                         {% set class = "green-text" %}
+                    {% elseif (shift.lastShifter) %}
+                        {% set class = "green-text text-lighten-4" %}
                     {% elseif (app.user and not beneficiary.membership.canBook(beneficiary,shift)) %}
                         {% set class = "grey-text text-lighten-2" %}
                     {% else %}
@@ -50,7 +52,7 @@
                     {% endif %}
                     <span class="{{ class }}">
                         {% if not shift.formation %}
-                            <i class="material-icons shifter">{% if shift.shifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
+                            <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
                             <i class="material-icons shifter">account_circle</i>
                         {% endif %}

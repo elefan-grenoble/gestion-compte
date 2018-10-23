@@ -42,14 +42,12 @@ class BookingController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
-        $membership = $this->getUser()->getBeneficiary();
+        $beneficiary = $this->getUser()->getBeneficiary();
         $canBook = false;
 
-        if ($membership) {
-            // We need to check for the current and the next cycle
-            $canBookCurrent = $membership->canBook(90, 0);
-            $canBookNext = $membership->canBook(90, 1);
-            $canBook = $canBookCurrent || $canBookNext;
+        if ($beneficiary) {//not ADMIN or SUPER_ADMIN
+            //todo : do not check for whole membership but only connected beneficiary
+            $canBook = $beneficiary->getMembership()->canBook();
         }
 
 
