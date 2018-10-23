@@ -461,7 +461,8 @@ class EventController extends Controller
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
                 'return_path' => 'event_proxy_give',
-                'event' => $event
+                'routeParam' => 'beneficiary',
+                'params' => ['id' => $event->getId()]
             ));
         }
         $session->getFlashBag()->add('error',"oups, quelque chose c'est mal passé");
