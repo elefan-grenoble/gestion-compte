@@ -192,8 +192,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE fos_user DROP main_beneficiary_id;
 
------
-
 ALTER TABLE registration DROP FOREIGN KEY FK_62A8A7A7A76ED395;
 DROP INDEX IDX_62A8A7A7A76ED395 ON registration;
 ALTER TABLE registration DROP user_id;
