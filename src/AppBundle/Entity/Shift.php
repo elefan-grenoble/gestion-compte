@@ -504,6 +504,9 @@ class Shift
         if ($member->isWithdrawn())
             return false;
 
+        if ($member->getFirstShiftDate()>$this->getStart())
+            return false;
+
         $current_cycle = $this->getCycleIndex($member);
 
         if ($member->getFrozen()){
