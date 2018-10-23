@@ -254,3 +254,6 @@ ALTER TABLE shift ADD CONSTRAINT FK_A50B3B455200282E FOREIGN KEY (formation_id) 
 
 ALTER TABLE membership DROP FOREIGN KEY FK_86FFD2856986CF73;
 ALTER TABLE membership ADD CONSTRAINT FK_86FFD2856986CF73 FOREIGN KEY (last_registration_id) REFERENCES registration (id) ON DELETE CASCADE;
+
+-- Delete old admin memberships
+DELETE FROM membership WHERE member_number <= 0
