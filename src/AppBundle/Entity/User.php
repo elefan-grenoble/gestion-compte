@@ -55,7 +55,12 @@ class User extends BaseUser
 
     public function getGroups()
     {
-        return $this->beneficiary->getFormations();
+        if ($this->getBeneficiary()){
+            return $this->getBeneficiary()->getFormations();
+        }else{
+            return new ArrayCollection();
+        }
+
     }
 
     public function __get($property) {
