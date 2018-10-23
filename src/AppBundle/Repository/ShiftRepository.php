@@ -31,7 +31,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
 
         $qb
             ->select('s, f')
-            ->join('s.formation', 'f')
+            ->leftJoin('s.formation', 'f')
             ->where('s.start > :from')
             ->setParameter('from', $from);
         if ($max){
