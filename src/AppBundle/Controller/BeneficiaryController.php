@@ -156,6 +156,7 @@ class BeneficiaryController extends Controller
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
                 'return_path' => 'confirm',
+                'routeParam' => 'id',
                 'params' => array()
             ));
         }

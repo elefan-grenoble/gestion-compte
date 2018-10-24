@@ -192,8 +192,6 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 ALTER TABLE fos_user DROP main_beneficiary_id;
 
------
-
 ALTER TABLE registration DROP FOREIGN KEY FK_62A8A7A7A76ED395;
 DROP INDEX IDX_62A8A7A7A76ED395 ON registration;
 ALTER TABLE registration DROP user_id;
@@ -256,3 +254,6 @@ ALTER TABLE shift ADD CONSTRAINT FK_A50B3B455200282E FOREIGN KEY (formation_id) 
 
 ALTER TABLE membership DROP FOREIGN KEY FK_86FFD2856986CF73;
 ALTER TABLE membership ADD CONSTRAINT FK_86FFD2856986CF73 FOREIGN KEY (last_registration_id) REFERENCES registration (id) ON DELETE CASCADE;
+
+-- Delete old admin memberships
+DELETE FROM membership WHERE member_number <= 0

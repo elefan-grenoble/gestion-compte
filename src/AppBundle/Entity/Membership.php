@@ -562,10 +562,32 @@ class Membership
      *
      * @return Boolean
      */
-    //todo put this in shift voter ones there is no more beneficiary but only users and membership
+    //todo get ride of this once we dont use membership anymore but the connected beneficiary
     public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 'undefined')
     {
-        return true; //todo use \AppBundle\Security\ShiftVoter::canBook
+        $can = false;
+        $beneficiaries = array();
+        if ($beneficiary){
+            $beneficiaries[] = $beneficiary;
+        }else{
+            $beneficiaries = $this->getBeneficiaries();
+        }
+        foreach ($beneficiaries as $beneficiary){
+            if (is_int($current_cycle)) {
+                if ($shift) {
+                    $can = $can || $shift->isBookable($beneficiary);
+                }else{
+                    $can = $can || $beneficiary->canBook(90, $current_cycle);
+                }
+            }else {
+                if ($shift) {
+                    $can = $can || $shift->isBookable($beneficiary);
+                }else{
+                    $can = $can || $beneficiary->canBook(90);
+                }
+            }
+        }
+        return $can;
     }
 
     /**

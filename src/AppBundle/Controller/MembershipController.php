@@ -414,10 +414,9 @@ class MembershipController extends Controller
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
             $ms = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $member_number));
-            $user = $ms->getMainBeneficiary()->getUser();
 
-            return $this->render('user/tools/confirm.html.twig', array(
-                'user' => $user,
+            return $this->render('beneficiary/confirm.html.twig', array(
+                'beneficiary' => $ms->getMainBeneficiary(),
             ));
         }
         return $this->render('user/tools/find_me.html.twig', array(
