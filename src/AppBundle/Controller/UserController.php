@@ -158,6 +158,17 @@ class UserController extends Controller
             $em->persist($ab);
             $em->flush();
 
+            $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn, tu te présentes ?'))
+                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setTo($ab->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/needInfo.html.twig'
+                    ),
+                    'text/html'
+                );
+            $mailer->send($welcome);
+
             $session = new Session();
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
 
