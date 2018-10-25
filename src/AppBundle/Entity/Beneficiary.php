@@ -698,8 +698,8 @@ class Beneficiary
         $beneficiary_counter = $this->getTimeCount($cycle);
 
         //check if beneficiary booked time is ok
-        //if timecount <=0 : some shift to catchup, can book more than what's due
-        if ($member->getTimeCount($member->endOfCycle($cycle)) > 0 && $beneficiary_counter >= $this->_getDueDurationByCycle()) { //Beneficiary is already ok
+        //if timecount <180 : some shift to catchup, can book more than what's due
+        if ($member->getTimeCount($member->endOfCycle($cycle)) >= 180 && $beneficiary_counter >= $this->_getDueDurationByCycle()) { //Beneficiary is already ok
             return false;
         }
 
