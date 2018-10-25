@@ -5,7 +5,9 @@
 ![modele V2](https://yuml.me/66888c7d.png)
 http://yuml.me/edit/66888c7d
 
-## <a name="mailcatcher"></a> Installation de mailcatcher, pour récupérer les mails envoyés (mode DEV)
+## mailcatcher
+
+Pour récupérer les mails envoyés (mode DEV)
 
 * [mailcatcher.me](https://mailcatcher.me/)
 <pre>sudo apt-get install ruby-full build-essential ruby-sqlite3</pre>
@@ -13,11 +15,11 @@ http://yuml.me/edit/66888c7d
 <pre>mailcatcher</pre>
 
 ## Guides lines
-* GitFlow
+* [GitFlow](https://www.grafikart.fr/formations/git/git-flow)
 
 ## Symfony
-* [cheatsheet](cheatsheet.md)
-* [doc](https://symfony.com/doc/current/index.html)
+* [local cheatsheet](cheatsheet.md)
+* [official doc](https://symfony.com/doc/current/index.html)
 
 ## Materialize
-* [doc](https://materializecss.com/)
+* [official doc](https://materializecss.com/)
