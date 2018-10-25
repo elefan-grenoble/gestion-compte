@@ -7,7 +7,7 @@ coopératif.
 
 Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet Grenoblois de Super Marché coopératif.
 
-![home](./doc/images/homepage _25102018.png)
+![home](doc/images/homepage_25102018.png)
 
 Il est open source sous licence LGPL?
 
