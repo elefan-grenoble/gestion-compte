@@ -5,7 +5,7 @@ Bonjour,
 Ceci est le code source d'une application symfony pour la gestion d'une épicerie ou d'un super marché
 coopératif.
 
-Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet Grenoblois de Super Marché coopératif.
+Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet grenoblois de super marché coopératif.
 
 ![home](doc/images/homepage_25102018.png)
 
