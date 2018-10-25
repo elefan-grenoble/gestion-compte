@@ -7,7 +7,7 @@
 
 ### Activer l'utilisateur
 
-L'activation passe par un envoi de mail. Il faut installer un mail catcher pour pouvoir faire fonctionner l'envoi de mail en local.
+L'activation passe par un envoi de mail. En dev, il est conseillé d'installer [un mail catcher](./dev.md#mailcatcher) pour pouvoir faire fonctionner l'envoi de mail en local.
 
 Sinon, il est possible d'activer un utilisateur via cette procédure:
 
@@ -30,4 +30,4 @@ Dans l'admin panel :
 - Quand tous les créneaux-types et postes d'une journée sont créés, il est possible de les *dupliquer* sur une autre journée avec la fonction idoine
 - Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
 
-La génération de créneaux peut être automatisée via une tâche cron.
+La génération de créneaux peut être automatisée via une [tâche cron](install.md#crontab).

@@ -1,40 +1,40 @@
-### Prérequis
+#May the magic be!
 
-* PHP (version 7+) installé
-* [Composer](https://getcomposer.org/) installé
-* Mysql installé et configuré (ou mariadb)
+## Prérequis
+
+* PHP (version 7+)
+* [Composer](https://getcomposer.org/)
+* Mysql (ou mariadb)
 * php-mysql (ou php-pdo_mysql)
 * php-xml
 * php-gd
-* Créer une base de donnée pour le projet
 
-### Installation
+## Installation
 
-* Create a mysql database ``mysql -e "CREATE DATABASE my_db_name;"``
-* ``git clone https://github.com/elefan-grenoble/gestion-compte.git``
-* ``cd gestion-compte``
-* ``composer install`` (utiliser le nom de la base précédemment créée)
-* ``bin/console doctrine:schema:create``
-* add ``127.0.0.1 membres.lelefan.local`` to your _/etc/hosts_ file (/!\important, le login ne fonctionnera pas sinon)
-* ``php bin/console server:start``
-* visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
+Create a mysql database 
+<pre>mysql -e "CREATE DATABASE my_db_name;"</pre>
+Clone code
+<pre>git clone https://github.com/elefan-grenoble/gestion-compte.git</pre>
+<pre>cd gestion-compte</pre>
+Lancer la configuration (utiliser le nom de la base précédemment créée)
+<pre>composer install</pre>
+Creer le schema de bdd
+<pre>bin/console doctrine:schema:create</pre>
+Lancer le serveur
+<pre>php bin/console server:start</pre>
+add ``127.0.0.1 membres.yourcoop.local`` to your _/etc/hosts_ file
+visit [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) to create the super admin user (babar:password)
 
-#### En Prod
-Pour nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et barecode en 404 
+
+### En Prod
+Avec nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et barecode en 404 
 <pre>location ~* ^/sw/(.*)/(qr|br)\.png$ {
 		rewrite ^/sw/(.*)/(qr|br)\.png$ /app.php/sw/$1/$2.png last;
 	}
 </pre>
 
-### Installation de mailcatcher, pour récupérer les mails envoyés (mode DEV)
 
-* https://mailcatcher.me/
-* sudo apt-get install unzip ruby-full build-essential
-* unzip mailcatcher-master.zip
-* sudo gem install mailcatcher
-* mailcatcher
-
-## crontab
+## <a name="crontab"></a>crontab
 
 <pre>
 #generate shifts in 27 days (same weekday as yesterday)
