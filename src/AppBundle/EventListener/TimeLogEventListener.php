@@ -6,6 +6,7 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Event\MemberCycleEndEvent;
+use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
@@ -102,7 +103,7 @@ class TimeLogEventListener
 
         $dispatcher = $this->container->get('event_dispatcher');
         if (!$member->getFrozen()) {
-            $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
+            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date));
         }
     }
 
