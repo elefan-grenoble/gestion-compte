@@ -177,7 +177,7 @@ class TimeLogEventListener
     {
         $log = new TimeLog();
         $log->setMembership($membership);
-        $log->setTime(-1 * $this->due_duration_by_cycle);
+        $log->setTime(0);
         $log->setDate($date);
         $log->setDescription("Début de cycle (compte gelé)");
         $this->em->persist($log);
