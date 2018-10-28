@@ -6,6 +6,7 @@ use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
+use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use Monolog\Logger;
@@ -98,10 +99,10 @@ class EmailingEventListener
     }
 
     /**
-     * @param MemberCycleEndEvent $event
+     * @param MemberCycleStartEvent $event
      * @throws \Exception
      */
-    public function onMemberCycleStart(MemberCycleEndEvent $event)
+    public function onMemberCycleStart(MemberCycleStartEvent $event)
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 
