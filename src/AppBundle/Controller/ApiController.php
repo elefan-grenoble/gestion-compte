@@ -24,7 +24,13 @@ class ApiController extends Controller
 
     protected function getUser(){
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        if ($user->isWithdrawn() || !$user->isEnabled()){ // user inactif
+        $beneficiary = $user->getBeneficiary();
+        $withDrawn = false;
+        if ($beneficiary) {
+            $withDrawn = $beneficiary->getMembership()->isWithdrawn();
+        }
+
+        if ($withDrawn || !$user->isEnabled()){ // user inactif
             return array('user'=>false,'message'=>'User not found');
         }else{
             return array('user'=>$user);
