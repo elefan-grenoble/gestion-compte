@@ -7,7 +7,7 @@
     {% else %}
         <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
     {% endif %}
-    <i class="material-icons">person</i><a href="{{ path('user_show',{'username':card.beneficiary.user.username}) }}">{{ card.beneficiary.user.autocompleteLabel }}</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">person</i><a href="{{ path('member_show',{'member_number':card.beneficiary.membership.memberNumber}) }}">{{ card.beneficiary.user.autocompleteLabel }}</a> <i class="material-icons">chevron_right</i>
     <i class="material-icons">membership</i> badge #{{ card.number }} pour {{ card.beneficiary.firstname }}
 {% endblock %}
 

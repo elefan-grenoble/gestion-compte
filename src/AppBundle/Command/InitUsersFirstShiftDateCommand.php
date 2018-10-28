@@ -22,15 +22,15 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
         $count = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findFirstShiftWithUserNotInitialized();
-        $last_user_id = null;
+        $last_member_id = null;
         foreach ($shifts as $shift) {
-            $user = $shift->getShifter()->getUser();
-            if ($user->getId() != $last_user_id) {
-                $last_user_id = $user->getId();
+            $membership = $shift->getShifter()->getMembership();
+            if ($membership->getId() != $last_member_id) {
+                $last_member_id = $membership->getId();
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
-                $user->setFirstShiftDate($firstDate);
-                $em->persist($user);
+                $membership->setFirstShiftDate($firstDate);
+                $em->persist($membership);
                 $count++;
             }
         }

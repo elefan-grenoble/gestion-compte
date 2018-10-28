@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\User;
 use http\Env\Response;
 use OAuth2\OAuth2;
 use Ornicar\GravatarBundle\GravatarApi;
@@ -23,7 +24,13 @@ class ApiController extends Controller
 
     protected function getUser(){
         $user = $this->get('security.token_storage')->getToken()->getUser();
-        if ($user->isWithdrawn() || !$user->isEnabled()){ // user inactif
+        $beneficiary = $user->getBeneficiary();
+        $withDrawn = false;
+        if ($beneficiary) {
+            $withDrawn = $beneficiary->getMembership()->isWithdrawn();
+        }
+
+        if ($withDrawn || !$user->isEnabled()){ // user inactif
             return array('user'=>false,'message'=>'User not found');
         }else{
             return array('user'=>$user);
@@ -89,10 +96,11 @@ class ApiController extends Controller
         if (!$response['user']){
             return new JsonResponse($response);
         }
+        /** @var User $current_app_user */
         $current_app_user = $response['user'];
         $gravatar_helper = new GravatarHelper(new GravatarApi());
         return new JsonResponse(array(
-            'id' => $current_app_user->getMemberNumber(),
+            'id' => $current_app_user->getBeneficiary()->getMemberNumber(),
             'username' => $current_app_user->getUsername(),
             'email' => $current_app_user->getEmail(),
             'name' => $current_app_user->getFirstName().' '.$current_app_user->getlastname(),

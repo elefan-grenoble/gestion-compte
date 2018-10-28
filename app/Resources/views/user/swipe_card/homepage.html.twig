@@ -1,4 +1,4 @@
-{% for beneficiary in app.user.beneficiaries %}
+{% for beneficiary in app.user.beneficiary.membership.beneficiaries %}
     {% if beneficiary.SwipeCards | length and not beneficiary.SwipeCards.first.Enable and not beneficiary.SwipeCards.first.DisabledAt %}
         {% set card = beneficiary.SwipeCards.first %}
         <div class="row">

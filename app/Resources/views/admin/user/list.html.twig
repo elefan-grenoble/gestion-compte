@@ -128,15 +128,15 @@
                     </div>
                     <div class="col s12 m4">
                         <div>
-                            <h5>Roles / Commissions</h5>
+                            <h5>Formations / Commissions</h5>
                             <div class="row">
                                 <div class="input-field col s6">
-                                    {{ form_widget(form.roles) }}
-                                    {{ form_label(form.roles) }}
+                                    {{ form_widget(form.formations) }}
+                                    {{ form_label(form.formations) }}
                                 </div>
                                 <div class="col s6 input-field">
-                                    {{ form_widget(form.or_and_exp_roles) }}
-                                    {{ form_label(form.or_and_exp_roles) }}
+                                    {{ form_widget(form.or_and_exp_formations) }}
+                                    {{ form_label(form.or_and_exp_formations) }}
                                 </div>
                             </div>
                             <div class="input-field">
@@ -145,10 +145,10 @@
                             </div>
                         </div>
                         <div>
-                            <h5>!Roles / !Commissions</h5>
+                            <h5>!Formations / !Commissions</h5>
                             <div class="input-field">
-                                {{ form_widget(form.not_roles) }}
-                                {{ form_label(form.not_roles) }}
+                                {{ form_widget(form.not_formations) }}
+                                {{ form_label(form.not_formations) }}
                             </div>
                             <div class="input-field">
                                 {{ form_widget(form.not_commissions) }}
@@ -181,50 +181,50 @@
                 <th data-col="b.lastname">nom</th>
                 <th data-col="b.email">email</th>
                 <th class="hide-on-small-and-down" data-col="r.date">Adhésion(s)</th>
-                <th class="hide-on-med-and-down">Role(s)</th>
+                <th class="hide-on-med-and-down">Formation(s)</th>
                 <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
         </thead>
         <tbody>
-        {% for user in users %}
-            {% if user.mainBeneficiary %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
+        {% for member in members %}
+            {% if member.mainBeneficiary %}
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td class="hide-on-med-and-down">
-                        {% if not user.withdrawn %}
-                            {% if not user.isEnabled %}
+                        {% if not member.withdrawn %}
+                            {% if not member.mainBeneficiary.user.isEnabled %}
                                 <i class="material-icons">phonelink_off</i>
                             {% endif %}
-                            {% if user.frozen %}
+                            {% if member.frozen %}
                                 <i class="material-icons">notifications_paused</i>
                             {% endif %}
                         {% else %}
                                 <i class="material-icons">do_not_disturb</i>
                         {% endif %}
                     </td>
-                    <td><a href="{{ path('user_show', { 'username': user.username }) }}">{{ user.membernumber }}</a></td>
-                    <td>{{ user.username }}</td>
+                    <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a></td>
+                    <td>{{ member.mainBeneficiary.user.username }}</td>
 
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.firstname }}<br/>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.lastname }}<br/>
                         {% endfor %}
                     </td>
                     <td>
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.email }}<br/>
                         {% endfor %}
                     </td>
                     <td class="hide-on-small-and-down">
-                        {% for registration in user.registrations %}
-                            {% if user.lastregistration %}
-                                {% if registration.id == user.lastregistration.id %}<strong>{% else %}<del>{% endif %}
+                        {% for registration in member.registrations %}
+                            {% if member.lastregistration %}
+                                {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
                                 {{ registration.date | date('d/m/Y') }}
-                                {% if registration.id == user.lastregistration.id %}</strong>{% else %}</del>{% endif %}
+                                {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
                                 <br/>
                             {% else %}
                                 {{ registration.date | date('d/m/Y') }}
@@ -233,16 +233,16 @@
                         {% endfor %}
                     </td>
                     <td class="hide-on-med-and-down">
-                        {% for beneficiary in user.beneficiaries %}
-                            {% for role in beneficiary.roles %}
+                        {% for beneficiary in member.beneficiaries %}
+                            {% for formation in beneficiary.formations %}
                                 <div class="chip truncate">
-                                    {{ role.name }}
+                                    {{ formation.name }}
                                 </div>
                             {% endfor %}
                         {% endfor %}
                     </td>
                     <td class="hide-on-med-and-down">
-                        {% for beneficiary in user.beneficiaries %}
+                        {% for beneficiary in member.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
                                 <div class="chip truncate">
                                     {{ commission.name }}
@@ -252,8 +252,8 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if user.withdrawn %}withdrawn{% endif %} {% if user.frozen %}frozen{% endif %}" data-url="{{ path('user_show', { 'username': user.username }) }}" >
-                    <td colspan="9">{{ user }}</td>
+                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
+                    <td colspan="9">{{ member.mainBeneficiary.user }}</td>
                 </tr>
             {% endif %}
         {% endfor %}

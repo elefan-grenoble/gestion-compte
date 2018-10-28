@@ -70,15 +70,15 @@
             </table>
             <ul class="pagination">
                 <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_browser",{'page':page-1}) }}{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':page-1}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
                 {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_browser",{'page':i}) }}">{{ i }}</a></li>
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_browser",{campaign:campaign.id,'page':i}) }}">{{ i }}</a></li>
                 {% endfor %}
                 <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_browser",{'page':page+1}) }}{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':page+1}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>

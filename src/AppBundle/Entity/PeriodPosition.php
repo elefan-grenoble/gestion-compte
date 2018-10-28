@@ -29,11 +29,11 @@ class PeriodPosition
     private $nbOfShifter;
 
     /**
-     * One Period has One Role.
-     * @ORM\ManyToOne(targetEntity="Role")
-     * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
+     * One Period has One Formation.
+     * @ORM\ManyToOne(targetEntity="Formation")
+     * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $role;
+    private $formation;
 
     /**
      * Many Positions have Many Periods.
@@ -77,33 +77,33 @@ class PeriodPosition
 
 
     /**
-     * Set role
+     * Set formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation $formation
      *
      * @return PeriodPosition
      */
-    public function setRole(\AppBundle\Entity\Role $role = null)
+    public function setFormation(\AppBundle\Entity\Formation $formation = null)
     {
-        $this->role = $role;
+        $this->formation = $formation;
 
         return $this;
     }
 
     /**
-     * Get role
+     * Get formation
      *
-     * @return \AppBundle\Entity\Role
+     * @return \AppBundle\Entity\Formation
      */
-    public function getRole()
+    public function getFormation()
     {
-        return $this->role;
+        return $this->formation;
     }
 
     public function __toString()
     {
-        if ($this->getRole())
-            return $this->getNbOfShifter()." x ".$this->getRole()->getName();
+        if ($this->getFormation())
+            return $this->getNbOfShifter()." x ".$this->getFormation()->getName();
         else
             return $this->getNbOfShifter()." x Membre";
     }

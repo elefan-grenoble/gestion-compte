@@ -2,9 +2,9 @@
 // src/AppBundle/Command/FixTimeLogCommand.php
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
-use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,22 +24,22 @@ class FixTimeLogCommand extends ContainerAwareCommand
     {
         $countShiftLogs = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('AppBundle:User')->findAll();
-        foreach ($users as $user) {
-            if ($user->getFirstShiftDate()) {
+        $members = $em->getRepository('AppBundle:Membership')->findAll();
+        foreach ($members as $member) {
+            if ($member->getFirstShiftDate()) {
 
-                $lastCycleShifts = $user->getShiftsOfCycle(-1, true)->toArray();
-                $currentCycleShifts = $user->getShiftsOfCycle(0, true)->toArray();
+                $lastCycleShifts = $member->getShiftsOfCycle(-1, true)->toArray();
+                $currentCycleShifts = $member->getShiftsOfCycle(0, true)->toArray();
                 $shifts = array_merge($lastCycleShifts, $currentCycleShifts);
                 foreach ($shifts as $shift) {
 
-                    $logs = $user->getTimeLogs()->filter(function ($log) use ($shift) {
+                    $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {
                         return ($log->getShift() && $log->getShift()->getId() == $shift->getId());
                     });
 
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $this->createShiftLog($em, $shift, $user);
+                        $this->createShiftLog($em, $shift, $member);
                         $countShiftLogs++;
                     }
                 }
@@ -49,10 +49,10 @@ class FixTimeLogCommand extends ContainerAwareCommand
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
     }
 
-    private function createShiftLog(EntityManager $em, Shift $shift, User $user)
+    private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
     {
         $log = new TimeLog();
-        $log->setUser($user);
+        $log->setMembership($membership);
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setDate($shift->getStart());

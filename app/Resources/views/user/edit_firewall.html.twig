@@ -7,11 +7,11 @@
 {% endblock %}
 
 {% block content %}
-    <h3>&Eacute;diter un utilisateur</h3>
+    <h3>&Eacute;diter un adhérent</h3>
     {{ form_start(form) }}
         {{ form_widget(form) }}
     {{ form_end(form) }}
     <p>
-        Si tu ne connais pas le numéro d'adhérent, <a href="{{ path('find_user_number') }}">clique ici pour le retrouver</a>.
+        Si tu ne connais pas le numéro d'adhérent, <a href="{{ path('find_member_number') }}">clique ici pour le retrouver</a>.
     </p>
 {% endblock %}

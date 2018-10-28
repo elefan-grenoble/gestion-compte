@@ -2,6 +2,7 @@
 // src/AppBundle/Security/ShiftVoter.php
 namespace AppBundle\Security;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -94,16 +95,7 @@ class ShiftVoter extends Voter
 
     private function canBook(Shift $shift, User $user)
     {
-        if ($user->isWithdrawn())
-            return false;
-        if ($user->getFrozen())
-            return false;
-        foreach ($user->getBeneficiaries() as $beneficiary){
-            $bool = $user->canBook($beneficiary,$shift);
-            if ($bool)
-                return true;
-        }
-        return false;
+        return $shift->isBookable($user->getBeneficiary());
     }
 
     private function canDismiss(Shift $shift, User $user)
@@ -117,7 +109,7 @@ class ShiftVoter extends Voter
         if ($shift->getIsPast()) {
             return false;
         }
-        if ($user->getBeneficiaries()->contains($shift->getShifter())) {
+        if ($user->getBeneficiary() === $shift->getShifter()) {
             return true;
         }
         return false;
@@ -126,7 +118,7 @@ class ShiftVoter extends Voter
     private function canReject(Shift $shift, User $user = null)
     {
         if ($user instanceof User) {  // the user is logged in
-            return $user->getBeneficiaries()->contains($shift->getLastShifter());
+            return $user->getBeneficiary() === $shift->getLastShifter();
         } // the user is not logged in
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
         if ($shift->getId()){

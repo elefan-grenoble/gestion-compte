@@ -25,7 +25,7 @@ class HelloassoEventListener
         if ($campaign->url == $this->container->getParameter('helloasso_registration_campaign_url')){ //good campaign
             $beneficiary = $this->_em->getRepository('AppBundle:Beneficiary')->findOneBy(array('email'=>$payment->getEmail()));
             if ($beneficiary){
-                if (!$beneficiary->getUser()->canRegister()){
+                if (!$beneficiary->getMembership()->canRegister()){
                     //throw new \LogicException('user cannot register yet');
                 }else{
                     $registration = new Registration();

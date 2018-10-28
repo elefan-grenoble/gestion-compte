@@ -30,6 +30,8 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
+            ->select('s, f')
+            ->leftJoin('s.formation', 'f')
             ->where('s.start > :from')
             ->setParameter('from', $from);
         if ($max){
@@ -106,9 +108,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
 
         $qb
             ->join('s.shifter', "ben")
-            ->join('ben.user', "user")
-            ->where('user.firstShiftDate is NULL')
-            ->addOrderBy('user.id', 'ASC')
+            ->join('ben.membership', "m")
+            ->where('m.firstShiftDate is NULL')
+            ->addOrderBy('m.id', 'ASC')
             ->addOrderBy('s.start', 'ASC');
 
         return $qb

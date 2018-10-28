@@ -12,21 +12,7 @@
             {{ form_label(form.frozen) }}
         </div>
     {% endif %}
-    {% include "user/_partial/beneficiary_form.html.twig" with { form: form.mainBeneficiary } %}
-<div class="address row">
-    <div class="input-field stree1 col s6">
-        {{ form_row(form.address.street1) }}
-    </div>
-    <div class="input-field stree2 col s6">
-        {{ form_row(form.address.street2) }}
-    </div>
-    <div class="input-field zipcode col s3">
-        {{ form_row(form.address.zipcode) }}
-    </div>
-    <div class="input-field city col s9">
-        {{ form_row(form.address.city) }}
-    </div>
-</div>
+    {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.mainBeneficiary } %}
 {% if form.lastRegistration is defined %}
     <h4>Première adhésion</h4>
     <div class="row">

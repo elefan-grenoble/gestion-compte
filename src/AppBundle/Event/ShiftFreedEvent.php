@@ -2,8 +2,8 @@
 
 namespace AppBundle\Event;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
 use Symfony\Component\EventDispatcher\Event;
 
 class ShiftFreedEvent extends Event
@@ -11,20 +11,20 @@ class ShiftFreedEvent extends Event
     const NAME = 'shift.freed';
 
     private $shift;
-    private $user;
+    private $membership;
 
-    public function __construct(Shift $shift, User $user)
+    public function __construct(Shift $shift, Membership $membership)
     {
         $this->shift = $shift;
-        $this->user = $user;
+        $this->membership = $membership;
     }
 
     /**
-     * @return User
+     * @return Membership
      */
-    public function getUser()
+    public function getMembership()
     {
-        return $this->user;
+        return $this->membership;
     }
 
     /**

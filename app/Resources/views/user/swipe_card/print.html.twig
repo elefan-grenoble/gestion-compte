@@ -30,8 +30,8 @@
     <table style="width: 210mm;">
         <tbody style="width: 100%">
         <tr style="width: 100%">
-            {% for user in users %}
-                {% for beneficiary in user.beneficiaries %}
+            {% for membership in memberships %}
+                {% for beneficiary in membership.beneficiaries %}
                     {% set card = beneficiary.SwipeCards.first   %}
                     {% include "user/swipe_card/_swipe_print.html.twig" with { card: card  } %}
                     {% set bindex = bindex + 1   %}

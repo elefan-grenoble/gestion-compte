@@ -40,14 +40,42 @@ class DefaultController extends Controller
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            if ($current_app_user->getWithdrawn()){
-                $this->container->get('security.token_storage')->setToken(null);
-                $this->container->get('session')->invalidate();
-                $session->getFlashBag()->add('error', 'Compte fermé !');
-                return $this->redirectToRoute('homepage');
-            }
-            $remainder = $current_app_user->getRemainder();
-            if ($current_app_user->getMemberNumber()>0) { //member only
+
+            if ($current_app_user->getBeneficiary() != null) { //member only
+
+                $membership = $current_app_user->getBeneficiary()->getMembership();
+                $remainder = $membership->getRemainder();
+
+                if ($membership->getWithdrawn()){
+                    $this->container->get('security.token_storage')->setToken(null);
+                    $this->container->get('session')->invalidate();
+                    $session->getFlashBag()->add('error', 'Compte fermé !');
+                    return $this->redirectToRoute('homepage');
+                }
+
+                $dayAfterEndOfCycle = clone $membership->endOfCycle();
+                $dayAfterEndOfCycle->modify('+1 day');
+                if ($membership->getFrozenChange() && !$membership->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('warning',
+                        'Comme demandé, ton compte sera gelé dans '.
+                        date_diff($now, $membership->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        $this->get('router')->generate('fos_user_profile_show')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
+                if ($membership->getFrozenChange() && $membership->getFrozen()){
+                    $now = new \DateTime('now');
+                    $session->getFlashBag()->add('notice',
+                        'Comme demandé, ton compte sera dégelé dans '.
+                        date_diff($now, $membership->endOfCycle())->format('%a jours').
+                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        $this->get('router')->generate('fos_user_profile_show')
+                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                }
+
                 if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
                     if (intval($remainder->format("%R%a"))<0)
                         $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
@@ -56,30 +84,8 @@ class DefaultController extends Controller
                 }else{
                     $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
                 }
-                $dayAfterEndOfCycle = clone $current_app_user->endOfCycle();
-                $dayAfterEndOfCycle->modify('+1 day');
-                if ($current_app_user->getFrozenChange() && !$current_app_user->getFrozen()){
-                    $now = new \DateTime('now');
-                    $session->getFlashBag()->add('warning',
-                        'Comme demandé, ton compte sera gelé dans '.
-                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                         $this->get('router')->generate('fos_user_profile_edit')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
-                }
-                if ($current_app_user->getFrozenChange() && $current_app_user->getFrozen()){
-                    $now = new \DateTime('now');
-                    $session->getFlashBag()->add('notice',
-                        'Comme demandé, ton compte sera dégelé dans '.
-                        date_diff($now,$current_app_user->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
-                        $this->get('router')->generate('fos_user_profile_edit')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
-                }
             }
-        }else{
+        } else {
 
             $today = strtotime('today');
             $from = new \DateTime();
@@ -89,7 +95,7 @@ class DefaultController extends Controller
 //            $to->setTimestamp($nextMonday);
             $to = new \DateTime();
             $to->modify('+7 days');
-            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from,$to);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -126,19 +132,12 @@ class DefaultController extends Controller
             ->getQuery()
             ->getResult();
 
-        $undismiss_shift_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
-            ->setMethod('POST')
-            ->add('shift_id',HiddenType::class)
-            ->getForm();
-
         $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
         if (!$codes){
             $codes[] = new Code();
         }
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
-            'undismiss_shift_form' => $undismiss_shift_form->createView(),
             'events' => $futur_events,
             'codes' => $codes
         ]);
@@ -162,129 +161,11 @@ class DefaultController extends Controller
             $beneficiary = $card->getBeneficiary();
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,
-                'counter' => $beneficiary->getUser()->getTimeCount($beneficiary->getUser()->endOfCycle(0))
+                'counter' => $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0))
             ]);
         }
 
         return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * @Route("/find_me", name="find_me")
-     */
-    public function activeUserAccountAction(Request $request){
-        $form = $this->createFormBuilder()
-            ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent','attr' => array(
-                'placeholder' => '0',
-            )))
-            ->add('find', SubmitType::class, array('label' => 'Activer mon compte'))
-            ->getForm();
-
-        if ($form->handleRequest($request)->isValid()) {
-            $member_number = $form->get('member_number')->getData();
-            $em = $this->getDoctrine()->getManager();
-            $user = $em->getRepository('AppBundle:User')->findOneBy(array('member_number'=>$member_number));
-
-            return $this->render('user/confirm.html.twig', array(
-                'user' => $user,
-            ));
-        }
-        return $this->render('user/find_me.html.twig', array(
-            'form' => $form->createView(),
-        ));
-    }
-
-    /**
-     * @Route("/{member_number}/confirm", name="confirm")
-     * @Method({"POST"})
-     */
-    public function confirmAction(User $user,Request $request){
-
-        return $this->render('user/confirm.html.twig', array(
-            'user' => $user,
-        ));
-    }
-
-    /**
-     * @Route("/{member_number}/set_email", name="set_email")
-     * @Method({"POST"})
-     */
-    public function setEmailAction(User $user,Request $request){
-        $email = $request->request->get('email');
-        $oldEmail = $user->getEmail();
-        $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-        if (count($matches) && filter_var($email,FILTER_VALIDATE_EMAIL)){ //was a temp mail
-            $user->setEmail($email);
-            $user->getMainBeneficiary()->setEmail($email);
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($user);
-            $em->flush();
-            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été entregistré');
-        }elseif (!filter_var($email,FILTER_VALIDATE_EMAIL)){
-            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problèmatique');
-        }
-        return $this->render('user/confirm.html.twig', array(
-            'user' => $user,
-        ));
-    }
-
-    /**
-     * @Route("/find_user_number", name="find_user_number")
-     */
-    public function findUserNumberAction(Request $request){
-        $securityContext = $this->container->get('security.authorization_checker');
-        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $form = $this->createFormBuilder()
-                ->add('firstname', TextType::class, array('label' => 'Le prénom','attr' => array(
-                    'placeholder' => 'babar',
-                )))
-                ->add('find', SubmitType::class, array('label' => 'Trouver le numéro'))
-                ->getForm();
-        }else{
-            $form = $this->createFormBuilder()
-                ->add('firstname', TextType::class, array('label' => 'Mon prénom','attr' => array(
-                    'placeholder' => 'babar',
-                )))
-                ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
-                ->getForm();
-        }
-
-        if ($form->handleRequest($request)->isValid()) {
-            $firstname = $form->get('firstname')->getData();
-            $em = $this->getDoctrine()->getManager();
-            $qb = $em->createQueryBuilder();
-            $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
-                ->join('b.user', 'u')
-                ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
-                ->andWhere("u.withdrawn != 1 or u.withdrawn is NULL" )
-                ->orderBy("u.member_number", 'ASC')
-                ->getQuery()
-                ->getResult();
-            return $this->render('user/find_user_number.html.twig', array(
-                'form' => null,
-                'beneficiaries' => $beneficiaries,
-                'return_path' => 'confirm',
-                'params' => array()
-            ));
-        }
-        return $this->render('user/find_user_number.html.twig', array(
-            'form' => $form->createView(),
-            'beneficiaries' => ''
-        ));
-    }
-    /**
-     * @Route("/help_find_user", name="find_user_help")
-     */
-    public function findUserHelpAction(Request $request){
-
-        return $this->render('default/find_user_number.html.twig');
-    }
-
-    /**
-     * @Route("/find_user", name="find_user")
-     */
-    public function findUserAction(Request $request){
-        die($request->getName());
     }
 
     /**

@@ -5,25 +5,36 @@
 
     <table class="striped">
         <thead>
-            <tr>
-                <th data-col="o.member_number">#</th>
-                <th data-col="o.username">username</th>
-                <th data-col="b.email">email</th>
-                <th></th>
-            </tr>
+        <tr>
+            <th data-col="o.member_number">#</th>
+            <th data-col="o.username">username</th>
+            <th data-col="b.email">email</th>
+            <th></th>
+        </tr>
         </thead>
         <tbody>
         {% for admin in admins %}
             <tr>
-                <td><a href="{{ path('user_show', { 'username': admin.username }) }}">{{ admin.membernumber }}</a></td>
+                <td>
+                    {% if admin.beneficiary %}
+                        <a href="{{ path('member_show', { 'member_number': admin.beneficiary.membership.memberNumber }) }}">
+                            {{ admin.beneficiary.membership.memberNumber }}
+                        </a>
+                    {% endif %}
+                </td>
                 <td>{{ admin.username }}</td>
                 <td>{{ admin.email }}</td>
                 <td>
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
-                    <a href="{{ path('user_edit', { 'username': admin.username }) }}" class="teal btn-floating"><i class="material-icons left">edit</i></a>
-                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
-                    <button type="submit" class="btn-floating waves-effect waves-light red"><i class="material-icons left">close</i></button>
+                    {% if admin.beneficiary %}
+                        <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
+                           class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
+
+                    {% else %}
+                        <button type="submit" class="btn-floating waves-effect waves-light red"><i
+                                    class="material-icons left">close</i></button>
+                    {% endif %}
                     {{ form_end(delete_forms[admin.id]) }}
                 </td>
             </tr>

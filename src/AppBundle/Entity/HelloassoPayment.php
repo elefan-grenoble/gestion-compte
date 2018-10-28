@@ -87,7 +87,7 @@ class HelloassoPayment
     private $status;
 
     /**
-     * @ORM\OneToOne(targetEntity="Registration")
+     * @ORM\OneToOne(targetEntity="Registration", inversedBy="helloassoPayment")
      * @ORM\JoinColumn(name="registration_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registration;

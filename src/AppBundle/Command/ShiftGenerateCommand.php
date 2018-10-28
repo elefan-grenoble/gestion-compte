@@ -75,19 +75,19 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                     $lastStart = $this->lastCycleDate($start);
                     $lastEnd = $this->lastCycleDate($end);
 
-                    $last_cycle_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                    $last_cycle_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
                     $last_cycle_shifts =  array_filter($last_cycle_shifts, function($shift) {return $shift->getShifter();});
                     $last_cycle_shifters_array = array();
                     foreach ($last_cycle_shifts as $last_cycle_shift){
                         $last_cycle_shifters_array[] = $last_cycle_shift->getShifter(); //clean keys
                     }
 
-                    $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'role' => $position->getRole()));
+                    $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
                     $count2 += count($existing_shifts);
                     for ($i=0; $i<$position->getNbOfShifter()-count($existing_shifts); $i++){
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
-                        $current_shift->setRole($position->getRole());
+                        $current_shift->setFormation($position->getFormation());
                         if ($last_cycle_shifters_array && $i < count($last_cycle_shifters_array)) {
                             $current_shift->setLastShifter($last_cycle_shifters_array[$i]);
                             $reservedShifts[] = $current_shift;

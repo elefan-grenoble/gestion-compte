@@ -5,39 +5,49 @@
 {% block aftercontainer %}
     <div class="center-align">
         {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
+            <img class="responsive-img" src="{{ asset_url }}" alt="elefan"/>
         {% endimage %}
     </div>
 {% endblock %}
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
-        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            <div class="container center">
-                <div class="section no-pad-bot">
-                    <h3 class="header">Bonjour {{ app.user.firstname }}</h3>
-                    {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        <p class="col s12">
-                            <span class="orange-text">&lt;warning&gt;</span>
-                            <span>With great power comes great responsibility</span>
-                            <span class="orange-text">&lt;/warning&gt;</span>
-                        </p>
-                    {% else %}
-                        <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
-                    {% endif %}
-                </div>
-                {{ render(controller("AppBundle:SwipeCard:homepage")) }}
-                <div class="row">
-                    {% for event in events %}
-                        {% include "default/event/_event.html.twig" with { event: event } %}
-                    {% endfor %}
-                </div>
+    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <div class="container center">
+            <div class="section no-pad-bot">
+                <h3 class="header">
+                    Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}{% else %}{{ app.user.username }}{% endif %}</h3>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <p class="col s12">
+                        <span class="orange-text">&lt;warning&gt;</span>
+                        <span>With great power comes great responsibility</span>
+                        <span class="orange-text">&lt;/warning&gt;</span>
+                    </p>
+                {% else %}
+                    <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
+                {% endif %}
+            </div>
 
-                {% if app.user.uptodate or is_granted("ROLE_ADMIN") %}
-                    {% if app.user.memberNumber > 0 %}{# not only admin ? #}
-                        {% include "booking/home_booked_shifts.html.twig" %}
-                    {% else %}
-                        <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
-                    {% endif %}
+            <div class="row">
+                {% for event in events %}
+                    {% include "default/event/_event.html.twig" with { event: event } %}
+                {% endfor %}
+            </div>
+
+
+            {% if app.user.beneficiary %}{# not only admin ? #}
+                {% if not app.user.beneficiary.membership.uptodate %}
+                    <p>Ton adhésion a expirée
+                        le {{ "now"|date_modify((app.user.beneficiary.membership.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
+                    <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
+                                class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
+                {% else %}
+                {{ render(controller("AppBundle:SwipeCard:homepage")) }}
+                {{ render(controller("AppBundle:Booking:homepage")) }}
+                {% endif %}
+            {% else %}
+                <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i
+                            class="material-icons left">date_range</i>Gérer les créneaux</a>
+            {% endif %}
 
                     <h5>Construire</h5>
                     {% if is_granted("access_tools",app.user)  %}
@@ -66,53 +76,58 @@
                         {% endif %}
                     {% endif %}
 
-                    {% if is_granted("ROLE_USER_MANAGER") %}
-                        <h5>Gérer les membres</h5>
-                        <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
-                    {% endif %}
-                    {% if is_granted("ROLE_FINANCE_MANAGER") and not is_granted("ROLE_ADMIN") %}
-                        <h5>Finances</h5>
-                        <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Voir les adhésions</a>
-                        <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">settings_ethernet</i>Paiements helloasso</a>
-                    {% endif %}
-                {% else %}
-                    <p>Ton adhésion a expirée le {{ "now"|date_modify((app.user.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
-                    <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
-                {% endif %}
+            {% if is_granted("ROLE_USER_MANAGER") %}
+                <h5>Gérer les membres</h5>
+                <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer
+                    les adhérents</a>
+            {% endif %}
+            {% if is_granted("ROLE_FINANCE_MANAGER") and not is_granted("ROLE_ADMIN") %}
+                <h5>Finances</h5>
+                <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i
+                            class="material-icons left">attach_money</i>Voir les adhésions</a>
+                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i
+                            class="material-icons left">settings_ethernet</i>Paiements helloasso</a>
+            {% endif %}
 
-                {% if app.user.ownedCommissions | length %}
-                    <a href="{{ path("commission_edit",{'id': app.user.ownedCommissions | first.id }) }}" class="waves-effect waves-light btn blue-grey">Gérer la commission {{ app.user.ownedCommissions | first.name }}</a>
-                {% endif %}
 
-                {% if is_granted("ROLE_ADMIN") %}
-                    <h5>Actions admin</h5>
-                    {% if app.user.memberNumber > 0 %}
-                        <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
-                    {% endif %}
-                    <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin panel</a>
+            {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
+                <a href="{{ path("commission_edit",{'id': app.user.beneficiary.commissions | first.id }) }}"
+                   class="waves-effect waves-light btn blue-grey">Gérer la
+                    commission {{ app.user.beneficiary.commissions | first.name }}</a>
+            {% endif %}
+
+            {% if is_granted("ROLE_ADMIN") %}
+                <h5>Actions admin</h5>
+                {% if app.user.beneficiary %}
+                    <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i
+                                class="material-icons left">date_range</i>Gérer les créneaux</a>
                 {% endif %}
+                <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Admin
+                    panel</a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="container">
+            <br><br>
+            <h3 class="header center orange-text">Mon compte à {{ project_name }}</h3>
+            <div class="row center">
+                <p class="col s12 light">Bienvenue sur l'espace membre</p>
             </div>
-        {% else %}
-            <div class="container">
-                <br><br>
-                <h3 class="header center orange-text">Mon compte à {{ project_name }}</h3>
-                <div class="row center">
-                    <p class="col s12 light">Bienvenue sur l'espace membre</p>
-                </div>
-                <div class="row center">
-                    <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light"><i class="material-icons left">lock_outline</i>Se connecter</a>
-                </div>
-                <div class="row center">
-                    <p class=" col s12 light"> Pas encore d'identifiant ?
-                        <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
-                    </p>
-                </div>
+            <div class="row center">
+                <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light"><i
+                            class="material-icons left">lock_outline</i>Se connecter</a>
             </div>
+            <div class="row center">
+                <p class=" col s12 light"> Pas encore d'identifiant ?
+                    <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
+                </p>
             </div>
-            {#<h4 class="header center gray-text">Planning</h4>#}
-            {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
-            <div>
-        {% endif %}
+        </div>
+        </div>
+        {#<h4 class="header center gray-text">Planning</h4>#}
+        {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+        <div>
+    {% endif %}
     </div>
 {% endblock %}
 
@@ -121,7 +136,7 @@
 {% block javascripts %}
     <script>
         jQuery(function () {
-            $(".collapsible .modal-trigger").on('click',function (e) {
+            $(".collapsible .modal-trigger").on('click', function (e) {
                 e.preventDefault();
             });
         })

@@ -84,7 +84,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     private function hasQualifiedShift($bucket)
     {
         foreach ($bucket->getShifts() as $shift) {
-            if ($shift->getRole()) {
+            if ($shift->getFormation()) {
                 return true;
             }
         }

@@ -82,11 +82,11 @@ class Shift
     private $lastShifter;
 
     /**
-     * One Period has One Role.
-     * @ORM\ManyToOne(targetEntity="Role")
-     * @ORM\JoinColumn(name="role_id", referencedColumnName="id")
+     * One Period has One Formation.
+     * @ORM\ManyToOne(targetEntity="Formation")
+     * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="SET NULL")
      */
-    private $role;
+    private $formation;
 
     /**
      * One Period has One Job.
@@ -326,27 +326,27 @@ class Shift
     }
 
     /**
-     * Set role
+     * Set formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation formation
      *
      * @return Shift
      */
-    public function setRole(\AppBundle\Entity\Role $role = null)
+    public function setFormation(\AppBundle\Entity\Formation $formation = null)
     {
-        $this->role = $role;
+        $this->formation = $formation;
 
         return $this;
     }
 
     /**
-     * Get role
+     * Get formation
      *
-     * @return \AppBundle\Entity\Role
+     * @return \AppBundle\Entity\Formation
      */
-    public function getRole()
+    public function getFormation()
     {
-        return $this->role;
+        return $this->formation;
     }
 
     /**
@@ -480,5 +480,56 @@ class Shift
     public function getTimeLogs()
     {
         return $this->timeLogs;
+    }
+
+    public function isBookable(Beneficiary $beneficiary = null){
+
+        if ($this->getIsPast()){ // Do not book old
+            return false;
+        }
+        if ($this->getShifter() && !$this->getIsDismissed()) { // Do not book already booked
+            return false;
+        }
+        if ($this->getLastShifter() && $beneficiary != $this->getLastShifter()) { // Do not book pre-booked shift
+            return false;
+        }
+        if (!$beneficiary){
+            return true;
+        }
+        if ($this->getFormation() && !$beneficiary->getFormations()->contains($this->getFormation())) { // Do not book shift i do not know how to handle (formation)
+            return false;
+        }
+
+        $member = $beneficiary->getMembership();
+        if ($member->isWithdrawn())
+            return false;
+
+        if ($member->getFirstShiftDate()>$this->getStart())
+            return false;
+
+        $current_cycle = $this->getCycleIndex($member);
+
+        if ($member->getFrozen()){
+            if (!$current_cycle) //current cycle : cannot book when frozen
+                return false;
+            if ($current_cycle > 0 && !$member->getFrozenChange()) //next cycle : cannot book if frozen
+                return false;
+        }
+
+        return $beneficiary->canBook($this->getDuration(),$current_cycle);
+    }
+
+    //todo use formula ?
+    public function getCycleIndex(Membership $membership){
+        $current_cycle = 0;
+        for ($cycle = 1; $cycle < 3; $cycle++){
+            if ($this->getStart() > $membership->endOfCycle($cycle-1)){
+                if ($this->getStart() < $membership->endOfCycle($cycle)){
+                    $current_cycle = $cycle;
+                    break;
+                }
+            }
+        }
+        return $current_cycle;
     }
 }

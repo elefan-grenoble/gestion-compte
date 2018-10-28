@@ -1,0 +1,24 @@
+{% if beneficiary %}
+    <div class="col s12 m6 l6 xl6">
+        <div class="card {% if beneficiary.isMain %}blue-grey darken-1{% else %}blue-grey lighten-1{% endif %}">
+            <div class="card-content white-text">
+                {% include "beneficiary/_partial/info.html.twig" with { beneficiary: beneficiary } %}
+                {% if is_granted("edit", beneficiary.membership) %}
+                    <form action="{{ path('beneficiary_edit',{'id':beneficiary.id}) }}" method="get" class="left">
+                        {% if not is_granted("ROLE_ADMIN") and token is defined %}
+                            <input type="hidden" value="{{ token }}" name="token">
+                        {% endif %}
+                        <button type="submit" class="btn btn-floating waves-effect waves-light"><i
+                                    class="material-icons">mode_edit</i></button>
+                    </form>
+                    {% if delete_form is defined and not beneficiary.isMain %}
+                        {{ form_start(delete_form) }}
+                        <button type="submit" class="btn btn-floating waves-effect waves-light red"><i
+                                    class="material-icons">remove</i></button>
+                        {{ form_end(delete_form) }}
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endif %}

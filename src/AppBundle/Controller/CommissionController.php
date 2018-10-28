@@ -82,7 +82,9 @@ class CommissionController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getOwnedCommissions()->contains($commission)) {
+        $beneficiary = $current_app_user->getBeneficiary();
+
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 
@@ -151,7 +153,7 @@ class CommissionController extends Controller
     {
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getOwnedCommissions()->contains($commission)) {
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
         $session = new Session();
@@ -198,7 +200,7 @@ class CommissionController extends Controller
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getOwnedCommissions()->contains($commission)) {
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 

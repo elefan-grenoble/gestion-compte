@@ -3,28 +3,18 @@
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin_roles') }}"><i class="material-icons">list</i>roles</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>role
+    <a href="{{ path('admin_formations') }}"><i class="material-icons">list</i>formations</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i>formation
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Nouveau Role</h4>
+    <h4 class="">Nouvelle formation</h4>
 
     {{ form_start(form) }}
     <div class="row">
         <div class="col s6">
             {{ form_label(form.name) }}
             {{ form_widget(form.name) }}
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s4">
-            {{ form_widget(form.has_view_user_data_rights) }}
-            {{ form_label(form.has_view_user_data_rights) }}
-        </div>
-        <div class="col s4">
-            {{ form_widget(form.has_edit_user_data_rights) }}
-            {{ form_label(form.has_edit_user_data_rights) }}
         </div>
     </div>
     {{ form_widget(form) }}

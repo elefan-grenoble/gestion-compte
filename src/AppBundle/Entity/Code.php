@@ -45,7 +45,7 @@ class Code
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
 

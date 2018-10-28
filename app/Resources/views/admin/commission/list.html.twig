@@ -20,7 +20,7 @@
                         <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i></a>
                         <a href="mailto:{{ commission.email | email_encode | raw }}"><i class="material-icons left">email</i></a>
                         {% for owner in commission.owners %}
-                            <a class="chip black-text" href="{{ path("user_show",{username:owner.user.username}) }}" style="font-size: 9px;">
+                            <a class="chip black-text" href="{{ path("member_show",{member_number:owner.user.beneficiary.membership.memberNumber}) }}" style="font-size: 9px;">
                                 <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
                                 {{ owner.firstname }}
                             </a>
