@@ -79,6 +79,7 @@ class TimeLogEventListener
      * @param MemberCycleEndEvent $event
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
@@ -99,7 +100,7 @@ class TimeLogEventListener
             $this->em->persist($member);
         }
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = $this->container->get('event_dispatcher');
         if (!$member->getFrozen()) {
             $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
         }
