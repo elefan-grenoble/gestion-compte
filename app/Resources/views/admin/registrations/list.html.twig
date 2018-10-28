@@ -5,119 +5,131 @@
 
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
 
-            {% set date = null %}
+        {% set date = null %}
 
-            {% set total_card = 0 %}
-            {% set total_local = 0 %}
-            {% set total_cash = 0 %}
-            {% set total_check = 0 %}
-            {% set total_helloasso = 0 %}
+        {% set total_card = 0 %}
+        {% set total_local = 0 %}
+        {% set total_cash = 0 %}
+        {% set total_check = 0 %}
+        {% set total_helloasso = 0 %}
 
-            {% for registration in registrations %}
-                {% if date and date != (registration.createdAt | date('d F Y')) %}
-                    <li>
-                        <div class="row">
-                            <div class="col s2 center"><br><b>Total</b></div>
-                            <div class="col s2 center"><small>Carte de Crédit</small>{% if total_card %}<br><b>{{ total_card }}</b>€{% endif %}</div>
-                            <div class="col s2 center"><small>Cairn</small>{% if total_local %}<br><b>{{ total_local }}</b>{% endif %}</div>
-                            <div class="col s2 center"><small>Espèce</small>{% if total_cash %}<br><b>{{ total_cash }}</b>€{% endif %}</div>
-                            <div class="col s2 center"><small>Chèque</small>{% if total_check %}<br><b>{{ total_check }}</b>€{% endif %}</div>
-                            <div class="col s2 center"><small>HelloAsso</small>{% if total_helloasso %}<br><b>{{ total_helloasso }}</b>€{% endif %}</div>
+        {% for registration in registrations %}
+            {% if date and date != (registration.createdAt | date('d F Y')) %}
+                <li>
+                    <div class="row">
+                        <div class="col s2 center"><br><b>Total</b></div>
+                        <div class="col s2 center">
+                            <small>Carte de Crédit</small>{% if total_card %}<br><b>{{ total_card }}</b>€{% endif %}
                         </div>
-                    </li>
+                        <div class="col s2 center">
+                            <small>Cairn</small>{% if total_local %}<br><b>{{ total_local }}</b>{% endif %}</div>
+                        <div class="col s2 center">
+                            <small>Espèce</small>{% if total_cash %}<br><b>{{ total_cash }}</b>€{% endif %}</div>
+                        <div class="col s2 center">
+                            <small>Chèque</small>{% if total_check %}<br><b>{{ total_check }}</b>€{% endif %}</div>
+                        <div class="col s2 center">
+                            <small>HelloAsso</small>{% if total_helloasso %}<br><b>{{ total_helloasso }}</b>€{% endif %}
+                        </div>
+                    </div>
+                </li>
+            {% endif %}
+            {% if not date or date != (registration.createdAt | date('d F Y')) %}
+
+                {% set total_card = 0 %}
+                {% set total_local = 0 %}
+                {% set total_cash = 0 %}
+                {% set total_check = 0 %}
+                {% set total_helloasso = 0 %}
+
+                {% if date %}
+                    </ul>
                 {% endif %}
-                {% if not date or date != (registration.createdAt | date('d F Y')) %}
-
-                    {% set total_card = 0 %}
-                    {% set total_local = 0 %}
-                    {% set total_cash = 0 %}
-                    {% set total_check = 0 %}
-                    {% set total_helloasso = 0 %}
-
-                    {% if date %}
-                        </ul>
+                {% set date = (registration.createdAt | date('d F Y')) %}
+                <h5>{{ registration.createdAt | date_fr_long }}</h5>
+                <ul class="collapsible" data-collapsible="accordion">
+            {% endif %}
+            <li class="">
+                <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                        <i class="material-icons tiny">credit_card</i>
+                    {% else %}
+                        <i class="material-icons tiny">attach_money</i>
                     {% endif %}
-                    {% set date = (registration.createdAt | date('d F Y')) %}
-                    <h5>{{ registration.createdAt | date_fr_long }}</h5>
-                    <ul class="collapsible" data-collapsible="accordion">
-                {% endif %}
-                <li class="">
-                    <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
-                            <i class="material-icons tiny">credit_card</i>
+                    {{ registration.amount }}
+                    {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                        {% set total_card = total_card + (registration.amount | number_format) %}
+                        € en CARTE CREDIT
+                    {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
+                        {% set total_local = total_local + (registration.amount | number_format) %}
+                        CAIRN{#TODO PUT THIS VALUE IN CONF#}
+                    {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
+                        {% set total_cash = total_cash + (registration.amount | number_format) %}
+                        € en ESPECE
+                    {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
+                        {% set total_check = total_check + (registration.amount | number_format) %}
+                        € en CHEQUE
+                    {% elseif registration.mode ==  constant('TYPE_HELLOASSO', registration) %}
+                        {% set total_helloasso = total_helloasso + (registration.amount | number_format) %}
+                        € HelloAsso
+                    {% endif %}
+                    {% if registration.registrar %}
+                        par&nbsp;
+                        {% if registration.registrar.beneficiary %}
+                            <a href="{{ path("member_show",{"member_number":registration.registrar.beneficiary.membership.memberNumber}) }}">{{ registration.registrar.username }}</a>
                         {% else %}
-                            <i class="material-icons tiny">attach_money</i>
+                            {{ registration.registrar.username }}
                         {% endif %}
-                        {{ registration.amount }}
-                        {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
-                            {% set total_card = total_card + (registration.amount | number_format) %}
-                            € en CARTE CREDIT
-                        {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
-                            {% set total_local = total_local + (registration.amount | number_format) %}
-                            CAIRN{#TODO PUT THIS VALUE IN CONF#}
-                        {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
-                            {% set total_cash = total_cash + (registration.amount | number_format) %}
-                            € en ESPECE
-                        {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
-                            {% set total_check = total_check + (registration.amount | number_format) %}
-                            € en CHEQUE
-                        {% elseif registration.mode ==  constant('TYPE_HELLOASSO', registration) %}
-                            {% set total_helloasso = total_helloasso + (registration.amount | number_format) %}
-                            € HelloAsso
-                        {% endif %}
-                        {% if registration.registrar  %}
-                            par&nbsp;
-                            <a href="{{ path("user_show",{"username":registration.registrar.username}) }}">{{ registration.registrar.username }}</a>
-                            &nbsp;&agrave;&nbsp;{% if is_granted("ROLE_SUPER_ADMIN") %}
-                        {% if(registration.user.registrations | length) > 1 %}
-                        <div class="collapsible-body">
+                        &nbsp;&agrave;&nbsp;{% if is_granted("ROLE_SUPER_ADMIN") %}
+                        {% if(registration.membership.registrations | length) > 1 %}
+                            <div class="collapsible-body">
 
-                            {{ form_start(delete_forms[registration.id]) }}
-                            {{ form_widget(delete_forms[registration.id]) }}
-                            <div>
-                                <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                                {{ form_start(delete_forms[registration.id]) }}
+                                {{ form_widget(delete_forms[registration.id]) }}
+                                <div>
+                                    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                                </div>
+                                {{ form_end(delete_forms[registration.id]) }}
                             </div>
-                            {{ form_end(delete_forms[registration.id]) }}
-                        </div>
                         {% endif %}
                     {% endif %}
-                            {{ registration.createdAt | date('H:i') }}
-                            &nbsp;
+                        {{ registration.createdAt | date('H:i') }}
+                        &nbsp;
+                    {% endif %}
+                    {% if registration.membership %}
+                        pour #<a
+                            href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
+                        {% if registration.membership.mainBeneficiary %}
+                            {{ registration.membership.mainBeneficiary.firstname }} {{ registration.membership.mainBeneficiary.lastname }}
                         {% endif %}
-                        {% if registration.user  %}
-                        pour #<a href="{{ path("user_show",{"username":registration.user.username}) }}">{{ registration.user.memberNumber }}</a>&nbsp;
-                            {% if registration.user.mainBeneficiary %}
-                                {{ registration.user.mainBeneficiary.firstname }} {{ registration.user.mainBeneficiary.lastname }}
-                            {% endif %}
-                            {% if(registration.user.registrations | length) > 1 %}
-                                (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
+                        {% if(registration.membership.registrations | length) > 1 %}
+                            (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                    <div class="collapsible-body">
+                        {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                            {{ form_start(edit_forms[registration.id]) }}
+                            {% include "user/_partial/registration_form.html.twig" with { form: edit_forms[registration.id] } %}
+                            {{ form_end(edit_forms[registration.id]) }}
+                        {% endif %}
+                        {% if(registration.membership.registrations | length) > 1 %}
+                            {% if is_granted("ROLE_SUPER_ADMIN") %}
+                                {{ form_start(delete_forms[registration.id]) }}
+                                {{ form_widget(delete_forms[registration.id]) }}
+                                <div>
+                                    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                                </div>
+                                {{ form_end(delete_forms[registration.id]) }}
                             {% endif %}
                         {% endif %}
                     </div>
+                {% endif %}
+            </li>
 
-                    {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                        <div class="collapsible-body">
-                            {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                                {{ form_start(edit_forms[registration.id]) }}
-                                {% include "user/_partial/registration_form.html.twig" with { form: edit_forms[registration.id] } %}
-                                {{ form_end(edit_forms[registration.id]) }}
-                            {% endif %}
-                            {% if(registration.user.registrations | length) > 1 %}
-                                {% if is_granted("ROLE_SUPER_ADMIN") %}
-                                    {{ form_start(delete_forms[registration.id]) }}
-                                    {{ form_widget(delete_forms[registration.id]) }}
-                                    <div>
-                                        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-                                    </div>
-                                    {{ form_end(delete_forms[registration.id]) }}
-                                {% endif %}
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </li>
-
-            {% endfor %}
+        {% endfor %}
         </ul>
-                        <br>
+        <br>
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
                 <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1}) }}{% endif %}">
@@ -125,7 +137,8 @@
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
-            <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("admin_registrations",{'page':i}) }}">{{ i }}</a></li>
+                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                            href="{{ path("admin_registrations",{'page':i}) }}">{{ i }}</a></li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
                 <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1}) }}{% endif %}">

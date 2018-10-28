@@ -60,57 +60,61 @@ class NoteVoter extends Voter
             case self::VIEW:
                 return true;
             case self::CREATE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-                    return true;
-                }
-                return $this->canAdd($note, $user);
+                return $this->canAdd($note, $token);
             case self::EDIT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-                    return true;
-                }
-                return $this->canEdit($note, $user);
+                return $this->canEdit($note, $token);
             case self::DELETE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-                    return true;
-                }
-                return $this->canDelete($note, $user);
+                return $this->canDelete($note, $token);
         }
 
         throw new \LogicException('This code should not be reached!');
     }
 
-    private function canAdd(Note $note, User $user)
+    private function canAdd(Note $note, TokenInterface $token)
     {
+        $user = $token->getUser();
+
         // if they can edit, they can add
-        if ($this->canEdit($note,$user)) {
+        if ($this->canEdit($note, $token)) {
             return true;
         }
         // can add note on self
-        if ($note->getSubject() === $user){
+        if ($note->getSubject() === $user) {
+            return true;
+        }
+        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
             return true;
         }
         return false;
     }
 
-    private function canEdit(Note $note, User $user)
+    private function canEdit(Note $note, TokenInterface $token)
     {
-        if ($note->getAuthor() === $user){
+        $user = $token->getUser();
+
+        if ($note->getAuthor() === $user) {
             return true;
         }
-        if (!$note->getSubject()) //postit can be edited by anyone
+        if (!$note->getSubject()) { //postit can be edited by anyone
             return true;
+        }
+        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+            return true;
+        }
         return false;
     }
 
-    private function canDelete(Note $note, User $user)
+    private function canDelete(Note $note, TokenInterface $token)
     {
-        if ($note->getAuthor() === $user){
+        $user = $token->getUser();
+
+        if ($note->getAuthor() === $user) {
             return true;
         }
-        if ($note->getSubject() === $user){
+        if ($note->getSubject() === $user) {
             return true;
         }
-        if ($user->getMainBeneficiary()->canEditUserData()){ //todo check also other Beneficiary ?
+        if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
             return true;
         }
         return false;

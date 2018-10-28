@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -20,6 +21,9 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class ProxyType extends AbstractType
 {
+    /**
+     * @var TokenStorageInterface
+     */
     private $tokenStorage;
 
     public function __construct(TokenStorageInterface $tokenStorage)
@@ -33,6 +37,7 @@ class ProxyType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
+        /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$user) {
             throw new \LogicException(
@@ -46,7 +51,15 @@ class ProxyType extends AbstractType
 
             if ($user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('giver',EntityType::class,array(
-                    'class' => User::class,
+                    'class' => Membership::class,
+                    'choice_label' => function (Membership $membership) {
+                        $mainBeneficiary = $membership->getMainBeneficiary();
+                        if ($mainBeneficiary) {
+                            return $mainBeneficiary;
+                        } else {
+                            return $membership->getMemberNumber();
+                        }
+                    },
                     'label'=>'Utilisateur donnant la procuration',
                     'required' => false));
                 $form->add('owner',EntityType::class,array(
@@ -64,7 +77,7 @@ class ProxyType extends AbstractType
                 }else{
                     $form->add('owner',EntityType::class,array(
                         'class' => Beneficiary::class,
-                        'choices' => $user->getBeneficiaries(),
+                        'choices' => $user->getBeneficiary()->getMembership()->getBeneficiaries(),
                         'label'=>'beneficiaire présent acceptant la procuration'));
                 }
             }

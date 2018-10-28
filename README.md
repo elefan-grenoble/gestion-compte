@@ -1,106 +1,123 @@
-Espace adhérent l'éléfàn
+Espace adhérent super marché coopératifs
 ========================
-## Modèle de données
 
-![modele](https://yuml.me/15627302.svg)
+Bonjour,
+Ceci est le code source d'une application symfony pour la gestion d'une épicerie ou d'un super marché
+coopératif.
 
-* yuml.me code:
-https://yuml.me/edit/5c392db4
+Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet grenoblois de super marché coopératif.
 
-TODO Nouveau schema (pour les utilisateurs et bénéficiaires) :
+![home](doc/images/homepage_25102018.png)
 
-![modele V2](http://yuml.me/463ff905.svg)
-http://yuml.me/edit/463ff905
+Il est open source sous licence LGPL?
 
-## Guide du développeur
+# Liste des fonctionnalités 
+travail en cours
 
-### Prérequis
+## Fonctions "Admin"
+(some features in video (18 sept 2018))
+[![Some features demo](http://img.youtube.com/vi/7rKr5UjAI-w/0.jpg)](https://www.youtube.com/watch?v=7rKr5UjAI-w "admin demo")
+* Gestion des membres
+    * Inscriptions "rapides" (email + paiement) pour les événements et réunion d'info [WIP]
+    * Inscriptions complètes
+    * Recherche utilisateur rapide via le header du site (ROLE_ADMIN)
+    * Recherche utilisateur compléte (filtre) via une page dédiée (ROLE_USER_MANAGER)
+    * Login As (ROLE_ADMIN)
+    * Export csv des emails des résultats filtrés
+    * Envoi de mail via résultats filtrés
+    * Envoi de mail de masse via command line (pour newsletter)
+    * Bénéficiaires
+        * Ajout d'un bénéficiaire à un compte membre (ROLE_USER_MANAGER)
+        * Suppression d'un bénéficiaire
+        * Editer un bénéficiaire (infos, commisions, formations)
+        * écrire éditer supprimer une note sur un bénéficiaire
+    * Gestion des paiements (ROLE_FINANCE_MANAGER)
+        * liste des adhésions / ré-adhésions
+        * liste des paiement helloasso via api
+        * Corrections manuel du lien helloasso <=> App
+    * Badge
+        * générer les badges
+        * imprimer les badges
+    * Liste des adhésions en retard pour appel téléphonique
+    * Espace "post it" pour bureau des membres
+* Gestion des créneaux
+    * Formation
+        * créer une formation        
+        * éditer une formation
+        * supprimer une formation
+    * Job
+        * créer un job (poste de travail)        
+        * éditer une job
+        * supprimer une job
+    * Semaine type
+        * créer des créneau (lié à un job)
+        * définir les créneau (nb personne, formations necessaires)
+    * Dupliquer un jour type
+    * Générer manuellement une période donnée
+    * Inscrire / libérer un membre pour un créneau
+    * voir le calendrier (En cours, passé et futur)
+    * Log individuel de temps [TODO manually add custom log]
+* Gestion associative
+    * Evénements
+        * Créer des événement (date, desc, photo) pour AG, ou autre rencontre
+        * Modifier des événements
+        * Editer la liste d'émargement avec procurations
+    * Taches
+        * créer une tache
+        * éditer une tache
+        * supprimer une tache
+    * Commission
+        * créer une Commission
+        * éditer une Commission
+        * supprimer une Commission
+        * nommer, changer un référent
+* Divers
+    * Services Oauth2
+        * Créer des services externes Oauth2 pour les membres (Wiki, Mattermost, NextCloud)
+        * Supprimer des services externes
+        * rendre publique / privé un service
 
-* PHP (version 7+) installé
-* [Composer](https://getcomposer.org/) installé
-* Mysql installé et configuré (ou mariadb sur Fedora)
-* php-mysql (php-pdo_mysql on Fedora)
-* php-xml
-* Créer une nouvelle base pour le projet
+## Fonctions "Membre"
+* Usages
+    * Se connecter pour la toute première fois avec son numéro d'adhérent ou son prénom
+    * Voir et modifier ces informations
+    * Se connecter à l'aide du QR sur le badge
+    * Se connecter à un service tiers avec le Oauth2 (Wiki, Mattermoser, NextCloud, ...)
+    [![OAuth2 demo](http://img.youtube.com/vi/sghxx1VqIp4/0.jpg)](https://www.youtube.com/watch?v=sghxx1VqIp4 "OAuth 2 demo")
+* Gestion associative
+    * Activer son badge
+    * Réadhérer via HelloAsso (API)
+    * Evénements
+        * Voir les prochains événement
+        * Faire une procuration pour un événement à venir (je suis absent)
+            * procuration anonyme (à qui veux bien la prendre)
+            * procuration nominative
+        * Accepter une procuration anonyme pour un événement à venir
+    * Créer une taches si je fait parti d'une comission
+    * Ajouter et retirer des membres si je suis référent d'une commission.
+* Créneaux
+    * Choisir un créneau et le reserver
+    * voir les créneaux réservés
+    * se désangager d'un créneau réservé
+    * reprendre un créneau pour lequel on s'est désangagé
+    * contacter les autres membres de son créneau
+    
+## Fonctions logged out
+* Visualisation anonyme du "planning" des prochains jours
+* Scan de carte membre avec scannette sur l'écran d'accueil (info sur a jour, en retard, ...)
 
-### Installation
+# Projet
 
-* Create a mysql database ``mysql -e "CREATE DATABASE my_db_name;"``
-* ``git clone https://github.com/elefan-grenoble/gestion-compte.git``
-* ``cd gestion-compte``
-* ``composer install`` (utiliser le nom de la base précédemment créée)
-* ``bin/console doctrine:schema:create``
-* add ``127.0.0.1 membres.lelefan.local`` to your _/etc/hosts_ file (/!\important, le login ne fonctionnera pas sinon)
-* ``php bin/console server:start``
-* visit http://membres.lelefan.local/user/install_admin to create the super admin user (babar:password)
+* Suivre [sur github](https://github.com/elefan-grenoble/gestion-compte/projects/2) 
 
-#### En Prod
-Pour nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et barecode en 404 
-<pre>location ~* ^/sw/(.*)/(qr|br)\.png$ {
-		rewrite ^/sw/(.*)/(qr|br)\.png$ /app.php/sw/$1/$2.png last;
-	}
-</pre>
+# Installation
 
-### Installation de mailcatcher, pour récupérer les mails envoyé en DEV
+* Suivez le [guide d'installation](doc/install.md)
 
-* https://mailcatcher.me/
-* sudo apt-get install unzip ruby-full build-essential
-* unzip mailcatcher-master.zip
-* sudo gem install mailcatcher
-* mailcatcher
+# Initialisation
 
-### Créer un utilisateur
+* Suivez le [guide de mise en route](doc/start.md)
 
-* Se connecter avec l'utilisateur super admin babar/password
-* Créer un utilisateur
+# Developpements
 
-#### Activer l'utilisateur
-
-L'activation passe par un envoi de mail. Il faut installer un mail catcher pour pouvoir faire fonctionner l'envoi de mail en local.
-
-Sinon, il est possible d'activer un utilisateur via cette procédure:
-
-* Activer l'utilisateur avec la commande suivante ``php bin/console fos:user:activate $username``
-* Changer le mot de passe avec la commande suivante ``php bin/console fos:user:change-password $username newp@ssword``
-
-Documentation Symfony pour manipuler les utilisateurs: http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
-
-### Mise en route des créneaux
-
-Dans l'admin panel :
-
-- Créer les *rôles* (qualifications) que les bénévoles peuvent avoir (ressource, ambassadeur, fermeture, ...)
-- Créer les *postes de bénévolat* à assurer lors d'un créneau (épicerie, bureau des membres) et choisir la couleur principale d'affichage dans l'emploi du temps
-- Aller dans la *semaine type* pour définir les horaires et types de créneaux
-- **Créer** un créneau-type en renseignant le jour de la semaine, les heures de début et de fin et le *poste* associé au créneau
-- Indiquer le rôle et le nombre de personnes avec ce rôle qui peuvent s'inscrire sur le créneau, puis cliquer sur **Ajouter**
-- Pour permettre à des bénévoles sans qualification de s'inscrire, laisser le champ rôle vide
-- *Sauvegarder* pour créer le créneau-type et les positions
-- Quand tous les créneaux-types et postes d'une journée sont créés, il est possible de les *dupliquer* sur une autre journée avec la fonction idoine
-- Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
-
-La génération de créneaux peut être automatisée via une tâche cron.
-
-## crontab
-
-<pre>
-#generate shifts in 27 days (same weekday as yesterday)
-55 5 * * * php YOUR_INSTALL_DIR_ABSOLUTE_PATH/bin/console app:shift:generate $(date -d "+27 days" +\%Y-\%m-\%d)
-#free pre-booked shifts
-55 5 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:free $(date -d "+21 days" +\%Y-\%m-\%d)
-#send reminder 2 days before shift
-0 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:reminder $(date -d "+2 days" +\%Y-\%m-\%d)
-#execute routine for cycle_end/cycle_start, everyday
-5 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:user:cycle_start
-</pre>
-
-### Cheatsheet
-
-#### Mise à jour du modèle
-
-* Créer une nouvelle entité: ``php bin/console doctrine:generate:entity AppBundle:EntityName``
-* Générer les getters et setters d'une entité: ``php bin/console doctrine:generate:entities``
-* Appliquer les mises à jours sur la base:
-   * Dryrun: ``php bin/console doctrine:schema:update``
-   * Voir les requêtes: ``php bin/console doctrine:schema:update --dump-sql``
-   * Appliquer les changements: ``php bin/console doctrine:schema:update --force``
+* [Developer Guide](doc/dev.md)

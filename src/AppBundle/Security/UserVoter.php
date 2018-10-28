@@ -4,7 +4,6 @@ namespace AppBundle\Security;
 
 use AppBundle\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -75,9 +74,9 @@ class UserVoter extends Voter
                 return $this->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
-                return $this->canView($subject, $user);
+                return $this->canView($subject, $token);
             case self::FREEZE_CHANGE:
-                if ($subject === $user){
+                if ($subject === $user) {
                     return true;
                 }
             case self::FREEZE:
@@ -85,38 +84,36 @@ class UserVoter extends Voter
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
             case self::EDIT:
-                return $this->canEdit($subject, $user);
+                return $this->canEdit($subject, $token);
         }
 
         throw new \LogicException('This code should not be reached!');
     }
 
-    private function canView(User $subject, User $user)
+    private function canView(User $subject, TokenInterface $token)
     {
+        $user = $token->getUser();
+
         // if they can edit, they can view
-        if ($this->canEdit($subject, $user)) {
+        if ($this->canEdit($subject, $token)) {
             return true;
         }
-        if ($user->getMainBeneficiary()->canViewUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
+        if ($this->decisionManager->decide($token, ['ROLE_USER_VIEWER'])) {
             return true;
         }
         return false;
     }
 
-    private function canEdit(User $subject, User $user)
+    private function canEdit(User $subject, TokenInterface $token)
     {
-        $session = new Session();
+        $user = $token->getUser();
 
-        $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
-
-        if ($this->isLocationOk()){
-            if ($user->getMainBeneficiary()->canEditUserData()){ //todo check also other Beneficiary ? < todo : use new ROLE_USER_MANAGER
+        if ($this->isLocationOk()) {
+            if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
                 return true;
             }
-            if ($subject->getId()){
-                if ($token == $subject->getTmpToken($session->get('token_key').$user->getUsername())){
+            if ($subject->getId() === $user->getId()) {
                     return true;
-                }
             }
             return false;
         }
@@ -124,7 +121,8 @@ class UserVoter extends Voter
 
     }
 
-    private function isLocationOk(){
+    private function isLocationOk()
+    {
         $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
         $ips = $this->container->getParameter('place_local_ip_address');
         $ips = explode(',',$ips);

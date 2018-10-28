@@ -2,28 +2,28 @@
 
 namespace AppBundle\Event;
 
-use AppBundle\Entity\User;
+use AppBundle\Entity\Membership;
 use Symfony\Component\EventDispatcher\Event;
 
 class MemberCycleEndEvent extends Event
 {
     const NAME = 'member.cycle.end';
 
-    private $user;
+    private $membership;
     private $date;
 
-    public function __construct(User $user, \DateTime $date)
+    public function __construct(Membership $user, \DateTime $date)
     {
-        $this->user = $user;
+        $this->membership = $user;
         $this->date = $date;
     }
 
     /**
-     * @return User
+     * @return Membership
      */
-    public function getUser()
+    public function getMembership()
     {
-        return $this->user;
+        return $this->membership;
     }
 
     /**

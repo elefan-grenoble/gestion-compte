@@ -8,9 +8,9 @@
 {% block content %}
     {% if is_granted("access_tools",app.user)  %}
         <div class="center">
-            <a href="{{ path('user_new') }}" class="waves-effect waves-light green btn {% if not is_granted("ROLE_USER_MANAGER") %}disabled{% endif %}"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
+            <a href="{{ path('member_new') }}" class="waves-effect waves-light green btn {% if not is_granted("ROLE_USER_MANAGER") %}disabled{% endif %}"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
             <a href="{{ path('user_quick_new') }}" class="waves-effect waves-light green btn"><i class="material-icons left">person_add</i>Nouvelle adhésion réunion info</a>
-            <a href="{{ path('user_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
+            <a href="{{ path('member_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
         </div>
     {% endif %}
     {% if is_granted("view",app.user)  %}

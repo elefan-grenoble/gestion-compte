@@ -2,11 +2,13 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
-use AppBundle\Entity\User;
 use AppBundle\Event\MemberCycleEndEvent;
+use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
@@ -47,8 +49,22 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
-        $this->deleteShiftLogs($event->getShift(), $event->getUser());
+        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
+
+    /**
+     * @param ShiftDeletedEvent $event
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function onShiftDeleted(ShiftDeletedEvent $event)
+    {
+        $this->logger->info("Time Log Listener: onShiftDeleted");
+        $shift = $event->getShift();
+        if ($shift->getShifter()) {
+            $this->deleteShiftLogs($shift, $shift->getShifter()->getMembership());
+        }
+    }
+
 
     /**
      * @param ShiftDismissedEvent $event
@@ -57,18 +73,38 @@ class TimeLogEventListener
     public function onShiftDismissed(ShiftDismissedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftDismissed");
-        $this->deleteShiftLogs($event->getShift(), $event->getUser());
+        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
 
     /**
      * @param MemberCycleEndEvent $event
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
-        $this->logger->info("Time Log Listener: onMemberCycleStart");
-        $this->createCycleBeginningLog($event->getUser(), $event->getDate());
+        $this->logger->info("Time Log Listener: onMemberCycleEnd");
+
+        $member = $event->getMembership();
+        $date = $event->getDate();
+
+        if ($member->getFrozen()) {
+            $this->createFrozenLog($member,$date);
+        } else {
+            $this->createCycleBeginningLog($member, $date);
+        }
+
+        if ($member->getFrozenChange()) {
+            $member->setFrozen(!$member->getFrozen());
+            $member->setFrozenChange(false);
+            $this->em->persist($member);
+        }
+
+        $dispatcher = $this->container->get('event_dispatcher');
+        if (!$member->getFrozen()) {
+            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date));
+        }
     }
 
     /**
@@ -79,7 +115,7 @@ class TimeLogEventListener
     private function createShiftLog(Shift $shift)
     {
         $log = new TimeLog();
-        $log->setUser($shift->getShifter()->getUser());
+        $log->setMembership($shift->getShifter()->getMembership());
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setDate($shift->getStart());
@@ -90,14 +126,14 @@ class TimeLogEventListener
 
     /**
      * @param Shift $shift
-     * @param User $user
+     * @param Membership $membership
      * @throws \Doctrine\ORM\ORMException
      */
-    private function deleteShiftLogs(Shift $shift, User $user)
+    private function deleteShiftLogs(Shift $shift, Membership $membership)
     {
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
-            if ($log->getUser()->getId() == $user->getId()) {
+            if ($log->getMembership()->getId() == $membership->getId()) {
                 $this->em->remove($log);
             }
         }
@@ -105,29 +141,46 @@ class TimeLogEventListener
     }
 
     /**
-     * @param User $user
+     * @param Membership $membership
      * @param \DateTime $date
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createCycleBeginningLog(User $user, \DateTime $date)
+    private function createCycleBeginningLog(Membership $membership, \DateTime $date)
     {
         $log = new TimeLog();
-        $log->setUser($user);
+        $log->setMembership($membership);
         $log->setTime(-1 * $this->due_duration_by_cycle);
         $log->setDate($date);
         $log->setDescription("Début de cycle");
         $this->em->persist($log);
 
-        $counter_today = $user->getTimeCount($date);
+        $counter_today = $membership->getTimeCount($date);
         if ($counter_today > $this->due_duration_by_cycle) { //surbook
             $log = new TimeLog();
-            $log->setUser($user);
+            $log->setMembership($membership);
             $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
             $log->setDate($date);
             $log->setDescription("Régulation du bénévolat facultatif");
             $this->em->persist($log);
         }
+        $this->em->flush();
+    }
+
+    /**
+     * @param Membership $membership
+     * @param \DateTime $date
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createFrozenLog(Membership $membership, \DateTime $date)
+    {
+        $log = new TimeLog();
+        $log->setMembership($membership);
+        $log->setTime(0);
+        $log->setDate($date);
+        $log->setDescription("Début de cycle (compte gelé)");
+        $this->em->persist($log);
         $this->em->flush();
     }
 

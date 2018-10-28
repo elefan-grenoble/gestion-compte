@@ -33,9 +33,9 @@
         jQuery(function ($) {
             $('input[name="form[from_text]"],input[name="form[dest_text]"]').autocomplete({
                 data: {
-            {% for user in users %}
-                {% if user.mainBeneficiary %}
-                    "#{{ user.memberNumber }} {{ user.mainBeneficiary.firstname }} {{ user.mainBeneficiary.lastname }}" : null,
+            {% for member in members %}
+                {% if member.mainBeneficiary %}
+                    "#{{ member.memberNumber }} {{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}" : null,
                 {% endif %}
             {% endfor %}
                 },

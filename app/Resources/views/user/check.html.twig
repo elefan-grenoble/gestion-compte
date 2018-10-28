@@ -5,11 +5,11 @@
 
 {% block content %}
     {% set more_than_one = false %}
-    {% if beneficiary.user.beneficiaries | length > 1 %}
+    {% if beneficiary.membership.beneficiaries | length > 1 %}
         {% set more_than_one = true %}
     {% endif %}
     {% set pass = true %}
-    {% if counter < -3*due_duration_by_cycle or beneficiary.user.Frozen or not beneficiary.user.Enabled or beneficiary.user.Withdrawn or not beneficiary.user.uptodate %}
+    {% if counter < -3*due_duration_by_cycle or beneficiary.membership.frozen or not beneficiary.user.enabled or beneficiary.membership.withdrawn or not beneficiary.membership.uptodate %}
         {% set pass = false %}
     {% endif %}
     <div class="container">

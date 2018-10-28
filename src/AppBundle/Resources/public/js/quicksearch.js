@@ -28,15 +28,15 @@ $(document).ready(function() {
                     if (response && response.count > 0){
                         var beneficiaries = response.data;
                         var dataBeneficiaries = {};
-                        var dataUsernames = {};
+                        var dataMembersNumbers = {};
                         for (var i = 0; i < beneficiaries.length; i++) {
                             dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
-                            dataUsernames[beneficiaries[i].id] = beneficiaries[i].username;
+                            dataMembersNumbers[beneficiaries[i].id] = beneficiaries[i].member_number;
                         }
                         //$('#quick_search').autocomplete('destroy');
                         $('#quick_search').autocomplete({
                             data: dataBeneficiaries,
-                            limit: 3,
+                            limit: 5,
                             onAutocomplete: function(val) {
                                 $('#quick_search_nav').slideUp();
                                 console.log(val);
@@ -45,8 +45,8 @@ $(document).ready(function() {
 
                                 if ((m = regex.exec(val)) !== null) {
                                     var beneficiary_id = m[1];
-                                    var username = dataUsernames[beneficiary_id];
-                                    var res = show_user_template_url.replace("-USERNAME-", username);
+                                    var member_number = dataMembersNumbers[beneficiary_id];
+                                    var res = show_user_template_url.replace("-MNID-", member_number);
                                     window.location = res;
                                 }
                             },

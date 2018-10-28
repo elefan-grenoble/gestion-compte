@@ -50,10 +50,10 @@ class Address
     private $city;
 
     /**
-     * One Address has User.
-     * @ORM\OneToOne(targetEntity="User", mappedBy="address")
+     * One Address has Beneficiary.
+     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="address")
      */
-    private $user;
+    private $beneficiary;
 
     /**
      * Get id
@@ -162,26 +162,18 @@ class Address
     }
 
     /**
-     * Set user
-     *
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return Address
+     * @return mixed
      */
-    public function setUser(\AppBundle\Entity\User $user = null)
+    public function getBeneficiary()
     {
-        $this->user = $user;
-
-        return $this;
+        return $this->beneficiary;
     }
 
     /**
-     * Get user
-     *
-     * @return \AppBundle\Entity\User
+     * @param mixed $beneficiary
      */
-    public function getUser()
+    public function setBeneficiary($beneficiary)
     {
-        return $this->user;
+        $this->beneficiary = $beneficiary;
     }
 }

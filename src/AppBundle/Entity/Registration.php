@@ -56,15 +56,14 @@ class Registration
      */
     private $mode;
 
-
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="registrations",)
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations",)
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $user;
+    private $membership;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="recordedRegistrations")
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -174,30 +173,6 @@ class Registration
     }
 
     /**
-     * Set user
-     *
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return Registration
-     */
-    public function setUser(\AppBundle\Entity\User $user = null)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Get user
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
      * Set registrar
      *
      * @param \AppBundle\Entity\User $registrar
@@ -301,5 +276,21 @@ class Registration
     public function getHelloassoPayment()
     {
         return $this->helloassoPayment;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getMembership()
+    {
+        return $this->membership;
+    }
+
+    /**
+     * @param mixed $membership
+     */
+    public function setMembership($membership)
+    {
+        $this->membership = $membership;
     }
 }

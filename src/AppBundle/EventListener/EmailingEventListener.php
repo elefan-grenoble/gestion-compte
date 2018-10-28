@@ -3,9 +3,12 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Event\CodeNewEvent;
+use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
+use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
@@ -24,6 +27,31 @@ class EmailingEventListener
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
+    }
+
+    /**
+     * @param MemberCreatedEvent $event
+     * @throws \Exception
+     */
+    public function onMemberCreated(MemberCreatedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onMemberCreated");
+
+        $beneficiaries = $event->getMembership()->getBeneficiaries();
+
+        foreach ($beneficiaries as $beneficiary) {
+            $welcome = (new \Swift_Message('Bienvenue à l\'éléfàn'))
+                ->setFrom('membres@lelefan.org')
+                ->setTo($beneficiary->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/welcome.html.twig',
+                        array('beneficiary' => $beneficiary)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($welcome);
+        }
     }
 
     /**
@@ -48,30 +76,51 @@ class EmailingEventListener
         $this->mailer->send($archive);
     }
 
-
     /**
-     * @param MemberCycleEndEvent $event
+     * @param ShiftDeletedEvent $event
      * @throws \Exception
      */
-    public function onMemberCycleEnd(MemberCycleEndEvent $event)
+    public function onShiftDeleted(ShiftDeletedEvent $event)
+    {
+        $shift = $event->getShift();
+        if ($shift->getShifter()) { //warn shifter
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
+                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setTo($shift->getShifter()->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/deleted_shift.html.twig',
+                        array('shift' => $shift)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($warn);
+        }
+    }
+
+    /**
+     * @param MemberCycleStartEvent $event
+     * @throws \Exception
+     */
+    public function onMemberCycleStart(MemberCycleStartEvent $event)
     {
         $this->logger->info("Emailing Listener: onMemberCycleStart");
 
-        $user = $event->getUser();
+        $membership = $event->getMembership();
         $date = $event->getDate();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        // user wont be frozen for this cycle && not a fresh new user && user still have to book
-        if (!$user->getFrozenChange() && $user->getFirstShiftDate() < $date && $user->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
+        // member wont be frozen for this cycle && not a fresh new member && member still have to book
+        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
             $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($user->getEmail())
+                ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->container->get('twig')->render(
                         'emails/cycle_start.html.twig',
-                        array('user' => $user, 'home_url' => $home_url)
+                        array('membership' => $membership, 'home_url' => $home_url)
                     ),
                     'text/html'
                 );
@@ -87,20 +136,20 @@ class EmailingEventListener
     {
         $this->logger->info("Emailing Listener: onMemberCycleHalf");
 
-        $user = $event->getUser();
+        $membership = $event->getMembership();
         $date = $event->getDate();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        if ($user->getFirstShiftDate() < $date && $user->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if user still have to book
+        if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($user->getEmail())
+                ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/cycle_half.html.twig',
-                        array('user' => $user, 'home_url' => $home_url)
+                        array('membership' => $membership, 'home_url' => $home_url)
                     ),
                     'text/html'
                 );
@@ -120,7 +169,7 @@ class EmailingEventListener
         $display = $event->getDisplay();
 
         $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', array('token'=>$this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername().',code:'.$code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
         if (!$display) { //use smartphone
             $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
@@ -129,7 +178,7 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/new_code.html.twig',
-                        array('code' => $code,'codes' => $old_codes,'changeCodeUrl' => $code_change_done_url)
+                        array('code' => $code, 'codes' => $old_codes, 'changeCodeUrl' => $code_change_done_url)
                     ),
                     'text/html'
                 );

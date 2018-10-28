@@ -8,7 +8,7 @@
             <td class="bc" >
                 <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode})) }}" alt="barecode">
                 <br>
-                Adhésion <strong>#{{ card.beneficiary.user.memberNumber }}</strong> [B{{ card.number }}]
+                Adhésion <strong>#{{ card.beneficiary.memberNumber }}</strong> [B{{ card.number }}]
                 <br>
                 <strong>{{ project_url_display }}</strong>
             </td>

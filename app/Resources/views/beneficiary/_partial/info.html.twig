@@ -1,0 +1,49 @@
+<span class="card-title">
+                <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}"
+                     class="circle responsive-img">
+    {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
+    {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
+    {% if beneficiary.membership.withdrawn %}<span class="red white-text badge"> fermé </span>{% endif %}
+    {% if beneficiary.membership.frozenChange %}
+        {% if beneficiary.membership.frozen %}<span class="deep-purple white-text badge"> Dégel à la fin du cycle</span>
+        {% else %}<span class="deep-purple white-text badge"> Gel à la fin du cycle</span>{% endif %}
+    {% endif %}
+    {% if beneficiary.membership.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
+    {% if beneficiary.membership.frozen %}<span
+            class="deep-purple white-text badge"> gelé </span>{% endif %}
+                </span>
+<div class="row">
+    <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}
+    </div>
+    {% if phone_only is not defined %}
+        <div class="col s12 truncate"><i
+                    class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}</div>
+        {% if beneficiary.address %}
+            <div class="col s12 truncate"><i
+                        class="material-icons tiny">location_on</i>
+                &nbsp;{{ beneficiary.address.street1 }}
+                {% if beneficiary.address.street2 %}
+                    &nbsp;{{ beneficiary.address.street2 }}
+                {% endif %}
+                &nbsp;{{ beneficiary.address.zipCode }}
+                &nbsp;{{ beneficiary.address.city }}
+                </span>
+            </div>
+        {% endif %}
+    {% endif %}
+    {% if beneficiary.formations | length %}
+        <div class="col s12 truncate"><i
+                    class="material-icons tiny">assignment_ind</i>&nbsp;{% for formation in beneficiary.formations %}
+            <div class="chip red-text">{{ formation.name }}</div>{% endfor %}</div>
+    {% endif %}
+    {% if beneficiary.commissions | length %}
+        <div class="col s12 truncate"><i
+                    class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}
+            <div class="chip blue-text">{{ commission.name }}</div>{% endfor %}</div>
+    {% endif %}
+    {% if beneficiary.user and beneficiary.user.roles | length %}
+        <div class="col s12 truncate"><i
+                    class="material-icons tiny">settings</i>&nbsp;{% for role in beneficiary.user.roles %}
+            <div class="chip purple-text">{{ role }}</div>{% endfor %}</div>
+    {% endif %}
+</div>

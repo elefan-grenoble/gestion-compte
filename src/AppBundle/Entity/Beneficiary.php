@@ -2,6 +2,7 @@
 
 namespace AppBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 
@@ -40,22 +41,28 @@ class Beneficiary
     /**
      * @var string
      *
-     * @ORM\Column(name="email", type="string", length=255, unique=true)
-     */
-    private $email;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="phone", type="string", length=255, nullable=true)
      */
     private $phone;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="user_id", referencedColumnName="id",onDelete="CASCADE")
+     * One Beneficiary has One Address.
+     * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     */
+    private $address;
+
+    /**
+     * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
      */
     private $user;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id",onDelete="CASCADE")
+     */
+    private $membership;
 
     /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
@@ -93,21 +100,23 @@ class Beneficiary
 
     /**
      * Many Beneficiary have Many Tasks.
-     * @ORM\ManyToMany(targetEntity="Task", inversedBy="owners")
+     * @ORM\ManyToMany(targetEntity="Task", mappedBy="owners")
      */
     private $tasks;
 
     /**
-     * Many Beneficiary have Many Roles.
-     * @ORM\ManyToMany(targetEntity="Role", inversedBy="beneficiaries")
-     * @ORM\JoinTable(name="beneficiaries_roles")
+     * Many Beneficiary have Many Formations.
+     * @ORM\ManyToMany(targetEntity="Formation", inversedBy="beneficiaries")
+     * @ORM\JoinTable(name="beneficiaries_formations")
      */
-    private $roles;
+    private $formations;
 
     /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="giver",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="owner", cascade={"persist", "remove"})
      */
     private $received_proxies;
+
+    private $_counters = [];
 
     /**
      * Get id
@@ -117,6 +126,16 @@ class Beneficiary
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get membernumber
+     *
+     * @return int
+     */
+    public function getMemberNumber()
+    {
+        return $this->getMembership()->getMemberNumber();
     }
 
     /**
@@ -157,18 +176,18 @@ class Beneficiary
         return $this;
     }
 
-    public function getDisplayName(){
-        if (!$this->getUser()){
-            return $this->getFirstname().' '.$this->getLastname();
-        }
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname();
+    public function getDisplayName()
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
-    public function getPublicDisplayName(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname()[0];
+    public function getPublicDisplayName()
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->getDisplayName();
     }
 
@@ -191,7 +210,7 @@ class Beneficiary
      */
     public function setEmail($email)
     {
-        $this->email = $email;
+        $this->getUser()->setEmail($email);
 
         return $this;
     }
@@ -203,7 +222,11 @@ class Beneficiary
      */
     public function getEmail()
     {
-        return $this->email;
+        if ($this->getUser()) {
+            return $this->getUser()->getEmail();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -254,48 +277,20 @@ class Beneficiary
         return $this->user;
     }
 
-    /**
-     * Get hasViewUserDataRights
-     *
-     * @return boolean
-     */
-    public function canViewUserData()
-    {
-        foreach ($this->getRoles() as $role){
-            if ($role->hasViewUserDataRights())
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * Get hasViewUserDataRights
-     *
-     * @return boolean
-     */
-    public function canEditUserData()
-    {
-        foreach ($this->getRoles() as $role){
-            if ($role->hasEditUserDataRights())
-                return true;
-        }
-        return false;
-    }
-
-
     public function isMain()
     {
-        return $this === $this->getUser()->getMainBeneficiary();
+        return $this === $this->getMembership()->getMainBeneficiary();
     }
+
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->booked_shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->commissions = new ArrayCollection();
+        $this->formations = new ArrayCollection();
+        $this->shifts = new ArrayCollection();
+        $this->booked_shifts = new ArrayCollection();
     }
 
     /**
@@ -332,38 +327,45 @@ class Beneficiary
         return $this->commissions;
     }
 
+    public function getOwnedCommissions()
+    {
+        return $this->commissions->filter(function ($commission) {
+            return $commission->getOwners()->contains($this);
+        });
+    }
+
     /**
-     * Add role
+     * Add formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation $formation
      *
      * @return Beneficiary
      */
-    public function addRole(\AppBundle\Entity\Role $role)
+    public function addFormation(\AppBundle\Entity\Formation $formation)
     {
-        $this->roles[] = $role;
+        $this->formations[] = $formation;
 
         return $this;
     }
 
     /**
-     * Remove role
+     * Remove formation
      *
-     * @param \AppBundle\Entity\Role $role
+     * @param \AppBundle\Entity\Formation $formation
      */
-    public function removeRole(\AppBundle\Entity\Role $role)
+    public function removeFormation(\AppBundle\Entity\Formation $formation)
     {
-        $this->roles->removeElement($role);
+        $this->formations->removeElement($formation);
     }
 
     /**
-     * Get roles
+     * Get formations
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getRoles()
+    public function getFormations()
     {
-        return $this->roles;
+        return $this->formations;
     }
 
     /**
@@ -570,12 +572,14 @@ class Beneficiary
         return $this->received_proxies;
     }
 
-    public function getAutocompleteLabel(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' ('. $this->getId() .')';
+    public function getAutocompleteLabel()
+    {
+        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' (' . $this->getId() . ')';
     }
 
-    public function getAutocompleteLabelFull(){
-        return '#'.$this->getUser()->getMemberNumber().' '.$this->getFirstname().' '.$this->getLastname().' '.$this->getEmail().' ('. $this->getId() .')';
+    public function getAutocompleteLabelFull()
+    {
+        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
     }
 
     /**
@@ -653,5 +657,83 @@ class Beneficiary
         return $this->swipe_cards->filter(function ($card) {
             return $card->getEnable();
         });
+    }
+
+    /**
+     * @return Membership
+     */
+    public function getMembership()
+    {
+        return $this->membership;
+    }
+
+    /**
+     * @param mixed $membership
+     */
+    public function setMembership($membership)
+    {
+        $this->membership = $membership;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param mixed $address
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+    }
+
+    public function canBook($duration = 90, $cycle = 0)
+    {
+
+        $member = $this->getMembership();
+        $beneficiary_counter = $this->getTimeCount($cycle);
+
+        //check if beneficiary booked time is ok
+        //if timecount <180 : some shift to catchup, can book more than what's due
+        if ($member->getTimeCount($member->endOfCycle($cycle)) >= 180 && $beneficiary_counter >= $this->_getDueDurationByCycle()) { //Beneficiary is already ok
+            return false;
+        }
+
+        //time count at start of cycle (before decrease)
+        $timeCounter = $member->getTimeCount($member->startOfCycle($cycle));
+        //time count at start of cycle  (after decrease)
+        if ($timeCounter > $this->_getDueDurationByCycle()) {
+            $timeCounter = 0;
+        } else {
+            $timeCounter -= $this->_getDueDurationByCycle();
+        }
+        // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what can membership book for this cycle
+        return ($duration + $beneficiary_counter + $timeCounter <= ($cycle + 1) * $this->_getDueDurationByCycle());
+
+    }
+
+    public function getTimeCount($cycle = 0)
+    {
+        if (!isset($this->_counters[$cycle])) {
+            $this->_counters[$cycle] = 0;
+            $member = $this->getMembership();
+            //todo add a custom query for this
+            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member, $cycle) {
+                return ($shift->getStart() > $member->startOfCycle($cycle) && $shift->getEnd() < $member->endOfCycle($cycle));
+            });
+            foreach ($beneficiary_shift_for_current_cycle as $s) {
+                $this->_counters[$cycle] += $s->getDuration();
+            }
+        }
+        return $this->_counters[$cycle];
+    }
+
+    private function _getDueDurationByCycle()
+    {
+        return 180; //todo return form parameters $this->container->getParameter('due_duration_by_cycle')
     }
 }

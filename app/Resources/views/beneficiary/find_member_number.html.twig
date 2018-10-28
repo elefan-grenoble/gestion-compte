@@ -32,15 +32,15 @@
             {% if beneficiaries %}
             <div class="collection">
                 {% for beneficiary in beneficiaries %}
-                    <form action="{{ path(return_path,{'member_number':beneficiary.user.memberNumber,'beneficiary':beneficiary.id}|merge(params)) }}" method="post" class="collection-item">
-                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.user.memberNumber }} {{ beneficiary.user.firstname }} {{ beneficiary.user.lastname | first | upper }}{% if beneficiary.user.lastRegistration %} - {{ beneficiary.user.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                    <form action="{{ path(return_path, { (routeParam): beneficiary.id } | merge(params)) }}" method="post" class="collection-item">
+                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname | first | upper }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
                     </form>
                 {% endfor %}
             </div>
             {% elseif not form %}
                 <div class="row center">
                     <p class=" col s12 light">Oups, aucun résultats pour ce prénom !<br>
-                        <a href="{{ path('find_user_number') }}" class="btn">Essayer un autre ?</a>
+                        <a href="{{ path('find_member_number') }}" class="btn">Essayer un autre ?</a>
                     </p>
                 </div>
             {% endif %}
@@ -52,14 +52,4 @@
 
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
-    <script>
-        $(document).ready(function(){
-            $('.parallax').parallax();
-        });
-    </script>
 {% endblock %}

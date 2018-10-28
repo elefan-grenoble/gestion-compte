@@ -41,7 +41,7 @@ class TaskType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            $userData = $event->getData();
+            $taskData = $event->getData();
 
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('commissions',EntityType::class, array(
@@ -54,7 +54,7 @@ class TaskType extends AbstractType
             }else{
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
-                    'choices' => $user->getCommissions(),
+                    'choices' => $user->getBeneficiary()->getCommissions(),
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => true,
@@ -75,13 +75,13 @@ class TaskType extends AbstractType
                     )
                 ));
 
-            if ($userData && $userData->getId()){
+            if ($taskData && $taskData->getId()){
                 $form->add('created_at',TextType::class,array('required' => true,'attr'=>array('class'=>'datepicker'),'label'=>'Début'));
                 $form->add('closed', CheckboxType::class,array('required' => false,'label'=>'Terminée'));
                 $form->add('status', TextType::class,array('required' => false,'label'=>'Status'));
-                if ($userData->getCommissions()->count() > 0){
+                if ($taskData->getCommissions()->count() > 0){
                     $collection = array();
-                    foreach ($userData->getCommissions() as $commission){
+                    foreach ($taskData->getCommissions() as $commission){
                         $collection = array_merge($commission->getBeneficiaries()->toArray(),$collection);
                     }
                     $beneficiaries = new ArrayCollection($collection);

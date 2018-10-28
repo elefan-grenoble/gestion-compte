@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Formation;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
 use AppBundle\Entity\Role;
@@ -24,10 +25,10 @@ class PeriodPositionType extends AbstractType
     {
         $builder
             ->add('nb_of_shifter',IntegerType::class,array('label'=>'Nombre de postes disponibles'))
-            ->add('role',EntityType::class, array(
+            ->add('formation', EntityType::class, array(
                 'label'=>'Rôle necessaire',
                 'choice_label' => 'name',
-                'class' => Role::class,
+                'class' => Formation::class,
                 'multiple' => false,
                 'required' => false
             ));

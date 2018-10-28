@@ -29,7 +29,7 @@
                         <div class="nav-wrapper">
                             <ul class="right">
                                 <li>
-                                    <a href="{{ path('user_show', {'username': app.user.username,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                                    <a href="{{ path('member_show', {'member_number': app.user.beneficiary.membership.memberNumber,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
                                 </li>
                             </ul>
                         </div>
@@ -44,7 +44,7 @@
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             <li>
-                                <a href="{{ path('fos_user_profile_edit') }}">
+                                <a href="{{ path('fos_user_profile_show') }}">
                                     <i class="material-icons small left">settings</i>
                                     <small>{{ app.user.firstname }}</small>
                                 </a>
@@ -58,9 +58,10 @@
 
                     <ul id="nav-mobile" class="side-nav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                            {% set frozen =  app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li><div class="user-view center-align">
                                     <div class="background">
-                                        {% if app.user.frozen %}
+                                        {% if  frozen %}
                                         {% image '@AppBundle/Resources/public/img/frozen.png' %}
                                             <img class="responsive-img" src="{{ asset_url }}" alt="" />
                                         {% endimage %}
@@ -71,13 +72,13 @@
                                         {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
-                                    <a href="#name"><span class="{% if not app.user.frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
+                                    <a href="#name"><span class="{% if not frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span></a>
                                 </div>
                             </li>
                             <li><a href="{{ path('homepage') }}"><i class="material-icons small">home</i>
                                     Accueil
                                 </a></li>
-                            <li><a href="{{ path('fos_user_profile_edit') }}"><i class="material-icons">settings</i>
+                            <li><a href="{{ path('fos_user_profile_show') }}"><i class="material-icons">settings</i>
                                     Mon profil ({{ app.user.username}})</a></li>
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
@@ -93,11 +94,11 @@
         </header>
         <main>
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                {% if app.user.frozen %}
+                {% if frozen %}
                     <div class="wrapper blue lighten-5">
                         <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
-                        {% if not app.user.frozenChange %}
-                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_edit') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
+                        {% if not app.user.beneficiary.membership.frozenChange %}
+                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
                         {% else %}
                             Dégel programmé.
                         {% endif %}
@@ -168,7 +169,7 @@
         {% if is_granted('ROLE_ADMIN') %}
             <script>
                 var search_url = "{{ path('search') }}";
-                var show_user_template_url = "{{ path('user_show',{'username':'-USERNAME-'}) }}";
+                var show_user_template_url = "{{ path('member_show',{'member_number':'-MNID-'}) }}";
             </script>
             <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
         {% endif %}

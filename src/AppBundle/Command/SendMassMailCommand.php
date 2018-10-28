@@ -69,11 +69,10 @@ class SendMassMailCommand extends ContainerAwareCommand
             $body = $template->render(array());*/
         }
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("AppBundle:User")->createQueryBuilder('o');
+        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");
-        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
         $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
