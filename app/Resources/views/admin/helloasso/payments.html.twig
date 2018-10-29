@@ -23,8 +23,8 @@
             </thead>
             <tbody>
                 {% for payment in payments %}
-                    <tr class="{% if payment.registration and payment.registration.membership  %}teal{% else %}red{% endif %} lighten-5">
-                        <td><i class="material-icons">{% if payment.registration and payment.registration.membership  %}person_pin{% else %}help{% endif %}</i></td>
+                    <tr class="{% if payment.registration and payment.registration.user  %}teal{% else %}red{% endif %} lighten-5">
+                        <td><i class="material-icons">{% if payment.registration and payment.registration.user  %}person_pin{% else %}help{% endif %}</i></td>
                         <td>{{ payment.id }}</td>
                         <td>{{ payment.paymentId }}</td>
                         <td>{{ payment.date | date('Y-m-d H:i:s') }}</td>
