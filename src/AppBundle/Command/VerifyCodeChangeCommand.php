@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/ShiftGenerateCommand.php
+// src/AppBundle/Command/VerifyCodeChangeCommand.php
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Shift;
