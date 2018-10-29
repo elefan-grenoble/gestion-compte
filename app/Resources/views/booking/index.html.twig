@@ -23,7 +23,7 @@
                         class="teal-text">{{ beneficiary.firstname }}</span>{% if (beneficiary.membership.beneficiaries | length > 1) %}
                 <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
                     ]</a>{% endif %}</h4>
-            {% if not beneficiary.membership.canBook(beneficiary) %}
+            {% if not shift_service.canBook(beneficiary) %}
                 <span class="red-text">NB: {{ beneficiary.firstname }} ne peut plus réserver de créneau sur le cycle actuel</span>
             {% endif %}
             <p>Mon cycle actuel commence le <b>{{ beneficiary.membership.startOfCycle |date_fr_long }}</b> et termine

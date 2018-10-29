@@ -86,5 +86,6 @@ services:
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
     shift_service:
             class:  AppBundle\Service\ShiftService
+            public: true
             arguments:
                 $container: "@service_container"

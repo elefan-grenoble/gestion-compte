@@ -231,18 +231,6 @@ class Membership
         return $this->beneficiaries;
     }
 
-    /**
-     * Get beneficiaries who can still book
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBeneficiariesWhoCanBook(Shift $shift = null,$current_cycle = 0)
-    {
-        return $this->beneficiaries->filter(function ($beneficiary) use ($shift,$current_cycle){
-            return $this->canBook($beneficiary,$shift,$current_cycle);
-        });
-    }
-
     public function __toString()
     {
         return '#'.$this->getMemberNumber();
