@@ -40,7 +40,7 @@ class HelloassoEventListener
 
                     $this->_em->persist($registration);
                     $payment->setRegistration($registration);
-                    $beneficiary->getUser()->addRegistration($registration);
+                    $beneficiary->getMembership()->addRegistration($registration);
                     $this->_em->flush();
                 }
             } else {
