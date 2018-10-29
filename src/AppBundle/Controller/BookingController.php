@@ -43,13 +43,12 @@ class BookingController extends Controller
             ->getForm();
 
         $beneficiary = $this->getUser()->getBeneficiary();
+
         $canBook = false;
-
-        if ($beneficiary) {//not ADMIN or SUPER_ADMIN
-            //todo : do not check for whole membership but only connected beneficiary
-            $canBook = $beneficiary->getMembership()->canBook();
+        if ($beneficiary) { //not ADMIN or SUPER_ADMIN
+            $shiftService = $this->container->get('shift_service');
+            $canBook = $shiftService->canBook($beneficiary);
         }
-
 
         return $this->render('booking/home_booked_shifts.html.twig', [
             'undismiss_shift_form' => $undismissShiftForm->createView(),
