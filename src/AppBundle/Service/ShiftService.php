@@ -19,6 +19,8 @@ class ShiftService
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
     }
 
+    public function canBookShift()
+
     public function canBook(Beneficiary $beneficiary, $duration = 90, $cycle = 0)
     {
         $member = $beneficiary->getMembership();
