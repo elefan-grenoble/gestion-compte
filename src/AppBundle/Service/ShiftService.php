@@ -26,6 +26,11 @@ class ShiftService
         return $this->due_duration_by_cycle - $member->getTimeCount($member->endOfCycle());
     }
 
+
+    public function canBookOnCycle(Beneficiary $beneficiary, $cycle){
+        return $this->canBookDuration($beneficiary, $this->min_shift_duration, $cycle);
+    }
+
     public function canBookSomething(Beneficiary $beneficiary){
         return $this->canBookDuration($beneficiary, $this->min_shift_duration, 0);
     }
