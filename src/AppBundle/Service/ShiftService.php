@@ -21,6 +21,12 @@ class ShiftService
         $this->min_shift_duration = $this->container->getParameter('min_shift_duration');
     }
 
+    public function remainingToBook(Beneficiary $beneficiary)
+    {
+        return $this->due_duration_by_cycle - $beneficiary->getTimeCount($beneficiary->getMembership()->endOfCycle());
+    }
+
+
     public function canBookShift()
     {
         // TODO
