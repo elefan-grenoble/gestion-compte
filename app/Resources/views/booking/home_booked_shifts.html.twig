@@ -1,5 +1,6 @@
 {% if  app.user.beneficiary %}
-    {% set member = app.user.beneficiary.membership %}
+    {% set beneficiary = app.user.beneficiary %}
+    {% set member = beneficiary.membership %}
     {% if (member.reservedShifts | length) > 0 %}
         <h5>Mes créneaux à accepter</h5>
         {% for shift in member.reservedShifts %}
@@ -9,40 +10,41 @@
 
     <h5>Mon bénévolat</h5>
 
+    {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% if not member.frozen %}
         {% if  member.timeCount < 0 %}
             <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.
             </p>
         {% else %}
-            {%  set remaining = shift_service.remainingToBook(member) %}
+            {% set remaining = shift_service.remainingToBook(member) %}
             {% if  remaining > 0 %}
                 <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as
                     encore {{ (due_duration_by_cycle - member.timeCount) | duration_from_minutes }} à réserver.</p>
-            {% elseif remaining <= 0 member.timeCount(member.endOfCycle) < member.shiftTimeByCycle %}
+            {% else %}
                 <p>Bravo
                     ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
-                    ont été planifiées sur le cycle actuel.
-                    <br>
-                    {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
-                    {% if beneficiariesWhoCanBook | length > 1 %}
-                        {% for b in beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}
-                        peuvent
-                    {% else %}
-                        {{ (beneficiariesWhoCanBook | first).firstname }} peut
-                    {% endif %} encore
-                    effectuer {{ (member.shiftTimeByCycle - member.timeCount(member.endOfCycle)) | duration_from_minutes }}
-                    .</p>
-            {% else %}
-                <p><i class="material-icons">stars</i> Bravo !
-                    Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été planifiés
-                    sur le cycle actuel !</p>
+                    ont été planifiées sur le cycle actuel.</p>
+                {% if beneficiariesWhoCanBook | length > 0 %}
+                    <p>
+                        {% if beneficiariesWhoCanBook | length > 1 %}
+                            {% for b in beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}peuvent
+                        {% else %}
+                            {{ (beneficiariesWhoCanBook | first).firstname }} peut
+                        {% endif %} encore
+                        effectuer {{ (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) | duration_from_minutes }}
+                        .</p>
+                {% else %}
+                    <p><i class="material-icons">stars</i> Bravo !
+                        Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été
+                        planifiés
+                        sur le cycle actuel !</p>
+                {% endif %}
             {% endif %}
         {% endif %}
     {% endif %}
 
     <a href="{{ path("booking") }}" class="btn teal"
-       {% if not shift_service.canBook(app.user.beneficiary) %}disabled{% endif %}>Je
-        réserve un créneau</a>
+       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>Je réserve un créneau</a>
 
     <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
 
