@@ -5,6 +5,8 @@ namespace AppBundle\Service;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\ShiftBucket;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\DependencyInjection\Container;
 
 class ShiftService
@@ -27,11 +29,13 @@ class ShiftService
     }
 
 
-    public function canBookOnCycle(Beneficiary $beneficiary, $cycle){
+    public function canBookOnCycle(Beneficiary $beneficiary, $cycle)
+    {
         return $this->canBookDuration($beneficiary, $this->min_shift_duration, $cycle);
     }
 
-    public function canBookSomething(Beneficiary $beneficiary){
+    public function canBookSomething(Beneficiary $beneficiary)
+    {
         return $this->canBookDuration($beneficiary, $this->min_shift_duration, 0);
     }
 
@@ -179,4 +183,62 @@ class ShiftService
         return $current_cycle;
     }
 
+    public function getBookableShifts(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    {
+        if (!$beneficiary) {
+            $bookableShifts = $bucket->getShifts()->filter(function (Shift $shift) {
+                return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
+            });
+        } else {
+            if ($bucket->canBookInterval($beneficiary)) {
+                $bookableShifts = $bucket->getShifts()->filter(function (Shift $shift) use ($beneficiary) {
+                    return $this->isShiftBookable($shift, $beneficiary);
+                });
+            } else {
+                $bookableShifts = new ArrayCollection();
+            }
+        }
+        return $bookableShifts;
+    }
+
+    /***
+     * Renvoie le premier shift bookable.
+     */
+    public function getFirstBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    {
+        if ($beneficiary && $this->isBucketBookable($bucket, $beneficiary)) {
+            $bookableShifts = $this->getBookableShifts($beneficiary);
+            $iterator = ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations())->getIterator();
+            $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
+                return ShiftBucket::compareShifts($a, $b, $beneficiary);
+            });
+            $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
+            return $sorted->isEmpty() ? null : $sorted->first();
+        } else {
+            return null;
+        }
+    }
+
+    /***
+     * Renvoie le nombre de shits bookable.
+     */
+    public function getBookableShiftsCount(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    {
+        $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
+        if (!$beneficiary)
+            return count($bookableShifts);
+        return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations()));
+    }
+
+    public function isBucketBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    {
+        return $this->getBookableShiftsCount($bucket, $beneficiary) > 0;
+    }
+
+    public function getShiftsForBeneficiary(ShiftBucket $bucket, Beneficiary $beneficiary)
+    {
+        $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
+        $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations());
+        return $bucket->getShifts()->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
+    }
 }

@@ -31,10 +31,10 @@ class ShiftBucket
         $this->shifts[] = $shift;
     }
 
-    static private function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary = null)
+    static public function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary = null)
     {
-        if (!$beneficiary){
-            if (!$a->getFormation()){
+        if (!$beneficiary) {
+            if (!$a->getFormation()) {
                 if (!$b->getFormation()) {
                     if (!$a->getShifter()) {
                         if (!$b->getShifter()) {
@@ -49,10 +49,10 @@ class ShiftBucket
                             return $a->getBookedTime() < $b->getBookedTime();
                         }
                     }
-                }else {
+                } else {
                     return 1;
                 }
-            }else{
+            } else {
                 if (!$b->getFormation())
                     return -1;
                 else
@@ -80,16 +80,13 @@ class ShiftBucket
         }
     }
 
-    public function getShifts(Beneficiary $beneficiary = null)
+    public function getShifts()
     {
-        if (!$beneficiary)
-            return $this->shifts;
-        $bookableShifts = $this->getBookableShifts($beneficiary);
-        $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations());
-        return $this->shifts->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
+        return $this->shifts;
     }
 
-    public function getShifterCount(){
+    public function getShifterCount()
+    {
         $bookedShifts = $this->getShifts()->filter(function (Shift $shift) {
             return ($shift->getShifter() != NULL);
         });
@@ -99,18 +96,12 @@ class ShiftBucket
     public function getSortedShifts()
     {
         $iterator = $this->getShifts()->getIterator();
-        $iterator->uasort(function (Shift $a, Shift $b)  {
+        $iterator->uasort(function (Shift $a, Shift $b) {
             return ShiftBucket::compareShifts($a, $b);
         });
         $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
         return $sorted->isEmpty() ? null : $sorted;
 
-    }
-
-
-    public function getShiftsCount(Beneficiary $beneficiary = null)
-    {
-        return count($this->getShifts($beneficiary));
     }
 
     public function getFirst()
@@ -145,62 +136,6 @@ class ShiftBucket
         });
     }
 
-    private function getBookableShifts(Beneficiary $beneficiary = null)
-    {
-        if (!$beneficiary) {
-            $bookableShifts = $this->shifts->filter(function (Shift $shift) {
-                return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
-            });
-        } else {
-            $member = $beneficiary->getMembership();
-            if ($this->canBookInterval($beneficiary))
-            {
-                $bookableShifts = $this->shifts->filter(function (Shift $shift) use ($beneficiary) {
-                    return $shift->isBookable($beneficiary);
-                });
-            }
-            else
-            {
-                $bookableShifts = new ArrayCollection();
-            }
-        }
-        return $bookableShifts;
-    }
-
-    public function isBookable(Beneficiary $beneficiary = null)
-    {
-        return $this->getBookableShiftsCount($beneficiary) > 0;
-    }
-
-    /***
-     * Renvoie le premier shift bookable.
-     */
-    public function getFirstBookable(Beneficiary $beneficiary = null)
-    {
-        if ($beneficiary && $this->isBookable($beneficiary)) {
-            $bookableShifts = $this->getBookableShifts($beneficiary);
-            $iterator = ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations())->getIterator();
-            $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
-                return ShiftBucket::compareShifts($a, $b, $beneficiary);
-            });
-            $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
-            return $sorted->isEmpty() ? null : $sorted->first();
-        } else {
-            return null;
-        }
-    }
-
-    /***
-     * Renvoie le nombre de shits bookable.
-     */
-    public function getBookableShiftsCount(Beneficiary $beneficiary = null)
-    {
-        $bookableShifts = $this->getBookableShifts($beneficiary);
-        if (!$beneficiary)
-            return count($bookableShifts);
-        return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations()));
-    }
-
     public function getIntervalCode()
     {
         return $this->shifts[0]->getIntervalCode();
@@ -210,16 +145,14 @@ class ShiftBucket
      * Return true if the intersection between $formations and
      * the shifts' formations is not empty.
      */
-    static private function shiftIntersectFormations($shifts, $formations)
+    static public function shiftIntersectFormations($shifts, $formations)
     {
         $formationsIds = [];
-        foreach ($formations as $formation)
-        {
+        foreach ($formations as $formation) {
             $formationsIds[] = $formation->getId();
         }
 
-        $formationInFormationIdsCallback = function ($key, Shift $shift) use($formationsIds)
-        {
+        $formationInFormationIdsCallback = function ($key, Shift $shift) use ($formationsIds) {
             $formation = $shift->getFormation();
             return !$formation ? false : in_array($formation->getId(), $formationsIds);
         };
@@ -229,13 +162,13 @@ class ShiftBucket
 
     /**
      * Renvoie une collection filtrée en fonction des formations.
-     * 
+     *
      * Si un des shifts a une formation qui appartient à $formations,
      * on renvoie seulement les shifts qui ont un formation.
-     * 
+     *
      * Sinon, on renvoie seulement les shifts qui n'ont pas de formation.
      */
-    static private function filterByFormations($shifts, $formations)
+    static public function filterByFormations($shifts, $formations)
     {
         $intersectionNotEmpty = ShiftBucket::shiftIntersectFormations($shifts, $formations);
         $filterCallback = ShiftBucket::createShiftFilterCallback($intersectionNotEmpty);
@@ -245,23 +178,19 @@ class ShiftBucket
     /**
      * If $withFormations, return a callback which returns true if the
      * shift has a formation.
-     * 
+     *
      * Else, return a callback which return true if the shift
      * doesn't have a formation.
      */
-    static private function createShiftFilterCallback($withFormations)
+    static public function createShiftFilterCallback($withFormations)
     {
-        if ($withFormations)
-        {
-            return function(Shift $shift)
-            {
+        if ($withFormations) {
+            return function (Shift $shift) {
                 if ($shift->getFormation())
                     return true;
             };
-        }
-        else {
-            return function(Shift $shift)
-            {
+        } else {
+            return function (Shift $shift) {
                 if (!$shift->getFormation())
                     return true;
             };

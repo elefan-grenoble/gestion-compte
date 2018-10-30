@@ -33,7 +33,7 @@
                                         {% endif %}
                                     {% endfor %}
                                     {# / compute lines #}
-                                    {% if bucket.isBookable(beneficiary) or not beneficiary %}
+                                    {% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
                                         {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
                                     {% else %}
                                         {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
