@@ -100,7 +100,7 @@ class ApiController extends Controller
         $current_app_user = $response['user'];
         $gravatar_helper = new GravatarHelper(new GravatarApi());
         return new JsonResponse(array(
-            'id' => $current_app_user->getBeneficiary()->getMembership()->getMemberNumber(), // ->getId()
+            'id' => $current_app_user->getId(),
             'username' => $current_app_user->getUsername(),
             'email' => $current_app_user->getEmail(),
             'name' => $current_app_user->getFirstName().' '.$current_app_user->getlastname(),
