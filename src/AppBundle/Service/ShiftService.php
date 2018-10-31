@@ -86,20 +86,23 @@ class ShiftService
 
     public function isShiftBookable(Shift $shift, Beneficiary $beneficiary = null)
     {
-
-        if ($shift->getIsPast()) { // Do not book old
+        // Do not book old
+        if ($shift->getIsPast()) {
             return false;
         }
-        if ($shift->getShifter() && !$shift->getIsDismissed()) { // Do not book already booked
+        // Do not book already booked
+        if ($shift->getShifter() && !$shift->getIsDismissed()) {
             return false;
         }
-        if ($shift->getLastShifter() && $beneficiary != $shift->getLastShifter()) { // Do not book pre-booked shift
+        // Do not book pre-booked shift
+        if ($shift->getLastShifter() && $beneficiary->getId() != $shift->getLastShifter()->getId()) {
             return false;
         }
         if (!$beneficiary) {
             return true;
         }
-        if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) { // Do not book shift i do not know how to handle (formation)
+        // Do not book shift i do not know how to handle (formation)
+        if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
             return false;
         }
 
@@ -113,9 +116,11 @@ class ShiftService
         $current_cycle = $this->getShiftCycleIndex($shift, $member);
 
         if ($member->getFrozen()) {
-            if (!$current_cycle) //current cycle : cannot book when frozen
+            //current cycle : cannot book when frozen
+            if (!$current_cycle)
                 return false;
-            if ($current_cycle > 0 && !$member->getFrozenChange()) //next cycle : cannot book if frozen
+            //next cycle : cannot book if frozen
+            if ($current_cycle > 0 && !$member->getFrozenChange())
                 return false;
         }
 
@@ -156,6 +161,9 @@ class ShiftService
 
     /***
      * Renvoie le premier shift bookable.
+     * @param ShiftBucket $bucket
+     * @param Beneficiary|null $beneficiary
+     * @return mixed|null
      */
     public function getFirstBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
     {
@@ -174,6 +182,9 @@ class ShiftService
 
     /***
      * Renvoie le nombre de shits bookable.
+     * @param ShiftBucket $bucket
+     * @param Beneficiary|null $beneficiary
+     * @return int
      */
     public function getBookableShiftsCount(ShiftBucket $bucket, Beneficiary $beneficiary = null)
     {
