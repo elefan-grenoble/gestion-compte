@@ -71,45 +71,6 @@ class ShiftService
         return $this->due_duration_by_cycle * count($member->getBeneficiaries());
     }
 
-
-    /**
-     * Can book a shift
-     *
-     * @param Membership $member
-     * @param \AppBundle\Entity\Beneficiary $beneficiary
-     * @param \AppBundle\Entity\Shift $shift
-     * @param string $current_cycle index of cycle
-     *
-     * @return Boolean
-     */
-    //todo get ride of this once we dont use membership anymore but the connected beneficiary
-    public function canBook(Membership $member, Beneficiary $beneficiary = null, Shift $shift = null, $current_cycle = 'undefined')
-    {
-        $can = false;
-        $beneficiaries = array();
-        if ($beneficiary) {
-            $beneficiaries[] = $beneficiary;
-        } else {
-            $beneficiaries = $member->getBeneficiaries();
-        }
-        foreach ($beneficiaries as $beneficiary) {
-            if (is_int($current_cycle)) {
-                if ($shift) {
-                    $can = $can || $this->isShiftBookable($shift, $beneficiary);
-                } else {
-                    $can = $can || $beneficiary->canBook($this->min_shift_duration, $current_cycle);
-                }
-            } else {
-                if ($shift) {
-                    $can = $can || $this->isShiftBookable($shift, $beneficiary);
-                } else {
-                    $can = $can || $beneficiary->canBook($this->min_shift_duration);
-                }
-            }
-        }
-        return $can;
-    }
-
     /**
      * Get beneficiaries who can still book
      *
