@@ -38,13 +38,6 @@ class ShiftService
         return $this->canBookDuration($beneficiary, $this->min_shift_duration, 0);
     }
 
-    public function canBookShift()
-    {
-        // TODO
-        return false;
-    }
-
-
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
         $member = $beneficiary->getMembership();
