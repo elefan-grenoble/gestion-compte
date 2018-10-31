@@ -1,5 +1,5 @@
-{% set nbShifts = bucket.shiftsCount() %}
-{% set nbBookableShifts = bucket.bookableShiftsCount() %}
+{% set nbShifts = bucket.shifts | length %}
+{% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
 {% set nbBookedShifts = nbShifts - nbBookableShifts %}
 <div class="tooltipped" data-tooltip="{{ bucket.sortedShifts.first.job.name }} - {% if nbBookableShifts == 0 %}complet{% else %}inaccessible pour {{ beneficiary.firstname }}{% endif %}"
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"

@@ -207,7 +207,7 @@ class ShiftService
     public function getFirstBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
     {
         if ($beneficiary && $this->isBucketBookable($bucket, $beneficiary)) {
-            $bookableShifts = $this->getBookableShifts($beneficiary);
+            $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
             $iterator = ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations())->getIterator();
             $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
                 return ShiftBucket::compareShifts($a, $b, $beneficiary);

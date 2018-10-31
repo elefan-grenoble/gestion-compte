@@ -45,7 +45,7 @@
                         {% set class = "green-text" %}
                     {% elseif (shift.lastShifter) %}
                         {% set class = "green-text text-lighten-4" %}
-                    {% elseif (app.user and not beneficiary.membership.canBook(beneficiary,shift)) %}
+                    {% elseif (app.user and not shift_service.isShiftBookable(shift, beneficiary)) %}
                         {% set class = "grey-text text-lighten-2" %}
                     {% else %}
                         {% set class = "grey-text text-darken-2" %}
