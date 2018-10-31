@@ -87,5 +87,4 @@ services:
     shift_service:
             class:  AppBundle\Service\ShiftService
             public: true
-            arguments:
-                $container: "@service_container"
+            arguments: ["%due_duration_by_cycle%", "%min_shift_duration%"]

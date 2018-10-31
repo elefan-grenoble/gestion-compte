@@ -16,11 +16,10 @@ class ShiftService
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
 
-    public function __construct(Container $container)
+    public function __construct($due_duration_by_cycle, $min_shift_duration)
     {
-        $this->container = $container;
-        $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
-        $this->min_shift_duration = $this->container->getParameter('min_shift_duration');
+        $this->due_duration_by_cycle = $due_duration_by_cycle;
+        $this->min_shift_duration = $min_shift_duration;
     }
 
     public function remainingToBook(Membership $member)
