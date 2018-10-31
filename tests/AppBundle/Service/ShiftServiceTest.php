@@ -1,21 +1,14 @@
 <?php
 
-namespace Tests\AppBundle\Entity;
+namespace AppBundle\Service;
 
-use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
 use AppBundle\Service\ShiftService;
-use AppBundle\Twig\Extension\AppExtension;
 use PHPUnit\Framework\TestCase;
+use Proxies\__CG__\AppBundle\Entity\Beneficiary;
 
 class ShiftServiceTest extends TestCase
 {
-
-    protected $beneficiary;
-
-    protected $member;
 
     /**
      * @var ShiftService
@@ -29,12 +22,15 @@ class ShiftServiceTest extends TestCase
 
     public function test_canBookNoFirstShift()
     {
+
+    }
+
+    public function testShiftTimeByCycle()
+    {
         $member = new Membership();
         $beneficiary = new Beneficiary();
         $member->setMainBeneficiary($beneficiary);
 
         $this->assertEquals(true, $this->shiftService->canBookOnCycle($beneficiary, 0));
     }
-
-
 }

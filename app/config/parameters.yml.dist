@@ -38,6 +38,7 @@ parameters:
     helloasso_api_key:
     helloasso_api_password:
     due_duration_by_cycle: 180
+    min_shift_duration: 90
     shift_mailer_user: ~
     #ip of the spot, comma separated if many
     place_local_ip_address: '127.0.0.1,192.168.0.x'
