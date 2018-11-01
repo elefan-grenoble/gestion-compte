@@ -104,9 +104,8 @@ class BookingController extends Controller
             } else {
                 $beneficiary = $beneficiaries->first();
             }
-            $formations = $beneficiary->getFormations();
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($formations);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
