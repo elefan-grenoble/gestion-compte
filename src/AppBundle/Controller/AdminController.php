@@ -512,6 +512,40 @@ class AdminController extends Controller
     }
 
     /**
+     * Widget generator
+     *
+     * @Route("/widget", name="widget_generator")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function widgetBuilderAction(Request $request){
+        $form = $this->createFormBuilder()
+            ->add('job', EntityType::class, array(
+                'label' => 'Poste',
+                'class' => 'AppBundle:Job',
+                'choice_label'=> 'name',
+                'multiple'     => false,
+                'required' => true
+            ))
+            ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin'))
+            ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides'))
+            ->add('generate', SubmitType::class, array('label' => 'generer'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $data = $form->getData();
+            return $this->render('admin/widget/generate.html.twig', array(
+                'query_string' => 'job_id='.$data['job']->getId().'&display_end='.$data['display_end'].'&display_on_empty='.$data['display_on_empty'],
+                'form' => $form->createView(),
+            ));
+        }
+
+        return $this->render('admin/widget/generate.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
      * Import from CSV
      *
      * @Route("/importcsv", name="user_import_csv")

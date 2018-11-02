@@ -11,7 +11,7 @@ namespace AppBundle\Repository;
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
 
-    public function findFutures($roles)
+    public function findFutures()
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -19,6 +19,30 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->where('s.start > :now')
             ->setParameter('now', new \Datetime('now'))
             ->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findFuturesWithJob($job,\DateTime $max = null)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->join('s.job', "job")
+            ->where('s.start > :now')
+            ->andwhere('job.id = :jid')
+            ->setParameter('now', new \Datetime('now'))
+            ->setParameter('jid', $job->getId());
+
+        if ($max){
+            $qb
+                ->andWhere('s.end < :max')
+                ->setParameter('max', $max);
+        }
+
+        $qb->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()
