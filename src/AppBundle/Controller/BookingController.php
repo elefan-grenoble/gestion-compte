@@ -6,6 +6,7 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
+use AppBundle\Security\MembershipVoter;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -308,17 +309,20 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Request $request, Shift $shift)
     {
-        if (!$this->isGranted('book', $shift)) {
+        $beneficiaryId = $request->get("beneficiaryId");
+        $em = $this->getDoctrine()->getManager();
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
+        // Check if the shift is bookable by the given beneficiary
+        // Also check if the beneficiary belongs to the same membership as the current user
+        if (!$beneficiary
+            || !$shift->isBookable($beneficiary)
+            || $this->isGranted($beneficiary->getMembership(), MembershipVoter::EDIT)
+        ) {
             $session = new Session();
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
             return $this->redirectToRoute("booking");
         }
-
-        $beneficiaryId = $request->get("beneficiaryId");
-
-        $em = $this->getDoctrine()->getManager();
-
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
         if (!$shift->getBooker()) {
             $shift->setBooker($beneficiary);
