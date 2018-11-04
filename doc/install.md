@@ -45,6 +45,10 @@ Avec nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et ba
 0 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:reminder $(date -d "+2 days" +\%Y-\%m-\%d)
 #execute routine for cycle_end/cycle_start, everyday
 5 6 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:user:cycle_start
+#send alert on shifts booking (low)
+0 10 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:shift:send_alerts $(date -d "+2 days" +\%Y-\%m-\%d) 1
+#send a reminder mail to the user who generate the last code but did not validate the change.
+45 21 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:code:verify_change --last_run 24
 </pre>
 
 ## mise en route

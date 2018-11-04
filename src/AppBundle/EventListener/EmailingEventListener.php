@@ -177,7 +177,7 @@ class EmailingEventListener
                 ->setTo($code->getRegistrar()->getEmail())
                 ->setBody(
                     $this->renderView(
-                        'emails/new_code.html.twig',
+                        'emails/code_new.html.twig',
                         array('code' => $code, 'codes' => $old_codes, 'changeCodeUrl' => $code_change_done_url)
                     ),
                     'text/html'

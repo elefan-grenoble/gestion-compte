@@ -1,0 +1,5 @@
+Bonjour {{ code.registrar.firstname }},<br>
+Tu as généré un nouveau code pour le boîtier clefs à {{ code.createdAt | date("H") }}h{{ code.createdAt | date("i") }} ce jour.<br>
+Depuis, tu n'as pas confirmé avoir bien remplacé l'ancien code et mis en place le nouveau.<br>
+Tu peux valider cette étape en <a href="{{ changeCodeUrl }}">cliquant ici</a>. <br>
+Si tu as rencontré un problème, répond à ce mail :)
