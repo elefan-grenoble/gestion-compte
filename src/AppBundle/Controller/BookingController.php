@@ -48,7 +48,7 @@ class BookingController extends Controller
 
         if ($beneficiary) {//not ADMIN or SUPER_ADMIN
             //todo : do not check for whole membership but only connected beneficiary
-            $canBook = $beneficiary->getMembership()->canBook();
+            $canBook = $beneficiary->getMembership()->canBook(null,null,0) || $beneficiary->getMembership()->canBook(null,null,1);
         }
 
 
