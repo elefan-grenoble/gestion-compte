@@ -115,6 +115,7 @@ class Membership
     {
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
+        $this->timeLogs = new ArrayCollection();
     }
 
     public function getTmpToken($key = ''){

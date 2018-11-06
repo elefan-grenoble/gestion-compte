@@ -2,10 +2,10 @@
 
 namespace AppBundle\Service;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Service\ShiftService;
 use PHPUnit\Framework\TestCase;
-use Proxies\__CG__\AppBundle\Entity\Beneficiary;
 
 class ShiftServiceTest extends TestCase
 {
