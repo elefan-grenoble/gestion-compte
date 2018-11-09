@@ -1,12 +1,13 @@
-{% set nbShifts = bucket.shiftsCount(beneficiary) %}
-{% set nbBookableShifts = bucket.bookableShiftsCount(beneficiary) %}
-<div id="book{{ bucket.firstBookable(beneficiary).id }}" class="modal">
-    <form action="{{ path('shift_book',{'id':bucket.firstBookable(beneficiary).id}) }}" method="post">
+{% set nbShifts = bucket.shifts | length %}
+{% set nbBookableShifts = shift_service.bookableShifts(bucket, beneficiary) | length %}
+{% set firstBookable = shift_service.firstBookable(bucket, beneficiary) %}
+<div id="book{{ firstBookable.id }}" class="modal">
+    <form action="{{ path('shift_book',{'id':firstBookable.id}) }}" method="post">
         <div class="modal-content">
-            <h5>Réserver ce créneau / <span class="{{ bucket.firstBookable(beneficiary).job.color }}-text">{{ bucket.firstBookable(beneficiary).job.name }}</span>
-                {% if bucket.firstBookable(beneficiary).formation %}/ Formation {{ bucket.firstBookable(beneficiary).formation.name }}{% endif %}</h5>
+            <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span>
+                {% if firstBookable.formation %}/ Formation {{ firstBookable.formation.name }}{% endif %}</h5>
             <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
-            {% if not bucket.firstBookable(beneficiary).formation and beneficiary.formations | length %}
+            {% if not firstBookable.formation and beneficiary.formations | length %}
                 <div class="row">
                     <div class="col s12">
                         <div class="card-panel teal warning">
@@ -21,7 +22,7 @@
                     </div>
                 </div>
             {% endif %}
-            {% if bucket.firstBookable(beneficiary).isDismissed %}
+            {% if firstBookable.isDismissed %}
                 <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
             {% endif %}
             {% if beneficiary.membership.beneficiaries | length < 1 %}

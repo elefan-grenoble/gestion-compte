@@ -115,6 +115,7 @@ class Membership
     {
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
+        $this->timeLogs = new ArrayCollection();
     }
 
     public function getTmpToken($key = ''){
@@ -229,18 +230,6 @@ class Membership
     public function getBeneficiaries()
     {
         return $this->beneficiaries;
-    }
-
-    /**
-     * Get beneficiaries who can still book
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBeneficiariesWhoCanBook(Shift $shift = null,$current_cycle = 0)
-    {
-        return $this->beneficiaries->filter(function ($beneficiary) use ($shift,$current_cycle){
-            return $this->canBook($beneficiary,$shift,$current_cycle);
-        });
     }
 
     public function __toString()
@@ -551,64 +540,6 @@ class Membership
             return $shift->getStart() > new DateTime('now') &&
                 $shift->getBooker() != $shift->getShifter();
         });
-    }
-
-    /**
-     * Can book a shift
-     *
-     * @param \AppBundle\Entity\Beneficiary $beneficiary
-     * @param \AppBundle\Entity\Shift $shift
-     * @param $current_cycle index of cycle
-     *
-     * @return Boolean
-     */
-    //todo get ride of this once we dont use membership anymore but the connected beneficiary
-    public function canBook(Beneficiary $beneficiary = null, Shift $shift = null,$current_cycle = 'undefined')
-    {
-        $can = false;
-        $beneficiaries = array();
-        if ($beneficiary){
-            $beneficiaries[] = $beneficiary;
-        }else{
-            $beneficiaries = $this->getBeneficiaries();
-        }
-        foreach ($beneficiaries as $beneficiary){
-            if (is_int($current_cycle)) {
-                if ($shift) {
-                    $can = $can || $shift->isBookable($beneficiary);
-                }else{
-                    $can = $can || $beneficiary->canBook(90, $current_cycle);
-                }
-            }else {
-                if ($shift) {
-                    $can = $can || $shift->isBookable($beneficiary);
-                }else{
-                    $can = $can || $beneficiary->canBook(90);
-                }
-            }
-        }
-        return $can;
-    }
-
-    /**
-     * Max time count for a membership
-     *
-     * @return Integer
-     */
-    // TODO Valeur à mettre dans une conf
-    public function getDueDurationByCycle()
-    {
-        return 60 * 3;
-    }
-
-    /**
-     * Get total shift time for a cycle
-     */
-    // TODO Valeur à mettre dans une conf
-    public function shiftTimeByCycle()
-    {
-        $nbOfBeneficiaries = count($this->getBeneficiaries());
-        return 60 * 3 * $nbOfBeneficiaries;
     }
 
     public function isUptodate()

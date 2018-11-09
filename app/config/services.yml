@@ -84,3 +84,7 @@ services:
                 - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
+    shift_service:
+            class:  AppBundle\Service\ShiftService
+            public: true
+            arguments: ["@doctrine.orm.entity_manager", "%due_duration_by_cycle%", "%min_shift_duration%"]

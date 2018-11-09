@@ -8,7 +8,7 @@
         {% endif %}
         {% for bucketsByjob in bucketsByDay %}
         <li>
-            <div class="collapsible-header {% if (not app.user or beneficiary.membership.canBook(beneficiary,null,current_cycle)) %}active {% else %}not-allowed {% endif %}"><i class="material-icons">{% if (not app.user or beneficiary.membership.canBook()) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}</div>
+            <div class="collapsible-header {% if (not app.user or shift_service.canBookOnCycle(beneficiary,current_cycle)) %}active {% else %}not-allowed {% endif %}"><i class="material-icons">{% if (not app.user or shift_service.canBookOnCycle(beneficiary,current_cycle)) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}</div>
             <div class="collapsible-body" style="padding: 1rem 0">
                 {% for buckets in bucketsByjob %}
                     <div class="row" style="display: flex;min-height: 40px;">
@@ -33,7 +33,7 @@
                                         {% endif %}
                                     {% endfor %}
                                     {# / compute lines #}
-                                    {% if bucket.isBookable(beneficiary) or not beneficiary %}
+                                    {% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
                                         {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
                                     {% else %}
                                         {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}

@@ -52,6 +52,8 @@ twig:
       due_duration_by_cycle: '%due_duration_by_cycle%'
       support_email: '%transactional_mailer_user%'
       images_tmp_dir: '%images_tmp_dir%'
+      shift_service: "@shift_service"
+
 # Doctrine Configuration
 doctrine:
   dbal:

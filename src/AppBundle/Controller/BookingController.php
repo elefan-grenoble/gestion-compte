@@ -43,18 +43,8 @@ class BookingController extends Controller
             ->add('shift_id',HiddenType::class)
             ->getForm();
 
-        $beneficiary = $this->getUser()->getBeneficiary();
-        $canBook = false;
-
-        if ($beneficiary) {//not ADMIN or SUPER_ADMIN
-            //todo : do not check for whole membership but only connected beneficiary
-            $canBook = $beneficiary->getMembership()->canBook(null,null,0) || $beneficiary->getMembership()->canBook(null,null,1);
-        }
-
-
         return $this->render('booking/home_booked_shifts.html.twig', [
-            'undismiss_shift_form' => $undismissShiftForm->createView(),
-            'canBook' => $canBook
+            'undismiss_shift_form' => $undismissShiftForm->createView()
         ]);
     }
 
@@ -62,6 +52,8 @@ class BookingController extends Controller
      * @Route("/", name="booking")
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
      * @Method({"GET","POST"})
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function indexAction(Request $request)
     {

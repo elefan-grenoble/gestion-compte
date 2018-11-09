@@ -691,31 +691,6 @@ class Beneficiary
         $this->address = $address;
     }
 
-    public function canBook($duration = 90, $cycle = 0)
-    {
-
-        $member = $this->getMembership();
-        $beneficiary_counter = $this->getTimeCount($cycle);
-
-        //check if beneficiary booked time is ok
-        //if timecount <180 : some shift to catchup, can book more than what's due
-        if ($member->getTimeCount($member->endOfCycle($cycle)) >= 180 && $beneficiary_counter >= $this->_getDueDurationByCycle()) { //Beneficiary is already ok
-            return false;
-        }
-
-        //time count at start of cycle (before decrease)
-        $timeCounter = $member->getTimeCount($member->startOfCycle($cycle));
-        //time count at start of cycle  (after decrease)
-        if ($timeCounter > $this->_getDueDurationByCycle()) {
-            $timeCounter = 0;
-        } else {
-            $timeCounter -= $this->_getDueDurationByCycle();
-        }
-        // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what can membership book for this cycle
-        return ($duration + $beneficiary_counter + $timeCounter <= ($cycle + 1) * $this->_getDueDurationByCycle());
-
-    }
-
     public function getTimeCount($cycle = 0)
     {
         if (!isset($this->_counters[$cycle])) {
@@ -732,8 +707,4 @@ class Beneficiary
         return $this->_counters[$cycle];
     }
 
-    private function _getDueDurationByCycle()
-    {
-        return 180; //todo return form parameters $this->container->getParameter('due_duration_by_cycle')
-    }
 }
