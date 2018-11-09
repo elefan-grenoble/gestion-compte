@@ -12,12 +12,13 @@ use Symfony\Component\DependencyInjection\Container;
 class ShiftService
 {
 
-    protected $container;
+    protected $em;
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
 
-    public function __construct($due_duration_by_cycle, $min_shift_duration)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration)
     {
+        $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
     }
@@ -113,6 +114,14 @@ class ShiftService
         if ($member->getFirstShiftDate() > $shift->getStart())
             return false;
 
+        // First shift ever of the beneficiary, check he or she is not the first one to book the bucket
+        if ($this->isBeginner($beneficiary)) {
+            $shifts = $this->em->getRepository('AppBundle:Shift')->findAlreadyBookedShiftsOfBucket($shift);
+            if (count($shifts) == 0) {
+                return false;
+            }
+        }
+
         $current_cycle = $this->getShiftCycleIndex($shift, $member);
 
         if ($member->getFrozen()) {
@@ -125,6 +134,15 @@ class ShiftService
         }
 
         return $this->canBookDuration($beneficiary, $shift->getDuration(), $current_cycle);
+    }
+
+    public function isBeginner(Beneficiary $beneficiary)
+    {
+        $shifts = $beneficiary->getShifts()->filter(function (Shift $shift) {
+            return $shift->getStart() < new \DateTime('now') && !$shift->getIsDismissed();
+        });
+
+        return $shifts->count() == 0;
     }
 
     public function getShiftCycleIndex(Shift $shift, Membership $membership)

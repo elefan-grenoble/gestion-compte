@@ -1,6 +1,7 @@
 <?php
 
 namespace AppBundle\Repository;
+use AppBundle\Entity\Shift;
 
 /**
  * ShiftRepository
@@ -163,4 +164,27 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param Shift $shift
+     * @return mixed
+     */
+    public function findAlreadyBookedShiftsOfBucket(Shift $shift)
+    {
+        $qb = $this->createQueryBuilder('s');
+        $qb
+            ->where('s.job = :job')
+            ->andwhere('s.start = :start')
+            ->andwhere('s.end = :end')
+            ->andWhere('s.shifter is not null')
+            ->andWhere('s.isDismissed = false')
+            ->setParameter('job', $shift->getJob())
+            ->setParameter('start', $shift->getStart())
+            ->setParameter('end', $shift->getEnd());
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
 }
