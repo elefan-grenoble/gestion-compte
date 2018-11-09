@@ -110,7 +110,7 @@ class SearchUserFormHelper {
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
         }
         if ($form->get('enabled')->getData() > 0){
-            $qb = $qb->andWhere('o.enabled = :enabled')
+            $qb = $qb->andWhere('u.enabled = :enabled')
                 ->setParameter('enabled', $form->get('enabled')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0){
@@ -199,10 +199,10 @@ class SearchUserFormHelper {
         if ($form->get('email')->getData()){
             $list  = explode(',',$form->get('email')->getData());
             if (count($list)>1){
-                $qb = $qb->andWhere('b.email IN (:emails)')
+                $qb = $qb->andWhere('u.email IN (:emails)')
                     ->setParameter('emails', $list);
             }else{
-                $qb = $qb->andWhere('b.email LIKE :email')
+                $qb = $qb->andWhere('u.email LIKE :email')
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }

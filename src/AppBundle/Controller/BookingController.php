@@ -317,7 +317,7 @@ class BookingController extends Controller
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
             || !$shift->isBookable($beneficiary)
-            || $this->isGranted($beneficiary->getMembership(), MembershipVoter::EDIT)
+            || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session = new Session();
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
