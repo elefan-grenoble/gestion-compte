@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h3>Générer un widget</h3>
+    <div class="row">
+        <div class="col s8 offset-s2">
+            {{ form_start(form) }}
+            {{ form_errors(form) }}
+                Quel poste ?
+                {{ form_widget(form.job) }}
+                Heures
+                <div class="switch">
+                    <label>
+                        heure de début (à X:XX)
+                        {{ form_widget(form.display_end) }}
+                        <span class="lever"></span>
+                        heure de début et de fin (de X:XX à X:XX)
+                    </label>
+                </div>
+                Afficher les créneaux vides
+                <div class="switch">
+                    <label>
+                        uniquement les créneaux occupés
+                        {{ form_widget(form.display_on_empty) }}
+                        <span class="lever"></span>
+                        tous les créneaux
+                    </label>
+                </div>
+                {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+            {{ form_end(form) }}
+        </div>
+    </div>
+    {% if query_string is defined %}
+    <div class="row">
+        <div class="col s6">
+            résultat <br>
+            <iframe src="{{ path('widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+        </div>
+        <div class="col s6">
+            <pre>&lt;iframe src="{{ absolute_url(path('widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

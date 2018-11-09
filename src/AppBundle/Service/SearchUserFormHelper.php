@@ -98,6 +98,7 @@ class SearchUserFormHelper {
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
+            ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("o.registrations", "r")->addSelect("r");
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
         return $qb;
@@ -109,7 +110,7 @@ class SearchUserFormHelper {
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
         }
         if ($form->get('enabled')->getData() > 0){
-            $qb = $qb->andWhere('o.enabled = :enabled')
+            $qb = $qb->andWhere('u.enabled = :enabled')
                 ->setParameter('enabled', $form->get('enabled')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0){
@@ -180,10 +181,10 @@ class SearchUserFormHelper {
         if ($form->get('username')->getData()){
             $list  = explode(',',$form->get('username')->getData());
             if (count($list)>1){
-                $qb = $qb->andWhere('o.username IN (:usernames)')
+                $qb = $qb->andWhere('u.username IN (:usernames)')
                     ->setParameter('usernames', $list);
             }else{
-                $qb = $qb->andWhere('o.username LIKE :username')
+                $qb = $qb->andWhere('u.username LIKE :username')
                     ->setParameter('username', '%'.$form->get('username')->getData().'%');
             }
         }
@@ -198,10 +199,10 @@ class SearchUserFormHelper {
         if ($form->get('email')->getData()){
             $list  = explode(',',$form->get('email')->getData());
             if (count($list)>1){
-                $qb = $qb->andWhere('b.email IN (:emails)')
+                $qb = $qb->andWhere('u.email IN (:emails)')
                     ->setParameter('emails', $list);
             }else{
-                $qb = $qb->andWhere('b.email LIKE :email')
+                $qb = $qb->andWhere('u.email LIKE :email')
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }

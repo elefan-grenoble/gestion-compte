@@ -14,7 +14,7 @@
         "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
     },
     "require": {
-        "php": ">=5.5.9",
+        "php": ">=7.1",
         "codeitnowin/barcode": "^3.0",
         "components/jquery": "^3.2",
         "doctrine/doctrine-bundle": "^1.6",

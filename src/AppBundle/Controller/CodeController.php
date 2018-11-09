@@ -76,8 +76,12 @@ class CodeController extends Controller
         $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
 
+        $granted = false;
         foreach ($old_codes as $code){
-            $this->denyAccessUnlessGranted('view',$code);
+            $granted = $granted || $this->isGranted('view',$code);
+        }
+        if (!$granted){
+            return $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
         }
 
         $logger = $this->get('logger');

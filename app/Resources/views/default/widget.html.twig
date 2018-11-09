@@ -1,0 +1,17 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block content %}
+    {% if job %}
+    liste des prochains créneaux de <strong>{{ job.name }}</strong>
+    <ul>
+        {% for bucket in buckets %}
+            {% if bucket.shifterCount > 0 or display_on_empty %}
+                <li>{{ bucket.start| date_fr_long }} {% if not display_end %}à{% else %}de{% endif %} {{ bucket.start|date('G\\hi') }}{% if display_end %} à {{ bucket.end|date('G\\hi') }}{% endif %}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+        <small>{% if display_on_empty %}Les créneaux vides sont affichés{% endif %}</small>
+    {% else %}
+        Aucun type de créneau choisi
+    {% endif %}
+{% endblock %}

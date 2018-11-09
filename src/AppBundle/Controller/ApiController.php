@@ -55,6 +55,9 @@ class ApiController extends Controller
      */
     public function userAction()
     {
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+            throw $this->createAccessDeniedException();
+        }
         $response = $this->getUser();
         if (!$response['user']){
             return new JsonResponse($response);
@@ -72,6 +75,9 @@ class ApiController extends Controller
      */
     public function nextcloudUserAction()
     {
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+            throw $this->createAccessDeniedException();
+        }
         $response = $this->getUser();
         if (!$response['user']){
             return new JsonResponse($response);
@@ -90,6 +96,9 @@ class ApiController extends Controller
     public function gitlabUserAction()
     {
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUser();

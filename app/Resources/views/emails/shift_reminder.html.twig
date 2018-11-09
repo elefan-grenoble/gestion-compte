@@ -2,6 +2,6 @@ Bonjour {{ shift.shifter.firstname | lower | capitalize }},<br >
 Ceci est juste un petit message pour te rappeler que tu as résérvé un créneau
 {{ shift.job.name }} le {{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br >
 {% if shift.isDismissed %}Tu as demandé à annuler ce créneau, mais personne ne l'a encore repris.<br >{% endif %}
-<strong>Si l'épicerie est fermée à ton arrivée, récupère les clefs dans le boîtier dédié. <a href="https://wiki.lelefan.org/index.php?title=Guide/Accueil/Boitier/Retrait/Proc%C3%A9dure">Procédure complète</a>sur notre wiki.</strong>
+<strong>Si l'épicerie est fermée à ton arrivée, récupère les clefs dans le boîtier dédié. <a href="https://wiki.lelefan.org/index.php?title=Guide/Accueil/Boitier/Retrait/Proc%C3%A9dure">Procédure complète</a> sur notre wiki.</strong>
 Belle journée à toi.<br >
 Céleste, la petite fée des créneaux :)
