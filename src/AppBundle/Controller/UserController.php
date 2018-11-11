@@ -113,7 +113,7 @@ class UserController extends Controller
             }
         } else { //main super user not created yet
             $admin = new User();
-            $admin->setEmail("admin@lelefan.org"); //todo put this in conf
+            $admin->setEmail($this->getParameter('emails.admin')['address']);
             $admin->setPlainPassword("password");
             $admin->setUsername("admin");
             $admin->setEnabled(true);

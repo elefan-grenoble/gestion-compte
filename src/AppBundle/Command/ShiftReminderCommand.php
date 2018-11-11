@@ -43,11 +43,14 @@ class ShiftReminderCommand extends ContainerAwareCommand
             ->andWhere('s.end < :end')
             ->setParameter('start', $from->format('Y-m-d'))
             ->setParameter('end', $from->add(\DateInterval::createFromDateString('+1 day'))->format('Y-m-d'));
+
         $shifts = $qb->getQuery()->getResult();
+        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+
         foreach ($shifts as $shift) {
             if ($shift->getShifter()){ //send reminder
-                $reminder = (new \Swift_Message('[ESPACE MEMBRES] Ton crénéau'))
-                    ->setFrom('creneaux@lelefan.org')
+                $reminder = (new \Swift_Message('[ESPACE MEMBRES] Ton créneau'))
+                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
                     ->setTo($shift->getShifter()->getEmail())
                     ->setBody(
                         $this->getContainer()->get('twig')->render(

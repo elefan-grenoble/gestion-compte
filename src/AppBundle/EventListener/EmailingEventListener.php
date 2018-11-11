@@ -20,13 +20,15 @@ class EmailingEventListener
     protected $logger;
     protected $container;
     protected $due_duration_by_cycle;
+    private $memberEmail;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container)
+    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail)
     {
         $this->mailer = $mailer;
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
+        $this->memberEmail = $memberEmail;
     }
 
     /**
@@ -41,7 +43,7 @@ class EmailingEventListener
 
         foreach ($beneficiaries as $beneficiary) {
             $welcome = (new \Swift_Message('Bienvenue à l\'éléfàn'))
-                ->setFrom('membres@lelefan.org')
+                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(

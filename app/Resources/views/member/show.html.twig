@@ -134,7 +134,7 @@
                 <h5>Etat du compte</h5>
                 {% for beneficiary in member.beneficiaries %}
                     {% if not beneficiary.user.enabled %}
-                        {% if beneficiary.user.email matches '/(membres\\+.*[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                        {% if isTemporaryEmail(beneficiary.user.email) %}
                             <p>{{ beneficiary.firstname }} n'a pas renseigné son email, son compte ne peux pas être activé.</p>
                         {% else %}
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
