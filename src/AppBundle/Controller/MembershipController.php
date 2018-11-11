@@ -352,29 +352,29 @@ class MembershipController extends Controller
     }
 
     /**
-     * @Route("/{member_number}/set_email", name="set_email")
+     * @Route("/{id}/set_email", name="set_email")
      * @Method({"POST"})
-     * @param User $user
+     * @param Beneficiary $beneficiary
      * @param Request $request
      * @return Response
      */
-    public function setEmailAction(User $user, Request $request)
+    public function setEmailAction(Beneficiary $beneficiary, Request $request)
     {
         $email = $request->request->get('email');
+        $user = $beneficiary->getUser();
         $oldEmail = $user->getEmail();
         $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
         if (count($matches) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
             $user->setEmail($email);
-            $user->getMainBeneficiary()->setEmail($email);
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
-            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été entregistré');
+            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été enregistré');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problèmatique');
+            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problématique');
         }
-        return $this->render('user/confirm.html.twig', array(
-            'user' => $user,
+        return $this->render('beneficiary/confirm.html.twig', array(
+            'beneficiary' => $beneficiary,
         ));
     }
 
