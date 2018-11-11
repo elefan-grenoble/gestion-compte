@@ -20,7 +20,7 @@ class RefreshToken extends BaseRefreshToken
 
     /**
      * @ORM\ManyToOne(targetEntity="Client")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     protected $client;
 
