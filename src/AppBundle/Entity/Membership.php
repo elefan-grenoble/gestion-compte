@@ -38,21 +38,21 @@ class Membership
     /**
      * @var bool
      *
-     * @ORM\Column(name="withdrawn", type="boolean", nullable=true, options={"default" : 0})
+     * @ORM\Column(name="withdrawn", type="boolean", nullable=false, options={"default" : 0})
      */
     private $withdrawn;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="frozen", type="boolean", nullable=true, options={"default" : 0})
+     * @ORM\Column(name="frozen", type="boolean", nullable=false, options={"default" : 0})
      */
     private $frozen;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="frozen_change", type="boolean", nullable=true, options={"default" : 0})
+     * @ORM\Column(name="frozen_change", type="boolean", nullable=false, options={"default" : 0})
      */
     private $frozen_change;
 
