@@ -42,3 +42,12 @@ parameters:
     shift_mailer_user: ~
     #ip of the spot, comma separated if many
     place_local_ip_address: '127.0.0.1,192.168.0.x'
+
+    logging.mattermost.enabled: false
+    logging.mattermost.level: 'critical'
+    logging.mattermost.url: ~
+    logging.mattermost.channel: ~
+
+    logging.swiftmailer.enabled: false
+    logging.swiftmailer.level: 'critical'
+    logging.swiftmailer.recipient: ~
