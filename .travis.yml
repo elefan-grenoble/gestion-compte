@@ -8,19 +8,19 @@ cache:
 matrix:
   fast_finish: true
   include:
-  - php: 7.1
   - php: 7.2
   - php: 7.3
   - php: hhvm
+  - php: nightly
   allow_failures:
   - php: nightly
+  - php: hhvm
 
 before_install:
   - composer self-update
 
 install:
   - composer install
-  - ./bin/phpunit install
 
 script:
   - ./vendor/bin/phpunit
