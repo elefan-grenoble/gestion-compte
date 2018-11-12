@@ -1,0 +1,37 @@
+language: php
+sudo: false
+
+cache:
+  directories:
+  - $HOME/.composer/cache/files
+
+matrix:
+  fast_finish: true
+  include:
+  - php: 7.2
+  - php: 7.3
+  - php: nightly
+  allow_failures:
+  - php: 7.3
+  - php: nightly
+
+before_install:
+  - composer self-update
+
+install:
+  - composer install
+
+script:
+  - ./vendor/bin/phpunit
+  # this checks that the YAML config files contain no syntax errors
+  - ./bin/console lint:yaml app
+  # this checks that the Twig template files contain no syntax errors
+  - ./bin/console lint:twig app
+  # this checks that the XLIFF translations contain no syntax errors
+  - ./bin/console lint:xliff app
+  # this checks that the application doesn't use dependencies with known security vulnerabilities
+  - ./bin/console security:check --end-point=http://security.sensiolabs.org/check_lock
+  # this checks that the composer.json and composer.lock files are valid
+  - composer validate --strict
+  # this checks that Doctrine's mapping configurations are valid
+  - ./bin/console doctrine:schema:validate --skip-sync -vvv --no-interaction
