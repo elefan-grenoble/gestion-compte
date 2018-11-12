@@ -102,7 +102,7 @@
                                     <br>
                                     Oups, on ne connait pas ton adresse courriel !<br>
                                     Pour utiliser l'espace membre elle est necessaire. <br>
-                                    <form action="{{ path('set_email',{'member_number':member.memberNumber}) }}" method="post">
+                                    <form action="{{ path('set_email', {'id': beneficiary.id}) }}" method="post">
                                         <input type="email" name="email" placeholder="mon-email@..." />
                                         <button type="submit" class="btn waves-effect">
                                             Définir mon email
