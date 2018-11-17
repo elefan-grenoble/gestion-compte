@@ -7,6 +7,8 @@ Pour ouvrir le boitier, le code en cours est <strong>{{ codes[0].value }}</stron
 Une fois ouvert, il faut saisir le nouveau code <strong>{{ code.value }}</strong>
 <br>
 <br>
-Retrouve la <a href="https://wiki.lelefan.org/index.php?title=Guide/Accueil/D%C3%A9p%C3%B4t_boitier">procédure complète</a> sur le wiki.
-<br>
+{% if wiki_keys_url %}
+    Retrouve la <a href="{{ wiki_keys_url }}">procédure complète</a> sur le wiki.
+    <br>
+{% endif %}
 Une fois le code changé, tu peux valider en <a href="{{ changeCodeUrl }}">cliquant ici</a>. Merci !

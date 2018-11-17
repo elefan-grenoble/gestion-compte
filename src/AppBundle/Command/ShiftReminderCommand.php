@@ -55,7 +55,10 @@ class ShiftReminderCommand extends ContainerAwareCommand
                     ->setBody(
                         $this->getContainer()->get('twig')->render(
                             'emails/shift_reminder.html.twig',
-                            array('shift' => $shift)
+                            array(
+                                'shift' => $shift,
+                                'wiki_keys_url' => $this->getContainer()->getParameter('wiki_keys_url')
+                            )
                         ),
                         'text/html'
                     );

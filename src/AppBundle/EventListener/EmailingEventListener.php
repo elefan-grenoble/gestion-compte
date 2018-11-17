@@ -21,14 +21,16 @@ class EmailingEventListener
     protected $container;
     protected $due_duration_by_cycle;
     private $memberEmail;
+    private $wikiKeysUrl;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail)
+    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $wikiKeysUrl)
     {
         $this->mailer = $mailer;
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->memberEmail = $memberEmail;
+        $this->wikiKeysUrl = $wikiKeysUrl;
     }
 
     /**
@@ -180,7 +182,12 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/code_new.html.twig',
-                        array('code' => $code, 'codes' => $old_codes, 'changeCodeUrl' => $code_change_done_url)
+                        array(
+                            'code' => $code,
+                            'codes' => $old_codes,
+                            'changeCodeUrl' => $code_change_done_url,
+                            'wiki_keys_url' => $this->wikiKeysUrl
+                        )
                     ),
                     'text/html'
                 );

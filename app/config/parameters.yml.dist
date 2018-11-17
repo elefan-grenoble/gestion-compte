@@ -66,6 +66,7 @@ parameters:
     project_name: My Local Coop
     project_url: https://localcoop.local/
     project_url_display: localcoop.local
+    wiki_keys_url: ~
     main_color: #51CAE9
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
     helloasso_api_key:
