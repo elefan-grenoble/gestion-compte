@@ -10,6 +10,9 @@ parameters:
     # You should uncomment this if you want to use pdo_sqlite
     #database_path: '%kernel.project_dir%/var/data/data.sqlite'
 
+    super_admin.username: admin
+    super_admin.initial_password: password
+
     mailer_transport: smtp
     mailer_host: 127.0.0.1
     mailer_port: 25

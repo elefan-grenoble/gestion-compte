@@ -127,6 +127,15 @@ class AnonymousBeneficiary
     }
 
     /**
+     * Get created_at
+     *
+     * @return DateTime
+     */
+    public function getCreatedAt(){
+        return $this->created_at;
+    }
+
+    /**
      * Set email
      *
      * @param string $email

@@ -29,6 +29,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -618,7 +619,9 @@ class MembershipController extends Controller
      */
     public function newAction(Request $request)
     {
-        $code = $request->request->get('code');
+        $session = new Session();
+
+        $code = $request->query->get('code');
         $em = $this->getDoctrine()->getManager();
         $a_beneficiary = null;
         if ($code){
@@ -627,18 +630,21 @@ class MembershipController extends Controller
                 $a_beneficiary = $em->getRepository('AppBundle:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
             }
             if (!$a_beneficiary){
-                return $this->createAccessDeniedException();
+                $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
+
             }
-        }else{
+        }
+
+        if (!$a_beneficiary){
             $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
         }
 
-        $session = new Session();
-        $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
         $member = new Membership();
         if ($a_beneficiary){
+            $user = new User();
+            $user->setEmail($a_beneficiary->getEmail());
             $beneficiary = new Beneficiary();
-            $beneficiary->setEmail($a_beneficiary->getEmail());
+            $beneficiary->setUser($user);
             $member->setMainBeneficiary($beneficiary);
         }
 
@@ -653,6 +659,8 @@ class MembershipController extends Controller
         if ($a_beneficiary){
             $registration->setDate($a_beneficiary->getCreatedAt());
             $registration->setRegistrar($a_beneficiary->getRegistrar());
+            $registration->setAmount($a_beneficiary->getAmount());
+            $registration->setMode($a_beneficiary->getMode());
         }else{
             $registration->setDate(new DateTime('now'));
             $registration->setRegistrar($this->getUser());
@@ -679,14 +687,23 @@ class MembershipController extends Controller
                     $password = User::randomPassword();
                     $member->getMainBeneficiary()->getUser()->setPassword($password);
 
-                    if (!$member->getLastRegistration()->getRegistrar())
-                        $member->getLastRegistration()->setRegistrar($this->getCurrentAppUser());
+                    if (!$a_beneficiary){
+                        if (!$member->getLastRegistration()->getRegistrar())
+                            $member->getLastRegistration()->setRegistrar($this->getUser());
+                    }else{
+                        $registration->setDate($a_beneficiary->getCreatedAt());
+                        $registration->setRegistrar($a_beneficiary->getRegistrar());
+                        $registration->setAmount($a_beneficiary->getAmount());
+                        $registration->setMode($a_beneficiary->getMode());
+                        $member->setLastRegistration($registration);
+                    }
 
                     $member->setWithdrawn(false);
                     $member->setFrozen(false);
                     $member->setFrozenChange(false);
 
                     $em->persist($member);
+                    $em->remove($a_beneficiary);
                     $em->flush();
 
                     $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
@@ -905,6 +922,10 @@ class MembershipController extends Controller
 
     private function redirectToShow(Membership $member)
     {
+        $securityContext = $this->container->get('security.authorization_checker');
+        if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            return $this->redirectToRoute('homepage');
+        }
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))

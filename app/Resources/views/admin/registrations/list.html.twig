@@ -49,7 +49,7 @@
                 <ul class="collapsible" data-collapsible="accordion">
             {% endif %}
             <li class="">
-                <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% else %}indigo{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% elseif registration.id %}indigo{% else %}orange{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                         <i class="material-icons tiny">credit_card</i>
                     {% else %}
                         <i class="material-icons tiny">attach_money</i>
@@ -78,19 +78,22 @@
                         {% else %}
                             {{ registration.registrar.username }}
                         {% endif %}
-                        &nbsp;&agrave;&nbsp;{% if is_granted("ROLE_SUPER_ADMIN") %}
-                        {% if(registration.membership.registrations | length) > 1 %}
-                            <div class="collapsible-body">
+                        &nbsp;&agrave;&nbsp;
+                        {% if registration.membership %}
+                            {% if is_granted("ROLE_SUPER_ADMIN") %}
+                                {% if(registration.membership.registrations | length) > 1 %}
+                                    <div class="collapsible-body">
 
-                                {{ form_start(delete_forms[registration.id]) }}
-                                {{ form_widget(delete_forms[registration.id]) }}
-                                <div>
-                                    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-                                </div>
-                                {{ form_end(delete_forms[registration.id]) }}
-                            </div>
+                                        {{ form_start(delete_forms[registration.id]) }}
+                                        {{ form_widget(delete_forms[registration.id]) }}
+                                        <div>
+                                            <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+                                        </div>
+                                        {{ form_end(delete_forms[registration.id]) }}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
                         {{ registration.createdAt | date('H:i') }}
                         &nbsp;
                     {% endif %}
@@ -104,9 +107,12 @@
                             (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
                         {% endif %}
                     {% endif %}
+                    {% if not registration.id %}
+                        Adhésion en attente
+                    {% endif %}
                 </div>
 
-                {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                {% if is_granted("ROLE_FINANCE_MANAGER") and registration.id %}
                     <div class="collapsible-body">
                         {% if is_granted("ROLE_FINANCE_MANAGER") %}
                             {{ form_start(edit_forms[registration.id]) }}

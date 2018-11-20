@@ -249,6 +249,10 @@ class AdminController extends Controller
             ->findBy(array(), array('created_at' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
         $delete_forms = array();
         $edit_forms = array();
+        $anonymous_beneficiaries = $this->getDoctrine()->getManager()
+            ->getRepository('AppBundle:AnonymousBeneficiary')
+            ->findAll();
+
         foreach ($registrations as $registration) {
             $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
             $form = $this->get('form.factory')->createNamed('registration_edit_' . $registration->getId(), 'AppBundle\Form\RegistrationType', $registration);
@@ -265,6 +269,16 @@ class AdminController extends Controller
 
             $edit_forms[$registration->getId()] = $form->createView();
         }
+        foreach ($anonymous_beneficiaries as $a_beneficiary){
+            $registration = new Registration();
+            $registration->setCreatedAt($a_beneficiary->getCreatedAt());
+            $registration->setDate($a_beneficiary->getCreatedAt());
+            $registration->setRegistrar($a_beneficiary->getRegistrar());
+            $registration->setAmount($a_beneficiary->getAmount());
+            $registration->setMode($a_beneficiary->getMode());
+            $registrations[] = $registration;
+        }
+
         return $this->render('admin/registrations/list.html.twig',
             array(
                 'registrations' => $registrations,
