@@ -614,23 +614,47 @@ class MembershipController extends Controller
      */
     public function newAction(Request $request)
     {
+        $code = $request->request->get('code');
+        $em = $this->getDoctrine()->getManager();
+        $a_beneficiary = null;
+        if ($code){
+            $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+            if ($email){
+                $a_beneficiary = $em->getRepository('AppBundle:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
+            }
+            if (!$a_beneficiary){
+                return $this->createAccessDeniedException();
+            }
+        }else{
+            $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
+        }
+
         $session = new Session();
         $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
         $member = new Membership();
+        if ($a_beneficiary){
+            $beneficiary = new Beneficiary();
+            $beneficiary->setEmail($a_beneficiary->getEmail());
+            $member->setMainBeneficiary($beneficiary);
+        }
 
-        $em = $this->getDoctrine()->getManager();
-
-        //todo use the first available, not the bigest plus one
-        $members = $em->getRepository('AppBundle:Membership')->findBy(array(), array('member_number' => 'DESC'));
+        //todo use the first available, not the bigest plus one ??
+        $m = $em->getRepository('AppBundle:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
         $mm = 1;
-        if (count($members) && isset($members[0]))
-            $mm = $members[0]->getMemberNumber() + 1;
+        if ($m)
+            $mm = $m->getMemberNumber() + 1;
         $member->setMemberNumber($mm);
 
         $registration = new Registration();
-        $registration->setDate(new DateTime('now'));
+        if ($a_beneficiary){
+            $registration->setDate($a_beneficiary->getCreatedAt());
+            $registration->setRegistrar($a_beneficiary->getRegistrar());
+        }else{
+            $registration->setDate(new DateTime('now'));
+            $registration->setRegistrar($this->getUser());
+        }
         $registration->setMembership($member);
-        $registration->setRegistrar($this->getCurrentAppUser());
+
         $member->addRegistration($registration);
 
         $form = $this->createForm('AppBundle\Form\MembershipType', $member);

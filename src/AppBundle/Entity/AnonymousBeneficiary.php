@@ -151,30 +151,6 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Registration $registration
-     *
-     * @return AnonymousBeneficiary
-     */
-    public function setRegistration(\AppBundle\Entity\Registration $registration = null)
-    {
-        $this->registration = $registration;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Registration
-     */
-    public function getRegistration()
-    {
-        return $this->registration;
-    }
-
-    /**
      * Set registrar
      *
      * @param \AppBundle\Entity\User $registrar

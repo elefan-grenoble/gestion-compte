@@ -52,11 +52,15 @@ class RegistrationType extends AbstractType
                     'year' => 'Année',
                     'month' => 'Mois',
                 ],
-                'years' => range(2016, date('Y')),'disabled' => !($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))))
-                ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
+                'years' => range(2016, date('Y')),'disabled' => !($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))));
 
             if (!$user->hasRole('ROLE_SUPER_ADMIN')){
                 if ($registration){
+                    if (!$registration->getAmount()){
+                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
+                    }else{
+                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('disabled'=>'true')));
+                    }
                     if (!$registration->getRegistrar()){
                         $form->add('registrar',EntityType::class,array(
                             'label' => 'Enregistré par',
@@ -81,8 +85,15 @@ class RegistrationType extends AbstractType
                             'attr'=>array('disabled' => true)
                         ));
                     }
+                    $form->add('mode', ChoiceType::class, array('choices'  => array(
+                        'Espèce' => Registration::TYPE_CASH,
+                        'Chèque' => Registration::TYPE_CHECK,
+                        'Cairn' => Registration::TYPE_LOCAL,
+//                    'CB' => Registration::TYPE_CREDIT_CARD,
+                    ),'label' => 'Mode de réglement')); //todo, make it dynamic
                 }
             }else{
+                $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
                 $form->add('registrar',EntityType::class,array(
                     'label' => 'Enregistré par',
                     'class' => 'AppBundle:User',
@@ -93,15 +104,14 @@ class RegistrationType extends AbstractType
                     'choice_label' => 'username',
                     'data' => $registration->getRegistrar()
                 ));
-            }
-
-
-            $form->add('mode', ChoiceType::class, array('choices'  => array(
+                $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
                     'Cairn' => Registration::TYPE_LOCAL,
 //                    'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
+            }
+
         });
 
     }
