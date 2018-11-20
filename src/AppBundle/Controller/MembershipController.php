@@ -16,6 +16,7 @@ use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\UserType;
 use AppBundle\Security\MembershipVoter;
+use AppBundle\Service\MailerService;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -363,8 +364,11 @@ class MembershipController extends Controller
         $email = $request->request->get('email');
         $user = $beneficiary->getUser();
         $oldEmail = $user->getEmail();
-        $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $oldEmail, $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-        if (count($matches) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
+
+        /** @var MailerService $mailerService */
+        $mailerService = $this->get('mailer_service');
+
+        if ($mailerService->isTemporaryEmail($oldEmail) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
             $user->setEmail($email);
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
@@ -834,10 +838,13 @@ class MembershipController extends Controller
         if ($beneficiaries) {
             $d = ','; // this is the default but i like to be explicit
             $e = '"'; // this is the default but i like to be explicit
+
+            /** @var MailerService $mailerService */
+            $mailerService = $this->get('mailer_service');
+
             foreach ($beneficiaries as $beneficiary) {
                 if (!$beneficiary->getMembership()->isWithdrawn()) {
-                    $r = preg_match_all('/(membres\\+[0-9]+@lelefan\\.org)/i', $beneficiary->getEmail(), $matches, PREG_SET_ORDER, 0); //todo put regex in conf
-                    if (!count($matches) && filter_var($beneficiary->getEmail(), FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                    if (!$mailerService->isTemporaryEmail($beneficiary->getEmail()) && filter_var($beneficiary->getEmail(), FILTER_VALIDATE_EMAIL)) { //was not a temp mail
                         $return .= $beneficiary->getFirstname() . $d . $beneficiary->getLastname() . $d . $beneficiary->getEmail() . "\n";
                     }
                 }

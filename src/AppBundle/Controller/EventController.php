@@ -547,8 +547,9 @@ class EventController extends Controller
 
         $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
 
+        $memberEmail = $this->getParameter('emails.member');
         $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
-            ->setFrom('membres@lelefan.org')
+            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
             ->setTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
             ->setReplyTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
             ->setBody(
@@ -562,7 +563,7 @@ class EventController extends Controller
                 'text/html'
             );
         $giver = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] votre procuration'))
-            ->setFrom('membres@lelefan.org')
+            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
             ->setTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
             ->setReplyTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
             ->setBody(

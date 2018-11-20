@@ -21,6 +21,39 @@ parameters:
     transactional_mailer_user: 'contact@localcoop.local'
     transactional_mailer_user_name: 'espace membre'
 
+
+    # The base domain used for mail addresses
+    emails.base_domain: localcoop.local
+
+    # Several email addresses, to be used as an associative array
+    emails.contact:
+        from_name: 'Contact Localcoop'
+        address: contact@localcoop.local
+    emails.member:
+        from_name: 'Membres Localcoop'
+        address: membres@localcoop.local
+    emails.shift:
+        from_name: 'Créneaux Localcoop'
+        address: creneaux@localcoop.local
+    emails.formation:
+        from_name: 'Formation Localcoop'
+        address: formations@localcoop.local
+    emails.admin:
+        from_name: 'Admin Localcoop'
+        address: admin@localcoop.local
+    emails.noreply:
+        from_name: 'Ne pas répondre'
+        address: noreply@localcoop.local
+
+    # Available emails in some mailing forms
+    emails.sendable:
+        - "%emails.contact%"
+        - "%emails.member%"
+        - "%emails.shift%"
+        - "%emails.formation%"
+        - "%emails.admin%"
+        - "%emails.noreply%"
+
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
@@ -33,6 +66,7 @@ parameters:
     project_name: My Local Coop
     project_url: https://localcoop.local/
     project_url_display: localcoop.local
+    wiki_keys_url: ~
     main_color: #51CAE9
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
     helloasso_api_key:

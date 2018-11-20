@@ -58,8 +58,9 @@ class VerifyCodeChangeCommand extends ContainerAwareCommand
                 if ($one_old_code_is_still_visible){
                     $router = $this->getContainer()->get('router');
                     $code_change_done_url = $router->generate('code_change_done', array('token' => $this->getContainer()->get('AppBundle\Helper\SwipeCard')->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+                    $shiftEmail = $this->getContainer()->getParameter('emails.shift');
                     $reminder = (new \Swift_Message('[ESPACE MEMBRES] As tu réussi à changer le code du boîtier ?'))
-                        ->setFrom('creneaux@lelefan.org')
+                        ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
                         ->setTo($last->getRegistrar()->getEmail())
                         ->setBody(
                             $this->getContainer()->get('twig')->render(

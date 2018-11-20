@@ -67,9 +67,13 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
             $subject = '[ELEFAN] Alertes de remplissage pour le '. $dateFormatted;
+
+            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+            $noreplyEmail = $this->getContainer()->getParameter('emails.noreply');
+
             $email = (new \Swift_Message($subject))
-                ->setFrom('noreply@lelefan.org')
-                ->setTo('creneaux@lelefan.org')
+                ->setFrom($noreplyEmail['address'], $noreplyEmail['from_name'])
+                ->setTo($shiftEmail['address'], $shiftEmail['from_name'])
                 ->setBody(
                     $this->getContainer()->get('twig')->render(
                         'emails/shift_alerts.html.twig',
