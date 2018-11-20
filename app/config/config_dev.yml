@@ -22,7 +22,7 @@ monolog:
             channels: ['!event']
         mattermost:
             type: slackwebhook
-            webhook_url: '%logging.mattermost.url%'
+            webhook_url: "@=parameter('logging.mattermost.url') ? parameter('logging.mattermost.url') : ''"
             channel: '%logging.mattermost.channel%'
             bot_name: 'Monolog'
             use_attachment: true,
@@ -43,7 +43,7 @@ monolog:
         swiftmailer:
             type: swift_mailer
             from_email: '%transactional_mailer_user%'
-            to_email: '%logging.swiftmailer.recipient%'
+            to_email: "@=parameter('logging.swiftmailer.recipient') ? parameter('logging.swiftmailer.recipient') : ''"
             subject: '%%level_name%% detected on %site_name% !'
             level: '%logging.swiftmailer.level%'
             formatter: monolog.formatter.html

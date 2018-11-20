@@ -98,9 +98,11 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 }
             }
             $em->flush();
+
+            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
             foreach ($reservedShifts as $shift){
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau dans 28 jours'))
-                    ->setFrom('creneaux@lelefan.org')
+                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
                     ->setTo($shift->getLastShifter()->getEmail())
                     ->setBody(
                         $this->getContainer()->get('twig')->render(

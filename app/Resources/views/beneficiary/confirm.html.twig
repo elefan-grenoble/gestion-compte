@@ -45,7 +45,7 @@
                                     <img class="responsive-img" src="/bundles/app/img/cry.gif" alt="lost" />
                                 </div>
                             {% else %}
-                                {% if user.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                                {% if isTemporaryEmail(user.email) %}
                                     <br>
                                     Oups, on ne connait pas l'adresse courriel de {{ beneficiary.firstname }}.<br>
                                     Pour éditer son profil et <b>saisir une adresse correcte</b> utilise <b class="lighten-4 blue">{{ user.email }}</b>
@@ -98,7 +98,7 @@
                             {% if not member.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peut pas être activé.</div>
                             {% else %}
-                                {% if beneficiary.email matches '/(membres\\+[0-9]+@lelefan\\.org)/i' %}{# todo but this regex in conf #}
+                                {% if isTemporaryEmail(user.email) %}
                                     <br>
                                     Oups, on ne connait pas ton adresse courriel !<br>
                                     Pour utiliser l'espace membre elle est necessaire. <br>

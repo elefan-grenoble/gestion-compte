@@ -37,12 +37,8 @@ class SendMassMailCommand extends ContainerAwareCommand
         $tolerance = $input->getOption('tolerance');
         $frozen = $input->getOption('frozen');
 
-        $allowed_from_emails = array(
-            "Gestion des membres" => "membres@lelefan.org",
-            "Gestion des créneaux" => "creneaux@lelefan.org",
-            "Association l'éléfàn" => "contact@lelefan.org",
-            "Formation l'éléfàn" => "formations@lelefan.org"
-        ); //todo put in conf (Controller/MailController.php:28)
+        $mailerService = $this->getContainer()->get('mailer_service');
+        $allowed_from_emails = $mailerService->getAllowedEmails();
 
         if (in_array($from_email,$allowed_from_emails)){
             $from = array($from_email => array_search($from_email, $allowed_from_emails));

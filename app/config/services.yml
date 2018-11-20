@@ -37,6 +37,12 @@ services:
         arguments: ['@service_container']
         tags:
             - { name: twig.extension }
+    app.twig.extensions.mail:
+        class: AppBundle\Twig\Extension\MailExtension
+        arguments: ['@mailer_service']
+        tags:
+            - { name: twig.extension }
+
     app.form.registration:
         class: AppBundle\Form\RegistrationType
         tags:
@@ -77,6 +83,8 @@ services:
                 $mailer: "@mailer"
                 $logger: "@logger"
                 $container: "@service_container"
+                $memberEmail: "%emails.member%"
+                $wikiKeysUrl: "%wiki_keys_url%"
             tags:
                 - { name: kernel.event_listener, event: code.new, method: onCodeNew }
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
@@ -110,3 +118,10 @@ services:
             arguments:
                 - '@logging.handler.swiftmailer.inner'
                 - '%logging.swiftmailer.enabled%'
+
+    mailer_service:
+            class: AppBundle\Service\MailerService
+            public: true
+            arguments:
+                $baseDomain: '%emails.base_domain%'
+                $sendableEmails: '%emails.sendable%'

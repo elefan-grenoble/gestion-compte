@@ -20,13 +20,17 @@ class EmailingEventListener
     protected $logger;
     protected $container;
     protected $due_duration_by_cycle;
+    private $memberEmail;
+    private $wikiKeysUrl;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container)
+    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $wikiKeysUrl)
     {
         $this->mailer = $mailer;
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
+        $this->memberEmail = $memberEmail;
+        $this->wikiKeysUrl = $wikiKeysUrl;
     }
 
     /**
@@ -41,7 +45,7 @@ class EmailingEventListener
 
         foreach ($beneficiaries as $beneficiary) {
             $welcome = (new \Swift_Message('Bienvenue à l\'éléfàn'))
-                ->setFrom('membres@lelefan.org')
+                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -178,7 +182,12 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/code_new.html.twig',
-                        array('code' => $code, 'codes' => $old_codes, 'changeCodeUrl' => $code_change_done_url)
+                        array(
+                            'code' => $code,
+                            'codes' => $old_codes,
+                            'changeCodeUrl' => $code_change_done_url,
+                            'wiki_keys_url' => $this->wikiKeysUrl
+                        )
                     ),
                     'text/html'
                 );

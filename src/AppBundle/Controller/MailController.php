@@ -23,19 +23,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class MailController extends Controller
 {
-    protected $_emails;
-
-    //todo put this in conf
-    function init()
-    {
-        $this->_emails = array(
-            "Gestion des membres" => "membres@lelefan.org",
-            "Gestion des créneaux" => "creneaux@lelefan.org",
-            "Association l'éléfàn" => "contact@lelefan.org",
-            "Formation l'éléfàn" => "formations@lelefan.org"
-        );
-    }
-
     /**
      * Edit a message
      *
@@ -90,11 +77,13 @@ class MailController extends Controller
 
             $nb = 0;
 
+            $mailerService = $this->get('mailer_service');
+
             $from_email = $mailform->get('from')->getData();
             $from = '';
-            if (in_array($from_email,$this->_emails)){
-                $from = array($from_email => array_search($from_email, $this->_emails));
-            }else{
+            if (in_array($from_email, $mailerService->getAllowedEmails())) {
+                $from = array($from_email => array_search($from_email, $mailerService->getAllowedEmails()));
+            } else {
                 //email not listed !
                 $session->getFlashBag()->add('error','cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
@@ -137,12 +126,13 @@ class MailController extends Controller
         return $this->json($r);
     }
 
-    private function getMailForm(){
-        $this->init();
+    private function getMailForm()
+    {
+        $mailerService = $this->get('mailer_service');
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
-            ->add('from', ChoiceType::class, array('label' => 'depuis','required' => false, 'choices' => $this->_emails))
+            ->add('from', ChoiceType::class, array('label' => 'depuis','required' => false, 'choices' => $mailerService->getAllowedEmails()))
             ->add('to', HiddenType::class, array('label' => 'à','required' => true))
             ->add('subject', TextType::class, array('label' => 'sujet','required' => true))
             ->add('message', TextareaType::class, array('label' => 'message','required' => true,'attr'=>array('class'=>'materialize-textarea')))

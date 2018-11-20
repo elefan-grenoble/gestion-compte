@@ -63,14 +63,14 @@ class UserController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
         $session = new Session();
-        $user = $em->getRepository('AppBundle:User')->findOneBy(array("member_number" => 0));
+        $user = $em->getRepository('AppBundle:User')->findByRole('ROLE_SUPER_ADMIN');
 
-        if ($user) { //main super admin exist
+        if (count($user) > 0) { //main super admin exist
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $form = $this->createFormBuilder()
                     ->add('username', TextType::class, array('label' => "Nom d'utilisateur"))
                     ->add('password', PasswordType::class, array('label' => "Mot de passe"))
-                    ->add('email', EmailType::class, array('label' => "Adresse email", "required" => false))
+                    ->add('email', EmailType::class, array('label' => "Adresse email"))
                     ->getForm();
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
@@ -90,19 +90,11 @@ class UserController extends Controller
                             'form' => $form->createView(),
                         ));
                     }
-                    $last_admin_recorded = $em->getRepository('AppBundle:User')->findBy(array(), array('member_number' => 'ASC'), 1);
-                    $lowest_member_number_yet = $last_admin_recorded[0]->getMemberNumber();
-
-                    $email = $form->get('email')->getData();
-                    if (!$form->get('email')->getData()) {
-                        $email = "membres+admin" . ($lowest_member_number_yet - 1) . "@lelefan.org";//todo put this in conf
-                    }
 
                     $new_admin = new User();
-                    $new_admin->setEmail($email);
+                    $new_admin->setEmail($form->get('email')->getData());
                     $new_admin->setPlainPassword($form->get('password')->getData());
                     $new_admin->setUsername($form->get('username')->getData());
-                    $new_admin->setMemberNumber($lowest_member_number_yet - 1);
                     $new_admin->setEnabled(true);
                     $new_admin->addRole('ROLE_ADMIN');
                     $em->persist($new_admin);
@@ -121,10 +113,9 @@ class UserController extends Controller
             }
         } else { //main super user not created yet
             $admin = new User();
-            $admin->setEmail("admin@lelefan.org"); //todo put this in conf
+            $admin->setEmail($this->getParameter('emails.admin')['address']);
             $admin->setPlainPassword("password");
-            $admin->setUsername("babar"); //todo put this in conf
-            $admin->setMemberNumber(0);
+            $admin->setUsername("admin");
             $admin->setEnabled(true);
             $admin->addRole('ROLE_SUPER_ADMIN');
             $em->persist($admin);
