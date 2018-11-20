@@ -19,7 +19,7 @@ monolog:
             process_psr_3_messages: false
         mattermost:
             type: slackwebhook
-            webhook_url: "@=parameter('logging.mattermost.url') ? parameter('logging.mattermost.url') : ''"
+            webhook_url: "%logging.mattermost.url%"
             channel: '%logging.mattermost.channel%'
             bot_name: 'Monolog'
             use_attachment: true,

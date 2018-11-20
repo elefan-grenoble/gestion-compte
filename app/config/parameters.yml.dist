@@ -79,7 +79,7 @@ parameters:
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
-    logging.mattermost.url: ~
+    logging.mattermost.url: 'http://mattermost.localcoop.local'
     logging.mattermost.channel: ~
 
     logging.swiftmailer.enabled: false
