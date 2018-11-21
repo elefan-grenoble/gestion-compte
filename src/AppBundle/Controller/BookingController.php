@@ -308,7 +308,7 @@ class BookingController extends Controller
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
-            || !$this->get('shift_service')->isShiftBookable($shift,$beneficiary)
+            || !$shift->isBookable($beneficiary)
             || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session = new Session();
