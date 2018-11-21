@@ -706,7 +706,14 @@ class MembershipController extends Controller
                     $em->remove($a_beneficiary);
                     $em->flush();
 
-                    $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+                    $securityContext = $this->container->get('security.authorization_checker');
+                    if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+                        $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. <br>Utilise ce formulaire pour créer tes accès. ton nom d\'utilisateur est <b>'.$member->getMainBeneficiary()->getUser()->getUsername().'</b>.');
+                        return $this->redirectToRoute('fos_user_resetting_request');
+                    }else{
+                        $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+                    }
+
 
                     $dispatcher = $this->get('event_dispatcher');
                     $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
