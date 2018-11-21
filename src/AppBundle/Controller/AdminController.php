@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\AbstractRegistration;
 use AppBundle\Entity\Address;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
@@ -235,56 +236,131 @@ class AdminController extends Controller
     public function registrationsAction(Request $request)
     {
         $session = new Session();
+
+        $qfrom = $request->query->get('from');
+        if (!$qfrom) {
+            $monday = strtotime('last monday', strtotime('tomorrow'));
+            $from = new DateTime();
+            $from->setTimestamp($monday);
+        }else{
+            $from = date_create_from_format('Y-m-d', $qfrom );
+            if (!$from || $from->format('Y-m-d') != $qfrom) {
+                $session->getFlashBag()->add('warning','la date "'.$qfrom.'"" n\'est pas au bon format (Y-m-d)');
+                $monday = strtotime('last monday', strtotime('tomorrow'));
+                $from = new DateTime();
+                $from->setTimestamp($monday);
+            }
+        }
+        $from = $from->setTime('0','0','0');
+
+        $qto = $request->query->get('to');
+        if ($qto) {
+            $to = date_create_from_format('Y-m-d', $qto );
+            if (!$to || $to->format('Y-m-d') != $qto) {
+                $session->getFlashBag()->add('warning','la date "'.$qto.'"" n\'est pas au bon format (Y-m-d)');
+                $to = null;
+            }else{
+                $to = $to->setTime('0','0','0');
+            }
+        }else{
+            $to = null;
+        }
+
+
+        $em = $this->getDoctrine()->getManager();
         if (!($page = $request->get('page')))
             $page = 1;
         $limit = 25;
-        $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\Registration', 'u')
-            ->select('count(u.id)')
-            ->getQuery()
+        $qb = $em->createQueryBuilder()->from('AppBundle\Entity\AbstractRegistration', 'r')
+            ->select('count(r.id)')
+            ->where('r.date >= :from')
+            ->setParameter('from', $from);
+        if ($to){
+            $qb = $qb->andwhere('r.date <= :to')->setParameter('to', $to);
+        }
+
+        $max = $qb->getQuery()
             ->getSingleScalarResult();
         $nb_of_pages = intval($max / $limit);
         $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-        $registrations = $this->getDoctrine()->getManager()
-            ->getRepository('AppBundle:Registration')
-            ->findBy(array(), array('created_at' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
-        $delete_forms = array();
-        $edit_forms = array();
-        $anonymous_beneficiaries = $this->getDoctrine()->getManager()
-            ->getRepository('AppBundle:AnonymousBeneficiary')
-            ->findAll();
-
-        foreach ($registrations as $registration) {
-            $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($registration)->createView();
-            $form = $this->get('form.factory')->createNamed('registration_edit_' . $registration->getId(), 'AppBundle\Form\RegistrationType', $registration);
-
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($registration);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
-                //recreate the form with new data
-                $form = $this->get('form.factory')->createNamed('registration_edit_' . $registration->getId(), 'AppBundle\Form\RegistrationType', $registration);
-            }
-
-            $edit_forms[$registration->getId()] = $form->createView();
+        $repository = $em->getRepository('AppBundle:AbstractRegistration');
+        $queryb = $repository->createQueryBuilder('r')
+            ->where('r.date >= :from')
+            ->setParameter('from', $from);
+        if ($to){
+            $queryb = $queryb->andwhere('r.date <= :to')->setParameter('to', $to);
         }
-        foreach ($anonymous_beneficiaries as $a_beneficiary){
-            $registration = new Registration();
-            $registration->setCreatedAt($a_beneficiary->getCreatedAt());
-            $registration->setDate($a_beneficiary->getCreatedAt());
-            $registration->setRegistrar($a_beneficiary->getRegistrar());
-            $registration->setAmount($a_beneficiary->getAmount());
-            $registration->setMode($a_beneficiary->getMode());
-            $registrations[] = $registration;
+        $queryb = $queryb->orderBy('r.date', 'DESC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $registrations = $queryb->getQuery()->getResult();
+        $delete_forms = array();
+
+        $connection = $em->getConnection();
+        $statement = $connection->prepare("SELECT date_format(date,\"%Y-%m-%d\") as date,
+SUM(IF(mode='1',amount,0)) as sum_1,
+SUM(IF(mode='2',amount,0)) as sum_2,
+SUM(IF(mode='3',amount,0)) as sum_3,
+SUM(IF(mode='4',amount,0)) as sum_4,
+SUM(IF(mode='5',amount,0)) as sum_5,
+SUM(IF(mode='6',amount,0)) as sum_6,
+SUM(amount) as grand_total
+FROM abstract_registration
+WHERE date >= :from ".(($to) ? "AND date <= :to" : "")."
+GROUP BY YEAR(date), MONTH(date), DAY(date)
+ORDER BY date DESC;");
+        $statement->bindValue('from', $from->format('Y-m-d'));
+        if ($to){
+            $statement->bindValue('to', $to->format('Y-m-d'));
+        }
+        $statement->execute();
+        $results = $statement->fetchAll();
+
+        $totaux = array();
+        foreach ($results as $result){
+            $totaux[$result['date']] = $result;
+        }
+
+        $connection = $em->getConnection();
+        $statement = $connection->prepare("SELECT
+SUM(IF(mode='1',amount,0)) as sum_1,
+SUM(IF(mode='2',amount,0)) as sum_2,
+SUM(IF(mode='3',amount,0)) as sum_3,
+SUM(IF(mode='4',amount,0)) as sum_4,
+SUM(IF(mode='5',amount,0)) as sum_5,
+SUM(IF(mode='6',amount,0)) as sum_6,
+SUM(amount) as grand_total
+FROM abstract_registration
+WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
+        $statement->bindValue('from', $from->format('Y-m-d'));
+        if ($to){
+            $statement->bindValue('to', $to->format('Y-m-d'));
+        }
+        $statement->execute();
+        $grand_total = $statement->fetch();
+
+
+        $re = '/1_([0-9]+)$/m';
+        foreach ($registrations as $registration) {
+            if ($registration->getType() == AbstractRegistration::TYPE_MEMBER){
+                $matches = array();
+                if (preg_match($re, $registration->getId(), $matches)) {
+                    $delete_forms[$registration->getId()] = $this->getRegistrationDeleteForm($matches[1])->createView();
+                }
+            }
         }
 
         return $this->render('admin/registrations/list.html.twig',
             array(
+                'R' => new Registration(),
                 'registrations' => $registrations,
+                'grand_total' => $grand_total,
+                'totaux' => $totaux,
                 'delete_forms' => $delete_forms,
-                'edit_forms' => $edit_forms,
                 'page' => $page,
+                'from' => $from,
+                'to' => $to,
                 'nb_of_pages' => $nb_of_pages));
     }
 
@@ -298,17 +374,22 @@ class AdminController extends Controller
     public function editRegistrationAction(Request $request, Registration $registration)
     {
         $session = new Session();
-        $edit_form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
-        $edit_form->handleRequest($request);
-        if ($edit_form->isSubmitted() && $edit_form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($registration);
-            $em->flush();
-            $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
+        if ($registration->getId() && ($request->attributes->get('id') == $registration->getId())){
+            $edit_form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $edit_form->handleRequest($request);
+            if ($edit_form->isSubmitted() && $edit_form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($registration);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
+                return $this->redirectToRoute("admin_registrations");
+            }
+        }else{
+            $session->getFlashBag()->add('error', 'l\'entrée #'.$request->attributes->get('id').' n\'a pas été trouvée');
             return $this->redirectToRoute("admin_registrations");
         }
-        return $this->render('admin/registrations/edit.html.twig', array('edit_form' => $edit_form->createView()));
 
+        return $this->render('admin/registrations/edit.html.twig', array('edit_form' => $edit_form->createView(),'registration' => $registration));
     }
 
     /**
@@ -321,7 +402,7 @@ class AdminController extends Controller
     public function removeRegistrationAction(Request $request, Registration $registration)
     {
         $session = new Session();
-        $form = $this->getRegistrationDeleteForm($registration);
+        $form = $this->getRegistrationDeleteForm($registration->getId());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($registration->getUser() && count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()) {
@@ -345,13 +426,13 @@ class AdminController extends Controller
     }
 
     /**
-     * @param Registration $registration
+     * @param integer $registration_id
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getRegistrationDeleteForm(Registration $registration)
+    protected function getRegistrationDeleteForm(int $registration_id)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_registration_remove', array('id' => $registration->getId())))
+            ->setAction($this->generateUrl('admin_registration_remove', array('id' => $registration_id)))
             ->setMethod('DELETE')
             ->getForm();
     }

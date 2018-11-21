@@ -2,75 +2,82 @@
 
 {% block content %}
     <h4 class="">Liste des dernières adhésions / ré-adhésions</h4>
+    <h5>par date de saisie</h5>
 
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">tune</i>Filtres (
+                    {% if to is not null %}
+                    du {{ from | date_fr_full }} au {{ to | date_fr_full }}
+                    {% else %}
+                    à partir du {{ from | date_fr_full }}
+                    {% endif %})</div>
+                <div class="collapsible-body">
+                    <form name="form" method="get" action="">
+                        <div class="row">
+                            <div class="input-field col m3">
+                                <input name="from" value="{{ from | date('Y-m-d') }}" class="datepicker" type="text">
+                                <label for="from" class="active">A partir de</label>
+                            </div>
+                            <div class="input-field col m3">
+                                <input name="to" value="{% if to is not null %}{{ to | date('Y-m-d') }}{% endif %}" class="datepicker" type="text">
+                                <label for="to" class="active">Jusqu'à</label>
+                            </div>
+                        </div>
+                        <button type="submit" id="form_filter" class="btn" value="filtrer">Filtrer</button>
+                    </form>
+                </div>
+            </li>
+        </ul>
+
+        <h5>Total sur toute la période : {{ grand_total['grand_total'] }}€</h5>
+        <ul class="collapsible" data-collapsible="accordion">
+            <li>
+                <div class="row">
+                    {% for i in 1..6 %}
+                        <div class="col s2 center">
+                            <small>Total {{ i | payment_mode }}</small>{% if grand_total['sum_'~i] is defined and grand_total['sum_'~i] > 0 %}<br><b>{{ grand_total['sum_'~i] }}</b>€{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </li>
+        </ul>
 
         {% set date = null %}
-
-        {% set total_card = 0 %}
-        {% set total_local = 0 %}
-        {% set total_cash = 0 %}
-        {% set total_check = 0 %}
-        {% set total_helloasso = 0 %}
+        {% set datekey = null %}
 
         {% for registration in registrations %}
-            {% if date and date != (registration.createdAt | date('d F Y')) %}
+            {% if date and (date != registration.date | date('d F Y')) and totaux[datekey] is defined %}
                 <li>
                     <div class="row">
-                        <div class="col s2 center"><br><b>Total</b></div>
+                        {% for i in 1..6 %}
                         <div class="col s2 center">
-                            <small>Carte de Crédit</small>{% if total_card %}<br><b>{{ total_card }}</b>€{% endif %}
+                            <small>Total {{ i | payment_mode }}</small>{% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}<br><b>{{ totaux[datekey]['sum_'~i] }}</b>€{% endif %}
                         </div>
-                        <div class="col s2 center">
-                            <small>Cairn</small>{% if total_local %}<br><b>{{ total_local }}</b>{% endif %}</div>
-                        <div class="col s2 center">
-                            <small>Espèce</small>{% if total_cash %}<br><b>{{ total_cash }}</b>€{% endif %}</div>
-                        <div class="col s2 center">
-                            <small>Chèque</small>{% if total_check %}<br><b>{{ total_check }}</b>€{% endif %}</div>
-                        <div class="col s2 center">
-                            <small>HelloAsso</small>{% if total_helloasso %}<br><b>{{ total_helloasso }}</b>€{% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
                 </li>
             {% endif %}
-            {% if not date or date != (registration.createdAt | date('d F Y')) %}
-
-                {% set total_card = 0 %}
-                {% set total_local = 0 %}
-                {% set total_cash = 0 %}
-                {% set total_check = 0 %}
-                {% set total_helloasso = 0 %}
+            {% if not date or date != (registration.date | date('d F Y')) %}
 
                 {% if date %}
                     </ul>
                 {% endif %}
-                {% set date = (registration.createdAt | date('d F Y')) %}
-                <h5>{{ registration.createdAt | date_fr_long }}</h5>
+                {% set date = (registration.date | date('d F Y')) %}
+                {% set datekey = (registration.date | date('Y-m-d')) %}
+                <h5>{{ registration.date | date_fr_long }}</h5>
                 <ul class="collapsible" data-collapsible="accordion">
             {% endif %}
             <li class="">
-                <div class="collapsible-header {% if registration.user is defined and registration.user and (registration.user.registrations | length) > 1 %}teal{% elseif registration.id %}indigo{% else %}orange{% endif %} lighten-4">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+                <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">
+                    {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
                         <i class="material-icons tiny">credit_card</i>
                     {% else %}
                         <i class="material-icons tiny">attach_money</i>
                     {% endif %}
                     {{ registration.amount }}
-                    {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
-                        {% set total_card = total_card + (registration.amount | number_format) %}
-                        € en CARTE CREDIT
-                    {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
-                        {% set total_local = total_local + (registration.amount | number_format) %}
-                        CAIRN{#TODO PUT THIS VALUE IN CONF#}
-                    {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
-                        {% set total_cash = total_cash + (registration.amount | number_format) %}
-                        € en ESPECE
-                    {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
-                        {% set total_check = total_check + (registration.amount | number_format) %}
-                        € en CHEQUE
-                    {% elseif registration.mode ==  constant('TYPE_HELLOASSO', registration) %}
-                        {% set total_helloasso = total_helloasso + (registration.amount | number_format) %}
-                        € HelloAsso
-                    {% endif %}
+                    {{ registration.mode | payment_mode }}
                     {% if registration.registrar %}
                         par&nbsp;
                         {% if registration.registrar.beneficiary %}
@@ -79,7 +86,7 @@
                             {{ registration.registrar.username }}
                         {% endif %}
                         &nbsp;&agrave;&nbsp;
-                        {% if registration.membership %}
+                        {% if delete_forms[registration.id] is defined %}
                             {% if is_granted("ROLE_SUPER_ADMIN") %}
                                 {% if(registration.membership.registrations | length) > 1 %}
                                     <div class="collapsible-body">
@@ -94,31 +101,24 @@
                                 {% endif %}
                             {% endif %}
                         {% endif %}
-                        {{ registration.createdAt | date('H:i') }}
+                        {{ registration.date | date('H:i') }}
                         &nbsp;
                     {% endif %}
                     {% if registration.membership %}
                         pour #<a
                             href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
-                        {% if registration.membership.mainBeneficiary %}
-                            {{ registration.membership.mainBeneficiary.firstname }} {{ registration.membership.mainBeneficiary.lastname }}
-                        {% endif %}
+                        {{ registration.beneficiary }}
                         {% if(registration.membership.registrations | length) > 1 %}
                             (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
                         {% endif %}
-                    {% endif %}
-                    {% if not registration.id %}
-                        Adhésion en attente
+                    {% else %}
+                        pour {{ registration.beneficiary }}
                     {% endif %}
                 </div>
 
-                {% if is_granted("ROLE_FINANCE_MANAGER") and registration.id %}
+                {% if is_granted("ROLE_FINANCE_MANAGER") and (registration.type == constant('TYPE_MEMBER', registration)) %}
                     <div class="collapsible-body">
-                        {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                            {{ form_start(edit_forms[registration.id]) }}
-                            {% include "user/_partial/registration_form.html.twig" with { form: edit_forms[registration.id] } %}
-                            {{ form_end(edit_forms[registration.id]) }}
-                        {% endif %}
+                        <a href="{{ path("admin_registration_edit",{"id":registration.id |split('_')[1] }) }}" class="btn waves-effect waves-light">Editer</a>
                         {% if(registration.membership.registrations | length) > 1 %}
                             {% if is_granted("ROLE_SUPER_ADMIN") %}
                                 {{ form_start(delete_forms[registration.id]) }}
@@ -134,24 +134,88 @@
             </li>
 
         {% endfor %}
+            {% if totaux[datekey] is defined %}
+                <li>
+                    <div class="row">
+                        {% for i in 1..6 %}
+                            <div class="col s2 center">
+                                <small>Total {{ i | payment_mode }}</small>{% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}<br><b>{{ totaux[datekey]['sum_'~i] }}</b>€{% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </li>
+            {% endif %}
         </ul>
         <br>
         <ul class="pagination">
-            <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1}) }}{% endif %}">
-                    <i class="material-icons">chevron_left</i>
-                </a>
-            </li>
-            {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                            href="{{ path("admin_registrations",{'page':i}) }}">{{ i }}</a></li>
-            {% endfor %}
-            <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1}) }}{% endif %}">
-                    <i class="material-icons">chevron_right</i>
-                </a>
-            </li>
+            {% if to is not null %}
+                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                        <i class="material-icons">chevron_left</i>
+                    </a>
+                </li>
+                {% for i in range(1,nb_of_pages) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                                href="{{ path("admin_registrations",{'page':i,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}">{{ i }}</a></li>
+                {% endfor %}
+                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                        <i class="material-icons">chevron_right</i>
+                    </a>
+                </li>
+            {% else %}
+                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                        <i class="material-icons">chevron_left</i>
+                    </a>
+                </li>
+                {% for i in range(1,nb_of_pages) %}
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                                href="{{ path("admin_registrations",{'page':i,'from':(from | date('Y-m-d'))}) }}">{{ i }}</a></li>
+                {% endfor %}
+                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                        <i class="material-icons">chevron_right</i>
+                    </a>
+                </li>
+            {% endif %}
         </ul>
     {% endif %}
 
+{% endblock %}
+
+
+{% block javascripts %}
+    <script>
+        jQuery.extend( jQuery.fn.pickadate.defaults, {
+            monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
+            monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
+            weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
+            weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
+            today: 'Aujourd\'hui',
+            clear: 'Effacer',
+            close: 'Fermer',
+            firstDay: 1,
+            format: 'yyyy-mm-dd',
+            formatSubmit: 'yyyy-mm-dd',
+            labelMonthNext:"Mois suivant",
+            labelMonthPrev:"Mois précédent",
+            labelMonthSelect:"Sélectionner un mois",
+            labelYearSelect:"Sélectionner une année"
+        });
+
+        jQuery(function(){
+            $('.datepicker').pickadate({
+                selectMonths: true, // Creates a dropdown to control month
+                selectYears: 2, // Creates a dropdown of 15 years to control year,
+                close: 'Ok',
+                closeOnSelect: true // Close upon selecting a date,
+            });
+//            $('[type=submit]').click(function(e){
+//                e.preventDefault();
+//                $('#form_action').val($(this).val());
+//                $('#form_action').closest('form').submit();
+//            });
+        });
+    </script>
 {% endblock %}

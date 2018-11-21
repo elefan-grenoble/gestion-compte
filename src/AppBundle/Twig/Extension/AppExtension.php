@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Twig\Extension;
 
+use AppBundle\Entity\Registration;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Service\Picture\BasePathPicture;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
@@ -38,6 +39,8 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('vigenere_encode',array($this, 'vigenere_encode')),
             new \Twig_SimpleFilter('vigenere_decode',array($this, 'vigenere_decode')),
             new \Twig_SimpleFilter('img',array($this, 'imgFilter')),
+            new \Twig_SimpleFilter('payment_mode_devise',array($this, 'payment_mode_devise')),
+            new \Twig_SimpleFilter('payment_mode',array($this, 'payment_mode')),
         );
     }
 
@@ -114,6 +117,55 @@ class AppExtension extends \Twig_Extension
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
+    }
+
+    public function payment_mode_devise(int $value)
+    {
+        $name = "€";
+        switch ($value){
+            case Registration::TYPE_CREDIT_CARD :
+                $name = '€ en CARTE CREDIT';
+                break;
+            case Registration::TYPE_LOCAL :
+                $name = $this->container->getParameter('local_currency_name');
+                break;
+            case Registration::TYPE_CASH :
+                $name = '€ en ESPECE';
+                break;
+            case Registration::TYPE_CHECK :
+                $name = '€ en CHEQUE';
+                break;
+            case Registration::TYPE_HELLOASSO :
+                $name = '€ HelloAsso';
+                break;
+        }
+        return $name;
+    }
+
+    public function payment_mode(int $value)
+    {
+        $name = "€";
+        switch ($value){
+            case Registration::TYPE_CREDIT_CARD :
+                $name = 'carte';
+                break;
+            case Registration::TYPE_LOCAL :
+                $name = $this->container->getParameter('local_currency_name');
+                break;
+            case Registration::TYPE_CASH :
+                $name = 'espèce';
+                break;
+            case Registration::TYPE_CHECK :
+                $name = 'chéque';
+                break;
+            case Registration::TYPE_DEFAULT :
+                $name = 'autre';
+                break;
+            case Registration::TYPE_HELLOASSO :
+                $name = 'HelloAsso';
+                break;
+        }
+        return $name;
     }
 
     public function duration_from_minutes(int $minutes)
