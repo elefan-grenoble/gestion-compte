@@ -46,7 +46,7 @@ class DefaultController extends Controller
                 $membership = $current_app_user->getBeneficiary()->getMembership();
                 $remainder = $membership->getRemainder();
 
-                if ($membership->getWithdrawn()){
+                if ($membership->getWithdrawn()) {
                     $this->container->get('security.token_storage')->setToken(null);
                     $this->container->get('session')->invalidate();
                     $session->getFlashBag()->add('error', 'Compte fermé !');
@@ -55,33 +55,33 @@ class DefaultController extends Controller
 
                 $dayAfterEndOfCycle = clone $membership->endOfCycle();
                 $dayAfterEndOfCycle->modify('+1 day');
-                if ($membership->getFrozenChange() && !$membership->getFrozen()){
+                if ($membership->getFrozenChange() && !$membership->getFrozen()) {
                     $now = new \DateTime('now');
                     $session->getFlashBag()->add('warning',
-                        'Comme demandé, ton compte sera gelé dans '.
-                        date_diff($now, $membership->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        'Comme demandé, ton compte sera gelé dans ' .
+                        date_diff($now, $membership->endOfCycle())->format('%a jours') .
+                        ', le <strong>' . AppExtension::date_fr_long($dayAfterEndOfCycle) . '</strong>' .
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"" .
                         $this->get('router')->generate('fos_user_profile_show')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                        . "\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
-                if ($membership->getFrozenChange() && $membership->getFrozen()){
+                if ($membership->getFrozenChange() && $membership->getFrozen()) {
                     $now = new \DateTime('now');
                     $session->getFlashBag()->add('notice',
-                        'Comme demandé, ton compte sera dégelé dans '.
-                        date_diff($now, $membership->endOfCycle())->format('%a jours').
-                        ', le <strong>'.AppExtension::date_fr_long($dayAfterEndOfCycle).'</strong>'.
-                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"".
+                        'Comme demandé, ton compte sera dégelé dans ' .
+                        date_diff($now, $membership->endOfCycle())->format('%a jours') .
+                        ', le <strong>' . AppExtension::date_fr_long($dayAfterEndOfCycle) . '</strong>' .
+                        " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"" .
                         $this->get('router')->generate('fos_user_profile_show')
-                        ."\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
+                        . "\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
 
-                if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')){
-                    if (intval($remainder->format("%R%a"))<0)
-                        $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a '.$remainder->format('%a jours').'... n\'oublie pas de ré-adhérer !');
-                    elseif (intval($remainder->format("%R%a"))<15) //todo put this in conf
-                        $session->getFlashBag()->add('warning', 'Ton adhésion expire dans '.$remainder->format('%a jours').'...');
-                }else{
+                if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')) {
+                    if (intval($remainder->format("%R%a")) < 0)
+                        $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
+                    elseif (intval($remainder->format("%R%a")) < 15) //todo put this in conf
+                        $session->getFlashBag()->add('warning', 'Ton adhésion expire dans ' . $remainder->format('%a jours') . '...');
+                } else {
                     $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
                 }
             }
@@ -126,38 +126,47 @@ class DefaultController extends Controller
         }
         $qb = $em->createQueryBuilder();
         $futur_events = $qb->select('e')->from('AppBundle\Entity\Event', 'e')
-            ->Where("e.date > :now" )
+            ->Where("e.date > :now")
             ->orderBy("e.id", 'ASC')
-            ->setParameter('now',new \DateTime())
+            ->setParameter('now', new \DateTime())
             ->getQuery()
             ->getResult();
 
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
-        if (!$codes){
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
+        if (!$codes) {
             $codes[] = new Code();
         }
         return $this->render('default/index.html.twig', [
-            'base_dir' => realpath($this->getParameter('kernel.project_dir')).DIRECTORY_SEPARATOR,
+            'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
             'events' => $futur_events,
             'codes' => $codes
         ]);
     }
 
     /**
+     * @Route("/cardReader", name="cardReader")
+     */
+    public function cardReaderAction(Request $request)
+    {
+        return $this->render('default/card_reader.html.twig', []);
+    }
+
+    /**
      * @Route("/check", name="check")
      * @Method({"POST","GET"})
      */
-    public function checkAction(Request $request){
+    public function checkAction(Request $request)
+    {
         $session = new Session();
         $code = $request->get('swipe_code');
-        if (!$code){
-            return $this->redirectToRoute('homepage');
+        if (!$code) {
+            return $this->redirectToRoute('cardReader');
         }
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code,'enable'=>1));
-        if (!$card){
-            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'existe pas");
-        }else{
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
+        if (!$card) {
+            $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
+        } else {
             $beneficiary = $card->getBeneficiary();
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,
@@ -165,7 +174,7 @@ class DefaultController extends Controller
             ]);
         }
 
-        return $this->redirectToRoute('homepage');
+        return $this->redirectToRoute('cardReader');
     }
 
     /**
@@ -175,55 +184,56 @@ class DefaultController extends Controller
      * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
      * https://github.com/Mailforgood/HelloAsso.Api.Doc/blob/master/HelloAsso.Api.Samples/php/helloasso_stat.php
      */
-    public function helloassoNotify(Request $request){
+    public function helloassoNotify(Request $request)
+    {
 
         $logger = $this->get('logger');
-        $logger->info('helloasso notify',$_POST);
+        $logger->info('helloasso notify', $_POST);
 
         $actionId = $_POST['action_id'];
 
-        if (!$actionId){ //missing notification id
+        if (!$actionId) { //missing notification id
             $logger->info("missing action id");
-            return $this->json(array('success' => false, "message"=> "missing action id in POST content"));
+            return $this->json(array('success' => false, "message" => "missing action id in POST content"));
         }
 
         $actionId = str_pad($actionId, 12, '0', STR_PAD_LEFT);
 
-        $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/'.$actionId);
+        $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $actionId);
 
-        if (!isset($action_json->id)){
-            if(isset($action_json->code)){
-                return $this->json(array('success' => false, "code"=>$action_json->code, "message"=> $action_json->message));
+        if (!isset($action_json->id)) {
+            if (isset($action_json->code)) {
+                return $this->json(array('success' => false, "code" => $action_json->code, "message" => $action_json->message));
             }
-            return $this->json(array('success' => false, "message"=> "wrong api response"));
+            return $this->json(array('success' => false, "message" => "wrong api response"));
         }
-        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/'.$action_json->id_payment);
-        if (!isset($payment_json->id)){
-            if(isset($payment_json->code)){
-                return $this->json(array('success' => false, "code"=>$payment_json->code, "message"=> $payment_json->message));
+        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $action_json->id_payment);
+        if (!isset($payment_json->id)) {
+            if (isset($payment_json->code)) {
+                return $this->json(array('success' => false, "code" => $payment_json->code, "message" => $payment_json->message));
             }
-            return $this->json(array('success' => false, "message"=> "wrong api response"));
+            return $this->json(array('success' => false, "message" => "wrong api response"));
         }
 
         $em = $this->getDoctrine()->getManager();
-        $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
+        $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
 
-        if ($exist){ //notification already exist
+        if ($exist) { //notification already exist
             $logger->info("notification already exist");
-            return $this->json(array('success' => false, "message"=> "notification already exist"));
+            return $this->json(array('success' => false, "message" => "notification already exist"));
         }
 
         $payments = array();
         $action_json = null;
         $dispatcher = $this->get('event_dispatcher');
-        foreach ($payment_json->actions as $action){
+        foreach ($payment_json->actions as $action) {
             $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-            $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId'=>$payment_json->id));
-            if ($payment){ //payment already exist (created from a previous actions in THIS loop)
+            $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
+            if ($payment) { //payment already exist (created from a previous actions in THIS loop)
                 $amount = $action_json->amount;
                 $amount = str_replace(',', '.', $amount);
-                $payment->setAmount($payment->getAmount()+$amount);
-            }else{
+                $payment->setAmount($payment->getAmount() + $amount);
+            } else {
                 $payment = new HelloassoPayment();
                 $payment->fromActionObj($action_json);
             }
@@ -231,7 +241,7 @@ class DefaultController extends Controller
             $em->flush();
             $payments[$payment->getId()] = $payment;
         }
-        foreach ($payments as $payment){
+        foreach ($payments as $payment) {
             $dispatcher->dispatch(
                 HelloassoEvent::PAYMENT_AFTER_SAVE,
                 new HelloassoEvent($payment)
@@ -246,13 +256,14 @@ class DefaultController extends Controller
      * @Route("/shift/{id}/contact_form", name="shift_contact_form")
      * @Method({"GET","POST"})
      */
-    public function shiftContactFormAction(Shift $shift,Request $request, \Swift_Mailer $mailer){
+    public function shiftContactFormAction(Shift $shift, Request $request, \Swift_Mailer $mailer)
+    {
 
         $formBuilder = $this->createFormBuilder();
-        $formBuilder->add('from',HiddenType::class,array('data'=>$shift->getShifter()->getId()));
-        $formBuilder->add('to',HiddenType::class);
-        $formBuilder->add('message',TextareaType::class,array('attr'=>array('class'=>'materialize-textarea','label'=>'message')));
-        $formBuilder->setAction($this->generateUrl('shift_contact_form',array('id'=>$shift->getId())));
+        $formBuilder->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()));
+        $formBuilder->add('to', HiddenType::class);
+        $formBuilder->add('message', TextareaType::class, array('attr' => array('class' => 'materialize-textarea', 'label' => 'message')));
+        $formBuilder->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())));
         $formBuilder->setMethod('POST');
         $form = $formBuilder->getForm();
 
@@ -261,15 +272,15 @@ class DefaultController extends Controller
             $to = json_decode($to);
             $from = $form->get('from')->getData();
             $em = $this->getDoctrine()->getManager();
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id'=>$to));
-            $from = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id'=>$from));
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id' => $to));
+            $from = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id' => $from));
             $emails = array();
             $firstnames = array();
-            foreach ($beneficiaries as $beneficiary){
+            foreach ($beneficiaries as $beneficiary) {
                 $emails[] = $beneficiary->getEmail();
                 $firstnames[] = $beneficiary->getFirstname();
             }
-            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de '.$from->getFirstName()))
+            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName()))
                 ->setFrom($this->getParameter('transactional_mailer_user'))
                 ->setReplyTo($this->getParameter('transactional_mailer_user'))
                 ->setBcc($emails)
@@ -285,22 +296,22 @@ class DefaultController extends Controller
                 );
             $mailer->send($message);
             $session = new Session();
-            if (count($firstnames) > 1){
+            if (count($firstnames) > 1) {
                 $last_firstname = array_pop($firstnames);
-                $firstnames = implode(', ',$firstnames);
-                $firstnames .= ' et '.$last_firstname;
-            }else{
+                $firstnames = implode(', ', $firstnames);
+                $firstnames .= ' et ' . $last_firstname;
+            } else {
                 $firstnames = $firstnames[0];
             }
 
-            $session->getFlashBag()->add('success','Ton message a été transmit à '.$firstnames);
+            $session->getFlashBag()->add('success', 'Ton message a été transmit à ' . $firstnames);
             return $this->redirectToRoute('homepage');
-        }else{
+        } else {
             $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start'=>$shift->getStart(),'end'=>$shift->getEnd()));
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $shift->getStart(), 'end' => $shift->getEnd()));
             $coShifts = array();
-            foreach ($shifts as $s){
-                if ($s->getBooker() != null && $s->getId()!=$shift->getId()){
+            foreach ($shifts as $s) {
+                if ($s->getBooker() != null && $s->getId() != $shift->getId()) {
                     $coShifts[] = $s;
                 }
             }
@@ -316,24 +327,25 @@ class DefaultController extends Controller
      * @Route("/widget", name="widget")
      * @Method({"GET"})
      */
-    public function widgetAction(Request $request){
+    public function widgetAction(Request $request)
+    {
         $job_id = $request->get('job_id');
         $buckets = array();
         $display_end = $request->get('display_end') ? ($request->get('display_end') == 1) : false;
         $display_on_empty = $request->get('display_on_empty') ? ($request->get('display_on_empty') == 1) : false;
         $job = null;
-        if ($job_id){
+        if ($job_id) {
             $em = $this->getDoctrine()->getManager();
             $job = $em->getRepository('AppBundle:Job')->find($job_id);
-            if ($job){
+            if ($job) {
                 $shifts = $em->getRepository('AppBundle:Shift')->findFuturesWithJob($job);
                 foreach ($shifts as $shift) {
                     $day = $shift->getStart()->format("d m Y");
                     $interval = $shift->getIntervalCode();
-                    if (!isset($buckets[$interval.$day])) {
-                        $buckets[$interval.$day] = new ShiftBucket();
+                    if (!isset($buckets[$interval . $day])) {
+                        $buckets[$interval . $day] = new ShiftBucket();
                     }
-                    $buckets[$interval.$day]->addShift($shift);
+                    $buckets[$interval . $day]->addShift($shift);
                 }
             }
         }
