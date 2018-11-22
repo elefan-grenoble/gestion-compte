@@ -130,6 +130,13 @@ class MembershipVoter extends Voter
         if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership
             return true;
         }
+
+        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
+        $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
+        if ($token && $token == $subject->getTmpToken($session->get('token_key') . $user->getUsername())){
+            return true;
+        }
+
         return false;
 
     }
