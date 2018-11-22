@@ -48,8 +48,8 @@ class AnonymousBeneficiaryType extends AbstractType
                 'Espèce' => Registration::TYPE_CASH,
                 'Chèque' => Registration::TYPE_CHECK,
                 'Cairn' => Registration::TYPE_LOCAL,
-//                    'CB' => Registration::TYPE_CREDIT_CARD,
-            ),'label' => 'Mode de réglement')); //todo, make it dynamic
+//                'Helloasso' => Registration::TYPE_HELLOASSO,
+            ),'label' => 'Mode de réglement','placeholder' => '','required' => true)); //todo, make it dynamic
 
     }
     

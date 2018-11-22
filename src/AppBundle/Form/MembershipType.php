@@ -43,7 +43,7 @@ class MembershipType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+            if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'));
             } else {
                 $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true));

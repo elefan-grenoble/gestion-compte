@@ -40,16 +40,18 @@ class MemberType extends AbstractType
             $form = $event->getForm();
             $memberData = $event->getData();
 
-            if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
+            if (is_object($user) && ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))){
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
             }else{
                 $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
             }
 
-            if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
-                if ($memberData && $memberData->getId()) { //in not new
-                    $form->add('withdrawn', CheckboxType::class, array('label' => 'Compte fermé', 'required' => false));
-                    $form->add('frozen', CheckboxType::class, array('label' => 'Compte gelé', 'required' => false));
+            if (is_object($user)){
+                if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
+                    if ($memberData && $memberData->getId()) { //in not new
+                        $form->add('withdrawn', CheckboxType::class, array('label' => 'Compte fermé', 'required' => false));
+                        $form->add('frozen', CheckboxType::class, array('label' => 'Compte gelé', 'required' => false));
+                    }
                 }
             }
 

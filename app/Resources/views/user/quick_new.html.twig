@@ -9,6 +9,7 @@
 {% block content %}
     <h3>Nouvelle adhésion</h3>
 
+    {#<p>Pour une adhésion <span style="text-decoration: underline;">future</span>, choisir <span style="text-decoration: underline;">Helloasso</span> : la personne recevra un lien pour finaliser et payer son adhésion en ligne.</p>#}
     {{ form_start(form) }}
     {% include "user/_partial/user_quick_form.html.twig" with { form: form } %}
     <div>

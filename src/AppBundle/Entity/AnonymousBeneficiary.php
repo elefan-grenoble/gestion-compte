@@ -127,6 +127,15 @@ class AnonymousBeneficiary
     }
 
     /**
+     * Get created_at
+     *
+     * @return DateTime
+     */
+    public function getCreatedAt(){
+        return $this->created_at;
+    }
+
+    /**
      * Set email
      *
      * @param string $email
@@ -148,30 +157,6 @@ class AnonymousBeneficiary
     public function getEmail()
     {
         return $this->email;
-    }
-
-    /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Registration $registration
-     *
-     * @return AnonymousBeneficiary
-     */
-    public function setRegistration(\AppBundle\Entity\Registration $registration = null)
-    {
-        $this->registration = $registration;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Registration
-     */
-    public function getRegistration()
-    {
-        return $this->registration;
     }
 
     /**

@@ -3,6 +3,7 @@
 {% block content %}
     <h4 class="">editer adhésions / ré-adhésions</h4>
 
+    Adhésion pour <a href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.mainBeneficiary }}</a> enregistrée {{ registration.createdAt | date_fr_full  }}
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
         {{ form_start(edit_form) }}
         {% include "user/_partial/registration_form.html.twig" with { form: edit_form } %}
