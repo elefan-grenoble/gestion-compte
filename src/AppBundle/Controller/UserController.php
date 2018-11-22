@@ -26,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -114,8 +115,8 @@ class UserController extends Controller
         } else { //main super user not created yet
             $admin = new User();
             $admin->setEmail($this->getParameter('emails.admin')['address']);
-            $admin->setPlainPassword("password");
-            $admin->setUsername("admin");
+            $admin->setPlainPassword($this->getParameter('super_admin.initial_password'));
+            $admin->setUsername($this->getParameter('super_admin.username'));
             $admin->setEnabled(true);
             $admin->addRole('ROLE_SUPER_ADMIN');
             $em->persist($admin);
@@ -149,12 +150,17 @@ class UserController extends Controller
             $em->persist($ab);
             $em->flush();
 
+            $url = $this->generateUrl('member_new', array('code' => $this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($ab->getEmail())),UrlGeneratorInterface::ABSOLUTE_URL);
+
             $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn, tu te présentes ?'))
                 ->setFrom($this->container->getParameter('shift_mailer_user'))
                 ->setTo($ab->getEmail())
                 ->setBody(
                     $this->renderView(
-                        'emails/needInfo.html.twig'
+                        'emails/needInfo.html.twig',
+                        array(
+                            'register_url' => $url
+                        )
                     ),
                     'text/html'
                 );
