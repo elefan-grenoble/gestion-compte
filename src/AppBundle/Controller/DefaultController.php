@@ -148,7 +148,9 @@ class DefaultController extends Controller
      */
     public function cardReaderAction(Request $request)
     {
-        return $this->render('default/card_reader.html.twig', []);
+        return $this->render('default/card_reader.html.twig', [
+            "dashboard_url" => $this->getParameter("card_reader.dashboard.url")
+        ]);
     }
 
     /**
