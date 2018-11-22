@@ -47,6 +47,7 @@ security:
       - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+      - { path: ^/member/new, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/admin/, role: ROLE_USER_MANAGER }
       - { path: ^/api, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_REMEMBERED] }
       - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }

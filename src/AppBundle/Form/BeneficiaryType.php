@@ -46,7 +46,7 @@ class BeneficiaryType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+            if (is_object($user)&&($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',
@@ -63,7 +63,7 @@ class BeneficiaryType extends AbstractType
                     'required' => false,
                     'label' => 'Formation(s)'
                 ));
-            } else if ($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions())) {
+            } else if (is_object($user) && ($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions()))) {
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',
