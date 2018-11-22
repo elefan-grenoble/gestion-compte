@@ -706,17 +706,18 @@ class MembershipController extends Controller
                     $em->remove($a_beneficiary);
                     $em->flush();
 
+                    $dispatcher = $this->get('event_dispatcher');
+                    $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
+
                     $securityContext = $this->container->get('security.authorization_checker');
                     if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-                        $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. <br>Utilise ce formulaire pour créer tes accès. ton nom d\'utilisateur est <b>'.$member->getMainBeneficiary()->getUser()->getUsername().'</b>.');
-                        return $this->redirectToRoute('fos_user_resetting_request');
+                        $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée');
+                        return $this->render('member/active_me.html.twig', array(
+                            'user' => $member->getMainBeneficiary()->getUser(),
+                        ));
                     }else{
                         $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
                     }
-
-
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
 
                     return $this->redirectToShow($member);
                 }
