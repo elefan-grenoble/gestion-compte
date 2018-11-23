@@ -703,7 +703,8 @@ class MembershipController extends Controller
                     $member->setFrozenChange(false);
 
                     $em->persist($member);
-                    $em->remove($a_beneficiary);
+                    if ($a_beneficiary)
+                        $em->remove($a_beneficiary);
                     $em->flush();
 
                     $dispatcher = $this->get('event_dispatcher');
