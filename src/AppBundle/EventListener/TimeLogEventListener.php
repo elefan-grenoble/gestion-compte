@@ -89,7 +89,9 @@ class TimeLogEventListener
         $member = $event->getMembership();
         $date = $event->getDate();
 
-        if ($member->getFrozen()) {
+        if (new \DateTime('1 year ago') > $member->getLastRegistration()->getDate()) {
+            $this->createRegistrationExpiredLog($member,$date);
+        } else if ($member->getFrozen()) {
             $this->createFrozenLog($member,$date);
         } else {
             $this->createCycleBeginningLog($member, $date);
@@ -180,6 +182,23 @@ class TimeLogEventListener
         $log->setTime(0);
         $log->setDate($date);
         $log->setDescription("Début de cycle (compte gelé)");
+        $this->em->persist($log);
+        $this->em->flush();
+    }
+
+    /**
+     * @param Membership $membership
+     * @param \DateTime $date
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createRegistrationExpiredLog(Membership $membership, \DateTime $date)
+    {
+        $log = new TimeLog();
+        $log->setMembership($membership);
+        $log->setTime(0);
+        $log->setDate($date);
+        $log->setDescription("Début de cycle (adhésion non renouvelée)");
         $this->em->persist($log);
         $this->em->flush();
     }
