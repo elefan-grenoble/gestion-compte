@@ -1,0 +1,25 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block breadcrumps %}
+{% endblock %}
+
+{% block beforecontainer %}
+<iframe src="{{ dashboard_url }}"
+            frameborder="0" onload="this.width=screen.width;this.height=screen.height;" allowtransparency></iframe>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery(function () {
+            $(".collapsible .modal-trigger").on('click', function (e) {
+                e.preventDefault();
+            });
+        })
+        {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        var barcode_submit_url = "{{ path('check') }}";
+        {% endif %}
+    </script>
+    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+    {% endif %}
+{% endblock %}
