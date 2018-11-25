@@ -198,7 +198,7 @@ class TimeLogEventListener
         $log->setMembership($membership);
         $log->setTime(0);
         $log->setDate($date);
-        $log->setDescription("Début de cycle (adhésion non renouvelée)");
+        $log->setDescription("Début de cycle (adhésion expirée)");
         $this->em->persist($log);
         $this->em->flush();
     }
