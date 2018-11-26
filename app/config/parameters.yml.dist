@@ -76,6 +76,8 @@ parameters:
     helloasso_api_password:
     due_duration_by_cycle: 180
     min_shift_duration: 90
+    registration_duration: '1 year'
+    cycle_duration: '28 days'
     shift_mailer_user: ~
     local_currency_name: 'monnaie locale'
     #ip of the spot, comma separated if many
