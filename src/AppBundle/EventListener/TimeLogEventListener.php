@@ -21,6 +21,8 @@ class TimeLogEventListener
     protected $logger;
     protected $container;
     protected $due_duration_by_cycle;
+    protected $cycle_duration;
+    protected $registration_duration;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -28,6 +30,8 @@ class TimeLogEventListener
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
+        $this->cycle_duration = $this->container->getParameter('cycle_duration');
+        $this->registration_duration = $this->container->getParameter('registration_duration');
     }
 
     /**
@@ -89,7 +93,13 @@ class TimeLogEventListener
         $member = $event->getMembership();
         $date = $event->getDate();
 
-        if ($member->getFrozen()) {
+        $registrationEnd = clone $member->getLastRegistration()->getDate();
+        $registrationEnd->modify('+'.$this->registration_duration);
+        $registrationEnd->modify('+'.$this->cycle_duration);
+        
+        if ($date > $registrationEnd) {
+            $this->createRegistrationExpiredLog($member,$date);
+        } else if ($member->getFrozen()) {
             $this->createFrozenLog($member,$date);
         } else {
             $this->createCycleBeginningLog($member, $date);
@@ -180,6 +190,23 @@ class TimeLogEventListener
         $log->setTime(0);
         $log->setDate($date);
         $log->setDescription("Début de cycle (compte gelé)");
+        $this->em->persist($log);
+        $this->em->flush();
+    }
+
+    /**
+     * @param Membership $membership
+     * @param \DateTime $date
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createRegistrationExpiredLog(Membership $membership, \DateTime $date)
+    {
+        $log = new TimeLog();
+        $log->setMembership($membership);
+        $log->setTime(0);
+        $log->setDate($date);
+        $log->setDescription("Début de cycle (adhésion expirée)");
         $this->em->persist($log);
         $this->em->flush();
     }
