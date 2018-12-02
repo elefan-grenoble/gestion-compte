@@ -93,6 +93,11 @@ services:
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
 
+    beneficiary_initialization_subscriber:
+            class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
+            arguments:
+                - "@doctrine.orm.entity_manager"
+
     shift_service:
             class:  AppBundle\Service\ShiftService
             public: true

@@ -4,7 +4,6 @@ namespace AppBundle\EventListener;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
@@ -17,6 +16,7 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
      */
     private $em;
 
+
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -25,17 +25,8 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            FormEvents::PRE_SET_DATA => 'preInitializeMembership',
             FormEvents::SUBMIT       => 'postInitializeMembership',
         );
-    }
-
-    public function preInitializeMembership(FormEvent $event)
-    {
-        $beneficiary = $event->getData();
-        if ($beneficiary && $beneficiary->getUser()) {
-            $event->getForm()->get('email')->setData($beneficiary->getUser()->getEmail());
-        }
     }
 
     public function postInitializeMembership(FormEvent $event)
@@ -44,14 +35,18 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
         if ($beneficiary) {
             if (!$beneficiary->getUser()) {
                 $beneficiary->setUser(new User());
+            }
+
+            if (!$beneficiary->getUser()->getUsername()) {
 
                 $username = $this->generateUsername($beneficiary);
                 $beneficiary->getUser()->setUsername($username);
+            }
 
+            if (!$beneficiary->getUser()->getPassword()) {
                 $password = User::randomPassword();
                 $beneficiary->getUser()->setPassword($password);
             }
-            $beneficiary->getUser()->setEmail($event->getForm()->get('email')->getData());
         }
     }
 

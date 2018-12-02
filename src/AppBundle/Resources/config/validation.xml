@@ -14,5 +14,10 @@
                 <option name="strict">true</option>
             </constraint>
         </property>
+        <property name="username">
+            <constraint name="NotBlank">
+                <option name="message">fos_user.email.blank</option>
+            </constraint>
+        </property>
     </class>
 </constraint-mapping>

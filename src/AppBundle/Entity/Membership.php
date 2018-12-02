@@ -30,8 +30,7 @@ class Membership
 
     /**
      * @ORM\Column(type="integer")
-     * @Assert\NotBlank()
-     * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent.", groups={"Registration"})
+     * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent")
      */
     protected $member_number;
 

@@ -105,7 +105,7 @@ fos_user:
       type: AppBundle\Form\RegistrationType
   profile:
     form:
-      type: AppBundle\Form\UserType
+      type: AppBundle\Form\UserWithBeneficiaryType
 assetic:
   filters:
     less:

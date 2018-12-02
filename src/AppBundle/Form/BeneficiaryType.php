@@ -31,12 +31,16 @@ class BeneficiaryType extends AbstractType
      * @var EntityManager
      */
     private $em;
+    /**
+     * @var BeneficiaryInitializationSubscriber
+     */
+    private $beneficiaryInitializationSubscriber;
 
-    public function __construct(TokenStorageInterface $tokenStorage, ValidatorInterface $validator, EntityManagerInterface $em)
+    public function __construct(TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
-        $this->em = $em;
+        $this->beneficiaryInitializationSubscriber = $beneficiaryInitializationSubscriber;
     }
 
     /**
@@ -53,7 +57,7 @@ class BeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email', EmailType::class,array('label' => 'Courriel', 'mapped' => false, 'property_path' => 'user.email'))
+            ->add('user', UserType::class)
             ->add('lastname', TextType::class, array('label' => 'Nom de famille'))
             ->add('firstname', TextType::class, array('label' => 'Prénom'))
             ->add('phone', TextType::class, array('label' => 'Téléphone', 'required' => false))
@@ -91,7 +95,7 @@ class BeneficiaryType extends AbstractType
             }
         });
 
-        $builder->addEventSubscriber(new BeneficiaryInitializationSubscriber($this->em));
+        $builder->addEventSubscriber($this->beneficiaryInitializationSubscriber);
     }
 
     /**

@@ -13,7 +13,6 @@ use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
-use AppBundle\Form\UserType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

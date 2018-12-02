@@ -15,7 +15,6 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
-use AppBundle\Form\UserType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Service\MailerService;
 use FOS\UserBundle\Event\FormEvent;
@@ -261,16 +260,10 @@ class MembershipController extends Controller
             if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
                 $beneficiary->setMembership($member);
                 $member->addBeneficiary($beneficiary);
-
                 $em = $this->getDoctrine()->getManager();
-                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getUser()->getEmail()));
-                if (!$otherUser) {
-                    $em->persist($beneficiary);
-                    $em->flush();
-                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
-                } else {
-                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
-                }
+                $em->persist($beneficiary);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
             }
