@@ -59,11 +59,17 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
         $qb = $this->em->createQueryBuilder();
         $usernames = $qb->select('u')->from('AppBundle\Entity\User', 'u')
             ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
+            ->orderBy('u.username', 'DESC')
             ->getQuery()
             ->getResult();
-        $alreadyRegistered = (isset($usernames[$username])) ? $usernames[$username] : 0;
-        if (count($usernames) || $alreadyRegistered) {
-            $username = User::makeUsername($beneficiary->getFirstname(), $beneficiary->getLastname(), $alreadyRegistered + 1);
+
+        if (count($usernames)) {
+            $count = 1;
+            $first = $usernames[0]->getUsername();
+            if(preg_match_all('/\d+/', $first, $numbers)) {
+                $count = end($numbers[0]) + 1;
+            }
+            $username = $username . + $count;
         }
         return $username;
     }
