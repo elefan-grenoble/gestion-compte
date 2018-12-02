@@ -57,6 +57,7 @@ class Registration
      * @var string
      *
      * @ORM\Column(name="mode", type="integer")
+     * @Assert\NotBlank(message="Un mode de paiement est requis")
      */
     private $mode;
 

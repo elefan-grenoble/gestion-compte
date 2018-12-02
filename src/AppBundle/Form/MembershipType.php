@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -41,8 +42,9 @@ class MembershipType extends AbstractType
 
         $builder->add('mainBeneficiary', BeneficiaryType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user, $options) {
             $form = $event->getForm();
+            /** @var Membership $userData */
             $userData = $event->getData();
 
             if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
@@ -51,7 +53,7 @@ class MembershipType extends AbstractType
                 $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true));
             }
 
-            if ($userData && !$userData->getId()) {
+            if ($userData && !$userData->getId() && $userData->getLastRegistration()->getAmount() === null) {
                 $form->add('lastRegistration', RegistrationType::class, array('label' => ' ', 'data_class' => Registration::class));
             }
         });

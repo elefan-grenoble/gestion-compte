@@ -18,6 +18,9 @@
         </div>
     </div>
     <div class="input-field city col s3">
+        <div class="errors">
+            {{ form_errors(form.mode) }}
+        </div>
         {{ form_widget(form.mode) }}
         {{ form_label(form.mode) }}
     </div>
