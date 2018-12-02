@@ -2,7 +2,11 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
+use AppBundle\EventListener\BeneficiaryInitializationSubscriber;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -14,14 +18,25 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints\Email;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BeneficiaryType extends AbstractType
 {
     private $tokenStorage;
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+    /**
+     * @var EntityManager
+     */
+    private $em;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(TokenStorageInterface $tokenStorage, ValidatorInterface $validator, EntityManagerInterface $em)
     {
         $this->tokenStorage = $tokenStorage;
+        $this->validator = $validator;
+        $this->em = $em;
     }
 
     /**
@@ -76,20 +91,7 @@ class BeneficiaryType extends AbstractType
             }
         });
 
-        $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
-            $beneficiary = $event->getData();
-            if ($beneficiary && $beneficiary->getUser()) {
-                $event->getForm()->get('email')->setData($beneficiary->getUser()->getEmail());
-            }
-        });
-
-        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
-            $beneficiary = $event->getForm()->getData();
-            if (!$beneficiary->getUser()) {
-                $beneficiary->setUser(new User());
-            }
-            $beneficiary->getUser()->setEmail($event->getForm()->get('email')->getData());
-        });
+        $builder->addEventSubscriber(new BeneficiaryInitializationSubscriber($this->em));
     }
 
     /**

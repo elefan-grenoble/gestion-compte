@@ -52,6 +52,7 @@ class Beneficiary
      * One Beneficiary has One Address.
      * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     * @Assert\NotNull
      * @Assert\Valid
      */
     private $address;
@@ -59,6 +60,7 @@ class Beneficiary
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
+     * @Assert\NotNull
      * @Assert\Valid
      */
     private $user;
