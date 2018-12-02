@@ -23,22 +23,44 @@ class ShiftService
         $this->min_shift_duration = $min_shift_duration;
     }
 
+    /**
+     * Return the remaining amount of time to book by the given membership in the current cycle
+     * @param Membership $member
+     * @return mixed
+     */
     public function remainingToBook(Membership $member)
     {
         return $this->due_duration_by_cycle - $member->getTimeCount($member->endOfCycle());
     }
 
-
+    /**
+     * Check if a beneficiary can book on the given cycle
+     * @param Beneficiary $beneficiary
+     * @param int $cycle
+     * @return bool
+     */
     public function canBookOnCycle(Beneficiary $beneficiary, $cycle)
     {
         return $this->canBookDuration($beneficiary, $this->min_shift_duration, $cycle);
     }
 
+    /**
+     * Check if a beneficiary can book on the current and next cycles
+     * @param Beneficiary $beneficiary
+     * @return bool
+     */
     public function canBookSomething(Beneficiary $beneficiary)
     {
-        return $this->canBookDuration($beneficiary, $this->min_shift_duration, 0);
+        return $this->canBookOnCycle($beneficiary, 0) || $this->canBookOnCycle($beneficiary, 1);
     }
 
+    /**
+     * Check if a beneficiary can book a specific duration on the given cycle
+     * @param Beneficiary $beneficiary
+     * @param $duration
+     * @param int $cycle
+     * @return bool
+     */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
         $member = $beneficiary->getMembership();
@@ -73,7 +95,7 @@ class ShiftService
     }
 
     /**
-     * Get beneficiaries who can still book
+     * Get beneficiaries who can book for the current and next cycles
      *
      * @param Membership $member
      * @return \Doctrine\Common\Collections\Collection
@@ -81,7 +103,21 @@ class ShiftService
     public function getBeneficiariesWhoCanBook(Membership $member)
     {
         return $member->getBeneficiaries()->filter(function ($beneficiary) {
-            return $this->canBookDuration($beneficiary, $this->min_shift_duration, 0);
+            return $this->canBookSomething($beneficiary);
+        });
+    }
+
+    /**
+     * Get beneficiaries who can book for the given cycle
+     *
+     * @param Membership $member
+     * @param int $cycle
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBeneficiariesWhoCanBookForCycle(Membership $member, $cycle = 0)
+    {
+        return $member->getBeneficiaries()->filter(function ($beneficiary) use ($cycle) {
+            return $this->canBookOnCycle($beneficiary, $cycle);
         });
     }
 
