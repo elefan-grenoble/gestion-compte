@@ -1,9 +1,21 @@
 <div class="address row">
     <div class="input-field city col s6">
-        {{ form_row(form.email) }}
+        <div class="errors">
+            {{ form_errors(form.email) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.email) }}
+            {{ form_label(form.email) }}
+        </div>
     </div>
     <div class="input-field city col s3">
-        {{ form_row(form.amount) }}
+        <div class="errors">
+            {{ form_errors(form.amount) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.amount) }}
+            {{ form_label(form.amount) }}
+        </div>
     </div>
     <div class="input-field city col s3">
         {{ form_widget(form.mode) }}

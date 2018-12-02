@@ -2,6 +2,7 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\Registration;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -42,7 +43,7 @@ class AnonymousBeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'))
+            ->add('email',EmailType::class,array('label'=>'Courriel'))
             ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
             ->add('mode', ChoiceType::class, array('choices'  => array(
                 'Espèce' => Registration::TYPE_CASH,
@@ -59,7 +60,7 @@ class AnonymousBeneficiaryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\AnonymousBeneficiary'
+            'data_class' => AnonymousBeneficiary::class
         ));
     }
 

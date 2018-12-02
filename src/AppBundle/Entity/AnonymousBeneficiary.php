@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
@@ -28,6 +29,8 @@ class AnonymousBeneficiary
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=255, unique=true)
+     * @Assert\Email(strict="true")
+     * @Assert\NotBlank(message="L'email doit être saisie")
      */
     private $email;
 
@@ -36,6 +39,7 @@ class AnonymousBeneficiary
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
+     * @Assert\NotBlank(message="Le montant doit être saisi")
      */
     private $amount;
 
