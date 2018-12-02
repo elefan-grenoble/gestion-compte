@@ -38,11 +38,11 @@ class BeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel', 'mapped' => false))
-            ->add('lastname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom de famille'))
-            ->add('firstname', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Prénom'))
-            ->add('phone', TextType::class, array('constraints' => array(), 'label' => 'Téléphone', 'required' => false))
-            ->add('address', AddressType::class, array('label' => ' '));
+            ->add('email', EmailType::class,array('label' => 'Courriel', 'mapped' => false, 'property_path' => 'user.email'))
+            ->add('lastname', TextType::class, array('label' => 'Nom de famille'))
+            ->add('firstname', TextType::class, array('label' => 'Prénom'))
+            ->add('phone', TextType::class, array('label' => 'Téléphone', 'required' => false))
+            ->add('address', AddressType::class, array('label' => false));
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
@@ -98,7 +98,7 @@ class BeneficiaryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Beneficiary'
+            'data_class' => Beneficiary::class
         ));
     }
 

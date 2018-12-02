@@ -39,6 +39,8 @@ class MembershipType extends AbstractType
             );
         }
 
+        $builder->add('mainBeneficiary', BeneficiaryType::class);
+
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
             $userData = $event->getData();
@@ -48,8 +50,6 @@ class MembershipType extends AbstractType
             } else {
                 $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true));
             }
-
-            $form->add('mainBeneficiary', BeneficiaryType::class);
 
             if ($userData && !$userData->getId()) {
                 $form->add('lastRegistration', RegistrationType::class, array('label' => ' ', 'data_class' => Registration::class));

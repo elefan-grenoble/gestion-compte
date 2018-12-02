@@ -65,6 +65,7 @@ class Membership
     /**
      * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
      * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
+     * @Assert\Valid
      */
     private $lastRegistration;
 
@@ -77,6 +78,7 @@ class Membership
      * One Membership has One Main Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
+     * @Assert\Valid
      */
     private $mainBeneficiary;
 

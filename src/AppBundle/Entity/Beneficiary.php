@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
@@ -28,6 +29,7 @@ class Beneficiary
      * @var string
      *
      * @ORM\Column(name="lastname", type="string", length=255)
+     * @Assert\NotBlank(message="Le nom du bénéficiaire est requis")
      */
     private $lastname;
 
@@ -35,6 +37,7 @@ class Beneficiary
      * @var string
      *
      * @ORM\Column(name="firstname", type="string", length=255)
+     * @Assert\NotBlank(message="Le prénom du bénéficiaire est requis")
      */
     private $firstname;
 
@@ -49,12 +52,14 @@ class Beneficiary
      * One Beneficiary has One Address.
      * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     * @Assert\Valid
      */
     private $address;
 
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
+     * @Assert\Valid
      */
     private $user;
 

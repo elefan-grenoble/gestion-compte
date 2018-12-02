@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Registration
@@ -32,6 +33,7 @@ class Registration
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="datetime")
+     * @Assert\DateTime()
      */
     private $date;
 
@@ -39,6 +41,7 @@ class Registration
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
+     * @Assert\DateTime()
      */
     private $created_at;
 
@@ -46,6 +49,7 @@ class Registration
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
+     * @Assert\NotBlank(message="Un montant est requis")
      */
     private $amount;
 
