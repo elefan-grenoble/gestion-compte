@@ -103,6 +103,8 @@ fos_user:
   registration:
     form:
       type: AppBundle\Form\RegistrationType
+    confirmation:
+      enabled:    true # change to true for required email confirmation
   profile:
     form:
       type: AppBundle\Form\UserWithBeneficiaryType

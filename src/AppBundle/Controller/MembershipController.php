@@ -255,8 +255,11 @@ class MembershipController extends Controller
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
-
             $beneficiary = $beneficiaryForm->getData();
+
+            $event = new FormEvent($beneficiaryForm->get('user'), $request);
+            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+
             if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
                 $beneficiary->setMembership($member);
                 $member->addBeneficiary($beneficiary);
@@ -662,6 +665,9 @@ class MembershipController extends Controller
             $member->setWithdrawn(false);
             $member->setFrozen(false);
             $member->setFrozenChange(false);
+
+            $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
+            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($member);
             if ($a_beneficiary)
