@@ -680,9 +680,7 @@ class MembershipController extends Controller
             $securityContext = $this->container->get('security.authorization_checker');
             if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
                 $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée');
-                return $this->render('member/active_me.html.twig', array(
-                    'user' => $member->getMainBeneficiary()->getUser(),
-                ));
+                return $this->redirectToRoute('fos_user_registration_check_email');
             } else {
                 $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
             }
