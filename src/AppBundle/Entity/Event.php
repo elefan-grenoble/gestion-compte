@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
@@ -34,6 +35,7 @@ class Event
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="title", type="string", length=255)
      */
     private $title;
@@ -41,6 +43,13 @@ class Event
     /**
      * @var string
      *
+     * @Assert\NotBlank()
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 1000,
+     *      minMessage = "La description doit avoir au minimum {{ limit }} caractères",
+     *      maxMessage = "La description ne doit pas dépasser {{ limit }} caractères"
+     * )
      * @ORM\Column(name="description", type="text")
      */
     private $description;
@@ -71,6 +80,8 @@ class Event
     /**
      * @var \DateTime
      *
+     * @Assert\DateTime()
+     * @Assert\NotNull()
      * @ORM\Column(name="date", type="datetime")
      */
     private $date;

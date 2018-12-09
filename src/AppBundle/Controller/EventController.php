@@ -97,14 +97,6 @@ class EventController extends Controller
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$event->getDescription()){
-                $session->getFlashBag()->add('error', 'La description est obligatoire !');
-                return $this->render('admin/event/new.html.twig', array(
-                    'commission' => $event,
-                    'form' => $form->createView(),
-                    'errors' => $form->getErrors()
-                ));
-            }
             $em->persist($event);
             $em->flush();
             $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');

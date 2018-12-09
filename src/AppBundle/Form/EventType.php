@@ -19,8 +19,8 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\Length;
 use Vich\UploaderBundle\Form\Type\VichImageType;
+
 
 class EventType extends AbstractType
 {
@@ -55,7 +55,7 @@ class EventType extends AbstractType
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
                 ))
-                ->add('description',TextareaType::class,array('constraints' => array( new Length(array('min'=>0,'max'=>1000))), 'label'=>'Description','required' => false));
+                ->add('description',TextareaType::class,array('label'=>'Description','required' => false));
             $form->add('imgFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,
