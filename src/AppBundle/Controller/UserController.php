@@ -14,6 +14,7 @@ use AppBundle\Entity\User;
 use AppBundle\Form\AnonymousBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
+use AppBundle\Form\UserAdminType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -68,34 +69,10 @@ class UserController extends Controller
 
         if (count($user) > 0) { //main super admin exist
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
-                $form = $this->createFormBuilder()
-                    ->add('username', TextType::class, array('label' => "Nom d'utilisateur"))
-                    ->add('password', PasswordType::class, array('label' => "Mot de passe"))
-                    ->add('email', EmailType::class, array('label' => "Adresse email"))
-                    ->getForm();
+                $new_admin = new User();
+                $form = $this->createForm(UserAdminType::class, $new_admin);
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
-
-                    $existing_user = $em->getRepository('AppBundle:User')->findOneBy(array("username" => $form->get('username')->getData()));
-                    if ($existing_user) {
-                        $session->getFlashBag()->add('error', 'A user with this username already exist !');
-                        return $this->render('admin/user/new_admin.html.twig', array(
-                            'form' => $form->createView(),
-                        ));
-                    }
-                    $existing_user = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $form->get('email')->getData()));
-                    if ($existing_user) {
-                        $session->getFlashBag()->add('error', 'A user with this email already exist !');
-                        $session->getFlashBag()->add('warning', 'Put an empty email, we will provide one for your');
-                        return $this->render('admin/user/new_admin.html.twig', array(
-                            'form' => $form->createView(),
-                        ));
-                    }
-
-                    $new_admin = new User();
-                    $new_admin->setEmail($form->get('email')->getData());
-                    $new_admin->setPlainPassword($form->get('password')->getData());
-                    $new_admin->setUsername($form->get('username')->getData());
                     $new_admin->setEnabled(true);
                     $new_admin->addRole('ROLE_ADMIN');
                     $em->persist($new_admin);
