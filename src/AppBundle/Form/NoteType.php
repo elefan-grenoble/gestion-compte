@@ -17,7 +17,7 @@ class NoteType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('text',TextareaType::class,array('attr'=>array('class'=>'materialize-textarea')));
+        $builder->add('text', TextareaType::class, array('required' => true, 'attr' => array('class'=>'materialize-textarea')));
     }
 
     /**

@@ -37,7 +37,8 @@ class AmbassadorController extends Controller
      * @Route("/phone", name="ambassador_phone_list")
      * @Method({"GET","POST"})
      */
-    public function phoneAction(Request $request){
+    public function phoneAction(Request $request)
+    {
 
         $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
 
@@ -220,14 +221,14 @@ class AmbassadorController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function newNoteAction(Membership $member, Request $request){
-
+    public function newNoteAction(Membership $member, Request $request)
+    {
         $this->denyAccessUnlessGranted('annotate', $member);
         $session = new Session();
         $note = new Note();
         $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()){
+        if ($form->isSubmitted() && $form->isValid()) {
 
             $note->setSubject($member);
             $note->setAuthor($this->get('security.token_storage')->getToken()->getUser());
@@ -237,8 +238,8 @@ class AmbassadorController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success','La note a bien été ajoutée');
-        }else{
-            $session->getFlashBag()->add('error','oups');
+        } else {
+            $session->getFlashBag()->add('error', 'Impossible d\'ajouter une note');
         }
 
         return $this->redirectToRoute("ambassador_phone_show", array('member_number'=>$member->getMemberNumber()));

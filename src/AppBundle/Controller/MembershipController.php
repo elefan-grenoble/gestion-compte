@@ -772,17 +772,22 @@ class MembershipController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if ($note_form->isSubmitted() && $note_form->isValid()) {
-            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
-            $session = new Session();
-            if ($existing_note) {
-                $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+        $session = $request->getSession();
+        if ($note_form->isSubmitted()) {
+            if ($note_form->isValid()) {
+                $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
+                if ($existing_note) {
+                    $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+                } else {
+                    $em->persist($note);
+                    $em->flush();
+                    $session->getFlashBag()->add('success', 'Post-it ajouté');
+                }
             } else {
-                $em->persist($note);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Post-it ajouté');
+                $session->getFlashBag()->add('error', 'Impossible d\'ajouter le post-it');
             }
         }
+
 
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
         $notes_form = array();
