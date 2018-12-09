@@ -42,6 +42,8 @@ framework:
 twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
+  form_themes:
+      - "form/fields.html.twig"
   globals:
       site_name: "%site_name%"
       main_color: "%main_color%"
