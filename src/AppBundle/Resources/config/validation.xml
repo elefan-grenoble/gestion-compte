@@ -16,7 +16,15 @@
         </property>
         <property name="username">
             <constraint name="NotBlank">
-                <option name="message">fos_user.email.blank</option>
+                <option name="message">fos_user.username.blank</option>
+            </constraint>
+        </property>
+    </class>
+
+    <class name="AppBundle\Entity\Formation">
+        <property name="name">
+            <constraint name="NotBlank">
+                <option name="message">fos_user.group.blank</option>
             </constraint>
         </property>
     </class>
