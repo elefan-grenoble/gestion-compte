@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Task;
+use AppBundle\Form\JobType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -51,7 +52,7 @@ class JobController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\JobType', $job);
+        $form = $this->createForm(JobType::class, $job);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -86,7 +87,7 @@ class JobController extends Controller
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\JobType', $job);
+        $form = $this->createForm(JobType::class, $job);
 
         $form->handleRequest($request);
 

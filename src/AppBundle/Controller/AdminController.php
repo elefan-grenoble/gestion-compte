@@ -12,6 +12,7 @@ use AppBundle\Entity\Formation;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\BeneficiaryType;
+use AppBundle\Form\RegistrationType;
 use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
@@ -374,7 +375,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     {
         $session = new Session();
         if ($registration->getId() && ($request->attributes->get('id') == $registration->getId())){
-            $edit_form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $edit_form = $this->createForm(RegistrationType::class, $registration);
             $edit_form->handleRequest($request);
             if ($edit_form->isSubmitted() && $edit_form->isValid()) {
                 $em = $this->getDoctrine()->getManager();

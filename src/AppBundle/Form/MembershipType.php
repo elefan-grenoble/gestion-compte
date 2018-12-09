@@ -65,7 +65,7 @@ class MembershipType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Membership'
+            'data_class' => Membership::class
         ));
     }
 

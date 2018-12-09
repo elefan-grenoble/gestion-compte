@@ -6,6 +6,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
+use AppBundle\Form\ClientType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -47,7 +48,7 @@ class ClientController extends Controller
 
         $session = new Session();
 
-        $form = $this->createForm('AppBundle\Form\ClientType');
+        $form = $this->createForm(ClientType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -90,7 +91,7 @@ class ClientController extends Controller
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\ClientType');
+        $form = $this->createForm(ClientType::class);
         $form->get('urls')->setData($client->getUrls());
         $form->get('grant_types')->setData($client->getAllowedGrantTypes());
         $form->get('service')->setData($client->getService());

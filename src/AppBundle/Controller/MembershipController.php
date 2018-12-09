@@ -15,6 +15,7 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
+use AppBundle\Form\RegistrationType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Service\MailerService;
 use FOS\UserBundle\Event\FormEvent;
@@ -86,7 +87,7 @@ class MembershipController extends Controller
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $note, array(
+        $note_form = $this->createForm(NoteType::class, $note, array(
             'action' => $this->generateUrl('ambassador_new_note', array("member_number" => $member->getMemberNumber())),
             'method' => 'POST',
         ));
@@ -94,7 +95,7 @@ class MembershipController extends Controller
         $notes_delete_form = array();
         $new_notes_form = array();
         foreach ($member->getNotes() as $n) {
-            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
@@ -119,7 +120,7 @@ class MembershipController extends Controller
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
 
 
-        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg, array('action' => $action));
+        $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
 
         $deleteBeneficiaryForms = array();
@@ -175,7 +176,7 @@ class MembershipController extends Controller
             $newReg->setDate(new DateTime('now'));
         }
         $newReg->setRegistrar($this->getCurrentAppUser());
-        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        $registrationForm = $this->createForm(RegistrationType::class, $newReg);
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
         $registrationForm->handleRequest($request);
         if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
@@ -209,7 +210,7 @@ class MembershipController extends Controller
 
         $registrationForms = array();
         foreach ($member->getRegistrations() as $registration) {
-            $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $form = $this->createForm(RegistrationType::class, $registration);
             $registrationForms[$registration->getId()] = $form->createView();
         }
 
@@ -218,7 +219,7 @@ class MembershipController extends Controller
             $em = $this->getDoctrine()->getManager();
             $registration = $em->getRepository('AppBundle:Registration')->find($id);
             if ($registration) {
-                $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+                $form = $this->createForm(RegistrationType::class, $registration);
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
                     if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
@@ -766,7 +767,7 @@ class MembershipController extends Controller
         $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
         $note = new Note();
         $note->setAuthor($this->getCurrentAppUser());
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form = $this->createForm(NoteType::class, $note);
         $note_form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
@@ -788,7 +789,7 @@ class MembershipController extends Controller
         $notes_delete_form = array();
         $new_notes_form = array();
         foreach ($notes as $n) {
-            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;

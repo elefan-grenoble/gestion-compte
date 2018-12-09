@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\Task;
+use AppBundle\Form\TaskType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -58,7 +59,7 @@ class TaskController extends Controller
         $task->setRegistrar($current_app_user);
         $task->setCreatedAt(new \DateTime('now'));
 
-        $form = $this->createForm('AppBundle\Form\TaskType', $task);
+        $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -98,7 +99,7 @@ class TaskController extends Controller
         $this->denyAccessUnlessGranted('edit',$task);
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\TaskType', $task);
+        $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
         $form->get('created_at')->setData($task->getCreatedAt()->format('Y-m-d'));
 

@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
+use AppBundle\Form\ServiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -70,7 +71,7 @@ class ServiceController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\ServiceType', $service);
+        $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -109,7 +110,7 @@ class ServiceController extends Controller
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\ServiceType', $service);
+        $form = $this->createForm(ServiceType::class, $service);
 
         $form->handleRequest($request);
 

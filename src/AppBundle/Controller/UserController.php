@@ -11,6 +11,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Form\AnonymousBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -138,7 +139,7 @@ class UserController extends Controller
     {
         $ab = new AnonymousBeneficiary();
 
-        $form = $this->createForm('AppBundle\Form\AnonymousBeneficiaryType', $ab);
+        $form = $this->createForm(AnonymousBeneficiaryType::class, $ab);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

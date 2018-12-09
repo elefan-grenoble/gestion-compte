@@ -4,6 +4,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
+use AppBundle\Form\EventType;
+use AppBundle\Form\ProxyType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -92,7 +94,7 @@ class EventController extends Controller
         $session = new Session();
         $event = new Event();
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\EventType', $event);
+        $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if (!$event->getDescription()){
@@ -126,7 +128,7 @@ class EventController extends Controller
     {
         $session = new Session();
 
-        $form = $this->createForm('AppBundle\Form\EventType', $event);
+        $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -203,7 +205,7 @@ class EventController extends Controller
     {
         $session = new Session();
         $event = $proxy->getEvent();
-        $form = $this->createForm('AppBundle\Form\ProxyType', $proxy);
+        $form = $this->createForm(ProxyType::class, $proxy);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -391,7 +393,7 @@ class EventController extends Controller
                 }
                 $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
                 $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
-                $confirm_form = $this->createForm('AppBundle\Form\ProxyType', $proxy);
+                $confirm_form = $this->createForm(ProxyType::class, $proxy);
                 $confirm_form->handleRequest($request);
 
                 if ($confirm_form->isSubmitted() && $confirm_form->isValid()) {
@@ -515,7 +517,7 @@ class EventController extends Controller
             $proxy->setEvent($event);
             $proxy->setCreatedAt(new \DateTime());
         }
-        $form = $this->createForm('AppBundle\Form\ProxyType', $proxy);
+        $form = $this->createForm(ProxyType::class, $proxy);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -2,9 +2,8 @@
 
 namespace AppBundle\Form;
 
+use AppBundle\Entity\Job;
 use AppBundle\Entity\PeriodPosition;
-use AppBundle\Entity\PeriodRoom;
-use AppBundle\Entity\Role;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -33,7 +32,7 @@ class JobType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Job'
+            'data_class' => Job::class
         ));
     }
 

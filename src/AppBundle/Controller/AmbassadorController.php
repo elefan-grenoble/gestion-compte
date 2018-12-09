@@ -225,7 +225,7 @@ class AmbassadorController extends Controller
         $this->denyAccessUnlessGranted('annotate', $member);
         $session = new Session();
         $note = new Note();
-        $form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()){
 
