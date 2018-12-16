@@ -28,6 +28,9 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
+    AppBundle\EventListener\:
+        resource: '../../src/AppBundle/EventListener'
+        autoconfigure: false
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
@@ -47,6 +50,21 @@ services:
         class: AppBundle\Form\RegistrationType
         tags:
             - { name: form.type, alias: app_user_registration }
+
+    beneficiary_type:
+      class: AppBundle\Form\BeneficiaryType
+      arguments:
+        - '@security.token_storage'
+        - '@validator'
+        - '@beneficiary_initialization_subscriber'
+
+    beneficiary_without_user_type:
+      class: AppBundle\Form\BeneficiaryWithoutUserType
+      arguments:
+        - '@security.token_storage'
+        - '@validator'
+        - '@beneficiary_initialization_subscriber'
+
     app.authentication_success_handler:
             class: AppBundle\EventListener\AuthenticationSuccessHandler
             tags:
@@ -94,12 +112,24 @@ services:
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
                 - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
 
+
     beneficiary_initialization_subscriber:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
+            public: true
+            autowire: false
+            autoconfigure: false
             arguments:
-                - "@doctrine.orm.entity_manager"
+                $em: "@doctrine.orm.entity_manager"
+                $defaultRoles: "%user.default_roles%"
             tags:
                 - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
+                - { name: kernel.event_subscriber }
+
+    booking_rights_subscriber:
+            class: AppBundle\EventListener\BookingRightsSubscriber
+            arguments: ["@doctrine.orm.entity_manager"]
+            tags:
+              - { name: kernel.event_subscriber }
 
     shift_service:
             class:  AppBundle\Service\ShiftService

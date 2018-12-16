@@ -102,3 +102,9 @@ parameters:
     logging.swiftmailer.enabled: false
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
+
+    # The default roles applied to new users
+    # ROLE_SHIFT_FIRST_BOOKER is useful if we want to allow new users to book empty shifts
+    user.default_roles:
+        - ROLE_USER
+        - ROLE_SHIFT_FIRST_BOOKER

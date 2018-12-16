@@ -6,6 +6,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
 use AppBundle\Event\BeneficiaryCreatedEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use FOS\UserBundle\FOSUserEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -16,17 +17,20 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
      * @var EntityManagerInterface
      */
     private $em;
+    private $defaultRoles;
 
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, array $defaultRoles)
     {
         $this->em = $em;
+        $this->defaultRoles = $defaultRoles;
     }
 
     public static function getSubscribedEvents()
     {
         return array(
-            FormEvents::SUBMIT       => 'postInitializeMembership',
+            FormEvents::SUBMIT => 'postInitializeMembership',
+            FOSUserEvents::REGISTRATION_SUCCESS => 'setupRoles'
         );
     }
 
@@ -70,6 +74,13 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
                 $beneficiary->getUser()->setPassword($password);
             }
         }
+    }
+
+    public function setupRoles(\FOS\UserBundle\Event\FormEvent $event)
+    {
+        /** @var User $user */
+        $user = $event->getForm()->getData();
+        $user->setRoles($this->defaultRoles);
     }
 
     private function generateUsername(Beneficiary $beneficiary)
