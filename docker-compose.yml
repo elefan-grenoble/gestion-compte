@@ -1,0 +1,30 @@
+version: '3.2'
+
+services:
+
+  db:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    volumes:
+       - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DBROOTPWD}
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: on-failure
+    ports:
+      - 8080:8080
+
+  gestion-membres:
+    build: .
+    image: web-gestion-membres
+    restart: always
+    container_name: web-gestion-membres
+    ports:
+      - 80:80
+
+volumes: 
+  dbdata:
