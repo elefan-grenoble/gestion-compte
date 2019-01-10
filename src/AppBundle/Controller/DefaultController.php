@@ -148,8 +148,11 @@ class DefaultController extends Controller
      */
     public function cardReaderAction(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+        $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
+        $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
         return $this->render('default/card_reader.html.twig', [
-            "dashboard_url" => $this->getParameter("card_reader.dashboard.url")
+            "buckets" => $buckets
         ]);
     }
 

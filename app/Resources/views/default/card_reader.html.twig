@@ -4,8 +4,64 @@
 {% endblock %}
 
 {% block beforecontainer %}
-<iframe src="{{ dashboard_url }}"
-            frameborder="0" onload="this.width=screen.width;this.height=screen.height;" allowtransparency></iframe>
+
+    <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+        <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
+    </nav>
+
+    <div class="row">
+
+        <div class="col s6">
+            <h5>Créneaux en cours</h5>
+
+            {% for bucket in buckets %}
+
+                <div class="card sticky-action">
+                    <div class="card-content {{ bucket.job.color }} lighten-4">
+                        <div class="card-title activator">
+                            <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> /
+                            <b>{{ bucket.start | date('H:i') }} à {{ bucket.end | date('H:i') }}</b>
+                        </div>
+                        <ul>
+                            {% for shift in bucket.shifts %}
+                                <li style="height: 30px">
+                                    <div>
+                                        <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
+                                        {% if shift.formation %}<span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b>
+                                            </span>{% endif %}
+                                        {% if not shift.shifter.shifts | length %}<span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>{% endif %}
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="col s6">
+
+            <h5>Actualités</h5>
+
+            <h6>Changements de procédures</h6>
+
+            <p>Les stocks sont maintenant au sous-sol</p>
+            <p>Lire les nouvelles procédures pour le réapprovisionnement des rayons sur le Wiki (R24 et R25).</p>
+            <p>Le cahier de réapprovisionnement (vert clair) fait son apparition pour noter les produits à remettre en rayons.</p>
+
+
+            <h6>Produits d'entretiens au vrac</h6>
+
+            <p>Les liquides d'entretiens au vrac doivent être contenus dans des récipients spéciaux disponibles à l'achat au rayon 1F.</p>
+            <p>Une étiquette (payante, disponible à la caisse) doit être apposée dessus.</p>
+            <p>Une fois le récipient utilisé pour contenir un produit, il ne peut être réutilisé que pour ce produit.</p>
+
+
+        </div>
+
+
+    </div>
+
 {% endblock %}
 
 {% block javascripts %}

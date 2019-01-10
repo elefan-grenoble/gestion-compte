@@ -40,7 +40,7 @@ class BookingController extends Controller
         $undismissShiftForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('undismiss_shift'))
             ->setMethod('POST')
-            ->add('shift_id',HiddenType::class)
+            ->add('shift_id', HiddenType::class)
             ->getForm();
 
         return $this->render('booking/home_booked_shifts.html.twig', [
@@ -99,33 +99,17 @@ class BookingController extends Controller
             }
 
             $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+            $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+            $dismissedShifts = array();
+            foreach ($shifts as $shift) {
+                if ($shift->getIsDismissed()) {
+                    $dismissedShifts[] = $shift;
+                }
+            }
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
                 $hours[] = $i;
-            }
-
-            $bucketsByDay = array();
-            $dismissedShifts = array();
-            foreach ($shifts as $shift) {
-                $day = $shift->getStart()->format("d m Y");
-                $job = $shift->getJob()->getId();
-                $interval = $shift->getIntervalCode();
-                if (!isset($bucketsByDay[$day])) {
-                    $bucketsByDay[$day] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job])) {
-                    $bucketsByDay[$day][$job] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job][$interval])) {
-                    $bucket = new ShiftBucket();
-                    $bucketsByDay[$day][$job][$interval] = $bucket;
-                }
-                $bucketsByDay[$day][$job][$interval]->addShift($shift);
-                //dismissed
-                if ($shift->getIsDismissed()) {
-                    $dismissedShifts[] = $shift;
-                }
             }
 
             return $this->render('booking/index.html.twig', [
@@ -193,8 +177,7 @@ class BookingController extends Controller
             ->createQueryBuilder('b')
             ->select('b, m')
             ->join('b.user', 'u')
-            ->join('b.membership', 'm')
-        ;
+            ->join('b.membership', 'm');
         $beneficiaries = $beneficiariesQb->getQuery()->getResult();
 
         $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
@@ -308,7 +291,7 @@ class BookingController extends Controller
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
-            || !$this->get('shift_service')->isShiftBookable($shift,$beneficiary)
+            || !$this->get('shift_service')->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session = new Session();

@@ -109,6 +109,9 @@ class ShiftBucket
         return $this->shifts->first();
     }
 
+    /**
+     * @return Job
+     */
     public function getJob()
     {
         return $this->getFirst()->getJob();

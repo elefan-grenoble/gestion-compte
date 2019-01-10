@@ -1,6 +1,7 @@
 <?php
 
 namespace AppBundle\Repository;
+
 use AppBundle\Entity\Shift;
 
 /**
@@ -26,7 +27,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFuturesWithJob($job,\DateTime $max = null)
+    public function findFuturesWithJob($job, \DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -37,7 +38,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('now', new \Datetime('now'))
             ->setParameter('jid', $job->getId());
 
-        if ($max){
+        if ($max) {
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
@@ -50,7 +51,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFrom(\DateTime $from,\DateTime $max = null)
+    public function findFrom(\DateTime $from, \DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -59,7 +60,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->leftJoin('s.formation', 'f')
             ->where('s.start > :from')
             ->setParameter('from', $from);
-        if ($max){
+        if ($max) {
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
@@ -120,7 +121,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->andwhere('s.start < :datePlusOne')
             ->andWhere('s.lastShifter is not null')
             ->setParameter('date', $date)
-            ->setParameter('datePlusOne',$datePlusOne );
+            ->setParameter('datePlusOne', $datePlusOne);
 
         return $qb
             ->getQuery()
@@ -158,7 +159,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->andwhere('s.start < :datePlusOne')
             ->setParameter('job', $job)
             ->setParameter('date', $date)
-            ->setParameter('datePlusOne',$datePlusOne );
+            ->setParameter('datePlusOne', $datePlusOne);
 
         return $qb
             ->getQuery()
@@ -186,5 +187,21 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findInProgress(\DateTime $date)
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.shifter is not null')
+            ->andWhere('s.isDismissed = 0')
+            ->andwhere(':date between s.start and s.end')
+            ->setParameter('date', $date);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
 
 }

@@ -7,6 +7,7 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
+use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
 
 class ShiftService
@@ -258,5 +259,45 @@ class ShiftService
         $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
         $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations());
         return $bucket->getShifts()->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
+    }
+
+    public function generateShiftBucketsByDayAndJob($shifts)
+    {
+        $bucketsByDay = array();
+        foreach ($shifts as $shift) {
+            $day = $shift->getStart()->format("d m Y");
+            $job = $shift->getJob()->getId();
+            $interval = $shift->getIntervalCode();
+            if (!isset($bucketsByDay[$day])) {
+                $bucketsByDay[$day] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job])) {
+                $bucketsByDay[$day][$job] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job][$interval])) {
+                $bucket = new ShiftBucket();
+                $bucketsByDay[$day][$job][$interval] = $bucket;
+            }
+            $bucketsByDay[$day][$job][$interval]->addShift($shift);
+        }
+        return $bucketsByDay;
+    }
+
+    /**
+     * @param $shifts
+     * @return array
+     */
+    public function generateShiftBuckets($shifts)
+    {
+        $buckets = array();
+        foreach ($shifts as $shift) {
+            $key = $shift->getIntervalCode().$shift->getJob()->getId();
+            if (!isset($buckets[$key])) {
+                $bucket = new ShiftBucket();
+                $buckets[$key] = $bucket;
+            }
+            $buckets[$key]->addShift($shift);
+        }
+        return $buckets;
     }
 }
