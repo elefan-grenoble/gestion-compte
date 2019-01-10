@@ -13,14 +13,12 @@ class ShiftService
 {
 
     protected $em;
-    protected $logger;
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
 
-    public function __construct($em, $logger, $due_duration_by_cycle, $min_shift_duration)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration)
     {
         $this->em = $em;
-        $this->logger = $logger;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
     }
