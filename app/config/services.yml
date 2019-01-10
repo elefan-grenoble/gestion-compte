@@ -96,7 +96,7 @@ services:
     shift_service:
             class:  AppBundle\Service\ShiftService
             public: true
-            arguments: ["@doctrine.orm.entity_manager", "%due_duration_by_cycle%", "%min_shift_duration%"]
+            arguments: ["@doctrine.orm.entity_manager", "@logger", "%due_duration_by_cycle%", "%min_shift_duration%"]
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor
