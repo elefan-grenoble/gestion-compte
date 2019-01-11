@@ -11,6 +11,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Form\AnonymousBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
@@ -127,21 +128,8 @@ class UserController extends Controller
             $em->persist($ab);
             $em->flush();
 
-            $url = $this->generateUrl('member_new', array('code' => $this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($ab->getEmail())),UrlGeneratorInterface::ABSOLUTE_URL);
-
-            $welcome = (new \Swift_Message('Bienvenu à l\'éléfàn, tu te présentes ?'))
-                ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($ab->getEmail())
-                ->setBody(
-                    $this->renderView(
-                        'emails/needInfo.html.twig',
-                        array(
-                            'register_url' => $url
-                        )
-                    ),
-                    'text/html'
-                );
-            $mailer->send($welcome);
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
 
             $session = new Session();
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');

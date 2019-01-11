@@ -2,6 +2,7 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
@@ -34,6 +35,34 @@ class EmailingEventListener
     }
 
     /**
+     * @param AnonymousBeneficiaryCreatedEvent $event
+     * @throws \Exception
+     */
+    public function onAnonymousBeneficiaryCreated(AnonymousBeneficiaryCreatedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onAnonymousBeneficiaryCreated");
+
+        $email = $event->getAnonymousBeneficiary()->getEmail();
+
+        $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $needInfo = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', tu te présentes ?'))
+            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setTo($email)
+            ->setBody(
+                $this->renderView(
+                    'emails/needInfo.html.twig',
+                    array(
+                        'register_url' => $url
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($needInfo);
+
+    }
+
+    /**
      * @param MemberCreatedEvent $event
      * @throws \Exception
      */
@@ -43,14 +72,20 @@ class EmailingEventListener
 
         $beneficiaries = $event->getMembership()->getBeneficiaries();
 
+        $em = $this->container->get('doctrine')->getManager();
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+
         foreach ($beneficiaries as $beneficiary) {
-            $welcome = (new \Swift_Message('Bienvenue à l\'éléfàn'))
+            $welcome = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name')))
                 ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/welcome.html.twig',
-                        array('beneficiary' => $beneficiary)
+                        array(
+                            'beneficiary' => $beneficiary,
+                            'dynamicContent' => $dynamicContent
+                        )
                     ),
                     'text/html'
                 );

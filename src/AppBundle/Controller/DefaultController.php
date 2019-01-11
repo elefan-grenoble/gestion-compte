@@ -148,8 +148,16 @@ class DefaultController extends Controller
      */
     public function cardReaderAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('card_reader', $this->getUser());
+        $em = $this->getDoctrine()->getManager();
+        $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
+        $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
+
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
+
         return $this->render('default/card_reader.html.twig', [
-            "dashboard_url" => $this->getParameter("card_reader.dashboard.url")
+            "buckets" => $buckets,
+            "dynamicContent" => $dynamicContent
         ]);
     }
 

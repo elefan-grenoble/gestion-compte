@@ -92,6 +92,7 @@ services:
                 - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
+                - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
 
     beneficiary_initialization_subscriber:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
