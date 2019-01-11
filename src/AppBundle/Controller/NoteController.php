@@ -13,7 +13,6 @@ use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
-use AppBundle\Form\UserType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -69,7 +68,7 @@ class NoteController extends Controller
         $new_note->setCreatedAt(new \DateTime());
         $new_note->setSubject($note->getSubject());
 
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $new_note);
+        $note_form = $this->createForm(NoteType::class, $new_note);
         $note_form->handleRequest($request);
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
@@ -96,7 +95,7 @@ class NoteController extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $note);
 
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form = $this->createForm(NoteType::class, $note);
         $note_form->handleRequest($request);
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {

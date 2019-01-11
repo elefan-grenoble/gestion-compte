@@ -17,7 +17,13 @@
     <h4>Première adhésion</h4>
     <div class="row">
         <div class="amount col s3">
-            {{ form_row(form.lastRegistration.amount) }}
+            <div class="errors">
+                {{ form_errors(form.lastRegistration.amount) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.lastRegistration.amount) }}
+                {{ form_label(form.lastRegistration.amount) }}
+            </div>
         </div>
         <div class="type col s3">
             {{ form_row(form.lastRegistration.mode) }}

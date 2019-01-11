@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Address
@@ -25,6 +26,7 @@ class Address
      * @var string
      *
      * @ORM\Column(name="street1", type="string", length=255)
+     * @Assert\NotBlank(message="L'adresse est requise")
      */
     private $street1;
 
@@ -39,6 +41,9 @@ class Address
      * @var string
      *
      * @ORM\Column(name="zipcode", type="string", length=255)
+     * @Assert\NotNull(message="Le code postal est requis")
+     * @Assert\Regex(pattern="/^[0-9]+$/", message="Le code postal doit comporter que des chiffres")
+     * @Assert\Length(min="5", max="5", exactMessage="Le code postal doit comporter 5 chiffres")
      */
     private $zipcode;
 
@@ -46,6 +51,7 @@ class Address
      * @var string
      *
      * @ORM\Column(name="city", type="string", length=255)
+     * @Assert\NotBlank(message="La ville est requise")
      */
     private $city;
 

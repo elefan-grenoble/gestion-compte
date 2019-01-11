@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\Role;
+use AppBundle\Form\CommissionType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -52,7 +53,7 @@ class CommissionController extends Controller
         $commission = new Commission();
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
+        $form = $this->createForm(CommissionType::class, $commission);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -88,7 +89,7 @@ class CommissionController extends Controller
             throw $this->createAccessDeniedException();
         }
 
-        $form = $this->createForm('AppBundle\Form\CommissionType', $commission);
+        $form = $this->createForm(CommissionType::class, $commission);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -1,0 +1,7 @@
+.card-content .card-btn-bar {
+  position: absolute;
+  bottom: -20px;
+}
+.card-content .card-btn-bar .card-btn {
+  display: inline-block;
+}

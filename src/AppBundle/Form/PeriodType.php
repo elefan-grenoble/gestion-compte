@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Job;
+use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -49,7 +50,7 @@ class PeriodType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Period'
+            'data_class' => Period::class
         ));
     }
 

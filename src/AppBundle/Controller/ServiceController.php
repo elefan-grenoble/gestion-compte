@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
+use AppBundle\Form\ServiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -24,7 +25,6 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class ServiceController extends Controller
 {
-
     /**
      * Lists all services.
      *
@@ -32,7 +32,8 @@ class ServiceController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function listAction(Request $request){
+    public function listAction(Request $request)
+    {
         $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('AppBundle:Service')->findAll();
         return $this->render('admin/service/list.html.twig', array(
@@ -48,7 +49,8 @@ class ServiceController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_USER')")
      */
-    public function navlistAction(){
+    public function navlistAction()
+    {
         $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('AppBundle:Service')->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
@@ -63,14 +65,15 @@ class ServiceController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request)
+    {
         $session = new Session();
 
         $service = new Service();
 
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\ServiceType', $service);
+        $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -86,11 +89,6 @@ class ServiceController extends Controller
 
             return $this->redirectToRoute('admin_services');
 
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
         }
         return $this->render('admin/service/new.html.twig', array(
             'form' => $form->createView()
@@ -105,11 +103,12 @@ class ServiceController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Service $service){
+    public function editAction(Request $request,Service $service)
+    {
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\ServiceType', $service);
+        $form = $this->createForm(ServiceType::class, $service);
 
         $form->handleRequest($request);
 
@@ -126,11 +125,6 @@ class ServiceController extends Controller
 
             return $this->redirectToRoute('admin_services');
 
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
         }
         return $this->render('admin/service/edit.html.twig', array(
             'form' => $form->createView(),
@@ -148,7 +142,8 @@ class ServiceController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Service $service){
+    public function removeAction(Request $request,Service $service)
+    {
         $session = new Session();
 
         $form = $this->getDeleteForm($service);
@@ -175,7 +170,8 @@ class ServiceController extends Controller
      * @param Service $service
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Service $service){
+    protected function getDeleteForm(Service $service)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('service_remove', array('id' => $service->getId())))
             ->setMethod('DELETE')
@@ -186,7 +182,8 @@ class ServiceController extends Controller
      * @param Service $service
      * @return string
      */
-    protected function resolveLogo(Service $service){
+    protected function resolveLogo(Service $service)
+    {
         $helper = $this->container->get('vich_uploader.templating.helper.uploader_helper');
         $path = $helper->asset($service, 'logoFile');
         $imagineCacheManager = $this->get('liip_imagine.cache.manager');
@@ -194,7 +191,8 @@ class ServiceController extends Controller
         return $resolvedPath;
     }
 
-    private function getErrorMessages(Form $form) {
+    private function getErrorMessages(Form $form)
+    {
         $errors = array();
 
         foreach ($form->getErrors() as $key => $error) {

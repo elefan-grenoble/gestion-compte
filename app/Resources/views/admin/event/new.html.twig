@@ -36,7 +36,9 @@
             </div>
         </div>
     </div>
-    {{ form_errors(form.description) }}
+    <div class="errors">
+        {{ form_errors(form.description) }}
+    </div>
     {{ form_label(form.description) }}
     {{ form_widget(form.description) }}
     <div>

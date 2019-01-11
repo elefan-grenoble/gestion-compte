@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 /**
@@ -27,6 +28,7 @@ class Service
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
@@ -34,6 +36,7 @@ class Service
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="description", type="string", length=255)
      */
     private $description;
@@ -41,6 +44,7 @@ class Service
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="icon", type="string", length=255)
      */
     private $icon;
@@ -48,6 +52,7 @@ class Service
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="slug", type="string", length=255)
      */
     private $slug;

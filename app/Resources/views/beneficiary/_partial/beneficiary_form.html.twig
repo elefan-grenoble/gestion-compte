@@ -1,4 +1,15 @@
 <div class="beneficiary row">
+    {% if form.user is defined %}
+        <div class="input-field email col s12">
+            <div class="errors">
+                {{ form_errors(form.user.email) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.user.email) }}
+                {{ form_label(form.user.email) }}
+            </div>
+        </div>
+    {% endif %}
     <div class="input-field firstname col s6">
         <div class="errors">
             {{ form_errors(form.firstname) }}
@@ -17,16 +28,7 @@
             {{ form_label(form.lastname) }}
         </div>
     </div>
-    <div class="input-field email col s6">
-        <div class="errors">
-            {{ form_errors(form.email) }}
-        </div>
-        <div class="input-field">
-            {{ form_widget(form.email) }}
-            {{ form_label(form.email) }}
-        </div>
-    </div>
-    <div class="input-field phone col s6">
+    <div class="input-field phone col s12">
         <div class="errors">
             {{ form_errors(form.phone) }}
         </div>
