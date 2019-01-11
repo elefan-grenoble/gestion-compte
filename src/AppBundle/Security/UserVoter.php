@@ -50,11 +50,10 @@ class UserVoter extends Voter
     {
         $user = $token->getUser();
 
-        if ($attribute == self::CARD_READER){
-            return $this->isLocationOk();
-        }
-
         if (!$user instanceof User) {
+            if ($attribute == self::CARD_READER){
+                return $this->isLocationOk();
+            }
             // the user must be logged in; if not, deny access
             return false;
         }
@@ -74,6 +73,8 @@ class UserVoter extends Voter
 
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
+            case self::CARD_READER: //for all
+                return true;
             case self::ACCESS_TOOLS:
             case self::CREATE:
                 return $this->isLocationOk();
