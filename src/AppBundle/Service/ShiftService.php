@@ -72,16 +72,16 @@ class ShiftService
             return false;
         }
 
-        //time count at start of cycle (before decrease)
-        $timeCounter = $member->getTimeCount($member->startOfCycle($cycle));
-        //time count at start of cycle  (after decrease)
-        if ($timeCounter > $this->due_duration_by_cycle) {
-            $timeCounter = 0;
-        } else {
-            $timeCounter -= $this->due_duration_by_cycle;
+        // Time count before the end of cycle
+        $timeCounter = $member->getTimeCount($member->endOfCycle($cycle));
+
+        // Check if there is some time to catchup for the membership
+        if ($duration + $timeCounter <= ($cycle + 1) * $this->due_duration_by_cycle) {
+            return true;
         }
-        // duration of shift + what beneficiary already booked for cycle + timecount (may be < 0) minus due should be <= what can membership book for this cycle
-        return ($duration + $beneficiary_counter + $timeCounter <= ($cycle + 1) * $this->due_duration_by_cycle);
+
+        // No time to catchup, check if this beneficiary can book on this cycle
+        return $duration + $beneficiary_counter <= ($cycle + 1) * $this->due_duration_by_cycle;
     }
 
     /**

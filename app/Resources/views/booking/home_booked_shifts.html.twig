@@ -19,7 +19,7 @@
             {% set remaining = shift_service.remainingToBook(member) %}
             {% if  remaining > 0 %}
                 <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. Tu as
-                    encore {{ (due_duration_by_cycle - member.timeCount) | duration_from_minutes }} à réserver.</p>
+                    encore {{ remaining | duration_from_minutes }} à réserver.</p>
             {% else %}
                 <p>Bravo
                     ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
