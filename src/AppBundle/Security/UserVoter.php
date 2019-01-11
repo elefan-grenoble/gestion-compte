@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class UserVoter extends Voter
 {
     const ACCESS_TOOLS = 'access_tools';
+    const CARD_READER = 'card_reader';
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
@@ -33,12 +34,12 @@ class UserVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS))) {
+        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS, self::CARD_READER))) {
             return false;
         }
 
         // only vote on Post objects inside this voter
-        if (!$subject instanceof User) {
+        if (!$subject instanceof User && $attribute != self::CARD_READER) {
             return false;
         }
 
@@ -48,6 +49,10 @@ class UserVoter extends Voter
     protected function voteOnAttribute($attribute, $subject, TokenInterface $token)
     {
         $user = $token->getUser();
+
+        if ($attribute == self::CARD_READER){
+            return $this->isLocationOk();
+        }
 
         if (!$user instanceof User) {
             // the user must be logged in; if not, deny access

@@ -148,6 +148,7 @@ class DefaultController extends Controller
      */
     public function cardReaderAction(Request $request)
     {
+        $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
         $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
