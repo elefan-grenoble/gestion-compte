@@ -7,6 +7,9 @@
 
     <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
         <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
+        <div class="nav-wrapper" style="margin-right: 20px; font-size: 16px; font-weight: 600">
+            <ul class="right"><li>{{ "now" | date('H:i') }}</li></ul>
+        </div>
     </nav>
 
     <div class="row">
@@ -39,32 +42,14 @@
             {% endfor %}
         </div>
 
-        <div class="col s6">
-
-            <h5>Actualités</h5>
-
-            <h6>Changements de procédures</h6>
-
-            <p>Les stocks sont maintenant au sous-sol</p>
-            <p>Lire les nouvelles procédures pour le réapprovisionnement des rayons sur le Wiki (R24 et R25).</p>
-            <p>Le cahier de réapprovisionnement (vert clair) fait son apparition pour noter les produits à remettre en rayons.</p>
-
-
-            <h6>Produits d'entretiens au vrac</h6>
-
-            <p>Les liquides d'entretiens au vrac doivent être contenus dans des récipients spéciaux disponibles à l'achat au rayon 1F.</p>
-            <p>Une étiquette (payante, disponible à la caisse) doit être apposée dessus.</p>
-            <p>Une fois le récipient utilisé pour contenir un produit, il ne peut être réutilisé que pour ce produit.</p>
-
-
-        </div>
-
+        <div class="col s6">{{ dynamicContent | markdown | raw }}</div>
 
     </div>
 
 {% endblock %}
 
 {% block javascripts %}
+
     <script>
         jQuery(function () {
             $(".collapsible .modal-trigger").on('click', function (e) {
@@ -75,7 +60,15 @@
         var barcode_submit_url = "{{ path('check') }}";
         {% endif %}
     </script>
+
     {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
     {% endif %}
+
+    <script type="text/javascript">
+        setTimeout(function(){
+            location.reload();
+        },60000);
+    </script>
+
 {% endblock %}

@@ -8,7 +8,7 @@ use FOS\UserBundle\Model\Group;
 /**
  * Dynamic Content (CMS)
  *
- * @ORM\Table(name="cms_dynamic_content")
+ * @ORM\Table(name="dynamic_content")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DynamicContentRepository")
  */
 class DynamicContent
@@ -24,11 +24,31 @@ class DynamicContent
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="code", type="string", length=64)
+     */
+    protected $code;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="name", type="string", length=64)
+     *
      */
     protected $name;
 
     /**
      * @var string
+     *
+     * @ORM\Column(name="description", type="text")
+     *
+     */
+    protected $description;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="content", type="text")
      */
     protected $content;
 
@@ -47,6 +67,22 @@ class DynamicContent
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCode(): string
+    {
+        return $this->code;
+    }
+
+    /**
+     * @param string $code
+     */
+    public function setCode(string $code): void
+    {
+        $this->code = $code;
     }
 
     /**
@@ -87,6 +123,22 @@ class DynamicContent
     public function setContent(string $content): void
     {
         $this->content = $content;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string $description
+     */
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
     }
 
     public function __toString()

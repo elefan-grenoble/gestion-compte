@@ -1,13 +1,10 @@
 Bonjour {{ shift.shifter.firstname | lower | capitalize }},<br >
+<br >
 Ceci est juste un petit message pour te rappeler que tu as résérvé un créneau
 {{ shift.job.name }} le {{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br >
 {% if shift.isDismissed %}Tu as demandé à annuler ce créneau, mais personne ne l'a encore repris.<br >{% endif %}
-<strong>
-    Si l'épicerie est fermée à ton arrivée, récupère les clefs dans le boîtier dédié.
-    {% if wiki_keys_url is not empty %}
-        <a href="{{ wiki_keys_url }}">Procédure complète</a> sur notre wiki.
-    {% endif %}
-    <br/>
-</strong>
+
+{{ dynamicContent | markdown | raw }}
+
 Belle journée à toi.<br >
 Céleste, la petite fée des créneaux :)

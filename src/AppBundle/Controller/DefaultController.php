@@ -151,8 +151,12 @@ class DefaultController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
         $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
+
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
+
         return $this->render('default/card_reader.html.twig', [
-            "buckets" => $buckets
+            "buckets" => $buckets,
+            "dynamicContent" => $dynamicContent
         ]);
     }
 
