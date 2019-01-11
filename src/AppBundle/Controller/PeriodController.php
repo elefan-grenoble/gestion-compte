@@ -7,6 +7,8 @@ use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
+use AppBundle\Form\PeriodPositionType;
+use AppBundle\Form\PeriodType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -52,7 +54,7 @@ class PeriodController extends Controller
         $session = new Session();
         $period = new Period();
 
-        $form = $this->createForm('AppBundle\Form\PeriodType',$period);
+        $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -83,7 +85,7 @@ class PeriodController extends Controller
     {
         $session = new Session();
 
-        $form = $this->createForm('AppBundle\Form\PeriodType',$period);
+        $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -116,10 +118,10 @@ class PeriodController extends Controller
                 ->getForm()->createView();
         }
 
-        return $this->render('admin/period/edit.html.twig',array(
+        return $this->render('admin/period/edit.html.twig', array(
             "form" => $form->createView(),
             "period" => $period,
-            "position_form" => $this->createForm('AppBundle\Form\PeriodPositionType',new PeriodPosition(),array('action'=>$this->generateUrl('add_position_to_period',array('id'=>$period->getId()))))->createView(),
+            "position_form" => $this->createForm(PeriodPositionType::class, new PeriodPosition(), array('action' => $this->generateUrl('add_position_to_period', array('id' => $period->getId()))))->createView(),
             "delete_form" => $delete_form->createView(),
             "positions_delete_form" => $positions_delete_form
         ));
@@ -135,7 +137,7 @@ class PeriodController extends Controller
         $session = new Session();
 
         $position = new PeriodPosition();
-        $form = $this->createForm('AppBundle\Form\PeriodPositionType',$position);
+        $form = $this->createForm(PeriodPositionType::class, $position);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

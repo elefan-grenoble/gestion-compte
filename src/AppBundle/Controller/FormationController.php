@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Formation;
+use AppBundle\Form\FormationType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -46,7 +47,7 @@ class FormationController extends Controller
         $formation = new Formation();
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\FormationType', $formation);
+        $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -77,7 +78,7 @@ class FormationController extends Controller
     {
         $session = new Session();
 
-        $form = $this->createForm('AppBundle\Form\FormationType', $formation);
+        $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Task;
+use AppBundle\Form\JobType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -51,7 +52,7 @@ class JobController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createForm('AppBundle\Form\JobType', $job);
+        $form = $this->createForm(JobType::class, $job);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -62,12 +63,6 @@ class JobController extends Controller
             $session->getFlashBag()->add('success', 'Le nouveau poste a été créé !');
 
             return $this->redirectToRoute('job_list');
-
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
         }
         return $this->render('admin/job/new.html.twig', array(
             'form' => $form->createView()
@@ -82,11 +77,11 @@ class JobController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Job $job){
+    public function editAction(Request $request, Job $job){
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createForm('AppBundle\Form\JobType', $job);
+        $form = $this->createForm(JobType::class, $job);
 
         $form->handleRequest($request);
 
@@ -98,12 +93,6 @@ class JobController extends Controller
             $session->getFlashBag()->add('success', 'Le poste a bien été édité !');
 
             return $this->redirectToRoute('job_list');
-
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
         }
         return $this->render('admin/job/edit.html.twig', array(
             'form' => $form->createView(),
