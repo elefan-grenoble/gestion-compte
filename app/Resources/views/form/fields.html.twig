@@ -1,0 +1,10 @@
+
+{%- block form_row -%}
+    <div>
+        {{ form_label(form) }}
+        <div class="errors">
+            {{ form_errors(form) }}
+        </div>
+        {{ form_widget(form) }}
+    </div>
+{%- endblock form_row -%}

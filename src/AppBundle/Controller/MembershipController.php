@@ -13,10 +13,15 @@ use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
+use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
-use AppBundle\Form\UserType;
+use AppBundle\Form\RegistrationType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Service\MailerService;
+use FOS\UserBundle\Event\FormEvent;
+use FOS\UserBundle\Event\UserEvent;
+use FOS\UserBundle\FOSUserBundle;
+use FOS\UserBundle\FOSUserEvents;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -82,7 +87,7 @@ class MembershipController extends Controller
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $note, array(
+        $note_form = $this->createForm(NoteType::class, $note, array(
             'action' => $this->generateUrl('ambassador_new_note', array("member_number" => $member->getMemberNumber())),
             'method' => 'POST',
         ));
@@ -90,7 +95,7 @@ class MembershipController extends Controller
         $notes_delete_form = array();
         $new_notes_form = array();
         foreach ($member->getNotes() as $n) {
-            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
@@ -115,7 +120,7 @@ class MembershipController extends Controller
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
 
 
-        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg, array('action' => $action));
+        $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
 
         $deleteBeneficiaryForms = array();
@@ -171,7 +176,7 @@ class MembershipController extends Controller
             $newReg->setDate(new DateTime('now'));
         }
         $newReg->setRegistrar($this->getCurrentAppUser());
-        $registrationForm = $this->createForm('AppBundle\Form\RegistrationType', $newReg);
+        $registrationForm = $this->createForm(RegistrationType::class, $newReg);
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
         $registrationForm->handleRequest($request);
         if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
@@ -205,7 +210,7 @@ class MembershipController extends Controller
 
         $registrationForms = array();
         foreach ($member->getRegistrations() as $registration) {
-            $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+            $form = $this->createForm(RegistrationType::class, $registration);
             $registrationForms[$registration->getId()] = $form->createView();
         }
 
@@ -214,7 +219,7 @@ class MembershipController extends Controller
             $em = $this->getDoctrine()->getManager();
             $registration = $em->getRepository('AppBundle:Registration')->find($id);
             if ($registration) {
-                $form = $this->createForm('AppBundle\Form\RegistrationType', $registration);
+                $form = $this->createForm(RegistrationType::class, $registration);
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
                     if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
@@ -251,35 +256,25 @@ class MembershipController extends Controller
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
-
             $beneficiary = $beneficiaryForm->getData();
+
+            $event = new FormEvent($beneficiaryForm->get('user'), $request);
+            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+
             if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
                 $beneficiary->setMembership($member);
                 $member->addBeneficiary($beneficiary);
-
                 $em = $this->getDoctrine()->getManager();
-                $otherUser = $em->getRepository('AppBundle:User')->findBy(array("email" => $beneficiary->getUser()->getEmail()));
-                if (!$otherUser) {
-
-                    $username = $this->generateUsername($beneficiary);
-                    $beneficiary->getUser()->setUsername($username);
-                    $password = User::randomPassword();
-                    $beneficiary->getUser()->setPassword($password);
-
-                    $em->persist($beneficiary);
-                    $em->flush();
-                    $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
-                } else {
-                    $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
-                }
+                $em->persist($beneficiary);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
             }
             return $this->redirectToShow($member);
         } elseif ($beneficiaryForm->isSubmitted()) {
-            foreach ($this->getErrorMessages($beneficiaryForm) as $key => $errors) {
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key . " : " . $error);
+            foreach ($beneficiaryForm->getErrors(true) as $key => $error) {
+                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -290,7 +285,7 @@ class MembershipController extends Controller
     private function createNewBeneficiaryForm(Membership $member)
     {
         $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
-        return $this->createForm('AppBundle\Form\BeneficiaryType', new Beneficiary(), array('action' => $newBeneficiaryAction));
+        return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
     }
 
     /**
@@ -593,22 +588,6 @@ class MembershipController extends Controller
         return $this->redirectToRoute('user_index');
     }
 
-    private function generateUsername(Beneficiary $beneficiary)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $username = User::makeUsername($beneficiary->getFirstname(), $beneficiary->getLastname());
-        $qb = $em->createQueryBuilder();
-        $usernames = $qb->select('u')->from('AppBundle\Entity\User', 'u')
-            ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
-            ->getQuery()
-            ->getResult();
-        $already_registred = (isset($usernames[$username])) ? $usernames[$username] : 0;
-        if (count($usernames) || $already_registred) {
-            $username = User::makeUsername($beneficiary->getFirstname(), $beneficiary->getLastname(), $already_registred + 1);
-        }
-        return $username;
-    }
-
     /**
      * Creates a new membership entity.
      *
@@ -669,64 +648,48 @@ class MembershipController extends Controller
 
         $member->addRegistration($registration);
 
-        $form = $this->createForm('AppBundle\Form\MembershipType', $member);
+        $form = $this->createForm(MembershipType::class, $member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $email = $member->getMainBeneficiary()->getUser()->getEmail();
-            if (!filter_var($email, FILTER_SANITIZE_EMAIL) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $session->getFlashBag()->add('error', 'cet adresse email n\'est pas valide');
+            if (!$a_beneficiary) {
+                if (!$member->getLastRegistration()->getRegistrar())
+                    $member->getLastRegistration()->setRegistrar($this->getUser());
             } else {
-                $other_user = $em->getRepository('AppBundle:User')->findOneBy(array("email" => $email));
-                if ($other_user) {
-                    $session->getFlashBag()->add('error', 'Oups, un membres utilise déjà cet email ! (' . '#' . $other_user->getBeneficiary()->getMemberNumber() . " " . $other_user->getFirstName() . " " . $other_user->getLastName()[0] . ')');
-                } else {
-
-                    $username = $this->generateUsername($member->getMainBeneficiary());
-                    $member->getMainBeneficiary()->getUser()->setUsername($username);
-                    $password = User::randomPassword();
-                    $member->getMainBeneficiary()->getUser()->setPassword($password);
-
-                    if (!$a_beneficiary){
-                        if (!$member->getLastRegistration()->getRegistrar())
-                            $member->getLastRegistration()->setRegistrar($this->getUser());
-                    }else{
-                        $registration->setDate($a_beneficiary->getCreatedAt());
-                        $registration->setRegistrar($a_beneficiary->getRegistrar());
-                        $registration->setAmount($a_beneficiary->getAmount());
-                        $registration->setMode($a_beneficiary->getMode());
-                        $member->setLastRegistration($registration);
-                    }
-
-                    $member->setWithdrawn(false);
-                    $member->setFrozen(false);
-                    $member->setFrozenChange(false);
-
-                    $em->persist($member);
-                    if ($a_beneficiary)
-                        $em->remove($a_beneficiary);
-                    $em->flush();
-
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
-
-                    $securityContext = $this->container->get('security.authorization_checker');
-                    if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-                        $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée');
-                        return $this->render('member/active_me.html.twig', array(
-                            'user' => $member->getMainBeneficiary()->getUser(),
-                        ));
-                    }else{
-                        $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
-                    }
-
-                    return $this->redirectToShow($member);
-                }
+                $registration->setDate($a_beneficiary->getCreatedAt());
+                $registration->setRegistrar($a_beneficiary->getRegistrar());
+                $registration->setAmount($a_beneficiary->getAmount());
+                $registration->setMode($a_beneficiary->getMode());
+                $member->setLastRegistration($registration);
             }
-        } elseif ($form->isSubmitted()) {
-            foreach ($this->getErrorMessages($form) as $key => $errors) {
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key . " : " . $error);
+
+            $member->setWithdrawn(false);
+            $member->setFrozen(false);
+            $member->setFrozenChange(false);
+
+            $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
+            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+
+            $em->persist($member);
+            if ($a_beneficiary)
+                $em->remove($a_beneficiary);
+            $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
+
+            $securityContext = $this->container->get('security.authorization_checker');
+            if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+                $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée');
+                return $this->redirectToRoute('fos_user_registration_check_email');
+            } else {
+                $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+            }
+
+            return $this->redirectToShow($member);
+        } else if ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $key => $error) {
+                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -804,29 +767,34 @@ class MembershipController extends Controller
         $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
         $note = new Note();
         $note->setAuthor($this->getCurrentAppUser());
-        $note_form = $this->createForm('AppBundle\Form\NoteType', $note);
+        $note_form = $this->createForm(NoteType::class, $note);
         $note_form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
 
-        if ($note_form->isSubmitted() && $note_form->isValid()) {
-            $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
-            $session = new Session();
-            if ($existing_note) {
-                $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+        $session = $request->getSession();
+        if ($note_form->isSubmitted()) {
+            if ($note_form->isValid()) {
+                $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
+                if ($existing_note) {
+                    $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+                } else {
+                    $em->persist($note);
+                    $em->flush();
+                    $session->getFlashBag()->add('success', 'Post-it ajouté');
+                }
             } else {
-                $em->persist($note);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Post-it ajouté');
+                $session->getFlashBag()->add('error', 'Impossible d\'ajouter le post-it');
             }
         }
+
 
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
         $notes_form = array();
         $notes_delete_form = array();
         $new_notes_form = array();
         foreach ($notes as $n) {
-            $notes_form[$n->getId()] = $this->createForm('AppBundle\Form\NoteType', $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
             $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
@@ -905,28 +873,6 @@ class MembershipController extends Controller
             'Content-Type' => 'application/force-download; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
         ));
-    }
-
-    private function getErrorMessages(Form $form)
-    {
-        $errors = array();
-
-        foreach ($form->getErrors() as $key => $error) {
-            if ($form->isRoot()) {
-                $errors['#'][] = $error->getMessage();
-            } else {
-                $errors[] = $error->getMessage();
-            }
-        }
-
-        foreach ($form->all() as $child) {
-            if (!$child->isValid()) {
-                $key = (isset($child->getConfig()->getOptions()['label'])) ? $child->getConfig()->getOptions()['label'] : $child->getName();
-                $errors[$key] = $this->getErrorMessages($child);
-            }
-        }
-
-        return $errors;
     }
 
     private function redirectToShow(Membership $member)

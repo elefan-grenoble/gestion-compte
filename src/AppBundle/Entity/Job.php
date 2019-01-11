@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Job
@@ -24,6 +25,7 @@ class Job
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="name", type="string", length=255, unique=true)
      */
     private $name;
@@ -32,6 +34,7 @@ class Job
     /**
      * @var string
      *
+     * @Assert\NotBlank()
      * @ORM\Column(name="color", type="string", length=255, unique=false)
      */
     private $color;

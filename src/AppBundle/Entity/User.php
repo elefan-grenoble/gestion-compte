@@ -18,6 +18,8 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * @ORM\Entity(repositoryClass="AppBundle\Repository\UserRepository")
  * @ORM\Table(name="fos_user")
+ * @UniqueEntity(fields={"email"}, message="Cette adresse e-mail est déjà utilisée par un autre compte")
+ * @UniqueEntity(fields={"username"}, message="Ce nom d'utilisateur est déjà utilisé par un autre compte")
  */
 class User extends BaseUser
 {
@@ -36,6 +38,7 @@ class User extends BaseUser
 
     /**
      * Beneficiary's user.
+     * @Assert\Valid()
      * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user")
      */
     private $beneficiary;

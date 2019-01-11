@@ -13,6 +13,7 @@
                 <div class="errors">
                     {{ form_errors(form) }}
                 </div>
+                {{ form_row(form.email) }}
                 {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary } %}
                 <div>
                     <button type="submit"

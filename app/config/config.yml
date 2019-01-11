@@ -42,6 +42,8 @@ framework:
 twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
+  form_themes:
+      - "form/fields.html.twig"
   globals:
       site_name: "%site_name%"
       main_color: "%main_color%"
@@ -103,9 +105,11 @@ fos_user:
   registration:
     form:
       type: AppBundle\Form\RegistrationType
+    confirmation:
+      enabled:    true # change to true for required email confirmation
   profile:
     form:
-      type: AppBundle\Form\UserType
+      type: AppBundle\Form\UserWithBeneficiaryType
 assetic:
   filters:
     less:

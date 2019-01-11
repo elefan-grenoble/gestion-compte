@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
+use AppBundle\Form\BeneficiaryType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
@@ -44,18 +45,14 @@ class BeneficiaryController extends Controller
         $member = $beneficiary->getMembership();
         $this->denyAccessUnlessGranted('edit', $member);
 
-        $editForm = $this->createForm('AppBundle\Form\BeneficiaryType', $beneficiary);
+        $editForm = $this->createForm(BeneficiaryType::class, $beneficiary);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $otherUser = $em->getRepository('AppBundle:User')->findOneBy(array("email"=>$beneficiary->getUser()->getEmail()));
-            if (!$otherUser || ($otherUser->getBeneficiary()->getId() === $beneficiary->getId())) {
-                $em->flush();
-                $session->getFlashBag()->add('success', 'Mise à jour effectuée');
-            } else {
-                $session->getFlashBag()->add('error', 'Cet email est déjà utilisé');
-            }
+
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
 
             return $this->redirectToShow($member);
         }

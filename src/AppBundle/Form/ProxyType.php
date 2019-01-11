@@ -4,6 +4,7 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\Proxy;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -90,7 +91,7 @@ class ProxyType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'AppBundle\Entity\Proxy'
+            'data_class' => Proxy::class
         ));
     }
 
