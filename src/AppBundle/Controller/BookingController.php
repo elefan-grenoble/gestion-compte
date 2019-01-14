@@ -89,7 +89,7 @@ class BookingController extends Controller
         $beneficiaryForm->handleRequest($request);
 
         //beneficiary selected, or only one beneficiary
-        if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid() || $beneficiaries->count() == 1) {
+        if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
 
             $em = $this->getDoctrine()->getManager();
             if ($beneficiaries->count() > 1) {
