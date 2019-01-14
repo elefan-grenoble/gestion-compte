@@ -115,17 +115,18 @@ class CodeVoter extends Voter
         }
 
         if ($user->getBeneficiary()) {
+            if ($this->container->get("shift_service")->isBeginner($user->getBeneficiary())) // not for beginner
+                return false;
             $shifts = $user->getBeneficiary()->getMembership()->getShiftsOfCycle(0);
             $y = new \DateTime('Yesterday');
             $y->setTime(23,59,59);
-            $sometimeago = new \DateTime();
-            $insometime = new \DateTime();
-            $sometimeago->sub(new \DateInterval("PT1H")); //TODO put in conf
-            $insometime->add(new \DateInterval("PT15M")); //TODO put in conf
+            $some_time_ago = new \DateTime();
+            $in_some_time = new \DateTime();
+            $some_time_ago->sub(new \DateInterval("PT1H")); //time - 60min TODO put in conf
+            $in_some_time->add(new \DateInterval("PT15M")); //time + 15min TODO put in conf
             foreach ($shifts as $shift){
-                if (($shift->getStart() < $insometime) && $shift->getStart() > $y && ($shift->getEnd() > $sometimeago)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
-                    if ($code->getCreatedAt() > $shift->getBookedTime()) // code crée après la réservation du créneau
-                        return true;
+                if (($shift->getStart() < $in_some_time) && $shift->getStart() > $y && ($shift->getEnd() > $some_time_ago)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
+                    return true;
                 }
             }
         }
