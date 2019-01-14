@@ -131,6 +131,10 @@ class MembershipVoter extends Voter
             return true;
         }
 
+        if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
+            return true;
+        }
+
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
         if ($token && $token == $subject->getTmpToken($session->get('token_key') . $user->getUsername())){

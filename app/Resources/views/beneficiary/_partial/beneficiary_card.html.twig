@@ -24,8 +24,8 @@
                     {% if is_granted("edit", beneficiary.membership) %}
                         <div class="card-btn">
                             <form action="{{ path('beneficiary_edit',{'id':beneficiary.id}) }}" method="get">
-                                {% if not is_granted("ROLE_ADMIN") and token is defined %}
-                                    <input type="hidden" value="{{ token }}" name="token">
+                                {% if not is_granted("ROLE_ADMIN") and app.request.get('token') is defined %}
+                                    <input type="hidden" value="{{ app.request.get('token') }}" name="token">
                                 {% endif %}
                                 <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons">mode_edit</i>
                                 </button>
