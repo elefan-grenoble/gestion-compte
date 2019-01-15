@@ -22,6 +22,7 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         $qb
             ->where('u.withdrawn = 0')
             ->andWhere('u.firstShiftDate is not NULL')
+            ->andWhere('u.firstShiftDate != :now')
             ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0')
             ->setParameter('now',$date);
 
