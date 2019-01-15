@@ -883,9 +883,9 @@ class MembershipController extends Controller
         }
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 }
