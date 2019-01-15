@@ -31,6 +31,9 @@
             </div>
         {% endif %}
     {% endif %}
+        <div class="col s12 truncate"><i
+                    class="material-icons tiny">person</i>&nbsp;{{ beneficiary.user.username }}
+        </div>
     {% if beneficiary.formations | length %}
         <div class="col s12 truncate"><i
                     class="material-icons tiny">assignment_ind</i>&nbsp;{% for formation in beneficiary.formations %}
