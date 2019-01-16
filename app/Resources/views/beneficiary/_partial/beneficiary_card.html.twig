@@ -46,6 +46,14 @@
                                    title="Se connecter comme {{ beneficiary.user.username }}">
                                     <img height="22px" class="emoticon" src="/images/605c500_072-ninja_1.svg" alt="ninja mode"></a>
                             </div>
+                            {% if not isTemporaryEmail(beneficiary.user.email) %}
+                                <div class="card-btn">
+                                    <a href="{{ path('mail_edit_one_beneficiary', {'id':  beneficiary.id }) }}"
+                                       class="btn btn-floating waves-effect waves-light teal">
+                                        <i class="material-icons">email</i>
+                                    </a>
+                                </div>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 </div>

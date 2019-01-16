@@ -45,11 +45,10 @@
                     $('.chips').material_chip({
                         placeholder: 'Destinataires',
                         data: [
-                            {% for user in to %}
-                                {% for beneficiary in user.beneficiaries %}
+                            {% for beneficiary in to %}
                             {
                             tag: "{{ beneficiary.autocompleteLabel }}",
-                        },{% endfor %}{% endfor %} ],
+                        },{% endfor %} ],
                         autocompleteOptions: {
                             data: dataUsers,
                             limit: Infinity,
