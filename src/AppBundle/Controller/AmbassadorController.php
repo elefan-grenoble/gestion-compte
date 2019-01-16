@@ -76,6 +76,7 @@ class AmbassadorController extends Controller
 
         $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
             ->leftJoin("o.registrations", "r")->addSelect("r");
 
@@ -153,7 +154,7 @@ class AmbassadorController extends Controller
                     ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
             }
             if ($form->get('email')->getData()){
-                $qb = $qb->andWhere('b.email LIKE :email')
+                $qb = $qb->andWhere('u.email LIKE :email')
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }else{
