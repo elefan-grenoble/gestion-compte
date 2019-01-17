@@ -77,10 +77,18 @@ class DefaultController extends Controller
                 }
 
                 if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')) {
-                    if (intval($remainder->format("%R%a")) < 0)
+                    $remainingDays = intval($remainder->format("%R%a"));
+                    if ($remainingDays < 0)
                         $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
-                    elseif (intval($remainder->format("%R%a")) < 15) //todo put this in conf
-                        $session->getFlashBag()->add('warning', 'Ton adhésion expire dans ' . $remainder->format('%a jours') . '...');
+                    elseif ($remainingDays < 15) { //todo put this in conf
+                        $renewalDate = new \DateTime('now');
+                        $renewalDate->modify('+' . ($remainingDays + 1) . ' day');
+                        setlocale(LC_TIME, 'fr_FR.UTF8');
+                        $session->getFlashBag()->add('warning',
+                            'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
+                            'Tu pourras réadhérer en ligne par carte bancaire à partir du ' . strftime("%A %e %B", $renewalDate->getTimestamp()) .
+                            ' ou dès à présent au bureau des membres par chèque, espèce ou monnaie locale.');
+                    }
                 } else {
                     $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
                 }
