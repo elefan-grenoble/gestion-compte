@@ -11,9 +11,9 @@ namespace AppBundle\Repository;
 class MembershipRepository extends \Doctrine\ORM\EntityRepository
 {
 
-    public function findWithNewCycleStarting($date =  null)
+    public function findWithNewCycleStarting($date = null)
     {
-        if (!($date)){
+        if (!($date)) {
             $date = new \Datetime('now');
         }
 
@@ -24,16 +24,16 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere('u.firstShiftDate is not NULL')
             ->andWhere('u.firstShiftDate != :now')
             ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0')
-            ->setParameter('now',$date);
+            ->setParameter('now', $date);
 
         return $qb
             ->getQuery()
             ->getResult();
     }
 
-    public function findWithHalfCyclePast($date =  null)
+    public function findWithHalfCyclePast($date = null)
     {
-        if (!($date)){
+        if (!($date)) {
             $date = new \Datetime('now');
         }
         $qb = $this->createQueryBuilder('u');
@@ -62,8 +62,26 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         $qb->select('u')
             ->from($this->_entityName, 'u')
             ->where('u.roles LIKE :roles')
-            ->setParameter('roles', '%"'.$role.'"%');
+            ->setParameter('roles', '%"' . $role . '"%');
 
         return $qb->getQuery()->getResult();
     }
+
+    /**
+     * @param \DateTime $from
+     *
+     * @return array
+     */
+    public function findWithExpiredRegistrationFrom($from)
+    {
+        $qb = $this->createQueryBuilder('m');
+        $qb->join('m.lastRegistration', 'r')
+            ->where('m.withdrawn = false')
+            ->andWhere("DATE_ADD(r.date, 1, 'YEAR') < :from")
+            ->setParameter('from', $from);
+
+        return $qb->getQuery()->getResult();
+    }
+
+
 }
