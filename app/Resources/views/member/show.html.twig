@@ -291,7 +291,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn-large waves-effect waves-light btn orange"
+                                    <a class="btn waves-effect waves-light orange"
                                        href="{{ path('member_freeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce que
                                         je fais !</a>
                                 </div>
@@ -308,7 +308,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn-large waves-effect waves-light btn orange"
+                                    <a class="btn waves-effect waves-light orange"
                                        href="{{ path('member_unfreeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
                                         que je fais !</a>
                                 </div>
@@ -328,11 +328,35 @@
                 </div>
                 <div class="collapsible-body white">
                     {% if not member.withdrawn %}
-                        <a href="{{ path("member_close",{"id":member.id}) }}" class="waves-effect waves-light btn red">
+                        <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte</a>
+                        <div id="close-member" class="modal">
+                            <div class="modal-content">
+                                <h5><i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre</h5>
+                                <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                <a class="btn waves-effect waves-light orange"
+                                   href="{{ path('member_close',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
+                                    que je fais !</a>
+                            </div>
+                        </div>
                     {% else %}
-                        <a href="{{ path("member_open",{"id":member.id}) }}" class="waves-effect waves-light btn teal">
+                        <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
                             <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
+                        <div id="reopen-member" class="modal">
+                            <div class="modal-content">
+                                <h5><i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre</h5>
+                                <p>Attention, vous êtes sur le point de ré-ouvrir le compte du membre.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                <a class="btn waves-effect waves-light orange"
+                                   href="{{ path('member_open',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
+                                    que je fais !</a>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
             </li>
