@@ -41,40 +41,48 @@
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
                                 class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
                 {% else %}
-                {{ render(controller("AppBundle:SwipeCard:homepage")) }}
-                {{ render(controller("AppBundle:Booking:homepage")) }}
+                    {% if swipe_cards.autoactivate.enabled %}
+                        {{ render(controller("AppBundle:SwipeCard:homepage")) }}
+                    {% endif %}
+                    {{ render(controller("AppBundle:Booking:homepage")) }}
                 {% endif %}
             {% else %}
                 <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal"><i
                             class="material-icons left">date_range</i>Gérer les créneaux</a>
             {% endif %}
 
-                    <h5>Construire</h5>
-                    {% if is_granted("access_tools",app.user)  %}
-                        <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste adhésion / ré-adhésion</a>
-                    {% endif %}
-                    <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
-                    {% if is_granted("view",codes | first) or is_granted("create",codes | first)  %}
-                        <br>
-                    {% endif %}
-                    {% if not is_granted("ROLE_ADMIN") %}
-                        {% if is_granted("view",codes | first)  %}
-                            {% if (codes | first).registrar == app.user %}
-                                {% if codes | length > 1 %} {# last code is users one, but other codes exist #}
-                                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Changer code boîtier à clefs</a>
-                                {% elseif is_granted("create",codes | first) %}
-                                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
-                                {% endif %}
-                            {% else %}
-                                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code{% if codes | length > 1%}s{% endif %} boîtier à clefs</a>
-                                {% if is_granted("create",codes | first)  %}
-                                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
-                                {% endif %}
-                            {% endif %}
+            <h5>Construire</h5>
+            {% if is_granted("access_tools",app.user) %}
+                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">list</i>Poste
+                    adhésion / ré-adhésion</a>
+            {% endif %}
+            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
+            {% if is_granted("view",codes | first) or is_granted("create",codes | first) %}
+                <br>
+            {% endif %}
+            {% if not is_granted("ROLE_ADMIN") %}
+                {% if is_granted("view",codes | first) %}
+                    {% if (codes | first).registrar == app.user %}
+                        {% if codes | length > 1 %} {# last code is users one, but other codes exist #}
+                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i
+                                        class="material-icons left">vpn_key</i>Changer code boîtier à clefs</a>
                         {% elseif is_granted("create",codes | first) %}
-                                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
+                                les clefs</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
+                            code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
+                        {% if is_granted("create",codes | first) %}
+                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
+                                les clefs</a>
                         {% endif %}
                     {% endif %}
+                {% elseif is_granted("create",codes | first) %}
+                    <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i
+                                class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                {% endif %}
+            {% endif %}
 
             {% if is_granted("ROLE_USER_MANAGER") %}
                 <h5>Gérer les membres</h5>
@@ -141,7 +149,7 @@
             });
         })
         {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            var barcode_submit_url="{{ path('check') }}";
+        var barcode_submit_url = "{{ path('check') }}";
         {% endif %}
     </script>
     {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}

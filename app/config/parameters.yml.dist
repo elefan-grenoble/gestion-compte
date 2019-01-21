@@ -57,6 +57,8 @@ parameters:
         - "%emails.admin%"
         - "%emails.noreply%"
 
+    shift_mailer_user: ~
+
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt
 
@@ -65,23 +67,31 @@ parameters:
     router.request_context.scheme: https
     router.request_context.base_url:
 
+    # Branding
     site_name: Espace membre @ MyLocalCoop
     project_name: My Local Coop
     project_url: https://localcoop.local/
     project_url_display: localcoop.local
-    wiki_keys_url: ~
     main_color: #51CAE9
-    helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
-    helloasso_api_key:
-    helloasso_api_password:
-    due_duration_by_cycle: 180
-    min_shift_duration: 90
-    registration_duration: '1 year'
-    cycle_duration: '28 days'
-    shift_mailer_user: ~
     local_currency_name: 'monnaie locale'
     #ip of the spot, comma separated if many
     place_local_ip_address: '127.0.0.1,192.168.0.x'
+
+    wiki_keys_url: ~
+
+    # Registration
+    registration_duration: '1 year'
+    helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
+    helloasso_api_key:
+    helloasso_api_password:
+
+    # Shifting configuration
+    due_duration_by_cycle: 180
+    min_shift_duration: 90
+    cycle_duration: '28 days'
+
+    # Swipe cards
+    swipe_cards.autoactivate.enabled: false
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
