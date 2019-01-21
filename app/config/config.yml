@@ -43,18 +43,21 @@ twig:
   debug: '%kernel.debug%'
   strict_variables: '%kernel.debug%'
   form_themes:
-      - "form/fields.html.twig"
+    - "form/fields.html.twig"
   globals:
-      site_name: "%site_name%"
-      main_color: "%main_color%"
-      project_name: "%project_name%"
-      project_url: "%project_url%"
-      project_url_display: "%project_url_display%"
-      helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
-      due_duration_by_cycle: '%due_duration_by_cycle%'
-      support_email: '%transactional_mailer_user%'
-      images_tmp_dir: '%images_tmp_dir%'
-      shift_service: "@shift_service"
+    site_name: "%site_name%"
+    main_color: "%main_color%"
+    project_name: "%project_name%"
+    project_url: "%project_url%"
+    project_url_display: "%project_url_display%"
+    helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
+    due_duration_by_cycle: '%due_duration_by_cycle%'
+    support_email: '%transactional_mailer_user%'
+    images_tmp_dir: '%images_tmp_dir%'
+    shift_service: "@shift_service"
+    swipe_cards:
+      autoactivate:
+        enabled: '%swipe_cards.autoactivate.enabled%'
 
 # Doctrine Configuration
 doctrine:
@@ -169,27 +172,27 @@ vich_uploader:
       delete_on_remove: true
       namer: vich_uploader.namer_origname
 
-liip_imagine :
-  resolvers :
-    default :
-        web_path : ~
+liip_imagine:
+  resolvers:
+    default:
+      web_path: ~
   loaders:
     default:
       filesystem:
         data_root: '%kernel.project_dir%/web/'
-  filter_sets :
-    cache : ~
-    card :
-      quality : 75
-      filters :
-        thumbnail  : { size : [600, 100], position : center, color : '#000000' }
-    service_logo :
-      quality : 75
-      filters :
+  filter_sets:
+    cache: ~
+    card:
+      quality: 75
+      filters:
+        thumbnail: { size: [600, 100], position: center, color: '#000000' }
+    service_logo:
+      quality: 75
+      filters:
         # create a thumbnail: set size to 120x90 and use the "outbound" mode
         # to crop the image when the size ratio of the input differs
-#        service_logo  : { size : [120, 120], mode : outbound }
-        thumbnail  : { size : [120, 120], position : center, color : '#FFFFFF' }
+        #        service_logo  : { size : [120, 120], mode : outbound }
+        thumbnail: { size: [120, 120], position: center, color: '#FFFFFF' }
         # create a 2px black border: center the thumbnail on a black background
         # 4px larger to create a 2px border around the final image
 #        background : { size : [124, 94], position : center, color : '#000000' }

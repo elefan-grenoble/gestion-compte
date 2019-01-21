@@ -150,8 +150,7 @@ class DefaultController extends Controller
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
             'events' => $futur_events,
-            'codes' => $codes,
-            'autoactivate_swipe_cards' => $this->getParameter('swipe_cards.autoactivate.enabled')
+            'codes' => $codes
         ]);
     }
 
