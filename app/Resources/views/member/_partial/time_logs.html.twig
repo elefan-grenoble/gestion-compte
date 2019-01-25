@@ -40,7 +40,6 @@
         <th>Date du log</th>
         <th>Temps</th>
         <th>Motif</th>
-        <th>Créneau associé</th>
         <th></th>
     </tr>
     </thead>
@@ -49,8 +48,7 @@
         <tr class="{% if timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
             <td>{{ timeLog.date | date_fr_full }}</td>
             <td>{{ timeLog.time | duration_from_minutes }}</td>
-            <td>{{ timeLog.description }}</td>
-            <td>{{ timeLog.shift }}</td>
+            <td>{{ timeLog.computedDescription }}</td>
             <td>
                 {% if is_granted("ROLE_ADMIN") %}
                     <a href="{{ path('member_timelog_delete',{ "id":member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>

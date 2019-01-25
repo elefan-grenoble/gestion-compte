@@ -69,6 +69,7 @@ class TimeLogController extends Controller
             $timeLog->setMembership($member);
             $timeLog->setTime($form->get('time')->getData());
             $timeLog->setDescription($form->get('description')->getData());
+            $timeLog->setType(TimeLog::TYPE_CUSTOM);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($timeLog);

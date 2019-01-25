@@ -129,7 +129,7 @@ class TimeLogEventListener
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setDate($shift->getStart());
-        $log->setDescription(TimeLog::DESC_BOOKING);
+        $log->setType(TimeLog::TYPE_SHIFT);
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -162,7 +162,7 @@ class TimeLogEventListener
         $log->setMembership($membership);
         $log->setTime(-1 * $this->due_duration_by_cycle);
         $log->setDate($date);
-        $log->setDescription("Début de cycle");
+        $log->setType(TimeLog::TYPE_CYCLE_END);
         $this->em->persist($log);
 
         $counter_today = $membership->getTimeCount($date);
@@ -171,7 +171,7 @@ class TimeLogEventListener
             $log->setMembership($membership);
             $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
             $log->setDate($date);
-            $log->setDescription("Régulation du bénévolat facultatif");
+            $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);
         }
         $this->em->flush();
@@ -189,7 +189,7 @@ class TimeLogEventListener
         $log->setMembership($membership);
         $log->setTime(0);
         $log->setDate($date);
-        $log->setDescription("Début de cycle (compte gelé)");
+        $log->setType(TimeLog::TYPE_CYCLE_END_FROZEN);
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -206,7 +206,7 @@ class TimeLogEventListener
         $log->setMembership($membership);
         $log->setTime(0);
         $log->setDate($date);
-        $log->setDescription("Début de cycle (adhésion expirée)");
+        $log->setType(TimeLog::TYPE_CYCLE_END_EXPIRED_REGISTRATION);
         $this->em->persist($log);
         $this->em->flush();
     }
