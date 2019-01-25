@@ -21,6 +21,7 @@ final class Version20190125122437 extends AbstractMigration
         $this->addSql("UPDATE time_log SET type = 3 WHERE description = 'Début de cycle (compte gelé)'");
         $this->addSql("UPDATE time_log SET type = 4 WHERE description = 'Début de cycle (adhésion expirée)'");
         $this->addSql("UPDATE time_log SET type = 5 WHERE description = 'Régulation du bénévolat facultatif'");
+        $this->addSql('ALTER TABLE time_log CHANGE description description VARCHAR(255) DEFAULT NULL');
         $this->addSql("UPDATE time_log SET description = NULL");
     }
 
@@ -30,5 +31,6 @@ final class Version20190125122437 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE time_log DROP type');
+        $this->addSql('ALTER TABLE time_log CHANGE description description VARCHAR(255) NOT NULL COLLATE utf8_unicode_ci');
     }
 }
