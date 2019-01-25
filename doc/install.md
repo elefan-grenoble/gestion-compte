@@ -22,8 +22,8 @@ Creer le schema de bdd
 <pre>bin/console doctrine:schema:create</pre>
 Lancer le serveur
 <pre>php bin/console server:start</pre>
-add ``127.0.0.1 membres.yourcoop.local`` to your _/etc/hosts_ file
-visit [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) to create the super admin user (babar:password)
+add ``127.0.0.1 membres.localcoop.local`` to your _/etc/hosts_ file
+visit [http://membres.localcoop.local/user/install_admin](http://membres.localcoop.local/user/install_admin) to create the super admin user (babar:password)
 
 
 ### En Prod
