@@ -16,6 +16,7 @@ use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\RegistrationType;
+use AppBundle\Form\TimeLogType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Service\MailerService;
 use FOS\UserBundle\Event\FormEvent;
@@ -140,6 +141,8 @@ class MembershipController extends Controller
 
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
 
+        $timeLogForm = $this->createNewTimeLogForm($member);
+
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
@@ -151,8 +154,16 @@ class MembershipController extends Controller
             'new_notes_form' => $new_notes_form,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'delete_form' => $deleteForm->createView(),
+            'time_log_form' => $timeLogForm->createView()
         ));
     }
+
+    private function createNewTimeLogForm(Membership $member)
+    {
+        $newTimeLogAction = $this->generateUrl('time_log_new', array('id' => $member->getId()));
+        return $this->createForm(TimeLogType::class, new TimeLog(), array('action' => $newTimeLogAction));
+    }
+
 
     /**
      * Add a new registration.
@@ -536,32 +547,6 @@ class MembershipController extends Controller
     }
 
     /**
-     * Delete time log
-     *
-     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
-     * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
-     * @param Membership $member
-     * @param $timelog_id
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function timelogDeleteAction(Membership $member, $timelog_id)
-    {
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $timeLog = $this->getDoctrine()->getManager()->getRepository('AppBundle:TimeLog')->find($timelog_id);
-        if ($timeLog->getMembership() === $member) {
-            $em->remove($timeLog);
-            $em->flush();
-            $session->getFlashBag()->add('success', 'Time log supprimé');
-        } else {
-            $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
-            $session->getFlashBag()->add('error', $timeLog->getId());
-        }
-        return $this->redirectToShow($member);
-    }
-
-    /**
      * Deletes a member entity.
      *
      * @Route("/delete/{id}", name="member_delete")
@@ -881,7 +866,6 @@ class MembershipController extends Controller
         if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirectToRoute('homepage');
         }
-        $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));

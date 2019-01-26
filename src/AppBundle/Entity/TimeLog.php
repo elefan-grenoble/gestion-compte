@@ -12,7 +12,15 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TimeLog
 {
-    const DESC_BOOKING = "Créneau réservé";
+    const TYPE_CUSTOM = 0;
+
+    const TYPE_SHIFT = 1;
+
+    const TYPE_CYCLE_END = 2;
+    const TYPE_CYCLE_END_FROZEN = 3;
+    const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
+    const TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS = 5;
+
     /**
      * @var int
      *
@@ -37,9 +45,16 @@ class TimeLog
     private $time;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="type", type="smallint")
+     */
+    private $type;
+
+    /**
      * @var string
      *
-     * @ORM\Column(name="description", type="string", length=255)
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
     private $description;
 
@@ -176,4 +191,49 @@ class TimeLog
     {
         $this->membership = $membership;
     }
+
+    /**
+     * @return int
+     */
+    public function getType(): int
+    {
+        return $this->type;
+    }
+
+    /**
+     * @param int $type
+     */
+    public function setType(int $type): void
+    {
+        $this->type = $type;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getComputedDescription(): string
+    {
+        switch ($this->type) {
+            case self::TYPE_CUSTOM:
+                return $this->description;
+            case self::TYPE_SHIFT:
+                if ($this->shift) {
+                    setlocale(LC_TIME, 'fr_FR.UTF8');
+                    return strftime("Créneau de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                } else {
+                    return "Créneau (non renseigné)";
+                }
+            case self::TYPE_CYCLE_END:
+                return "Début de cycle";
+            case self::TYPE_CYCLE_END_FROZEN:
+                return "Début de cycle (compte gelé)";
+            case self::TYPE_CYCLE_END_EXPIRED_REGISTRATION:
+                return "Début de cycle (compte expiré)";
+            case self::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS:
+                return "Régulation du bénévolat facultatif";
+        }
+        return "Type de log de temps inconnu: " . $this->type;
+    }
+
 }

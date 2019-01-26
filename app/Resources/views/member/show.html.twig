@@ -137,44 +137,7 @@
                 <i class="material-icons">access_time</i>Compteur de temps
             </div>
             <div class="collapsible-body white">
-                <table class="striped">
-                    <thead>
-                    <tr>
-                        <th>Date du log</th>
-                        <th>Temps</th>
-                        <th>Motif</th>
-                        <th>Créneau associé</th>
-                        <th></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for timeLog in member.timeLogs %}
-                        <tr>
-                            <td>{{ timeLog.date | date_fr_full }}</td>
-                            <td>{{ timeLog.time | duration_from_minutes }}</td>
-                            <td>{{ timeLog.description }}</td>
-                            <td>{{ timeLog.shift }}</td>
-                            <td>
-                                {% if is_granted("ROLE_ADMIN") %}
-                                    <a href="{{ path('member_timelog_delete',{ "id":member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    <tr>
-                        <th>TOTAL</th>
-                        <td><b>{{ member.timeCount | duration_from_minutes }}</b></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <th>TOTAL CYCLE EN COURS</th>
-                        <td><b>{{ member.timeCount(member.endOfCycle(0)) | duration_from_minutes }}</b></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    </tbody>
-                </table>
+                {% include "member/_partial/time_logs.html.twig" with { member: member, time_log_form: time_log_form } %}
             </div>
         </li>
 
@@ -462,14 +425,29 @@
             data.user_show.note_open = !$(this).hasClass("active");
             Cookies.set("frontend", data);
         });
-        $('#actions .collapsible-header').on('click', function () {
+        $('#time_log .collapsible-header').on('click', function () {
             var data = init();
-            data.user_show.actions_open = !$(this).hasClass("active");
+            data.user_show.time_log_open = !$(this).hasClass("active");
             Cookies.set("frontend", data);
         });
         $('#shifts .collapsible-header').on('click', function () {
             var data = init();
             data.user_show.shifts_open = !$(this).hasClass("active");
+            Cookies.set("frontend", data);
+        });
+        $('#badges .collapsible-header').on('click', function () {
+            var data = init();
+            data.user_show.badges_open = !$(this).hasClass("active");
+            Cookies.set("frontend", data);
+        });
+        $('#freeze .collapsible-header').on('click', function () {
+            var data = init();
+            data.user_show.freeze_open = !$(this).hasClass("active");
+            Cookies.set("frontend", data);
+        });
+        $('#close .collapsible-header').on('click', function () {
+            var data = init();
+            data.user_show.close_open = !$(this).hasClass("active");
             Cookies.set("frontend", data);
         });
         $('#super .collapsible-header').on('click', function () {

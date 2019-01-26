@@ -20,6 +20,12 @@ class InitTimeLogCommand extends ContainerAwareCommand
             ->setHelp('This command allows you to init time logs data');
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     * @throws \Doctrine\ORM\ORMException
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $countShiftLogs = 0;
@@ -50,6 +56,12 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $output->writeln($countCycleBeginning . ' logs de début de cycle créés');
     }
 
+    /**
+     * @param EntityManager $em
+     * @param Shift $shift
+     * @param Membership $membership
+     * @throws \Doctrine\ORM\ORMException
+     */
     private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
     {
         $log = new TimeLog();
@@ -57,10 +69,15 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setDate($shift->getStart());
-        $log->setDescription("Créneau réalisé");
+        $log->setType(TimeLog::TYPE_SHIFT);
         $em->persist($log);
     }
 
+    /**
+     * @param EntityManager $em
+     * @param Membership $membership
+     * @throws \Doctrine\ORM\ORMException
+     */
     private function createCurrentCycleBeginningLog(EntityManager $em, Membership $membership)
     {
         $date = $membership->startOfCycle(0);
@@ -68,7 +85,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log->setMembership($membership);
         $log->setTime(-180);
         $log->setDate($date);
-        $log->setDescription("Début de cycle");
+        $log->setType(TimeLog::TYPE_CYCLE_END);
         $em->persist($log);
     }
 

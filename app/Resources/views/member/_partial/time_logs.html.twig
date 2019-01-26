@@ -1,0 +1,61 @@
+<table>
+    <thead>
+    <tr>
+        <th>TOTAL</th>
+        <th>TOTAL CYCLE EN COURS</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>{{ member.timeCount | duration_from_minutes }}</td>
+        <td>{{ member.timeCount(member.endOfCycle(0)) | duration_from_minutes }}</td>
+    </tr>
+    </tbody>
+</table>
+
+{% if is_granted("ROLE_ADMIN") %}
+
+    <a href="#add-time-log" class="modal-trigger waves-effect waves-light btn teal">
+        <i class="material-icons left">add</i>Ajouter un log de temps</a>
+    {{ form_start(time_log_form) }}
+
+    <div id="add-time-log" class="modal">
+        <div class="modal-content">
+            <h5><i class="material-icons left small">access_time</i>Ajouter un log de temps</h5>
+            {{ form_widget(time_log_form) }}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat orange-text">Annuler</a>
+
+            <button type="submit" class="btn green"><i class="material-icons left">add</i>Ajouter le log de temps</button>
+
+        </div>
+    </div>
+    {{ form_end(time_log_form) }}
+{% endif %}
+
+<table>
+    <thead>
+    <tr class="grey lighten-2">
+        <th>Date du log</th>
+        <th>Temps</th>
+        <th>Motif</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for timeLog in member.timeLogs %}
+        <tr class="{% if timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
+            <td>{{ timeLog.date | date_fr_full }}</td>
+            <td>{{ timeLog.time | duration_from_minutes }}</td>
+            <td>{{ timeLog.computedDescription }}</td>
+            <td>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <a href="{{ path('member_timelog_delete',{ "id":member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
