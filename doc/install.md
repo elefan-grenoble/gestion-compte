@@ -11,16 +11,16 @@
 
 ## Installation
 
-Create a mysql database 
-<pre>mysql -e "CREATE DATABASE my_db_name;"</pre>
 Clone code
 <pre>git clone https://github.com/elefan-grenoble/gestion-compte.git</pre>
 <pre>cd gestion-compte</pre>
 Lancer la configuration (utiliser le nom de la base précédemment créée)
 <pre>composer install</pre>
-Creer le schema de bdd
-<pre>bin/console doctrine:schema:create</pre>
-Lancer le serveur
+Creer la base de donnée
+<pre>bin/console doctrine:schema:create<pre>
+Migrer
+<pre>bin/console doctrine:migration:migrate</pre>
+Lancer le serveur (si pas de serveur)
 <pre>php bin/console server:start</pre>
 add ``127.0.0.1 membres.localcoop.local`` to your _/etc/hosts_ file
 visit [http://membres.localcoop.local/user/install_admin](http://membres.localcoop.local/user/install_admin) to create the super admin user (babar:password)
