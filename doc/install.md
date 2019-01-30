@@ -17,7 +17,7 @@ Clone code
 Lancer la configuration (utiliser le nom de la base précédemment créée)
 <pre>composer install</pre>
 Creer la base de donnée
-<pre>bin/console doctrine:schema:create<pre>
+<pre>bin/console doctrine:schema:create</pre>
 Migrer
 <pre>bin/console doctrine:migration:migrate</pre>
 Lancer le serveur (si pas de serveur)
