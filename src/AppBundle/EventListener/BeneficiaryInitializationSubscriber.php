@@ -4,6 +4,7 @@ namespace AppBundle\EventListener;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
+use AppBundle\Event\BeneficiaryCreatedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\FormEvent;
@@ -27,6 +28,27 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
         return array(
             FormEvents::SUBMIT       => 'postInitializeMembership',
         );
+    }
+
+    public function onBeforePersist(BeneficiaryCreatedEvent $event)
+    {
+        $beneficiary = $event->getBeneficiary();
+        if ($beneficiary) {
+            if (!$beneficiary->getUser()) {
+                $beneficiary->setUser(new User());
+            }
+
+            if (!$beneficiary->getUser()->getUsername()) {
+
+                $username = $this->generateUsername($beneficiary);
+                $beneficiary->getUser()->setUsername($username);
+            }
+
+            if (!$beneficiary->getUser()->getPassword()) {
+                $password = User::randomPassword();
+                $beneficiary->getUser()->setPassword($password);
+            }
+        }
     }
 
     public function postInitializeMembership(FormEvent $event)

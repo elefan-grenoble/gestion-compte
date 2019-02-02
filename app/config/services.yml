@@ -98,6 +98,8 @@ services:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
             arguments:
                 - "@doctrine.orm.entity_manager"
+            tags:
+                - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
 
     shift_service:
             class:  AppBundle\Service\ShiftService

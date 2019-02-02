@@ -1,30 +1,53 @@
 {% extends 'layout.html.twig' %}
 
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}">Admin</a><i class="material-icons">chevron_right</i>
+    Import CSV
+{% endblock %}
+
 {% block content %}
     <div class="row">
+        Colonnes par default :<br>
+        <pre>
+            numero,nom,prénom,adresse,code postal,commune,N/A,téléphone,email,Commissions,A associer à (email),montant
+        </pre>
+
         <div class="col s8 offset-s2">
             {{ form_start(form) }}
             {{ form_errors(form) }}
-                <div class="file-field input-field">
-                    <div class="btn">
-                        <span>Fichier csv</span>
-                        {{ form_widget(form.submitFile) }}
-                    </div>
-                    <div class="file-path-wrapper">
-                        <input class="file-path validate" type="text">
+            <div class="row">
+                <div class="col s7">
+                    <div class="file-field input-field">
+                        <div class="btn indigo">
+                            <span><i class="material-icons left">insert_drive_file</i>Fichier csv</span>
+                            {{ form_widget(form.submitFile) }}
+                        </div>
+                        <div class="file-path-wrapper">
+                            <input class="file-path validate" type="text">
+                        </div>
                     </div>
                 </div>
-                {{ form_widget(form.delimiter) }}
-                <div class="switch">
-                    <label>
-                        Tester
-                        {{ form_widget(form.persist) }}
-                        <span class="lever"></span>
-                        Sauver
-                    </label>
+                <div class="col s5">
+                    {{ form_label(form.delimiter) }}
+                    {{ form_widget(form.delimiter) }}
                 </div>
-                {{ form_widget(form.compute, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+                <div class="col s12">
+                    <button type="submit" class="btn"><i class="material-icons left">file_upload</i>Importer</button>
+                </div>
+            </div>
+
             {{ form_end(form) }}
         </div>
+        <div class="col s12">
+            <p>
+                Pour d'autre format de colonne ou d'autres données (seconde ligne d'adresse, date d'adhésion, mode de réglement,
+                utilisateur ayant enregistré l'adhésion) utiliser l'import en ligne de commande.
+            <pre>
+                php bin/console app:import:users PATH_TO/YOURFILE.csv
+            </pre>
+            </p>
+        </div>
+
     </div>
 {% endblock %}
