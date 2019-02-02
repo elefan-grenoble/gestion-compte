@@ -21,32 +21,32 @@ parameters:
     mailer_encryption: null
 
     # mail user used for transactional
-    transactional_mailer_user: 'contact@localcoop.local'
+    transactional_mailer_user: 'contact@yourcoop.local'
     transactional_mailer_user_name: 'espace membre'
 
 
     # The base domain used for mail addresses
-    emails.base_domain: localcoop.local
+    emails.base_domain: yourcoop.local
 
     # Several email addresses, to be used as an associative array
     emails.contact:
         from_name: 'Contact Localcoop'
-        address: contact@localcoop.local
+        address: contact@yourcoop.local
     emails.member:
         from_name: 'Membres Localcoop'
-        address: membres@localcoop.local
+        address: membres@yourcoop.local
     emails.shift:
         from_name: 'Créneaux Localcoop'
-        address: creneaux@localcoop.local
+        address: creneaux@yourcoop.local
     emails.formation:
         from_name: 'Formation Localcoop'
-        address: formations@localcoop.local
+        address: formations@yourcoop.local
     emails.admin:
         from_name: 'Admin Localcoop'
-        address: admin@localcoop.local
+        address: admin@yourcoop.local
     emails.noreply:
         from_name: 'Ne pas répondre'
-        address: noreply@localcoop.local
+        address: noreply@yourcoop.local
 
     # Available emails in some mailing forms
     emails.sendable:
@@ -63,15 +63,15 @@ parameters:
     secret: ThisTokenIsNotSoSecretChangeIt
 
     #router https://symfony.com/doc/3.4/console/request_context.html
-    router.request_context.host: membres.localcoop.local
+    router.request_context.host: membres.yourcoop.local
     router.request_context.scheme: https
     router.request_context.base_url:
 
     # Branding
     site_name: Espace membre @ MyLocalCoop
     project_name: My Local Coop
-    project_url: https://localcoop.local/
-    project_url_display: localcoop.local
+    project_url: https://yourcoop.local/
+    project_url_display: yourcoop.local
     main_color: #51CAE9
     local_currency_name: 'monnaie locale'
     #ip of the spot, comma separated if many
@@ -95,7 +95,7 @@ parameters:
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
-    logging.mattermost.url: 'http://mattermost.localcoop.local'
+    logging.mattermost.url: 'http://mattermost.yourcoop.local'
     logging.mattermost.channel: ~
 
     logging.swiftmailer.enabled: false

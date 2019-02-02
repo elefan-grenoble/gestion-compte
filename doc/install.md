@@ -22,8 +22,8 @@ Migrer
 <pre>bin/console doctrine:migration:migrate</pre>
 Lancer le serveur (si pas de serveur)
 <pre>php bin/console server:start</pre>
-add ``127.0.0.1 membres.localcoop.local`` to your _/etc/hosts_ file
-visit [http://membres.localcoop.local/user/install_admin](http://membres.localcoop.local/user/install_admin) to create the super admin user (babar:password)
+add ``127.0.0.1 membres.yourcoop.local`` to your _/etc/hosts_ file
+visit [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) to create the super admin user (admin:password are default values)
 
 
 ### En Prod
