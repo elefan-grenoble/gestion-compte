@@ -272,7 +272,7 @@ class MembershipController extends Controller
             $event = new FormEvent($beneficiaryForm->get('user'), $request);
             $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
-            if (count($member->getBeneficiaries()) < 4) { //todo put this in conf
+            if (count($member->getBeneficiaries()) <= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
                 $beneficiary->setMembership($member);
                 $member->addBeneficiary($beneficiary);
                 $em = $this->getDoctrine()->getManager();
@@ -280,7 +280,7 @@ class MembershipController extends Controller
                 $em->flush();
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
-                $session->getFlashBag()->add('error', 'Maximum ' . (5 - 1) . ' beneficiaires enregistrés'); //todo put this in conf
+                $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
             }
             return $this->redirectToShow($member);
         } elseif ($beneficiaryForm->isSubmitted()) {

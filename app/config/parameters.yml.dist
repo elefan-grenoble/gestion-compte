@@ -89,6 +89,7 @@ parameters:
     due_duration_by_cycle: 180
     min_shift_duration: 90
     cycle_duration: '28 days'
+    maximum_nb_of_beneficiaries_in_membership: 2
 
     # Swipe cards
     swipe_cards.autoactivate.enabled: false

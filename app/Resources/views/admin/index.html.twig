@@ -40,8 +40,8 @@
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>
             <h6>Membres</h6>
-            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn disabled">Importer des adhérents en CSV</a>
-            <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>export emails as csv</a>
+            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_upload</i>Importer des adhérents en CSV</a>
+            <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_download</i>export emails as csv</a>
             <h6>Admins</h6>
             <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">add</i>Ajouter un admin</a>
             <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">list</i>List des utilisateurs admin</a>
