@@ -11,6 +11,22 @@ Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet grenob
 
 Il est open source sous licence LGPL?
 
+# Projet
+
+* Suivre [sur github](https://github.com/elefan-grenoble/gestion-compte/projects/2) 
+
+# Installation
+
+* Suivez le [guide d'installation](doc/install.md)
+
+# Initialisation
+
+* Suivez le [guide de mise en route](doc/start.md)
+
+# Developpements
+
+* [Developer Guide](doc/dev.md)
+
 # Liste des fonctionnalités 
 travail en cours
 
@@ -105,19 +121,3 @@ travail en cours
 ## Fonctions logged out
 * Visualisation anonyme du "planning" des prochains jours
 * Scan de carte membre avec scannette sur l'écran d'accueil (info sur a jour, en retard, ...)
-
-# Projet
-
-* Suivre [sur github](https://github.com/elefan-grenoble/gestion-compte/projects/2) 
-
-# Installation
-
-* Suivez le [guide d'installation](doc/install.md)
-
-# Initialisation
-
-* Suivez le [guide de mise en route](doc/start.md)
-
-# Developpements
-
-* [Developer Guide](doc/dev.md)
