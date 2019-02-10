@@ -127,7 +127,9 @@ services:
 
     booking_rights_subscriber:
             class: AppBundle\EventListener\BookingRightsSubscriber
-            arguments: ["@doctrine.orm.entity_manager"]
+            arguments:
+              - "@doctrine.orm.entity_manager"
+              - "@shift_service"
             tags:
               - { name: kernel.event_subscriber }
 
