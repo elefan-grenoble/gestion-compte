@@ -42,6 +42,11 @@ services:
         arguments: ['@mailer_service']
         tags:
             - { name: twig.extension }
+    app.twig.extensions.event:
+        class: AppBundle\Twig\Extension\EventExtension
+        arguments: ['@event_service']
+        tags:
+            - { name: twig.extension }
 
     app.form.registration:
         class: AppBundle\Form\RegistrationType
@@ -133,3 +138,7 @@ services:
             arguments:
                 $baseDomain: '%emails.base_domain%'
                 $sendableEmails: '%emails.sendable%'
+
+    event_service:
+            class: AppBundle\Service\EventService
+            public: true

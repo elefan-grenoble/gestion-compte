@@ -28,29 +28,26 @@
                         <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br>Penses à mettre à jour ton adhésion pour participer ! :)
                     {% else %}
-                        {% set proxy_given = false %}
+                        {% set proxy_given = event | givenProxy %}
+                        {% set proxy_received = event | receivedProxy %}
                         <ul>
-                        {% for proxy in event.proxies %}
-                            {% if proxy.giver == app.user %}
-                                {% if proxy.owner is null %}
+                            {% if proxy_given is not null %}
+                                {% if proxy_given.owner is null %}
                                     <li>Procuration donnée au premier volontaire</li>
-                                    {% set proxy_given = true %}
                                 {% else %}
-                                    <li>Procuration donnée à &nbsp;<b>{{ proxy.owner.user.firstname }} {{ proxy.owner.user.lastname }}</b></li>
-                                    {% set proxy_given = true %}
+                                    <li>Procuration donnée à &nbsp;<b>{{ proxy_given.owner.user.firstname }} {{ proxy_given.owner.user.lastname }}</b></li>
                                 {% endif %}
                             {% endif %}
 
-                            {% if proxy.owner in app.user.beneficiary.membership.beneficiaries %}
-                                {% if proxy.giver %}
-                                    <li>Procuration pour <b>{{ proxy.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy.giver.mainBeneficiary.user.firstname }} {{ proxy.giver.mainBeneficiary.user.lastname }}</b></li>
+                            {% if proxy_received is not null %}
+                                {% if proxy_received.giver %}
+                                    <li>Procuration pour <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></li>
                                 {% else %}
-                                    <li><b>{{ proxy.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy.id}) }}" class="red-text">X</a></li>
+                                    <li><b>{{ proxy_received.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received.id}) }}" class="red-text">X</a></li>
                                 {% endif %}
                             {% endif %}
-                        {% endfor %}
                         </ul>
-                        {% if not proxy_given %}
+                        {% if proxy_given is null and proxy_received is null %}
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only">Je ne peux pas venir, je fais une procuration</a>
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up">Je ne peux pas venir, je fais une procuration</a>
                             <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only">Je viens, j'accepte une procuration</a>
@@ -60,6 +57,5 @@
                 {% endif %}
             {% endif %}
         </div>
-
     </div>
 </div>
