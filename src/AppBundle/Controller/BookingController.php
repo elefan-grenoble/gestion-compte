@@ -2,10 +2,7 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Event\ShiftBookedEvent;
-use AppBundle\Event\ShiftDeletedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
-use AppBundle\Event\ShiftFreedEvent;
+use AppBundle\Event\ShiftEvent;
 use AppBundle\Security\MembershipVoter;
 use DateTime;
 use AppBundle\Entity\Shift;
@@ -262,7 +259,7 @@ class BookingController extends Controller
                 foreach ($shifts as $s) {
 
                     $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
+                    $dispatcher->dispatch(ShiftEvent::EVENT_DELETED, new ShiftEvent($s, $s->getShifter()));
 
                     $em->remove($s);
                     $count++;
@@ -321,7 +318,7 @@ class BookingController extends Controller
         $em->flush();
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $dispatcher->dispatch(ShiftEvent::EVENT_BOOKED, new ShiftEvent($shift, $shift->getShifter()));
 
         return $this->redirectToRoute('homepage');
     }
@@ -340,7 +337,7 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking");
         }
 
-        $membership = $shift->getShifter()->getMembership();
+        $originalShifter = $shift->getShifter();
 
         $em = $this->getDoctrine()->getManager();
 
@@ -353,7 +350,7 @@ class BookingController extends Controller
         $em->flush();
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $membership));
+        $dispatcher->dispatch(ShiftEvent::EVENT_DISMISSED, new ShiftEvent($shift, $originalShifter));
 
         return $this->redirectToRoute('homepage');
     }
@@ -388,7 +385,7 @@ class BookingController extends Controller
                 $em->flush();
 
                 $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+                $dispatcher->dispatch(ShiftEvent::EVENT_BOOKED, new ShiftEvent($shift, $shift->getShifter()));
 
             } else {
                 $session->getFlashBag()->add('xarning', "shift not found");
@@ -425,7 +422,7 @@ class BookingController extends Controller
                 $em->flush();
 
                 $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+                $dispatcher->dispatch(ShiftEvent::EVENT_BOOKED, new ShiftEvent($shift, $shift->getShifter()));
 
                 $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
             } else {
@@ -522,7 +519,7 @@ class BookingController extends Controller
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+            $dispatcher->dispatch(ShiftEvent::EVENT_BOOKED, new ShiftEvent($shift, $shift->getShifter()));
 
             $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
             return $this->redirectToRoute('booking_admin');
@@ -541,7 +538,7 @@ class BookingController extends Controller
 
         $session = new Session();
 
-        $membership = $shift->getShifter()->getMembership();
+        $originalShifter = $shift->getShifter();
 
         $em = $this->getDoctrine()->getManager();
         $shift->free();
@@ -549,11 +546,11 @@ class BookingController extends Controller
         $em->flush();
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
+        $dispatcher->dispatch(ShiftEvent::EVENT_FREED, new ShiftEvent($shift, $originalShifter));
 
         $session->getFlashBag()->add('success', "Le shift a bien été libéré");
 
-        return $this->redirectToRoute('member_show', array('member_number' => $membership->getMemberNumber()));
+        return $this->redirectToRoute('member_show', array('member_number' => $originalShifter->getMembership()->getMemberNumber()));
 
     }
 

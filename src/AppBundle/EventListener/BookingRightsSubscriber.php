@@ -2,7 +2,8 @@
 
 namespace AppBundle\EventListener;
 
-use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftEvent;
+use AppBundle\Service\ShiftService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -21,11 +22,14 @@ class BookingRightsSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            ShiftBookedEvent::NAME => 'updateFirstShiftBookerRights',
+            ShiftEvent::EVENT_BOOKED => 'updateFirstShiftBookerRights',
+            ShiftEvent::EVENT_DELETED => 'removeBookerFirstShiftRights',
+            ShiftEvent::EVENT_DISMISSED => 'removeBookerFirstShiftRights',
+            ShiftEvent::EVENT_FREED => 'removeBookerFirstShiftRights',
         );
     }
 
-    public function updateFirstShiftBookerRights(ShiftBookedEvent $event)
+    public function updateFirstShiftBookerRights(ShiftEvent $event)
     {
         $shift = $event->getShift();
         $user = $shift->getBooker()->getUser();
