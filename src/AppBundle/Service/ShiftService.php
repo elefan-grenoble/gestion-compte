@@ -16,12 +16,14 @@ class ShiftService
     protected $em;
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
+    private $newUserStartAsBeginner;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
+        $this->newUserStartAsBeginner = $newUserStartAsBeginner;
     }
 
     /**
@@ -152,11 +154,8 @@ class ShiftService
             return false;
 
         // First shift ever of the beneficiary, check he or she is not the first one to book the bucket
-        if ($this->isBeginner($beneficiary)) {
-            $shifts = $this->em->getRepository('AppBundle:Shift')->findAlreadyBookedShiftsOfBucket($shift);
-            if (count($shifts) == 0) {
-                return false;
-            }
+        if ($this->isBeginner($beneficiary) && $this->isShiftEmpty($shift)) {
+            return false;
         }
 
         $current_cycle = $this->getShiftCycleIndex($shift, $member);
@@ -173,13 +172,43 @@ class ShiftService
         return $this->canBookDuration($beneficiary, $shift->getDuration(), $current_cycle);
     }
 
+    /**
+     * Check if the beneficiary is a beginner, eg : no shift completed
+     * @param Beneficiary $beneficiary
+     * @return bool
+     */
     public function isBeginner(Beneficiary $beneficiary)
+    {
+        if (!$this->newUserStartAsBeginner) {
+            return false;
+        }
+
+        return !$this->hasPreviousValidShifts($beneficiary);
+    }
+
+    /**
+     * Check if the given beneficiary did at least one shift
+     * @param Beneficiary $beneficiary
+     * @return bool
+     */
+    public function hasPreviousValidShifts(Beneficiary $beneficiary)
     {
         $shifts = $beneficiary->getShifts()->filter(function (Shift $shift) {
             return $shift->getStart() < new \DateTime('now') && !$shift->getIsDismissed();
         });
 
-        return $shifts->count() == 0;
+        return $shifts->count() > 0;
+    }
+
+    /**
+     * Check if the bucket of the given shift doesn't contain any shifters
+     * @param $shift
+     * @return bool
+     */
+    public function isShiftEmpty($shift)
+    {
+        $shifts = $this->em->getRepository('AppBundle:Shift')->findAlreadyBookedShiftsOfBucket($shift);
+        return count($shifts) === 0;
     }
 
     public function getShiftCycleIndex(Shift $shift, Membership $membership)

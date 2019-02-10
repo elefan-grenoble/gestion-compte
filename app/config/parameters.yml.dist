@@ -91,3 +91,5 @@ parameters:
     logging.swiftmailer.enabled: false
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
+
+    new_users_start_as_beginner: true
