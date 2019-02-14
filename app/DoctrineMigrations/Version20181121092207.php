@@ -15,6 +15,8 @@ final class Version20181121092207 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
+        $this->addSql('DROP VIEW IF EXISTS abstract_registration');
+
         $this->addSql('CREATE ALGORITHM=TEMPTABLE VIEW abstract_registration AS (SELECT CONCAT(\'1_\',registration.id) as id,1 as type,registrar_id,created_at as date,amount,mode,CONCAT(LOWER(beneficiary.firstname),\' \',UPPER(beneficiary.lastname)) as beneficiary, registration.membership_id
        FROM registration
        LEFT JOIN membership ON registration.membership_id = membership.id
