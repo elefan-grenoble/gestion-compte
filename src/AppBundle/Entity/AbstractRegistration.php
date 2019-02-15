@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * AbstractRegistration
  *
- * @ORM\Table(name="abstract_registration")
+ * @ORM\Table(name="view_abstract_registration")
  * @ORM\Entity(readOnly=true)
  */
 class AbstractRegistration
