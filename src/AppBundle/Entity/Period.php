@@ -46,7 +46,7 @@ class Period
     /**
      * One Period has One Job.
      * @ORM\ManyToOne(targetEntity="Job")
-     * @ORM\JoinColumn(name="job_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
 
