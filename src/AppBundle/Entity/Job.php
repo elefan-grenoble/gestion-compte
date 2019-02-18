@@ -39,6 +39,17 @@ class Job
      */
     private $color;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="job", cascade={"persist", "remove"}), orphanRemoval=true)
+     */
+    private $shifts;
+
+
+    /**
+     * @ORM\OneToMany(targetEntity="Period", mappedBy="job", cascade={"persist", "remove"}), orphanRemoval=true)
+     */
+    private $periods;
+
 
     /**
      * Get id
@@ -96,5 +107,84 @@ class Job
     public function getColor()
     {
         return $this->color;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add shift.
+     *
+     * @param \AppBundle\Entity\Shift $shift
+     *
+     * @return Job
+     */
+    public function addShift(\AppBundle\Entity\Shift $shift)
+    {
+        $this->shifts[] = $shift;
+
+        return $this;
+    }
+
+    /**
+     * Remove shift.
+     *
+     * @param \AppBundle\Entity\Shift $shift
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeShift(\AppBundle\Entity\Shift $shift)
+    {
+        return $this->shifts->removeElement($shift);
+    }
+
+    /**
+     * Get shifts.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShifts()
+    {
+        return $this->shifts;
+    }
+
+    /**
+     * Add period.
+     *
+     * @param \AppBundle\Entity\Period $period
+     *
+     * @return Job
+     */
+    public function addPeriod(\AppBundle\Entity\Period $period)
+    {
+        $this->periods[] = $period;
+
+        return $this;
+    }
+
+    /**
+     * Remove period.
+     *
+     * @param \AppBundle\Entity\Period $period
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removePeriod(\AppBundle\Entity\Period $period)
+    {
+        return $this->periods->removeElement($period);
+    }
+
+    /**
+     * Get periods.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPeriods()
+    {
+        return $this->periods;
     }
 }

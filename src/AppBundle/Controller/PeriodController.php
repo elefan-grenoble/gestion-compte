@@ -2,7 +2,9 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\AppBundle;
 use AppBundle\Entity\BookedShift;
+use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
@@ -54,6 +56,14 @@ class PeriodController extends Controller
         $session = new Session();
         $period = new Period();
 
+        $em = $this->getDoctrine()->getManager();
+        $job = $em->getRepository(Job::class)->findOneBy(array());
+
+        if (!$job) {
+            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénevolat');
+            return $this->redirectToRoute('job_new');
+        }
+
         $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
@@ -64,7 +74,7 @@ class PeriodController extends Controller
             $time = $form->get('end')->getData();
             $period->setEnd(new \DateTime($time));
 
-            $em = $this->getDoctrine()->getManager();
+
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le nouveau creneau type a bien été créé !');

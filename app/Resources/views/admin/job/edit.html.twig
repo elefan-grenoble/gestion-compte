@@ -7,4 +7,8 @@
         {{ form_widget(form) }}
     <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
     {{ form_end(form) }}
+
+    {{ form_start(delete_form) }}
+    <button type="submit" class="btn-large waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
+    {{ form_end(delete_form) }}
 {% endblock %}
