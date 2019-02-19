@@ -9,11 +9,14 @@
             <span class="activator card-title"><i class="material-icons left">event</i>{{ event.title }}<i class="material-icons right">more_vert</i></span>
             <h6><i>{{ event.date | date_fr_long }} {{ event.date | date('H:i') }}</i></h6>
         </div>
-        {% if is_granted("ROLE_SUPER_ADMIN") %}
-            <div class="card-action">
-                <a href="{{ path("event_edit",{'id':event.id}) }}" class=""><i class="material-icons">edit</i> Editer</a>
-            </div>
-        {% endif %}
+        <div class="card-action">
+            {% if event.needProxy %}
+                <a class="activator waves-effect waves-light btn orange" href="#"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+            {% endif %}
+            {% if is_granted("ROLE_SUPER_ADMIN") %}
+                <a href="{{ path("event_edit",{'id':event.id}) }}" class="btn"><i class="material-icons">edit</i> Editer</a>
+            {% endif %}
+        </div>
         <div class="card-reveal">
             <span class="card-title grey-text text-darken-4">{{ event.title }}<i class="material-icons right">close</i></span>
             <h6><i>{{ event.date | date_fr_long }} {{ event.date | date('H:i') }}</i></h6>
