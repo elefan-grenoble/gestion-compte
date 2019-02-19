@@ -368,15 +368,21 @@ class EventController extends Controller
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($request->get("beneficiary"));
             if ($beneficiary){
 
+                $beneficiaries_ids = [];
                 foreach ($beneficiary->getMembership()->getBeneficiaries() as $b){
                     $beneficiaries_ids[] = $b;
                 }
                 $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
-                    array("owner"=>$beneficiaries_ids,"event"=>$event,"giver"=>null)
+                    array("owner" => $beneficiaries_ids, "event" => $event)
                 );
 
-                if ($proxy){
-                    $session->getFlashBag()->add('notice', $beneficiary->getUser()->getFirstName().' partage son adhéstion #'.$beneficiary->getMemberNumber().' avec '.$proxy->getOwner()->getUser()->getFirstname().' qui accepte de prendre une procuration pour cet événement !');
+                if ($proxy) {
+                    if ($proxy->getGiver() !== null) {
+                        $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre une procuration d\'une autre personne');
+                        return $this->redirectToRoute('homepage');
+                    } else {
+                        $session->getFlashBag()->add('notice', $beneficiary->getUser()->getFirstName() . ' partage son adhésion #' . $beneficiary->getMemberNumber() . ' avec ' . $proxy->getOwner()->getUser()->getFirstname() . ' qui accepte de prendre une procuration pour cet événement !');
+                    }
                 } else {
                     $proxy = new Proxy();
                     $proxy->setEvent($event);
