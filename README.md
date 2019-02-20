@@ -19,6 +19,10 @@ Il est open source sous licence LGPL?
 
 * Suivez le [guide d'installation](doc/install.md)
 
+# Mise à jour
+
+* Suivez le [guide de mise à jour](doc/maj.md)
+
 # Initialisation
 
 * Suivez le [guide de mise en route](doc/start.md)
