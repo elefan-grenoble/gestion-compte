@@ -76,13 +76,13 @@ class RandomSortMembersCommand extends ContainerAwareCommand
         foreach ($memberships as $membership){
             $beneficiaries = $membership->getBeneficiaries()->toArray();
             $rand = rand(0,count($beneficiaries)-1);
-            if ($rand >= 0){
+            if ($rand >= 0 && isset($beneficiaries[$rand])){
                 $beneficiary = $beneficiaries[$rand];
                 $csv .= $index++.',';
                 $csv .= $membership->getMemberNumber().',';
                 $csv .= $beneficiary->getFirstName().',';
                 $csv .= $beneficiary->getLastName().',';
-                $csv .= $beneficiary->getPhone().',';
+                $csv .= intval($beneficiary->getPhone()).',';
                 $csv .= $beneficiary->getEmail().',';
                 $csv .= 'bénéficiaire #'.($rand+1);
             }else{
