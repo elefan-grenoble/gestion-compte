@@ -325,7 +325,13 @@ ORDER BY date DESC;");
 
         $totaux = array();
         foreach ($results as $result){
-            $totaux[$result['date']] = $result;
+            if (!isset($totaux[$result['date']]))
+                $totaux[$result['date']] = $result;
+            foreach ($result as $key => $value){
+                if ($value>0)
+                    $totaux[$result['date']][$key] = $value;
+            }
+
         }
 
         $connection = $em->getConnection();
