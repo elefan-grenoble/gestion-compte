@@ -1,9 +1,6 @@
 # Email spool folder
 /app/spool/*
 
-#local dump
-/*.sql
-
 # Cache, session files and logs (Symfony3)
 /var
 
