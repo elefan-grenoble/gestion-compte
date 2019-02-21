@@ -1,3 +1,4 @@
+
 <div class="col s12 m12">
     <div class="card white center event">
         {% if event.img %}
@@ -11,7 +12,29 @@
         </div>
         <div class="card-action">
             {% if event.needProxy %}
-                <a class="activator waves-effect waves-light btn orange" href="#"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                {% if not app.user.beneficiary or not app.user.beneficiary.membership or not app.user.beneficiary.membership.lastRegistration %}
+                    <span>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</span>
+                {% else %}
+                    {% set proxy_given = event | givenProxy %}
+                    {% set proxy_received = event | receivedProxy %}
+                    {% if proxy_given is not null %}
+                        {% if proxy_given.owner is null %}
+                            <span>Procuration donnée au premier membre volontaire</span>
+                        {% else %}
+                            <span>Procuration donnée à &nbsp;<b>{{ proxy_given.owner.user.firstname }} {{ proxy_given.owner.user.lastname }}</b></span>
+                        {% endif %}
+                    {% endif %}
+                    {% if proxy_received is not null %}
+                        {% if proxy_received.giver %}
+                            <span>Procuration portée <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></span>
+                        {% else %}
+                            <span><b>{{ proxy_received.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received.id}) }}" class="red-text">X</a></span>
+                        {% endif %}
+                    {% endif %}
+                    {% if proxy_received is null and proxy_given is null %}
+                        <a class="activator waves-effect waves-light btn orange" href="#"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                    {% endif %}
+                {% endif %}
             {% endif %}
             {% if is_granted("ROLE_SUPER_ADMIN") %}
                 <a href="{{ path("event_edit",{'id':event.id}) }}" class="btn"><i class="material-icons">edit</i> Editer</a>
@@ -24,15 +47,15 @@
                 {{ event.description | markdown | raw }}
             </div>
             {% if event.needProxy %}
-                {% if not app.user.beneficiary or not app.user.beneficiary.membership.lastRegistration %}
+                {% if not app.user.beneficiary or not app.user.beneficiary.membership or not app.user.beneficiary.membership.lastRegistration %}
                     <b>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</b>
                 {% else %}
+                    {% set proxy_given = event | givenProxy %}
+                    {% set proxy_received = event | receivedProxy %}
                     {% if app.user.beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration %}
                         <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br>Penses à mettre à jour ton adhésion pour participer ! :)
                     {% else %}
-                        {% set proxy_given = event | givenProxy %}
-                        {% set proxy_received = event | receivedProxy %}
                         <ul>
                             {% if proxy_given is not null %}
                                 {% if proxy_given.owner is null %}
@@ -44,7 +67,7 @@
 
                             {% if proxy_received is not null %}
                                 {% if proxy_received.giver %}
-                                    <li>Procuration pour <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></li>
+                                    <li>Procuration portée <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></li>
                                 {% else %}
                                     <li><b>{{ proxy_received.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received.id}) }}" class="red-text">X</a></li>
                                 {% endif %}
