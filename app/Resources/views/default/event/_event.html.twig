@@ -26,7 +26,7 @@
                     {% endif %}
                     {% if proxy_received is not null %}
                         {% if proxy_received.giver %}
-                            <span>Procuration portée <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></span>
+                            <span>Procuration portée par <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></span>
                         {% else %}
                             <span><b>{{ proxy_received.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received.id}) }}" class="red-text">X</a></span>
                         {% endif %}
@@ -67,7 +67,7 @@
 
                             {% if proxy_received is not null %}
                                 {% if proxy_received.giver %}
-                                    <li>Procuration portée <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></li>
+                                    <li>Procuration portée par <b>{{ proxy_received.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received.giver.mainBeneficiary.user.firstname }} {{ proxy_received.giver.mainBeneficiary.user.lastname }}</b></li>
                                 {% else %}
                                     <li><b>{{ proxy_received.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received.id}) }}" class="red-text">X</a></li>
                                 {% endif %}
