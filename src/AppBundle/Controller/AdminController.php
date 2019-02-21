@@ -302,6 +302,7 @@ class AdminController extends Controller
         $registrations = $queryb->getQuery()->getResult();
         $delete_forms = array();
 
+        $table_name = $em->getClassMetadata('AppBundle:AbstractRegistration')->getTableName();
         $connection = $em->getConnection();
         $statement = $connection->prepare("SELECT date_format(date,\"%Y-%m-%d\") as date,
 SUM(IF(mode='1',amount,0)) as sum_1,
@@ -311,7 +312,7 @@ SUM(IF(mode='4',amount,0)) as sum_4,
 SUM(IF(mode='5',amount,0)) as sum_5,
 SUM(IF(mode='6',amount,0)) as sum_6,
 SUM(amount) as grand_total
-FROM abstract_registration
+FROM ".$table_name."
 WHERE date >= :from ".(($to) ? "AND date <= :to" : "")."
 GROUP BY date 
 ORDER BY date DESC;");
@@ -336,7 +337,7 @@ SUM(IF(mode='4',amount,0)) as sum_4,
 SUM(IF(mode='5',amount,0)) as sum_5,
 SUM(IF(mode='6',amount,0)) as sum_6,
 SUM(amount) as grand_total
-FROM abstract_registration
+FROM ".$table_name."
 WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
         $statement->bindValue('from', $from->format('Y-m-d'));
         if ($to){
