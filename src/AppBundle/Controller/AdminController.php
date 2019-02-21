@@ -329,7 +329,7 @@ ORDER BY date DESC;");
                 $totaux[$result['date']] = $result;
             foreach ($result as $key => $value){
                 if ($value>0)
-                    $totaux[$result['date']][$key] = $value;
+                    $totaux[$result['date']][$key] += $value;
             }
 
         }
