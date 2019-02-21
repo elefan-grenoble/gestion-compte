@@ -304,7 +304,8 @@ class AdminController extends Controller
 
         $table_name = $em->getClassMetadata('AppBundle:AbstractRegistration')->getTableName();
         $connection = $em->getConnection();
-        $statement = $connection->prepare("SELECT date_format(date,\"%Y-%m-%d\") as date,
+        $statement = $connection->prepare("SELECT date, SUM(sum_1) as sum_1,SUM(sum_2) as sum_2,SUM(sum_3) as sum_3,SUM(sum_4) as sum_4,SUM(sum_5) as sum_5,SUM(sum_6) as sum_6,SUM(grand_total) as grand_total FROM
+(SELECT date_format(date,\"%Y-%m-%d\") as date,
 SUM(IF(mode='1',amount,0)) as sum_1,
 SUM(IF(mode='2',amount,0)) as sum_2,
 SUM(IF(mode='3',amount,0)) as sum_3,
@@ -314,8 +315,7 @@ SUM(IF(mode='6',amount,0)) as sum_6,
 SUM(amount) as grand_total
 FROM ".$table_name."
 WHERE date >= :from ".(($to) ? "AND date <= :to" : "")."
-GROUP BY date 
-ORDER BY date DESC;");
+GROUP BY date) as sum GROUP BY date ORDER BY date DESC;");
         $statement->bindValue('from', $from->format('Y-m-d'));
         if ($to){
             $statement->bindValue('to', $to->format('Y-m-d'));
@@ -325,13 +325,7 @@ ORDER BY date DESC;");
 
         $totaux = array();
         foreach ($results as $result){
-            if (!isset($totaux[$result['date']]))
-                $totaux[$result['date']] = $result;
-            foreach ($result as $key => $value){
-                if ($value>0)
-                    $totaux[$result['date']][$key] += $value;
-            }
-
+            $totaux[$result['date']] = $result;
         }
 
         $connection = $em->getConnection();
