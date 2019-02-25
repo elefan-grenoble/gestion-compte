@@ -248,10 +248,10 @@ class Event
         });
     }
 
-    public function getProxiesByGiver(User $user)
+    public function getProxiesByGiver(Membership $membership)
     {
-        return $this->proxies->filter(function (Proxy $proxy) use ($user) {
-            return ($proxy->getGiver() === $user);
+        return $this->proxies->filter(function (Proxy $proxy) use ($membership) {
+            return ($proxy->getGiver() === $membership);
         });
     }
 
