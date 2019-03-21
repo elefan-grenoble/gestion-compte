@@ -35,6 +35,7 @@
             <a href="{{ path("event_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">event</i>Gérer les événements</a>
             <a href="{{ path("widget_generator") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">tune</i>Générer un widget</a>
             <a href="{{ path("dynamic_content_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">content_paste</i>Contenus dynamiques</a>
+            <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">mail</i>Modèles d'emails</a>
 
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}
