@@ -8,11 +8,11 @@
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>modèles d'emails</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i>
+    <i class="material-icons">add</i>
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Modifier le modèle d'email</h4>
+    <h4 class="">Nouveau modèle d'email</h4>
 
     <p>La balise <strong>{{ "{{template_content}}" }}</strong> dans le modèle sera remplacée par le contenu du mail.</p>
 
@@ -20,7 +20,6 @@
     <div class="errors">
         {{ form_errors(form.content) }}
     </div>
-
 
     <div class="row">
         <div class="input-field col s12">
@@ -35,7 +34,7 @@
 
     {{ form_widget(form.content) }}
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+        <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
     </div>
     {{ form_end(form) }}
 

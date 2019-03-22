@@ -44,6 +44,36 @@ class EmailTemplateController extends Controller
         ));
     }
 
+
+    /**
+     * Create an email template
+     *
+     * @Route("/new", name="email_template_new")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function newAction(Request $request, EmailTemplate $emailTemplate)
+    {
+        $this->denyAccessUnlessGranted('edit', $emailTemplate);
+
+        $form = $this->createForm('AppBundle\Form\EmailTemplateType', $emailTemplate);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($emailTemplate);
+            $em->flush();
+            $session->getFlashBag()->add('success', "Modèle d'email édité");
+            return $this->redirectToRoute('email_template_list');
+
+        }
+
+        return $this->render('admin/mail/template/edit.html.twig', array(
+            'form' => $form->createView()
+        ));
+    }
+
     /**
      * Edit an email template
      *

@@ -25,13 +25,6 @@ class EmailTemplate
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=64)
-     */
-    protected $code;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="name", type="string", length=64)
      *
      */
@@ -40,7 +33,7 @@ class EmailTemplate
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="text")
+     * @ORM\Column(name="description", type="string", length=512)
      *
      */
     protected $description;
@@ -67,22 +60,6 @@ class EmailTemplate
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCode(): string
-    {
-        return $this->code;
-    }
-
-    /**
-     * @param string $code
-     */
-    public function setCode(string $code): void
-    {
-        $this->code = $code;
     }
 
     /**
