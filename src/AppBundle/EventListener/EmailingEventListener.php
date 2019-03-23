@@ -3,6 +3,7 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
+use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
@@ -60,6 +61,34 @@ class EmailingEventListener
             );
         $this->mailer->send($needInfo);
 
+    }
+
+    /**
+     * @param AnonymousBeneficiaryRecallEvent $event
+     * @throws \Exception
+     */
+    public function onAnonymousBeneficiaryRecall(AnonymousBeneficiaryRecallEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onAnonymousBeneficiaryRecall");
+
+        $email = $event->getAnonymousBeneficiary()->getEmail();
+
+        $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $needInfoRecall = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', souhaites-tu te présenter ?'))
+            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setTo($email)
+            ->setBody(
+                $this->renderView(
+                    'emails/needInfoRecall.html.twig',
+                    array(
+                        'register_url' => $url,
+                        'rdate' => $event->getAnonymousBeneficiary()->getCreatedAt()
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($needInfoRecall);
     }
 
     /**
