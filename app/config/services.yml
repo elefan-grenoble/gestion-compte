@@ -98,6 +98,7 @@ services:
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
                 - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
+                - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
 
     beneficiary_initialization_subscriber:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber

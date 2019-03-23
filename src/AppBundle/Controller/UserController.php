@@ -12,6 +12,7 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
+use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Form\AnonymousBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
@@ -27,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
@@ -142,6 +144,28 @@ class UserController extends Controller
             'form' => $form->createView(),
         ));
     }
+
+    /**
+     * Creates a new user entity.
+     *
+     * @Route("/quick_new/{id}/recall", name="user_quick_new_recall")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"GET"})
+     */
+    public function quickNewRecallAction(Request $request, \Swift_Mailer $mailer,AnonymousBeneficiary $anonymousBeneficiary)
+    {
+
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
+
+        $session = new Session();
+        $session->getFlashBag()->add('success', 'La relance a été envoyée !');
+
+        $referer = $request->headers->get('referer');
+
+        return new RedirectResponse($referer);
+    }
+
 
     /**
      * remove role of user
