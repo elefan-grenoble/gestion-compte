@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\EmailTemplate;
+use AppBundle\Form\EmailTemplateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -52,11 +53,10 @@ class EmailTemplateController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request, EmailTemplate $emailTemplate)
+    public function newAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('edit', $emailTemplate);
-
-        $form = $this->createForm('AppBundle\Form\EmailTemplateType', $emailTemplate);
+        $emailTemplate = new EmailTemplate();
+        $form = $this->createForm(EmailTemplateType::class, $emailTemplate);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -64,7 +64,7 @@ class EmailTemplateController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
             $em->flush();
-            $session->getFlashBag()->add('success', "Modèle d'email édité");
+            $session->getFlashBag()->add('success', "Modèle d'email créé");
             return $this->redirectToRoute('email_template_list');
 
         }
@@ -85,7 +85,7 @@ class EmailTemplateController extends Controller
     {
         $this->denyAccessUnlessGranted('edit', $emailTemplate);
 
-        $form = $this->createForm('AppBundle\Form\EmailTemplateType', $emailTemplate);
+        $form = $this->createForm(EmailTemplateType::class, $emailTemplate);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

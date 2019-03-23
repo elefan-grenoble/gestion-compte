@@ -89,7 +89,7 @@ class EmailTemplate
     /**
      * @return string
      */
-    public function getContent(): string
+    public function getContent()
     {
         return $this->content;
     }
@@ -105,7 +105,7 @@ class EmailTemplate
     /**
      * @return string
      */
-    public function getDescription(): string
+    public function getDescription()
     {
         return $this->description;
     }
