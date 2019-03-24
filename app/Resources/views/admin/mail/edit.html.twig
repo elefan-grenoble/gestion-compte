@@ -13,6 +13,10 @@
             </div>
         </div>
         <div class="input-field col s12">
+            {{ form_widget(form.template) }}
+            {{ form_label(form.template) }}
+        </div>
+        <div class="input-field col s12">
             {{ form_widget(form.subject) }}
             {{ form_label(form.subject) }}
         </div>
@@ -67,4 +71,5 @@
             });
         });
     </script>
+
 {% endblock %}
