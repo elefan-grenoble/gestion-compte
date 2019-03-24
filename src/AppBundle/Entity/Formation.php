@@ -4,12 +4,14 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use FOS\UserBundle\Model\Group;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * Formation
  *
  * @ORM\Table(name="formation")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\FormationRepository")
+ * @UniqueEntity(fields={"name"}, message="Ce nom est déjà utilisé par une autre formation")
  */
 class Formation extends Group
 {
@@ -38,30 +40,6 @@ class Formation extends Group
         return $this->id;
     }
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Formation
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
     public function __toString()
     {
         return $this->getName();
@@ -71,6 +49,7 @@ class Formation extends Group
      */
     public function __construct()
     {
+        parent::__construct(null);
         $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
