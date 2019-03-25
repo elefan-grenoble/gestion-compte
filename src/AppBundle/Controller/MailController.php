@@ -130,9 +130,11 @@ class MailController extends Controller
                 return $this->redirectToRoute('mail_edit');
             }
 
+            $contentType = 'text/plain';
             $content = $mailform->get('message')->getData();
             $emailTemplate = $mailform->get('template')->getData();
             if ($emailTemplate) {
+                $contentType = 'text/html';
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
 
@@ -144,7 +146,7 @@ class MailController extends Controller
                     ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
                     ->addPart(
                         $body,
-                        'text/plain'
+                        $contentType
                     );
                 $mailer->send($message);
                 $nb++;
