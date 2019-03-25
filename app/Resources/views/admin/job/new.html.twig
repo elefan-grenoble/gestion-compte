@@ -4,10 +4,13 @@
     <h4 class="">Nouveau poste</h4>
 
     {{ form_start(form) }}
+
+    <div class="row">
         {{ form_label(form.name) }}
         {{ form_errors(form.name) }}
         {{ form_widget(form.name) }}
-
+    </div>
+    <div class="row">
         {{ form_label(form.color) }}<br>
         <a href="https://materializecss.com/color.html" target="_blank"><i class="material-icons left">link</i> Couleur materialize</a>
         <span class="badge red">red</span>
@@ -25,6 +28,12 @@
         <span class="badge gray">...</span>
         {{ form_errors(form.color) }}
         {{ form_widget(form.color) }}
+    </div>
+    <div class="row">
+        {{ form_errors(form.enabled) }}
+        {{ form_widget(form.enabled) }}
+        {{ form_label(form.enabled) }}
+    </div>
         <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
     {{ form_end(form) }}
 {% endblock %}

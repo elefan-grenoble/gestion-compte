@@ -3,16 +3,11 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Job;
-use AppBundle\Entity\PeriodPosition;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class JobType extends AbstractType
 {
@@ -23,7 +18,8 @@ class JobType extends AbstractType
     {
         $builder
             ->add('name',TextType::class,array('label'=>'Nom du poste de bénévolat'))
-            ->add('color',TextType::class,array('label'=>'Couleur des créneaux dans le planning'));
+            ->add('color',TextType::class,array('label'=>'Couleur des créneaux dans le planning'))
+            ->add('enabled',CheckboxType::class,array('required' => false, 'label'=>'Poste activé'));
     }
 
     /**
