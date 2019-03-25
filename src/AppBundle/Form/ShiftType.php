@@ -80,17 +80,12 @@ class ShiftType extends AbstractType implements DataMapperInterface
         /** @var FormInterface[] $forms */
         $forms = iterator_to_array($forms);
 
-        // as data is passed by reference, overriding it will change it in
-        // the form object as well
-        // beware of type inconsistency, see caution below
-        $data = new Shift();
-
         $date = new \DateTime($forms['date']->getData());
         $start = new \DateTime($forms['start']->getData());
         $end = new \DateTime($forms['end']->getData());
 
         $year = intval($date->format('Y'));
-        $month = intval($date->format('M'));
+        $month = intval($date->format('n'));
         $day = intval($date->format('d'));
 
         $start->setDate($year, $month, $day);
@@ -100,7 +95,5 @@ class ShiftType extends AbstractType implements DataMapperInterface
         $data->setEnd($end);
         $data->setJob($forms['job']->getData());
         $data->setFormation($forms['formation']->getData());
-
-        die($data);
     }
 }
