@@ -2,19 +2,14 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
-use AppBundle\Entity\PeriodPosition;
-use AppBundle\Entity\PeriodRoom;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
+use AppBundle\Repository\JobRepository;
 
 class PeriodType extends AbstractType
 {
@@ -40,7 +35,14 @@ class PeriodType extends AbstractType
                 'class' => 'AppBundle:Job',
                 'choice_label'=> 'name',
                 'multiple'     => false,
-                'required' => true
+                'required' => true,
+                'query_builder' => function(JobRepository $repository) {
+                    $qb = $repository->createQueryBuilder('j');
+                    return $qb
+                        ->where($qb->expr()->eq('j.enabled', '?1'))
+                        ->setParameter('1', '1')
+                        ->orderBy('j.name', 'ASC');
+                }
             ));
     }
 

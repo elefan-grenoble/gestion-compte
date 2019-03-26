@@ -1,14 +1,15 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-    <h4 class="">editer job</h4>
+    <h4 class="">éditer job</h4>
 
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-    <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
-    {{ form_end(form) }}
+    {% include "/admin/job/_form.html.twig" with { form: form  } %}
 
-    {{ form_start(delete_form) }}
-    <button type="submit" class="btn-large waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
-    {{ form_end(delete_form) }}
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        {{ form_start(delete_form) }}
+        <button type="submit" class="btn-large waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer
+        </button>
+        {{ form_end(delete_form) }}
+    {% endif %}
+
 {% endblock %}
