@@ -65,6 +65,14 @@ class AnonymousBeneficiary
      */
     private $created_at;
 
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="recall_date", type="datetime", nullable=true)
+     */
+    private $recall_date;
+
     /**
      * Get id
      *
@@ -138,6 +146,29 @@ class AnonymousBeneficiary
      */
     public function getCreatedAt(){
         return $this->created_at;
+    }
+
+    /**
+     * Set recall_date
+     *
+     * @param \DateTime $date
+     *
+     * @return AnonymousBeneficiary
+     */
+    public function setRecallDate(\DateTime $date)
+    {
+        $this->recall_date = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get recall_date
+     *
+     * @return \DateTime
+     */
+    public function getRecallDate(){
+        return $this->recall_date;
     }
 
     /**

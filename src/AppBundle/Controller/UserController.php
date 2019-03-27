@@ -146,17 +146,22 @@ class UserController extends Controller
     }
 
     /**
-     * Creates a new user entity.
+     * Recall new unconfirmed user.
      *
      * @Route("/quick_new/{id}/recall", name="user_quick_new_recall")
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
      */
-    public function quickNewRecallAction(Request $request, \Swift_Mailer $mailer,AnonymousBeneficiary $anonymousBeneficiary)
+    public function quickNewRecallAction(Request $request,AnonymousBeneficiary $anonymousBeneficiary)
     {
 
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
+
+        $anonymousBeneficiary->setRecallDate(new \DateTime());
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($anonymousBeneficiary);
+        $em->flush();
 
         $session = new Session();
         $session->getFlashBag()->add('success', 'La relance a été envoyée !');
