@@ -15,6 +15,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 
 /**
  * Email controller.
@@ -129,15 +130,23 @@ class MailController extends Controller
                 return $this->redirectToRoute('mail_edit');
             }
 
+            $contentType = 'text/plain';
+            $content = $mailform->get('message')->getData();
+            $emailTemplate = $mailform->get('template')->getData();
+            if ($emailTemplate) {
+                $contentType = 'text/html';
+                $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
+            }
+
             foreach ($beneficiaries as $beneficiary) {
-                $template = $this->get('twig')->createTemplate($mailform->get('message')->getData());
+                $template = $this->get('twig')->createTemplate($content);
                 $body = $template->render(array('beneficiary' => $beneficiary));
                 $message = (new \Swift_Message($mailform->get('subject')->getData()))
                     ->setFrom($from)
                     ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
                     ->addPart(
                         $body,
-                        'text/plain'
+                        $contentType
                     );
                 $mailer->send($message);
                 $nb++;
@@ -156,10 +165,18 @@ class MailController extends Controller
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
-            ->add('from', ChoiceType::class, array('label' => 'depuis', 'required' => false, 'choices' => $mailerService->getAllowedEmails()))
-            ->add('to', HiddenType::class, array('label' => 'à', 'required' => true))
-            ->add('subject', TextType::class, array('label' => 'sujet', 'required' => true))
-            ->add('message', TextareaType::class, array('label' => 'message', 'required' => true, 'attr' => array('class' => 'materialize-textarea')))
+            ->add('from', ChoiceType::class, array('label' => 'Depuis', 'required' => false, 'choices' => $mailerService->getAllowedEmails()))
+            ->add('to', HiddenType::class, array('label' => 'Destinataires', 'required' => true))
+            ->add('template', EntityType::class, array(
+                'class' => 'AppBundle:EmailTemplate',
+                'placeholder' => '',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'label' => 'Modèle'
+            ))
+            ->add('subject', TextType::class, array('label' => 'Sujet', 'required' => true))
+            ->add('message', TextareaType::class, array('label' => 'Message', 'required' => true, 'attr' => array('class' => 'materialize-textarea')))
             ->getForm();
         return $mailform;
     }

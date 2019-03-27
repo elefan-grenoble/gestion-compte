@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    Modèles d'emails
+{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>modèles d'emails
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Modèles d'emails</h4>
+    <div class="row">
+        {% for emailTemplate in emailTemplates %}
+            <div class="col s12 m4">
+                <div class="card blue-grey darken-1">
+                    <div class="card-content white-text">
+                        <span class="card-title"><i class="material-icons left">content_paste</i>{{ emailTemplate.name }}</span>
+                        {{ emailTemplate.description }}
+                    </div>
+                    <div class="card-action">
+
+                        <div class="left">
+                            <a href="{{ path("email_template_edit",{'id':emailTemplate.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+                        </div>
+                        <div>
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <a href="{{ path('email_template_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un modèle</a>
+{% endblock %}
