@@ -1,6 +1,8 @@
 <?php
 namespace AppBundle\Twig\Extension;
 
+use AppBundle\Entity\AbstractRegistration;
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Service\Picture\BasePathPicture;
@@ -33,11 +35,13 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
             new \Twig_SimpleFilter('date_fr_full',array($this, 'date_fr_full')),
+            new \Twig_SimpleFilter('date_fr_with_time',array($this, 'date_fr_with_time')),
             new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
             new \Twig_SimpleFilter('qr',array($this, 'qr')),
             new \Twig_SimpleFilter('barcode',array($this, 'barcode')),
             new \Twig_SimpleFilter('vigenere_encode',array($this, 'vigenere_encode')),
             new \Twig_SimpleFilter('vigenere_decode',array($this, 'vigenere_decode')),
+            new \Twig_SimpleFilter('recall_date',array($this, 'get_recall_date')),
             new \Twig_SimpleFilter('img',array($this, 'imgFilter')),
             new \Twig_SimpleFilter('payment_mode_devise',array($this, 'payment_mode_devise')),
             new \Twig_SimpleFilter('payment_mode',array($this, 'payment_mode')),
@@ -117,6 +121,12 @@ class AppExtension extends \Twig_Extension
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
+    }
+
+    public function date_fr_with_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
     }
 
     public function payment_mode_devise(int $value)
@@ -215,5 +225,16 @@ class AppExtension extends \Twig_Extension
 
     public function vigenere_decode($text){
         return $this->container->get('AppBundle\Helper\SwipeCard')->vigenereDecode($text);
+    }
+
+    public function get_recall_date(AbstractRegistration $ar){
+        if ($ar->getType() == AbstractRegistration::TYPE_ANONYMOUS){
+            $em = $this->container->get('doctrine')->getManager();
+            $anonyB = $em->getRepository(AnonymousBeneficiary::class)->find($ar->getEntityId());
+            if ($anonyB){
+                return $anonyB->getRecallDate();
+            }
+        }
+        return null;
     }
 }

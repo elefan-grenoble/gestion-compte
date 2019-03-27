@@ -161,4 +161,8 @@ class AbstractRegistration
         return $registration;
     }
 
+    public function getEntityId(){
+        return substr($this->getId(),2);
+    }
+
 }

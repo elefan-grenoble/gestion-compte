@@ -117,6 +117,11 @@
                 {% elseif is_granted("ROLE_FINANCE_MANAGER") and  (registration.type == constant('TYPE_ANONYMOUS', registration)) %}
                     <div class="collapsible-body">
                         <div>
+                            {% if registration | recall_date %}
+                                Dernière relance faite le {{ registration | recall_date | date_fr_with_time }}
+                            {% else %}
+                                Jamais relancé
+                            {% endif %}&nbsp;
                             <a href="{{ path('user_quick_new_recall',{'id' : registration.id[2:]}) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
                         </div>
                     </div>
