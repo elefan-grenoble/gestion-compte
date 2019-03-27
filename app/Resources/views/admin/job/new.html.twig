@@ -3,29 +3,8 @@
 {% block content %}
     <h4 class="">Nouveau poste</h4>
 
-    {{ form_start(form) }}
-        {{ form_label(form.name) }}
-        {{ form_errors(form.name) }}
-        {{ form_widget(form.name) }}
+    {% include "/admin/job/_form.html.twig" with { form: form  } %}
 
-        {{ form_label(form.color) }}<br>
-        <a href="https://materializecss.com/color.html" target="_blank"><i class="material-icons left">link</i> Couleur materialize</a>
-        <span class="badge red">red</span>
-        <span class="badge pink">pink</span>
-        <span class="badge purple">purple</span>
-        <span class="badge deep-purple">deep-purple</span>
-        <span class="badge indigo">indigo</span>
-        <span class="badge blue">blue</span>
-        <span class="badge light-blue">light-blue</span>
-        <span class="badge cyan">cyan</span>
-        <span class="badge teal">teal</span>
-        <span class="badge green">green</span>
-        <span class="badge light-green">light-green</span>
-        <span class="badge lime">lime</span>
-        <span class="badge gray">...</span>
-        {{ form_errors(form.color) }}
-        {{ form_widget(form.color) }}
-        <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
-    {{ form_end(form) }}
+
 {% endblock %}
 

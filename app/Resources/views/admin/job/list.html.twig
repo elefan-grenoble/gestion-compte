@@ -14,7 +14,7 @@
         <tr>
             <th>id</th>
             <th>Poste</th>
-            <th>couleur</th>
+            <th>Couleur</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -23,7 +23,7 @@
         {% for job in jobs %}
             <tr>
                 <td>{{ job.id }}</td>
-                <td>{{ job.name }}</td>
+                <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
                 <td class="{{ job.color }} white-text">{{ job.color }}</td>
                 <td><a href="{{ path("job_edit",{'id':job.id}) }}"><i class="material-icons">edit</i>editer</a></td>
             </tr>

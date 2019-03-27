@@ -50,6 +50,12 @@ class Job
      */
     private $periods;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="enabled", type="boolean", nullable=false, options={"default" : 1})
+     */
+    private $enabled;
 
     /**
      * Get id
@@ -186,5 +192,21 @@ class Job
     public function getPeriods()
     {
         return $this->periods;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * @param bool $enabled
+     */
+    public function setEnabled(bool $enabled)
+    {
+        $this->enabled = $enabled;
     }
 }

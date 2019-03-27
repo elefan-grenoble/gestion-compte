@@ -49,6 +49,7 @@ class JobController extends Controller
         $session = new Session();
 
         $job = new Job();
+        $job->setEnabled(true);
 
         $em = $this->getDoctrine()->getManager();
 

@@ -3,14 +3,11 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Shift;
+use AppBundle\Repository\JobRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use AppBundle\Form\ShiftMapper;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\DataMapperInterface;
 
 class ShiftType extends AbstractType implements DataMapperInterface
@@ -36,7 +33,14 @@ class ShiftType extends AbstractType implements DataMapperInterface
                 'class' => 'AppBundle:Job',
                 'choice_label' => 'name',
                 'multiple' => false,
-                'required' => true
+                'required' => true,
+                'query_builder' => function(JobRepository $repository) {
+                    $qb = $repository->createQueryBuilder('j');
+                    return $qb
+                        ->where($qb->expr()->eq('j.enabled', '?1'))
+                        ->setParameter('1', '1')
+                        ->orderBy('j.name', 'ASC');
+                }
             ))
             ->setDataMapper($this);
     }
