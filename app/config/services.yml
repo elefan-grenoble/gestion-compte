@@ -107,6 +107,11 @@ services:
             tags:
                 - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
 
+    anonymous_beneficiary:
+            class: AppBundle\Validator\Constraints\UniqueEmailValidator
+            arguments:
+              - "@doctrine.orm.entity_manager"
+
     shift_service:
             class:  AppBundle\Service\ShiftService
             public: true
