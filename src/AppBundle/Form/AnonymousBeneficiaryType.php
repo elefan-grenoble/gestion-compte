@@ -43,14 +43,15 @@ class AnonymousBeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email',EmailType::class,array('label'=>'Courriel'))
-            ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')))
+            ->add('email',EmailType::class,array('label'=>'Courriel du nouveau membre'))
+            ->add('join_to',AutocompleteBeneficiaryType::class,array('label'=>'Email du compte parent','required'=>false))
+            ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),'required'=>false))
             ->add('mode', ChoiceType::class, array('choices'  => array(
                 'Espèce' => Registration::TYPE_CASH,
                 'Chèque' => Registration::TYPE_CHECK,
                 'Cairn' => Registration::TYPE_LOCAL,
 //                'Helloasso' => Registration::TYPE_HELLOASSO,
-            ),'label' => 'Mode de réglement','placeholder' => '','required' => true)); //todo, make it dynamic
+            ),'label' => 'Mode de réglement','placeholder' => '','required' => false)); //todo, make it dynamic
 
     }
     

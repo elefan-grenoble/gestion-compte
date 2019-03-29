@@ -92,6 +92,13 @@ class HelloassoPayment
      */
     private $registration;
 
+
+    /***
+     * @return string
+     */
+    public function __toString(){
+        return '#'.$this->getId().' de '.$this->getEmail().' le '. $this->getCreatedAt()->format('d-M-Y à H:i').' '.$this->getAmount().' €';
+    }
     /**
      * @ORM\PrePersist
      */

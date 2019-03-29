@@ -6,12 +6,15 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
 use AppBundle\Validator\Constraints as AppAssert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * AnonymousBeneficiary
  *
  * @ORM\Table(name="anonymous_beneficiary")
  * @ORM\HasLifecycleCallbacks()
+ * @UniqueEntity("email")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\AnonymousBeneficiaryRepository")
  */
 class AnonymousBeneficiary
@@ -35,20 +38,24 @@ class AnonymousBeneficiary
      */
     private $email;
 
+    /**
+     * @ORM\OneToOne(targetEntity="Beneficiary")
+     * @ORM\JoinColumn(name="join_to", referencedColumnName="id", onDelete="SET NULL")
+     * @AppAssert\BeneficiaryCanHost
+     */
+    private $join_to;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="amount", type="string", length=255)
-     * @Assert\NotBlank(message="Le montant doit être saisi")
+     * @ORM\Column(name="amount", type="string", length=255, nullable=true)
      */
     private $amount;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="mode", type="integer")
-     * @Assert\NotBlank(message="Un mode de paiement est requis")
+     * @ORM\Column(name="mode", type="integer", nullable=true)
      */
     private $mode;
 
@@ -89,7 +96,7 @@ class AnonymousBeneficiary
      *
      * @param string $amount
      *
-     * @return Registration
+     * @return AnonymousBeneficiary
      */
     public function setAmount($amount)
     {
@@ -143,7 +150,7 @@ class AnonymousBeneficiary
     /**
      * Get created_at
      *
-     * @return DateTime
+     * @return \DateTime
      */
     public function getCreatedAt(){
         return $this->created_at;
@@ -196,12 +203,37 @@ class AnonymousBeneficiary
         return $this->email;
     }
 
+
+    /**
+     * Set join_to
+     *
+     * @param Beneficiary $beneficiary
+     *
+     * @return AnonymousBeneficiary
+     */
+    public function setJoinTo($beneficiary)
+    {
+        $this->join_to = $beneficiary;
+
+        return $this;
+    }
+
+    /**
+     * Get join_to_email
+     *
+     * @return Beneficiary
+     */
+    public function getJoinTo()
+    {
+        return $this->join_to;
+    }
+
     /**
      * Set registrar
      *
      * @param \AppBundle\Entity\User $registrar
      *
-     * @return Registration
+     * @return AnonymousBeneficiary
      */
     public function setRegistrar(\AppBundle\Entity\User $registrar = null)
     {
@@ -220,4 +252,36 @@ class AnonymousBeneficiary
         return $this->registrar;
     }
 
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+        // check data consistency
+        if (!$this->getJoinTo()){
+            if (!$this->getAmount()) {
+                $context->buildViolation('Pour une nouvelle adhésion, merci de saisir un montant')
+                    ->atPath('amount')
+                    ->addViolation();
+            }
+            if (!$this->getMode()) {
+                $context->buildViolation('Merci de saisir le moyen de paiement')
+                    ->atPath('mode')
+                    ->addViolation();
+            }
+        }else{
+            if ($this->getAmount()) {
+                $context->buildViolation('Pour un ajout de beneficiaire sur un compte existant, merci de ne pas enregistrer de paiement')
+                    ->atPath('amount')
+                    ->addViolation();
+            }
+            if ($this->getMode()) {
+                $context->buildViolation('Pour un ajout de beneficiaire sur un compte existant, merci de ne pas enregistrer de mode paiement')
+                    ->atPath('mode')
+                    ->addViolation();
+            }
+
+        }
+
+    }
 }

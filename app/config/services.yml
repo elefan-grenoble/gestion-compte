@@ -99,6 +99,7 @@ services:
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
                 - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
                 - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
+                - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
 
     beneficiary_initialization_subscriber:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
@@ -107,10 +108,15 @@ services:
             tags:
                 - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
 
-    anonymous_beneficiary:
+    validator_anonymous_beneficiary_unique_email:
             class: AppBundle\Validator\Constraints\UniqueEmailValidator
             arguments:
               - "@doctrine.orm.entity_manager"
+
+    validator_anonymous_beneficiary_beneficiary_can_host:
+      class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
+      arguments:
+        - "%maximum_nb_of_beneficiaries_in_membership%"
 
     shift_service:
             class:  AppBundle\Service\ShiftService

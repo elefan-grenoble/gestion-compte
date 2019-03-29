@@ -13,7 +13,7 @@ $(document).ready(function() {
     $('#quick_search_close').click(function () {
         $('#quick_search_nav').slideUp();
     });
-    $('#quick_search').keyup(function () {
+    $('#quick_search').keydown(function () {
         var val = $(this).val();
         if ($(this).val().length > 1){
             $.ajax({
@@ -33,6 +33,7 @@ $(document).ready(function() {
                             dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
                             dataMembersNumbers[beneficiaries[i].id] = beneficiaries[i].member_number;
                         }
+                        $('#quick_search').trigger('keyup');
                         //$('#quick_search').autocomplete('destroy');
                         $('#quick_search').autocomplete({
                             data: dataBeneficiaries,
@@ -40,8 +41,8 @@ $(document).ready(function() {
                             onAutocomplete: function(val) {
                                 $('#quick_search_nav').slideUp();
                                 console.log(val);
-                                const regex = /\(([0-9]*)\)/gm;
-                                let m;
+                                var regex = /\(([0-9]*)\)/gm;
+                                var m;
 
                                 if ((m = regex.exec(val)) !== null) {
                                     var beneficiary_id = m[1];

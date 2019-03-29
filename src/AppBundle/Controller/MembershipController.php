@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Address;
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Membership;
@@ -11,6 +12,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
@@ -23,6 +25,7 @@ use FOS\UserBundle\Event\FormEvent;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserBundle;
 use FOS\UserBundle\FOSUserEvents;
+use Spipu\Html2Pdf\Tag\Html\U;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -278,6 +281,10 @@ class MembershipController extends Controller
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($beneficiary);
                 $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
+
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
@@ -580,6 +587,7 @@ class MembershipController extends Controller
      * @Method({"GET", "POST"})
      * @param Request $request
      * @return Response
+     * @throws
      */
     public function newAction(Request $request)
     {
@@ -612,7 +620,6 @@ class MembershipController extends Controller
             $member->setMainBeneficiary($beneficiary);
         }
 
-        //todo use the first available, not the bigest plus one ??
         $m = $em->getRepository('AppBundle:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
         $mm = 1;
         if ($m)
@@ -679,6 +686,82 @@ class MembershipController extends Controller
         }
 
         return $this->render('member/new.html.twig', array(
+            'member' => $member,
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Add a new beneficiary to an existing membership.
+     *
+     * @Route("/add_beneficiary", name="member_add_beneficiary")
+     * @Method({"GET", "POST"})
+     * @param Request $request
+     * @return Response
+     * @throws
+     */
+    public function addBeneficiaryAction(Request $request)
+    {
+        $session = new Session();
+
+        $code = $request->query->get('code');
+        $em = $this->getDoctrine()->getManager();
+        $a_beneficiary = null;
+        if ($code) {
+            $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+            if ($email) {
+                $a_beneficiary = $em->getRepository('AppBundle:AnonymousBeneficiary')->findOneBy(array('email' => $email));
+            }
+            if (!$a_beneficiary) {
+                $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
+            }
+        }
+
+        if (!$a_beneficiary) {
+            $this->createAccessDeniedException('Tu cherches ?');
+        }
+        if (!$a_beneficiary->getJoinTo()){
+            $session->getFlashBag()->add('error','destination non trouvé');
+            return $this->redirectToRoute('homepage');
+        }
+        $member = $a_beneficiary->getJoinTo()->getMembership();
+
+        $form = $this->createFormBuilder()
+            ->add('beneficiary', BeneficiaryType::class)
+            ->getForm();
+
+        $beneficiary = new Beneficiary();
+        $beneficiary->setUser(new User());
+        $beneficiary->setEmail($a_beneficiary->getEmail());
+
+        $form->get('beneficiary')->setData($beneficiary);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $beneficiary = $form->get('beneficiary')->getData();
+            $beneficiary->setMembership($member);
+
+            $event = new FormEvent($form->get('beneficiary')->get('user'), $request);
+            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+
+            $em->persist($beneficiary);
+            $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
+
+            $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
+            return $this->redirectToRoute('fos_user_registration_check_email');
+
+        } else if ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $key => $error) {
+                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+            }
+        }
+
+        return $this->render('member/add_beneficiary.html.twig', array(
             'member' => $member,
             'form' => $form->createView(),
         ));
