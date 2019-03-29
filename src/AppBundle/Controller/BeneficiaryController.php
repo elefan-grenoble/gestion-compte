@@ -5,14 +5,19 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Form\BeneficiaryType;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
 
 /**
  * Beneficiary controller.
@@ -183,5 +188,47 @@ class BeneficiaryController extends Controller
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+    }
+
+    /**
+     * @Route("/list", name="beneficiary_list")
+     * @Method({"POST"})
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     */
+    public function listAction(Request $request){
+
+        if ($request->isXmlHttpRequest()){
+            $em = $this->getDoctrine()->getManager();
+            $userRepo = $em->getRepository(Beneficiary::class);
+
+            $string = $request->get('string');
+
+            $rsm = new ResultSetMappingBuilder($em);
+            $rsm->addRootEntityFromClassMetadata('AppBundle:Beneficiary', 'b');
+
+            $query = $em->createNativeQuery('SELECT b.* FROM beneficiary AS b LEFT JOIN fos_user as u ON u.id = b.user_id WHERE LOWER(CONCAT_WS(u.username,u.email,b.lastname,b.firstname)) LIKE :key', $rsm);
+
+            $beneficiaries = $query->setParameter('key', '%' . $string . '%')
+                ->getResult();
+
+            $returnArray = array();
+            foreach ($beneficiaries as $beneficiary){
+                $dead = false;
+                if ($beneficiary->getMembership()->isWithdrawn()){
+                    $dead = true;
+                }
+                if ($beneficiary->getMembership()->isUptodate()){
+                    $dead = true;
+                }
+                if (!$beneficiary->getMembership()){
+                    $dead = true;
+                }
+                $returnArray[] = array('name' => $beneficiary->getAutocompleteLabelFull() ,'icon' => (!$dead) ? $request->getUriForPath('/bundles/app/img/cancel.svg') : '');
+            }
+            return new JsonResponse($returnArray);
+        }
+        return new Response("Ajax only",400);
     }
 }

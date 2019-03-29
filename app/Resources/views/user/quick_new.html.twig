@@ -7,13 +7,15 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Nouvelle adhésion</h3>
+    <h3>Adhésion rapide</h3>
 
     {#<p>Pour une adhésion <span style="text-decoration: underline;">future</span>, choisir <span style="text-decoration: underline;">Helloasso</span> : la personne recevra un lien pour finaliser et payer son adhésion en ligne.</p>#}
     {{ form_start(form) }}
     {% include "user/_partial/user_quick_form.html.twig" with { form: form } %}
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Adhérer</button>
+        <button type="submit" class="btn-large waves-effect waves-light teal"><i class="material-icons left">check</i>Valider</button>
+        <br>
+        <a href="{{ path("user_office_tools") }}" class="btn-large white blue-grey-text"><i class="material-icons left">arrow_back</i>Retour</a>
     </div>
     {{ form_end(form) }}
 

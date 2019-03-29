@@ -136,7 +136,7 @@ class UserController extends Controller
             $session = new Session();
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
 
-            return $this->redirectToRoute('user_office_tools');
+            return $this->redirectToRoute('user_quick_new');
         }
 
         return $this->render('user/quick_new.html.twig', array(
