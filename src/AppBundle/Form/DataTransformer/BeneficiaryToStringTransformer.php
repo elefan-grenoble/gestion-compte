@@ -57,19 +57,26 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
         $re = '/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+).*\(([0-9]+)\)/';
         preg_match($re, $autocomplete, $matches, PREG_OFFSET_CAPTURE, 0);
 
+        if (count($matches)<=1){
+            throw new TransformationFailedException(sprintf(
+                'Aucun utilisateur trouvé avec ces données "%s".',
+                $autocomplete
+            ));
+        }
+
         $user = $userRepo->findOneBy(array('email'=>$matches[1][0]));
         $beneficiary = $beneficiaryRepo->find($matches[2][0]);
 
         if (null === $user) {
             throw new TransformationFailedException(sprintf(
-                'Aucune utilisateur trouvé avec cet email "%s" !',
+                'Aucun utilisateur trouvé avec cet email "%s" !',
                 $matches[1][0]
             ));
         }
 
         if (null === $beneficiary) {
             throw new TransformationFailedException(sprintf(
-                'Aucune beneficiaire trouvé avec cet id "%s" !',
+                'Aucun beneficiaire trouvé avec cet id "%s" !',
                 $matches[2][0]
             ));
         }
