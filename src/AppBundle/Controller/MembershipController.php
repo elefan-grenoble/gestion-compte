@@ -12,6 +12,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
+use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Form\BeneficiaryType;
@@ -21,6 +22,7 @@ use AppBundle\Form\RegistrationType;
 use AppBundle\Form\TimeLogType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Service\MailerService;
+use AppBundle\Validator\Constraints\BeneficiaryCanHost;
 use FOS\UserBundle\Event\FormEvent;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserBundle;
@@ -255,7 +257,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Add a beneficiary.
+     * Add a beneficiary from admin ton a member
      *
      * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary")
      * @Method({"GET", "POST"})
@@ -267,6 +269,24 @@ class MembershipController extends Controller
     {
         $session = new Session();
         $this->denyAccessUnlessGranted(MembershipVoter::BENEFICIARY_ADD, $member);
+
+        //check if member can host
+        $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
+        $violations = $this->get('validator')->validate(
+            $member->getMainBeneficiary(),
+            $beneficiaryCanHostConstraint
+        );
+        if (0 !== count($violations)) {
+            // there are errors, now you can show them
+            foreach ($violations as $violation) {
+                $session->getFlashBag()->add('error',$violation->getMessage());
+            }
+            $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
+
+            return $this->redirectToShow($member);
+        }
+        //yes he can
+
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
@@ -644,6 +664,9 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $dispatcher = $this->get('event_dispatcher');
+
             if (!$a_beneficiary) {
                 if (!$member->getLastRegistration()->getRegistrar())
                     $member->getLastRegistration()->setRegistrar($this->getUser());
@@ -663,11 +686,22 @@ class MembershipController extends Controller
             $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($member);
-            if ($a_beneficiary)
+            if ($a_beneficiary) {
+                $beneficiaries_emails = $a_beneficiary->getBeneficiariesEmailsAsArray();
+                foreach ($beneficiaries_emails as $email){
+                    $new_anonymous_beneficiary = new AnonymousBeneficiary();
+                    $new_anonymous_beneficiary->setCreatedAtValue(new \DateTime());
+                    $new_anonymous_beneficiary->setEmail($email);
+                    $new_anonymous_beneficiary->setJoinTo($member->getMainBeneficiary());
+                    $new_anonymous_beneficiary->setRegistrar($a_beneficiary->getRegistrar());
+                    $em->persist($new_anonymous_beneficiary);
+                    //dispatch to send mail
+                    $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($new_anonymous_beneficiary));
+                }
                 $em->remove($a_beneficiary);
+            }
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
 
             $securityContext = $this->container->get('security.authorization_checker');
@@ -692,7 +726,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Add a new beneficiary to an existing membership.
+     * Add a new beneficiary from an anynimous one to an existing membership.
      *
      * @Route("/add_beneficiary", name="member_add_beneficiary")
      * @Method({"GET", "POST"})
@@ -714,6 +748,7 @@ class MembershipController extends Controller
             }
             if (!$a_beneficiary) {
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
+                return $this->redirectToRoute('homepage');
             }
         }
 
@@ -725,6 +760,23 @@ class MembershipController extends Controller
             return $this->redirectToRoute('homepage');
         }
         $member = $a_beneficiary->getJoinTo()->getMembership();
+
+        $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
+        $violations = $this->get('validator')->validate(
+            $member->getMainBeneficiary(),
+            $beneficiaryCanHostConstraint
+        );
+        if (0 !== count($violations)) {
+            // there are errors, now you can show them
+            foreach ($violations as $violation) {
+                $session->getFlashBag()->add('error',$violation->getMessage());
+            }
+            $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
+            $em->remove($a_beneficiary);
+            $em->flush();
+
+            return $this->redirectToRoute('homepage');
+        }
 
         $form = $this->createFormBuilder()
             ->add('beneficiary', BeneficiaryType::class)
@@ -747,6 +799,7 @@ class MembershipController extends Controller
             $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($beneficiary);
+            $em->remove($a_beneficiary);
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');

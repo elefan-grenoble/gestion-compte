@@ -9,7 +9,7 @@
 {% block content %}
 
     <h3>Nouveau béneficiaire</h3>
-    <h4>sur le compte {{ member }}</h4>
+    <h4>sur le compte {{ member }} ({% for b in member.beneficiaries %}{{ b.firstname }}{% if not loop.last %},{% endif %}{% endfor %})</h4>
 
     {{ form_start(form) }}
     {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary } %}
