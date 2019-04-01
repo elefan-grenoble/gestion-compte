@@ -257,7 +257,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Add a beneficiary from admin ton a member
+     * Add a beneficiary from admin to a member
      *
      * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary")
      * @Method({"GET", "POST"})
