@@ -14,11 +14,15 @@ cd /var/www/html/gestion-compte
 # Exécution de l'installation des dépendances
 composer install
 
-# Création du cache de production
-php bin/console cache:clear --env=prod
-
 # Mise à jour de la base de données
 php bin/console doctrine:migrations:migrate
+
+# Installer les nouveaux media
+php bin/console assetic:dump
+
+# Vider le cache de production
+php bin/console cache:clear --env=prod
+
 </pre>
 
 ### Votre application est maintenant à jour 
