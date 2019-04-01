@@ -48,6 +48,13 @@ class AnonymousBeneficiary
     /**
      * @var string
      *
+     * @ORM\Column(name="beneficiaries_emails", type="string", length=255, nullable=true)
+     */
+    private $beneficiaries_emails;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="amount", type="string", length=255, nullable=true)
      */
     private $amount;
@@ -113,6 +120,40 @@ class AnonymousBeneficiary
     public function getAmount()
     {
         return $this->amount;
+    }
+
+    /**
+     * Set beneficiaries_emails
+     *
+     * @param string $beneficiaries_emails
+     *
+     * @return AnonymousBeneficiary
+     */
+    public function setBeneficiariesEmails($beneficiaries_emails)
+    {
+        $this->beneficiaries_emails = $beneficiaries_emails;
+
+        return $this;
+    }
+
+    /**
+     * Get beneficiaries_emails
+     *
+     * @return string
+     */
+    public function getBeneficiariesEmails()
+    {
+        return $this->beneficiaries_emails;
+    }
+
+    /**
+     * Get beneficiaries_emails as array
+     *
+     * @return array
+     */
+    public function getBeneficiariesEmailsAsArray()
+    {
+        return array_filter(explode(', ',$this->getBeneficiariesEmails()));
     }
 
     /**

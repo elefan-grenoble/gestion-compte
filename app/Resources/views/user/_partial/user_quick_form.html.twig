@@ -30,6 +30,57 @@
                     {{ form_label(form.mode) }}
                 </div>
             </div>
+            <div class="col s12">
+                {#{{ form_label(form.beneficiaries_emails) }}#}
+                <div class="errors">
+                {{ form_errors(form.beneficiaries_emails) }}
+                </div>
+                <div id="beneficiaries-emails-fields-list"
+                    data-prototype="{{ form_label(form.beneficiaries_emails.vars.prototype)|e }}{{ form_widget(form.beneficiaries_emails.vars.prototype)|e }}"
+                    data-widget-tags="{{ '<div class="input-field"></div>'|e }}"
+                    data-widget-counter="{{ form.beneficiaries_emails.children|length }}">
+                    {% for emailField in form.beneficiaries_emails %}
+                        <div>
+                            <div class="errors">
+                            {{ form_errors(emailField) }}
+                            </div>
+                            {{ form_widget(emailField) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <a href="#" class="add-another-collection-widget blue-grey-text" data-list-selector="#beneficiaries-emails-fields-list"><i class="material-icons left">add_circle</i>ajouter un beneficiaire</a>
+                <script>
+                    var max_b = {{ maximum_nb_of_beneficiaries_in_membership }};
+                    defer(function() {
+                        jQuery(document).ready(function () {
+                            jQuery('.add-another-collection-widget').click(function (e) {
+                                e.preventDefault();
+                                var list = $($(this).attr('data-list-selector'));
+                                // Try to find the counter of the list or use the length of the list
+                                var counter = list.data('widget-counter') | list.children().length;
+
+                                // grab the prototype template
+                                var newWidget = list.attr('data-prototype');
+                                // replace the "__name__" used in the id and name of the prototype
+                                // with a number that's unique to your emails
+                                // end name attribute looks like name="contact[emails][2]"
+                                newWidget = newWidget.replace(/__name__/g, counter);
+                                // Increase the counter
+                                counter++;
+                                // And store it, the length cannot be used if deleting widgets is allowed
+                                list.data('widget-counter', counter);
+
+                                // create a new list element and add it to the list
+                                var newElem = jQuery(list.attr('data-widget-tags')).html(newWidget);
+                                newElem.appendTo(list);
+                                if ((max_b-1)<=counter){
+                                    $(this).hide();
+                                }
+                            });
+                        });
+                    });
+                </script>
+            </div>
         </div>
     </div>
     <div class="col s12 m2 center-align">

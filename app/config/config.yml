@@ -58,6 +58,7 @@ twig:
     swipe_cards:
       autoactivate:
         enabled: '%swipe_cards.autoactivate.enabled%'
+    maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
 
 # Doctrine Configuration
 doctrine:
