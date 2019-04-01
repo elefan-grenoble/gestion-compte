@@ -14,20 +14,22 @@
 Clone code
 <pre>git clone https://github.com/elefan-grenoble/gestion-compte.git</pre>
 <pre>cd gestion-compte</pre>
-Lancer la configuration (utiliser le nom de la base précédemment créée)
+Lancer la configuration
 <pre>composer install</pre>
 Creer la base de donnée
-<pre>bin/console doctrine:schema:create</pre>
-Migrer
-<pre>bin/console doctrine:migration:migrate</pre>
-Lancer le serveur (si pas de serveur)
+<pre>php bin/console doctrine:database:create</pre>
+Migrer : creation du schema
+<pre>php bin/console doctrine:migration:migrate</pre>
+Installer les medias
+<pre>php bin/console assetic:dump</pre>
+Lancer le serveur (si pas de serveur web)
 <pre>php bin/console server:start</pre>
 add ``127.0.0.1 membres.yourcoop.local`` to your _/etc/hosts_ file
 visit [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) to create the super admin user (admin:password are default values)
 
 
 ### En Prod
-Avec nginx, ligne necessaire pour ne pas avoir les images dynamiques de qr et barecode en 404 
+Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode (au lieu de 404) 
 <pre>location ~* ^/sw/(.*)/(qr|br)\.png$ {
 		rewrite ^/sw/(.*)/(qr|br)\.png$ /app.php/sw/$1/$2.png last;
 	}
