@@ -18,7 +18,6 @@ Pour récupérer les mails envoyés (mode DEV)
 * [GitFlow](https://www.grafikart.fr/formations/git/git-flow)
 
 ## Symfony
-* [local cheatsheet](cheatsheet.md)
 * [official doc](https://symfony.com/doc/current/index.html)
 
 ## Materialize
