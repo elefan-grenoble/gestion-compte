@@ -726,7 +726,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Add a new beneficiary from an anynimous one to an existing membership.
+     * Add a new beneficiary from an anonymous one to an existing membership.
      *
      * @Route("/add_beneficiary", name="member_add_beneficiary")
      * @Method({"GET", "POST"})
