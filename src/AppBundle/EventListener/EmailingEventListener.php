@@ -99,27 +99,7 @@ class EmailingEventListener
     {
         $this->logger->info("Emailing Listener: onMemberCreated");
 
-        $beneficiaries = $event->getMembership()->getBeneficiaries();
-
-        $em = $this->container->get('doctrine')->getManager();
-        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
-
-        foreach ($beneficiaries as $beneficiary) {
-            $welcome = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name')))
-                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-                ->setTo($beneficiary->getEmail())
-                ->setBody(
-                    $this->renderView(
-                        'emails/welcome.html.twig',
-                        array(
-                            'beneficiary' => $beneficiary,
-                            'dynamicContent' => $dynamicContent
-                        )
-                    ),
-                    'text/html'
-                );
-            $this->mailer->send($welcome);
-        }
+        //
     }
 
     /**

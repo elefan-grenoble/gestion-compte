@@ -1,3 +1,5 @@
-Bonjour {{ beneficiary.firstname }},<br>
+Bonjour {{ user.firstname }},<br>
 
 {{ dynamicContent | markdown | raw }}
+
+Pour valider ton compte membre, merci de cliquer sur <a href="{{ login_url }}">{{ login_url }}</a>

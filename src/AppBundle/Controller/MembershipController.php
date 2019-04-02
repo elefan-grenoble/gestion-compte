@@ -595,7 +595,7 @@ class MembershipController extends Controller
             }
             if (!$a_beneficiary){
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
-
+                return $this->redirectToRoute("homepage");
             }
         }
 
@@ -665,8 +665,8 @@ class MembershipController extends Controller
 
             $securityContext = $this->container->get('security.authorization_checker');
             if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-                $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée');
-                return $this->redirectToRoute('fos_user_registration_check_email');
+                $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. Verifie tes emails pour te connecter.');
+                return $this->redirectToRoute('homepage');
             } else {
                 $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
             }

@@ -101,6 +101,8 @@ fos_user:
   db_driver: orm # other valid values are 'mongodb' and 'couchdb'
   firewall_name: main
   user_class: AppBundle\Entity\User
+  service:
+    mailer: mailer_service
   group:
     group_class: AppBundle\Entity\Formation
   from_email:
@@ -111,6 +113,7 @@ fos_user:
       type: AppBundle\Form\RegistrationType
     confirmation:
       enabled:    true # change to true for required email confirmation
+      template:   'emails/welcome.html.twig'
   profile:
     form:
       type: AppBundle\Form\UserWithBeneficiaryType
