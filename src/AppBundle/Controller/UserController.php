@@ -17,6 +17,8 @@ use AppBundle\Form\AnonymousBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\UserAdminType;
+use FOS\UserBundle\Event\UserEvent;
+use FOS\UserBundle\FOSUserEvents;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -29,6 +31,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
@@ -110,9 +113,56 @@ class UserController extends Controller
     }
 
     /**
+     * change_password
+     *
+     * @Route("/change_password", name="user_change_password")
+     * @Method({"GET","POST"})
+     * @param Request $request
+     * @return Response
+     */
+    public function changePasswordAction(Request $request)
+    {
+        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+            throw $this->createAccessDeniedException();
+        }
+        $formBuilder = $this->createFormBuilder();
+        $formBuilder->add('password',PasswordType::class,array('label'=>'Un mot de passe','trim'=>true));
+        $formBuilder->add('password_repeat',PasswordType::class,array('label'=>'Le même une deuxième fois','trim'=>true));
+        $form = $formBuilder->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($form->getData()['password'] === $form->getData()['password_repeat']){
+                $this->getUser()->setPlainPassword($form->getData()['password']);
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($this->getUser());
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $event = new UserEvent($this->getUser(), $request);
+                $dispatcher->dispatch(FOSUserEvents::USER_PASSWORD_CHANGED, $event);
+
+                $session = new Session();
+                $session->getFlashBag()->add('success', 'Mot de passe enregistré, merci !');
+
+                return $this->redirectToRoute('homepage');
+            }else{
+                $session = new Session();
+                $session->getFlashBag()->add('error','Attention : tes deux mots de passe ne sont pas identique !');
+            }
+
+        }
+
+        return $this->render('user/change_password.html.twig',array('form'=>$form->createView()));
+    }
+
+    /**
      * Creates a new user entity.
      *
      * @Route("/quick_new", name="user_quick_new")
+     * @Security("has_role('ROLE_USER')")
      * @Method({"GET", "POST"})
      */
     public function quickNewAction(Request $request, \Swift_Mailer $mailer)

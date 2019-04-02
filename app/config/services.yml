@@ -141,9 +141,29 @@ services:
             class: AppBundle\Service\MailerService
             public: true
             arguments:
+                $mailer: "@mailer"
                 $baseDomain: '%emails.base_domain%'
+                $memberEmail: "%emails.member%"
+                $project_name: "%project_name%"
                 $sendableEmails: '%emails.sendable%'
+                $entity_manager: "@doctrine.orm.entity_manager"
+                $router: "@router"
+                $templating: "@templating"
 
     event_service:
             class: AppBundle\Service\EventService
             public: true
+
+    set_password:
+            class: AppBundle\EventListener\SetFirstPasswordListener
+            public: true
+            arguments:
+                  $entity_manager: "@doctrine.orm.entity_manager"
+                  $router: "@router"
+                  $token_storage : '@security.token_storage'
+            tags:
+#                - { name: kernel.event_listener, event: fos_user.user.created, method: onUserCreated }
+#                - { name: kernel.event_listener, event: fos_user.registration.success, method: onRegistrationSuccess }
+                - { name: doctrine.event_listener, event: prePersist }
+                - { name: kernel.event_listener, event: kernel.request, method: forcePasswordChange }
+                - { name: kernel.event_listener, event: fos_user.user.password_changed, method: onPasswordChanged }

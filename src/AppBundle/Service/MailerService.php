@@ -2,18 +2,41 @@
 
 namespace AppBundle\Service;
 
-class MailerService
+use Doctrine\ORM\EntityManager;
+use FOS\UserBundle\Mailer\MailerInterface;
+use FOS\UserBundle\Model\UserInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Router;
+
+class MailerService implements MailerInterface
 {
     private $baseDomain;
-    
+    private $memberEmail;
+    private $project_name;
     private $sendableEmails;
+    private $entity_manager;
+    private $mailer;
+    private $router;
+    private $templating;
 
     public function __construct(
+        $mailer,
         string $baseDomain,
-        array $sendableEmails
+        array $memberEmail,
+        string $project_name,
+        array $sendableEmails,
+        EntityManager $entity_manager,
+        Router $router,
+        $templating
     ) {
+        $this->mailer = $mailer;
         $this->baseDomain = $baseDomain;
+        $this->memberEmail = $memberEmail;
+        $this->project_name = $project_name;
         $this->sendableEmails = $sendableEmails;
+        $this->entity_manager = $entity_manager;
+        $this->router = $router;
+        $this->templating = $templating;
     }
 
     /**
@@ -36,5 +59,70 @@ class MailerService
     private function getTemporaryEmailPattern() : string
     {
         return '/(membres\\+[0-9]+@' . preg_quote($this->baseDomain) . ')/i';
+    }
+
+    /**
+     * Send an email to a user to confirm the account creation.
+     *
+     * @param UserInterface $user
+     */
+    public function sendConfirmationEmailMessage(UserInterface $user){
+        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+
+        $login_url = $url = $this->router->generate('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
+        $welcome = (new \Swift_Message('Bienvenue à '.$this->project_name))
+            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setTo($user->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/welcome.html.twig',
+                    array(
+                        'user' => $user,
+                        'dynamicContent' => $dynamicContent,
+                        'login_url' => $login_url,
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($welcome);
+    }
+
+    /**
+     * Send an email to a user to confirm the password reset.
+     *
+     * @param UserInterface $user
+     */
+    public function sendResettingEmailMessage(UserInterface $user){
+        $confirmationUrl = $this->router->generate('fos_user_resetting_reset', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
+
+        $forgot = (new \Swift_Message('Réinitialisation de ton mot de passe'))
+            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setTo($user->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/forgot.html.twig',
+                    array(
+                        'user' => $user,
+                        'confirmationUrl' => $confirmationUrl,
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($forgot);
+    }
+
+
+    /**
+     * Returns a rendered view.
+     *
+     * @param string $view The view name
+     * @param array $parameters An array of parameters to pass to the view
+     *
+     * @return string The rendered view
+     * @throws \Exception
+     */
+    protected function renderView($view, array $parameters = array())
+    {
+        return $this->templating->render($view, $parameters);
     }
 }

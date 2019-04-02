@@ -32,31 +32,20 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
 
     public function onBeforePersist(BeneficiaryCreatedEvent $event)
     {
-        $beneficiary = $event->getBeneficiary();
-        if ($beneficiary) {
-            if (!$beneficiary->getUser()) {
-                $beneficiary->setUser(new User());
-            }
-
-            if (!$beneficiary->getUser()->getUsername()) {
-
-                $username = $this->generateUsername($beneficiary);
-                $beneficiary->getUser()->setUsername($username);
-            }
-
-            if (!$beneficiary->getUser()->getPassword()) {
-                $password = User::randomPassword();
-                $beneficiary->getUser()->setPassword($password);
-            }
-        }
+        $this->makeUser($event);
     }
 
     public function postInitializeMembership(FormEvent $event)
     {
+        $this->makeUser($event);
+    }
+
+    private function makeUser(FormEvent $event){
         $beneficiary = $event->getData();
         if ($beneficiary) {
             if (!$beneficiary->getUser()) {
-                $beneficiary->setUser(new User());
+                $user = new User();
+                $beneficiary->setUser($user);
             }
 
             if (!$beneficiary->getUser()->getUsername()) {
