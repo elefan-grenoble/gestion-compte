@@ -22,8 +22,7 @@ final class Version20190402014558_add_role_to_never_logged_user extends Abstract
         $em = $this->container->get('doctrine.orm.entity_manager');
         // this up() migration is auto-generated, please modify it to your needs
         $query = $em->getRepository(User::class)->createQueryBuilder('u')
-            ->where('u.last_login is :null')
-            ->setParameter('null', 'NULL')
+            ->where('u.lastLogin IS NULL')
             ->getQuery();
 
         $users = $query->getResult();
@@ -41,8 +40,7 @@ final class Version20190402014558_add_role_to_never_logged_user extends Abstract
         $em = $this->container->get('doctrine.orm.entity_manager');
         // this up() migration is auto-generated, please modify it to your needs
         $query = $em->getRepository(User::class)->createQueryBuilder('u')
-            ->where('u.last_login is :null')
-            ->setParameter('null', 'NULL')
+            ->where('u.lastLogin IS NULL')
             ->getQuery();
 
         $users = $query->getResult();
