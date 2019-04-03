@@ -64,17 +64,20 @@ class SetFirstPasswordListener{
 
     function forcePasswordChange(GetResponseEvent $event){
 
-        $currentUser = $this->token_storage->getToken()->getUser();
-
-        if($currentUser instanceof User){
-            if($currentUser->hasRole(self::ROLE_PASSWORD_TO_SET)){
-                $route = $event->getRequest()->get('_route');
-                if ($route && $route != 'user_change_password'){
-                    $changePassword = $this->router->generate('user_change_password');
-                    $event->setResponse(new RedirectResponse($changePassword));
+        $token = $this->token_storage->getToken();
+        if ($token){
+            $currentUser = $token->getUser();
+            if($currentUser instanceof User){
+                if($currentUser->hasRole(self::ROLE_PASSWORD_TO_SET)){
+                    $route = $event->getRequest()->get('_route');
+                    if ($route && $route != 'user_change_password'){
+                        $changePassword = $this->router->generate('user_change_password');
+                        $event->setResponse(new RedirectResponse($changePassword));
+                    }
                 }
             }
         }
+
     }
 
 }
