@@ -31,7 +31,9 @@
                 </div>
             </div>
             <div class="col s12">
-                {#{{ form_label(form.beneficiaries_emails) }}#}
+                <div style="display: none">
+                    {{ form_label(form.beneficiaries_emails) }}
+                </div>
                 <div class="errors">
                 {{ form_errors(form.beneficiaries_emails) }}
                 </div>
