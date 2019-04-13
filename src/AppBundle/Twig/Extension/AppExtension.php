@@ -154,25 +154,25 @@ class AppExtension extends \Twig_Extension
 
     public function payment_mode(int $value)
     {
-        $name = "€";
+        $name = "€ ";
         switch ($value){
             case Registration::TYPE_CREDIT_CARD :
-                $name = 'carte';
+                $name .= 'carte';
                 break;
             case Registration::TYPE_LOCAL :
                 $name = $this->container->getParameter('local_currency_name');
                 break;
             case Registration::TYPE_CASH :
-                $name = 'espèce';
+                $name .= 'espèce';
                 break;
             case Registration::TYPE_CHECK :
-                $name = 'chéque';
+                $name .= 'chéque';
                 break;
             case Registration::TYPE_DEFAULT :
-                $name = 'autre';
+                $name .= 'autre';
                 break;
             case Registration::TYPE_HELLOASSO :
-                $name = 'HelloAsso';
+                $name .= 'HelloAsso';
                 break;
         }
         return $name;
