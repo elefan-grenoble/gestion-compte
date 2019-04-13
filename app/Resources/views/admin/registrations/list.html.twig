@@ -71,13 +71,19 @@
             {% endif %}
             <li class="">
                 <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">
-                    {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
-                        <i class="material-icons tiny">credit_card</i>
+                    {% if registration.amount is not null %}
+                        {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
+                            <i class="material-icons tiny">credit_card</i>
+                        {% else %}
+                            <i class="material-icons tiny">attach_money</i>
+                        {% endif %}
+
+                        {{ registration.amount }}
+                        {{ registration.mode | payment_mode }}
                     {% else %}
-                        <i class="material-icons tiny">attach_money</i>
+                        <i class="material-icons tiny">people</i>
+                        Bénéficiaire rattaché
                     {% endif %}
-                    {{ registration.amount }}
-                    {{ registration.mode | payment_mode }}
                     {% if registration.registrar %}
                         par&nbsp;
                         {% if registration.registrar.beneficiary %}
