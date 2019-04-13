@@ -78,6 +78,7 @@ class CommissionController extends Controller
      *
      * @Route("/{id}/edit", name="commission_edit")
      * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function editAction(Request $request,Commission $commission)
     {
