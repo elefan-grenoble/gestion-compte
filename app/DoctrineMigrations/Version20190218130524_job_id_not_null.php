@@ -19,19 +19,19 @@ final class Version20190218130524_job_id_not_null extends AbstractMigration impl
     public function up(Schema $schema) : void
     {
 
-        $em = $this->container->get('doctrine.orm.entity_manager');
-        $job = $em->getRepository(Job::class)->findOneBy(array());
+        $connection = $this->container->get('doctrine.orm.entity_manager')->getConnection();
+        $result = $connection->fetchColumn('select id from job limit 1');
 
-        if (!$job){
-            $job = new Job();
-            $job->setName('default');
-            $job->setColor('teal');
-            $em->persist($job);
-            $em->flush();
+        if (false === $result) {
+            $connection->exec('INSERT INTO job(name, color) VALUES("default", "teal")');
+            $jobId = $connection->lastInsertId();
+        } else {
+            $jobId = $result;
         }
 
-        $this->addSql('UPDATE period SET job_id = '.$job->getId().' WHERE job_id IS NULL');
-        $this->addSql('UPDATE shift SET job_id = '.$job->getId().' WHERE job_id IS NULL');
+
+        $this->addSql('UPDATE period SET job_id = '.$jobId.' WHERE job_id IS NULL');
+        $this->addSql('UPDATE shift SET job_id = '.$jobId.' WHERE job_id IS NULL');
 
         $this->addSql('ALTER TABLE shift DROP FOREIGN KEY FK_A50B3B45BE04EA9');
         $this->addSql('ALTER TABLE shift CHANGE job_id job_id INT NOT NULL;');
