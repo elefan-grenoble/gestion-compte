@@ -22,3 +22,9 @@ Pour récupérer les mails envoyés (mode DEV)
 
 ## Materialize
 * [official doc](https://materializecss.com/)
+
+## Docker
+
+Si vous souhaitez développer en utilisant Docker, n'oubliez pas de définir
+la variable d'environnement `DEV_MODE_ENABLED` dans le container qui exécute
+le code de l'application.
