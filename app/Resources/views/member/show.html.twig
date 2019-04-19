@@ -336,33 +336,37 @@
                     <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
                     {{ form_end(delete_form) }}
 
-                    <h6>Roles</h6>
+                    <h5>Roles</h5>
 
-                    {% if member.mainBeneficiary.user.hasRole('ROLE_ADMIN') %}
-                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i
-                                    class="material-icons left">arrow_downward</i>supprimer le role ADMIN</a>
-                    {% else %}
-                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i
-                                    class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }} un ADMIN</a>
-                    {% endif %}
+                    {% for beneficiary in member.beneficiaries %}
+                        <h6>{{ beneficiary.user.firstname }}</h6>
+                        {% if beneficiary.user.hasRole('ROLE_ADMIN') %}
+                            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i
+                                        class="material-icons left">arrow_downward</i>supprimer le role ADMIN de {{ beneficiary.user.firstname }}</a>
+                        {% else %}
+                            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': 'ROLE_ADMIN' }) }}" class="btn purple"><i
+                                        class="material-icons left">arrow_upward</i>Faire de {{ beneficiary.user.firstname }} un ADMIN</a>
+                        {% endif %}
 
-                    {% if member.mainBeneficiary.user.hasRole('ROLE_USER_MANAGER') %}
-                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}"
-                           class="btn deep-purple"><i class="material-icons left">arrow_downward</i>supprimer le role USER_MANAGER</a>
-                    {% else %}
-                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}"
-                           class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }}
-                            un USER_MANAGER</a>
-                    {% endif %}
+                        {% if beneficiary.user.hasRole('ROLE_USER_MANAGER') %}
+                            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}"
+                               class="btn deep-purple"><i class="material-icons left">arrow_downward</i>supprimer le role USER_MANAGER de {{ beneficiary.user.firstname }}</a>
+                        {% else %}
+                            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': 'ROLE_USER_MANAGER' }) }}"
+                               class="btn deep-purple"><i class="material-icons left">arrow_upward</i>Faire de {{ beneficiary.user.firstname }}
+                                un USER_MANAGER</a>
+                        {% endif %}
 
-                    {% if member.mainBeneficiary.user.hasRole('ROLE_FINANCE_MANAGER') %}
-                        <a href="{{ path('user_remove_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}"
-                           class="btn deep-green"><i class="material-icons left">arrow_downward</i>supprimer le role FINANCE_MANAGER</a>
-                    {% else %}
-                        <a href="{{ path('user_add_role', { 'id': member.mainBeneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}"
-                           class="btn deep-green"><i class="material-icons left">arrow_upward</i>Faire de {{ member.mainBeneficiary.user.firstname }}
-                            un FINANCE_MANAGER</a>
-                    {% endif %}
+                        {% if beneficiary.user.hasRole('ROLE_FINANCE_MANAGER') %}
+                            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}"
+                               class="btn deep-green"><i class="material-icons left">arrow_downward</i>supprimer le role FINANCE_MANAGER de {{ beneficiary.user.firstname }}</a>
+                        {% else %}
+                            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': 'ROLE_FINANCE_MANAGER' }) }}"
+                               class="btn deep-green"><i class="material-icons left">arrow_upward</i>Faire de {{ beneficiary.user.firstname }}
+                                un FINANCE_MANAGER</a>
+                        {% endif %}
+
+                    {% endfor %}
 
                     <h6>Recorded registrations</h6>
                     <ul class="collapsible" data-collapsible="accordion">
