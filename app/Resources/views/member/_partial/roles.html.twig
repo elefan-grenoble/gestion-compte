@@ -1,0 +1,22 @@
+<h5>Roles</h5>
+
+{% for beneficiary in member.beneficiaries %}
+    <h6>Les roles de {{ beneficiary.user.firstname }}</h6>
+
+    {% set icons = {'ROLE_ADMIN':'verified_user','ROLE_USER_MANAGER':'group', 'ROLE_FINANCE_MANAGER':'attach_money', 'ROLE_SHIFT_MANAGER':'date_range'} %}
+    {% set names = {'ROLE_ADMIN':'Administrateur','ROLE_USER_MANAGER':'gestion des utilisateurs', 'ROLE_FINANCE_MANAGER':'gestion financiaire', 'ROLE_SHIFT_MANAGER':'gestion des creneaux'} %}
+    {% for role in ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER'] %}
+        {% if beneficiary.user.hasRole(role) %}
+            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn light-green">
+                <i class="material-icons left">clear</i>
+                <i class="material-icons right">{{ icons[role] }}</i>
+                {{ names[role] }}</a>
+        {% else %}
+            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn blue-grey">
+                <i class="material-icons left">add</i>
+                <i class="material-icons right">{{ icons[role] }}</i>
+                {{ names[role] }}</a>
+        {% endif %}
+    {% endfor %}
+
+{% endfor %}

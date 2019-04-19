@@ -59,10 +59,22 @@
                     <li>
                         <div class="collapsible-header">
                         {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
-                            <a href="{{ path("member_show",{'member_number':shift.shifter.membership.memberNumber}) }}">#{{ shift.shifter.membership.memberNumber }}</a>&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                            #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                             {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                        </div>
+                        <div class="collapsible-body">
+                            Réservé le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number':shift.booker.membership.memberNumber}) }}">{{ shift.booker }}</a>.
+                            {% if is_granted('free',shift) %}
+                                <form action="{{ path('free_shift', {'id' : shift.id }) }}" method="post" id="free_shift_{{ shift.id }}">
+                                    {% if shift.isPast %}
+                                        <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
+                                    {% else %}
+                                        <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
+                                    {% endif %}
+                                </form>
+                            {% endif %}
                         </div>
                     </li>
                 {% else %}
