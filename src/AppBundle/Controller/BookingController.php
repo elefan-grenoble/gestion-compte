@@ -17,6 +17,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -131,7 +132,7 @@ class BookingController extends Controller
 
     /**
      * @Route("/admin", name="booking_admin")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET","POST"})
      */
     public function adminAction(Request $request)
@@ -237,7 +238,7 @@ class BookingController extends Controller
      * delete all shifts in bucket.
      *
      * @Route("/delete_bucket/", name="delete_bucket")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
      */
     public function deleteBucketAction(Request $request, \Swift_Mailer $mailer)
@@ -476,7 +477,7 @@ class BookingController extends Controller
      * Book a shift admin.
      *
      * @Route("/admin/shift/{id}/book", name="admin_shift_book")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
@@ -553,7 +554,9 @@ class BookingController extends Controller
 
         $session->getFlashBag()->add('success', "Le shift a bien été libéré");
 
-        return $this->redirectToRoute('member_show', array('member_number' => $membership->getMemberNumber()));
+        $referer = $request->headers->get('referer');
+
+        return new RedirectResponse($referer);
 
     }
 

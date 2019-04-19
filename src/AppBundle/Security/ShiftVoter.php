@@ -71,27 +71,27 @@ class ShiftVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::BOOK:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }
                 return $this->shiftService->isShiftBookable($shift, $user->getBeneficiary());
             case self::FREE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }
                 return false;
             case self::DISMISS:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }
                 return $this->canDismiss($shift, $user);
             case self::REJECT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }
                 return $this->canReject($shift, $user);
             case self::ACCEPT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }
                 return $this->canAccept($shift, $user);

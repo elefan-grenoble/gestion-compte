@@ -26,7 +26,7 @@ class TimeLogController extends Controller
      *
      * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @param Membership $member
      * @param $timelog_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -52,7 +52,7 @@ class TimeLogController extends Controller
      *
      * @Route("/{id}/new", name="time_log_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @param Membership $member
      */
     public function newAction(Request $request, Membership $member)
@@ -91,6 +91,6 @@ class TimeLogController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
     }
 }

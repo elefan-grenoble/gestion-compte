@@ -158,11 +158,6 @@
                 close: 'Ok',
                 closeOnSelect: true // Close upon selecting a date,
             });
-            $('[type=submit]').click(function(e){
-                e.preventDefault();
-                $('#form_action').val($(this).val());
-                $('#form_action').closest('form').submit();
-            });
         });
     </script>
 {% endblock %}
