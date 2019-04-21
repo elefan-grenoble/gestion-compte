@@ -344,6 +344,7 @@ class BookingController extends Controller
         $beneficiary = $shift->getShifter();
         $em = $this->getDoctrine()->getManager();
         $shift->setShifter(null);
+        $shift->setBooker(null);
         $em->persist($shift);
         $em->flush();
 
