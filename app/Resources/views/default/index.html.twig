@@ -79,6 +79,11 @@
                 <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i
                             class="material-icons left">vpn_key</i>Déposer les clefs</a>
             {% endif %}
+            {% if is_granted("ROLE_PROCESS_MANAGER") %}
+                <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
+                    <i class="material-icons left">assignment</i>
+                    Gérer les procédures</a>
+            {% endif %}
 
             {% if is_granted("ROLE_SHIFT_MANAGER") %}
                 <h5>Gérer les creneaux</h5>

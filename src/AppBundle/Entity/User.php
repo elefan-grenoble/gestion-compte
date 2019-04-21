@@ -56,6 +56,12 @@ class User extends BaseUser
      */
     private $annotations;
 
+    /**
+     * @ORM\OneToMany(targetEntity="ProcessUpdate", mappedBy="author",cascade={"persist"})
+     * @OrderBy({"date" = "DESC"})
+     */
+    private $processUpdates;
+
     public function getGroups()
     {
         if ($this->getBeneficiary()){
@@ -329,5 +335,13 @@ class User extends BaseUser
     public function setBeneficiary($beneficiary)
     {
         $this->beneficiary = $beneficiary;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProcessUpdates()
+    {
+        return $this->processUpdates;
     }
 }

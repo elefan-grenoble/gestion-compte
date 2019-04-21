@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    Mises à jour de procédures
+{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>mises à jour de procédures
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Mises à jour de procédures</h4>
+    <div class="row">
+        {% for processUpdate in processUpdates %}
+            <div class="col s12">
+                <div class="card blue-grey darken-1">
+                    <div class="card-content white-text">
+                        <span class="card-title"><i class="material-icons left">content_paste</i>{{ processUpdate.title }}</span>
+                        <div><i>Créée le {{ processUpdate.date | date_fr_long }} par {{ processUpdate.author }}</i></div>
+                        <div style="margin-top: 15px"><strong>Description:</strong></div>
+                        <div>{{ processUpdate.description }}</div>
+                        {% if processUpdate.link %}
+                        <div style="margin-top: 20px"><strong>Lien vers la procédure complète:</strong></div>
+                        <div><a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a></div>
+                        {% endif %}
+                    </div>
+                    <div class="card-action">
+
+                        <div class="left">
+                            <a href="{{ path("process_update_edit",{'id':processUpdate.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+                        </div>
+                        <div>
+                            &nbsp;
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="row">
+        <a href="{{ path('process_update_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une mise à jour de procédure</a>
+    </div>
+{% endblock %}
