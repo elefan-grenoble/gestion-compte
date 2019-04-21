@@ -3,9 +3,9 @@
 {% for beneficiary in member.beneficiaries %}
     <h6>Les roles de {{ beneficiary.user.firstname }}</h6>
 
-    {% set icons = {'ROLE_ADMIN':'verified_user','ROLE_USER_MANAGER':'group', 'ROLE_FINANCE_MANAGER':'attach_money', 'ROLE_SHIFT_MANAGER':'date_range'} %}
-    {% set names = {'ROLE_ADMIN':'Administrateur','ROLE_USER_MANAGER':'gestion des utilisateurs', 'ROLE_FINANCE_MANAGER':'gestion financiaire', 'ROLE_SHIFT_MANAGER':'gestion des creneaux'} %}
-    {% for role in ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER'] %}
+    {% set icons = {'ROLE_ADMIN':'verified_user','ROLE_USER_MANAGER':'group', 'ROLE_FINANCE_MANAGER':'attach_money', 'ROLE_SHIFT_MANAGER':'date_range', 'ROLE_PROCESS_MANAGER':'assignment'} %}
+    {% set names = {'ROLE_ADMIN':'Administrateur','ROLE_USER_MANAGER':'gestion des utilisateurs', 'ROLE_FINANCE_MANAGER':'gestion financiaire', 'ROLE_SHIFT_MANAGER':'gestion des creneaux', 'ROLE_PROCESS_MANAGER':'gestion des procédures'} %}
+    {% for role in ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER', 'ROLE_PROCESS_MANAGER'] %}
         {% if beneficiary.user.hasRole(role) %}
             <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn light-green">
                 <i class="material-icons left">clear</i>
