@@ -2,7 +2,7 @@
 
 namespace AppBundle\Event;
 
-use AppBundle\Entity\Membership;
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -11,20 +11,22 @@ class ShiftDismissedEvent extends Event
     const NAME = 'shift.dismissed';
 
     private $shift;
-    private $membership;
+    private $beneficiary;
+    private $reason;
 
-    public function __construct(Shift $shift, Membership $membership)
+    public function __construct(Shift $shift, Beneficiary $beneficiary, string $reason)
     {
         $this->shift = $shift;
-        $this->membership = $membership;
+        $this->beneficiary = $beneficiary;
+        $this->reason = $reason;
     }
 
     /**
-     * @return Membership
+     * @return Beneficiary
      */
-    public function getMembership()
+    public function getBeneficiary()
     {
-        return $this->membership;
+        return $this->beneficiary;
     }
 
     /**
@@ -33,5 +35,13 @@ class ShiftDismissedEvent extends Event
     public function getShift()
     {
         return $this->shift;
+    }
+
+    /**
+     * @return string
+     */
+    public function getReason()
+    {
+        return $this->reason;
     }
 }

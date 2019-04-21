@@ -341,20 +341,15 @@ class BookingController extends Controller
             return $this->redirectToRoute("booking");
         }
 
-        $membership = $shift->getShifter()->getMembership();
-
+        $beneficiary = $shift->getShifter();
         $em = $this->getDoctrine()->getManager();
-
-        $shift->setIsDismissed(true);
-        $shift->setDismissedTime(new DateTime('now'));
-        $shift->setDismissedReason($request->get("reason"));
-        $shift->setShifter($shift->getBooker());
-
+        $shift->setShifter(null);
         $em->persist($shift);
         $em->flush();
 
+        $reason = $request->get("reason");
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $membership));
+        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
 
         return $this->redirectToRoute('homepage');
     }
