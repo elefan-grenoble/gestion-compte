@@ -69,7 +69,6 @@ class TimeLogEventListener
         }
     }
 
-
     /**
      * @param ShiftDismissedEvent $event
      * @throws \Doctrine\ORM\ORMException
@@ -77,7 +76,7 @@ class TimeLogEventListener
     public function onShiftDismissed(ShiftDismissedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftDismissed");
-        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
+        $this->deleteShiftLogs($event->getShift(), $event->getBeneficiary()->getMembership());
     }
 
     /**

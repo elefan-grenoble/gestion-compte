@@ -5,11 +5,7 @@
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
         </p>
     </div>
-    {% if (shift.getIsUpcoming()) %}
-        <div class="card-action">
-            <a href="#contact{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>à venir</span>
-        </div>
-    {% elseif (shift.getIsCurrent()) %}
+    {% if (shift.getIsCurrent()) %}
         <div class="card-action">
             <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>créneau en cours</span>
         </div>
@@ -40,7 +36,10 @@
 
         {% else %}
             <div class="card-action">
-                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text">Annuler ?!</a>
+                <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text">Annuler</a>
+                {% if (shift.getIsUpcoming()) %}
+                    <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
+                {% endif %}
             </div>
             <div id="dismiss{{ shift.id }}" class="modal black-text">
                 <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">

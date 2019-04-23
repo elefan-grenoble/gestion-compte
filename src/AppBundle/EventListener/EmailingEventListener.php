@@ -12,6 +12,7 @@ use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
+use AppBundle\Event\ShiftDismissedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
@@ -189,6 +190,33 @@ class EmailingEventListener
                     $this->renderView(
                         'emails/deleted_shift.html.twig',
                         array('shift' => $shift)
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($warn);
+        }
+    }
+
+    /**
+     * @param ShiftDismissedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftDismissed(ShiftDismissedEvent $event)
+    {
+        $shift = $event->getShift();
+        $beneficiary = $event->getBeneficiary();
+        if ($shift->getIsUpcoming()) {
+            $warn = (new \Swift_Message("[ESPACE MEMBRES] Crénéau annulé moins de 48 heures à l'avance"))
+                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setTo($this->container->getParameter('shift_mailer_user'))
+                ->setBody(
+                    $this->renderView(
+                        'emails/dismissed_shift.html.twig',
+                        array(
+                            'shift' => $shift,
+                            'beneficiary' => $beneficiary,
+                            'reason' => $event->getReason()
+                        )
                     ),
                     'text/html'
                 );
