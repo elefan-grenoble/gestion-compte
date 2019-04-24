@@ -67,6 +67,12 @@
 .card-content .card-btn-bar .card-btn {
   display: inline-block;
 }
+/*
+ * Updates
+ */
+.card.update a {
+  color: #4dd0e1;
+}
 h1,
 h2,
 h3,
