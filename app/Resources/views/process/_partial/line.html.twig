@@ -13,16 +13,23 @@
         {% endif %}
     </td>
     <td>
-        {{ processUpdate.description }}
-    </td>
-    <td>
         {% if processUpdate.link %}
             <a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
         {% endif %}
     </td>
     <td>
-        <a href="{{ path("process_update_edit",{'id':processUpdate.id}) }}"><i class="material-icons left">edit</i></a>
-        <a href="#delete_{{ processUpdate.id }}" class="modal-trigger red-text"><i class="material-icons left">delete</i></a>
+        <a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails"><i class="material-icons left">visibility</i></a>
+        <div id="view_{{ processUpdate.id }}" class="modal">
+            <div class="modal-content">
+                <h5>{{ processUpdate.title }}</h5>
+                {{ processUpdate.description | raw}}
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
+            </div>
+        </div>
+        <a href="{{ path("process_update_edit",{'id':processUpdate.id}) }}" title="Editer" class="orange-text"><i class="material-icons left">edit</i></a>
+        <a href="#delete_{{ processUpdate.id }}" class="modal-trigger red-text" title="Supprimer"><i class="material-icons left">delete</i></a>
         <div id="delete_{{ processUpdate.id }}" class="modal">
             <div class="modal-content">
                 <h5>Confirmer</h5>
