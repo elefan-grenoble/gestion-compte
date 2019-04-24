@@ -3,7 +3,6 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\DynamicContent;
-use AppBundle\Entity\Note;
 use AppBundle\Entity\ProcessUpdate;
 use AppBundle\Form\ProcessUpdateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -139,6 +138,8 @@ class ProcessUpdateController extends Controller
      */
     public function deleteAction(Request $request, ProcessUpdate $processUpdate)
     {
+
+        $this->denyAccessUnlessGranted('delete', $processUpdate);
 
         $form = $this->createDeleteForm($processUpdate);
         $form->handleRequest($request);

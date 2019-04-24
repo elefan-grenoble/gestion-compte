@@ -13,6 +13,7 @@ class ProcessUpdateVoter extends Voter
 {
     const VIEW = 'view';
     const EDIT = 'edit';
+    const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -24,7 +25,7 @@ class ProcessUpdateVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::VIEW))) {
+        if (!in_array($attribute, array(self::EDIT, self::VIEW, self::DELETE))) {
             return false;
         }
 
