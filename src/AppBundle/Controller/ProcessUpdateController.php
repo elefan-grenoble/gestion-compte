@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\DynamicContent;
+use AppBundle\Entity\Note;
 use AppBundle\Entity\ProcessUpdate;
 use AppBundle\Form\ProcessUpdateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -38,11 +39,19 @@ class ProcessUpdateController extends Controller
      */
     public function listAction(Request $request)
     {
+        //todo paginate
 
         $em = $this->getDoctrine()->getManager();
         $processUpdates = $em->getRepository('AppBundle:ProcessUpdate')->findAll();
+
+        $delete_forms = array();
+        foreach ($processUpdates as $update){
+            $delete_forms[$update->getId()] = $this->createDeleteForm($update)->createView();
+        }
+
         return $this->render('process/list.html.twig', array(
             'processUpdates' => $processUpdates,
+            'deleteForms' => $delete_forms,
         ));
     }
 
@@ -105,6 +114,44 @@ class ProcessUpdateController extends Controller
         return $this->render('process/edit.html.twig', array(
             'form' => $form->createView()
         ));
+    }
+
+    /**
+     * Creates a form to delete an entity.
+     *
+     * @param ProcessUpdate $processUpdate the entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createDeleteForm(ProcessUpdate $processUpdate)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('process_update_delete', array('id' => $processUpdate->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Delete a process update.
+     *
+     * @Route("/updates/{id}", name="process_update_delete")
+     * @Method("DELETE")
+     */
+    public function deleteAction(Request $request, ProcessUpdate $processUpdate)
+    {
+
+        $form = $this->createDeleteForm($processUpdate);
+        $form->handleRequest($request);
+        $session = new Session();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($processUpdate);
+            $em->flush();
+            $session->getFlashBag()->add('success', "l'entrée a bien été supprimée");
+        }
+
+        return $this->redirectToRoute('process_update_list');
     }
 
 }

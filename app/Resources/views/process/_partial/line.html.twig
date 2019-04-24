@@ -1,0 +1,41 @@
+<tr>
+    <td>
+        <i class="material-icons left">content_paste</i>{{ processUpdate.title }}
+    </td>
+    <td>
+        {{ processUpdate.date | date_fr_with_time }}
+    </td>
+    <td>
+        {% if processUpdate.author.beneficiary %}
+            <a href="{{ path("member_show",{"member_number":processUpdate.author.beneficiary.membership.memberNumber}) }}">{{ processUpdate.author }}</a>
+        {% else %}
+            {{ processUpdate.author }}
+        {% endif %}
+    </td>
+    <td>
+        {{ processUpdate.description }}
+    </td>
+    <td>
+        {% if processUpdate.link %}
+            <a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
+        {% endif %}
+    </td>
+    <td>
+        <a href="{{ path("process_update_edit",{'id':processUpdate.id}) }}"><i class="material-icons left">edit</i></a>
+        <a href="#delete_{{ processUpdate.id }}" class="modal-trigger red-text"><i class="material-icons left">delete</i></a>
+        <div id="delete_{{ processUpdate.id }}" class="modal">
+            <div class="modal-content">
+                <h5>Confirmer</h5>
+                <div>
+                    Suppression de l'entrée &rdquo;<i>{{ processUpdate.title }}</i>&ldquo;
+                </div>
+            </div>
+            <div class="modal-footer">
+                {{ form_start(deleteForms[processUpdate.id]) }}
+                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+                    <button type="submit" class="btn-large waves-effect waves-light green"><i class="material-icons left">check</i> supprimer</button>
+                {{ form_end(deleteForms[processUpdate.id]) }}
+            </div>
+        </div>
+    </td>
+</tr>
