@@ -2,6 +2,7 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,11 +44,11 @@ class SetFirstPasswordListener{
     {
         $entity = $args->getObject();
 
-        // only for users created trow "Membership" entity
-        if (!$entity instanceof Membership) {
+        // only for users created trow "Beneficiary" entity
+        if (!$entity instanceof Beneficiary) {
             return;
         }
-        $user = $entity->getMainBeneficiary()->getUser();
+        $user = $entity->getUser();
 
         if (!$user->getId()){
             $user->addRole(self::ROLE_PASSWORD_TO_SET);
