@@ -79,7 +79,11 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+        if (!$event->getAnonymousBeneficiary()->getJoinTo()){
+            $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+        }else{
+            $url = $this->container->get('router')->generate('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+        }
 
         $needInfoRecall = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', souhaites-tu te présenter ?'))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
@@ -105,24 +109,6 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onBeneficiaryAdd");
 
         $beneficiary = $event->getBeneficiary();
-
-        $em = $this->container->get('doctrine')->getManager();
-        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
-
-        $welcome = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name')))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-            ->setTo($beneficiary->getEmail())
-            ->setBody(
-                $this->renderView(
-                    'emails/welcome.html.twig',
-                    array(
-                        'beneficiary' => $beneficiary,
-                        'dynamicContent' => $dynamicContent
-                    )
-                ),
-                'text/html'
-            );
-        $this->mailer->send($welcome);
 
         $owner = $beneficiary->getMembership()->getMainBeneficiary();
         $newBuddy = (new \Swift_Message($beneficiary->getFirstname().' a été ajouté à ton compte '.$this->container->getParameter('project_name')))

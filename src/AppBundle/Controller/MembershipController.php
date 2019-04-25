@@ -15,6 +15,7 @@ use AppBundle\Entity\User;
 use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\MemberCreatedEvent;
+use AppBundle\EventListener\SetFirstPasswordListener;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
@@ -624,6 +625,10 @@ class MembershipController extends Controller
             if (!$a_beneficiary){
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
                 return $this->redirectToRoute("homepage");
+            }else{
+                if ($a_beneficiary->getJoinTo()){ //adding beneficiary to an existing membership : wrong place
+                    return $this->redirectToRoute('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)));
+                }
             }
         }
 
