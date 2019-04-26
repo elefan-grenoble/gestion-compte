@@ -55,7 +55,7 @@ class EventType extends AbstractType
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
                 ))
-                ->add('description',TextareaType::class,array('label'=>'Description','required' => false));
+                ->add('description',MarkdownEditorType::class,array('label'=>'Description','required' => false));
             $form->add('imgFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,
