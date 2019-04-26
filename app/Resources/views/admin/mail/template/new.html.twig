@@ -1,8 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}"/>
-{% endblock %}
 
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
@@ -26,9 +23,8 @@
             {{ form_label(form.name) }}
             {{ form_widget(form.name) }}
         </div>
-        <div class="input-field col s12">
-            {{ form_label(form.description) }}
-            {{ form_widget(form.description) }}
+        <div class="col s12">
+            {{ form_row(form.description) }}
         </div>
     </div>
 
@@ -38,14 +34,4 @@
     </div>
     {{ form_end(form) }}
 
-{% endblock %}
-
-{% block javascripts %}
-    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
-    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
-    <script>
-        new Editor({
-            element: document.getElementById('appbundle_email_template_content'),
-        })
-    </script>
 {% endblock %}
