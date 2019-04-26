@@ -16,7 +16,7 @@ class DynamicContentType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('content', TextareaType::class, array('label' => 'Contenu', 'required' => false));
+            ->add('content', MarkdownEditorType::class, array('label' => 'Contenu', 'required' => false));
     }
 
     /**
