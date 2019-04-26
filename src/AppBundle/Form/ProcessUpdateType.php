@@ -4,7 +4,6 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\ProcessUpdate;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -19,7 +18,7 @@ class ProcessUpdateType extends AbstractType
         $builder
             ->add('title', TextType::class, array('label' => 'Titre', 'required' => true))
             ->add('link', TextType::class, array('label' => 'Lien vers la procédure complète', 'required' => false))
-            ->add('description', TextareaType::class, array('label' => 'Description', 'required' => false));
+            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => true));
     }
 
     /**
