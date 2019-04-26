@@ -115,17 +115,9 @@
                 </div>
                 <div class="collapsible-body white">
                     {{ form_start(note_form) }}
-                    <div class="input-field text col s12">
-                        <div class="errors">
-                            {{ form_errors(note_form.text) }}
-                        </div>
-                        <div class="input-field">
-                            {{ form_widget(note_form.text) }}
-                            {{ form_label(note_form.text) }}
-                        </div>
-                    </div>
+                        {{ form_row(note_form.text) }}
                     <div>
-                        <button type="submit" class="btn waves-effect waves-light">Ajouter une note</button>
+                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
                     </div>
                     {{ form_end(note_form) }}
                 </div>

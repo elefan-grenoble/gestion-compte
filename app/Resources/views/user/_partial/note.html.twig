@@ -35,23 +35,15 @@
     <div class="modal-content">
         {% if is_granted("create",note) %}
             <h4>Répondre à cette note</h4>
-            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'form-note-reply-'~note.id,'class': 'edit-post-it' }}) }}
-            <div class="input-field text col s12">
-                <div class="errors">
-                    {{ form_errors(new_notes_form[note.id].text) }}
-                </div>
-                <div class="input-field">
-                    {{ form_widget(new_notes_form[note.id].text) }}
-                    {{ form_label(new_notes_form[note.id].text) }}
-                </div>
-            </div>
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'form_note_reply_'~note.id,'class': 'edit-post-it' }}) }}
+                {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
             {{ form_end(new_notes_form[note.id]) }}
         {% endif %}
     </div>
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
         {% if is_granted("create",note) %}
-            <a href="#!" class="modal-action modal-close green waves-effect waves-green btn" onclick="document.getElementById('form-note-reply-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+            <a href="#!" class="modal-action modal-close green waves-effect waves-green btn" onclick="document.getElementById('form_note_reply_{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
         {% endif %}
     </div>
 </div>
@@ -60,16 +52,8 @@
     <div class="modal-content">
         {% if is_granted("edit",note) %}
         <h4>Editer la note</h4>
-        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id,'class': 'edit-post-it' }}) }}
-        <div class="input-field text col s12">
-            <div class="errors">
-                {{ form_errors(notes_form[note.id].text) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(notes_form[note.id].text) }}
-                {{ form_label(notes_form[note.id].text) }}
-            </div>
-        </div>
+        {{ form_start(notes_form[note.id], {'attr': {'id': 'form_note_edit_'~note.id,'class': 'edit-post-it' }}) }}
+            {{ form_widget(notes_form[note.id].text, {'id': 'note_text_edit_'~note.id}) }}
         {{ form_end(notes_form[note.id]) }}
         {% else %}
             <h4>{{ note.author.username }} le {{ note.createdAt | date('d M Y à H:i') }}</h4>
@@ -78,16 +62,16 @@
             </p>
         {% endif %}
     </div>
-    {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form-note-delete-'~note.id }}) }}
-    {{ form_widget(notes_delete_form[note.id]) }}
+    {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
+        {{ form_widget(notes_delete_form[note.id]) }}
     {{ form_end(notes_delete_form[note.id]) }}
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
         {% if is_granted("delete",note) %}
-            <a href="#!" class="modal-action modal-close red waves-effect waves-red btn" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
+            <a href="#!" class="modal-action modal-close red waves-effect waves-red btn" onclick="document.getElementById('form_note_delete_{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
         {% endif %}
         {% if is_granted("edit",note) %}
-            <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form_note_edit_{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
         {% endif %}
     </div>
 </div>
