@@ -1,9 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}" />
-{% endblock %}
-
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
@@ -24,14 +20,4 @@
     </div>
     {{ form_end(form) }}
 
-{% endblock %}
-
-{% block javascripts %}
-    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
-    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
-    <script>
-        new Editor({
-            element: document.getElementById('appbundle_dynamic_content_content'),
-        })
-    </script>
 {% endblock %}
