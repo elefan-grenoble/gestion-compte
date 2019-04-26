@@ -22,7 +22,7 @@
         <div id="view_{{ processUpdate.id }}" class="modal">
             <div class="modal-content">
                 <h5>{{ processUpdate.title }}</h5>
-                {{ processUpdate.description | raw}}
+                {{ processUpdate.description | markdown | raw}}
             </div>
             <div class="modal-footer">
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
