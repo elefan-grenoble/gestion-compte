@@ -8,7 +8,11 @@ $(document).ready(function() {
         onOpen: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
         onClose: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
     });
-    $('.modal').modal();
+    $('.modal').modal({
+        ready: function (modal) {
+            $(modal).find('.simplemde-container').trigger('modalOpen'); //tell markdown editor to refresh
+            },
+    });
     $('.tooltipped').tooltip();
     $(".dropdown-button").dropdown();
 });
