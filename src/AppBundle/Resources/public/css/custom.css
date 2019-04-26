@@ -318,3 +318,17 @@ strong {
   left: 50%;
   margin-left: -79px;
 }
+#quick_search_nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+.simplemde-container.error .CodeMirror {
+  border-color: #F44336;
+}
+.simplemde-container.error .editor-statusbar .error-message {
+  color: #F44336;
+  float: left;
+  font-weight: bold;
+}
