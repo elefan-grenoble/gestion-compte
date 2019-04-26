@@ -47,7 +47,7 @@ class CommissionType extends AbstractType
                 ->add('name', TextType::class, array('constraints' => array(new NotBlank()), 'label' => 'Nom'));
         }
         $builder
-            ->add('description',TextareaType::class,array('label'=>'Description'))
+            ->add('description',MarkdownEditorType::class,array('label'=>'Description'))
             ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'));
 
         $builder->add('next_meeting_date',DateTimeType::class,array('required' => false,

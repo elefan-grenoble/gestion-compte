@@ -1,9 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}" />
-{% endblock %}
-
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
@@ -44,14 +40,8 @@
                 {{ form_widget(form.email) }}
             </div>
         </div>
-        <div class="input-field description col s12">
-            <div class="errors">
-                {{ form_errors(form.description) }}
-            </div>
-            <div class="input-field">
-                {{ form_label(form.description) }}
-                {{ form_widget(form.description) }}
-            </div>
+        <div class="description col s12">
+            {{ form_row(form.description) }}
         </div>
     </div>
     <div class="card-panel teal lighten-5">
@@ -141,12 +131,7 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
-    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
     <script>
-        new Editor({
-            element: document.getElementById('appbundle_commission_description'),
-        })
         jQuery.extend( jQuery.fn.pickadate.defaults, {
             monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
             monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
@@ -181,8 +166,5 @@
             });
         });
 
-        new Editor({
-            element: document.getElementById('appbundle_event_description'),
-        })
     </script>
 {% endblock %}

@@ -47,14 +47,16 @@
 
 {% block simplemde_editor_row %}
     <div class="markdow-editor">
+        <div class="errors">
+            {{ form_errors(form) }}
+        </div>
         {{ form_label(form) }}
         {{ form_widget(form) }}
-        {{ form_errors(form) }}
     </div>
 {% endblock %}
 
 {% block simplemde_editor_widget %}
-    <div class="simplemde-container" data-for="{{ id }}">
+    <div class="simplemde-container row" data-for="{{ id }}">
     {{ block('textarea_widget') }}
     </div>
     <script type="text/javascript">
