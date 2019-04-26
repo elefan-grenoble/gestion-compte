@@ -1,9 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}" />
-{% endblock %}
-
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
@@ -88,8 +84,6 @@
 {% endblock %}
 
 {% block javascripts %}
-    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
-    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
     <script>
         jQuery.extend( jQuery.fn.pickadate.defaults, {
             monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
@@ -130,9 +124,5 @@
                 ampmclickable: false, // make AM PM clickable
             });
         });
-
-        new Editor({
-            element: document.getElementById('appbundle_event_description'),
-        })
     </script>
 {% endblock %}
