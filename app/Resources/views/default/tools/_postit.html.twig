@@ -24,7 +24,7 @@
                 <i class="material-icons tiny">reply</i>
                 {{ child.author.firstname }} le {{ child.createdAt | date('d/m/Y à H:i') }}
                 {% if is_granted('delete',child) %}
-                <a href="#!" class="red-text right" onclick="document.getElementById('form-note-delete-{{ child.id }}').submit();">
+                <a href="#!" class="red-text right" onclick="document.getElementById('form_note_delete_{{ child.id }}').submit();">
                     <i class="material-icons">close</i>
                 </a>
                 {% endif %}
@@ -34,25 +34,17 @@
                     {{ child.textWithBr  | markdown | raw }}
                 </p>
             </div>
-                {{ form_start(notes_delete_form[child.id], {'attr': {'id': 'form-note-delete-'~child.id }}) }}
+                {{ form_start(notes_delete_form[child.id], {'attr': {'id': 'form_note_delete_'~child.id }}) }}
                 {{ form_widget(notes_delete_form[child.id]) }}
                 {{ form_end(notes_delete_form[child.id]) }}
             {% endfor %}
-            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new-note-form-child-'~note.id ,'class':'reply'}}) }}
-            <div class="input-field text col s12">
-                <div class="errors">
-                {{ form_errors(new_notes_form[note.id].text) }}
-                </div>
-                <div class="input-field">
-                {{ form_widget(new_notes_form[note.id].text) }}
-                {{ form_label(new_notes_form[note.id].text) }}
-                </div>
-            </div>
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new_note_form_child_'~note.id ,'class':'reply'}}) }}
+                {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
             {{ form_end(new_notes_form[note.id]) }}
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new-note-form-child-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new_note_form_child_{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
         </div>
     </div>
     {% else %}
@@ -61,21 +53,13 @@
                 <h4>
                     Ajouter une réponse
                 </h4>
-            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new-note-form-'~note.id ,'class':'reply'}}) }}
-            <div class="input-field text col s12">
-                <div class="errors">
-                    {{ form_errors(new_notes_form[note.id].text) }}
-                </div>
-                <div class="input-field">
-                    {{ form_widget(new_notes_form[note.id].text) }}
-                    {{ form_label(new_notes_form[note.id].text) }}
-                </div>
-            </div>
+            {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new_note_form_'~note.id ,'class':'reply'}}) }}
+                {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
             {{ form_end(new_notes_form[note.id]) }}
             </div>
             <div class="modal-footer">
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
-                <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new-note-form-{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn blue" onclick="document.getElementById('new_note_form_{{ note.id }}').submit();"><i class="material-icons left">reply</i>Répondre</a>
             </div>
         </div>
 {% endif %}
@@ -85,31 +69,21 @@
 
     <div class="modal-content">
         <h4>Editer ce post-it</h4>
-        {{ form_start(notes_form[note.id], {'attr': {'id': 'form-note-'~note.id,'class': 'edit-post-it' }}) }}
-        <div class="input-field text col s12">
-            <div class="errors">
-                {{ form_errors(notes_form[note.id].text) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(notes_form[note.id].text) }}
-                {{ form_label(notes_form[note.id].text) }}
-            </div>
-        </div>
+        {{ form_start(notes_form[note.id], {'attr': {'id': 'form_note_edit_'~note.id,'class': 'edit-post-it' }}) }}
+            {{ form_row(notes_form[note.id].text, {'id': 'note_text_edit_'~note.id}) }}
         {{ form_end(notes_form[note.id]) }}
 
-
-
         {% if is_granted('delete',note) %}
-        {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form-note-delete-'~note.id }}) }}
+        {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
         {{ form_widget(notes_delete_form[note.id]) }}
         {{ form_end(notes_delete_form[note.id]) }}
         {% endif %}
     </div>
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">retour</a>
-        <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form-note-{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-teal btn teal" onclick="document.getElementById('form_note_edit_{{ note.id }}').submit();"><i class="material-icons left">check</i>Enregistrer</a>
         {% if is_granted('delete',note) %}
-            <a href="#!" class="modal-action modal-close waves-effect waves-red btn red" onclick="document.getElementById('form-note-delete-{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-red btn red" onclick="document.getElementById('form_note_delete_{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
         {% endif %}
     </div>
 

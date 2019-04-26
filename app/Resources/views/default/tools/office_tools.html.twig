@@ -48,29 +48,7 @@
     </div>
 {% endblock %}
 
-
-{% block javascripts %}
-    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
-    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
-    <script>
-        new Editor({
-            element: document.getElementById('appbundle_note_text'),
-        });
-        $('form.reply textarea').each(function () {
-            new Editor({
-                element: this,
-            })
-        });
-        $('form.edit-post-it textarea').each(function () {
-            new Editor({
-                element: this,
-            })
-        });
-    </script>
-{% endblock %}
-
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}" />
     <link rel="stylesheet" href="{{ asset('bundles/app/css/post-it.css') }}" />
     <link href="https://fonts.googleapis.com/css?family=Coming+Soon" rel="stylesheet">
 {% endblock %}
