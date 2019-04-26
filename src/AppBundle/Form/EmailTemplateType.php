@@ -19,7 +19,7 @@ class EmailTemplateType extends AbstractType
         $builder
             ->add('name', TextType::class, array('label' => 'Nom', 'required' => true))
             ->add('description', TextType::class, array('label' => 'Description', 'required' => false))
-            ->add('content', TextareaType::class, array('label' => 'Contenu', 'required' => false));
+            ->add('content', MarkdownEditorType::class, array('label' => 'Contenu', 'required' => true));
     }
 
     /**
