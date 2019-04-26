@@ -65,6 +65,9 @@
             var config = {{ form.vars.editor_config|raw}};
             var simplemde_{{ id }} = new SimpleMDE(Object.assign(config, {'element': element}));
             var required = $("#{{ id }}").attr('required') === "required";
+            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () { //refresh
+                simplemde_{{ id }}.codemirror.refresh();
+            });
             if (required){
                 $("#{{ id }}").removeAttr('required');
                 $("#{{ id }}").closest('form').submit(function (e) {
