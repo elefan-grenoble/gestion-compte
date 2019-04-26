@@ -324,6 +324,10 @@ strong {
   top: 0;
   z-index: 1000;
 }
+.CodeMirror,
+.CodeMirror-scroll {
+  min-height: 100px;
+}
 .simplemde-container.error .CodeMirror {
   border-color: #F44336;
 }
