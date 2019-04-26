@@ -1,0 +1,51 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    Mises à jour de procédures
+{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>mises à jour de procédures
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Mises à jour de procédures / nouveautés</h4>
+    <div class="row">
+{#        {% for processUpdate in processUpdates %}
+            <div class="col s12">
+                {% include "process/_partial/card.html.twig" %}
+            </div>
+        {% endfor %}#}
+        <table>
+            <thead>
+            <tr>
+                <th>
+                    titre
+                </th>
+                <th>
+                    date
+                </th>
+                <th>
+                    auteur
+                </th>
+                <th>
+                    lien
+                </th>
+                <th>
+                    action
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for processUpdate in processUpdates %}
+                    {% include "process/_partial/line.html.twig" %}
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    <div class="row">
+        <a href="{{ path('process_update_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter</a>
+    </div>
+{% endblock %}

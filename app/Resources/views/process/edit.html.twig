@@ -1,0 +1,48 @@
+{% extends 'layout.html.twig' %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/app/markdown-editor/editor.css') }}" />
+{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('process_update_list') }}"><i class="material-icons">list</i>mises à jour de procédures</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i>
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Modifier mise à jour de procédure / nouveauté</h4>
+
+    {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            {{ form_label(form.title) }}
+            {{ form_widget(form.title) }}
+        </div>
+        <div class="input-field col s12">
+            {{ form_label(form.link) }}
+            {{ form_widget(form.link) }}
+        </div>
+    </div>
+
+    {{ form_widget(form.description) }}
+    <div>
+        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('bundles/app/markdown-editor/editor.js') }}"></script>
+    <script src="{{ asset('bundles/app/markdown-editor/marked.js') }}"></script>
+    <script>
+        new Editor({
+            element: document.getElementById('appbundle_process_update_description')
+        })
+    </script>
+{% endblock %}
