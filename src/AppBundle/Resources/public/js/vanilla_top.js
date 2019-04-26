@@ -11,4 +11,10 @@ function onceSimpleMDEReady(method) {
     } else {
         setTimeout(function() { onceSimpleMDEReady(method) }, 50);
     }
+}function onceSimpleMDEReady(method) {
+    if (window.SimpleMDE) {
+        defer(method);
+    } else {
+        setTimeout(function() { onceSimpleMDEReady(method) }, 50);
+    }
 }
