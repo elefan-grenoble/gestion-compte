@@ -239,13 +239,13 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
         $form = $this->getRegistrationDeleteForm($registration->getId());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($registration->getUser() && count($registration->getUser()->getRegistrations()) === 1 && $registration === $registration->getUser()->getLastRegistration()) {
+            if ($registration->getMembership() && count($registration->getMembership()->getRegistrations()) === 1 && $registration === $registration->getMembership()->getLastRegistration()) {
                 $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
             } else {
                 $em = $this->getDoctrine()->getManager();
-                if ($registration->getUser()) {
-                    $registration->getUser()->removeRegistration($registration);
-                    $em->persist($registration->getUser());
+                if ($registration->getMembership()) {
+                    $registration->getMembership()->removeRegistration($registration);
+                    $em->persist($registration->getMembership());
                 }
                 if ($registration->getRegistrar()) {
                     $registration->getRegistrar()->removeRecordedRegistration($registration);
