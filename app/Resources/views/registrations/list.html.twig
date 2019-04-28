@@ -108,7 +108,7 @@
 
                 {% if is_granted("ROLE_FINANCE_MANAGER") and (registration.type == constant('TYPE_MEMBER', registration)) %}
                     <div class="collapsible-body">
-                        <a href="{{ path("admin_registration_edit",{"id":registration.id |split('_')[1] }) }}" class="btn waves-effect waves-light">Editer</a>
+                        <a href="{{ path("registration_edit",{"id":registration.id |split('_')[1] }) }}" class="btn waves-effect waves-light">Editer</a>
                         {% if(registration.membership.registrations | length) > 1 %}
                             {% if is_granted("ROLE_SUPER_ADMIN") %}
                                 {{ form_start(delete_forms[registration.id]) }}
