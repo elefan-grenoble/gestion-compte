@@ -99,7 +99,7 @@
             {% endif %}
             {% if is_granted("ROLE_FINANCE_MANAGER") and not is_granted("ROLE_ADMIN") %}
                 <h5>Finances</h5>
-                <a href="{{ path("admin_registrations") }}" class="waves-effect waves-light btn indigo"><i
+                <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo"><i
                             class="material-icons left">attach_money</i>Voir les adhésions</a>
                 <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i
                             class="material-icons left">settings_ethernet</i>Paiements helloasso</a>

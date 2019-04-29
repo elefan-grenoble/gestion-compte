@@ -108,7 +108,7 @@
 
                 {% if is_granted("ROLE_FINANCE_MANAGER") and (registration.type == constant('TYPE_MEMBER', registration)) %}
                     <div class="collapsible-body">
-                        <a href="{{ path("admin_registration_edit",{"id":registration.id |split('_')[1] }) }}" class="btn waves-effect waves-light">Editer</a>
+                        <a href="{{ path("registration_edit",{"id":registration.id |split('_')[1] }) }}" class="btn waves-effect waves-light">Editer</a>
                         {% if(registration.membership.registrations | length) > 1 %}
                             {% if is_granted("ROLE_SUPER_ADMIN") %}
                                 {{ form_start(delete_forms[registration.id]) }}
@@ -151,31 +151,31 @@
         <ul class="pagination">
             {% if to is not null %}
                 <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
                 {% for i in range(1,nb_of_pages) %}
                     <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                                href="{{ path("admin_registrations",{'page':i,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}">{{ i }}</a></li>
+                                href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
                 <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>
             {% else %}
                 <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("admin_registrations",{'page':page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
                 {% for i in range(1,nb_of_pages) %}
                     <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                                href="{{ path("admin_registrations",{'page':i,'from':(from | date('Y-m-d'))}) }}">{{ i }}</a></li>
+                                href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
                 <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("admin_registrations",{'page':page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>
