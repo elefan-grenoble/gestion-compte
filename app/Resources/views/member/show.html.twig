@@ -150,15 +150,55 @@
                 <div class="collapsible-body white">
                     <ul>
                         {% for beneficiary in member.beneficiaries %}
-                            {% if (beneficiary.getSwipeCards | length == 0) or beneficiary.SwipeCards.first.DisabledAt %}
-                                <li><a href="{{ path("generate_swipe",{"id":beneficiary.id}) }}" class="btn light-blue lighten-1">Génerer un badge
-                                        pour {{ beneficiary.firstname }}</a></li>
-                            {% else %}
-                                {% for badge in beneficiary.getSwipeCards %}
-                                    <a href="{{ path("swipe_show",{"id":badge.id}) }}" class="btn light-blue darken-4">voir badge
-                                        #{{ badge.number }} de {{ beneficiary.firstname }} </a>
-                                {% endfor %}
-                            {% endif %}
+                            <div class="row">
+                                <div class="col">
+                                    <h4>{{ beneficiary.firstname }}</h4>
+                                    {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
+                                        <p><b class="red-text">Aucun badges actif</b></p>
+                                        <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
+                                        <div id="swipe_add_b{{ beneficiary.id }}" class="modal">
+                                            <div class="modal-content">
+                                                <h4>Associer un badge</h4>
+                                                <form action="{{ path('active_swipe_for_beneficiary',{id:beneficiary.id})}}" method="post">
+                                                    <div class="row">
+                                                        <div class="input-field col s6">
+                                                            <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                                                            <input pattern=".{13,13}" type="text" name="code" autocomplete="off"/>
+                                                            <label for="code">Code du badge à 13 chiffres</label>
+                                                        </div>
+                                                        <div class="col s6">
+                                                            <br>
+                                                            <button type="submit" class="waves-effect waves-light btn-flat green white-text"><i class="material-icons left">check</i>Associer le badge</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#!" class="modal-close waves-effect red-text btn-flat">Fermer</a>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <div class="badge">
+                                            <img
+                                                    src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}"
+                                                    alt="barecode">
+                                        </div>
+                                        <br>
+                                    {% endif %}
+                                    {% if beneficiary.getSwipeCards | length %}
+                                        <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
+                                        <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
+                                            <div class="modal-content">
+                                                <h4>Tous les badges {{ beneficiary.firstname }}</h4>
+                                                {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         {% endfor %}
                     </ul>
                 </div>

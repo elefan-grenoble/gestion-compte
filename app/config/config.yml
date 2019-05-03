@@ -55,9 +55,6 @@ twig:
     support_email: '%transactional_mailer_user%'
     images_tmp_dir: '%images_tmp_dir%'
     shift_service: "@shift_service"
-    swipe_cards:
-      autoactivate:
-        enabled: '%swipe_cards.autoactivate.enabled%'
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
 
 # Doctrine Configuration
