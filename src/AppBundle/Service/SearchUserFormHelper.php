@@ -88,9 +88,8 @@ class SearchUserFormHelper {
             ->add('dir', HiddenType::class,array())
             ->add('sort', HiddenType::class,array())
             ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
-            ->add('csv', SubmitType::class, array('label' => 'CSV','attr' => array('class' => 'btn','value' => 'csv')))
-            ->add('mail', SubmitType::class, array('label' => 'Mail','attr' => array('class' => 'btn','value' => 'mail')))
-            ->add('swipe', SubmitType::class, array('label' => 'Badges','attr' => array('class' => 'btn','value' => 'swipe')));
+            ->add('csv', SubmitType::class, array('label' => 'Export CSV','attr' => array('class' => 'btn','value' => 'csv')))
+            ->add('mail', SubmitType::class, array('label' => 'Envoyer un mail','attr' => array('class' => 'btn','value' => 'mail')));
         return $formBuilder->getForm();
     }
 

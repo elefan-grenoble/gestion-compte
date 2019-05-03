@@ -5,9 +5,11 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
+use AppBundle\Security\SwipeCardVoter;
 use AppBundle\Service\SearchUserFormHelper;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,7 +46,7 @@ class SwipeCardController extends Controller
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable($code);
         if (!$card){
-            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'existe pas");
+            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
             $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
                 $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
@@ -57,99 +59,203 @@ class SwipeCardController extends Controller
         }
         return $this->redirectToRoute('homepage');
     }
-    /**
-     * generate Swipe Card
-     *
-     * @param Beneficiary $beneficiary
-     * @return Response
-     * @Route("/generate/{id}", name="generate_swipe")
-     * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method({"GET"})
-     */
-    public function generateSwipeCardAction(Beneficiary $beneficiary){
-        $session = new Session();
-        $result = $this->generateSwipeCard($beneficiary);
-        if (!$result){
-            $session->getFlashBag()->add('error','Un badge est déjà actif');
-            return $this->redirectToRoute('user_show',array('username'=>$beneficiary->getUser()->getUsername()));
-        }else{
-            $session->getFlashBag()->add('success','Le badge #'.$result->getNumber().' a bien été généré');
-            return $this->redirectToRoute('swipe_show',array('id'=>$result->getId()));
-        }
-    }
 
     public function homepageAction(){
         return $this->render('user/swipe_card/homepage.html.twig');
     }
 
     /**
-     * activate Swipe Card
+     * activate / pair Swipe Card
      *
-     * @param SwipeCard $card
+     * @param Request $request
+     * @param Beneficiary $beneficiary
      * @return Response
      * @Route("/active/", name="active_swipe")
+     * @Route("/active/{id}", name="active_swipe_for_beneficiary")
      * @Security("has_role('ROLE_USER')")
      * @Method({"POST"})
      */
-    public function activeSwipeCardAction(Request $request){
+    public function activeSwipeCardAction(Request $request,Beneficiary $beneficiary = null)
+    {
         $session = new Session();
-        $code = intval($request->get("code"));
-        $card_id = intval($request->get("card_id"));
+        $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCard());
+        $referer = $request->headers->get('referer');
+
+        $code = $request->get("code");
+        //verify code :
+        if (!SwipeCard::checkEAN13($code)) {
+            $session->getFlashBag()->add('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
+            return new RedirectResponse($referer);
+        }
+        $code = substr($code, 0, -1); //remove controle
+        if ($code === '421234567890'){
+            $session->getFlashBag()->add('warning', 'Hihi, ceci est le numéro d&rsquo;exemple 😁 Utilise un badge physique 🍌');
+            return new RedirectResponse($referer);
+        }
+
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('id'=>$card_id));
-        if (!$card || !$card->getId()){
-            $session->getFlashBag()->add('error','Badge non trouvé avec ce numéro');
-            return $this->redirectToRoute('homepage');
-        }else{
-            /** @var User $current_app_user */
-            $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            $membership = $current_app_user->getBeneficiary()->getMembership();
-            if (!$membership->getBeneficiaries()->contains($card->getBeneficiary())){
-                $session->getFlashBag()->add('error','Ce badge ne t\'appartient pas !');
-                return $this->redirectToRoute('homepage');
-            }else{
-                if ($card->getCode()!=$code){
-                    $session->getFlashBag()->add('error','Le code ne correspond pas !');
-                    return $this->redirectToRoute('homepage');
-                }else {
-                    $card->setEnable(1);
-                    $em->persist($card);
-                    $em->flush();
-                    $session->getFlashBag()->add('success','Le badge #'.$card->getNumber().' a bien été activé !');
-                    return $this->redirectToRoute('homepage');
-                }
+        if (!$beneficiary){
+            $beneficiary = $this->getUser()->getBeneficiary();
+        }
+        $cards = $beneficiary->getEnabledSwipeCards();
+        if ($cards->count()) {
+            if ($beneficiary->getUser() === $this->getUser())
+                $session->getFlashBag()->add('error', 'Ton compte possède déjà un badge actif');
+            else
+                $session->getFlashBag()->add('error', 'Il existe déjà un badge actif associé à ce compte');
+            return new RedirectResponse($referer);
+        }
+
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
+
+        if ($card) {
+            if ($card->getBeneficiary() != $this->getUser()->getBeneficiary()) {
+                $session->getFlashBag()->add('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
+            } else {
+                $session->getFlashBag()->add('error', 'Oups ! Ce badge est déjà associé mais il est inactif. Reactive le !');
             }
+            return new RedirectResponse($referer);
+        } else {
+            $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($this->getUser()->getBeneficiary());
+            $card = new SwipeCard();
+            $card->setBeneficiary($beneficiary);
+            $card->setCode($code);
+            $card->setNumber($lastCard ? max($lastCard->getNumber(),$beneficiary->getSwipeCards()->count()) + 1 : 1);
+            $card->setEnable(1);
+            $em->persist($card);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Le badge ' . $card->getcode() . ' a bien été associé à ton compte.');
+            return new RedirectResponse($referer);
         }
     }
 
-    private function generateSwipeCard(Beneficiary $beneficiary, $flush = true){
+    /**
+     * enable existing Swipe Card
+     *
+     * @param Request $request
+     * @param Beneficiary $beneficiary
+     * @return Response
+     * @Route("/enable/", name="enable_swipe")
+     * @Route("/enable/{id}", name="enable_swipe_for_beneficiary")
+     * @Security("has_role('ROLE_USER')")
+     * @Method({"POST"})
+     */
+    public function enableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+        $session = new Session();
+        $referer = $request->headers->get('referer');
+
+        $code = $request->get("code");
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable(null,$beneficiary);
-        if ($card){
-            return false;
+        if (!$beneficiary){
+            $beneficiary = $this->getUser()->getBeneficiary();
         }
-        $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($beneficiary);
-        if ($lastCard && !$lastCard->getDisabledAt()){ //last card is not active
-            return false;
+        $cards = $beneficiary->getEnabledSwipeCards();
+        if ($cards->count()) {
+            $session->getFlashBag()->add('error', 'Tu as déjà un badge actif');
+            return new RedirectResponse($referer);
         }
 
-        $card = new SwipeCard();
-        $code = null;
-        $exist = true;
-        while ($exist){
-            $code = $this->get('AppBundle\Helper\SwipeCard')->generateCode();
-            $exist = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        /** @var SwipeCard $card */
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
+
+        if ($card) {
+            $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
+            if ($card->getBeneficiary() != $beneficiary) {
+                if ($beneficiary === $this->getUser()->getBeneficiary())
+                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
+                else
+                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
+            } else {
+                $card->setEnable(true);
+                $card->setDisabledAt(null);
+                $em->persist($card);
+                $em->flush();
+                $session->getFlashBag()->add('success', 'Le badge #' . $card->getNumber() . ' a bien été ré-activé');
+            }
+        } else {
+            $session->getFlashBag()->add('error', 'Aucun badge ne correspond à ce code');
         }
-        $card->setCode($code);
-        $card->setBeneficiary($beneficiary);
-        $card->setNumber($lastCard ? $lastCard->getNumber() + 1 : 1 );
-        $card->setEnable(0); // default is not enable
-        $beneficiary->addSwipeCard($card);
-        $em->persist($beneficiary);
-        $em->persist($card);
-        if ($flush)
+        return new RedirectResponse($referer);
+    }
+
+    /**
+     * disable Swipe Card
+     *
+     * @param Request $request
+     * @param Beneficiary $beneficiary
+     * @return Response
+     * @Route("/disable/", name="disable_swipe")
+     * @Route("/disable/{id}", name="disable_swipe_for_beneficiary")
+     * @Security("has_role('ROLE_USER')")
+     * @Method({"POST"})
+     */
+    public function disableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+        $session = new Session();
+        $referer = $request->headers->get('referer');
+
+        $code = $request->get("code");
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+
+        $em = $this->getDoctrine()->getManager();
+        /** @var SwipeCard $card */
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+        if (!$beneficiary){
+            $beneficiary = $this->getUser()->getBeneficiary();
+        }
+
+        if ($card){
+            $this->denyAccessUnlessGranted(SwipeCardVoter::DISABLE, $card);
+            if ($card->getBeneficiary() != $beneficiary) {
+                if ($beneficiary === $this->getUser()->getBeneficiary())
+                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
+                else
+                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
+            } else {
+                $card->setEnable(false);
+                $em->persist($card);
+                $em->flush();
+                $session->getFlashBag()->add('success','Ce badge est maintenant désactivé');
+            }
+        }else{
+            $session->getFlashBag()->add('error','Aucune badge trouvé');
+        }
+        return new RedirectResponse($referer);
+    }
+
+    /**
+     * remove Swipe Card
+     *
+     * @param Request $request
+     * @return Response
+     * @Route("/delete/", name="delete_swipe")
+     * @Security("has_role('ROLE_ADMIN')")
+     * @Method({"POST"})
+     */
+    public function deleteAction(Request $request){
+        $session = new Session();
+        $referer = $request->headers->get('referer');
+
+        $code = $request->get("code");
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+
+        $em = $this->getDoctrine()->getManager();
+        /** @var SwipeCard $card */
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
+
+        if ($card){
+            if (!$this->get('security.authorization_checker')->isGranted(SwipeCardVoter::DELETE, $card)) {
+                $session->getFlashBag()->add('error','Tu ne peux pas supprimer ce badge');
+                return new RedirectResponse($referer);
+            }
+            $em->remove($card);
             $em->flush();
-        return $card;
+            $session->getFlashBag()->add('success','Le badge '.$code.' a bien été supprimé');
+        }else{
+            $session->getFlashBag()->add('error','Aucune badge trouvé');
+        }
+        return new RedirectResponse($referer);
     }
 
     /**
@@ -189,6 +295,7 @@ class SwipeCardController extends Controller
      * @Method({"GET"})
      */
     public function qrAction(Request $request, $code){
+        $code = urldecode($code);
         $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
@@ -217,6 +324,7 @@ class SwipeCardController extends Controller
      * @Method({"GET"})
      */
     public function brAction(Request $request, $code){
+        $code = urldecode($code);
         $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
@@ -234,87 +342,5 @@ class SwipeCardController extends Controller
         return $response;
     }
 
-    /**
-     * print Swipe Card
-     *
-     * @param SwipeCard $card
-     * @return Response A Response instance
-     * @Route("/print", name="swipe_print")
-     * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method({"POST"})
-     */
-    public function printAction(Request $request, SearchUserFormHelper $formHelper){
-        $em = $this->getDoctrine()->getManager();
-        $form = $formHelper->getSearchForm($this->createFormBuilder());
-        $form->handleRequest($request);
-        $qb = $formHelper->initSearchQuery($em);
-        $memberships = null;
-        if ($form->isSubmitted() && $form->isValid()) {
-            $qb = $formHelper->processSearchFormData($form,$qb);
-            $memberships = $qb->getQuery()->getResult();
-        }elseif ($request->get('beneficiary_id')&&$request->get('column')&&$request->get('line')){
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id'=>intval($request->get('beneficiary_id'))));
-            if ($beneficiary->getId()){
-                $this->generateSwipeCard($beneficiary);
-                $card = $beneficiary->getSwipeCards()->first();
-                $barcodeImg = $card->getBarcode();
-                $qr_swipein_url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
-                $qrImg = $this->_getQr($qr_swipein_url);
-                if (!is_dir($this->getParameter('images_tmp_dir')))
-                    mkdir($this->getParameter('images_tmp_dir'));
-                file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png',base64_decode($barcodeImg));
-                file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png',base64_decode($qrImg));
-                $template = $this->renderView('user/swipe_card/printone.html.twig',[
-                    'beneficiary' => $beneficiary,
-                    'line' => intval($request->get('line')),
-                    'column' => intval($request->get('column'))
-                ]);
-                $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
-                $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
-                $response = $html2pdf->generatePdf($template,'badge_'.$beneficiary->getId());
-                unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png');
-                unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png');
-                return $response;
-            }else{
-                return $this->redirectToRoute('homepage');
-            }
-        }else{
-            throw $this->createAccessDeniedException();
-        }
-        if ($memberships){
-            /** @var User $user */
-            foreach ($memberships as $membership){
-                $beneficiaries = $membership->getBeneficiaries();
-                foreach ($beneficiaries as $beneficiary){
-                    $this->generateSwipeCard($beneficiary,false);
-                    $card = $beneficiary->getSwipeCards()->first();
-                    $barcodeImg = $card->getBarcode();
-                    $qr_swipein_url = $this->generateUrl('swipe_in',array('code'=>$this->get('AppBundle\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
-                    $qrImg = $this->_getQr($qr_swipein_url);
-                    if (!is_dir($this->getParameter('images_tmp_dir')))
-                        mkdir($this->getParameter('images_tmp_dir'));
-                    file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png',base64_decode($barcodeImg));
-                    file_put_contents($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png',base64_decode($qrImg));
-                }
-            }
-            $em->flush();
-            $template = $this->renderView('user/swipe_card/print.html.twig',[
-                'memberships' => $memberships
-            ]);
-            $html2pdf = $this->get('AppBundle\Helper\Html2Pdf');
-            $html2pdf->create('P','A4','fr',true,'UTF-8',array(0,0,0,0),false);
-            $response = $html2pdf->generatePdf($template,'badges');
-            /** @var User $user */
-            foreach ($memberships as $membership){
-                $beneficiaries = $membership->getBeneficiaries();
-                foreach ($beneficiaries as $beneficiary){
-                    $card = $beneficiary->getSwipeCards()->first();
-                    unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_bc.png');
-                    unlink($this->getParameter('images_tmp_dir').'/'.$card->getCode().'_qr.png');
-                }
-            }
-            return $response;
-            }
-        return $this->redirectToRoute('homepage');
-    }
+
 }

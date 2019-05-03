@@ -36,6 +36,7 @@ class AppExtension extends \Twig_Extension
             new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
             new \Twig_SimpleFilter('date_fr_full',array($this, 'date_fr_full')),
             new \Twig_SimpleFilter('date_fr_with_time',array($this, 'date_fr_with_time')),
+            new \Twig_SimpleFilter('date_time',array($this, 'date_time')),
             new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
             new \Twig_SimpleFilter('qr',array($this, 'qr')),
             new \Twig_SimpleFilter('barcode',array($this, 'barcode')),
@@ -115,6 +116,12 @@ class AppExtension extends \Twig_Extension
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $date->getTimestamp());
+    }
+
+    public function date_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%D %H:%M", $date->getTimestamp());
     }
 
     public function date_fr_full(\DateTime $date)
@@ -212,7 +219,7 @@ class AppExtension extends \Twig_Extension
     public function barcode($text){
         $barcode = new BarcodeGenerator();
         $barcode->setText($text);
-        $barcode->setType(BarcodeGenerator::Code128);
+        $barcode->setType(BarcodeGenerator::Ean13);
         $barcode->setScale(2);
         $barcode->setThickness(25);
         $barcode->setFontSize(10);
