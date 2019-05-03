@@ -53,7 +53,12 @@ class MailerService implements MailerInterface
 
     public function getAllowedEmails() : array
     {
-        return array_column($this->sendableEmails, 'address', 'from_name');
+        $return = array();
+        foreach ($this->sendableEmails as $email){
+            $key = $email['from_name'].' <'.$email['address'].'>';
+            $return[$key] = $email['address'];
+        }
+        return $return;
     }
 
     private function getTemporaryEmailPattern() : string

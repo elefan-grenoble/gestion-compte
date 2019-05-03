@@ -24,6 +24,7 @@ class SendMassMailCommand extends ContainerAwareCommand
             ->addOption('tolerance','t', InputOption::VALUE_OPTIONAL, 'Tolerance des adhésions expirées en jours',0)
             ->addOption('bat', 'bat',InputOption::VALUE_OPTIONAL, 'Email test','')
             ->addOption('frozen','f', InputOption::VALUE_NONE, 'Include frozen accounts')
+            ->addOption('include_non_member','inm', InputOption::VALUE_NONE, 'Include non member')
 
         ;
     }
@@ -36,6 +37,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         $test_email = $input->getOption('bat');
         $tolerance = $input->getOption('tolerance');
         $frozen = $input->getOption('frozen');
+        $include_non_member = $input->getOption('include_non_member');
 
         $mailerService = $this->getContainer()->get('mailer_service');
         $allowed_from_emails = $mailerService->getAllowedEmails();
@@ -93,6 +95,12 @@ class SendMassMailCommand extends ContainerAwareCommand
         foreach ($memberships as $membership){
             foreach ($membership->getBeneficiaries() as $beneficiary)
                 $to[] = $beneficiary->getEmail();
+        }
+        if ($include_non_member){
+            $non_members = $em->getRepository("AppBundle:User")->findNonMember();
+            foreach ($non_members as $user){
+                $to[] = $user->getEmail();
+            }
         }
         $message = (new \Swift_Message($subject))
             ->setFrom($from)
