@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\User;
 use AppBundle\Service\SearchUserFormHelper;
 use Metadata\Tests\Driver\Fixture\C\SubDir\C;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -44,6 +45,23 @@ class MailController extends Controller
     }
 
     /**
+     * Get non members autocomplete labels
+     *
+     * @Route("/non_members", name="mail_get_non_members")
+     * @Method({"GET"})
+     */
+    public function nonMembersListAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $users = $em->getRepository("AppBundle:User")->findNonMember();
+        $r = array();
+        foreach ($users as $user) {
+            $r[] = $user->getUsername().' ['.$user->getEmail().']';
+        }
+        return $this->json($r);
+    }
+
+    /**
      * Edit a message
      *
      * @Route("/to/{id}", name="mail_edit_one_beneficiary")
@@ -80,6 +98,11 @@ class MailController extends Controller
                 }
             }
         }
+        $non_members_users = array();
+        $non_members = $this->getDoctrine()->getManager()->getRepository("AppBundle:User")->findNonMember();
+        foreach ($non_members as $user){
+            $non_members_emails[] = $user;
+        }
 
         $params = array();
         foreach ($request->request as $k => $param) {
@@ -90,6 +113,7 @@ class MailController extends Controller
         return $this->render('admin/mail/edit.html.twig', array(
             'form' => $mailform->createView(),
             'to' => $to,
+            'non_member' => $non_members_users
         ));
     }
 
@@ -106,22 +130,42 @@ class MailController extends Controller
         $mailform = $this->getMailForm();
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            //beneficiaries
             $to = $mailform->get('to')->getData();
             $chips = json_decode($to);
             $beneficiaries = array();
-
-            $em = $this->getDoctrine()->getManager();
-
             foreach ($chips as $chip) {
                 $beneficiaries[] = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($chip->tag);
             }
+            //end beneficiaries
+            //non-member
+            $cci = $mailform->get('cci')->getData();
+            $chips = json_decode($cci);
+            $nonMembers = array();
+            $re = '/\[(?<email>.*?)\]/';
+            foreach ($chips as $chip) {
+                $matches = array();
+                preg_match($re, $chip->tag, $matches);
+                if (isset($matches['email']))
+                    $nonMembers[] = $matches['email'];
+            }
+            foreach ($nonMembers as $nonMember) {
+                /** @var User $user */
+                $user = $em->getRepository(User::class)->findOneBy(array('email'=>$nonMember));
+                if (is_object($user)) {
+                    $fake_beneficiary = new Beneficiary();
+                    $fake_beneficiary->setUser($user);
+                    $fake_beneficiary->setFirstname($user->getUsername());
+                    $fake_beneficiary->setLastname(' ');
+                    $beneficiaries[] = $fake_beneficiary;
+                }
+            }
+            //en non-member
 
             $nb = 0;
-
             $mailerService = $this->get('mailer_service');
-
             $from_email = $mailform->get('from')->getData();
-            $from = '';
             if (in_array($from_email, $mailerService->getAllowedEmails())) {
                 $from = array($from_email => array_search($from_email, $mailerService->getAllowedEmails()));
             } else {
@@ -129,7 +173,6 @@ class MailController extends Controller
                 $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
             }
-
             $contentType = 'text/plain';
             $content = $mailform->get('message')->getData();
             $emailTemplate = $mailform->get('template')->getData();
@@ -137,9 +180,8 @@ class MailController extends Controller
                 $contentType = 'text/html';
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
-
+            $template = $this->get('twig')->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
-                $template = $this->get('twig')->createTemplate($content);
                 $body = $template->render(array('beneficiary' => $beneficiary));
                 $message = (new \Swift_Message($mailform->get('subject')->getData()))
                     ->setFrom($from)
@@ -167,6 +209,7 @@ class MailController extends Controller
             ->setMethod('POST')
             ->add('from', ChoiceType::class, array('label' => 'Depuis', 'required' => false, 'choices' => $mailerService->getAllowedEmails()))
             ->add('to', HiddenType::class, array('label' => 'Destinataires', 'required' => true))
+            ->add('cci', HiddenType::class, array('label' => 'Non-membres', 'required' => false))
             ->add('template', EntityType::class, array(
                 'class' => 'AppBundle:EmailTemplate',
                 'placeholder' => '',
