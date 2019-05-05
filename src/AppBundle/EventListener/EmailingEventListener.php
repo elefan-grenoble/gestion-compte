@@ -193,7 +193,7 @@ class EmailingEventListener
         $beneficiary = $event->getBeneficiary();
         if ($shift->getIsUpcoming()) {
             $warn = (new \Swift_Message("[ESPACE MEMBRES] Crénéau annulé moins de 48 heures à l'avance"))
-                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setFrom($this->container->getParameter('transactional_mailer_user'))
                 ->setTo($this->container->getParameter('shift_mailer_user'))
                 ->setBody(
                     $this->renderView(
