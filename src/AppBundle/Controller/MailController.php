@@ -4,8 +4,10 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
+use AppBundle\Form\MarkdownEditorType;
 use AppBundle\Service\SearchUserFormHelper;
 use Metadata\Tests\Driver\Fixture\C\SubDir\C;
+use Michelf\Markdown;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -180,6 +182,7 @@ class MailController extends Controller
                 $contentType = 'text/html';
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
+            $content = Markdown::defaultTransform($content);
             $template = $this->get('twig')->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
                 $body = $template->render(array('beneficiary' => $beneficiary));
@@ -219,7 +222,7 @@ class MailController extends Controller
                 'label' => 'Modèle'
             ))
             ->add('subject', TextType::class, array('label' => 'Sujet', 'required' => true))
-            ->add('message', TextareaType::class, array('label' => 'Message', 'required' => true, 'attr' => array('class' => 'materialize-textarea')))
+            ->add('message', MarkdownEditorType::class, array('label' => 'Message', 'required' => true, 'attr' => array('class' => 'materialize-textarea')))
             ->getForm();
         return $mailform;
     }

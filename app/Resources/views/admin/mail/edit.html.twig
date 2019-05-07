@@ -26,9 +26,9 @@
             {{ form_widget(form.subject) }}
             {{ form_label(form.subject) }}
         </div>
-        <div class="input-field col s12">
-            {{ form_widget(form.message) }}
+        <div class="col s12">
             {{ form_label(form.message) }}
+            {{ form_widget(form.message) }}
         </div>
         <div class="tips right small">
             prénom : <input value="{{ '{{' }} beneficiary.firstname {{ '}}' }}"/>
