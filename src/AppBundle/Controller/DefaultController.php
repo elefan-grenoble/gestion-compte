@@ -8,6 +8,7 @@ use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Twig\Extension\AppExtension;
@@ -22,6 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -184,6 +186,10 @@ class DefaultController extends Controller
             return $this->redirectToRoute('cardReader');
         }
         $em = $this->getDoctrine()->getManager();
+        if (!SwipeCard::checkEAN13($code)) {
+            return $this->redirectToRoute('cardReader');
+        }
+        $code = substr($code, 0, -1); //remove controle
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
