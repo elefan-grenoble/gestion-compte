@@ -150,6 +150,12 @@ footer.page-footer {
 .breadcrumbs a {
   color: gray;
 }
+.teal.success,
+.teal.error,
+.teal.warning {
+  font-size: 16px;
+  font-weight: 600;
+}
 .teal.success {
   background-color: #8bc34a !important;
 }
@@ -308,15 +314,17 @@ strong {
 }
 .swiftcard_exemple {
   position: relative;
+  text-align: center;
 }
 .swiftcard_exemple img {
   margin-bottom: 5px;
 }
 .swiftcard_exemple .focus {
   position: absolute;
-  bottom: 0;
+  bottom: -10px;
   left: 50%;
-  margin-left: -79px;
+  width: 300px;
+  margin-left: -170px;
 }
 #quick_search_nav {
   display: none;
@@ -335,4 +343,15 @@ strong {
   color: #F44336;
   float: left;
   font-weight: bold;
+}
+.badge {
+  width: 300px;
+  text-align: center;
+  padding: 50px 0;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px gray;
+  max-width: 100%;
+}
+.badge img {
+  max-width: 90%;
 }

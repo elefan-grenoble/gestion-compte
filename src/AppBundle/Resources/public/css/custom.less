@@ -83,6 +83,10 @@ footer.page-footer{
     color: gray;
   }
 }
+.teal.success,.teal.error,.teal.warning{
+  font-size: 16px;
+  font-weight: 600;
+}
 .teal.success{
   background-color: @light-green !important;
 }
@@ -256,15 +260,17 @@ strong{
 
 .swiftcard_exemple{
   position: relative;
-}
-.swiftcard_exemple img{
-  margin-bottom: 5px;
-}
-.swiftcard_exemple .focus{
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  margin-left: -79px;
+  text-align: center;
+  img {
+    margin-bottom: 5px;
+  }
+  .focus{
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 300px; //fixed by dom
+    margin-left: -170px;
+  }
 }
 
 #quick_search_nav{
@@ -288,5 +294,17 @@ strong{
       float: left;
       font-weight: bold;
     }
+  }
+}
+
+.badge{
+  width: 300px;
+  text-align: center;
+  padding: 50px 0;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px gray;
+  max-width: 100%;
+  img{
+    max-width: 90%;
   }
 }

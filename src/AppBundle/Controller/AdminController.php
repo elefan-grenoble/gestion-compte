@@ -183,10 +183,6 @@ class AdminController extends Controller
             return $this->redirectToRoute('mail_edit', [
                 'request' => $request
             ], 307);
-        } else if ($action === "swipe") {
-            return $this->redirectToRoute('swipe_print', [
-                'request' => $request
-            ], 307);
         } else {
             $qb = $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
             $members = new Paginator($qb->getQuery());

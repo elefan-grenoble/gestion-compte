@@ -145,6 +145,8 @@ class SwipeCard
 
         if (!$enable){
             $this->setDisabledAt(new \DateTime('now'));
+        }else{
+            $this->setDisabledAt(null);
         }
 
         return $this;
@@ -214,7 +216,7 @@ class SwipeCard
     /**
      * Set disabledAt.
      *
-     * @param \DateTime $disabledAt
+     * @param \DateTime? $disabledAt
      *
      * @return SwipeCard
      */
@@ -239,10 +241,47 @@ class SwipeCard
     {
         $barcode = new BarcodeGenerator();
         $barcode->setText($this->getCode());
-        $barcode->setType(BarcodeGenerator::Code128);
+        $barcode->setType(BarcodeGenerator::Ean13);
         $barcode->setScale(2);
         $barcode->setThickness(25);
         $barcode->setFontSize(10);
         return $barcode->generate();
+    }
+
+    //FROM : \CodeItNow\BarcodeBundle\Generator\CINean13::calculateChecksum
+    public static function checkEAN13($code,$checksum = null)
+    {
+        $c = strlen($code);
+        if ($c === 13) {
+            if (!$checksum){
+                $checksum = substr($code, -1, 1);
+            }
+            $code = substr($code, 0, 12);
+        } elseif ($c !== 12 || !$checksum) {
+            return false;
+        }
+        $odd = true;
+        $checksumValue = 0;
+        $keys = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        $c = strlen($code);
+        for ($i = $c; $i > 0; $i--) {
+            if ($odd === true) {
+                $multiplier = 3;
+                $odd = false;
+            } else {
+                $multiplier = 1;
+                $odd = true;
+            }
+
+            if (!isset($keys[$code[$i - 1]])) {
+                return;
+            }
+
+            $checksumValue += $keys[$code[$i - 1]] * $multiplier;
+        }
+
+        $checksumValue = (10 - $checksumValue % 10) % 10;
+
+        return $checksumValue == $checksum;
     }
 }
