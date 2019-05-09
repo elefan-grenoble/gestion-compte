@@ -177,12 +177,13 @@ class MailController extends Controller
             }
             $contentType = 'text/plain';
             $content = $mailform->get('message')->getData();
+            $content = Markdown::defaultTransform($content);
             $emailTemplate = $mailform->get('template')->getData();
             if ($emailTemplate) {
                 $contentType = 'text/html';
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
-            $content = Markdown::defaultTransform($content);
+
             $template = $this->get('twig')->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
                 $body = $template->render(array('beneficiary' => $beneficiary));
