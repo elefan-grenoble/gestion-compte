@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'angular';
+
+  siteName = 'Espace Membre @ l\'éléfàn'
+  projectName = 'L\'éléfàn'
+  mainColor = '#51CAE9'
+
 }
