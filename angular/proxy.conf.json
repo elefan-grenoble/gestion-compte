@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "http://membres.lelefan.local:8000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
