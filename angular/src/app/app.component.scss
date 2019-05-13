@@ -1,3 +1,31 @@
 .logo-container {
   font-family: black_jackregular;
 }
+
+.breadcrumbs {
+  font-size: 12px;
+  padding: 5px;
+
+  .col {
+    height: 15px;
+  }
+
+  i.material-icons {
+    font-size: 15px;
+  }
+
+  a, span {
+    display: inline-block;
+    height: 15px;
+    line-height: 15px;
+    vertical-align: top;
+  }
+
+  span {
+    color: gray;
+  }
+
+  a {
+    color: gray;
+  }
+}

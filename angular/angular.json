@@ -29,6 +29,7 @@
             "styles": [
               "src/styles.scss",
               "src/assets/fonts/blackjack/stylesheet.css",
+              "src/assets/fonts/raleway/stylesheet.css",
               "node_modules/materialize-css/dist/css/materialize.css"
             ],
             "scripts": [
