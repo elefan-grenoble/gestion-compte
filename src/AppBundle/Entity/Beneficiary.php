@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -13,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="beneficiary")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BeneficiaryRepository")
+ * @Serializer\ExclusionPolicy("all")
  */
 class Beneficiary
 {
@@ -22,6 +24,7 @@ class Beneficiary
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @Serializer\Expose
      */
     private $id;
 
@@ -30,6 +33,7 @@ class Beneficiary
      *
      * @ORM\Column(name="lastname", type="string", length=255)
      * @Assert\NotBlank(message="Le nom du bénéficiaire est requis")
+     * @Serializer\Expose
      */
     private $lastname;
 
@@ -38,6 +42,7 @@ class Beneficiary
      *
      * @ORM\Column(name="firstname", type="string", length=255)
      * @Assert\NotBlank(message="Le prénom du bénéficiaire est requis")
+     * @Serializer\Expose
      */
     private $firstname;
 
@@ -45,6 +50,7 @@ class Beneficiary
      * @var string
      *
      * @ORM\Column(name="phone", type="string", length=255, nullable=true)
+     * @Serializer\Expose
      */
     private $phone;
 
@@ -54,6 +60,7 @@ class Beneficiary
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      * @Assert\NotNull
      * @Assert\Valid
+     * @Serializer\Expose
      */
     private $address;
 

@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityRepository;
 use FOS\OAuthServerBundle\Model\ClientInterface;
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -20,6 +21,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ORM\Table(name="fos_user")
  * @UniqueEntity(fields={"email"}, message="Cette adresse e-mail est déjà utilisée par un autre compte")
  * @UniqueEntity(fields={"username"}, message="Ce nom d'utilisateur est déjà utilisé par un autre compte")
+ * @Serializer\ExclusionPolicy("all")
  */
 class User extends BaseUser
 {
@@ -27,6 +29,7 @@ class User extends BaseUser
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @Serializer\Expose
      */
     protected $id;
 
@@ -40,6 +43,7 @@ class User extends BaseUser
      * Beneficiary's user.
      * @Assert\Valid()
      * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user")
+     * @Serializer\Expose
      */
     private $beneficiary;
 

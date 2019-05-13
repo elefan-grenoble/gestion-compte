@@ -198,3 +198,25 @@ liip_imagine:
         # create a 2px black border: center the thumbnail on a black background
         # 4px larger to create a 2px border around the final image
 #        background : { size : [124, 94], position : center, color : '#000000' }
+
+fos_rest:
+  param_fetcher_listener: true
+  body_listener: true
+  unauthorized_challenge: "Basic realm=\"Restricted Area\""
+  access_denied_listener:
+    # all requests using the 'json' format will return a 403 on an access denied violation
+    json: true
+  format_listener: true
+  view:
+    view_response_listener: 'force'
+  routing_loader:
+    default_format: json
+
+jms_serializer:
+  metadata:
+    debug: true
+    auto_detection: true
+    directories:
+      FOSUserBundle:
+        path: '%kernel.root_dir%/Resources/serializer/FOSUserBundle'
+        namespace_prefix: 'FOS\UserBundle'
