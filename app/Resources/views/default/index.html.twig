@@ -15,7 +15,7 @@
         <div class="container center">
             <div class="section no-pad-bot">
                 <h3 class="header">
-                    Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}<br>#{{ app.user.beneficiary.membership.memberNumber }}{% else %}{{ app.user.username }}{% endif %}</h3>
+                    Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}{% else %}{{ app.user.username }}{% endif %}</h3>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <p class="col s12">
                         <span class="orange-text">&lt;warning&gt;</span>
