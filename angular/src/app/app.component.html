@@ -7,7 +7,8 @@
         <li>
           <a href="#">
             <i class="material-icons small left">settings</i>
-            <small>Bastien</small>
+            <small *ngIf="user && user.beneficiary">{{user.beneficiary.firstname}}</small>
+            <small *ngIf="user && !user.beneficiary">{{user.username}}</small>
           </a>
         </li>
         <li><a href="#"><i class="material-icons small right">exit_to_app</i>
