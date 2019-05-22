@@ -13,7 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class UserController extends AbstractFOSRestController
 {
     /**
-     * @Rest\Get("/admin/users")Rl
+     * @Rest\Get("/admin/users")
      */
     public function getUsersAction()
     {
