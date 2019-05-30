@@ -82,4 +82,24 @@
             </div>
         {% endfor %}
     </div>
+
+    {# Shift history #}
+    <div class="row">
+        {% for cycle in -1..-2 %}
+            {% if shift_service.hasCycle(member, cycle) %}
+                <div class="col m6 s12">
+                    {% set previousShifts = member.getShiftsOfCycle(cycle) %}
+                    <h6>Cycle précédent (du {{ member.startOfCycle(cycle) | date('d/m/y') }} au {{ member.endOfCycle(cycle) | date('d/m/y') }})</h6>
+                    {% if previousShifts|length == 0 %}
+                        Pas de créneau
+                    {% endif %}
+                    {% for shift in previousShifts %}
+                        <div class="col m12 s12">
+                            {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endif %}
