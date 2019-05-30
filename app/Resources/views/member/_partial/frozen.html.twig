@@ -10,12 +10,12 @@
             Annuler le gel de mon compte</a>
     {% else %}
 
-        <a class="waves-effect waves-light btn modal-trigger blue" href="#pause"><i class="material-icons left">pause_circle_outline</i>Geler
+        <a class="waves-effect waves-light btn modal-trigger blue" href="#pause"><i class="material-icons left">ac_unit</i>Geler
             mon compte</a>
         <!-- Modal Structure -->
         <div id="pause" class="modal">
             <div class="modal-content">
-                <h5><i class="material-icons left small">pause_circle_filled</i>Gel de compte</h5>
+                <h5><i class="material-icons left small">ac_unit</i>Gel de compte</h5>
                 <p>Besoin de faire une pause ? demande le gel de ton compte ! <br> Pendant le gel, tu n'as plus accès au
                     magasin, mais tu n'es pas engagé par le bénévolat.
                     <br>Le gel sera effectif dès le début de ton prochain cycle, soit le
@@ -25,7 +25,7 @@
             </div>
             <div class="modal-footer">
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-                <a class="btn-large waves-effect waves-light btn green"
+                <a class="waves-effect waves-light btn green"
                    href="{{ path('member_freeze_change',{ 'id' : member.id }) }}"><i
                             class="material-icons left">check</i>Ok, je gèle mon compte</a>
             </div>

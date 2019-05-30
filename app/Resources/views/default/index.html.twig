@@ -28,22 +28,42 @@
             </div>
 
             <div class="row">
-                {% for event in events %}
-                    {% include "default/event/_event.html.twig" with { event: event } %}
-                {% endfor %}
+                {% if events | length > 0 %}
+                    <h5>Les événements</h5>
+                    {% for event in events %}
+                        {% include "default/event/_event.html.twig" with { event: event } %}
+                    {% endfor %}
+                {% endif %}
             </div>
 
 
-            {% if app.user.beneficiary %}{# not only admin ? #}
-                {% if not app.user.beneficiary.membership.uptodate %}
-                    <p>Ton adhésion a expirée
-                        le {{ "now"|date_modify((app.user.beneficiary.membership.remainder | date("%R%a"))~" days")| date_fr_long }}</p>
-                    <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
-                                class="material-icons left">card_membership</i>Je ré-adhérer en ligne</a>
-                {% else %}
-                    {{ render(controller("AppBundle:Booking:homepage")) }}
+            <h5>Mon compte</h5>
+            <div>
+                {% if app.user.beneficiary %}{# not only admin ? #}
+                    {% if not app.user.beneficiary.membership.uptodate %}
+                        <p>
+                            <i class="material-icons">warning</i>
+                            Ton adhésion a expirée le {{ "now"|date_modify((app.user.beneficiary.membership.remainder | date("%R%a"))~" days")| date_fr_long }}
+                        </p>
+                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
+                                    class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
+                    {% else %}
+                        <div>
+                            <p>Pour modifier tes informations personnelles, enregistrer ton badge ou geler ton compte (en cas d'absence prolongée) :</p>
+                            <div>
+                                {% include "member/_partial/swipe_card.html.twig" with { member: app.user.beneficiary.membership } %}
+                            </div>
+                            <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light light-green btn">
+                                <i class="material-icons left">settings</i>
+                                Gérer mon compte
+                            </a>
+                            {% include "member/_partial/frozen.html.twig" with { member: app.user.beneficiary.membership  } %}
+                        </div>
+
+                        {{ render(controller("AppBundle:Booking:homepage")) }}
+                    {% endif %}
                 {% endif %}
-            {% endif %}
+            </div>
 
             <h5>Construire</h5>
             {% if is_granted("access_tools",app.user) %}
