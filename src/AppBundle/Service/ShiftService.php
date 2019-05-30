@@ -4,6 +4,7 @@ namespace AppBundle\Service;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -328,5 +329,24 @@ class ShiftService
             $buckets[$key]->addShift($shift);
         }
         return $buckets;
+    }
+
+    /**
+     * Check if the given cycle is after the registration of this member
+     * @param Membership $membership
+     * @param $cycle
+     * @return bool
+     */
+    public function hasCycle(Membership $membership, $cycle)
+    {
+        /** @var Registration $firstRegistration */
+        $firstRegistration = $membership->getRegistrations()->first();
+        if (!$firstRegistration) {
+            return false;
+        }
+        $registrationDate = $firstRegistration->getDate();
+        $startOfCycle = $membership->startOfCycle($cycle);
+
+        return $registrationDate < $startOfCycle;
     }
 }
