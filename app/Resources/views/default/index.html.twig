@@ -51,7 +51,7 @@
                         <div>
                             <p>Pour modifier tes informations personnelles, enregistrer ton badge ou geler ton compte (en cas d'absence prolongée) :</p>
                             <div>
-                                {% include "member/_partial/swipe_card.html.twig" with { member: app.user.beneficiary.membership } %}
+                                {% include "member/_partial/swipe_card.html.twig" with { member: app.user.beneficiary.membership, showBadgeImage: false } %}
                             </div>
                             <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light light-green btn">
                                 <i class="material-icons left">settings</i>

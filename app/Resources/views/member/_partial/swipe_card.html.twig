@@ -1,11 +1,11 @@
 {% if app.user.beneficiary.getEnabledSwipeCards | length %}
     {% set card = app.user.beneficiary.getEnabledSwipeCards.first %}
-    <div class="badge">
-        <img
-                src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}"
-                alt="barecode">
-    </div>
-    <br>
+    {% if showBadgeImage %}
+        <div class="badge">
+            <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">
+        </div>
+        <br>
+    {% endif %}
     <a href="#swipe_disable_{{ card.id }}" class="btn waves-effect waves-light red modal-trigger">Badge perdu ?</a>
     <div id="swipe_disable_{{ card.id }}" class="modal">
         <div class="modal-content">
