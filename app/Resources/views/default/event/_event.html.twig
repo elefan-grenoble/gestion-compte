@@ -54,7 +54,7 @@
                     {% set proxy_received = event | receivedProxy %}
                     {% if app.user.beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration %}
                         <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
-                        <br>Penses à mettre à jour ton adhésion pour participer ! :)
+                        <br>Pense à mettre à jour ton adhésion pour participer ! :)
                     {% else %}
                         <ul>
                             {% if proxy_given is not null %}

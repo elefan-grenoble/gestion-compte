@@ -13,7 +13,7 @@
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% if not member.frozen %}
         {% if  member.timeCount < 0 %}
-            <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.
+            <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
             </p>
         {% else %}
             {% set remaining = shift_service.remainingToBook(member) %}
