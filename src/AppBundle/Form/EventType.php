@@ -54,6 +54,9 @@ class EventType extends AbstractType
                     'date_widget' => 'single_text',
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
+                    'attr' => [
+                        'class' => 'datepicker'
+                    ]
                 ))
                 ->add('description',MarkdownEditorType::class,array('label'=>'Description','required' => false));
             $form->add('imgFile', VichImageType::class, array(
@@ -68,6 +71,9 @@ class EventType extends AbstractType
                     'input' => 'datetime',
                     'widget' => 'single_text',
                     'label' => 'Date minimale d\'adhésion pour voter',
+                    'attr' => [
+                        'class' => 'datepicker'
+                    ]
                 ));
             }
 

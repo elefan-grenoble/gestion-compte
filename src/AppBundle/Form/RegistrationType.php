@@ -52,7 +52,11 @@ class RegistrationType extends AbstractType
                     'year' => 'Année',
                     'month' => 'Mois',
                 ],
-                'years' => range(2016, date('Y')),'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')))));
+                'years' => range(2016, date('Y')),'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))),
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ));
 
             if (!is_object($user)||!$user->hasRole('ROLE_SUPER_ADMIN')){
                 if ($registration){
