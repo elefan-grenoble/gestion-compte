@@ -331,7 +331,7 @@ class EventController extends Controller
         if ($membership->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                 $event->getMinDateOfLastRegistration()->format('d M Y').
-                ' peuvent voter à cet événement. Penses à mettre à jour ton adhésion pour participer !');
+                ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
 
@@ -506,7 +506,7 @@ class EventController extends Controller
         if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                 $event->getMinDateOfLastRegistration()->format('d M Y').
-                ' peuvent voter à cet événement. Penses à mettre à jour ton adhésion pour participer !');
+                ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
         $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
