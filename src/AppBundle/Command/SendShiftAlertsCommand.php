@@ -66,7 +66,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         if (count($alerts) > 0) {
             setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
-            $subject = '[ELEFAN] Alertes de remplissage pour le '. $dateFormatted;
+            $subject = '[ESPACE MEMBRES] Alertes de remplissage pour le '. $dateFormatted;
 
             $shiftEmail = $this->getContainer()->getParameter('emails.shift');
             $noreplyEmail = $this->getContainer()->getParameter('emails.noreply');

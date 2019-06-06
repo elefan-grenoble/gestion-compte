@@ -13,7 +13,7 @@
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% if not member.frozen %}
         {% if  member.timeCount < 0 %}
-            <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Penses à réserver tes créneaux.
+            <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
             </p>
         {% else %}
             {% set remaining = shift_service.remainingToBook(member) %}
@@ -44,20 +44,27 @@
     {% endif %}
 
     <a href="{{ path("booking") }}" class="btn teal"
-       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>Je réserve un créneau</a>
+       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+        <i class="material-icons left">schedule</i>
+        Je réserve un créneau
+    </a>
 
     <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
 
-    <div class="row">
+
     {% for cycle in 0..1 %}
-        {% for shift in member.getShiftsOfCycle(cycle) %}
-            <div class="col m6 s12 {% if member.getShiftsOfCycle(cycle) | length == 1 %}push-m3{% endif %}">
-                {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
+        {% set shiftsOfCycle = member.getShiftsOfCycle(cycle) %}
+        {% if shiftsOfCycle | length > 0 %}
+            <div class="row">
+                <h6>Mes créneaux à venir</h6>
+                {% for shift in shiftsOfCycle %}
+                    <div class="col m6 s12 {% if member.getShiftsOfCycle(cycle) | length == 1 %}push-m3{% endif %}">
+                        {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-        </div><div class="row">
+        {% endif %}
     {% endfor %}
-    </div>
 
     {% if (member.getFutureRebookedShifts() | length) != 0 %}<h5>Mes créneaux annulés et repris par un autre
         bénévole</h5>{% endif %}
@@ -73,6 +80,26 @@
                     </div>
                 </div>
             </div>
+        {% endfor %}
+    </div>
+
+    {# Shift history #}
+    <div class="row">
+        {% for cycle in -1..-2 %}
+            {% if shift_service.hasCycle(member, cycle) %}
+                <div class="col m6 s12">
+                    {% set previousShifts = member.getShiftsOfCycle(cycle) %}
+                    <h6>Cycle précédent (du {{ member.startOfCycle(cycle) | date('d/m/y') }} au {{ member.endOfCycle(cycle) | date('d/m/y') }})</h6>
+                    {% if previousShifts|length == 0 %}
+                        Pas de créneau
+                    {% endif %}
+                    {% for shift in previousShifts %}
+                        <div class="col m12 s12">
+                            {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endif %}

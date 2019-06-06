@@ -66,7 +66,7 @@ class TimeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="timeLogs")
-     * @ORM\JoinColumn(name="shift_id", referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\JoinColumn(name="shift_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $shift;
 

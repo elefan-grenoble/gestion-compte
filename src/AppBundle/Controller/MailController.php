@@ -166,6 +166,8 @@ class MailController extends Controller
             //en non-member
 
             $nb = 0;
+            $errored = [];
+
             $mailerService = $this->get('mailer_service');
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailerService->getAllowedEmails())) {
@@ -187,20 +189,28 @@ class MailController extends Controller
             $template = $this->get('twig')->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
                 $body = $template->render(array('beneficiary' => $beneficiary));
-                $message = (new \Swift_Message($mailform->get('subject')->getData()))
-                    ->setFrom($from)
-                    ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
-                    ->addPart(
-                        $body,
-                        $contentType
-                    );
-                $mailer->send($message);
-                $nb++;
+                try {
+                    $message = (new \Swift_Message($mailform->get('subject')->getData()))
+                        ->setFrom($from)
+                        ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
+                        ->addPart(
+                            $body,
+                            $contentType
+                        );
+                    $mailer->send($message);
+                    $nb++;
+                } catch (\Swift_RfcComplianceException $exception) {
+                    $errored[] = $beneficiary->getEmail();
+                }
             }
-            if ($nb > 1)
+            if ($nb > 1) {
                 $session->getFlashBag()->add('success', $nb . ' messages envoyés');
-            else
+                if (!empty($errored)) {
+                    $session->getFlashBag()->add('warning', 'Impossible d\'envoyer à : ' . implode(', ', $errored));
+                }
+            } else {
                 $session->getFlashBag()->add('success', 'message envoyé');
+            }
         }
         return $this->redirectToRoute('mail_edit');
     }
