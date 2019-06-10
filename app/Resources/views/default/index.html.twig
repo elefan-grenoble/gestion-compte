@@ -61,61 +61,53 @@
                         </div>
 
                         {{ render(controller("AppBundle:Booking:homepage")) }}
+
                     {% endif %}
                 {% endif %}
             </div>
 
+            {% if is_granted("view", codes | first) or is_granted("create",codes | first) %}
+                <h5>Boîtier à clefs</h5>
+            {% endif %}
+            {% if is_granted("view",codes | first) %}
+                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
+                    code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
+            {% endif %}
+            {% if is_granted("create",codes | first) %}
+                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
+                    les clefs</a>
+            {% endif %}
+
             <h5>Construire</h5>
             {% if is_granted("access_tools",app.user) %}
                 <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
-                    <i class="material-icons left">folder_shared</i>
-                    adhésion / ré-adhésion</a>
-            {% endif %}
-            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn"><i class="material-icons left">list</i>Taches en cours</a>
-            {% if is_granted("view",codes | first) or is_granted("create",codes | first) %}
+                    <i class="material-icons left">folder_shared</i>adhésion / ré-adhésion</a>
                 <br>
             {% endif %}
-            {% if is_granted("view",codes | first) %}
-                {% if (codes | first).registrar == app.user %}
-                    {% if codes | length > 1 %} {# last code is users one, but other codes exist #}
-                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i
-                                    class="material-icons left">vpn_key</i>Changer code boîtier à clefs</a>
-                    {% elseif is_granted("create",codes | first) %}
-                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
-                            les clefs</a>
-                    {% endif %}
-                {% else %}
-                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
-                        code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
-                    {% if is_granted("create",codes | first) %}
-                        <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
-                            les clefs</a>
-                    {% endif %}
-                {% endif %}
-            {% elseif is_granted("create",codes | first) %}
-                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i
-                            class="material-icons left">vpn_key</i>Déposer les clefs</a>
-            {% endif %}
+            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn lime darken-1"><i class="material-icons left">list</i>Taches en cours</a>
             {% if is_granted("ROLE_PROCESS_MANAGER") %}
-                <h5>Gérer les nouveautés</h5>
                 <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
                     <i class="material-icons left">assignment</i>
                     Gérer les nouveautés</a>
             {% endif %}
 
+
             {% if is_granted("ROLE_SHIFT_MANAGER") %}
-                <h5>Gérer les creneaux</h5>
-                <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn teal">
+                <br>
+                <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn orange">
                     <i class="material-icons left">date_range</i>
                     Gérer les créneaux</a>
             {% endif %}
+
+
             {% if is_granted("ROLE_USER_MANAGER") %}
-                <h5>Gérer les membres</h5>
+                <br>
                 <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer
                     les adhérents</a>
             {% endif %}
+
             {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                <h5>Finances</h5>
+                <br>
                 <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo"><i
                             class="material-icons left">attach_money</i>Voir les adhésions</a>
                 <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i
