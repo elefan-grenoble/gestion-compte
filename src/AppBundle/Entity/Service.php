@@ -5,6 +5,7 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * Service
@@ -13,6 +14,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ServiceRepository")
  * @Vich\Uploadable
+ * @Serializer\ExclusionPolicy("all")
  */
 class Service
 {
@@ -22,6 +24,7 @@ class Service
      * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
+     * @Serializer\Expose
      */
     private $id;
 
@@ -30,6 +33,7 @@ class Service
      *
      * @Assert\NotBlank()
      * @ORM\Column(name="name", type="string", length=255)
+     * @Serializer\Expose
      */
     private $name;
 
@@ -38,6 +42,7 @@ class Service
      *
      * @Assert\NotBlank()
      * @ORM\Column(name="description", type="string", length=255)
+     * @Serializer\Expose
      */
     private $description;
 
@@ -46,6 +51,7 @@ class Service
      *
      * @Assert\NotBlank()
      * @ORM\Column(name="icon", type="string", length=255)
+     * @Serializer\Expose
      */
     private $icon;
 
@@ -54,6 +60,7 @@ class Service
      *
      * @Assert\NotBlank()
      * @ORM\Column(name="slug", type="string", length=255)
+     * @Serializer\Expose
      */
     private $slug;
 
@@ -68,6 +75,7 @@ class Service
      * @var string
      *
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
+     * @Serializer\Expose
      */
     private $url;
 

@@ -4,6 +4,9 @@
       <a href="#" class="logo-container brand-logo hide-on-med-and-down">{{ siteName }}</a>
       <a href="#" class="logo-container brand-logo hide-on-large-only">{{ projectName }}</a>
       <ul class="right hide-on-med-and-down">
+        <li *ngFor="let service of services">
+          <a [href]="service.url"><i class="material-icons small left">{{ service.icon }}</i>{{ service.slug }}</a>
+        </li>
         <li>
           <a href="#">
             <i class="material-icons small left">settings</i>

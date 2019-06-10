@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {User} from './models/user';
 import {AuthService} from './services/auth.service';
+import {ServiceService} from './services/service.service';
+import {Service} from './models/service';
 
 @Component({
   selector: 'app-root',
@@ -18,12 +20,15 @@ export class AppComponent implements OnInit {
   today: number = Date.now();
 
   user: User;
+  services: Service[];
 
-  constructor(private authService: AuthService) {
+  constructor(private authService: AuthService,
+              private serviceService: ServiceService) {
   }
 
   ngOnInit(): void {
     this.authService.currentUserValue.subscribe(auth => this.user = auth.user);
+    this.serviceService.getServices().subscribe(services => this.services = services);
   }
 
 }
