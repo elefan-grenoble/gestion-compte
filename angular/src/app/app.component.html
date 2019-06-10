@@ -1,8 +1,8 @@
 <header>
-  <nav class="main-navigation" role="navigation" [style.background-color]="mainColor">
+  <nav class="main-navigation" role="navigation" [style.background-color]="config.main_color">
     <div class="nav-wrapper container">
-      <a href="#" class="logo-container brand-logo hide-on-med-and-down">{{ siteName }}</a>
-      <a href="#" class="logo-container brand-logo hide-on-large-only">{{ projectName }}</a>
+      <a href="#" class="logo-container brand-logo hide-on-med-and-down">{{ config.site_name }}</a>
+      <a href="#" class="logo-container brand-logo hide-on-large-only">{{ config.project_name }}</a>
       <ul class="right hide-on-med-and-down">
         <li *ngFor="let service of services">
           <a [href]="service.url"><i class="material-icons small left">{{ service.icon }}</i>{{ service.slug }}</a>
@@ -29,11 +29,11 @@
 <main>
   <router-outlet></router-outlet>
 </main>
-<footer class="page-footer" [style.background-color]="mainColor">
+<footer class="page-footer" [style.background-color]="config.main_color">
   <div class="footer-copyright">
     <div class="container">
-      © {{ today | date:'yyyy' }} Copyright {{ projectName }}
-      <a class="grey-text text-lighten-4 right" href="{{ projectUrl }}">{{ projectUrlDisplay }}</a>
+      © {{ today | date:'yyyy' }} Copyright {{ config.project_name }}
+      <a class="grey-text text-lighten-4 right" href="{{ config.project_url }}">{{ config.project_url_display }}</a>
     </div>
   </div>
 </footer>

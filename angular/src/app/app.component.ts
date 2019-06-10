@@ -3,6 +3,8 @@ import {User} from './models/user';
 import {AuthService} from './services/auth.service';
 import {ServiceService} from './services/service.service';
 import {Service} from './models/service';
+import {ConfigService} from './services/config.service';
+import {Config} from './models/config';
 
 @Component({
   selector: 'app-root',
@@ -11,11 +13,7 @@ import {Service} from './models/service';
 })
 export class AppComponent implements OnInit {
 
-  siteName = 'Espace Membre @ l\'éléfàn';
-  projectName = 'L\'éléfàn';
-  projectUrl = 'https://localcoop.local/';
-  projectUrlDisplay = 'localcoop.local';
-  mainColor = '#51CAE9';
+  config: Config;
 
   today: number = Date.now();
 
@@ -23,7 +21,9 @@ export class AppComponent implements OnInit {
   services: Service[];
 
   constructor(private authService: AuthService,
-              private serviceService: ServiceService) {
+              private serviceService: ServiceService,
+              private configService: ConfigService) {
+    this.config = configService.config;
   }
 
   ngOnInit(): void {

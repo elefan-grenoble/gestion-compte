@@ -13,4 +13,14 @@ class AuthSession
      */
     var $user;
 
+    /**
+     * @var string
+     */
+    var $ip;
+
+    /**
+     * @var boolean
+     */
+    var $trustedIp;
+
 }

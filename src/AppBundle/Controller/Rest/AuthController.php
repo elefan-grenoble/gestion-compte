@@ -18,10 +18,17 @@ class AuthController extends AbstractFOSRestController
     public function getAuthAction()
     {
         $session = new AuthSession();
+
         $user = $this->getUser();
         if ($user) {
             $session->user = $user;
         }
+
+        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
+        $session->ip = $ip;
+
+        $session->trustedIp = true;
+
         return $session;
     }
 }
