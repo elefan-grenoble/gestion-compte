@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
-import {UserService} from '../../services/user.service';
-import {User} from '../../models/user';
+import {Component, OnInit} from '@angular/core';
+import {AuthService} from '../../services/auth.service';
+import {Auth} from '../../models/auth';
 
 @Component({
   selector: 'app-test',
@@ -9,12 +9,12 @@ import {User} from '../../models/user';
 })
 export class TestComponent implements OnInit {
 
-  user: User;
+  auth: Auth;
 
-  constructor(private userService: UserService) { }
+  constructor(private authService: AuthService) { }
 
   ngOnInit() {
-    this.userService.getUser().subscribe(user => this.user = user);
+    this.authService.currentUserValue.subscribe(auth => this.auth = auth);
   }
 
 }

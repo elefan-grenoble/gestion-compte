@@ -17,11 +17,11 @@ class AuthController extends AbstractFOSRestController
      */
     public function getAuthAction()
     {
+        $session = new AuthSession();
         $user = $this->getUser();
-        $response = [        ];
         if ($user) {
-            $response['user'] = $this->json($user);
+            $session->user = $user;
         }
-        return $this->json($response);
+        return $session;
     }
 }

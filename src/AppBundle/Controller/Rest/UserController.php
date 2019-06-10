@@ -31,11 +31,4 @@ class UserController extends AbstractFOSRestController
         return $user;
     }
 
-    /**
-     * @Rest\Get("/user")
-     */
-    public function getCurrentUserAction()
-    {
-        return $this->getUser();
-    }
 }

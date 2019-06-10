@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {UserService} from './services/user.service';
 import {User} from './models/user';
+import {AuthService} from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -11,15 +11,19 @@ export class AppComponent implements OnInit {
 
   siteName = 'Espace Membre @ l\'éléfàn';
   projectName = 'L\'éléfàn';
+  projectUrl = 'https://localcoop.local/';
+  projectUrlDisplay = 'localcoop.local';
   mainColor = '#51CAE9';
+
+  today: number = Date.now();
 
   user: User;
 
-  constructor(private userService: UserService) {
+  constructor(private authService: AuthService) {
   }
 
   ngOnInit(): void {
-    this.userService.getUser().subscribe(user => this.user = user);
+    this.authService.currentUserValue.subscribe(auth => this.user = auth.user);
   }
 
 }
