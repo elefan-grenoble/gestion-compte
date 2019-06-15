@@ -179,7 +179,8 @@ class MailController extends Controller
             }
             $contentType = 'text/plain';
             $content = $mailform->get('message')->getData();
-            $content = Markdown::defaultTransform($content);
+            // FIXME Pour envoyer en html
+            //$content = Markdown::defaultTransform($content);
             $emailTemplate = $mailform->get('template')->getData();
             if ($emailTemplate) {
                 $contentType = 'text/html';
