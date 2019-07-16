@@ -74,6 +74,7 @@ class Membership
     private $beneficiaries;
 
     /**
+     * @var Beneficiary
      * One Membership has One Main Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")

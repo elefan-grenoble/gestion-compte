@@ -55,6 +55,7 @@ class Beneficiary
     private $phone;
 
     /**
+     * @var Address
      * One Beneficiary has One Address.
      * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
@@ -73,6 +74,7 @@ class Beneficiary
     private $user;
 
     /**
+     * @var Membership
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id",onDelete="CASCADE")
      */
@@ -690,7 +692,7 @@ class Beneficiary
     }
 
     /**
-     * @return mixed
+     * @return Address
      */
     public function getAddress()
     {

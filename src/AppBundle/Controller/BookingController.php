@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Job;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
@@ -118,7 +119,7 @@ class BookingController extends Controller
                 'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
-                'jobs' => $em->getRepository('AppBundle:Job')->findAll()
+                'jobs' => $em->getRepository(Job::class)->findByEnabled(true)
             ]);
 
         } else { // no beneficiary selected
@@ -171,7 +172,7 @@ class BookingController extends Controller
 
         /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManager();
-        $jobs = $em->getRepository('AppBundle:Job')->findAll();
+        $jobs = $em->getRepository(Job::class)->findByEnabled(true);
 
 
         $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
