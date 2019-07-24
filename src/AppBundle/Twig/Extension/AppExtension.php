@@ -3,7 +3,9 @@ namespace AppBundle\Twig\Extension;
 
 use AppBundle\Entity\AbstractRegistration;
 use AppBundle\Entity\AnonymousBeneficiary;
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Registration;
+use AppBundle\Entity\Shift;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Service\Picture\BasePathPicture;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
@@ -14,8 +16,10 @@ use Michelf\Markdown;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class AppExtension extends \Twig_Extension
+class AppExtension extends AbstractExtension
 {
 
     private $container;
@@ -29,23 +33,23 @@ class AppExtension extends \Twig_Extension
     public function getFilters()
     {
         return array(
-            new \Twig_SimpleFilter('markdown', array($this, 'markdown')),
-            new \Twig_SimpleFilter('json_decode', array($this, 'jsonDecode')),
-            new \Twig_SimpleFilter('email_encode',array($this, 'encodeText')),
-            new \Twig_SimpleFilter('priority_to_color',array($this, 'priority_to_color')),
-            new \Twig_SimpleFilter('date_fr_long',array($this, 'date_fr_long')),
-            new \Twig_SimpleFilter('date_fr_full',array($this, 'date_fr_full')),
-            new \Twig_SimpleFilter('date_fr_with_time',array($this, 'date_fr_with_time')),
-            new \Twig_SimpleFilter('date_time',array($this, 'date_time')),
-            new \Twig_SimpleFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
-            new \Twig_SimpleFilter('qr',array($this, 'qr')),
-            new \Twig_SimpleFilter('barcode',array($this, 'barcode')),
-            new \Twig_SimpleFilter('vigenere_encode',array($this, 'vigenere_encode')),
-            new \Twig_SimpleFilter('vigenere_decode',array($this, 'vigenere_decode')),
-            new \Twig_SimpleFilter('recall_date',array($this, 'get_recall_date')),
-            new \Twig_SimpleFilter('img',array($this, 'imgFilter')),
-            new \Twig_SimpleFilter('payment_mode_devise',array($this, 'payment_mode_devise')),
-            new \Twig_SimpleFilter('payment_mode',array($this, 'payment_mode')),
+            new TwigFilter('markdown', array($this, 'markdown')),
+            new TwigFilter('json_decode', array($this, 'jsonDecode')),
+            new TwigFilter('email_encode',array($this, 'encodeText')),
+            new TwigFilter('priority_to_color',array($this, 'priority_to_color')),
+            new TwigFilter('date_fr_long',array($this, 'date_fr_long')),
+            new TwigFilter('date_fr_full',array($this, 'date_fr_full')),
+            new TwigFilter('date_fr_with_time',array($this, 'date_fr_with_time')),
+            new TwigFilter('date_time',array($this, 'date_time')),
+            new TwigFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
+            new TwigFilter('qr',array($this, 'qr')),
+            new TwigFilter('barcode',array($this, 'barcode')),
+            new TwigFilter('vigenere_encode',array($this, 'vigenere_encode')),
+            new TwigFilter('vigenere_decode',array($this, 'vigenere_decode')),
+            new TwigFilter('recall_date',array($this, 'get_recall_date')),
+            new TwigFilter('img',array($this, 'imgFilter')),
+            new TwigFilter('payment_mode_devise',array($this, 'payment_mode_devise')),
+            new TwigFilter('payment_mode',array($this, 'payment_mode')),
         );
     }
 

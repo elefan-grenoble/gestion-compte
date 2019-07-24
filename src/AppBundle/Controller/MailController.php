@@ -5,7 +5,10 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
 use AppBundle\Form\MarkdownEditorType;
+use AppBundle\Service\Picture\BasePathPicture;
 use AppBundle\Service\SearchUserFormHelper;
+use AppBundle\Twig\Extension\AppExtension;
+use AppBundle\Twig\Extension\NewsExtension;
 use Metadata\Tests\Driver\Fixture\C\SubDir\C;
 use Michelf\Markdown;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -189,7 +192,7 @@ class MailController extends Controller
 
             $template = $this->get('twig')->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
-                $body = $template->render(array('beneficiary' => $beneficiary));
+                $body = $this->get('twig')->render($template, array('beneficiary' => $beneficiary));
                 try {
                     $message = (new \Swift_Message($mailform->get('subject')->getData()))
                         ->setFrom($from)
