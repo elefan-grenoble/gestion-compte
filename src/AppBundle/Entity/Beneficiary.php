@@ -75,6 +75,7 @@ class Beneficiary
 
     /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
+     * @OrderBy({"start" = "DESC"})
      */
     private $shifts;
 
