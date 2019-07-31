@@ -11,6 +11,7 @@ use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
+use AppBundle\Event\SwipeCardEvent;
 use AppBundle\Twig\Extension\AppExtension;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -194,6 +195,9 @@ class DefaultController extends Controller
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
         } else {
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card));
+
             $beneficiary = $card->getBeneficiary();
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,

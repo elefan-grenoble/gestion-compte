@@ -66,6 +66,11 @@ class SwipeCard
     private $beneficiary;
 
     /**
+     * @ORM\OneToMany(targetEntity="SwipeCardLog", mappedBy="swipeCard",cascade={"persist"})
+     */
+    private $logs;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
