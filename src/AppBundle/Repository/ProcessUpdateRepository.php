@@ -30,4 +30,23 @@ class ProcessUpdateRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function countFrom(\DateTime $from, \DateTime $max = null)
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        $qb
+            ->select('count(p.id)')
+            ->where('p.date > :from')
+            ->setParameter('from', $from);
+        if ($max) {
+            $qb
+                ->andWhere('p.date < :max')
+                ->setParameter('max', $max);
+        }
+
+        return $qb
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }
