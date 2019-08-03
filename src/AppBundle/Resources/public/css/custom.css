@@ -344,7 +344,7 @@ strong {
   float: left;
   font-weight: bold;
 }
-.badge {
+.badge_card {
   width: 300px;
   text-align: center;
   padding: 50px 0;
@@ -352,6 +352,47 @@ strong {
   box-shadow: 2px 2px 5px gray;
   max-width: 100%;
 }
-.badge img {
+.badge_card img {
   max-width: 90%;
+}
+.homebox {
+  border: 1px solid;
+  padding-bottom: 10px !important;
+  margin-bottom: 30px;
+}
+.homebox > h5 {
+  margin-top: -15px;
+}
+.homebox > h5 span {
+  padding: 0 5px;
+}
+.homebox .row {
+  margin: 0 5px;
+}
+.process-update-list .last-shift {
+  border-top: 1px solid #2196f3;
+  border-bottom: 1px solid #2196f3;
+  background: #2196f333;
+}
+.process-update-list tr.new > td > a {
+  font-weight: bold;
+}
+.btn .bubble_counter {
+  display: block;
+  position: absolute;
+  top: -13px;
+  left: -13px;
+  width: 26px;
+  height: 26px;
+  line-height: 26px;
+  text-align: center;
+  padding: 0;
+  overflow: hidden;
+  border-radius: 13px;
+  background: black;
+  font-weight: bold;
+  z-index: 999;
+}
+.event .card-image img {
+  max-height: 250px;
 }
