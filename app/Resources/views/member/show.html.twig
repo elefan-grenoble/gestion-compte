@@ -57,7 +57,7 @@
 
     <ul class="collapsible" data-collapsible="expandable">
         <li id="registration">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
@@ -110,7 +110,7 @@
         </li>
         {% if is_granted("create",note) %}
             <li id="note">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
                     <i class="material-icons">add</i>Ajouter une note
                 </div>
                 <div class="collapsible-body white">
@@ -125,7 +125,7 @@
         {% endif %}
 
         <li id="time_log">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.time_log_open is defined and frontend_cookie.user_show.time_log_open %}active{% endif %}">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.time_log_open is defined and frontend_cookie.user_show.time_log_open %}active{% endif %}">
                 <i class="material-icons">access_time</i>Compteur de temps
             </div>
             <div class="collapsible-body white">
@@ -134,7 +134,7 @@
         </li>
 
         <li id="shifts">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
             </div>
             <div class="collapsible-body white">
@@ -144,7 +144,7 @@
 
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="badges">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.badges_open is defined and frontend_cookie.user_show.badges_open %}active{% endif %}">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.badges_open is defined and frontend_cookie.user_show.badges_open %}active{% endif %}">
                     <i class="material-icons">credit_card</i>Badges
                 </div>
                 <div class="collapsible-body white">
@@ -207,7 +207,7 @@
 
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="freeze">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
                     <i class="material-icons">ac_unit</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
                 </div>
                 <div class="collapsible-body white">
@@ -276,7 +276,7 @@
 
         {% if is_granted("ROLE_USER_MANAGER") and is_granted("close",member) %}
             <li id="close">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
                     <i class="material-icons">close</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
                 </div>
                 <div class="collapsible-body white">
@@ -317,7 +317,7 @@
 
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <li id="super">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show and frontend_cookie.user_show.super_open is defined and frontend_cookie.user_show.super_open %}active{% endif %}">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_open is defined and frontend_cookie.user_show.super_open %}active{% endif %}">
                     <i class="material-icons">person</i>Actions super admin
                 </div>
                 <div class="collapsible-body white">
