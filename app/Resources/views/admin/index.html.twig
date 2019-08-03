@@ -7,37 +7,57 @@
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
-        {% if is_granted("ROLE_ADMIN") %}
+        {% if is_granted("ROLE_ADMIN_PANEL") %}
             <h4 class="row center">
                 <i class="material-icons large">settings</i><br>
                 Admin
             </h4>
 
-            <h6>Membres</h6>
-            <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
-            <a href="{{ path("member_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
-            <a href="{{ path("admin_commissions") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commissions</a>
-            <a href="{{ path("admin_formations") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les formations</a>
+            {% if is_granted("ROLE_USER_MANAGER") %}
+                <h6>Membres</h6>
+                <a href="{{ path("user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Gérer les adhérents</a>
+            {% endif %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path("member_join") }}" class="waves-effect waves-light btn"><i class="material-icons left">call_merge</i>Joindre deux comptes</a>
+                <a href="{{ path("admin_commissions") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les commissions</a>
+                <a href="{{ path("admin_formations") }}" class="waves-effect waves-light btn"><i class="material-icons left">tune</i>Gérer les formations</a>
+            {% endif %}
 
-            <h6>Finances</h6>
-            <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
-            <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">settings_ethernet</i>Paiements helloasso</a>
+            {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                <h6>Finances</h6>
+                <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">attach_money</i>Gérer les Adhésions / Réadhésions</a>
+                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo"><i class="material-icons left">settings_ethernet</i>Paiements helloasso</a>
+            {% endif %}
 
-            <h6>Créneaux</h6>
-            <a href="{{ path("period") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">date_range</i>la semaine type</a>
-            <a href="{{ path("period") }}" class="waves-effect waves-light btn disabled orange"><i class="material-icons left">date_range</i>les exceptions</a>
-            <a href="{{ path("job_list") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">person</i>les postes de bénévolat</a>
-            <a href="{{ path("shift_new") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">add</i>créer un créneau ponctuel</a>
+            {% if is_granted("ROLE_SHIFT_MANAGER") %}
+                <h6>Créneaux</h6>
+                <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">date_range</i>Gérer les créneaux</a>
+                <a href="{{ path("shift_new") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">add</i>créer un créneau ponctuel</a>
+            {% endif %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path("period") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">date_range</i>la semaine type</a>
+                <a href="{{ path("period") }}" class="waves-effect waves-light btn disabled orange"><i class="material-icons left">date_range</i>les exceptions</a>
+                <a href="{{ path("job_list") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">person</i>les postes de bénévolat</a>
+            {% endif %}
 
-            <h6>Boîtier cles</h6>
-            <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code(s)</a>
-            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+            {% if is_granted("ROLE_ADMIN") %}
+                <h6>Boîtier cles</h6>
+                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code(s)</a>
+                <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+            {% endif %}
 
-            <h6>Divers</h6>
-            <a href="{{ path("event_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">event</i>Gérer les événements</a>
-            <a href="{{ path("widget_generator") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">tune</i>Générer un widget</a>
-            <a href="{{ path("dynamic_content_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">content_paste</i>Contenus dynamiques</a>
-            <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">mail</i>Modèles d'emails</a>
+
+
+            {% if is_granted("ROLE_PROCESS_MANAGER") %}
+                <h6>Divers</h6>
+                <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1"><i class="material-icons left">assignment</i>Gérer les nouveautés</a>
+            {% endif %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <a href="{{ path("event_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">event</i>Gérer les événements</a>
+                <a href="{{ path("widget_generator") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">tune</i>Générer un widget</a>
+                <a href="{{ path("dynamic_content_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">content_paste</i>Contenus dynamiques</a>
+                <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal"><i class="material-icons left">mail</i>Modèles d'emails</a>
+            {% endif %}
 
         {% endif %}
         {% if is_granted("ROLE_SUPER_ADMIN") %}
