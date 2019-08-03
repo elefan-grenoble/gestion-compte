@@ -12,6 +12,11 @@
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?280920181151">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
         <script src="{{ asset('bundles/app/js/vanilla_top.js') }}"></script>
+        <style>
+            .homebox{
+                border-color: {{ main_color }};
+            }
+        </style>
     </head>
     <body>
         <header>
@@ -158,6 +163,7 @@
         {% include "JqueryBundle:Jquery:jquery.html.twig" %}
         <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
         <script src="{{ asset('bundles/app/simplemde/simplemde.min.js') }}"></script>
+        <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/radial/gauge.min.js"></script>
         <script src="{{ asset('bundles/app/js/app.js') }}"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
         <script src="{{ asset('bundles/app/js/datepicker.js') }}"></script>
