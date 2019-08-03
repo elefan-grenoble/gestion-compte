@@ -64,7 +64,7 @@ class AdminController extends Controller
      *
      * @Route("/", name="admin")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN_PANEL')")
      */
     public function indexAction()
     {
@@ -79,7 +79,7 @@ class AdminController extends Controller
     public function searchAction(Request $request)
     {
         if ($request->isXMLHttpRequest()) {
-            $key = $request->get('key');
+            $key = trim($request->get('key'));
             $return = array();
 
             $em = $this->getDoctrine()->getManager();
