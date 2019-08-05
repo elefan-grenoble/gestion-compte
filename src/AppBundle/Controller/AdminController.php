@@ -79,7 +79,7 @@ class AdminController extends Controller
     public function searchAction(Request $request)
     {
         if ($request->isXMLHttpRequest()) {
-            $key = trim($request->get('key'));
+            $key = preg_replace('/\s+/', '', $request->get('key'));
             $return = array();
 
             $em = $this->getDoctrine()->getManager();
@@ -87,7 +87,7 @@ class AdminController extends Controller
             $rsm = new ResultSetMappingBuilder($em);
             $rsm->addRootEntityFromClassMetadata('AppBundle:Beneficiary', 'b');
 
-            $query = $em->createNativeQuery('SELECT b.* FROM beneficiary AS b LEFT JOIN fos_user as u ON u.id = b.user_id WHERE LOWER(CONCAT_WS(u.username,u.email,b.lastname,b.firstname)) LIKE :key', $rsm);
+            $query = $em->createNativeQuery('SELECT b.* FROM beneficiary AS b LEFT JOIN fos_user as u ON u.id = b.user_id WHERE LOWER(CONCAT(u.username,u.email,b.lastname,b.firstname,b.lastname)) LIKE :key', $rsm);
 
             $beneficiaries = $query->setParameter('key', '%' . $key . '%')
                 ->getResult();
