@@ -396,3 +396,7 @@ strong {
 .event .card-image img {
   max-height: 250px;
 }
+.gauge_container {
+  height: 210px;
+  overflow: hidden;
+}
