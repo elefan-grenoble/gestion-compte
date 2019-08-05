@@ -29,8 +29,6 @@ function myCookieInit(defaultData){
     if (typeof defaultData != "undefined"){
         for (var key in defaultData) {
             if (!defaultData.hasOwnProperty(key)) continue;
-            console.log(key);
-            console.log(defaultData[key]);
             if (!data[key])
                 data[key] = defaultData[key];
         }

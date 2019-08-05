@@ -73,32 +73,19 @@
                             </a>
                             <script>
                                 defer(function () {
-                                        var data_raw = Cookies.get("frontend");
-                                        var cookie_data = undefined;
-                                        if (data_raw)
-                                            cookie_data = JSON.parse(data_raw);
-                                        if (!cookie_data)
-                                            cookie_data = {};
-                                        if (!cookie_data.last_processupdates_check)
-                                            cookie_data.last_processupdates_check = "{{  app.user.beneficiary | last_shift_date | date_w3c }}";
-
-                                    $('#registration .collapsible-header').on('click', function () {
-                                        var data = init();
-                                        data.user_show.registration_open = !$(this).hasClass("active");
-                                        Cookies.set("frontend", data);
-                                    });
-                                   jQuery.ajax("{{ path("process_update_count_unread") }}",{
-                                       data: {date: cookie_data.last_processupdates_check.replace('_','+')},
-                                       method: "post",
-                                       dataType: "json"
-                                   }).done(function (data, textStatus, jqXHR) {
-                                      if (textStatus == "success"){
-                                          if (data.count > 1){
-                                              $('#news_home_button').find('.bubble_counter').html(data.count).show();
-                                              $('head title').prepend('('+data.count+') ');
-                                          }
+                                    var cookie_data = myCookieInit({'last_processupdates_check' : "{{  app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
+                                    jQuery.ajax(process_update_count_unread_url,{
+                                        data: {date: cookie_data.last_processupdates_check.replace('_','+')},
+                                        method: "post",
+                                        dataType: "json"
+                                    }).done(function (data, textStatus, jqXHR) {
+                                    if (textStatus == "success"){
+                                      if (data.count > 1){
+                                          $('#news_home_button').find('.bubble_counter').html(data.count).show();
+                                          $('head title').prepend('('+data.count+') ');
                                       }
-                                   });
+                                    }
+                                    });
                                 });
                             </script>
 
@@ -120,13 +107,23 @@
                     <div class="homebox">
                         <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action !</span></h5>
 
-                        {% if is_granted("view",codes | first) %}
-                            <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
-                                code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
-                        {% endif %}
-                        {% if is_granted("create",codes | first) %}
-                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
-                                les clefs</a>
+                        {% if (is_granted("view",codes | first) or is_granted("create",codes | first)) %}
+                            <a href="#modal_code" class="waves-effect waves-light btn deep-purple lighten-1 modal-trigger"><i class="material-icons left">vpn_key</i>Boîtier à clefs</a>
+                            <div id="modal_code" class="modal">
+                                <div class="modal-content">
+                                    <h4>Boîtier à clefs</h4>
+                                    <div>
+                                        {% if is_granted("view",codes | first) %}
+                                            <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
+                                                code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
+                                        {% endif %}
+                                        {% if is_granted("create",codes | first) %}
+                                            <a href="{{ path("code_new") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
+                                                les clefs</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
                         {% endif %}
 
                         {% if is_granted("access_tools",app.user) %}
@@ -137,13 +134,11 @@
 
                         {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
                             <h5>Mes commissions</h5>
-                            <a href="{{ path("commission_edit",{'id': app.user.beneficiary.commissions | first.id }) }}"
-                               class="waves-effect waves-light btn blue-grey">Gérer la
-                                commission {{ app.user.beneficiary.commissions | first.name }}</a>
-                        {% endif %}
-
-                        {% if is_granted("ROLE_ADMIN_PANEL") %}
-                            <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Administration</a>
+                            {% for com in app.user.beneficiary.ownedCommissions %}
+                                <a href="{{ path("commission_edit",{'id': com.id }) }}"
+                                   class="waves-effect waves-light btn blue-grey">Gérer la
+                                    commission {{ com.name }}</a>
+                            {% endfor %}
                         {% endif %}
                     </div>
                 </div>
