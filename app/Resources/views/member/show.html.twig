@@ -337,59 +337,14 @@
 
 {% block javascripts %}
     <script>
-        function init() {
-            var data_raw = Cookies.get("frontend");
-            var data = undefined;
-            if (data_raw)
-                data = JSON.parse(data_raw);
-            if (!data)
-                data = {};
-            if (!data.user_show)
-                data.user_show = {};
-            return data;
-        }
-
-        $('#registration .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.registration_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#note .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.note_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#time_log .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.time_log_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#shifts .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.shifts_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#badges .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.badges_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#freeze .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.freeze_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#close .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.close_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-        $('#super .collapsible-header').on('click', function () {
-            var data = init();
-            data.user_show.super_open = !$(this).hasClass("active");
-            Cookies.set("frontend", data);
-        });
-
+        initCollapsible('#registration');
+        initCollapsible('#note');
+        initCollapsible('#time_log');
+        initCollapsible('#shifts');
+        initCollapsible('#badges');
+        initCollapsible('#freeze');
+        initCollapsible('#close');
+        initCollapsible('#super');
     </script>
 {% endblock %}
 
