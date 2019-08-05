@@ -1,10 +1,10 @@
 {% trans_default_domain 'FOSUserBundle' %}
+{% if app.user.beneficiary %}
 <h5 class="center-align">
     <img src="{{ gravatar(app.user.beneficiary.email,100) }}" alt="{{ app.user.beneficiary.firstname | lower | capitalize }}" class="circle responsive-img"><br>
     {{ app.user }}
 </h5>
 <ul class="collapsible">
-    {% if app.user.beneficiary %}
         {% set member = app.user.beneficiary.membership %}
         <li>
             <div class="collapsible-header"><i class="material-icons">person</i>Mes informations</div>
@@ -73,5 +73,5 @@
                 </div>
             </li>
         {% endif %}
-    {% endif %}
 </ul>
+{% endif %}
