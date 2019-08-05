@@ -359,15 +359,19 @@ strong {
   border: 1px solid;
   padding-bottom: 10px !important;
   margin-bottom: 30px;
+  margin-top: 10px;
 }
-.homebox > h5 {
+.homebox > h5:first-child {
   margin-top: -15px;
 }
-.homebox > h5 span {
+.homebox > h5:first-child span {
   padding: 0 5px;
 }
 .homebox .row {
   margin: 0 5px;
+}
+.card.mini-shift .card-content .card-title {
+  font-size: 20px;
 }
 .process-update-list .last-shift {
   border-top: 1px solid #2196f3;
