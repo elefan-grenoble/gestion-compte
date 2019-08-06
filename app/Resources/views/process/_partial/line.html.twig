@@ -1,10 +1,11 @@
-<tr>
+<tr class="{% if check_date < processUpdate.date %}new {% else %}{% endif %}">
     <td>
-        <i class="material-icons left">content_paste</i>{{ processUpdate.title }}
+        <i class="material-icons left">content_paste</i><a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails">{{ processUpdate.date | date_fr_with_time }}</a>
     </td>
     <td>
-        {{ processUpdate.date | date_fr_with_time }}
+        {{ processUpdate.title }}
     </td>
+    {% if is_granted("ROLE_PROCESS_MANAGER") %}
     <td>
         {% if processUpdate.author.beneficiary %}
             <a href="{{ path("member_show",{"member_number":processUpdate.author.beneficiary.membership.memberNumber}) }}">{{ processUpdate.author }}</a>
@@ -17,6 +18,7 @@
             <a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
         {% endif %}
     </td>
+    {% endif %}
     <td>
         <a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails"><i class="material-icons left">visibility</i></a>
         <div id="view_{{ processUpdate.id }}" class="modal">
@@ -25,9 +27,13 @@
                 {{ processUpdate.description | markdown | raw}}
             </div>
             <div class="modal-footer">
+                {% if processUpdate.link %}
+                    <a href="{{ processUpdate.link }}" target="_blank" class="btn">En savoir plus</a>
+                {% endif %}
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
             </div>
         </div>
+        {% if is_granted("ROLE_PROCESS_MANAGER") %}
         <a href="{{ path("process_update_edit",{'id':processUpdate.id}) }}" title="Editer" class="orange-text"><i class="material-icons left">edit</i></a>
         <a href="#delete_{{ processUpdate.id }}" class="modal-trigger red-text" title="Supprimer"><i class="material-icons left">delete</i></a>
         <div id="delete_{{ processUpdate.id }}" class="modal">
@@ -44,5 +50,6 @@
                 {{ form_end(deleteForms[processUpdate.id]) }}
             </div>
         </div>
+        {% endif %}
     </td>
 </tr>

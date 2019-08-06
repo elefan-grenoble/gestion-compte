@@ -36,8 +36,12 @@ use Doctrine\ORM\EntityManager;
  */
 class BookingController extends Controller
 {
+    public function homepageDashboardAction()
+    {
+        return $this->render('booking/home_dashboard.html.twig');
+    }
 
-    public function homepageAction()
+    public function homepageShiftsAction()
     {
         $undismissShiftForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('undismiss_shift'))
@@ -49,6 +53,8 @@ class BookingController extends Controller
             'undismiss_shift_form' => $undismissShiftForm->createView()
         ]);
     }
+
+
 
     /**
      * @Route("/", name="booking")

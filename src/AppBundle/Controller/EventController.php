@@ -87,7 +87,7 @@ class EventController extends Controller
      *
      * @Route("/new", name="event_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -114,7 +114,7 @@ class EventController extends Controller
      *
      * @Route("/{id}/edit", name="event_edit")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request,Event $event)
     {

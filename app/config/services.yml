@@ -47,7 +47,11 @@ services:
         arguments: ['@event_service']
         tags:
             - { name: twig.extension }
-
+    app.twig.extensions.process_update:
+      class: AppBundle\Twig\Extension\ProcessUpdateExtension
+      arguments: ['@service_container']
+      tags:
+        - { name: twig.extension }
     app.form.registration:
         class: AppBundle\Form\RegistrationType
         tags:

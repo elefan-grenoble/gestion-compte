@@ -1,5 +1,5 @@
 function defer(method) {
-    if (window.jQuery) {
+    if (window.jQuery && window.Cookies) {
         method();
     } else {
         setTimeout(function() { defer(method) }, 50);

@@ -4,60 +4,86 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\DynamicContent;
 use AppBundle\Entity\ProcessUpdate;
+use AppBundle\Entity\Shift;
 use AppBundle\Form\ProcessUpdateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Validator\Constraints\Date;
 
 /**
  * Process update controller.
  *
- * @Route("process")
+ * @Route("process/updates")
  */
 class ProcessUpdateController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
 
     /**
      * Lists all process updates.
      *
-     * @Route("/updates/", name="process_update_list")
+     * @Route("/", name="process_update_list")
      * @Method("GET")
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("has_role('ROLE_USER')")
      */
     public function listAction(Request $request)
     {
         //todo paginate
 
         $em = $this->getDoctrine()->getManager();
-        $processUpdates = $em->getRepository('AppBundle:ProcessUpdate')->findAll();
+        $processUpdates = $em->getRepository('AppBundle:ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
 
         $delete_forms = array();
         foreach ($processUpdates as $update){
             $delete_forms[$update->getId()] = $this->createDeleteForm($update)->createView();
         }
 
+        $lastShiftDate = null;
+        $nbOfNew = null;
+        if ($beneficiary = $this->getUser()->getBeneficiary()){
+            $lastShiftDate = $em->getRepository(Shift::class)->findLastShifted($beneficiary)->getStart();
+            $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($lastShiftDate);
+        }
+
+
         return $this->render('process/list.html.twig', array(
             'processUpdates' => $processUpdates,
             'deleteForms' => $delete_forms,
+            'lastShiftDate' => $lastShiftDate,
+            'nbOfNew' => $nbOfNew,
         ));
+    }
+
+    /**
+     * @Route("/count_unread", name="process_update_count_unread")
+     * @Method("POST")
+     * @param Request $request
+     * @return Response | JsonResponse
+     * @throws
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function countUnreadAction(Request $request)
+    {
+        if ($request->isXMLHttpRequest()) {
+            $date = trim($request->get('date'));
+            $date = \DateTime::createFromFormat(\DateTimeInterface::W3C,$date);
+            $em = $this->getDoctrine()->getManager();
+            $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($date);
+
+            return new JsonResponse(array('count' => $nbOfNew,'date' => $date->format(\DateTimeInterface::W3C)));
+        }
+        return new Response('This is not ajax!', 400);
     }
 
     /**
      * Create a process update
      *
-     * @Route("/updates/new", name="process_update_new")
+     * @Route("/new", name="process_update_new")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
@@ -71,7 +97,7 @@ class ProcessUpdateController extends Controller
             $session = new Session();
 
             $emailTemplate->setDate(new \DateTime());
-            $emailTemplate->setAuthor($this->getCurrentAppUser());
+            $emailTemplate->setAuthor($this->getUser());
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
@@ -89,7 +115,7 @@ class ProcessUpdateController extends Controller
     /**
      * Edit a process update
      *
-     * @Route("/updates/{id}/edit", name="process_update_edit")
+     * @Route("/{id}/edit", name="process_update_edit")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
@@ -133,7 +159,7 @@ class ProcessUpdateController extends Controller
     /**
      * Delete a process update.
      *
-     * @Route("/updates/{id}", name="process_update_delete")
+     * @Route("/{id}", name="process_update_delete")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, ProcessUpdate $processUpdate)

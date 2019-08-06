@@ -7,8 +7,10 @@ use AppBundle\Entity\Proxy;
 use AppBundle\Entity\User;
 use AppBundle\Service\EventService;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFilter;
 
-class EventExtension extends \Twig_Extension
+class EventExtension extends AbstractExtension
 {
     /**
      * @var EventService
@@ -28,8 +30,8 @@ class EventExtension extends \Twig_Extension
     public function getFilters()
     {
         return array(
-            new \Twig_SimpleFilter('givenProxy', array($this, 'givenProxy')),
-            new \Twig_SimpleFilter('receivedProxy', array($this, 'receivedProxy')),
+            new TwigFilter('givenProxy', array($this, 'givenProxy')),
+            new TwigFilter('receivedProxy', array($this, 'receivedProxy')),
         );
     }
 

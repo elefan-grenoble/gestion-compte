@@ -1,18 +1,24 @@
 $(document).ready(function() {
+    $(document).on('click',function(event) {
+        $target = $(event.target);
+        if(!$target.closest('#quick_search_nav').length &&
+            $('#quick_search_nav').is(":visible") &&
+            !$target.closest('div.nav-wrapper').length) {
+                $('#quick_search_nav').slideUp();
+        }
+    });
     $('.main-navigation').click(function (e) {
         if ($(e.target).is('div.nav-wrapper')){
             $('#quick_search_nav').slideToggle($('#quick_search_nav').is(':visible'));
             $('#quick_search').val('');
             $('#quick_search').focus();
-            $('#quick_search').one('focusout',function () {
-                $('#quick_search_nav').slideUp();
-            });
         }
     });
     $('#quick_search_form').submit(function (e) {e.preventDefault()});
     $('#quick_search_close').click(function () {
         $('#quick_search_nav').slideUp();
     });
+
     $('#quick_search').keydown(function () {
         var val = $(this).val();
         if ($(this).val().length > 1){
@@ -22,43 +28,33 @@ $(document).ready(function() {
                 data: {
                     key: val,
                 },
-                dataType: "json",
-                success: function(response) {
-                    // console.log(response.data);
-                    if (response && response.count > 0){
-                        var beneficiaries = response.data;
-                        var dataBeneficiaries = {};
-                        var dataMembersNumbers = {};
-                        for (var i = 0; i < beneficiaries.length; i++) {
-                            dataBeneficiaries[beneficiaries[i].name] = beneficiaries[i].icon;
-                            dataMembersNumbers[beneficiaries[i].id] = beneficiaries[i].member_number;
-                        }
-                        $('#quick_search').trigger('keyup');
-                        //$('#quick_search').autocomplete('destroy');
-                        $('#quick_search').autocomplete({
-                            data: dataBeneficiaries,
-                            limit: 5,
-                            onAutocomplete: function(val) {
-                                $('#quick_search_nav').slideUp();
-                                console.log(val);
-                                var regex = /\(([0-9]*)\)/gm;
-                                var m;
-
-                                if ((m = regex.exec(val)) !== null) {
-                                    var beneficiary_id = m[1];
-                                    var member_number = dataMembersNumbers[beneficiary_id];
-                                    var res = show_user_template_url.replace("-MNID-", member_number);
-                                    window.location = res;
-                                }
-                            },
-                            minLength: 3,
-                        });
-                    }else{
-                        console.log("no results for '"+$(this).val()+"'");
+                dataType: "json"
+            }).done(function (data, textStatus, jqXHR) {
+                //console.log(data);
+                $('#quick_search_form .autocomplete-content').html('').hide();
+                if (data && data.count > 0){
+                    var beneficiaries = data.data;
+                    var regex = /\(([0-9]*)\)/gm;
+                    for (var i = 0; i < beneficiaries.length; i++) {
+                        var link = show_user_template_url.replace("-MNID-", beneficiaries[i].member_number);
+                        var content = highlight($('#quick_search').val(),beneficiaries[i].name);
+                        var $row = $('<li><a href="'+link+'"></a></li>');
+                        $row.find('a').html('<span>'+content+'</span>');
+                        $row.appendTo('#quick_search_form .autocomplete-content');
                     }
+                    $('#quick_search_form .autocomplete-content').show();
+                }else{
+                    console.log("no results for '"+val+"'");
                 }
             });
+        }else{
+            $('#quick_search_form .autocomplete-content').html('').hide();
         }
     });
 
 })
+
+function highlight(text,inputText) {
+    var regex = new RegExp(text,'gi');
+    return inputText.replace(regex,"<span class='highlight'>$&</span>");
+}
