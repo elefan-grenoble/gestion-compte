@@ -55,6 +55,9 @@ class CommissionType extends AbstractType
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
             'label' => 'Date & heure de la prochaine réunion',
+            'attr' => [
+                'class' => 'datepicker'
+            ]
         ));
         $builder->add('next_meeting_desc', TextType::class, array('required' => false, 'label' => 'Libelé de la prochaine réunion'));
 

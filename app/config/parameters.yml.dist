@@ -91,9 +91,6 @@ parameters:
     cycle_duration: '28 days'
     maximum_nb_of_beneficiaries_in_membership: 2
 
-    # Swipe cards
-    swipe_cards.autoactivate.enabled: false
-
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
     logging.mattermost.url: 'http://mattermost.yourcoop.local'

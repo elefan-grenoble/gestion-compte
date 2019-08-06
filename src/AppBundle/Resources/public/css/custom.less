@@ -83,6 +83,10 @@ footer.page-footer{
     color: gray;
   }
 }
+.teal.success,.teal.error,.teal.warning{
+  font-size: 16px;
+  font-weight: 600;
+}
 .teal.success{
   background-color: @light-green !important;
 }
@@ -256,15 +260,17 @@ strong{
 
 .swiftcard_exemple{
   position: relative;
-}
-.swiftcard_exemple img{
-  margin-bottom: 5px;
-}
-.swiftcard_exemple .focus{
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  margin-left: -79px;
+  text-align: center;
+  img {
+    margin-bottom: 5px;
+  }
+  .focus{
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 300px; //fixed by dom
+    margin-left: -170px;
+  }
 }
 
 #quick_search_nav{
@@ -287,6 +293,110 @@ strong{
       color: @red;
       float: left;
       font-weight: bold;
+    }
+  }
+}
+
+.badge_card{
+  width: 300px;
+  text-align: center;
+  padding: 50px 0;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px gray;
+  max-width: 100%;
+  img{
+    max-width: 90%;
+  }
+}
+
+.homebox{
+  border: 1px solid;
+  padding-bottom: 10px !important;
+  margin-bottom: 30px;
+  margin-top: 10px;
+  & > h5:first-child{
+    margin-top: -15px;
+    span{
+      padding: 0 5px;
+    }
+  }
+  .row{
+    margin: 0 5px;
+  }
+}
+
+.card.mini-shift .card-content .card-title{
+  font-size: 20px;
+}
+
+.process-update-list{
+  .last-shift{
+    border-top: 1px solid @bluelelefan;
+    border-bottom: 1px solid @bluelelefan;
+    background: lighten(@bluelelefan,30%);
+  }
+  tr.new{
+    & > td > a{
+      font-weight: bold;
+    }
+  }
+  tr:not(.new){
+
+  }
+}
+
+.btn{
+  .bubble_counter{
+    display: block;
+    position: absolute;
+    top: -13px;
+    left: -13px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 13px;
+    background: black;
+    font-weight: bold;
+    z-index: 999;
+  }
+}
+
+.event{
+  .card-image{
+    img{
+      max-height: 250px;
+    }
+  }
+}
+
+.gauge_container{
+  height: 210px;
+  overflow: hidden;
+}
+
+.show-on-xl-only{
+  display: none;
+}
+@media only screen and (min-width: 1200px) {
+  a,span,i,p,small{
+    &.show-on-xl-only {
+      display: inline !important;
+    }
+  }
+  div{
+    &.show-on-xl-only{
+      display: block !important;
+    }
+  }
+}
+
+.nav-wrapper{
+  ul#nav-desktop{
+    li a{
+      font-size: 75%;
     }
   }
 }

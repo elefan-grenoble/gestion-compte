@@ -20,7 +20,7 @@ class ShiftController extends Controller
 
     /**
      * @Route("/new", name="shift_new")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)

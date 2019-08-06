@@ -11,41 +11,74 @@
 
 {% block content %}
     <h4 class="">Mises à jour de procédures / nouveautés</h4>
+    {% if nbOfNew %}
+        <h5 class="">{{ nbOfNew }} nouveauté{% if nbOfNew | length > 1 %}s{% endif %} depuis mon dernier creneau</h5>
+    {% endif %}
+    {% if app.user.beneficiary %}
+        {% if frontend_cookie and frontend_cookie.last_processupdates_check is defined %}
+            {% set check_date = frontend_cookie.last_processupdates_check|replace({'_':'+'}) | w3c_to_date %}
+        {% else %}
+            {% set check_date = app.user.beneficiary | last_shift_date  %}
+        {% endif %}
+    {% else %}
+        {% set check_date = date('now')  %}
+    {% endif %}
     <div class="row">
-{#        {% for processUpdate in processUpdates %}
-            <div class="col s12">
-                {% include "process/_partial/card.html.twig" %}
-            </div>
-        {% endfor %}#}
-        <table>
+        <table class="process-update-list">
             <thead>
             <tr>
                 <th>
-                    titre
-                </th>
-                <th>
                     date
                 </th>
+                <th>
+                    titre
+                </th>
+                {% if is_granted("ROLE_PROCESS_MANAGER") %}
                 <th>
                     auteur
                 </th>
                 <th>
                     lien
                 </th>
+                {% endif %}
                 <th>
                     action
                 </th>
             </tr>
             </thead>
             <tbody>
+            {% set new = true %}
             {% for processUpdate in processUpdates %}
-                    {% include "process/_partial/line.html.twig" %}
+                {% if processUpdate.date < lastShiftDate and new %}
+                    <tr class="last-shift">
+                        <td><i class="material-icons left">date_range</i>{{ lastShiftDate | date_fr_with_time }}</td>
+                        <td colspan="{% if is_granted("ROLE_PROCESS_MANAGER") %}3{% endif %}" style="text-align: center">⬆️ Depuis et ⬇️ Avant mon dernier créneau️</td>
+                        <td></td>
+                    </tr>
+                    {% set new = false %}
+                {% endif %}
+                {% include "process/_partial/line.html.twig" %}
             {% endfor %}
             </tbody>
         </table>
-
     </div>
+    {% if app.user.beneficiary %}
+    <script>
+        defer(function () {
+            var data_raw = Cookies.get("frontend");
+            var cookie_data = undefined;
+            if (data_raw)
+                cookie_data = JSON.parse(data_raw);
+            if (!cookie_data)
+                cookie_data = {};
+            cookie_data.last_processupdates_check = "{{ date('now') | date_w3c }}".replace('+','_'); //checked now
+            Cookies.set("frontend", cookie_data);
+        });
+    </script>
+    {% endif %}
+    {% if is_granted("ROLE_PROCESS_MANAGER") %}
     <div class="row">
         <a href="{{ path('process_update_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter</a>
     </div>
+    {% endif %}
 {% endblock %}

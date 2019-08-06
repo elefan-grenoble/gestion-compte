@@ -3,8 +3,10 @@
 namespace AppBundle\Twig\Extension;
 
 use AppBundle\Service\MailerService;
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
 
-class MailExtension extends \Twig_Extension
+class MailExtension extends AbstractExtension
 {
     /**
      * @var MailerService
@@ -19,7 +21,7 @@ class MailExtension extends \Twig_Extension
     public function getFunctions()
     {
         return array(
-            new \Twig_SimpleFunction('isTemporaryEmail', array($this, 'isTemporaryEmail')),
+            new TwigFunction('isTemporaryEmail', array($this, 'isTemporaryEmail')),
         );
     }
 

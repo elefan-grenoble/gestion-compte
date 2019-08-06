@@ -2,7 +2,7 @@
 
 ## Prérequis
 
-* PHP (version 7+)
+* PHP (version 7.2 et supérieure)
 * [Composer](https://getcomposer.org/)
 * Mysql (ou mariadb)
 * php-mysql (ou php-pdo_mysql)
@@ -24,8 +24,15 @@ Installer les medias
 <pre>php bin/console assetic:dump</pre>
 Lancer le serveur (si pas de serveur web)
 <pre>php bin/console server:start</pre>
-add ``127.0.0.1 membres.yourcoop.local`` to your _/etc/hosts_ file
-visit [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) to create the super admin user (admin:password are default values)
+Attention, par défaut ce serveur n'est pas accessible depuis l'extérieur vu qu'il écoute en local seulement (127.0.0.1).
+Pour le rendre accessible, il faut utiliser la commande suivante :
+<pre>php bin/console server:start *:8080</pre>
+
+Pour un usage en production, il est très fortement recommandé d'utiliser un vrai serveur Web tel que Apache ou Nginx.
+
+Ajouter ``127.0.0.1 membres.yourcoop.local`` au fichier _/etc/hosts_.
+
+Visiter [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
 
 
 ### En Prod

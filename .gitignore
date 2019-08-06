@@ -42,4 +42,7 @@ LICENSE
 .project
 .settings/
 
+#script to download and import last prod DB to develop in local env
+/updateLocalDbFromProd.sh
+
 **/*~

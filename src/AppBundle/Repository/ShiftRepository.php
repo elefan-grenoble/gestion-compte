@@ -2,6 +2,7 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 
 /**
@@ -88,6 +89,32 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('user', $user)
             ->andWhere('s.isDismissed = 0')
             ->orderBy('s.start', 'ASC')
+            ->setMaxResults(1);
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+
+    /**
+     * @param Beneficiary $beneficiary
+     * @return mixed
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findLastShifted(Beneficiary $beneficiary)
+    {
+        $now = new \DateTime('now');
+
+        $qb = $this->createQueryBuilder('s');
+        $qb
+            ->join('s.shifter', "ben")
+            ->where('ben.id = :id')
+            ->setParameter('id', $beneficiary->getId())
+            ->andWhere('s.isDismissed = 0')
+            ->andWhere('s.end < :today')
+            ->setParameter('today',$now)
+            ->orderBy('s.start', 'DESC')
             ->setMaxResults(1);
 
         return $qb

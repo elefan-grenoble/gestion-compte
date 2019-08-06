@@ -16,3 +16,30 @@ $(document).ready(function() {
     $('.tooltipped').tooltip();
     $(".dropdown-button").dropdown();
 });
+
+function myCookieInit(defaultData){
+    var data_raw = Cookies.get("frontend");
+    var data = undefined;
+    if (data_raw)
+        data = JSON.parse(data_raw);
+    if (!data)
+        data = {};
+    if (!data.user_show)
+        data.user_show = {};
+    if (typeof defaultData != "undefined"){
+        for (var key in defaultData) {
+            if (!defaultData.hasOwnProperty(key)) continue;
+            if (!data[key])
+                data[key] = defaultData[key];
+        }
+    }
+    return data;
+}
+
+function initCollapsible(id){
+    $(id+' .collapsible-header').on('click', function () {
+        var data = myCookieInit();
+        data.user_show[id.substr(1)+"_open"] = !$(this).hasClass("active");
+        Cookies.set("frontend", data);
+    });
+}

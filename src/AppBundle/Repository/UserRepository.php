@@ -26,4 +26,15 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findNonMember()
+    {
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('u')
+            ->from($this->_entityName, 'u')
+            ->leftJoin('u.beneficiary', 'b')
+            ->where('b.id is NULL');
+
+        return $qb->getQuery()->getResult();
+    }
 }
