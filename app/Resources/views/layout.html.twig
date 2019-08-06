@@ -38,10 +38,10 @@
                 <div class="nav-wrapper container">
                     <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">{{ site_name }}</a>
                     <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
-                    <ul class="right hide-on-med-and-down">
+                    <ul class="right hide-on-med-and-down" id="nav-desktop">
                         {% if is_granted("ROLE_ADMIN_PANEL") %}
-                            <li><a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>
-                                    Administration
+                            <li class="grey darken-4"><a href="{{ path("admin") }}" class=""><i class="material-icons left indigo-text text-lighten-3">build</i>
+                                    <span class="show-on-xl-only">administration</span>
                                 </a></li>
                         {% endif %}
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
@@ -50,7 +50,7 @@
                             <li>
                                 <a href="{{ path('fos_user_profile_show') }}">
                                     <i class="material-icons small left">settings</i>
-                                    <small>{{ app.user.firstname }}</small>
+                                    <small class="show-on-xl-only">{{ app.user.firstname }}</small>
                                 </a>
                             </li>
                             {% endif %}
@@ -87,15 +87,15 @@
                             <li><a href="{{ path('fos_user_profile_show') }}"><i class="material-icons">settings</i>
                                     Mon profil ({{ app.user.username}})</a></li>
                             {% endif %}
+                            {% if is_granted("ROLE_ADMIN_PANEL") %}
+                                <li class="indigo lighten-5"><a href="{{ path("admin") }}" class=""><i class="material-icons left indigo-text darken-4">build</i>
+                                        Administration
+                                    </a></li>
+                            {% endif %}
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
-                            {% if is_granted("ROLE_ADMIN_PANEL") %}
-                                <li><a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>
-                                        Administration
-                                    </a></li>
-                            {% endif %}
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}

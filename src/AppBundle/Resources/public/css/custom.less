@@ -331,9 +331,9 @@ strong{
 
 .process-update-list{
   .last-shift{
-    border-top: 1px solid #2196f3;
-    border-bottom: 1px solid #2196f3;
-    background: #2196f333;
+    border-top: 1px solid @bluelelefan;
+    border-bottom: 1px solid @bluelelefan;
+    background: lighten(@bluelelefan,30%);
   }
   tr.new{
     & > td > a{
@@ -375,4 +375,28 @@ strong{
 .gauge_container{
   height: 210px;
   overflow: hidden;
+}
+
+.show-on-xl-only{
+  display: none;
+}
+@media only screen and (min-width: 1200px) {
+  a,span,i,p,small{
+    &.show-on-xl-only {
+      display: inline !important;
+    }
+  }
+  div{
+    &.show-on-xl-only{
+      display: block !important;
+    }
+  }
+}
+
+.nav-wrapper{
+  ul#nav-desktop{
+    li a{
+      font-size: 75%;
+    }
+  }
 }
