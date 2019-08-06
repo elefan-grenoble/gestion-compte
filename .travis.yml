@@ -20,6 +20,10 @@ before_install:
 install:
   - composer install
 
+env:
+  global:
+    - SYMFONY_ENV=test
+
 script:
   - ./vendor/bin/phpunit
   # this checks that the YAML config files contain no syntax errors
