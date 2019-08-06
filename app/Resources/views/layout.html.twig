@@ -96,6 +96,11 @@
                             <li><a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>
                                     {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
                                 </a></li>
+                            {% if is_granted("ROLE_ADMIN_PANEL") %}
+                                <li><a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>
+                                        Administration
+                                    </a></li>
+                            {% endif %}
                         {% else %}
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}

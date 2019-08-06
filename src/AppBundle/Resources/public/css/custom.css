@@ -404,6 +404,7 @@ strong {
   height: 210px;
   overflow: hidden;
 }
+
 .show-on-xl-only {
   display: none;
 }
