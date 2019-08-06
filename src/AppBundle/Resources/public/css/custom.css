@@ -374,9 +374,9 @@ strong {
   font-size: 20px;
 }
 .process-update-list .last-shift {
-  border-top: 1px solid #2196f3;
-  border-bottom: 1px solid #2196f3;
-  background: #2196f333;
+  border-top: 1px solid #51CAE9;
+  border-bottom: 1px solid #51CAE9;
+  background: #d9f3fa;
 }
 .process-update-list tr.new > td > a {
   font-weight: bold;
@@ -403,4 +403,23 @@ strong {
 .gauge_container {
   height: 210px;
   overflow: hidden;
+}
+
+.show-on-xl-only {
+  display: none;
+}
+@media only screen and (min-width: 1200px) {
+  a.show-on-xl-only,
+  span.show-on-xl-only,
+  i.show-on-xl-only,
+  p.show-on-xl-only,
+  small.show-on-xl-only {
+    display: inline !important;
+  }
+  div.show-on-xl-only {
+    display: block !important;
+  }
+}
+.nav-wrapper ul#nav-desktop li a {
+  font-size: 75%;
 }
