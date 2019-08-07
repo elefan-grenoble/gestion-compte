@@ -103,7 +103,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if app.user.beneficiary.membership.uptodate %}
+                {% if not app.user.beneficiary or app.user.beneficiary.membership.uptodate %}
                     <div class="col s12">
                         {{ render(controller("AppBundle:Booking:homepageShifts")) }}
                     </div>
