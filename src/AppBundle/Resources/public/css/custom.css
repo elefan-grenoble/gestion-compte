@@ -404,7 +404,6 @@ strong {
   height: 210px;
   overflow: hidden;
 }
-
 .show-on-xl-only {
   display: none;
 }
@@ -422,4 +421,7 @@ strong {
 }
 .nav-wrapper ul#nav-desktop li a {
   font-size: 75%;
+}
+.solo-logo {
+  margin: 30px 0 20px 0;
 }

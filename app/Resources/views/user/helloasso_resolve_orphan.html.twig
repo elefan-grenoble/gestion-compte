@@ -1,0 +1,36 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block aftercontainer %}
+    <div class="center-align solo-logo">
+        <a href="https://www.helloasso.com" target="_blank">{% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
+                <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
+            {% endimage %}</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h4>Confirmer une réadhésion via helloasso</h4>
+
+    <p>Bonjour <b>{{ app.user.firstname }}</b>, pourrais-tu valider ce paiement reçu par {{ project_name }} ?</p>
+
+    <div class="row">
+        <div class="col s12 m6">
+            <div class="card blue-grey">
+                <div class="card-content white-text">
+                    <span class="card-title">{{ payment.date | date_fr_with_time }}</span>
+                    <p>{{ payment.amount }}€ de la part de <b>{{ payment.payerFirstName }} {{ payment.payerLastName }}</b> ({{ payment.email }})</p>
+                </div>
+                <div class="card-action">
+                    <a href="{{ path('helloasso_confirm_resolve_orphan',{id:payment.id,code: payment.email  | vigenere_encode}) }}" class="btn waves-effect teal">
+                        <i class="material-icons left">check</i>
+                        Oui, c'est moi ! ({{ app.user.firstname }})</a>
+                    <a href="{{ path('helloasso_orphan_exit_and_back',{id:payment.id,code: payment.email  | vigenere_encode}) }}" class="btn red waves-effect">
+                        <i class="material-icons left">exit_to_app</i>
+                        Non</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

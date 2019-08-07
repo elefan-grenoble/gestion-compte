@@ -70,10 +70,13 @@ services:
     helloasso_event_listener:
             class:  AppBundle\EventListener\HelloassoEventListener
             arguments:
+                $mailer: "@mailer"
                 $entityManager: "@doctrine.orm.entity_manager"
                 $container: "@service_container"
+                $memberEmail: "%emails.member%"
             tags:
                 - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
+                - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }
     time_log_event_listener:
             class:  AppBundle\EventListener\TimeLogEventListener
             arguments:
