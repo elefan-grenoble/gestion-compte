@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/app/simplemde/simplemde.min.css') }}"/>
         {% block stylesheets %}{% endblock %}
-        <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?280920181151">
+        <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?060820191303">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
         <script src="{{ asset('bundles/app/js/vanilla_top.js') }}"></script>
         <style>
@@ -40,7 +40,7 @@
                     <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
                     <ul class="right hide-on-med-and-down" id="nav-desktop">
                         {% if is_granted("ROLE_ADMIN_PANEL") %}
-                            <li class="grey darken-4"><a href="{{ path("admin") }}" class=""><i class="material-icons left indigo-text text-lighten-3">build</i>
+                            <li class="highlight"><a href="{{ path("admin") }}" class=""><i class="material-icons left">build</i>
                                     <span class="show-on-xl-only">administration</span>
                                 </a></li>
                         {% endif %}
@@ -188,7 +188,7 @@
         <script>
             var process_update_count_unread_url = "{{ path("process_update_count_unread") }}";
         </script>
-        <script src="{{ asset('bundles/app/js/app.js') }}"></script>
+        <script src="{{ asset('bundles/app/js/app.js') }}?060820191303"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
         <script src="{{ asset('bundles/app/js/datepicker.js') }}"></script>
         {% if is_granted('ROLE_ADMIN') %}
