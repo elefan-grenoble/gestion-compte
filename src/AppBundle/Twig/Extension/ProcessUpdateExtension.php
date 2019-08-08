@@ -29,7 +29,11 @@ class ProcessUpdateExtension extends AbstractExtension
     }
 
     public function last_shift_date(Beneficiary $beneficiary){
-        return $this->container->get('doctrine')->getManager()->getRepository(Shift::class)->findLastShifted($beneficiary)->getStart();
+        $lastShifted = $this->container->get('doctrine')->getManager()->getRepository(Shift::class)->findLastShifted($beneficiary);
+        if ($lastShifted)
+            return $lastShifted->getStart();
+        else
+            return $beneficiary->getUser()->getLastLogin();
     }
 
     public function updates_list_from_date(\DateTime $date){
