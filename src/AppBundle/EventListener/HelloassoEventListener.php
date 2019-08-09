@@ -35,7 +35,10 @@ class HelloassoEventListener
         if ($user){
             $this->linkPaymentToUser($user,$payment);
         } else {
-            $url = $this->container->get('router')->generate('helloasso_resolve_orphan', array('id' => $payment->getId(),'code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($payment->getEmail())),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $this->container->get('router')->generate('helloasso_resolve_orphan', array(
+                'id' => $payment->getId(),
+                'code' => urlencode($this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($payment->getEmail()))
+                ),UrlGeneratorInterface::ABSOLUTE_URL);
 
             $needInfo = (new \Swift_Message('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?'))
                 ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])

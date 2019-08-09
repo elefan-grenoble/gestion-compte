@@ -21,10 +21,10 @@
                     <p>{{ payment.amount }}€ de la part de <b>{{ payment.payerFirstName }} {{ payment.payerLastName }}</b> ({{ payment.email }})</p>
                 </div>
                 <div class="card-action">
-                    <a href="{{ path('helloasso_confirm_resolve_orphan',{id:payment.id,code: payment.email  | vigenere_encode}) }}" class="btn waves-effect teal">
+                    <a href="{{ path('helloasso_confirm_resolve_orphan',{id:payment.id,code: payment.email  | vigenere_encode  | url_encode}) }}" class="btn waves-effect teal">
                         <i class="material-icons left">check</i>
                         Oui, c'est moi ! ({{ app.user.firstname }})</a>
-                    <a href="{{ path('helloasso_orphan_exit_and_back',{id:payment.id,code: payment.email  | vigenere_encode}) }}" class="btn red waves-effect">
+                    <a href="{{ path('helloasso_orphan_exit_and_back',{id:payment.id,code: payment.email  | vigenere_encode | url_encode}) }}" class="btn red waves-effect">
                         <i class="material-icons left">exit_to_app</i>
                         Non</a>
 

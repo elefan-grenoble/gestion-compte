@@ -236,6 +236,7 @@ class HelloassoController extends Controller
      * @Security("has_role('ROLE_USER')")
      */
     public function resolveOrphan(HelloassoPayment $payment,$code){
+        $code = urldecode($code);
         $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()){
@@ -260,7 +261,7 @@ class HelloassoController extends Controller
      * @Security("has_role('ROLE_USER')")
      */
     public function confirmOrphan(HelloassoPayment $payment,$code){
-        //zlacornerie
+        $code = urldecode($code);
         $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
