@@ -17,8 +17,8 @@ swiftmailer:
 
 doctrine:
     dbal:
-        driver: pdo_sqlite
         default_connection: default
         connections:
             default:
-                path: '%kernel.cache_dir%/test.db'
+                driver:   pdo_sqlite
+                path:     "%kernel.cache_dir%/test.db"

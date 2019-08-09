@@ -1,0 +1,37 @@
+<?php
+
+namespace AppBundle\EventListener;
+
+use AppBundle\Entity\SwipeCardLog;
+use AppBundle\Event\SwipeCardEvent;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class SwipeCardEventListener implements EventSubscriberInterface
+{
+    /**
+     * @var EntityManagerInterface
+     */
+    private $em;
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        $this->em = $em;
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return [
+            SwipeCardEvent::SWIPE_CARD_SCANNED => 'onSwipeCardScanned'
+        ];
+    }
+
+    public function onSwipeCardScanned(SwipeCardEvent $event)
+    {
+        $log = new SwipeCardLog();
+        $log->setDate(new \DateTime());
+        $log->setSwipeCard($event->getSwipeCard());
+        $this->em->persist($log);;
+        $this->em->flush();
+    }
+}
