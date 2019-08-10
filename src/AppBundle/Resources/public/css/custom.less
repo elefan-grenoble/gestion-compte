@@ -398,6 +398,37 @@ strong{
     li a{
       font-size: 75%;
     }
+    li.highlight{
+      a{
+        background: #00000055;
+        position: relative;
+        &:hover{
+          background: #ffffff55;
+          &::before,&:after{
+            border-right: 4px solid #00000055;
+          }
+          color: black;
+          i.material-icons{
+            color: black;
+          }
+        }
+      }
+      a::before,a:after{
+        content: '';
+        display: block;
+        height: 100%;
+        position: absolute;
+        border-right: 4px solid white;
+      }
+      a::before{
+        bottom: 0;
+        left: 0;
+      }
+      a:after{
+        top: 0;
+        right: 0;
+      }
+    }
   }
 }
 

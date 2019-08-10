@@ -422,6 +422,38 @@ strong {
 .nav-wrapper ul#nav-desktop li a {
   font-size: 75%;
 }
+.nav-wrapper ul#nav-desktop li.highlight a {
+  background: #00000055;
+  position: relative;
+}
+.nav-wrapper ul#nav-desktop li.highlight a:hover {
+  background: #ffffff55;
+  color: black;
+}
+.nav-wrapper ul#nav-desktop li.highlight a:hover::before,
+.nav-wrapper ul#nav-desktop li.highlight a:hover:after {
+  border-right: 4px solid #00000055;
+}
+.nav-wrapper ul#nav-desktop li.highlight a:hover i.material-icons {
+  color: black;
+}
+.nav-wrapper ul#nav-desktop li.highlight a::before,
+.nav-wrapper ul#nav-desktop li.highlight a:after {
+  content: '';
+  display: block;
+  height: 100%;
+  position: absolute;
+  border-right: 4px solid white;
+}
+.nav-wrapper ul#nav-desktop li.highlight a::before {
+  bottom: 0;
+  left: 0;
+}
+.nav-wrapper ul#nav-desktop li.highlight a:after {
+  top: 0;
+  right: 0;
+}
+
 .solo-logo {
   margin: 30px 0 20px 0;
 }

@@ -83,7 +83,7 @@
                                         dataType: "json"
                                     }).done(function (data, textStatus, jqXHR) {
                                     if (textStatus == "success"){
-                                      if (data.count > 1){
+                                      if (data.count > 0){
                                           $('#news_home_button').find('.bubble_counter').html(data.count).show();
                                           $('head title').prepend('('+data.count+') ');
                                       }
