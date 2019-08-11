@@ -180,13 +180,23 @@ class MailController extends Controller
                 $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
             }
-            $contentType = 'text/plain';
+            $contentType = 'text/html';
             $content = $mailform->get('message')->getData();
-            // FIXME Pour envoyer en html
-            //$content = Markdown::defaultTransform($content);
+            $re = '/({(?>{|%)[^%}]*(?>}|%)})/m';
+            preg_match_all($re, $content, $matches, PREG_SET_ORDER, 0);
+            if(count($matches)){
+                $content = preg_replace($re,'{{TWIG}}',$content);
+            }
+            $content = Markdown::defaultTransform($content);
+            if(count($matches)){
+                foreach ($matches as $match){
+                    $twig_code = $match[1];
+                    $re = '/({{TWIG}})/m';
+                    $content = preg_replace($re, $twig_code, $content,1);
+                }
+            }
             $emailTemplate = $mailform->get('template')->getData();
             if ($emailTemplate) {
-                $contentType = 'text/html';
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
 
