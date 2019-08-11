@@ -6,14 +6,18 @@ Ceci est juste un petit message pour te rappeler que tu as résérvé un crénea
 
 {{ dynamicContent | markdown | raw }}
 
-{% if (shift.shifter | last_shift_date | updates_list_from_date | length) %}
-Voici la liste des nouveautés à {{ project_name }} depuis ton dernier créneau le {{ shift.shifter | last_shift_date | date_fr_with_time  }}
+{%  if shift.shifter | last_shift_date | updates_list_from_date | length %}
+Voici la liste des nouveautés à {{ project_name }} depuis ton dernier créneau le {{ shift.shifter | last_shift_date | date_fr_with_time }}
 <ul>
-    {% for update in (shift.shifter | last_shift_date | updates_list_from_date) %}
-        <li>{{ update.date | date_fr_long }} - <a href="{{ update.link }}">{{ update.title }}</a> : {{ update.description }}</a></li>
-    {% endfor %}
+{% for update in (shift.shifter | last_shift_date | updates_list_from_date) %}
+    <li>
+        {{ update.date | date_fr_long }} - {{ update.title }}<br>
+        <a href="{{ update.link }}">{{ update.link }}</a>
+        {{ update.description | markdown | raw }}
+    </li>
+{% endfor %}
 </ul>
-{%endif%}
+{% endif %}
 
 Belle journée à toi.<br >
 Céleste, la petite fée des créneaux :)

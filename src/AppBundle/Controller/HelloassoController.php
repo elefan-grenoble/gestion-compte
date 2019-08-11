@@ -227,4 +227,66 @@ class HelloassoController extends Controller
             ->setMethod('DELETE')
             ->getForm();
     }
+
+    /**
+     * resolve orphan payment
+     *
+     * @Route("/payment/{id}/resolve_orphan/{code}", name="helloasso_resolve_orphan")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function resolveOrphan(HelloassoPayment $payment,$code){
+        $code = urldecode($code);
+        $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $session = new Session();
+        if ($email == $payment->getEmail()){
+            if ($payment->getRegistration()){
+                $session->getFlashBag()->add('error', 'Le paiement helloasso que tu cherches à corriger n\'a plus besoin de ton aide !');
+            }else{
+                return $this->render(
+                    'user/helloasso_resolve_orphan.html.twig',
+                    array('payment' => $payment));
+            }
+        }else{
+            $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * confirm resolve orphan payment
+     *
+     * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function confirmOrphan(HelloassoPayment $payment,$code){
+        $code = urldecode($code);
+        $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $session = new Session();
+        if ($email == $payment->getEmail()) {
+            $session->getFlashBag()->add('success', 'Merci !');
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(
+                HelloassoEvent::ORPHAN_SOLVE,
+                new HelloassoEvent($payment, $this->getUser())
+            );
+        }else{
+            $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
+        }
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * exit app and redirect to resolve
+     *
+     * @Route("/payment/{id}/orphan_exit_and_back/{code}", name="helloasso_orphan_exit_and_back")
+     * @Method({"GET"})
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function orphanExitAndConfirm(Request $request,HelloassoPayment $payment,$code){
+        $this->get('security.token_storage')->setToken(null);
+        $request->getSession()->invalidate();
+        return $this->redirectToRoute('helloasso_resolve_orphan',array('id'=>$payment->getId(),'code'=>$code));
+    }
 }
