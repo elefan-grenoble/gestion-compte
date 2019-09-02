@@ -74,6 +74,17 @@
     </div>
     {{ form_end(form) }}
 
+    {% if event.needProxy %}
+        <ul>
+            <li>
+                <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons">list</i>Procurations</a>
+            </li>
+            <li>
+                <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons">list</i>Emargement</a>
+            </li>
+        </ul>
+    {% endif %}
+
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
     <div>
