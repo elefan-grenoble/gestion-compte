@@ -2,50 +2,120 @@
 
 namespace AppBundle\EventListener;
 
+use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManager;
+use Monolog\Logger;
+use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class HelloassoEventListener
 {
     protected $_em;
     protected $container;
+    protected $mailer;
+    private $memberEmail;
 
-    public function __construct(EntityManager $entityManager, Container $container)
+    public function __construct(EntityManager $entityManager, Container $container,Swift_Mailer $mailer,$memberEmail)
     {
         $this->_em = $entityManager;
         $this->container = $container;
+        $this->mailer = $mailer;
+        $this->memberEmail = $memberEmail;
     }
 
     public function onPaymentAfterSave(HelloassoEvent $event)
     {
         $payment = $event->getPayment();
-        $campaign = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/'.$payment->getCampaignId());
-        if ($campaign->url == $this->container->getParameter('helloasso_registration_campaign_url')) { //good campaign
-            /** @var User $user */
-            $user = $this->_em->getRepository('AppBundle:User')->findOneBy(array('email' => $payment->getEmail()));
-            $beneficiary = $user->getBeneficiary();
-            if ($beneficiary) {
-                if (!$beneficiary->getMembership()->canRegister()){
-                    //throw new \LogicException('user cannot register yet');
-                } else {
-                    $registration = new Registration();
-                    $registration->setAmount($payment->getAmount());
-                    $registration->setDate(new \DateTime('now'));
-                    $registration->setHelloassoPayment($payment);
-                    $registration->setMode(Registration::TYPE_HELLOASSO);
-                    $registration->setMembership($beneficiary->getMembership());
+        /** @var User $user */
+        $user = $this->_em->getRepository('AppBundle:User')->findOneBy(array('email' => strtolower($payment->getEmail())));
+        if ($user){
+            $this->linkPaymentToUser($user,$payment);
+        } else {
+            $url = $this->container->get('router')->generate('helloasso_resolve_orphan', array(
+                'id' => $payment->getId(),
+                'code' => urlencode($this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($payment->getEmail()))
+                ),UrlGeneratorInterface::ABSOLUTE_URL);
 
-                    $this->_em->persist($registration);
-                    $payment->setRegistration($registration);
-                    $beneficiary->getMembership()->addRegistration($registration);
-                    $this->_em->flush();
-                }
+            $needInfo = (new \Swift_Message('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?'))
+                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+                ->setTo($payment->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/helloasso_wrong_email.html.twig',
+                        array(
+                            'firstname' => $payment->getPayerFirstName(),
+                            'email' => $payment->getEmail(),
+                            'project_name' => $this->container->getParameter('project_name'),
+                            'url' => $url
+                        )
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($needInfo);
+            //throw new \LogicException('user not found');
+        }
+    }
+
+    public function onOrphanSolve(HelloassoEvent $event)
+    {
+        $payment = $event->getPayment();
+        $user = $event->getUser();
+        if ($user) {
+            $this->linkPaymentToUser($user, $payment);
+        }
+    }
+
+    /**
+     * Returns a rendered view.
+     *
+     * @param string $view The view name
+     * @param array $parameters An array of parameters to pass to the view
+     *
+     * @return string The rendered view
+     * @throws \Exception
+     */
+    protected function renderView($view, array $parameters = array())
+    {
+        if ($this->container->has('templating')) {
+            return $this->container->get('templating')->render($view, $parameters);
+        }
+
+        if (!$this->container->has('twig')) {
+            throw new \LogicException('You can not use the "renderView" method if the Templating Component or the Twig Bundle are not available.');
+        }
+
+        return $this->container->get('twig')->render($view, $parameters);
+    }
+
+    protected function linkPaymentToUser(User $user,HelloassoPayment $payment){
+        $beneficiary = $user->getBeneficiary();
+        if ($beneficiary) {
+            if (!$beneficiary->getMembership()->canRegister()) {
+                throw new \LogicException('user cannot register yet');
             } else {
-                //throw new \LogicException('user not found');
+                $registration = new Registration();
+                $registration->setAmount($payment->getAmount());
+                $registration->setDate(new \DateTime('now'));
+                $registration->setHelloassoPayment($payment);
+                $registration->setMode(Registration::TYPE_HELLOASSO);
+                $registration->setMembership($beneficiary->getMembership());
+
+                $this->_em->persist($registration);
+                $payment->setRegistration($registration);
+                $beneficiary->getMembership()->addRegistration($registration);
+
+                if ($beneficiary->getMembership()->isWithdrawn()){
+                    $beneficiary->getMembership()->setWithdrawn(false); //open
+                }
+
+                $this->_em->flush();
             }
+        } else {
+            throw new \LogicException('user without beneficiary');
         }
     }
 }

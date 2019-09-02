@@ -10,4 +10,13 @@ namespace AppBundle\Repository;
  */
 class HelloassoPaymentRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findOrphan()
+    {
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('p')
+            ->from($this->_entityName, 'p')
+            ->where('p.registration IS NULL');
+
+        return $qb->getQuery()->getResult();
+    }
 }
