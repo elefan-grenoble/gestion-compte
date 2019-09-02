@@ -100,7 +100,7 @@
         <a href="{{ path('mail_bucketshift', {'id':  bucket.first.id }) }}" class="btn">
             <i class="material-icons left">mail</i>Envoyer un email aux membres
         </a>
-        <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservation ?!'); if (r == true) {
+        <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
             $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
             <i class="material-icons left">delete</i>Supprimer
         </a>
