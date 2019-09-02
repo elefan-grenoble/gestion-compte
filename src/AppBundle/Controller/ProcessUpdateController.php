@@ -46,7 +46,11 @@ class ProcessUpdateController extends Controller
         $lastShiftDate = null;
         $nbOfNew = null;
         if ($beneficiary = $this->getUser()->getBeneficiary()){
-            $lastShiftDate = $em->getRepository(Shift::class)->findLastShifted($beneficiary)->getStart();
+            $lastShift = $em->getRepository(Shift::class)->findLastShifted($beneficiary);
+            $lastShiftDate = $this->getUser()->getLastLogin();
+            if ($lastShift){
+                $lastShiftDate = $lastShift->getStart();
+            }
             $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($lastShiftDate);
         }
 
