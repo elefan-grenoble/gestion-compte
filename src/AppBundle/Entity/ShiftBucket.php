@@ -85,6 +85,14 @@ class ShiftBucket
         return $this->shifts;
     }
 
+    public function getShiftIds(){
+        $ids = array();
+        foreach ($this->getShifts() as $shift){
+            $ids[] = $shift->getId();
+        }
+        return $ids;
+    }
+
     public function getShifterCount()
     {
         $bookedShifts = $this->getShifts()->filter(function (Shift $shift) {

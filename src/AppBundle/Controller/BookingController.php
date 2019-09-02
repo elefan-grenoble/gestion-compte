@@ -248,7 +248,7 @@ class BookingController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
      */
-    public function deleteBucketAction(Request $request, \Swift_Mailer $mailer)
+    public function deleteBucketAction(Request $request)
     {
 
         $session = new Session();

@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Form\MarkdownEditorType;
 use AppBundle\Service\Picture\BasePathPicture;
@@ -79,6 +80,27 @@ class MailController extends Controller
             'form' => $mailform->createView(),
             'to' => array($beneficiary),
         ));
+    }
+
+    /**
+     * @Route("/to_bucket/{id}", name="mail_bucketshift")
+     * @Method({"GET","POST"})
+     */
+    public function mailBucketShift(Request $request, Shift $shift)
+    {
+        $mailform = $this->getMailForm();
+        if ($shift) {
+            $em = $this->getDoctrine()->getManager();
+            $shifts = $em->getRepository(Shift::class)->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
+            $beneficiary = array();
+            foreach ($shifts as $shift) {
+                $beneficiary[] = $shift->getShifter();
+            }
+            return $this->render('admin/mail/edit.html.twig', array(
+                'form' => $mailform->createView(),
+                'to' => $beneficiary
+            ));
+        }
     }
 
     /**
