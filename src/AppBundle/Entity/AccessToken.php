@@ -8,6 +8,17 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
+ * @ORM\Table(name="access_token", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\AttributeOverrides({
+ *     @ORM\AttributeOverride(name="token",
+ *         column=@ORM\Column(
+ *             name   = "token",
+ *             type   = "string",
+ *             length = 191,
+ *             unique = true
+ *         )
+ *     )
+ * })
  */
 class AccessToken extends BaseAccessToken
 {
