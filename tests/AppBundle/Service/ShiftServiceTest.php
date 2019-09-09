@@ -27,7 +27,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->shiftService = new ShiftService($this->em, 180, 90, false);
+        $this->shiftService = new ShiftService($this->em, 180, 90, false, false);
     }
 
     public function testShiftTimeByCycle()
@@ -86,7 +86,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
-            ->setConstructorArgs([$this->em, 180, 90, false])
+            ->setConstructorArgs([$this->em, 180, 90, false, false])
             ->getMock()
         ;
         $shiftService->expects($this->any())
@@ -130,7 +130,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
-            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner])
+            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false])
             ->getMock()
         ;
 
