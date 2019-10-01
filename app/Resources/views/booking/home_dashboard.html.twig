@@ -2,6 +2,7 @@
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
+    {% set due_duration_hour = due_duration_by_cycle / 60 %}
     {% if not member.frozen %}
         <div class="gauge_container">
             <canvas id="gauge"
@@ -9,20 +10,20 @@
                     data-width="300"
                     data-height="300"
                     data-units="{{ member.timeCount / 60 }}h"
-                    data-min-value="-9"
+                    data-min-value="{{ due_duration_hour * -3 }}"
                     data-start-angle="90"
                     data-ticks-angle="180"
                     data-value-box="false"
                     data-value="{{ member.timeCount / 60 }}"
                     data-max-value="{{ ((member.beneficiaries | length) * due_duration_by_cycle) / 60 }}"
-                    data-major-ticks="-9h,-6h,-3h,0,3h{% if (member.beneficiaries | length) > 1 %},6h{% endif %}"
+                    data-major-ticks="{{ due_duration_hour * -3 }}h,{{ due_duration_hour * -2 }}h,{{ due_duration_hour * -1}}h,0,{{ due_duration_hour }}h{% if (member.beneficiaries | length) > 1 %},{{ due_duration_hour *2 }}h{% endif %}"
                     data-minor-ticks="2"
                     data-stroke-ticks="true"
                     data-highlights='[
-        {"from": -9, "to": -6, "color": "rgba(200, 50, 50, .95)"},
-        {"from": -6, "to": -3, "color": "rgba(200, 50, 50, .75)"},
-        {"from": -3, "to": 0, "color": "yellow"},
-        {"from": 0, "to": 3, "color": "#8bc34a55"}{% if (member.beneficiaries | length) > 1 %},{"from": 3, "to": 6, "color": "#8bc34a"}{% endif %}
+        {"from": {{ due_duration_hour * -3 }}, "to": {{ due_duration_hour * -2 }}, "color": "rgba(200, 50, 50, .95)"},
+        {"from": {{ due_duration_hour * -2 }}, "to": {{ due_duration_hour * -1 }}, "color": "rgba(200, 50, 50, .75)"},
+        {"from": {{ due_duration_hour * -1 }}, "to": 0, "color": "yellow"},
+        {"from": 0, "to": {{ due_duration_hour }}, "color": "#8bc34a55"}{% if (member.beneficiaries | length) > 1 %},{"from": {{ due_duration_hour }}, "to": {{ due_duration_hour * 2 }}, "color": "#8bc34a"}{% endif %}
     ]'
                     data-color-plate="#fff"
                     data-border-shadow-width="0"
