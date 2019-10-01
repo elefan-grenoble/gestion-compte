@@ -134,6 +134,7 @@ services:
                 - "%due_duration_by_cycle%"
                 - "%min_shift_duration%"
                 - "%new_users_start_as_beginner%"
+                - "%unlimited_book_duration%"
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor

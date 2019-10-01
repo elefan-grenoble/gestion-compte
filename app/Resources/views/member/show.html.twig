@@ -16,7 +16,7 @@
     <h4>
         {% if member.withdrawn %}
         <del>{% endif %}
-            #{{ member.memberNumber }}
+            Membre #{{ member.memberNumber }}
             {% if member.withdrawn %}</del>{% endif %}
         {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
     </h4>

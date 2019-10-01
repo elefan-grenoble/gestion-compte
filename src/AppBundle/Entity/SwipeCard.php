@@ -55,7 +55,7 @@ class SwipeCard
     /**
      * @var string
      *
-     * @ORM\Column(name="code", type="string", length=255, unique=true)
+     * @ORM\Column(name="code", type="string", length=50, unique=true)
      */
     private $code;
 

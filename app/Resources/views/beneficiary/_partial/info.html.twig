@@ -31,8 +31,18 @@
             </div>
         {% endif %}
     {% endif %}
-        <div class="col s12 truncate"><i
+        <div class="col s12 truncate">
+            <i
                     class="material-icons tiny">person</i>&nbsp;{{ beneficiary.user.username }}
+            {% if is_granted("ROLE_ADMIN") %}
+            (<i
+                    class="material-icons tiny" title="dernière connexion">exit_to_app</i>
+            {% if beneficiary.user.lastlogin %}
+                {{ beneficiary.user.lastlogin | date_fr_with_time }}
+            {% else %}
+                <span class="orange-text">la personne ne s'est jamais connectée</span>
+            {% endif %})
+            {% endif %}
         </div>
     {% if beneficiary.formations | length %}
         <div class="col s12 truncate"><i

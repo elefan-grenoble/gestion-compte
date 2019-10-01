@@ -45,10 +45,11 @@
                 <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. <br>Tu as
                     encore {{ remaining | duration_from_minutes }} à réserver.</p>
             {% else %}
+                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
                 <p>Bravo
                     ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.</p>
-                {% if beneficiariesWhoCanBook | length > 0 %}
+                {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0%}
                     <p>
                         {% if beneficiariesWhoCanBook | length > 1 %}
                             {% for b in beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}peuvent

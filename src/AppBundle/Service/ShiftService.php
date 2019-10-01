@@ -18,13 +18,15 @@ class ShiftService
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
     private $newUserStartAsBeginner;
+    private $unlimitedBookDuration;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $unlimitedBookDuration)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
         $this->newUserStartAsBeginner = $newUserStartAsBeginner;
+        $this->unlimitedBookDuration = $unlimitedBookDuration;
     }
 
     /**
@@ -67,6 +69,10 @@ class ShiftService
      */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
+        if (true === $this->unlimitedBookDuration) {
+            return true;
+        }
+
         $member = $beneficiary->getMembership();
         $beneficiary_counter = $beneficiary->getTimeCount($cycle);
 

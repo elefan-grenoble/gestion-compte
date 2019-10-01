@@ -31,14 +31,3 @@ Dans l'admin panel :
 - Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
 
 La génération de créneaux peut être automatisée via une [tâche cron](install.md#crontab).
-
-## email de rappel
-
-    {% if (beneficiary | last_shift_date | updates_list_from_date | length) %}
-    Voici la liste des nouveautés depuis ton dernier créneau le {{ beneficiary | last_shift_date | date_fr_with_time  }}
-    <ul>
-    {% for update in (beneficiary | last_shift_date | updates_list_from_date) %}
-    <li><a href="{{ update.link }}">{{ update.date | date_fr_long }} - {{ update.title }}</a> : {{ update.description }}</li>
-    {% endfor %}
-    </ul>
-    {%endif%}

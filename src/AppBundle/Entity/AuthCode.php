@@ -6,8 +6,21 @@ namespace AppBundle\Entity;
 use FOS\OAuthServerBundle\Entity\AuthCode as BaseAuthCode;
 use Doctrine\ORM\Mapping as ORM;
 
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * @ORM\Entity
+ * @ORM\Table(name="auth_code", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})
+ * @ORM\AttributeOverrides({
+ *     @ORM\AttributeOverride(name="token",
+ *         column=@ORM\Column(
+ *             name   = "token",
+ *             type   = "string",
+ *             length = 191,
+ *             unique = true
+ *         )
+ *     )
+ * })
  */
 class AuthCode extends BaseAuthCode
 {

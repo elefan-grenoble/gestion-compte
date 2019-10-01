@@ -49,8 +49,12 @@ class ShiftReminderCommand extends ContainerAwareCommand
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
 
+        $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent);
+
+        /** @var Shift $shift */
         foreach ($shifts as $shift) {
             if ($shift->getShifter()){ //send reminder
+                $dynamicContent = $this->getContainer()->get('twig')->render($template, array('beneficiary' => $shift->getShifter()));
                 $reminder = (new \Swift_Message('[ESPACE MEMBRES] Ton créneau'))
                     ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
                     ->setTo($shift->getShifter()->getEmail())

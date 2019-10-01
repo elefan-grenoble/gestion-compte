@@ -31,7 +31,7 @@ class AnonymousBeneficiary
     /**
      * @var string
      *
-     * @ORM\Column(name="email", type="string", length=255, unique=true)
+     * @ORM\Column(name="email", type="string", length=191, unique=true)
      * @Assert\Email(strict="true")
      * @Assert\NotBlank(message="L'email doit être saisie")
      * @AppAssert\UniqueEmail

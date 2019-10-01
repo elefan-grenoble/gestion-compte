@@ -47,7 +47,6 @@
         </div>
     </a>
 </div>
-
 <div id="edit{{ bucket.first.id }}" class="modal">
     <div class="modal-content">
         <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
@@ -56,7 +55,7 @@
         <ul class="collapsible" data-collapsible="accordion">
             {% for shift in bucket.sortedShifts() %}
                 {% if shift.shifter %}{# is booked #}
-                    <li>
+                    <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                         {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                             #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
@@ -78,7 +77,7 @@
                         </div>
                     </li>
                 {% else %}
-                    <li>
+                    <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                             {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
                         </div>
@@ -98,10 +97,12 @@
                 {% endif %}
             {% endfor %}
         </ul>
-
-    </div>
-    <div class="modal-footer">
-        <a href="#" onclick="$('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();" class="red-text"><i class="material-icons">delete</i>Supprimer
-            tous les créneaux à cette heure et ce poste</a>
+        <a href="{{ path('mail_bucketshift', {'id':  bucket.first.id }) }}" class="btn">
+            <i class="material-icons left">mail</i>Envoyer un email aux membres
+        </a>
+        <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
+            $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
+            <i class="material-icons left">delete</i>Supprimer
+        </a>
     </div>
 </div>
