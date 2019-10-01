@@ -49,7 +49,7 @@
                 <p>Bravo
                     ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.</p>
-                {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0%}
+                {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0 and not unlimited_book_duration %}
                     <p>
                         {% if beneficiariesWhoCanBook | length > 1 %}
                             {% for b in beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}peuvent
@@ -58,6 +58,15 @@
                         {% endif %} encore
                         effectuer {{ (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) | duration_from_minutes }}
                         .</p>
+                {% elseif (unlimited_book_duration) %}
+                    <p>
+                        {% if member.beneficiaries | length %}
+                            Vous pouvez
+                        {% else %}
+                            Tu peux
+                        {% endif %}
+                        encore effectuer des créneaux.
+                    </p>
                 {% else %}
                     <p><i class="material-icons">stars</i> Bravo !
                         Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été
