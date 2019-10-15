@@ -454,6 +454,13 @@ class MembershipController extends Controller
             $em = $this->getDoctrine()->getManager();
             $ms = $em->getRepository('AppBundle:Membership')->findOneBy(array('member_number' => $member_number));
 
+            if (!$ms){
+                $request->getSession()->getFlashBag()->add('warning', 'Oups, aucun membre trouvé avec ce numéro d\'adhérent');
+                return $this->render('user/tools/find_me.html.twig', array(
+                    'form' => $form->createView(),
+                ));
+            }
+
             return $this->render('beneficiary/confirm.html.twig', array(
                 'beneficiary' => $ms->getMainBeneficiary(),
             ));
