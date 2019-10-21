@@ -112,7 +112,7 @@ class DynamicContent
     /**
      * @return string
      */
-    public function getContent(): string
+    public function getContent()
     {
         return $this->content;
     }
