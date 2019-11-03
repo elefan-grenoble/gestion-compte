@@ -100,6 +100,13 @@ class Shift
      */
     private $timeLogs;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="locked", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $locked = false;
+
     public function __construct()
     {
         $this->isDismissed = false;
@@ -480,5 +487,21 @@ class Shift
     public function getTimeLogs()
     {
         return $this->timeLogs;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isLocked(): ?bool
+    {
+        return $this->locked;
+    }
+
+    /**
+     * @param bool $locked
+     */
+    public function setLocked(?bool $locked): void
+    {
+        $this->locked = $locked;
     }
 }

@@ -8,6 +8,7 @@ use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Security\MembershipVoter;
+use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -541,7 +542,7 @@ class BookingController extends Controller
      */
     public function freeShiftAction(Request $request, Shift $shift)
     {
-        $this->denyAccessUnlessGranted('free', $shift);
+        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
         $session = new Session();
 
@@ -563,4 +564,49 @@ class BookingController extends Controller
 
     }
 
+    /**
+     * free a shift.
+     *
+     * @Route("/lock_shift/{id}", name="lock_shift")
+     * @Method("GET")
+     */
+    public function lockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(true);
+            }
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
+     * free a shift.
+     *
+     * @Route("/unlock_shift/{id}", name="unlock_shift")
+     * @Method("GET")
+     */
+    public function unlockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(false);
+            }
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
 }

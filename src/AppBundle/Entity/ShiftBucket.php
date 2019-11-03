@@ -31,6 +31,15 @@ class ShiftBucket
         $this->shifts[] = $shift;
     }
 
+    public function addShifts(iterable $shifts)
+    {
+        foreach ($shifts as $shift) {
+            if ($shift instanceof Shift) {
+                $this->shifts[] = $shift;
+            }
+        }
+    }
+
     static public function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
