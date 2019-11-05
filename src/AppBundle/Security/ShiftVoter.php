@@ -18,6 +18,7 @@ class ShiftVoter extends Voter
     const DISMISS = 'dismiss';
     const REJECT = 'reject';
     const ACCEPT = 'accept';
+    const LOCK = 'lock';
     private $decisionManager;
     private $container;
 
@@ -36,7 +37,7 @@ class ShiftVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::BOOK, self::DISMISS, self::REJECT, self::FREE, self::ACCEPT))) {
+        if (!in_array($attribute, array(self::BOOK, self::DISMISS, self::REJECT, self::FREE, self::ACCEPT, self::LOCK))) {
             return false;
         }
 
@@ -76,6 +77,7 @@ class ShiftVoter extends Voter
                 }
                 return $this->shiftService->isShiftBookable($shift, $user->getBeneficiary());
             case self::FREE:
+            case self::LOCK:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
                 }

@@ -133,8 +133,8 @@ class ShiftService
 
     public function isShiftBookable(Shift $shift, Beneficiary $beneficiary = null)
     {
-        // Do not book old
-        if ($shift->getIsPast()) {
+        // Do not book old or locked shifts
+        if ($shift->getIsPast() || $shift->isLocked()) {
             return false;
         }
         // Do not book already booked
@@ -354,5 +354,23 @@ class ShiftService
         $startOfCycle = $membership->startOfCycle($cycle);
 
         return $registrationDate < $startOfCycle;
+    }
+
+    /**
+     * Create a ShiftBucket from a single Shift
+     * @param Shift $shift
+     * @return ShiftBucket
+     */
+    public function getShiftBucketFromShift(Shift $shift)
+    {
+        $shiftBucket = new ShiftBucket();
+        $shifts = $this->em->getRepository('AppBundle:Shift')->findBy([
+            'job' => $shift->getJob(),
+            'start' => $shift->getStart(),
+            'end' => $shift->getEnd()
+        ]);
+        $shiftBucket->addShifts($shifts);
+
+        return $shiftBucket;
     }
 }
