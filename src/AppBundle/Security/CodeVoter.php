@@ -122,10 +122,12 @@ class CodeVoter extends Voter
             $y->setTime(23,59,59);
             $some_time_ago = new \DateTime();
             $in_some_time = new \DateTime();
-            $some_time_ago->sub(new \DateInterval("PT1H")); //time - 60min TODO put in conf
-            $in_some_time->add(new \DateInterval("PT15M")); //time + 15min TODO put in conf
+            $some_time_ago->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
+            $in_some_time->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
             foreach ($shifts as $shift){
-                if (($shift->getStart() < $in_some_time) && $shift->getStart() > $y && ($shift->getEnd() > $some_time_ago)){ // si l'utilisateur à un créneau aujourd'hui qu'il a commencé et qu'il n'est pas fini
+                if (($shift->getStart() < $in_some_time) && // dans une heure il sera commencé
+                    $shift->getStart() > $y && // le début est aujourd'hui (après hier 23h59:59)
+                    ($shift->getEnd() > $some_time_ago)){ // il y a deux heure il n'était pas fini
                     return true;
                 }
             }
