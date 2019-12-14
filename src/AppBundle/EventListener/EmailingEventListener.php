@@ -281,29 +281,27 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onCodeNew");
         $code = $event->getCode();
         $old_codes = $event->getOldCodes();
-        $display = $event->getDisplay();
 
         $router = $this->container->get('router');
         $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        if (!$display) { //use smartphone
-            $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
-                ->setFrom($this->container->getParameter('transactional_mailer_user'))
-                ->setTo($code->getRegistrar()->getEmail())
-                ->setBody(
-                    $this->renderView(
-                        'emails/code_new.html.twig',
-                        array(
-                            'code' => $code,
-                            'codes' => $old_codes,
-                            'changeCodeUrl' => $code_change_done_url,
-                            'wiki_keys_url' => $this->wikiKeysUrl
-                        )
-                    ),
-                    'text/html'
-                );
-            $this->mailer->send($notify);
-        }
+        $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
+            ->setFrom($this->container->getParameter('transactional_mailer_user'))
+            ->setTo($code->getRegistrar()->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/code_new.html.twig',
+                    array(
+                        'code' => $code,
+                        'codes' => $old_codes,
+                        'changeCodeUrl' => $code_change_done_url,
+                        'wiki_keys_url' => $this->wikiKeysUrl
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($notify);
+
     }
 
     /**

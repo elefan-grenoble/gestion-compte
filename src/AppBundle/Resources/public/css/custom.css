@@ -453,7 +453,23 @@ strong {
   top: 0;
   right: 0;
 }
-
 .solo-logo {
   margin: 30px 0 20px 0;
+}
+.hover-toggle-text-icon a {
+  display: block;
+  height: 24px;
+}
+.hover-toggle-text-icon a i {
+  display: none;
+}
+.hover-toggle-text-icon a span {
+  display: inline-block;
+  line-height: 1;
+}
+.hover-toggle-text-icon a:hover i {
+  display: inline-block;
+}
+.hover-toggle-text-icon a:hover span {
+  display: none;
 }

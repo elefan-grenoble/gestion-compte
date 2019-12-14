@@ -16,6 +16,7 @@ class CodeVoter extends Voter
     const EDIT = 'edit';
     const DELETE = 'delete';
     const CLOSE = 'close';
+    const OPEN = 'open';
 
     private $decisionManager;
     private $container;
@@ -29,7 +30,7 @@ class CodeVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE,self::CLOSE))) {
+        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE,self::OPEN,self::CLOSE))) {
             return false;
         }
 
@@ -62,10 +63,6 @@ class CodeVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::VIEW:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-                    return true;
-                }
-                return $this->canView($code, $user);
             case self::CLOSE:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;
@@ -76,6 +73,7 @@ class CodeVoter extends Voter
                     return true;
                 }
                 return $this->canAdd($code, $user);
+            case self::OPEN:
             case self::EDIT:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;

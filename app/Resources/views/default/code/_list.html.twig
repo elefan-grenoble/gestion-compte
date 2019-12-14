@@ -36,11 +36,11 @@
                         <td>{% if code.closed %}<del>{% endif %}
                                 {{ code.getRegistrar }}
                         </td>{% if code.closed %}</del>{% endif %}
-                        <td>
+                        <td class="hover-toggle-text-icon center">
                             {% if code.closed %}
-                                inactif
+                                <a href="{{ path("code_toggle",{'id':code.id}) }}" class="text-black"><span>inactif</span><i class="material-icons green-text">check</i></a>
                             {% else %}
-                                <a href="{{ path("code_close",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
+                                <a href="{{ path("code_toggle",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
                             {% endif %}
                         </td>
                     </tr>
@@ -95,11 +95,7 @@
                                 {{ code.getRegistrar }}
                         </td>{% if code.closed %}</del>{% endif %}
                         <td>
-                            {% if code.closed %}
-                                inactif
-                            {% else %}
-                                <a href="{{ path("code_close",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
-                            {% endif %}
+                            inactif
                         </td>
                     </tr>
                 {% else %}

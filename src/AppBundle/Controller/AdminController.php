@@ -113,6 +113,19 @@ class AdminController extends Controller
                     'id' => 'C'.$commission->getId()
                 );
             }
+
+            $admin_actions = array();
+            $admin_actions[] = array(
+                'name' => 'ACTION : liste des codes',
+                'icon' => null,
+                'url' => $this->generateUrl('codes_list'),
+                'id' => 'A'.'CODES'
+            );
+            foreach ($admin_actions as $action){
+              if (strpos($action['name'],$key)){
+                  $return[] = $action;
+              }
+            }
             
             return new JsonResponse(array('count' => count($return), 'data' => array_values($return)));
         }
