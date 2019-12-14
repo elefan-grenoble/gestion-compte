@@ -40,9 +40,6 @@
                 {{ form_widget(form.email) }}
             </div>
         </div>
-        <div class="description col s12">
-            {{ form_row(form.description) }}
-        </div>
     </div>
     <div class="card-panel teal lighten-5">
         <div class="row">
@@ -69,18 +66,23 @@
         </div>
     </div>
     <div class="row">
+        <div class="description col s12">
+            {{ form_row(form.description) }}
+        </div>
+    </div>
+    <div class="row">
         {% if form.owners is defined %}
         <div class="input-field owners col s12">
-            <div class="errors">
-                {{ form_errors(form.owners) }}
-            </div>
-            <div class="input-field">
-                {{ form_label(form.owners) }}
-                {{ form_widget(form.owners) }}
-            </div>
+            {{ form_widget(form.owners) }}
         </div>
         {% else %}
-            Référents : {{ commission.owners | join(',') }}
+            Référents :
+            {% for beneficiary in commission.owners %}
+                <div class="chip black-text {% if not commission.beneficiaries.contains(beneficiary) %}red{% endif %}">
+                    <img src="{{ gravatar(beneficiary.email) }}" alt="{{ beneficiary.displayname }}">
+                    {{ beneficiary.firstname }} {{ beneficiary.lastname }}
+                </div>
+            {% endfor %}
         {% endif %}
     </div>
     <div>
@@ -101,26 +103,65 @@
     <div id="users" class="modal">
         <div class="modal-content">
             <h5><i class="material-icons left small">people</i>membres de la commission</h5>
-            <table>
-                <tbody>
-                {% for beneficiary in commission.beneficiaries %}
-                    <tr>
-                        <td>{{ beneficiary }}</td>
-                        <td>
-                            {{ form_start(remove_beneficiary_form) }}
-                            <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
-                            <div>
-                                <a href="#" onclick="$(this).closest('form').submit(); return false;" class="red-text">X</a>
-                            </div>
-                            {{ form_end(remove_beneficiary_form) }}
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+            <div class="messages">
+
+            </div>
+            <div class="list">
+                {{ form_start(remove_beneficiary_form) }}
+                <div class="chips">
+                    {% for beneficiary in commission.beneficiaries %}
+                        {% include "beneficiary/_partial/chip.html.twig" with { close: true } %}
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="beneficiary" value="" />
+                {{ form_end(remove_beneficiary_form) }}
+            </div>
+
+            <script>
+                defer(function (){
+                    $('.list .chips').click(function (e) {
+                        if ($(e.target).is('.close')){
+                            e.preventDefault()
+                            $('input[name=beneficiary]').val($(e.target).data('target'));
+                            var $form = $(e.target).closest('form');
+                            var data = $form.serialize();
+                            $.ajax($form.attr('action'),{
+                                data: data,
+                                method: 'post'
+                            }).success(function (d) {
+                                //console.log(d);
+                                if (d.success){
+                                    Materialize.toast(d.message,2500,'green');
+                                }else{
+                                    Materialize.toast(d.message,2500,'red');
+                                }
+                            });
+                        }
+                    });
+                    $('#add_beneficiary').click(function (e) {
+                        e.preventDefault();
+                        var $form = $(this).closest('form');
+                        var data = $form.serialize();
+                        $.ajax($form.attr('action'),{
+                            data: data,
+                            method: 'post'
+                        }).success(function (d) {
+                            if (d.success){
+                                Materialize.toast(d.message,2500,'green');
+                                $('#users .chips').append(d.html);
+                            }else{
+                                Materialize.toast(d.message,2500,'red');
+                            }
+                            $('#form_beneficiary').val('');
+                        });
+                    });
+                });
+            </script>
+
             {{ form_start(add_form) }}
             {{ form_widget(add_form) }}
             <div>
-                <button type="submit" class="btn waves-effect waves-light blue"><i class="material-icons left">add</i>ajouter</button>
+                <button type="submit" id="add_beneficiary" class="btn waves-effect waves-light blue"><i class="material-icons left">add</i>ajouter</button>
             </div>
             {{ form_end(add_form) }}
         </div>
