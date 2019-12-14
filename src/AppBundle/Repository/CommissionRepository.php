@@ -10,4 +10,15 @@ namespace AppBundle\Repository;
  */
 class CommissionRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findByString($value): ?array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.name like :val')
+            ->setParameter('val', '%'.$value.'%')
+            ->orderBy('c.id', 'ASC')
+            ->setMaxResults(20)
+            ->getQuery()
+            ->getResult()
+            ;
+    }
 }

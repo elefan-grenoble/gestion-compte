@@ -33,11 +33,11 @@ $(document).ready(function() {
                 //console.log(data);
                 $('#quick_search_form .autocomplete-content').html('').hide();
                 if (data && data.count > 0){
-                    var beneficiaries = data.data;
+                    var results = data.data;
                     var regex = /\(([0-9]*)\)/gm;
-                    for (var i = 0; i < beneficiaries.length; i++) {
-                        var link = show_user_template_url.replace("-MNID-", beneficiaries[i].member_number);
-                        var content = highlight($('#quick_search').val(),beneficiaries[i].name);
+                    for (var i = 0; i < results.length; i++) {
+                        var link = results[i].url;
+                        var content = highlight($('#quick_search').val(),results[i].name);
                         var $row = $('<li><a href="'+link+'"></a></li>');
                         $row.find('a').html('<span>'+content+'</span>');
                         $row.appendTo('#quick_search_form .autocomplete-content');

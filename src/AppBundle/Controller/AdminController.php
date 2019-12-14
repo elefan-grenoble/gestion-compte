@@ -97,11 +97,23 @@ class AdminController extends Controller
                     $return[] = array(
                         'name' => $beneficiary->getAutocompleteLabelFull(),
                         'icon' => null,
-                        'member_number' => $beneficiary->getMembership()->getMemberNumber(),
-                        'id' => $beneficiary->getId()
+                        'url' => $this->generateUrl('member_show', array('member_number' => $beneficiary->getMembership()->getMemberNumber())),
+                        'id' => 'B'.$beneficiary->getId()
                     );
                 }
             }
+
+            $commissions = $em->getRepository(Commission::class)->findByString($key);
+            /** @var Commission $commission */
+            foreach ($commissions as $commission){
+                $return[] = array(
+                    'name' => 'COMMISSION : '.$commission->getName(),
+                    'icon' => null,
+                    'url' => $this->generateUrl('commission_edit', array('id' => $commission->getId())),
+                    'id' => 'C'.$commission->getId()
+                );
+            }
+            
             return new JsonResponse(array('count' => count($return), 'data' => array_values($return)));
         }
 
