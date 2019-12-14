@@ -107,12 +107,10 @@ class CodeController extends Controller
 
         //no code open for this user
 
-        if ($request->get('smartphone') === null){ //first visit
+        if ($request->get('generate') === null){ //first visit
             $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
             return $this->render('default/code/new.html.twig');
         }
-
-        $display = ($request->get('smartphone') == '0');
 
         $value = rand(0,9999);//code aléatoire à 4 chiffres
         $code = new Code();
@@ -125,47 +123,45 @@ class CodeController extends Controller
         $em->persist($code);
         $em->flush();
 
-        $logger->info('CODE : code_new created',array('username'=>$current_app_user->getUsername()));
+        $logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
 
         $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $display,$old_codes));
+        $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $old_codes));
 
-        if ($request->get('smartphone') == '1'){ //send by email
-            $session->getFlashBag()->add('success','Consulte ton espace membre ou tes emails depuis ton smartphone pour ouvrir le coffre, changer le code et déposer les clefs');
-            return $this->redirectToRoute('homepage');
-        }else{
-            return $this->render('default/code/new.html.twig', array(
-                'display' =>  $display,
-                'no_smartphone' => true,
-                'code' => $code,
-                'old_codes' => $old_codes,
-            ));
-        }
+        $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
+
+        return $this->render('default/code/new.html.twig', array(
+            'generate' =>  true,
+            'code' => $code,
+            'old_codes' => $old_codes,
+        ));
 
     }
 
     /**
      *
-     * @Route("/close/{id}", name="code_close")
+     * @Route("/toggle/{id}", name="code_toggle")
      * @Method({"GET"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function editAction(Request $request,Code $code){
+    public function toggleAction(Request $request,Code $code){
         $session = new Session();
 
-        $this->denyAccessUnlessGranted('close',$code);
+        if ($code->getClosed())
+            $this->denyAccessUnlessGranted('open',$code);
+        else
+            $this->denyAccessUnlessGranted('close',$code);
 
         $em = $this->getDoctrine()->getManager();
 
-        $code->setClosed(true);
+        $code->setClosed(!$code->getClosed());
 
         $em->persist($code);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le code a bien été marqué fermé !');
+        $session->getFlashBag()->add('success', 'Le code a bien été marqué '.(($code->getClosed())?'fermé':'ouvert').' !');
 
         return $this->redirectToRoute('codes_list');
-
     }
 
     /**

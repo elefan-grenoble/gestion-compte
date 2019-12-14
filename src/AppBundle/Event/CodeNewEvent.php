@@ -10,13 +10,11 @@ class CodeNewEvent extends Event
     const NAME = 'code.new';
 
     private $code;
-    private $display;
     private $old_codes;
 
-    public function __construct(Code $code, $display, $old_codes)
+    public function __construct(Code $code, $old_codes)
     {
         $this->code = $code;
-        $this->display = $display;
         $this->old_codes = $old_codes;
     }
 
@@ -34,14 +32,6 @@ class CodeNewEvent extends Event
     public function getOldCodes()
     {
         return $this->old_codes;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function getDisplay()
-    {
-        return $this->display;
     }
 
 }
