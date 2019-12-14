@@ -1,7 +1,10 @@
-Bonjour {{ membership.mainBeneficiary.firstname | lower | capitalize }},<br >
+Bonjour {{ beneficiary.firstname | lower | capitalize }},<br >
 <br >
+{% if beneficiary.membership.beneficiaries | length %}
+Votre nouveau cycle commence aujourd'hui.<br >
+Pensez à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver vos créneaux.<br >{% else %}
 Ton nouveau cycle commence aujourd'hui.<br >
-Pense à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver tes créneaux.<br >
+Pense à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver tes créneaux.<br >{% endif %}
 <br >
 Merci<br >
 <br >
