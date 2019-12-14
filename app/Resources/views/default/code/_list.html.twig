@@ -11,7 +11,6 @@
                 </div>
             </div>
         </div>
-
     {% else %}
         <h4 class="">Liste des codes {% if not is_granted("ROLE_ADMIN") %}en cours{% endif %}</h4>
         <table>
@@ -25,6 +24,64 @@
             </thead>
             <tbody>
             {% for code in codes %}
+                {% if is_granted("view",code)  %}
+                    <tr>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                <b>{{ code.value }}</b>
+                                {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>{% if code.closed %}<del>{% endif %}
+                                {{ code.getRegistrar }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}
+                                inactif
+                            {% else %}
+                                <a href="{{ path("code_close",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                <b>XXXX</b>
+                                {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>{% if code.closed %}<del>{% endif %}
+                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>{% if code.closed %}<del>{% endif %}
+                                {{ code.getRegistrar }}
+                        </td>{% if code.closed %}</del>{% endif %}
+                        <td class="red-text">
+                            {% if code.closed %}
+                                inactif
+                            {% else %}
+                                accès intedit
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    {% if old_codes | length %}
+        <h4 class="">Liste des codes précedents inactifs</h4>
+        <table>
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Créé le</th>
+                <th>Membre</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for code in old_codes %}
                 {% if is_granted("view",code)  %}
                     <tr>
                         <td>{% if code.closed %}<del>{% endif %}
