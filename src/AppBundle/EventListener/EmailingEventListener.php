@@ -226,17 +226,20 @@ class EmailingEventListener
 
         // member wont be frozen for this cycle && not a fresh new member && member still have to book
         if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
-            $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
-                ->setFrom($this->container->getParameter('shift_mailer_user'))
-                ->setTo($membership->getMainBeneficiary()->getEmail())
-                ->setBody(
-                    $this->container->get('twig')->render(
-                        'emails/cycle_start.html.twig',
-                        array('membership' => $membership, 'home_url' => $home_url)
-                    ),
-                    'text/html'
-                );
-            $this->mailer->send($mail);
+            foreach ($membership->getBeneficiaries() as $beneficiary){
+                $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
+                    ->setFrom($this->container->getParameter('shift_mailer_user'))
+                    ->setTo($beneficiary->getEmail())
+                    ->setBody(
+                        $this->container->get('twig')->render(
+                            'emails/cycle_start.html.twig',
+                            array('beneficiary' => $beneficiary, 'home_url' => $home_url)
+                        ),
+                        'text/html'
+                    );
+                $this->mailer->send($mail);
+            }
+
         }
     }
 
