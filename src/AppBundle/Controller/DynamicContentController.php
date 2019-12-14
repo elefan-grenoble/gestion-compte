@@ -72,6 +72,7 @@ class DynamicContentController extends Controller
         }
 
         return $this->render('admin/content/edit.html.twig', array(
+            'dynamicContent' => $dynamicContent,
             'form' => $form->createView()
         ));
     }

@@ -121,6 +121,12 @@ class AdminController extends Controller
                 'url' => $this->generateUrl('codes_list'),
                 'id' => 'A'.'CODES'
             );
+            $admin_actions[] = array(
+                'name' => 'ACTION : contenus dynamiques',
+                'icon' => null,
+                'url' => $this->generateUrl('dynamic_content_list'),
+                'id' => 'A'.'DYNAMIC_CONTENT'
+            );
             foreach ($admin_actions as $action){
               if (strpos($action['name'],$key)){
                   $return[] = $action;
