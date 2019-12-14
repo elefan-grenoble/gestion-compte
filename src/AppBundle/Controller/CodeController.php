@@ -35,17 +35,17 @@ class CodeController extends Controller
     public function listAction(Request $request){
         $session = new Session();
 
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
         $logger = $this->get('logger');
-        $logger->info('CODE : codes_list',array('username'=>$current_app_user->getUsername()));
+        $logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
 
         $em = $this->getDoctrine()->getManager();
 
-        if ($current_app_user->hasRole('ROLE_ADMIN')){
+        if ($this->getUser()->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
+            $old_codes =  null;
         }else{
             $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);
+            $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>1),array('createdAt'=>'DESC'),3);
         }
 
         if (!count($codes)){
@@ -56,7 +56,8 @@ class CodeController extends Controller
         $this->denyAccessUnlessGranted('view',$codes[0]);
 
         return $this->render('default/code/list.html.twig', array(
-            'codes' => $codes
+            'codes' => $codes,
+            'old_codes' => $old_codes
         ));
     }
 
