@@ -27,13 +27,13 @@
                                 {% if not is_granted("ROLE_ADMIN") and app.request.get('token') is defined %}
                                     <input type="hidden" value="{{ app.request.get('token') }}" name="token">
                                 {% endif %}
-                                <button type="submit" class="btn btn-floating waves-effect waves-light"><i class="material-icons">mode_edit</i>
+                                <button type="submit" class="btn btn-floating waves-effect waves-light" title="éditer"><i class="material-icons">mode_edit</i>
                                 </button>
                             </form>
                         </div>
                         {% if delete_form is defined and not beneficiary.isMain %}
                             <div class="card-btn">
-                                <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red"><i
+                                <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le beneficiaire"><i
                                             class="material-icons">remove</i>
                                 </a>
                             </div>
@@ -48,7 +48,7 @@
                             {% if not isTemporaryEmail(beneficiary.user.email) %}
                                 <div class="card-btn">
                                     <a href="{{ path('mail_edit_one_beneficiary', {'id':  beneficiary.id }) }}"
-                                       class="btn btn-floating waves-effect waves-light teal">
+                                       class="btn btn-floating waves-effect waves-light teal" title="écrire à {{ beneficiary.user.firstname }}">
                                         <i class="material-icons">email</i>
                                     </a>
                                 </div>
