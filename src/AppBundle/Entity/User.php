@@ -107,7 +107,11 @@ class User extends BaseUser
 
     public function __toString()
     {
-        return $this->getUsername();
+        if (!$this->getBeneficiary())
+            return $this->getUsername();
+        else{
+            return (string)$this->getBeneficiary();
+        }
     }
 
     public function getTmpToken($key = '')

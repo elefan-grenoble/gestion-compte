@@ -195,11 +195,16 @@ class BeneficiaryController extends Controller
      * @Method({"POST"})
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("has_role('ROLE_USER')")
      */
     public function listAction(Request $request){
 
-        if ($request->isXmlHttpRequest()){
+        $granted = false;
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
+            $granted = true;
+        if ($this->getUser()->getBeneficiary() && count($this->getUser()->getBeneficiary()->getOwnedCommissions()))
+            $granted = true;
+        if ($granted && $request->isXmlHttpRequest()){
             $em = $this->getDoctrine()->getManager();
             $userRepo = $em->getRepository(Beneficiary::class);
 

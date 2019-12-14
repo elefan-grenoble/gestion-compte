@@ -4,12 +4,18 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
+use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Role;
+use AppBundle\Event\CommissionJoinOrLeaveEvent;
+use AppBundle\Event\HelloassoEvent;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\CommissionType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -117,18 +123,7 @@ class CommissionController extends Controller
 
         }
 
-        $add_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
-            ->add('beneficiaries', EntityType::class, array(
-                'class' => Beneficiary::class,
-                'label' => 'Membre à ajouter',
-                'choice_label'=> 'display_name',
-                //'choices' => $beneficiaries,
-                'multiple' => true,
-                'required' => false
-            ))
-            ->setMethod('POST')
-            ->getForm();
+        $add_form = $this->getAddBeneficiaryForm($commission);
 
         return $this->render('admin/commission/edit.html.twig', array(
             'commission' => $commission,
@@ -138,6 +133,14 @@ class CommissionController extends Controller
             'delete_form' => $this->getDeleteForm($commission)->createView(),
         ));
 
+    }
+
+    private function getAddBeneficiaryForm(Commission $commission){
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
+            ->add('beneficiary',AutocompleteBeneficiaryType::class,array('label'=>'Email ou nom de la personne','required'=>true))
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
@@ -159,35 +162,38 @@ class CommissionController extends Controller
             throw $this->createAccessDeniedException();
         }
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
-            ->add('beneficiaries', EntityType::class, array(
-                'class' => Beneficiary::class,
-                'label' => 'Membre à ajouter',
-                'choice_label'=> 'display_name',
-                //'choices' => $beneficiaries,
-                'multiple' => true,
-                'required' => false
-            ))
-            ->setMethod('POST')
-            ->getForm();
+        $success = true;
+        $form = $this->getAddBeneficiaryForm($commission);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $beneficiaries = $form->getData('beneficiaries')['beneficiaries'];
-            foreach ( $beneficiaries as $beneficiary){
-                if (!$commission->getBeneficiaries()->contains($beneficiary)) {
-                    $beneficiary->addCommission($commission);
-                    $em->persist($beneficiary);
-                }
+            $beneficiary = $form->getData('beneficiary')['beneficiary'];
+            if (!$commission->getBeneficiaries()->contains($beneficiary)) {
+                $beneficiary->addCommission($commission);
+                $em->persist($beneficiary);
+                $em->flush();
+                $message = $beneficiary->getFirstname().' a bien été ajouté à la commission';
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(
+                    CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME,
+                    new CommissionJoinOrLeaveEvent($beneficiary,$commission)
+                );
+            }else{
+                $success = false;
+                $message = $beneficiary->getFirstname().' fait déjà partie de la commission';
             }
-            $em->flush();
-            if (count($beneficiaries))
-                $session->getFlashBag()->add('success', 'Les membres ont bien été ajoutés !');
-            else
-                $session->getFlashBag()->add('success', 'Le membre a bien été ajouté !');
-
         }
+
+        if ($request->isXmlHttpRequest()){
+            $html = $this->container->get('twig')->render('beneficiary/_partial/chip.html.twig', [
+                'beneficiary' => $beneficiary,
+                'close' => true,
+            ]);
+            return new JsonResponse(array('success'=>$success,'message'=>$message,'html'=>$html));
+        }
+
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+
         return $this->redirectToRoute('commission_edit',array('id' => $commission->getId()));
     }
 
@@ -208,10 +214,19 @@ class CommissionController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($_POST['beneficiary']);
+        /** @var Beneficiary $beneficiary */
         if ($beneficiary->getId()){
             $beneficiary->removeCommission($commission);
             $em->persist($beneficiary);
             $em->flush();
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(
+                CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME,
+                new CommissionJoinOrLeaveEvent($beneficiary,$commission)
+            );
+        }
+        if ($request->isXmlHttpRequest()){
+            return new JsonResponse(array('success'=>true,'message'=>$beneficiary->getFirstname().' a bien été retiré de la commission'));
         }
         $session->getFlashBag()->add('success', 'Le membre '.$beneficiary.' a bien été retiré de la commission !');
 
