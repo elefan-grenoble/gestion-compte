@@ -58,7 +58,7 @@ class AnonymousBeneficiaryType extends AbstractType
                 'Espèce' => Registration::TYPE_CASH,
                 'Chèque' => Registration::TYPE_CHECK,
                 'Cairn' => Registration::TYPE_LOCAL,
-//                'Helloasso' => Registration::TYPE_HELLOASSO,
+                'Helloasso' => Registration::TYPE_HELLOASSO,
             ),'label' => 'Mode de réglement','placeholder' => '','required' => false)); //todo, make it dynamic
 
         $builder->get('beneficiaries_emails')->addModelTransformer(new CallbackTransformer(

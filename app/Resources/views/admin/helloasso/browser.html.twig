@@ -27,19 +27,30 @@
             <table>
                 <thead>
                 <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th colspan="7" class="center" style="border-bottom: 1px solid black">payer</th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                <tr>
                     <th>id</th>
                     <th>date</th>
                     <th>amount</th>
                     <th>type</th>
-                    <th>payer_first_name</th>
-                    <th>payer_last_name</th>
-                    <th>payer_address</th>
-                    <th>payer_zip_code</th>
-                    <th>payer_city</th>
-                    <th>payer_country</th>
-                    <th>payer_email</th>
+                    <th>first_name</th>
+                    <th>last_name</th>
+                    <th>address</th>
+                    <th>zip_code</th>
+                    <th>city</th>
+                    <th>country</th>
+                    <th>email</th>
                     <th>status</th>
                     <th>actions</th>
+                    <th></th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,10 +64,14 @@
                         <td>{{ payment.payer_last_name }}</td>
                         <td>{{ payment.payer_address }}</td>
                         <td>{{ payment.payer_zip_code }}</td>
-                        <td>{{ payment.payer_city }}</td>
+                        <td>{% if payment.payer_city is defined %}{{ payment.payer_city }}{% endif %}</td>
                         <td>{{ payment.payer_country }}</td>
                         <td>{{ payment.payer_email }}</td>
                         <td>{{ payment.status }}</td>
+                        <td><ul>{% for key,action in payment.actions %}
+                                    <li>#{{ action.id }} {{ action.amount }}€ ({{ action.type }})</li>
+                            {% endfor %}</ul>
+                        </td>
                         <td>
                             <form action="{{ path("helloasso_manual_paiement_add",{paiementId : payment.id }) }}" method="post">
                                 <input type="hidden" name="paiementId" value="{{ payment.id }}">

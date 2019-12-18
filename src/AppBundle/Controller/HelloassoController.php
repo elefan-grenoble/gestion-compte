@@ -123,6 +123,11 @@ class HelloassoController extends Controller
         } else {
             $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
             $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId);
+            if (!$campaign_json){
+                $session = new Session();
+                $session->getFlashBag()->add('error','campaign not found');
+                return $this->redirectToRoute('helloasso_browser');
+            }
             $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $page));
             $page = $payments_json->pagination->page;
             $nb_of_pages = $payments_json->pagination->max_page;

@@ -592,7 +592,7 @@ class Membership
     {
         $remainder = $this->getRemainder($date);
         if ( ! $remainder->invert ){ //still some days
-            $min_delay_to_anticipate =  \DateInterval::createFromDateString('15 days');
+            $min_delay_to_anticipate =  \DateInterval::createFromDateString('28 days');
             $now = new \DateTimeImmutable();
             $away = $now->add($min_delay_to_anticipate);
             $now = new \DateTimeImmutable();
@@ -621,6 +621,11 @@ class Membership
         $expire = clone $this->getLastRegistration()->getDate();
         $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
         return date_diff($date,$expire);
+    }
+
+    public function getExpire(): ?\DateTime
+    {
+        return $this->getLastRegistration()->getDate()->add(\DateInterval::createFromDateString('1 year'));
     }
 
     /**

@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Code;
 use AppBundle\Entity\HelloassoPayment;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -46,8 +47,8 @@ class DefaultController extends Controller
 
             if ($current_app_user->getBeneficiary() != null) { //member only
 
+                /** @var Membership $membership */
                 $membership = $current_app_user->getBeneficiary()->getMembership();
-                $remainder = $membership->getRemainder();
 
                 if ($membership->getWithdrawn()) {
                     $this->container->get('security.token_storage')->setToken(null);
@@ -79,23 +80,23 @@ class DefaultController extends Controller
                         . "\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
 
-                if ($remainder->format("%R%a") < \DateInterval::createFromDateString('1 month')) {
-                    $remainingDays = intval($remainder->format("%R%a"));
-                    if ($remainingDays < 0)
-                        $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
-                    elseif ($remainingDays < 15) { //todo put this in conf
-                        $renewalDate = new \DateTime('now');
-                        $renewalDate->modify('+' . ($remainingDays + 1) . ' day');
-                        setlocale(LC_TIME, 'fr_FR.UTF8');
-                        $session->getFlashBag()->add('warning',
-                            'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
-                            'Tu pourras réadhérer en ligne par carte bancaire à partir du ' .
-                            strftime("%A %e %B", $renewalDate->getTimestamp()) .
-                            ' ou dès à présent au bureau des membres par chèque, espèce ou ' .
-                            $this->getParameter('local_currency_name') .
-                            '.');
+                if ($membership->canRegister()) {
+                    if ($membership->getRegistrations()->count() <= 0) {
+                        $session->getFlashBag()->add('warning', 'Pour poursuivre entre ton adhésion en ligne !');
+                    }else{
+                        $remainder = $membership->getRemainder();
+                        $remainingDays = intval($remainder->format("%R%a"));
+                        if ($remainingDays < 0)
+                            $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
+                        else {
+                            $session->getFlashBag()->add('warning',
+                                'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
+                                'Tu peux réadhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou ' .
+                                $this->getParameter('local_currency_name') .
+                                '.');
+                        }
                     }
-                } else {
+                } elseif ($membership->getRegistrations()->count() <= 0) {
                     $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
                 }
             }
@@ -243,7 +244,7 @@ class DefaultController extends Controller
                 return $this->json(array('success' => false, "code" => $action_json->code, "message" => $action_json->message));
             } else {
                 $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response"));
+                return $this->json(array('success' => false, "message" => "wrong api response for actions/" . $actionId));
             }
         }
         $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $action_json->id_payment);
@@ -254,7 +255,7 @@ class DefaultController extends Controller
                 return $this->json(array('success' => false, "code" => $payment_json->code, "message" => $payment_json->message));
             } else {
                 $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response"));
+                return $this->json(array('success' => false, "message" => "wrong api response for payments/" . $action_json->id_payment));
             }
         }
 

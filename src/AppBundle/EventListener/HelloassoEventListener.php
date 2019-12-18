@@ -95,11 +95,23 @@ class HelloassoEventListener
         $beneficiary = $user->getBeneficiary();
         if ($beneficiary) {
             if (!$beneficiary->getMembership()->canRegister()) {
-                throw new \LogicException('user cannot register yet');
+                //throw new \LogicException('user cannot register yet');
+                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::TOO_EARLY,new HelloassoEvent($payment,$user));
             } else {
                 $registration = new Registration();
                 $registration->setAmount($payment->getAmount());
-                $registration->setDate(new \DateTime('now'));
+                $registration->setCreatedAt($payment->getDate()); //created at payment date
+
+                if ($beneficiary->getMembership()->getLastRegistration()){
+                    $expire = clone $beneficiary->getMembership()->getExpire();
+                    if ($expire > $payment->getDate()) // a least one year
+                        $registration->setDate($expire);
+                    else
+                        $registration->setDate($payment->getDate());
+                }else{ //first registration
+                    $registration->setDate($payment->getDate());
+                }
+
                 $registration->setHelloassoPayment($payment);
                 $registration->setMode(Registration::TYPE_HELLOASSO);
                 $registration->setMembership($beneficiary->getMembership());
@@ -113,6 +125,8 @@ class HelloassoEventListener
                 }
 
                 $this->_em->flush();
+
+                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::RE_REGISTRATION_SUCCESS,new HelloassoEvent($payment,$beneficiary->getUser()));
             }
         } else {
             throw new \LogicException('user without beneficiary');
