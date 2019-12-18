@@ -127,6 +127,24 @@ class AdminController extends Controller
                 'url' => $this->generateUrl('dynamic_content_list'),
                 'id' => 'A'.'DYNAMIC_CONTENT'
             );
+            $admin_actions[] = array(
+                'name' => 'ACTION : adhésions - réadhésions',
+                'icon' => null,
+                'url' => $this->generateUrl('registrations'),
+                'id' => 'A'.'REGISTRATION_LIST'
+            );
+            $admin_actions[] = array(
+                'name' => 'ACTION : paiements helloasso',
+                'icon' => null,
+                'url' => $this->generateUrl('helloasso_payments'),
+                'id' => 'A'.'HELLOASSO_LIST'
+            );
+            $admin_actions[] = array(
+                'name' => 'ACTION : helloasso explorer',
+                'icon' => null,
+                'url' => $this->generateUrl('helloasso_browser'),
+                'id' => 'A'.'HELLOASSO_BROWSER'
+            );
             foreach ($admin_actions as $action){
               if (strpos($action['name'],$key)){
                   $return[] = $action;
