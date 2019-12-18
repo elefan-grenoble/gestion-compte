@@ -99,7 +99,7 @@
                             href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
                         {{ registration.beneficiary }}
                         {% if(registration.membership.registrations | length) > 1 %}
-                            (Ré-adhésion) effective le {{ registration.date | date('d F Y') }}
+                            (Ré-adhésion) effective le {{ registration.startDate | date('d F Y') }}
                         {% endif %}
                     {% else %}
                         pour {{ registration.beneficiary }}
