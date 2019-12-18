@@ -6,6 +6,7 @@ use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\CodeNewEvent;
+use AppBundle\Event\HelloassoEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
@@ -137,6 +138,71 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onMemberCreated");
 
         //
+    }
+
+    /**
+     * @param HelloassoEvent $event
+     * @throws \Exception
+     */
+    public function onHelloassoRegistrationSuccess(HelloassoEvent $event)
+    {
+        $user = $event->getUser();
+        $payment = $event->getPayment();
+
+        if ($user->getBeneficiary()->getMembership()->getRegistrations()->count()>1){
+            $thanks = (new \Swift_Message('[ESPACE MEMBRES] Re-adhésion helloasso bien reçue !'))
+                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setTo($user->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/reregistration.html.twig',
+                        array('beneficiary' => $user->getBeneficiary(),
+                            'payment' => $payment)
+                    ),
+                    'text/html'
+                );
+        }else{
+            $thanks = (new \Swift_Message('[ESPACE MEMBRES] Adhésion helloasso bien reçue !'))
+                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setTo($user->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/registration.html.twig',
+                        array('beneficiary' => $user->getBeneficiary(),
+                            'payment' => $payment)
+                    ),
+                    'text/html'
+                );
+        }
+
+        $this->mailer->send($thanks);
+    }
+
+    /**
+     * @param HelloassoEvent $event
+     * @throws \Exception
+     */
+    public function onHelloassoTooEarly(HelloassoEvent $event)
+    {
+        $user = $event->getUser();
+        $payment = $event->getPayment();
+
+        try {
+            $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour réadhérer !'))
+                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setTo($user->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/too_early_registration.html.twig',
+                        array('beneficiary' => $user->getBeneficiary(),
+                            'payment' => $payment)
+                    ),
+                    'text/html'
+                );
+        } catch (\Exception $e){
+            die($e->getMessage());
+        }
+        $this->mailer->send($oups);
     }
 
     /**

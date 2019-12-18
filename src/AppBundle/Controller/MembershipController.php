@@ -664,6 +664,9 @@ class MembershipController extends Controller
             $registration->setRegistrar($a_beneficiary->getRegistrar());
             $registration->setAmount($a_beneficiary->getAmount());
             $registration->setMode($a_beneficiary->getMode());
+            if ($a_beneficiary->getMode()===Registration::TYPE_HELLOASSO){
+                $registration->setAmount('--');
+            }
         }else{
             $registration->setDate(new DateTime('now'));
             $registration->setRegistrar($this->getUser());
@@ -682,12 +685,9 @@ class MembershipController extends Controller
             if (!$a_beneficiary) {
                 if (!$member->getLastRegistration()->getRegistrar())
                     $member->getLastRegistration()->setRegistrar($this->getUser());
-            } else {
-                $registration->setDate($a_beneficiary->getCreatedAt());
-                $registration->setRegistrar($a_beneficiary->getRegistrar());
-                $registration->setAmount($a_beneficiary->getAmount());
-                $registration->setMode($a_beneficiary->getMode());
-                $member->setLastRegistration($registration);
+            } else if ($a_beneficiary->getMode() === Registration::TYPE_HELLOASSO) {
+                $member->removeRegistration($member->getLastRegistration());
+                $member->setLastRegistration(null);
             }
 
             $member->setWithdrawn(false);

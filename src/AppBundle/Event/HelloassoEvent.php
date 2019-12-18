@@ -19,6 +19,8 @@ class HelloassoEvent extends Event
 {
     const PAYMENT_AFTER_SAVE = 'helloasso.payment_after_save';
     const ORPHAN_SOLVE = 'helloasso.orphan_solve';
+    const RE_REGISTRATION_SUCCESS = 'helloasso.registration_success';
+    const TOO_EARLY = 'helloasso.too_early';
 
     /**
      * @var HelloassoPayment

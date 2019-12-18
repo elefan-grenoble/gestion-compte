@@ -13,7 +13,7 @@ class Helloasso {
     }
 
     public function get($key,$params = array()){
-        $url = "https://api.helloasso.com/v3/$key.json";
+        $url = $this->container->getParameter('helloasso_api_base_url')."$key.json";
         if ($params)
             $url = $url . "?" . http_build_query($params);
         $curl = curl_init();

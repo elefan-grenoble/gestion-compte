@@ -300,7 +300,7 @@ class AnonymousBeneficiary
     {
         // check data consistency
         if (!$this->getJoinTo()){
-            if (!$this->getAmount()) {
+            if (!$this->getAmount()&&$this->getMode()!=Registration::TYPE_HELLOASSO) {
                 $context->buildViolation('Pour une nouvelle adhésion, merci de saisir un montant')
                     ->atPath('amount')
                     ->addViolation();
