@@ -117,6 +117,8 @@ services:
                 - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
                 - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
                 - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
+                - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
+                - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
 
     beneficiary_initialization_subscriber:
             class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
