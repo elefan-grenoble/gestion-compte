@@ -39,6 +39,13 @@ class AbstractRegistration
     private $date;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="start_date", type="datetime")
+     */
+    private $start_date;
+
+    /**
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
@@ -91,6 +98,16 @@ class AbstractRegistration
     public function getDate()
     {
         return $this->date;
+    }
+
+    /**
+     * Get start date
+     *
+     * @return \DateTime
+     */
+    public function getStartDate(): ?\DateTime
+    {
+        return $this->start_date;
     }
 
     /**
