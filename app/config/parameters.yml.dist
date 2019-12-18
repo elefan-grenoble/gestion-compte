@@ -84,6 +84,7 @@ parameters:
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
     helloasso_api_key:
     helloasso_api_password:
+    helloasso_api_base_url: https://api.helloasso.com/v3/
 
     # Shifting configuration
     due_duration_by_cycle: 180
