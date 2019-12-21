@@ -291,7 +291,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Request $request, Shift $shift)
+    public function bookShiftAction(Shift $shift,Request $request)
     {
         $beneficiaryId = $request->get("beneficiaryId");
         $em = $this->getDoctrine()->getManager();
@@ -497,7 +497,10 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
 
-        if ($beneficiary) {
+        if (!$beneficiary) {
+            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
+            return $this->redirectToRoute("booking_admin");
+        }else{
 
             if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
