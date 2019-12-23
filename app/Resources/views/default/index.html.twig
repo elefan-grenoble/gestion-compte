@@ -13,6 +13,7 @@
     <div class="section no-pad-bot" id="index-banner">
     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         <div class="container center">
+            <div class="announcement">{{ dynamicContent | markdown | raw }}</div>
             <div class="section no-pad-bot">
                 <h3 class="header">
                     Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}<br>#{{ app.user.beneficiary.membership.memberNumber }}{% else %}{{ app.user.username }}{% endif %}</h3>

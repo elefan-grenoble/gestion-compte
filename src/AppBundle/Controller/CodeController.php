@@ -42,7 +42,7 @@ class CodeController extends Controller
 
         $em = $this->getDoctrine()->getManager();
 
-        if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')){
+        if ($current_app_user->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
         }else{
             $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);

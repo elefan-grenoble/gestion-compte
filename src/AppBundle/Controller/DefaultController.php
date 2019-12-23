@@ -150,10 +150,14 @@ class DefaultController extends Controller
         if (!$codes) {
             $codes[] = new Code();
         }
+
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME")->getContent();
+
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
             'events' => $futur_events,
-            'codes' => $codes
+            'codes' => $codes,
+            'dynamicContent' => $dynamicContent
         ]);
     }
 
@@ -224,7 +228,7 @@ class DefaultController extends Controller
         $actionId = $_POST['action_id'];
 
         if (!$actionId) { //missing notification id
-            $logger->info("missing action id");
+            $logger->critical("missing action id");
             return $this->json(array('success' => false, "message" => "missing action id in POST content"));
         }
 
@@ -233,17 +237,25 @@ class DefaultController extends Controller
         $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $actionId);
 
         if (!isset($action_json->id)) {
+            $message = 'Unable to find an action for action id ' . $actionId;
             if (isset($action_json->code)) {
+                $logger->critical($message . ' code ' . $action_json->code);
                 return $this->json(array('success' => false, "code" => $action_json->code, "message" => $action_json->message));
+            } else {
+                $logger->critical($message);
+                return $this->json(array('success' => false, "message" => "wrong api response"));
             }
-            return $this->json(array('success' => false, "message" => "wrong api response"));
         }
         $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $action_json->id_payment);
         if (!isset($payment_json->id)) {
+            $message = 'Unable to find a payment for payment id ' . $action_json->id_payment;
             if (isset($payment_json->code)) {
+                $logger->critical($message . ' code ' . $payment_json->code);
                 return $this->json(array('success' => false, "code" => $payment_json->code, "message" => $payment_json->message));
+            } else {
+                $logger->critical($message);
+                return $this->json(array('success' => false, "message" => "wrong api response"));
             }
-            return $this->json(array('success' => false, "message" => "wrong api response"));
         }
 
         $em = $this->getDoctrine()->getManager();

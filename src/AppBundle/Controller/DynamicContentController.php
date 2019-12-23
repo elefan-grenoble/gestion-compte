@@ -61,6 +61,9 @@ class DynamicContentController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $session = new Session();
             $em = $this->getDoctrine()->getManager();
+            if ($dynamicContent->getContent() == null) {
+                $dynamicContent->setContent('');
+            }
             $em->persist($dynamicContent);
             $em->flush();
             $session->getFlashBag()->add('success', 'Contenu dynamique édité');

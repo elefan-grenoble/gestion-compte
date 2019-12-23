@@ -8,6 +8,7 @@ use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Security\MembershipVoter;
+use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -290,7 +291,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Request $request, Shift $shift)
+    public function bookShiftAction(Shift $shift,Request $request)
     {
         $beneficiaryId = $request->get("beneficiaryId");
         $em = $this->getDoctrine()->getManager();
@@ -496,7 +497,10 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
 
-        if ($beneficiary) {
+        if (!$beneficiary) {
+            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
+            return $this->redirectToRoute("booking_admin");
+        }else{
 
             if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
@@ -541,7 +545,7 @@ class BookingController extends Controller
      */
     public function freeShiftAction(Request $request, Shift $shift)
     {
-        $this->denyAccessUnlessGranted('free', $shift);
+        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
         $session = new Session();
 
@@ -563,4 +567,49 @@ class BookingController extends Controller
 
     }
 
+    /**
+     * free a shift.
+     *
+     * @Route("/lock_shift/{id}", name="lock_shift")
+     * @Method("GET")
+     */
+    public function lockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(true);
+            }
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
+     * free a shift.
+     *
+     * @Route("/unlock_shift/{id}", name="unlock_shift")
+     * @Method("GET")
+     */
+    public function unlockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(false);
+            }
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
 }
