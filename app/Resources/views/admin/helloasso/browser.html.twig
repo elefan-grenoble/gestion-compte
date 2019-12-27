@@ -62,8 +62,8 @@
                         <td>{{ payment.type }}</td>
                         <td>{{ payment.payer_first_name }}</td>
                         <td>{{ payment.payer_last_name }}</td>
-                        <td>{{ payment.payer_address }}</td>
-                        <td>{{ payment.payer_zip_code }}</td>
+                        <td>{% if payment.payer_city is defined %}{{ payment.payer_address }}{% endif %}</td>
+                        <td>{% if payment.payer_city is defined %}{{ payment.payer_zip_code }}{% endif %}</td>
                         <td>{% if payment.payer_city is defined %}{{ payment.payer_city }}{% endif %}</td>
                         <td>{{ payment.payer_country }}</td>
                         <td>{{ payment.payer_email }}</td>
