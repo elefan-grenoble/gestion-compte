@@ -62,13 +62,6 @@ class Membership
     private $registrations;
 
     /**
-     * @ORM\OneToOne(targetEntity="Registration",cascade={"persist"})
-     * @ORM\JoinColumn(name="last_registration_id", referencedColumnName="id", onDelete="CASCADE")
-     * @Assert\Valid
-     */
-    private $lastRegistration;
-
-    /**
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="membership", cascade={"persist", "remove"})
      */
     private $beneficiaries;
@@ -167,11 +160,6 @@ class Membership
     public function addRegistration(\AppBundle\Entity\Registration $registration)
     {
         $this->registrations[] = $registration;
-
-        if (!$this->getLastRegistration() || $registration->getDate() > $this->getLastRegistration()->getDate()){
-            $this->setLastRegistration($registration);
-        }
-
         return $this;
     }
 
@@ -183,12 +171,6 @@ class Membership
     public function removeRegistration(\AppBundle\Entity\Registration $registration)
     {
         $this->registrations->removeElement($registration);
-
-        if ($this->getLastRegistration() === $registration){
-            if ($this->getRegistrations()->count()){
-                $this->setLastRegistration($this->getRegistrations()->first());
-            }
-        }
     }
 
     /**
@@ -373,25 +355,13 @@ class Membership
     }
 
     /**
-     * Set lastRegistration
-     *
-     * @param \AppBundle\Entity\Registration $lastRegistration
-     *
-     * @return Membership
-     */
-    public function setLastRegistration(\AppBundle\Entity\Registration $lastRegistration = null)
-    {
-        $this->lastRegistration = $lastRegistration;
-        return $this;
-    }
-    /**
      * Get lastRegistration
      *
      * @return \AppBundle\Entity\Registration
      */
     public function getLastRegistration()
     {
-        return $this->lastRegistration;
+        return $this->getRegistrations()->first();
     }
 
     /**
