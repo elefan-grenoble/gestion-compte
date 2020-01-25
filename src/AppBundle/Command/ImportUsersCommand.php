@@ -209,16 +209,6 @@ class ImportUsersCommand extends CsvCommand
                         $registration->setRegistrar($registrar);
                         $registration->setMode($mode);
                         $em->persist($registration);
-
-                        if ($membership_is_new){
-                            $membership->setLastRegistration($registration);
-                            $em->persist($membership);
-                        }else if ($membership->getLastRegistration()){
-                            if ($membership->getLastRegistration()->getDate()<$registration->getDate()){
-                                $membership->setLastRegistration($registration);
-                                $em->persist($membership);
-                            }
-                        }
                     }
 
                     foreach ($commissions as $commission_id){

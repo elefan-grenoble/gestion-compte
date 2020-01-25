@@ -686,8 +686,7 @@ class MembershipController extends Controller
                 if (!$member->getLastRegistration()->getRegistrar())
                     $member->getLastRegistration()->setRegistrar($this->getUser());
             } else if ($a_beneficiary->getMode() === Registration::TYPE_HELLOASSO) {
-                $member->removeRegistration($member->getLastRegistration());
-                $member->setLastRegistration(null);
+                $member->removeRegistration($registration); //no registration yet
             }
 
             $member->setWithdrawn(false);

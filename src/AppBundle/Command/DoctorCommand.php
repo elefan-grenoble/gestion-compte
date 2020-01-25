@@ -115,11 +115,6 @@ class DoctorCommand extends ContainerAwareCommand
             $em = $this->getContainer()->get('doctrine')->getManager();
             $members = $em->getRepository('AppBundle:Membership')->findAll();
             foreach ($members as $member) {
-                if ($member->getRegistrations()->count() && $member->getRegistrations()->first())
-                    $member->setLastRegistration($member->getRegistrations()->first());
-                else
-                    $member->setLastRegistration();
-                $em->persist($member);
                 foreach ($member->getRegistrations() as $registration) {
                     if ($registration->getCreatedAt()->format('Y') < 0) {
                         $registration->setCreatedAt($registration->getDate());
