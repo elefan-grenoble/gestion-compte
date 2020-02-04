@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#todo mode maintenance NGINX
+#todo Appliquer les migrations avec un dump de base juste avant
+
 set -e
 
 ENVFILE="$PWD/.env"
@@ -18,7 +21,7 @@ if [ ! -f "$ENVFILE" ]; then
 fi
 
 set -a
-. $ENVFILE
+. "$ENVFILE"
 set +a
 
 if [ $# -lt 1 ]; then
@@ -60,13 +63,13 @@ git checkout $1
 
 echo "\e[93m2)\e[35m composer install\e[39m"
 export SYMFONY_ENV=prod
-sudo -u $PHP_USER composer install --no-dev --optimize-autoloader
+sudo -u "$PHP_USER" composer install --no-dev --optimize-autoloader
 
 echo "\e[93m3)\e[35m assetic:dump \e[39m"
-sudo -u $PHP_USER php bin/console assetic:dump
+sudo -u "$PHP_USER" php bin/console assetic:dump
 
 echo "\e[93m4)\e[35m Restart php sevice\e[39m"
-exec systemctl restart $PHP_SERVICE_NAME
+systemctl restart "$PHP_SERVICE_NAME"
 
 # Appliquer les migrations avec un dump de base juste avant.
 #echo "\e[93m5)\e[35m Backup DB\e[39m"
