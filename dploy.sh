@@ -69,7 +69,7 @@ echo "\e[93m3)\e[35m assetic:dump \e[39m"
 sudo -u "${PHP_USER}" php bin/console assetic:dump
 
 echo "\e[93m4)\e[35m Restart php sevice\e[39m"
-systemctl restart "$PHP_SERVICE_NAME"
+systemctl restart "${PHP_SERVICE_NAME}"
 
 # Appliquer les migrations avec un dump de base juste avant.
 #echo "\e[93m5)\e[35m Backup DB\e[39m"
