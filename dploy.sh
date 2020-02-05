@@ -30,7 +30,7 @@ if [ $# -lt 1 ]; then
   exit 2
 fi
 
-echo "\e[34m\"PHP_USER\" : \e[95m$PHP_USER\e[0m";
+echo "\e[34m\"PHP_USER\" : \e[95m${PHP_USER}\e[0m";
 echo "\e[34m\"PHP_SERVICE_NAME\" : \e[95m$PHP_SERVICE_NAME\e[0m";
 echo "\e[34m\"TAG TO DEPLOY\" : \e[95m$1\e[0m";
 
