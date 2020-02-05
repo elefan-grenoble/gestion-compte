@@ -21,7 +21,7 @@ if [ ! -f "$ENVFILE" ]; then
 fi
 
 set -a
-. "$ENVFILE"
+source "${ENVFILE}"
 set +a
 
 if [ $# -lt 1 ]; then
