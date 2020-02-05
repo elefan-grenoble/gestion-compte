@@ -59,7 +59,7 @@ while true; do
     esac
 done
 
-git checkout $1
+git checkout "${1}"
 
 echo "\e[93m2)\e[35m composer install\e[39m"
 export SYMFONY_ENV=prod
