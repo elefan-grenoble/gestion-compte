@@ -38,7 +38,7 @@ echo "\e[93m1a)\e[35m Fetch \e[39m"
 git fetch --all --tags --prune
 
 echo "\e[93m1b)\e[35m Check if tag \e[34m$1\e[35m exist\e[0m"
-if git tag --list | egrep -q "^$1$"
+if git tag --list | grep -E -q "^${1}$"
 then
     echo "\e[92mYes, Tag found ! 👌\e[0m"
 else
