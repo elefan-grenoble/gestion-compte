@@ -63,7 +63,7 @@ git checkout "${1}"
 
 echo "\e[93m2)\e[35m composer install\e[39m"
 export SYMFONY_ENV=prod
-sudo -u "$PHP_USER" composer install --no-dev --optimize-autoloader
+sudo -u "${PHP_USER}" composer install --no-dev --optimize-autoloader
 
 echo "\e[93m3)\e[35m assetic:dump \e[39m"
 sudo -u "$PHP_USER" php bin/console assetic:dump
