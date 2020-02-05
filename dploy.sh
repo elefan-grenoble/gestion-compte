@@ -5,7 +5,7 @@
 
 set -e
 
-ENVFILE="$PWD/.env"
+ENVFILE="${PWD}/.env"
 LOCAL_PATH="$(pwd)"
 
 if [ "$(whoami)" != "root" ] ; then
