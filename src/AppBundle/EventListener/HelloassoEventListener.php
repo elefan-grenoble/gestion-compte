@@ -102,8 +102,10 @@ class HelloassoEventListener
                 $registration->setAmount($payment->getAmount());
                 $registration->setCreatedAt($payment->getDate()); //created at payment date
 
-                if ($beneficiary->getMembership()->getLastRegistration()){
-                    $expire = clone $beneficiary->getMembership()->getExpire();
+                $membership = $beneficiary->getMembership();
+
+                if ($membership->getLastRegistration()){
+                    $expire = clone $membership->getExpire();
                     if ($expire > $payment->getDate()) // a least one year
                         $registration->setDate($expire);
                     else
@@ -114,15 +116,16 @@ class HelloassoEventListener
 
                 $registration->setHelloassoPayment($payment);
                 $registration->setMode(Registration::TYPE_HELLOASSO);
-                $registration->setMembership($beneficiary->getMembership());
+                $registration->setMembership($membership);
 
                 $this->_em->persist($registration);
                 $payment->setRegistration($registration);
-                $beneficiary->getMembership()->addRegistration($registration);
+                $membership->addRegistration($registration);
 
-                if ($beneficiary->getMembership()->isWithdrawn()){
-                    $beneficiary->getMembership()->setWithdrawn(false); //open
+                if ($membership->isWithdrawn()){
+                    $membership->setWithdrawn(false); //open
                 }
+                $this->_em->persist($membership);
 
                 $this->_em->flush();
 
