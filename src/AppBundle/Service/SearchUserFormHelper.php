@@ -2,12 +2,16 @@
 //DependencyInjection/SearchUserFormHelper.php
 namespace AppBundle\Service;
 
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Expr\Join;
+use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilder;
 
 class SearchUserFormHelper {
 
@@ -93,16 +97,25 @@ class SearchUserFormHelper {
         return $formBuilder->getForm();
     }
 
+    /**
+     * @param EntityManager $doctrineManager
+     * @return QueryBuilder
+     */
     public function initSearchQuery($doctrineManager){
+        /** @var QueryBuilder $qb */
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
-            ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
-            ->leftJoin("b.user", "u")->addSelect("u")
-            ->leftJoin("o.registrations", "r")->addSelect("r");
+            ->leftJoin("o.registrations", "r")->addSelect("r")
+            ->leftJoin("b.user", "u")->addSelect("u");
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
         return $qb;
     }
 
+    /**
+     * @param FormBuilder $form
+     * @param QueryBuilder $qb
+     * @return QueryBuilder
+     */
     public function processSearchFormData($form,&$qb){
         if ($form->get('withdrawn')->getData() > 0){
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
@@ -138,15 +151,24 @@ class SearchUserFormHelper {
                 ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
         }
         if ($form->get('lastregistrationdate')->getData()){
-            $qb = $qb->andWhere('lr.date LIKE :lastregistrationdate')
+            $qb = $qb
+                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->andWhere('lr.id IS NULL')
+                ->andWhere('r.date LIKE :lastregistrationdate')
                 ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
         }
         if ($form->get('lastregistrationdategt')->getData()){
-            $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+            $qb = $qb
+                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->andWhere('lr.id IS NULL')
+                ->andWhere('r.date > :lastregistrationdategt')
                 ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
         }
         if ($form->get('lastregistrationdatelt')->getData()){
-            $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+            $qb = $qb
+                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->andWhere('lr.id IS NULL')
+                ->andWhere('r.date < :lastregistrationdatelt')
                 ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
         }
         if ($form->get('membernumber')->getData()){
