@@ -32,7 +32,8 @@
                         {% endif %}
                     {% endif %}
                     {% if proxy_received is null and proxy_given is null %}
-                        <a class="activator waves-effect waves-light btn orange" href="#"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                        <a class="activator waves-effect waves-light btn orange hide-on-small-only" href="#" onclick="return false;"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                        <a class="activator waves-effect waves-light btn orange hide-on-med-and-up" href="#" onclick="return false;"><i class="material-icons">list</i>Procurations</a>
                     {% endif %}
                 {% endif %}
             {% endif %}
