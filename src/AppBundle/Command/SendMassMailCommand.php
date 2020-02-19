@@ -3,6 +3,7 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Shift;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -68,7 +69,6 @@ class SendMassMailCommand extends ContainerAwareCommand
         }
         $em = $this->getContainer()->get('doctrine')->getManager();
         $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.lastRegistration", "lr")->addSelect("lr");
         $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
@@ -85,7 +85,10 @@ class SendMassMailCommand extends ContainerAwareCommand
 
         if ($tolerance >= 0 ) {
             $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière adhésion après le </><fg=yellow;>'.$last_registration->format('d M Y').' </>');
-            $qb = $qb->andWhere('lr.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
+            $qb = $qb->leftJoin("o.registrations", "r")->addSelect("r"); //registrations
+            $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->andWhere('lr.id IS NULL'); //registration is the last one registered
+            $qb = $qb->andWhere('r.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
         }else{
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> tous les membres </>');
         }
