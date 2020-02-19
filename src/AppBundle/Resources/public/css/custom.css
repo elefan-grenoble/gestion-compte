@@ -67,6 +67,14 @@
 .card-content .card-btn-bar .card-btn {
   display: inline-block;
 }
+.homebox .card.event .btn {
+  font-size: 12px;
+  padding: 0 0.5rem;
+  width: 100%;
+}
+.homebox .card.event .btn .material-icons {
+  float: left;
+}
 /*
  * Updates
  */

@@ -78,10 +78,14 @@
         {% endif %}
     {% endif %}
 
-    <a href="{{ path("booking") }}" class="btn teal"
+    <a href="{{ path("booking") }}" class="btn teal hide-on-small-only"
        {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         <i class="material-icons left">schedule</i>
         Je réserve un créneau
+    </a>
+    <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up"
+       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+        Réserver
     </a>
 
     <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
