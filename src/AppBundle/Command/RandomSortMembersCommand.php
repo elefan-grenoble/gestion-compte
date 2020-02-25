@@ -2,7 +2,9 @@
 // src/AppBundle/Command/ShiftGenerateCommand.php
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
+use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -15,9 +17,9 @@ class RandomSortMembersCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('app:user:randomise')
-            ->setDescription('Get a random list of up to date members')
-            ->setHelp('This command give you a file containing a list of up to date members sorted randomly')
+            ->setName('app:beneficiary:randomise')
+            ->setDescription('Get a random list of beneficiary up on uptodate membership')
+            ->setHelp('This command give you a file containing a list of up to date beneficiary sorted randomly')
             ->addArgument('date', InputArgument::REQUIRED, 'The date for last registration to be valid (event date) (format yyyy-mm-dd)')
             ->addOption('max_date','m', InputOption::VALUE_OPTIONAL, 'The maximum date for last registration (format yyyy-mm-dd)')
             ->addOption('exclude_frozen',null, InputOption::VALUE_NONE, 'Exclude frozen accounts')
@@ -46,12 +48,15 @@ class RandomSortMembersCommand extends ContainerAwareCommand
 
 
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.registration", "lr")->addSelect("lr");
-        $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
+        $qb = $em->getRepository(Beneficiary::class)->createQueryBuilder('b');
+        $qb = $qb->leftJoin("b.membership", "m")->addSelect("m");
+        $qb = $qb->leftJoin("m.registrations", "r")->addSelect("r"); //registrations
+        $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+            ->where('lr.id IS NULL'); //registration is the last one registered
+        $qb = $qb->andWhere('m.withdrawn = 0'); //do not include withdrawn
         if ($exclude_frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
-            $qb = $qb->andWhere('o.frozen != 1');
+            $qb = $qb->andWhere('m.frozen != 1');
         }else{
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> les comptes gelés sont inclus </>');
         }
@@ -59,35 +64,28 @@ class RandomSortMembersCommand extends ContainerAwareCommand
         $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière (re)adhésion après le </><fg=yellow;>'.$last_registration->format('D d M Y').' </>');
-        $qb = $qb->andWhere('lr.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
+        $qb = $qb->andWhere('r.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
 
         if ($given_mdate){
             $output->writeln('<fg=cyan;>>>></><fg=green;> et membres avec dernière (re)adhésion avant le </><fg=yellow;>'.$max_last_registration->format('D d M Y').' </>');
-            $qb = $qb->andWhere('lr.date <= :lastregistrationdatelt')->setParameter('lastregistrationdatelt', $max_last_registration);
+            $qb = $qb->andWhere('r.date <= :lastregistrationdatelt')->setParameter('lastregistrationdatelt', $max_last_registration);
         }
 
-        $memberships = $qb->getQuery()->getResult();
+        $beneficiaries = $qb->getQuery()->getResult();
 
-        $output->writeln('<fg=cyan;>>>></><fg=green;> '.count($memberships).' comptes membres </>');
+        $output->writeln('<fg=cyan;>>>> <fg=yellow;>'.count($beneficiaries).'</><fg=green;> beneficiaires à jour </>');
 
-        shuffle($memberships);
-        $csv = 'Index, Numéro de membre, Prénom, Nom, Téléphone, Email, Index bénéficiaire'."\n";
+        shuffle($beneficiaries);
+        $csv = 'Index, Numéro de membre, Prénom, Nom, Téléphone, Email'."\n";
         $index = 1;
-        foreach ($memberships as $membership){
-            $beneficiaries = $membership->getBeneficiaries()->toArray();
-            $rand = rand(0,count($beneficiaries)-1);
-            if ($rand >= 0 && isset($beneficiaries[$rand])){
-                $beneficiary = $beneficiaries[$rand];
-                $csv .= $index++.',';
-                $csv .= $membership->getMemberNumber().',';
-                $csv .= $beneficiary->getFirstName().',';
-                $csv .= $beneficiary->getLastName().',';
-                $csv .= intval($beneficiary->getPhone()).',';
-                $csv .= $beneficiary->getEmail().',';
-                $csv .= 'bénéficiaire #'.($rand+1);
-            }else{
-                $csv .= $membership->getMemberNumber().',';
-            }
+        /** @var Beneficiary $beneficiary */
+        foreach ($beneficiaries as $beneficiary){
+            $csv .= $index++.',';
+            $csv .= $beneficiary->getMembership()->getMemberNumber().',';
+            $csv .= $beneficiary->getFirstName().',';
+            $csv .= $beneficiary->getLastName().',';
+            $csv .= intval($beneficiary->getPhone()).',';
+            $csv .= $beneficiary->getEmail().',';
             $csv .=  "\n";
         }
         if ($file){
