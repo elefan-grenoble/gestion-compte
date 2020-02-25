@@ -47,7 +47,7 @@ class RandomSortMembersCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
         $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.lastRegistration", "lr")->addSelect("lr");
+        $qb = $qb->leftJoin("o.registration", "lr")->addSelect("lr");
         $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
         if ($exclude_frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
@@ -56,7 +56,7 @@ class RandomSortMembersCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> les comptes gelés sont inclus </>');
         }
 
-        $last_registration->modify("-1 year");
+        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière (re)adhésion après le </><fg=yellow;>'.$last_registration->format('D d M Y').' </>');
         $qb = $qb->andWhere('lr.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);

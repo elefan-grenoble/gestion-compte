@@ -52,6 +52,11 @@ services:
       arguments: ['@service_container']
       tags:
         - { name: twig.extension }
+    app.twig.extensions.membership:
+      class: AppBundle\Twig\Extension\MembershipExtension
+      arguments: ['@service_container']
+      tags:
+        - { name: twig.extension }
     app.form.registration:
         class: AppBundle\Form\RegistrationType
         tags:
@@ -133,9 +138,10 @@ services:
               - "@doctrine.orm.entity_manager"
 
     validator_anonymous_beneficiary_beneficiary_can_host:
-      class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
-      arguments:
-        - "%maximum_nb_of_beneficiaries_in_membership%"
+        class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
+        arguments:
+              $container: "@service_container"
+              $maximum_nb_of_beneficiaries_in_membership: "%maximum_nb_of_beneficiaries_in_membership%"
 
     shift_service:
             class:  AppBundle\Service\ShiftService
@@ -180,6 +186,13 @@ services:
                 $entity_manager: "@doctrine.orm.entity_manager"
                 $router: "@router"
                 $templating: "@templating"
+
+    membership_service:
+            class: AppBundle\Service\MembershipService
+            public: true
+            arguments:
+                - "@doctrine.orm.entity_manager"
+                - "%registration_duration%"
 
     event_service:
             class: AppBundle\Service\EventService

@@ -113,10 +113,9 @@ class MembershipController extends Controller
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
         $newReg = new Registration();
-        $remainder = $member->getRemainder();
+        $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $date = clone $member->getLastRegistration()->getDate();
-            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+            $newReg->setDate($this->get('membership_service')->getExpire($member));
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
@@ -185,10 +184,9 @@ class MembershipController extends Controller
         $session = new Session();
         $this->denyAccessUnlessGranted('edit', $member);
         $newReg = new Registration();
-        $remainder = $member->getRemainder();
+        $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $date = clone $member->getLastRegistration()->getDate();
-            $newReg->setDate($date->add(\DateInterval::createFromDateString('1 year')));
+            $newReg->setDate($this->get('membership_service')->getExpire($member));
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
@@ -210,8 +208,8 @@ class MembershipController extends Controller
             $newReg->setRegistrar($this->getCurrentAppUser());
 
             $date = $registrationForm->get('date')->getData();
-            if (!$member->canRegister($date)) {
-                $session->getFlashBag()->add('warning', 'l\'adhésion précédente du est encore valable à cette date !');
+            if (!$this->get('membership_service')->canRegister($member,$date)) {
+                $session->getFlashBag()->add('warning', 'l\'adhésion précédente est encore valable à cette date !');
                 return $this->redirectToShow($member);
             }
             $newReg->setMembership($member);

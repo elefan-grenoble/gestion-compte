@@ -27,7 +27,8 @@ class CloseMembershipCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
 
-        $members = $em->getRepository('AppBundle:Membership')->findWithExpiredRegistrationFrom($date);
+        $delay = $this->getContainer()->getParameter('registration_duration');
+        $members = $em->getRepository('AppBundle:Membership')->findWithExpiredRegistrationFrom($date,$delay);
         $count = 0;
         foreach ($members as $member) {
             $member->setWithdrawn(true);

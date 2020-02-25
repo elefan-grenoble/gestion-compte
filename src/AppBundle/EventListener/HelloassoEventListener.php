@@ -94,7 +94,8 @@ class HelloassoEventListener
     protected function linkPaymentToUser(User $user,HelloassoPayment $payment){
         $beneficiary = $user->getBeneficiary();
         if ($beneficiary) {
-            if (!$beneficiary->getMembership()->canRegister()) {
+            $membership = $beneficiary->getMembership();
+            if (!$this->container->get('membership_service')->canRegister($membership)) {
                 //throw new \LogicException('user cannot register yet');
                 $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::TOO_EARLY,new HelloassoEvent($payment,$user));
             } else {
@@ -102,11 +103,9 @@ class HelloassoEventListener
                 $registration->setAmount($payment->getAmount());
                 $registration->setCreatedAt($payment->getDate()); //created at payment date
 
-                $membership = $beneficiary->getMembership();
-
                 if ($membership->getLastRegistration()){
-                    $expire = clone $membership->getExpire();
-                    if ($expire > $payment->getDate()) // a least one year
+                    $expire = clone $this->container->get('membership_service')->getExpire($membership);
+                    if ($expire > $payment->getDate()) // not yet expired
                         $registration->setDate($expire);
                     else
                         $registration->setDate($payment->getDate());

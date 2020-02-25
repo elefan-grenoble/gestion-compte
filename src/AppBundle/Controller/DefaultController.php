@@ -13,6 +13,7 @@ use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Event\SwipeCardEvent;
+use AppBundle\Service\MembershipService;
 use AppBundle\Twig\Extension\AppExtension;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -80,11 +81,11 @@ class DefaultController extends Controller
                         . "\">ton profil <i class=\"material-icons tiny\">settings</i></a>");
                 }
 
-                if ($membership->canRegister()) {
+                if ($this->get('membership_service')->canRegister($membership)) {
                     if ($membership->getRegistrations()->count() <= 0) {
                         $session->getFlashBag()->add('warning', 'Pour poursuivre entre ton adhésion en ligne !');
                     }else{
-                        $remainder = $membership->getRemainder();
+                        $remainder = $this->get('membership_service')->getRemainder($membership);
                         $remainingDays = intval($remainder->format("%R%a"));
                         if ($remainingDays < 0)
                             $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
