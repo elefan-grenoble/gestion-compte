@@ -514,11 +514,6 @@ class Membership
         });
     }
 
-    public function isUptodate()
-    {
-        return ($this->getRemainder()->format("%R%a") >= 0);
-    }
-
     /**
      * Add note
      *
@@ -550,52 +545,6 @@ class Membership
     public function getNotes()
     {
         return $this->notes;
-    }
-
-    /**
-     * Check if registration is possible
-     *
-     * @param \DateTime $date
-     * @return boolean
-     */
-    public function canRegister(\DateTime $date = null)
-    {
-        $remainder = $this->getRemainder($date);
-        if ( ! $remainder->invert ){ //still some days
-            $min_delay_to_anticipate =  \DateInterval::createFromDateString('28 days');
-            $now = new \DateTimeImmutable();
-            $away = $now->add($min_delay_to_anticipate);
-            $now = new \DateTimeImmutable();
-            $expire = $now->add($remainder);
-            return ($expire < $away);
-        }
-        else {
-            return true;
-        }
-    }
-
-    /**
-     * get remainder
-     *
-     * @return \DateInterval|false
-     */
-    public function getRemainder(\DateTime $date = null)
-    {
-        if (!$date){
-            $date = new \DateTime('now');
-        }
-        if (!$this->getLastRegistration()){
-            $expire = new \DateTime('-1 day');
-            return date_diff($date,$expire);
-        }
-        $expire = clone $this->getLastRegistration()->getDate();
-        $expire = $expire->add(\DateInterval::createFromDateString('1 year'));
-        return date_diff($date,$expire);
-    }
-
-    public function getExpire(): ?\DateTime
-    {
-        return $this->getLastRegistration()->getDate()->add(\DateInterval::createFromDateString('1 year'));
     }
 
     /**

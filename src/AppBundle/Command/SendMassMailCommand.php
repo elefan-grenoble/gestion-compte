@@ -78,7 +78,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         }
 
         $last_registration = new \DateTime();
-        $last_registration->modify("-1 year");
+        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
         if ($tolerance && $tolerance > 0){
             $last_registration->modify("-".$tolerance." days");
         }
