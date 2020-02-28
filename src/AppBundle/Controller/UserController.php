@@ -279,7 +279,7 @@ class UserController extends Controller
     {
         $session = new Session();
         $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
-        if (!$membership->canRegister()) {
+        if (!$this->get('membership_service')->canRegister($membership)) {
             $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }

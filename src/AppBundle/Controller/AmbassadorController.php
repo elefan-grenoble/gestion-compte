@@ -8,6 +8,7 @@ use AppBundle\Entity\Note;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
 use AppBundle\Form\NoteType;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -77,8 +78,10 @@ class AmbassadorController extends Controller
         $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
             ->leftJoin("b.user", "u")->addSelect("u")
-            ->leftJoin("o.lastRegistration", "lr")->addSelect("lr")
-            ->leftJoin("o.registrations", "r")->addSelect("r");
+            ->leftJoin("o.registrations", "r")->addSelect("r") //registrations
+            ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+            ->where('lr.id IS NULL') //registration is the last one registered
+            ->andWhere('o.withdrawn = false');
 
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
 
@@ -116,7 +119,7 @@ class AmbassadorController extends Controller
                     $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
                     $date = $lastYear->format('Y-m-d') ;
                 }
-                $qb = $qb->andWhere('lr.date > :lastregistrationdategt')
+                $qb = $qb->andWhere('r.date > :lastregistrationdategt')
                         ->setParameter('lastregistrationdategt', $date);
             }
             if ($form->get('lastregistrationdatelt')->getData()){
@@ -126,11 +129,11 @@ class AmbassadorController extends Controller
                     $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
                     $date = $lastYear->format('Y-m-d') ;
                 }
-                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                         ->setParameter('lastregistrationdatelt', $date);
             }else{
                 $date = $lastYear->format('Y-m-d') ;
-                $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+                $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                     ->setParameter('lastregistrationdatelt', $date);
             }
             if ($form->get('membernumber')->getData()){
@@ -162,7 +165,7 @@ class AmbassadorController extends Controller
             $form->get('dir')->setData($order);
             $qb = $qb->andWhere('o.withdrawn = 0');
             $qb = $qb->andWhere('o.frozen = 0');
-            $qb = $qb->andWhere('lr.date < :lastregistrationdatelt')
+            $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                     ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
         }
 

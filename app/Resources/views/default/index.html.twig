@@ -26,7 +26,7 @@
                 {% endif %}
                 {% if app.user.beneficiary %}
                     <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
-                    {% if app.user.beneficiary.membership.uptodate and app.user.beneficiary.membership.canRegister %}
+                    {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
                         <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
                                     class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
                         <br>
@@ -38,7 +38,7 @@
 
             <div class="row">
                 {% if app.user.beneficiary %}{# not only admin ? #}
-                    {% if app.user.beneficiary.membership.uptodate %}
+                    {% if app.user.beneficiary.membership | uptodate %}
                         <div class="col s12 l12 xl6">
                             <div class="homebox">
                                 <h5><span class="white">Mon Bénévolat</span></h5>
@@ -53,14 +53,14 @@
                         <div class="homebox">
                             <h5><span class="white">Mon compte</span></h5>
                             <div>
-                                {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership.uptodate %}
+                                {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
                                     <p>
                                         <i class="material-icons">warning</i>
-                                        Ton adhésion a expirée le {{ "now"|date_modify((app.user.beneficiary.membership.remainder | date("%R%a"))~" days")| date_fr_long }}
+                                        Ton adhésion a expirée le {{ "now"|date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
                                     </p>
                                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i
                                                 class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
-                                {% elseif not app.user.beneficiary.membership.uptodate %}
+                                {% elseif not app.user.beneficiary.membership | uptodate %}
                                     <p>
                                         <i class="material-icons">warning</i>
                                         Il est temps d'adhérer.
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if not app.user.beneficiary or app.user.beneficiary.membership.uptodate %}
+                {% if not app.user.beneficiary or app.user.beneficiary.membership | uptodate %}
                     <div class="col s12">
                         {{ render(controller("AppBundle:Booking:homepageShifts")) }}
                     </div>

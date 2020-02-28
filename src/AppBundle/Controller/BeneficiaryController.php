@@ -224,7 +224,7 @@ class BeneficiaryController extends Controller
                 if ($beneficiary->getMembership()->isWithdrawn()){
                     $dead = true;
                 }
-                if ($beneficiary->getMembership()->isUptodate()){
+                if (!$this->get('membership_service')->isUptodate($beneficiary->getMembership())){
                     $dead = true;
                 }
                 if (!$beneficiary->getMembership()){

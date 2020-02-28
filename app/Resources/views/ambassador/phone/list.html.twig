@@ -110,12 +110,12 @@
                 <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a></td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.firstname }}<br/>
+                        {{ beneficiary.firstname }}{% if not loop.last %}<hr/>{% endif %}
                     {% endfor %}
                 </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.lastname }}<br/>
+                        {{ beneficiary.lastname }}{% if not loop.last %}<hr/>{% endif %}
                     {% endfor %}
                 </td>
                 <td>

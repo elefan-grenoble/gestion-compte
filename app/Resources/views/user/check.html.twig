@@ -9,7 +9,7 @@
         {% set more_than_one = true %}
     {% endif %}
     {% set pass = true %}
-    {% if counter < -3*due_duration_by_cycle or beneficiary.membership.frozen or not beneficiary.user.enabled or beneficiary.membership.withdrawn or not beneficiary.membership.uptodate %}
+    {% if counter < -3*due_duration_by_cycle or beneficiary.membership.frozen or not beneficiary.user.enabled or beneficiary.membership.withdrawn or not beneficiary.membership | uptodate %}
         {% set pass = false %}
     {% endif %}
     <div class="container">
@@ -93,7 +93,7 @@
                 <p class="center-align"><strong>{% if more_than_one %}Votre{% else %}Ton{% endif %} compte est fermé !</strong> Mais je suis content de te voir revoir quand même !
                     <br>
                     {% image '@AppBundle/Resources/public/img/emoticons/066-ghost.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":(" />{% endimage %}</p>
-            {%  elseif not beneficiary.membership.uptodate %}
+            {%  elseif not beneficiary.membership | uptodate %}
                 <p class="center-align"><strong>Oups, {% if more_than_one %}votre{% else %}ton{% endif %} adhésion n'est plus à jour !</strong>
                     <br>
                     {% image '@AppBundle/Resources/public/img/emoticons/019-shocked-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":o" />{% endimage %}</p>

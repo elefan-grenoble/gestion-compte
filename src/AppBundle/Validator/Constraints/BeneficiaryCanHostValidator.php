@@ -3,7 +3,10 @@
 namespace AppBundle\Validator\Constraints;
 
 use AppBundle\Entity\User;
+use AppBundle\Service\MembershipService;
+use AppBundle\Service\ShiftService;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -13,10 +16,18 @@ use Symfony\Component\Validator\ConstraintValidator;
 class BeneficiaryCanHostValidator extends ConstraintValidator
 {
     private $maximum_nb_of_beneficiaries_in_membership;
+    private $container;
 
-    public function __construct($maximum_nb_of_beneficiaries_in_membership)
+    /**
+     * @var MembershipService
+     */
+    private $memberService;
+
+    public function __construct(ContainerInterface $container, $maximum_nb_of_beneficiaries_in_membership)
     {
         $this->maximum_nb_of_beneficiaries_in_membership = $maximum_nb_of_beneficiaries_in_membership;
+        $this->container = $container;
+        $this->memberService = $container->get("membership_service");
     }
 
     public function validate($value, Constraint $constraint)
@@ -34,7 +45,7 @@ class BeneficiaryCanHostValidator extends ConstraintValidator
                 ->setParameter('{{ host }}', '#'.$value->getMemberNumber().' de '.$value->getFirstname().' '.$value->getLastname())
                 ->setParameter('{{ reason }}', 'Son compte est fermé')
                 ->addViolation();
-        }else if (!$value->getMembership()->isUptodate()) {
+        }else if (!$this->memberService->isUptodate($value->getMembership())) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ host }}', '#'.$value->getMemberNumber().' de '.$value->getFirstname().' '.$value->getLastname())
                 ->setParameter('{{ reason }}', 'Son compte est n\'est plus à jour d\'adhésion')
