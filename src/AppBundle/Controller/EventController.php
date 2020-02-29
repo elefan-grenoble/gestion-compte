@@ -373,6 +373,7 @@ class EventController extends Controller
                 foreach ($beneficiary->getMembership()->getBeneficiaries() as $b){
                     $beneficiaries_ids[] = $b;
                 }
+                /** @var Proxy $proxy */
                 $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
@@ -381,7 +382,7 @@ class EventController extends Controller
                     if ($proxy->getGiver() !== null) {
                         $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre une procuration d\'une autre personne');
                         return $this->redirectToRoute('homepage');
-                    } else {
+                    } else if ($proxy->getOwner()!=$beneficiary){
                         $session->getFlashBag()->add('notice', $beneficiary->getUser()->getFirstName() . ' partage son adhésion #' . $beneficiary->getMemberNumber() . ' avec ' . $proxy->getOwner()->getUser()->getFirstname() . ' qui accepte de prendre une procuration pour cet événement !');
                     }
                 } else {
