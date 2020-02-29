@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Membership;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,8 +32,10 @@ class CloseMembershipCommand extends ContainerAwareCommand
         $delay = \DateInterval::createFromDateString($registration_duration);
         $members = $em->getRepository('AppBundle:Membership')->findWithExpiredRegistrationFrom($date,$delay->y);
         $count = 0;
+        /** @var Membership $member */
         foreach ($members as $member) {
             $member->setWithdrawn(true);
+            $member->setFrozen(false); //not frozen anymore
             $em->persist($member);
             $count++;
             $message = 'Close membership #' . $member->getMemberNumber();
