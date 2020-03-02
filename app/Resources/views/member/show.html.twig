@@ -77,7 +77,7 @@
                         </li>
                     {% endfor %}
                 </ul>
-                {% if member.canRegister and member.mainBeneficiary.user != app.user %}
+                {% if member | can_register and member.mainBeneficiary.user != app.user %}
                     <ul class="collapsible" data-collapsible="accordion">
                         <li>
                             {% if not member.lastRegistration %}
@@ -101,7 +101,7 @@
                                 <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
                             {% endif %}
                             <div class="collapsible-body new_registration_form">
-                                Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ member.remainder | date('%a') }} jours.
+                                Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ member | remainder | date('%a') }} jours.
                             </div>
                         </li>
                     </ul>

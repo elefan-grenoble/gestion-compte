@@ -6,23 +6,18 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Form\MarkdownEditorType;
-use AppBundle\Service\Picture\BasePathPicture;
 use AppBundle\Service\SearchUserFormHelper;
-use AppBundle\Twig\Extension\AppExtension;
-use AppBundle\Twig\Extension\NewsExtension;
-use Metadata\Tests\Driver\Fixture\C\SubDir\C;
 use Michelf\Markdown;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Email controller.
@@ -62,7 +57,7 @@ class MailController extends Controller
         $users = $em->getRepository("AppBundle:User")->findNonMember();
         $r = array();
         foreach ($users as $user) {
-            $r[] = $user->getUsername().' ['.$user->getEmail().']';
+            $r[] = $user->getUsername() . ' [' . $user->getEmail() . ']';
         }
         return $this->json($r);
     }
@@ -94,7 +89,9 @@ class MailController extends Controller
             $shifts = $em->getRepository(Shift::class)->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
             $beneficiary = array();
             foreach ($shifts as $shift) {
-                $beneficiary[] = $shift->getShifter();
+                if ($shift->getShifter()) {
+                    $beneficiary[] = $shift->getShifter();
+                }
             }
             return $this->render('admin/mail/edit.html.twig', array(
                 'form' => $mailform->createView(),
@@ -127,7 +124,7 @@ class MailController extends Controller
         }
         $non_members_users = array();
         $non_members = $this->getDoctrine()->getManager()->getRepository("AppBundle:User")->findNonMember();
-        foreach ($non_members as $user){
+        foreach ($non_members as $user) {
             $non_members_emails[] = $user;
         }
 
@@ -179,7 +176,7 @@ class MailController extends Controller
             }
             foreach ($nonMembers as $nonMember) {
                 /** @var User $user */
-                $user = $em->getRepository(User::class)->findOneBy(array('email'=>$nonMember));
+                $user = $em->getRepository(User::class)->findOneBy(array('email' => $nonMember));
                 if (is_object($user)) {
                     $fake_beneficiary = new Beneficiary();
                     $fake_beneficiary->setUser($user);
@@ -206,15 +203,15 @@ class MailController extends Controller
             $content = $mailform->get('message')->getData();
             $re = '/({(?>{|%)[^%}]*(?>}|%)})/m';
             preg_match_all($re, $content, $matches, PREG_SET_ORDER, 0);
-            if(count($matches)){
-                $content = preg_replace($re,'{{TWIG}}',$content);
+            if (count($matches)) {
+                $content = preg_replace($re, '{{TWIG}}', $content);
             }
             $content = Markdown::defaultTransform($content);
-            if(count($matches)){
-                foreach ($matches as $match){
+            if (count($matches)) {
+                foreach ($matches as $match) {
                     $twig_code = $match[1];
                     $re = '/({{TWIG}})/m';
-                    $content = preg_replace($re, $twig_code, $content,1);
+                    $content = preg_replace($re, $twig_code, $content, 1);
                 }
             }
             $emailTemplate = $mailform->get('template')->getData();

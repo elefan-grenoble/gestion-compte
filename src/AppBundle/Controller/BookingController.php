@@ -67,20 +67,23 @@ class BookingController extends Controller
     public function indexAction(Request $request)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $mode = null;
-        if ($current_app_user->getBeneficiary() == null) {
+        if ($this->getUser()->getBeneficiary() == null) {
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
-            $remainder = $current_app_user->getBeneficiary()->getMembership()->getRemainder();
+            $remainder = $this->get('membership_service')->getRemainder($this->getUser()->getBeneficiary()->getMembership());
             if (intval($remainder->format("%R%a")) < 0) {
                 $session->getFlashBag()->add('warning', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
             }
+            if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
+                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ ! Dégel pour reserver 😉');
+                return $this->redirectToRoute('homepage');
+            }
         }
 
-        $beneficiaries = $current_app_user->getBeneficiary()->getMembership()->getBeneficiaries();
+        $beneficiaries = $this->getUser()->getBeneficiary()->getMembership()->getBeneficiaries();
 
         $beneficiaryForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking'))
