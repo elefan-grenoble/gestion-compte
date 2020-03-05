@@ -21,7 +21,7 @@ class CodeVoter extends Voter
     private $decisionManager;
     private $container;
 
-    public function __construct(ContainerInterface $container,AccessDecisionManagerInterface $decisionManager)
+    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
     {
         $this->container = $container;
         $this->decisionManager = $decisionManager;
@@ -30,7 +30,7 @@ class CodeVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE,self::OPEN,self::CLOSE))) {
+        if (!in_array($attribute, array(self::CREATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE))) {
             return false;
         }
 
@@ -69,6 +69,9 @@ class CodeVoter extends Voter
                 }
                 return $this->canView($code, $user);
             case self::CREATE:
+                if (!$this->container->getParameter('code_generation_enabled')) {
+                    return false;
+                }
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
                     return true;
                 }
@@ -91,9 +94,9 @@ class CodeVoter extends Voter
     private function canAdd(Code $code, User $user)
     {
         $now = new \DateTime('now');
-        if ($this->canView($code, $user)){ //can add only if last code can be seen
-            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d')!=($now->format('Y m d'))){ // on ne change pas son propre code
-                if ($this->isLocationOk()){ // et si l'utilisateur est physiquement à l'épicerie
+        if ($this->canView($code, $user)) { //can add only if last code can be seen
+            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d') != ($now->format('Y m d'))) { // on ne change pas son propre code
+                if ($this->isLocationOk()) { // et si l'utilisateur est physiquement à l'épicerie
                     return true;
                 }
             }
@@ -108,7 +111,7 @@ class CodeVoter extends Voter
         if (!$code->getId())
             return false;
 
-        if ($code->getRegistrar() === $user){ // my code
+        if ($code->getRegistrar() === $user) { // my code
             return true;
         }
 
@@ -117,15 +120,15 @@ class CodeVoter extends Voter
                 return false;
             $shifts = $user->getBeneficiary()->getMembership()->getShiftsOfCycle(0);
             $y = new \DateTime('Yesterday');
-            $y->setTime(23,59,59);
+            $y->setTime(23, 59, 59);
             $some_time_ago = new \DateTime();
             $in_some_time = new \DateTime();
             $some_time_ago->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
             $in_some_time->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
-            foreach ($shifts as $shift){
+            foreach ($shifts as $shift) {
                 if (($shift->getStart() < $in_some_time) && // dans une heure il sera commencé
                     $shift->getStart() > $y && // le début est aujourd'hui (après hier 23h59:59)
-                    ($shift->getEnd() > $some_time_ago)){ // il y a deux heure il n'était pas fini
+                    ($shift->getEnd() > $some_time_ago)) { // il y a deux heure il n'était pas fini
                     return true;
                 }
             }
@@ -140,10 +143,11 @@ class CodeVoter extends Voter
     }
 
     //\AppBundle\Security\UserVoter::isLocationOk DUPLICATED
-    private function isLocationOk(){
+    private function isLocationOk()
+    {
         $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
         $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',',$ips);
-        return (isset($ip) and in_array($ip,$ips));
+        $ips = explode(',', $ips);
+        return (isset($ip) and in_array($ip, $ips));
     }
 }
