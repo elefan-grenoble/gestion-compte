@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 class CodeVoter extends Voter
 {
     const VIEW = 'view';
-    const CREATE = 'create';
+    const GENERATE = 'generate';
     const EDIT = 'edit';
     const DELETE = 'delete';
     const CLOSE = 'close';
@@ -30,7 +30,7 @@ class CodeVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE))) {
+        if (!in_array($attribute, array(self::GENERATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE))) {
             return false;
         }
 
@@ -53,7 +53,7 @@ class CodeVoter extends Voter
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            if ($attribute == self::CREATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
+            if ($attribute == self::GENERATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
                 return false;
             }
             return true;
@@ -71,7 +71,7 @@ class CodeVoter extends Voter
                     return true;
                 }
                 return $this->canView($code, $user);
-            case self::CREATE:
+            case self::GENERATE:
                 if (!$this->container->getParameter('code_generation_enabled')) {
                     return false;
                 }
