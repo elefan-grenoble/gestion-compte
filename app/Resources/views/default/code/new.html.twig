@@ -3,62 +3,26 @@
 {% block title %}Nouveau code boîtier - {{ site_name }}{% endblock %}
 
 {% block content %}
-    {% if not code is defined %}
-        <h4 class="row center">
-            <i class="material-icons large">vpn_key</i><br>
-            Déposer les clefs
-        </h4>
-        <h5 class="center">dans le boîtier extérieur</h5>
-        <br>
-        <br>
-        <div class="row center">
-            <a class="btn-large modal-trigger" href="{{ path('code_new',{'generate':true}) }}"><i class="material-icons left">autorenew</i>Génerer le code</a>
-        </div>
-    {% else %}
-        <div class="row">
-            <div class="col s6">
-                {%  if old_codes | length > 0 %}
-                    {% for c in old_codes %}
-                        {% if is_granted("view",c) and c != code %}
-                            <div class="card-panel">
-                                <h4>Ancien code</h4>
-                                <h5><i class="material-icons left">vpn_key</i>{{ c.value }}</h5>
-                                entré à {{ c.createdAt | date('H:m:i') }} le {{ c.createdAt | date_fr_long }} par {{ c.getRegistrar }}
-                            </div>
-                        {% elseif c != code %}
-                            <div class="card-panel">
-                                <h4>Ancien code (invisible)</h4>
-                                <h5><i class="material-icons left">vpn_key</i>XXXX</h5>
-                                entré à {{ c.createdAt | date('H:m:i') }} le {{ c.createdAt | date_fr_long }} par {{ c.getRegistrar }}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                {% else %}
-                    <div class="card-panel">
-                        <h4>Aucun ancien code !</h4>
-                        <h5><i class="material-icons left">vpn_key</i>0000</h5>
-                        essai le code par default...
-                    </div>
-                {% endif %}
-            </div>
-            {% if old_codes | length == 1 and old_codes | first == code %}
-                </div><div class="row">
-            {% endif %}
-            <div class="col s6{% if old_codes | length == 1 and old_codes | first == code %} push-s3{% endif %}">
-                <div class="card-panel green lighten-5">
-                    <h4>Mon nouveau code</h4>
-                    <h5><i class="material-icons left">vpn_key</i>{{ code.value }}</h5>
-                    généré par mes soins le {{ code.createdAt | date_fr_long }} à {{ code.createdAt | date('H:m:i') }}
-                </div>
-            </div>
-        </div>
-        <div class="center-align">
-            {% if no_smartphone is defined %}
-                <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>J'ai noté merci !</a>
-            {% else %}
-                <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>Changement de code effectué !</a>
-            {% endif %}
-        </div>
-    {% endif %}
+    <h4 class="">Changer le code</h4>
+    {{ form_start(form) }}
 
+    <div class="row">
+        <div class="input-field col s12 m6 l4">
+            {{ form_widget(form.code) }}
+            {{ form_label(form.code) }}
+        </div>
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.close_old_codes) }}
+            </div>
+            <div class="">
+                {{ form_widget(form.close_old_codes) }}
+                {{ form_label(form.close_old_codes) }}
+            </div>
+        </div>
+    </div>
+
+    <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Valider</button>
+    {{ form_widget(form) }}
+    {{ form_end(form) }}
 {% endblock %}

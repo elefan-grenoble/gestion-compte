@@ -53,6 +53,9 @@ class CodeVoter extends Voter
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+            if ($attribute == self::CREATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
+                return false;
+            }
             return true;
         }
 
