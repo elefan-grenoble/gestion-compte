@@ -104,3 +104,5 @@ parameters:
     new_users_start_as_beginner: true
 
     unlimited_book_duration: false
+
+    code_generation_enabled: true

@@ -207,6 +207,11 @@ class MailController extends Controller
                 $content = preg_replace($re, '{{TWIG}}', $content);
             }
             $content = Markdown::defaultTransform($content);
+            $re = '/[^>](\n)/m';
+            preg_match_all($re, $content, $matches2, PREG_SET_ORDER, 0);
+            if (count($matches2)) {
+                $content = preg_replace($re, '<br/>', $content);
+            }
             if (count($matches)) {
                 foreach ($matches as $match) {
                     $twig_code = $match[1];

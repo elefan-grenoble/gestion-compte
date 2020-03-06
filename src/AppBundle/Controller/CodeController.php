@@ -9,6 +9,8 @@ use AppBundle\Security\CodeVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -24,6 +26,15 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class CodeController extends Controller
 {
+    public function homepageDashboardAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
+        if (!$codes) {
+            $codes[] = new Code();
+        }
+        return $this->render('default/code/home_dashboard.html.twig',array('codes'=>$codes));
+    }
 
     /**
      * Lists all codes.
@@ -64,11 +75,65 @@ class CodeController extends Controller
     /**
      * add new code.
      *
-     * @Route("/new", name="code_new")
+     * @Route("/new", name="code_edit")
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
+        $codeform = $this->createFormBuilder()
+            ->setAction($this->generateUrl('code_edit'))
+            ->setMethod('POST')
+            ->add('code', IntegerType::class, array('label' => 'code', 'required' => true))
+            ->add('close_old_codes', CheckboxType::class, array('label' => 'fermer les anciens codes ?', 'required' => false))
+            ->getForm();
+
+        $codeform->handleRequest($request);
+
+        if ($codeform->isSubmitted() && $codeform->isValid()) {
+
+            $value = $codeform->get('code')->getData();
+            $code = new Code();
+            $code->setValue($value);
+
+            $code->setClosed(false);
+            $code->setCreatedAt(new \DateTime('now'));
+            $code->setRegistrar($this->getUser());
+
+            $em->persist($code);
+
+            if ($codeform->get('close_old_codes')->getData()){
+                //close old codes
+                $open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0));
+                foreach ($open_codes as $open_code) {
+                    $open_code->setClosed(true);
+                    $em->persist($code);
+                }
+                //$session->getFlashBag()->add('success', 'Anciens codes fermés.');
+            }
+
+            $em->flush();
+
+            $session->getFlashBag()->add('success', '🎉 Nouveau code enregistré.');
+
+            return $this->redirectToRoute('codes_list');
+        }
+
+        return $this->render('default/code/new.html.twig', array(
+            'form' => $codeform->createView()
+        ));
+    }
+    /**
+     * add new code.
+     *
+     * @Route("/generate", name="code_generate")
+     * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
+     */
+    public function generateAction(Request $request){
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -90,13 +155,13 @@ class CodeController extends Controller
         if (count($my_open_codes)){
             $logger->info('CODE : code_new make change screen',array('username'=>$current_app_user->getUsername()));
             if (count($old_codes) > 1){
-                return $this->render('default/code/new.html.twig', array(
+                return $this->render('default/code/generate.html.twig', array(
                     'display' =>  true,
                     'code' => $my_open_codes[0],
                     'old_codes' => $old_codes,
                 ));
             }else{
-                return $this->render('default/code/new.html.twig', array(
+                return $this->render('default/code/generate.html.twig', array(
                     'display' =>  true,
                     'code' => $my_open_codes[0],
                     'old_codes' => $my_open_codes,
@@ -109,7 +174,7 @@ class CodeController extends Controller
 
         if ($request->get('generate') === null){ //first visit
             $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
-            return $this->render('default/code/new.html.twig');
+            return $this->render('default/code/generate.html.twig');
         }
 
         $value = rand(0,9999);//code aléatoire à 4 chiffres
@@ -130,7 +195,7 @@ class CodeController extends Controller
 
         $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
 
-        return $this->render('default/code/new.html.twig', array(
+        return $this->render('default/code/generate.html.twig', array(
             'generate' =>  true,
             'code' => $code,
             'old_codes' => $old_codes,

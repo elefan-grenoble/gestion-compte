@@ -1,0 +1,21 @@
+{% if (is_granted("view",codes | first) and is_granted("generate",codes | first)) %}
+    <a href="#modal_code" class="waves-effect waves-light btn deep-purple lighten-1 modal-trigger"><i class="material-icons left">vpn_key</i>Boîtier à clefs</a>
+    <div id="modal_code" class="modal">
+        <div class="modal-content">
+            <h4>Boîtier à clefs</h4>
+            <div>
+                {% if is_granted("view",codes | first) %}
+                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
+                        code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
+                {% endif %}
+                {% if is_granted("generate",codes | first) %}
+                    <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer
+                        les clefs</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% elseif (is_granted("view",codes | first) and not is_granted("generate",codes | first)) %}
+    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir
+        code{% if codes | length > 1 %}s{% endif %} boîtier à clefs</a>
+{% endif %}

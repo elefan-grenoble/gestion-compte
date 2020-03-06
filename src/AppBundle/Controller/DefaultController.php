@@ -148,17 +148,11 @@ class DefaultController extends Controller
             ->getQuery()
             ->getResult();
 
-        $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
-        if (!$codes) {
-            $codes[] = new Code();
-        }
-
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME")->getContent();
 
         return $this->render('default/index.html.twig', [
             'base_dir' => realpath($this->getParameter('kernel.project_dir')) . DIRECTORY_SEPARATOR,
             'events' => $futur_events,
-            'codes' => $codes,
             'dynamicContent' => $dynamicContent
         ]);
     }
