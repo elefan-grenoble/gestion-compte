@@ -18,14 +18,16 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             ->setDescription('Send shift alerts')
             ->setHelp('This command allows you to send shifts alerts for a given date')
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
-            ->addArgument('job', InputArgument::REQUIRED, 'Job id');
+            ->addArgument('jobs', InputArgument::REQUIRED, 'Jobs ids (comma separated)')
+            ->addArgument('recipients', InputArgument::REQUIRED, 'Email recipients (comma separated)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $mailer = $this->getContainer()->get('mailer');
         $date_given = $input->getArgument('date');
-        $job = $input->getArgument('job');
+        $jobs = explode(',', $input->getArgument('jobs'));
+        $recipients = explode(',', $input->getArgument('recipients'));
         $date = date_create_from_format('Y-m-d', $date_given);
         if (!$date || $date->format('Y-m-d') != $date_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
@@ -33,8 +35,9 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         }
         $date->setTime(0, 0);
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findFreeAt($date, $job);
+        $shifts = $em->getRepository('AppBundle:Shift')->findAt($date, $jobs);
 
+        // Build buckets from shifts
         $buckets = array();
         foreach ($shifts as $shift) {
             $interval = $shift->getIntervalCode();
@@ -47,15 +50,10 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
 
         $alerts = array();
         foreach ($buckets as $bucket) {
-            $hasIssue = false;
             $alert = new ShiftAlert($bucket);
-
-            if (count($bucket->getShifts()) > 2) {
-                $alert->addIssue(count($bucket->getShifts()).' personnes manquantes.');
-            }
-
-            if ($this->hasQualifiedShift($bucket)) {
-                $alert->addIssue( 'Bénévole qualifié manquant');
+            $shifterCount = $bucket->getShifterCount();
+            if ($shifterCount < 2) {
+                $alert->addIssue($shifterCount.' personnes inscrites sur '.count($bucket->getShifts()));
             }
 
             if (count($alert->issues) > 0) {
@@ -63,17 +61,18 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             }
         }
 
-        if (count($alerts) > 0) {
+        $nbAlerts = count($alerts);
+        if ($nbAlerts > 0) {
             setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
-            $subject = '[ESPACE MEMBRES] Alertes de remplissage pour le '. $dateFormatted;
+            $subject = '[ALERTE CRENEAUX] '. $dateFormatted;
 
             $shiftEmail = $this->getContainer()->getParameter('emails.shift');
             $noreplyEmail = $this->getContainer()->getParameter('emails.noreply');
 
             $email = (new \Swift_Message($subject))
                 ->setFrom($noreplyEmail['address'], $noreplyEmail['from_name'])
-                ->setTo($shiftEmail['address'], $shiftEmail['from_name'])
+                ->setTo($recipients)
                 ->setBody(
                     $this->getContainer()->get('twig')->render(
                         'emails/shift_alerts.html.twig',
@@ -82,17 +81,10 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
                     'text/html'
                 );
             $mailer->send($email);
+            $output->writeln('<fg=cyan;>Email sent with '.$nbAlerts.' alerts</>');
+        } else {
+            $output->writeln('<fg=cyan;>No shift alert to send</>');
         }
-    }
-
-    private function hasQualifiedShift($bucket)
-    {
-        foreach ($bucket->getShifts() as $shift) {
-            if ($shift->getFormation()) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }
