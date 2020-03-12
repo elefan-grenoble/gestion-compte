@@ -68,10 +68,8 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             $subject = '[ALERTE CRENEAUX] '. $dateFormatted;
 
             $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-            $noreplyEmail = $this->getContainer()->getParameter('emails.noreply');
-
             $email = (new \Swift_Message($subject))
-                ->setFrom($noreplyEmail['address'], $noreplyEmail['from_name'])
+                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
                 ->setTo($recipients)
                 ->setBody(
                     $this->getContainer()->get('twig')->render(
