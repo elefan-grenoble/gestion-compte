@@ -58,6 +58,7 @@ twig:
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
     unlimited_book_duration: '%unlimited_book_duration%'
     code_generation_enabled: '%code_generation_enabled%'
+    local_currency_name: '%local_currency_name%'
 
 # Doctrine Configuration
 doctrine:

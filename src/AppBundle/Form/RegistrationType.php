@@ -7,12 +7,9 @@ use AppBundle\Entity\Registration;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use AppBundle\Form\AddressType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -20,10 +17,12 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class RegistrationType extends AbstractType
 {
+    private $localCurrency;
     private $tokenStorage;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
     {
+        $this->localCurrency = $localCurrency;
         $this->tokenStorage = $tokenStorage;
     }
 
@@ -93,14 +92,14 @@ class RegistrationType extends AbstractType
                         $form->add('mode', ChoiceType::class, array('choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
-                            'Cairn' => Registration::TYPE_LOCAL,
+                            $this->localCurrency => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
                         ), 'label' => 'Mode de réglement')); //todo, make it dynamic
                     }else{
                         $form->add('mode', ChoiceType::class, array('choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
-                            'Cairn' => Registration::TYPE_LOCAL,
+                             $this->localCurrency => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
                         ), 'label' => 'Mode de réglement','attr'=>array('disabled' => true))); //todo, make it dynamic
                     }
@@ -120,7 +119,7 @@ class RegistrationType extends AbstractType
                 $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
-                    'Cairn' => Registration::TYPE_LOCAL,
+                    $this->localCurrency => Registration::TYPE_LOCAL,
 //                    'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
             }

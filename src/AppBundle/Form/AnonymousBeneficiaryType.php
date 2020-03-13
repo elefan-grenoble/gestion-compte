@@ -3,32 +3,26 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\AnonymousBeneficiary;
-use AppBundle\Entity\Commission;
 use AppBundle\Entity\Registration;
 use AppBundle\Validator\Constraints\UniqueEmail;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\Email;
-use Symfony\Component\Validator\Constraints\NotBlank;
 
 class AnonymousBeneficiaryType extends AbstractType
 {
+    private $localCurrency;
     private $tokenStorage;
 
-    public function __construct(TokenStorageInterface $tokenStorage)
+    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
     {
+        $this->localCurrency = $localCurrency;
         $this->tokenStorage = $tokenStorage;
     }
 
@@ -57,7 +51,7 @@ class AnonymousBeneficiaryType extends AbstractType
             ->add('mode', ChoiceType::class, array('choices'  => array(
                 'Espèce' => Registration::TYPE_CASH,
                 'Chèque' => Registration::TYPE_CHECK,
-                'Cairn' => Registration::TYPE_LOCAL,
+                $this->localCurrency => Registration::TYPE_LOCAL,
                 'Helloasso' => Registration::TYPE_HELLOASSO,
             ),'label' => 'Mode de réglement','placeholder' => '','required' => false)); //todo, make it dynamic
 
