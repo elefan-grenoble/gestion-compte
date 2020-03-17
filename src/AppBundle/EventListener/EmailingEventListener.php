@@ -26,15 +26,17 @@ class EmailingEventListener
     protected $container;
     protected $due_duration_by_cycle;
     private $memberEmail;
+    private $shiftEmail;
     private $wikiKeysUrl;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $wikiKeysUrl)
+    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $shiftEmail, $wikiKeysUrl)
     {
         $this->mailer = $mailer;
         $this->logger = $logger;
         $this->container = $container;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->memberEmail = $memberEmail;
+        $this->shiftEmail = $shiftEmail;
         $this->wikiKeysUrl = $wikiKeysUrl;
     }
 
@@ -151,7 +153,7 @@ class EmailingEventListener
 
         if ($user->getBeneficiary()->getMembership()->getRegistrations()->count()>1){
             $thanks = (new \Swift_Message('[ESPACE MEMBRES] Re-adhésion helloasso bien reçue !'))
-                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -189,7 +191,7 @@ class EmailingEventListener
 
         try {
             $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour réadhérer !'))
-                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -214,7 +216,7 @@ class EmailingEventListener
         $shift = $event->getShift();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-            ->setFrom($this->container->getParameter('transactional_mailer_user'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($this->container->getParameter('shift_mailer_user'))
             ->setReplyTo($shift->getShifter()->getEmail())
             ->setBody(
@@ -233,10 +235,11 @@ class EmailingEventListener
      */
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
+        $this->logger->info("Emailing Listener: onShiftDeleted");
         $shift = $event->getShift();
         if ($shift->getShifter()) { //warn shifter
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
-                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($shift->getShifter()->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -255,11 +258,12 @@ class EmailingEventListener
      */
     public function onShiftDismissed(ShiftDismissedEvent $event)
     {
+        $this->logger->info("Emailing Listener: onShiftDismissed");
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
         if ($shift->getIsUpcoming()) {
             $warn = (new \Swift_Message("[ESPACE MEMBRES] Crénéau annulé moins de 48 heures à l'avance"))
-                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($this->container->getParameter('shift_mailer_user'))
                 ->setBody(
                     $this->renderView(
@@ -294,7 +298,7 @@ class EmailingEventListener
         if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
             foreach ($membership->getBeneficiaries() as $beneficiary){
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
-                    ->setFrom($this->container->getParameter('shift_mailer_user'))
+                    ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                     ->setTo($beneficiary->getEmail())
                     ->setBody(
                         $this->container->get('twig')->render(
@@ -325,7 +329,7 @@ class EmailingEventListener
 
         if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
-                ->setFrom($this->container->getParameter('shift_mailer_user'))
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -352,7 +356,7 @@ class EmailingEventListener
         $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
         $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
-            ->setFrom($this->container->getParameter('transactional_mailer_user'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($code->getRegistrar()->getEmail())
             ->setBody(
                 $this->renderView(
