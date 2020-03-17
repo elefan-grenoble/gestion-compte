@@ -217,7 +217,7 @@ class EmailingEventListener
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
-            ->setTo($this->container->getParameter('shift_mailer_user'))
+            ->setTo($this->shiftEmail['address'])
             ->setReplyTo($shift->getShifter()->getEmail())
             ->setBody(
                 $this->renderView(
@@ -263,8 +263,9 @@ class EmailingEventListener
         $beneficiary = $event->getBeneficiary();
         if ($shift->getIsUpcoming()) {
             $warn = (new \Swift_Message("[ESPACE MEMBRES] Crénéau annulé moins de 48 heures à l'avance"))
-                ->setFrom($beneficiary->getEmail(), $beneficiary->getDisplayName())
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($this->shiftEmail['address'])
+                ->setReplyTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/dismissed_shift.html.twig',
