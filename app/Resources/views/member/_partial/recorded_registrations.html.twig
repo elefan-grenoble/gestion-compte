@@ -12,7 +12,7 @@
                 {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                     € en CARTE CREDIT
                 {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
-                    CAIRN{#TODO PUT THIS VALUE IN CONF#}
+                    {{ local_currency_name }}
                 {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
                     € en ESPECE
                 {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
