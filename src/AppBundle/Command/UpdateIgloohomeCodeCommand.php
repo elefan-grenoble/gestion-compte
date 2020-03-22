@@ -91,11 +91,13 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $code->setClosed(false);
         $code->setCreatedAt(new \DateTime('now'));
         $code->setRegistrar($adminUSer);
+        
+        $em->persist($code);
 
         // Close the old open codes
         foreach ($open_codes as $open_code) {
             $open_code->setClosed(true);
-            $em->persist($code);
+            $em->persist($open_code);
         }
 
         $em->flush();
