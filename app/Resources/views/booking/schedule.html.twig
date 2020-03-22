@@ -1,0 +1,15 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}
+    Planning
+{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>planning
+{% endblock %}
+
+{% block content %}
+    <h4>Planning</h4>
+    {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+{% endblock %}

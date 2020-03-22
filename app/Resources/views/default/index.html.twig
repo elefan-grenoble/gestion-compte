@@ -83,8 +83,9 @@
                         </div>
                         <div class="homebox">
                             <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
-                            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn teal darken-1"><i class="material-icons left">list</i>Taches en cours</a><br><br>
-                            <a href="{{ path("process_update_list") }}" class="btn teal darken-1" id="news_home_button" style="position: relative">
+                            <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1"><i class="material-icons left">schedule</i>Planning</a><br><br>
+                            <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn blue-grey"><i class="material-icons left">list</i>Taches en cours</a><br>
+                            <a href="{{ path("process_update_list") }}" class="btn blue-grey" id="news_home_button" style="position: relative">
                                 <i class="material-icons left" >info</i>Les nouveautés
                                 <span class="bubble_counter red white-text" style="display:none;">{{ app.user.beneficiary | last_shift_date | count_updates_list_from_date}}</span>
                             </a>

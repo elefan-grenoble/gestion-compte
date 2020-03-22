@@ -28,6 +28,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
@@ -102,42 +103,9 @@ class DefaultController extends Controller
                 }
             }
         } else {
-
-            $today = strtotime('today');
-            $from = new \DateTime();
-            $from->setTimestamp($today);
-//            $nextMonday = strtotime('next monday');
-//            $to = new \DateTime();
-//            $to->setTimestamp($nextMonday);
-            $to = new \DateTime();
-            $to->modify('+7 days');
-            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
-
-            $hours = array();
-            for ($i = 6; $i < 22; $i++) { //todo put this in conf
-                $hours[] = $i;
-            }
-
-            $bucketsByDay = array();
-            foreach ($shifts as $shift) {
-                $day = $shift->getStart()->format("d m Y");
-                $job = $shift->getJob()->getId();
-                $interval = $shift->getIntervalCode();
-                if (!isset($bucketsByDay[$day])) {
-                    $bucketsByDay[$day] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job])) {
-                    $bucketsByDay[$day][$job] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job][$interval])) {
-                    $bucket = new ShiftBucket();
-                    $bucketsByDay[$day][$job][$interval] = $bucket;
-                }
-                $bucketsByDay[$day][$job][$interval]->addShift($shift);
-            }
             return $this->render('default/index.html.twig', [
-                'bucketsByDay' => $bucketsByDay,
-                'hours' => $hours
+                'bucketsByDay' => $this->getSchedule(),
+                'hours' => $this->getHours()
             ]);
         }
         $qb = $em->createQueryBuilder();
@@ -155,6 +123,57 @@ class DefaultController extends Controller
             'events' => $futur_events,
             'dynamicContent' => $dynamicContent
         ]);
+    }
+
+    /**
+     * @Route("/schedule", name="schedule")
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
+     * @Method({"GET","POST"})
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     */
+    public function scheduleAction()
+    {
+        return $this->render('booking/schedule.html.twig', [
+            'bucketsByDay' => $this->getSchedule(),
+            'hours' => $this->getHours()
+        ]);
+    }
+
+    private function getHours() {
+        $hours = array();
+        for ($i = 6; $i < 22; $i++) { //todo put this in conf
+            $hours[] = $i;
+        }
+        return $hours;
+    }
+
+    private function getSchedule() {
+        $em = $this->getDoctrine()->getManager();
+        $today = strtotime('today');
+        $from = new \DateTime();
+        $from->setTimestamp($today);
+        $to = new \DateTime();
+        $to->modify('+7 days');
+        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
+        $bucketsByDay = array();
+        foreach ($shifts as $shift) {
+            $day = $shift->getStart()->format("d m Y");
+            $job = $shift->getJob()->getId();
+            $interval = $shift->getIntervalCode();
+            if (!isset($bucketsByDay[$day])) {
+                $bucketsByDay[$day] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job])) {
+                $bucketsByDay[$day][$job] = array();
+            }
+            if (!isset($bucketsByDay[$day][$job][$interval])) {
+                $bucket = new ShiftBucket();
+                $bucketsByDay[$day][$job][$interval] = $bucket;
+            }
+            $bucketsByDay[$day][$job][$interval]->addShift($shift);
+        }
+        return $bucketsByDay;
     }
 
     /**
