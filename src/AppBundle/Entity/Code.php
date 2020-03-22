@@ -69,9 +69,7 @@ class Code
      */
     public function setValue($value)
     {
-        if ($value){
-            $this->value = str_pad(intval($value), 4, '0', STR_PAD_LEFT);;
-        }
+        $this->value = $value;
 
         return $this;
     }
@@ -79,7 +77,7 @@ class Code
     /**
      * Get value
      *
-     * @return integer
+     * @return string
      */
     public function getValue()
     {
