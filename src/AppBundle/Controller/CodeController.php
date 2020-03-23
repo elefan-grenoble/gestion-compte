@@ -11,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -87,7 +88,7 @@ class CodeController extends Controller
         $codeform = $this->createFormBuilder()
             ->setAction($this->generateUrl('code_edit'))
             ->setMethod('POST')
-            ->add('code', IntegerType::class, array('label' => 'code', 'required' => true))
+            ->add('code', TextType::class, array('label' => 'code', 'required' => true))
             ->add('close_old_codes', CheckboxType::class, array('label' => 'fermer les anciens codes ?', 'required' => false))
             ->getForm();
 
