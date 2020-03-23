@@ -112,6 +112,7 @@ services:
                 $logger: "@logger"
                 $container: "@service_container"
                 $memberEmail: "%emails.member%"
+                $shiftEmail: "%emails.shift%"
                 $wikiKeysUrl: "%wiki_keys_url%"
             tags:
                 - { name: kernel.event_listener, event: code.new, method: onCodeNew }
