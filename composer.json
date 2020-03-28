@@ -24,7 +24,7 @@
         "friendsofsymfony/oauth-server-bundle": "^1.5",
         "friendsofsymfony/user-bundle": "^2.0",
         "incenteev/composer-parameter-handler": "^2.0",
-        "liip/imagine-bundle": "^1.9",
+        "liip/imagine-bundle": "^2.0",
         "michelf/php-markdown": "^1.7",
         "nesbot/carbon": "^2.36",
         "ornicar/gravatar-bundle": "^1.1",

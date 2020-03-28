@@ -13,7 +13,9 @@ use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class SetFirstPasswordListener{
 
@@ -24,16 +26,16 @@ class SetFirstPasswordListener{
      */
     private $em;
     /**
-     * @var TokenStorage
+     * @var TokenStorageInterface
      */
     private $token_storage;
     /**
-     * @var Router
+     * @var UrlGeneratorInterface
      */
     private $router;
 
 
-    public function __construct(EntityManagerInterface $entity_manager, TokenStorage $token_storage,Router $router)
+    public function __construct(EntityManagerInterface $entity_manager, TokenStorageInterface $token_storage, UrlGeneratorInterface $router)
     {
         $this->em = $entity_manager;
         $this->token_storage = $token_storage;

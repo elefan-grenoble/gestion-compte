@@ -22,8 +22,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class ApiController extends Controller
 {
 
-    protected function getUser(){
-        $user = $this->get('security.token_storage')->getToken()->getUser();
+    protected function getUserIfActive()
+    {
+        $user = $this->getUser();
         $beneficiary = $user->getBeneficiary();
         $withDrawn = false;
         if ($beneficiary) {
@@ -42,7 +43,8 @@ class ApiController extends Controller
      * @Method({"POST"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
-    public function swipeInAction(){
+    public function swipeInAction()
+    {
         return new JsonResponse(array(
             'success' => true
         ));
@@ -58,7 +60,7 @@ class ApiController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
-        $response = $this->getUser();
+        $response = $this->getUserIfActive();
         if (!$response['user']){
             return new JsonResponse($response);
         }
@@ -78,7 +80,7 @@ class ApiController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
-        $response = $this->getUser();
+        $response = $this->getUserIfActive();
         if (!$response['user']){
             return new JsonResponse($response);
         }
@@ -101,7 +103,7 @@ class ApiController extends Controller
         if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
-        $response = $this->getUser();
+        $response = $this->getUserIfActive();
         if (!$response['user']){
             return new JsonResponse($response);
         }

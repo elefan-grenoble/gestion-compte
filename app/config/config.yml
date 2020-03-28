@@ -10,6 +10,7 @@ parameters:
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
+  container.autowiring.strict_mode: true
 
 framework:
   #esi: ~
@@ -87,7 +88,7 @@ doctrine:
     #path: '%database_path%'
   orm:
     auto_generate_proxy_classes: '%kernel.debug%'
-    naming_strategy: doctrine.orm.naming_strategy.underscore
+    naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
     auto_mapping: true
 
 doctrine_migrations:
