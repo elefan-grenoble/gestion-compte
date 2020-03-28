@@ -230,7 +230,7 @@ class BeneficiaryController extends Controller
                 if (!$beneficiary->getMembership()){
                     $dead = true;
                 }
-                $returnArray[] = array('name' => $beneficiary->getAutocompleteLabelFull() ,'icon' => (!$dead) ? $request->getUriForPath('/bundles/app/img/cancel.svg') : '');
+                $returnArray[] = array('name' => $beneficiary->getAutocompleteLabelFull() ,'icon' => (!$dead) ? $request->getUriForPath('/build/images/cancel.svg') : '');
             }
             return new JsonResponse($returnArray);
         }

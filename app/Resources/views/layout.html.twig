@@ -5,13 +5,11 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}{{ site_name }}{% endblock %}</title>
-        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize.min.css') }}">
-        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
-        <link rel="stylesheet" href="{{ asset('bundles/app/simplemde/simplemde.min.css') }}"/>
-        {% block stylesheets %}{% endblock %}
-        <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?060820191303">
+        {{ encore_entry_link_tags('app') }}
+        {% block stylesheets %}
+
+        {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
-        <script src="{{ asset('bundles/app/js/vanilla_top.js') }}"></script>
         <style>
             .homebox{
                 border-color: {{ main_color }};
@@ -23,7 +21,9 @@
             {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
                 <div class="navbar-fixed">
                     <nav class="impersonate">
-                        <div class="brand-logo">{% image '@AppBundle/Resources/public/img/emoticons/072-ninja.svg' %}<img height="30px" class="emoticon" src="{{ asset_url }}" alt="ninja mode" />{% endimage %}</div>
+                        <div class="brand-logo">
+                            <img src="{{ asset('build/image/emoticons/072-ninja.svg') }}" alt="accès interdit">
+                        </div>
                         <div class="nav-wrapper">
                             <ul class="right">
                                 <li>
@@ -61,19 +61,15 @@
                         {% endif %}
                     </ul>
 
-                    <ul id="nav-mobile" class="side-nav">
+                    <ul id="nav-mobile" class="sidenav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {% set frozen =  app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li><div class="user-view center-align">
                                     <div class="background">
                                         {% if  frozen %}
-                                        {% image '@AppBundle/Resources/public/img/frozen.png' %}
-                                            <img class="responsive-img" src="{{ asset_url }}" alt="" />
-                                        {% endimage %}
+                                            <img src="{{ asset('build/images/frozen.png') }}" alt="">
                                         {% else %}
-                                        {% image '@AppBundle/Resources/public/img/dumbo-in-the-air.jpg' %}
-                                            <img class="responsive-img" src="{{ asset_url }}" alt="" style="position: absolute;bottom: -46px;left: 0;" />
-                                        {% endimage %}
+                                            <img src="{{ asset('build/images/dumbo-in-the-air.jpg') }}" alt="">
                                         {% endif %}
                                     </div>
                                     <a href="#user"><img class="circle" src="{{ gravatar(app.user.email) }}"></a>
@@ -105,7 +101,7 @@
                             <li><a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a></li>
                         {% endif %}
                     </ul>
-                    <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+                    <a href="#" data-target="nav-mobile" class="button-collapse sidenav-trigger"><i class="material-icons">menu</i></a>
                 </div>
             </nav>
         </header>
@@ -181,21 +177,40 @@
                 </div>
             </nav>
         {% endif %}
-        {% include "JqueryBundle:Jquery:jquery.html.twig" %}
-        <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
-        <script src="{{ asset('bundles/app/simplemde/simplemde.min.js') }}"></script>
+
+        {{ encore_entry_script_tags('app') }}
         <script src="//cdn.rawgit.com/Mikhus/canvas-gauges/gh-pages/download/2.1.5/radial/gauge.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                $('select').formSelect();
+                $('.sidenav').sidenav({
+                    menuWidth: 300, // Default is 300
+                    edge: 'left', // Choose the horizontal origin
+                    closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
+                    draggable: true, // Choose whether you can drag to open on touch screens,
+                    onOpenStart: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
+                    onCloseStart: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
+                });
+                $('.modal').modal({
+                    ready: function (modal) {
+                        $(modal).find('.simplemde-container').trigger('modalOpen'); //tell markdown editor to refresh
+                    },
+                });
+                $('.tooltipped').tooltip();
+                $(".dropdown-button").dropdown();
+                $('.collapsible').collapsible();
+            });
+        </script>
+
         <script>
             var process_update_count_unread_url = "{{ path("process_update_count_unread") }}";
         </script>
-        <script src="{{ asset('bundles/app/js/app.js') }}?060820191303"></script>
-        <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
-        <script src="{{ asset('bundles/app/js/datepicker.js') }}"></script>
+
         {% if is_granted('ROLE_ADMIN') %}
             <script>
                 var search_url = "{{ path('search') }}";
             </script>
-            <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
         {% endif %}
         {% block javascripts %}{% endblock %}
     </body>

@@ -341,7 +341,7 @@
         }
         tr.frozen{
             background-color: rgba(0, 138, 255, 0.1);
-            background-image: url({% image '@AppBundle/Resources/public/img/snowflakes.svg' %}{{ asset_url }}{% endimage %});
+            background-image: url("{{ asset('build/images/snowflakes.svg') }}");
             background-position: top right;
             background-repeat: no-repeat;
             background-size: contain;

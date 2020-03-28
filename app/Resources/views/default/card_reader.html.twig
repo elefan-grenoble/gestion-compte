@@ -64,8 +64,9 @@
             });
         })
         var barcode_submit_url = "{{ path('check') }}";
+        initSwipeCode(barcode_submit_url);
     </script>
-    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+
     <script type="text/javascript">
         setTimeout(function(){
             location.reload();

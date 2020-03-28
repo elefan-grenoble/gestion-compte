@@ -16,7 +16,7 @@
         <input type="text" autocomplete="off" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     {% endspaceless %}
     <script>
-        defer(function(){
+        $(document).ready(function() {
             //
             $('#{{ id }}').on('keydown',function () {
                 if ($(this).val().length > 2){
@@ -60,6 +60,14 @@
     {{ block('textarea_widget') }}
     </div>
     <script type="text/javascript">
+        function onceSimpleMDEReady(method) {
+            if (window.SimpleMDE) {
+                method();
+            } else {
+                setTimeout(function() { onceSimpleMDEReady(method) }, 50);
+            }
+        }
+
         onceSimpleMDEReady(function () {
             var element = $("#{{ id }}")[0];
             var config = {{ form.vars.editor_config|raw}};

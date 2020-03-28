@@ -53,7 +53,7 @@
                 <a href="#" class="add-another-collection-widget blue-grey-text" data-list-selector="#beneficiaries-emails-fields-list"><i class="material-icons left">add_circle</i>ajouter un second beneficiaire ?</a>
                 <script>
                     var max_b = {{ maximum_nb_of_beneficiaries_in_membership }};
-                    defer(function() {
+                    $(document).ready(function() {
                         jQuery(document).ready(function () {
                             jQuery('#appbundle_anonymous_beneficiary_mode').change(function () {
                                 var $amount = jQuery('#appbundle_anonymous_beneficiary_amount');

@@ -4,9 +4,7 @@
 {% endblock %}
 {% block aftercontainer %}
     <div class="center-align">
-        {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-            <img class="responsive-img" src="{{ asset_url }}" alt="elefan"/>
-        {% endimage %}
+        <img src="{{ asset('build/images/cute-elefan.png') }}" alt="elefan">
     </div>
 {% endblock %}
 {% block content %}
@@ -90,7 +88,7 @@
                                 <span class="bubble_counter red white-text" style="display:none;">{{ app.user.beneficiary | last_shift_date | count_updates_list_from_date}}</span>
                             </a>
                             <script>
-                                defer(function () {
+                                $(document).ready(function() {
                                     var cookie_data = myCookieInit({'last_processupdates_check' : "{{  app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
                                     jQuery.ajax(process_update_count_unread_url,{
                                         data: {date: cookie_data.last_processupdates_check.replace('_','+')},
@@ -183,9 +181,7 @@
         })
         {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         var barcode_submit_url = "{{ path('check') }}";
+        initSwipeCode(barcode_submit_url);
         {% endif %}
     </script>
-    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-        <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
-    {% endif %}
 {% endblock %}

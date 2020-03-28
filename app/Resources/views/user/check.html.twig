@@ -24,24 +24,16 @@
             <div class="col s6">
                 {% if counter > due_duration_by_cycle %}
                     {#we love you#}
-                    {% image '@AppBundle/Resources/public/img/love.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="we love you" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/love.svg') }}" alt="we love you">
                 {% elseif counter == due_duration_by_cycle %}
                     {#all good#}
-                    {% image '@AppBundle/Resources/public/img/good.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="all good" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/good.svg') }}" alt="all good">
                 {% elseif counter < due_duration_by_cycle and counter >=0 %}
                     {#fair enough#}
-                    {% image '@AppBundle/Resources/public/img/thumbup.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="fair enough" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/thumbup.svg') }}" alt="fair enough">
                 {% else %}{# < 0 = retard #}
                     {#Oups#}
-                    {% image '@AppBundle/Resources/public/img/bad.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="Oups" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/bad.svg') }}" alt="Oups">
                 {% endif %}
             </div>
             {% else %}
@@ -51,25 +43,21 @@
             {% endif %}
             <div class="col s6">
                 {% if not pass %}
-                    {% image '@AppBundle/Resources/public/img/donotenter.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="accès interdit" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/donotenter.svg') }}" alt="accès interdit">
                 {% else %}
-                    {% image '@AppBundle/Resources/public/img/enter.svg' %}
-                        <img class="responsive-img" src="{{ asset_url }}" alt="accès autorisé" />
-                    {% endimage %}
+                    <img src="{{ asset('build/images/enter.svg') }}" alt="accès autorisé">
                 {% endif %}
             </div>
         </div>
         {% if pass %}
             {% if counter > due_duration_by_cycle %}
-                <p class="center-align">Wha ! c'est trop d'amour ! merci !! {% image '@AppBundle/Resources/public/img/emoticons/028-heart-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt="<3" />{% endimage %}</p>
+                <p class="center-align">Wha ! c'est trop d'amour ! merci !! <img src="{{ asset('build/images/emoticons/028-heart-1.svg') }}" alt="<3"></p>
             {% endif %}
             {% if counter < due_duration_by_cycle and counter >=0 %}
-                <p class="center-align">Pense à reserver les {{ (due_duration_by_cycle - counter) | duration_from_minutes }} qu'il {% if more_than_one %}vous{% else %}te{% endif %} manque {% image '@AppBundle/Resources/public/img/emoticons/002-wink.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=";)" />{% endimage %}</p>
+                <p class="center-align">Pense à reserver les {{ (due_duration_by_cycle - counter) | duration_from_minutes }} qu'il {% if more_than_one %}vous{% else %}te{% endif %} manque <img src="{{ asset('build/images/emoticons/002-wink.svg') }}" alt=";)"></p>
             {% endif %}
             {% if counter == due_duration_by_cycle %}
-                <p class="center-align">Tout roule, passe un bon moment à {{ project_name }} ! {% image '@AppBundle/Resources/public/img/emoticons/015-smile-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":)" />{% endimage %}</p>
+                <p class="center-align">Tout roule, passe un bon moment à {{ project_name }} ! <img src="{{ asset('build/images/emoticons/015-smile-1.svg') }}" alt=":)"></p>
             {% endif %}
             {% if counter < 0 %}
                 <p class="center-align">Oups, {% if more_than_one %}vous êtes{% else %}tu es{% endif %} en retard ! il {% if more_than_one %}vous{% else %}te{% endif %} reste {{ (due_duration_by_cycle - counter) | duration_from_minutes }} à réserver !! </p>
@@ -78,12 +66,12 @@
             {% if counter < -3*due_duration_by_cycle %}
                 <p class="center-align"><strong>Oups, {% if more_than_one %}vous êtes{% else %}tu es{% endif %} vraiment trop en retard sur ton devoir !</strong>
                     <br>
-                    {% image '@AppBundle/Resources/public/img/emoticons/019-shocked-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":o" />{% endimage %}</p>
+                    <img src="{{ asset('build/images/emoticons/019-shocked-1.svg') }}" alt=":o">
                 <p class="center-align">{% if more_than_one %}Votre{% else %}Ton{% endif %} compteur temps est à <strong>{{ counter | duration_from_minutes }} !!!</strong></p>
             {%  elseif beneficiary.membership.frozen %}
                 <p class="center-align"><strong>{% if more_than_one %}Votre{% else %}Ton{% endif %} compte est gelé !</strong> Tu ne peux pas faire tes courses aujourd'hui !
                     <br>
-                    {% image '@AppBundle/Resources/public/img/emoticons/021-sad.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":(" />{% endimage %}</p>
+                    <img src="{{ asset('build/images/emoticons/021-sad.svg') }}" alt=":(">
                 {% if beneficiary.membership.frozenChange %}
                     <p class="center-align">Le degel est programmé, il sera effectif le {{ beneficiary.user.endOfCycle(0) | date_fr_long }}</p>
                 {% else %}
@@ -92,11 +80,11 @@
             {%  elseif not beneficiary.user.enabled or beneficiary.membership.withdrawn %}
                 <p class="center-align"><strong>{% if more_than_one %}Votre{% else %}Ton{% endif %} compte est fermé !</strong> Mais je suis content de te voir revoir quand même !
                     <br>
-                    {% image '@AppBundle/Resources/public/img/emoticons/066-ghost.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":(" />{% endimage %}</p>
+                    <img src="{{ asset('build/images/emoticons/066-ghost.svg') }}" alt=":(">
             {%  elseif not beneficiary.membership | uptodate %}
                 <p class="center-align"><strong>Oups, {% if more_than_one %}votre{% else %}ton{% endif %} adhésion n'est plus à jour !</strong>
                     <br>
-                    {% image '@AppBundle/Resources/public/img/emoticons/019-shocked-1.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":o" />{% endimage %}</p>
+                    <img src="{{ asset('build/images/emoticons/019-shocked-1.svg') }}" alt=":o">
                 <p class="center-align">Rendez-vous au bureau de membres régulariser tout ça !</p>
             {% endif %}
             <style>
@@ -118,8 +106,8 @@
 
         //can scan another barcode
         var barcode_submit_url="{{ path('check') }}";
+        initSwipeCode(barcode_submit_url);
     </script>
-    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
 {% endblock %}
 
 {% block stylesheets %}

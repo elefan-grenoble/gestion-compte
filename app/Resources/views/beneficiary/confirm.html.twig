@@ -42,7 +42,7 @@
                             {% if not member.lastRegistration %}
                                 <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour ce compte. <br/>Il ne peux donc pas être activé.</div>
                                 <div class="center-align">
-                                    <img class="responsive-img" src="/bundles/app/img/cry.gif" alt="lost" />
+                                    <img class="responsive-img" src="{{ asset("build/images/cry.gif") }}" alt="lost" />
                                 </div>
                             {% else %}
                                 {% if isTemporaryEmail(user.email) %}

@@ -64,16 +64,16 @@
     </div>
     {% if app.user.beneficiary %}
     <script>
-        defer(function () {
+        $(document).ready(function() {
             var data_raw = Cookies.get("frontend");
             var cookie_data = undefined;
             if (data_raw)
                 cookie_data = JSON.parse(data_raw);
             if (!cookie_data)
                 cookie_data = {};
-            cookie_data.last_processupdates_check = "{{ date('now') | date_w3c }}".replace('+','_'); //checked now
+            cookie_data.last_processupdates_check = "{{ date('now') | date_w3c }}".replace('+', '_'); //checked now
             Cookies.set("frontend", cookie_data);
-        });
+        };
     </script>
     {% endif %}
     {% if is_granted("ROLE_PROCESS_MANAGER") %}

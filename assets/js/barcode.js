@@ -3,7 +3,7 @@ function bc_focus() {
     $('input[name="swipe_code"]').focus();
     setTimeout(bc_focus,200);
 }
-jQuery(function () {
+let initSwipeCode = function (barcode_submit_url) {
     var form = $('<form style="display: block;position:fixed;bottom:0;left: 0;background: transparent; opacity: 0;" action="' + barcode_submit_url + '" method="post">' +
         '<input type="text" name="swipe_code" value="' + barcode + '" />' +
         '</form>');
@@ -31,4 +31,6 @@ jQuery(function () {
             }
         }
     });
-});
+}
+
+global.initSwipeCode = initSwipeCode

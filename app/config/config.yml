@@ -34,7 +34,8 @@ framework:
     save_path: '%kernel.project_dir%/var/sessions/%kernel.environment%'
   fragments: ~
   http_method_override: true
-  assets: ~
+  assets:
+    json_manifest_path: '%kernel.project_dir%/web/build/manifest.json'
   php_errors:
     log: true
 
@@ -126,26 +127,11 @@ fos_user:
   profile:
     form:
       type: AppBundle\Form\UserWithBeneficiaryType
-assetic:
-  filters:
-    less:
-      node: /usr/local/bin/node
-      node_paths: [/usr/local/lib/node_modules]
-      apply_to: '\.less$'
-    cssrewrite: ~
-  bundles: [ JqueryBundle, MaterializeBundle ]
-  assets:
-    jquery:
-      inputs:
-        - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
-      output: js/jquery.js
-materialize:
-  version: 1.0.0-beta
+
 ornicar_gravatar:
   rating: g
   size: 80
   default: robohash
-jquery: ~
 
 fos_oauth_server:
   db_driver:            orm   # Drivers available: orm, mongodb, or propel
@@ -209,3 +195,8 @@ liip_imagine:
         # create a 2px black border: center the thumbnail on a black background
         # 4px larger to create a 2px border around the final image
 #        background : { size : [124, 94], position : center, color : '#000000' }
+
+webpack_encore:
+  # The path where Encore is building the assets.
+  # This should match Encore.setOutputPath() in webpack.config.js.
+  output_path: '%kernel.project_dir%/web/build'

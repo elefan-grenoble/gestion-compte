@@ -82,10 +82,8 @@
         </tbody>
     </table>
     <script>
-        defer(function () {
-            jQuery('.swipe-card-status-switcher input').on('click',function () {
-                jQuery(this).closest('form').submit();
-            });
+        $('.swipe-card-status-switcher input').on('click',function () {
+            $(this).closest('form').submit();
         });
     </script>
 {% endif %}
