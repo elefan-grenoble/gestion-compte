@@ -19,38 +19,27 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
             ->setHelp('This command create an igloohome code using the API and set it the code table')
             ->addArgument('api_key', InputArgument::REQUIRED, 'Igloohome API key')
             ->addArgument('lock_id', InputArgument::REQUIRED, 'Lock id')
-            ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
-            ->addArgument('start_hour', InputArgument::REQUIRED, 'Start hour (integer from 0 to 23)')
-            ->addArgument('end_hour', InputArgument::REQUIRED, 'End hour (integer from 0 to 23)')
+            ->addArgument('start', InputArgument::REQUIRED, 'Start of code validity (ISO 8601 format)')
+            ->addArgument('end', InputArgument::REQUIRED, 'End of code validity (ISO 8601 format)')
             ->addArgument('alert_recipients', InputArgument::REQUIRED, 'Alert email recipients (comma separated)');;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dateArg = $input->getArgument('date');
-        $date = date_create_from_format('Y-m-d', $dateArg);
-        if (!$date || $date->format('Y-m-d') != $dateArg) {
-            $output->writeln('<fg=red;> Mauvais format de date. Use Y-m-d </>');
-            return;
-        }
-
         $api_key = $input->getArgument('api_key');
         $lock_id = $input->getArgument('lock_id');
-        $start_hour = $input->getArgument('start_hour');
-        $end_hour = $input->getArgument('end_hour');
         $recipients = $input->getArgument('alert_recipients');
-
+        $start = $input->getArgument('start');
+        $end = $input->getArgument('end');
 
         // Create a new temporary code using the Igloohome API
         $client = HttpClient::create(['headers' => ['X-IGLOOHOME-APIKEY' => $api_key]]);
-        $start_hour = $this->value = str_pad(intval($start_hour), 2, '0', STR_PAD_LEFT);
-        $end_hour = $this->value = str_pad(intval($end_hour), 2, '0', STR_PAD_LEFT);
         $response = $client->request('POST', 'https://partnerapi.igloohome.co/v1/locks/' . $lock_id . '/lockcodes', [
             'json' => [
                 'durationCode' => 3,
-                'startDate' => $dateArg . 'T' . $start_hour . ':00:00+01:00',
-                'endDate' => $dateArg . 'T' . $end_hour . ':00:00+01:00',
-                'description' => 'Code du ' . $dateArg
+                'startDate' => $start,
+                'endDate' => $end,
+                'description' => $start
             ]
         ]);
 
