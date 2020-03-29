@@ -1,0 +1,39 @@
+monolog:
+    handlers:
+        main:
+            type: fingers_crossed
+            action_level: info
+            handler: grouped
+        grouped:
+            type: group
+            members: [file, mattermost, deduplicated]
+        file:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+        console:
+            type: console
+            process_psr_3_messages: false
+        mattermost:
+            type: slackwebhook
+            webhook_url: "%logging.mattermost.url%"
+            channel: '%logging.mattermost.channel%'
+            bot_name: 'Monolog'
+            use_attachment: true,
+            icon_emoji: ''
+            use_short_attachment: true
+            include_extra: true
+            level: '%logging.mattermost.level%'
+        # Avoid getting spammed multiple times by the same exception
+        deduplicated:
+            type: deduplication
+            time: 20
+            handler: swiftmailer
+        swiftmailer:
+            type: swift_mailer
+            from_email: '%transactional_mailer_user%'
+            to_email: "@=parameter('logging.swiftmailer.recipient') ? parameter('logging.swiftmailer.recipient') : ''"
+            subject: '%%level_name%% detected on %site_name% !'
+            level: '%logging.swiftmailer.level%'
+            formatter: monolog.formatter.html
+            content_type: text/html

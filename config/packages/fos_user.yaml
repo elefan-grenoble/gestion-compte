@@ -1,0 +1,20 @@
+fos_user:
+  db_driver: orm # other valid values are 'mongodb' and 'couchdb'
+  firewall_name: main
+  user_class: App\Entity\User
+  service:
+    mailer: mailer_service
+  group:
+    group_class: App\Entity\Formation
+  from_email:
+    address: '%transactional_mailer_user%'
+    sender_name: '%transactional_mailer_user_name%'
+  registration:
+    form:
+      type: App\Form\RegistrationType
+    confirmation:
+      enabled:    true # change to true for required email confirmation
+      template:   'emails/welcome.html.twig'
+  profile:
+    form:
+      type: App\Form\UserWithBeneficiaryType

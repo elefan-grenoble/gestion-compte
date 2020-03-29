@@ -1,0 +1,19 @@
+fos_oauth_server:
+  db_driver:            orm   # Drivers available: orm, mongodb, or propel
+  client_class:        App\Entity\Client
+  access_token_class:  App\Entity\AccessToken
+  refresh_token_class: App\Entity\RefreshToken
+  auth_code_class:     App\Entity\AuthCode
+  authorize:
+    form:
+      type:               fos_oauth_server_authorize
+      handler:            fos_oauth_server.authorize.form.handler.default
+      name:               fos_oauth_server_authorize_form
+      validation_groups:
+        # Defaults:
+        - Authorize
+        - Default
+  service:
+    user_provider: fos_user.user_provider.username
+    options:
+      supported_scopes: oauth_login
