@@ -20,7 +20,7 @@
     "less-loader": "^4.1.0"
   },
   "scripts": {
-    "dev-server": "encore dev-server",
+    "dev-server": "encore dev-server --disable-host-check",
     "dev": "encore dev",
     "watch": "encore dev --watch",
     "build": "encore production --progress"
