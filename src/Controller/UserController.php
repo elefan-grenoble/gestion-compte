@@ -18,8 +18,11 @@ use App\Form\BeneficiaryType;
 use App\Form\NoteType;
 use App\Form\UserAdminType;
 use App\Service\MembershipService;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserEvents;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -36,6 +39,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -53,30 +57,19 @@ use Twig\Sandbox\SecurityError;
  */
 class UserController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * install admin
      *
      * @Route("/install_admin", name="user_install_admin")
      * @Method({"GET","POST"})
      */
-    public function installAdminAction(Request $request)
+    public function installAdminAction(Request $request, EntityManagerInterface $em, AuthorizationCheckerInterface $authorizationChecker, $adminEmail, $superAdminInitialPassword, $superAdminUsername)
     {
-        $em = $this->getDoctrine()->getManager();
         $session = new Session();
         $user = $em->getRepository('App:User')->findByRole('ROLE_SUPER_ADMIN');
 
         if (count($user) > 0) { //main super admin exist
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+            if ($authorizationChecker->isGranted('ROLE_ADMIN')) {
                 $new_admin = new User();
                 $form = $this->createForm(UserAdminType::class, $new_admin);
                 $form->handleRequest($request);
@@ -99,9 +92,9 @@ class UserController extends Controller
             }
         } else { //main super user not created yet
             $admin = new User();
-            $admin->setEmail($this->getParameter('emails.admin')['address']);
-            $admin->setPlainPassword($this->getParameter('super_admin.initial_password'));
-            $admin->setUsername($this->getParameter('super_admin.username'));
+            $admin->setEmail($adminEmail['address']);
+            $admin->setPlainPassword($superAdminInitialPassword);
+            $admin->setUsername($superAdminUsername);
             $admin->setEnabled(true);
             $admin->addRole('ROLE_SUPER_ADMIN');
             $em->persist($admin);
@@ -122,9 +115,9 @@ class UserController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function changePasswordAction(Request $request)
+    public function changePasswordAction(Request $request, AuthorizationCheckerInterface $authorizationChecker, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
         $formBuilder = $this->createFormBuilder();
@@ -138,11 +131,9 @@ class UserController extends Controller
             if ($form->getData()['password'] === $form->getData()['password_repeat']){
                 $this->getUser()->setPlainPassword($form->getData()['password']);
 
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($this->getUser());
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $event = new UserEvent($this->getUser(), $request);
                 $dispatcher->dispatch(FOSUserEvents::USER_PASSWORD_CHANGED, $event);
 
@@ -167,7 +158,7 @@ class UserController extends Controller
      * @Security("has_role('ROLE_USER')")
      * @Method({"GET", "POST"})
      */
-    public function quickNewAction(Request $request, \Swift_Mailer $mailer)
+    public function quickNewAction(Request $request, \Swift_Mailer $mailer, EventDispatcherInterface $dispatcher, EntityManagerInterface $em)
     {
         $ab = new AnonymousBeneficiary();
 
@@ -176,13 +167,11 @@ class UserController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $ab->setRegistrar($this->getCurrentAppUser());
+            $ab->setRegistrar($this->getUser());
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($ab);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
 
             $session = new Session();
@@ -204,14 +193,11 @@ class UserController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
      */
-    public function quickNewRecallAction(Request $request,AnonymousBeneficiary $anonymousBeneficiary)
+    public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary, EventDispatcherInterface $dispatcher, EntityManagerInterface $em)
     {
-
-        $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
 
         $anonymousBeneficiary->setRecallDate(new \DateTime());
-        $em = $this->getDoctrine()->getManager();
         $em->persist($anonymousBeneficiary);
         $em->flush();
 
@@ -230,11 +216,10 @@ class UserController extends Controller
      * @Route("/{id}/removeRole/{role}", name="user_remove_role")
      * @Method({"GET"})
      */
-    public function removeRoleAction(User $user, $role)
+    public function removeRoleAction(User $user, $role, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('role_remove', $user);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         if (!$user->hasRole($role)) {
             $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le role ' . $role);
             return $this->redirectToShow($user);
@@ -255,11 +240,10 @@ class UserController extends Controller
      * @param $role
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function addRoleAction(User $user, $role)
+    public function addRoleAction(User $user, $role, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('role_add', $user);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         if ($user->hasRole($role)) {
             $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le role ' . $role);
             return $this->redirectToShow($user);
@@ -277,11 +261,11 @@ class UserController extends Controller
      * @Route("/self_register", name="user_self_register")
      * @Method({"GET"})
      */
-    public function selfRegistrationAction()
+    public function selfRegistrationAction(MembershipService $membershipService)
     {
         $session = new Session();
-        $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
-        if (!$this->get(MembershipService::class)->canRegister($membership)) {
+        $membership = $this->getUser()->getBeneficiary()->getMembership();
+        if (!$membershipService->canRegister($membership)) {
             $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }
@@ -294,21 +278,21 @@ class UserController extends Controller
      * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
      * @Method({"GET", "POST"})
      */
-    public function removeClientUserAction(User $user, $client_id)
+    public function removeClientUserAction(User $user, $client_id, AuthorizationCheckerInterface $authorizationChecker, EntityManagerInterface $em)
     {
         $session = new Session();
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($this->getCurrentAppUser() != $user)) {
+        if (!$authorizationChecker->isGranted('ROLE_ADMIN') && ($this->getUser() != $user)) {
             throw $this->createAccessDeniedException();
         }
         if ($client_id) {
-            $client = $this->getDoctrine()->getManager()->getRepository('App:Client')->find($client_id);
+            $client = $em->getRepository('App:Client')->find($client_id);
             if ($client->getId()) {
                 if ($user->getClients()->contains($client)) {
                     $user->removeClient($client);
-                    $this->getDoctrine()->getManager()->flush($user);
+                    $em->flush($user);
                     $session->getFlashBag()->add('success', 'Le service a bien été supprimé de votre compte');
                 } else {
                     $session->getFlashBag()->add('error', 'ce client n\'est pas associé à votre compte');
@@ -333,14 +317,13 @@ class UserController extends Controller
      * @param User $user
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function deleteAction(Request $request, User $user)
+    public function deleteAction(Request $request, User $user, EntityManagerInterface $em)
     {
         $form = $this->createDeleteForm($user);
         $form->handleRequest($request);
 
         $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($user);
             $em->flush();
 
@@ -420,15 +403,15 @@ class UserController extends Controller
     }
 
 
-    private function redirectToShow(User $user)
+    private function redirectToShow(User $user, AuthorizationCheckerInterface $authorizationChecker)
     {
         if ($user->getBeneficiary()) {
             $session = new Session();
             $memberNumber = $user->getBeneficiary()->getMembership()->getMemberNumber();
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            if ($authorizationChecker->isGranted('ROLE_ADMIN'))
                 return $this->redirectToRoute('member_show', array('member_number' => $memberNumber));
             else
-                return $this->redirectToRoute('member_show', array('member_number' => $memberNumber, 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+                return $this->redirectToRoute('member_show', array('member_number' => $memberNumber, 'token' => $user->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
         } else {
             return $this->redirectToRoute("homepage");
         }

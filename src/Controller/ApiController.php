@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 /**
  * User controller.
@@ -55,9 +56,9 @@ class ApiController extends Controller
      * @Method({"GET"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
-    public function userAction()
+    public function userAction(AuthorizationCheckerInterface $authorizationChecker)
     {
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($authorizationChecker->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUserIfActive();
@@ -75,9 +76,9 @@ class ApiController extends Controller
      * @Method({"GET"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
-    public function nextcloudUserAction()
+    public function nextcloudUserAction(AuthorizationCheckerInterface $authorizationChecker)
     {
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($authorizationChecker->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUserIfActive();
@@ -95,12 +96,12 @@ class ApiController extends Controller
      * @Route("/v4/user", name="api_gitlab_user")
      * @Method({"GET"})
      */
-    public function gitlabUserAction()
+    public function gitlabUserAction(AuthorizationCheckerInterface $authorizationChecker)
     {
-        if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($authorizationChecker->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUserIfActive();

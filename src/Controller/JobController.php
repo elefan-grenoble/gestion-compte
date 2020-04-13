@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Job;
 use App\Entity\Task;
 use App\Form\JobType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -29,9 +30,8 @@ class JobController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listAction(Request $request){
-
-        $em = $this->getDoctrine()->getManager();
+    public function listAction(Request $request, EntityManagerInterface $em)
+    {
         $jobs = $em->getRepository('App:Job')->findAll();
         return $this->render('admin/job/list.html.twig', array(
             'jobs' => $jobs
@@ -45,13 +45,12 @@ class JobController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request, EntityManagerInterface $em)
+    {
         $session = new Session();
 
         $job = new Job();
         $job->setEnabled(true);
-
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(JobType::class, $job);
         $form->handleRequest($request);
@@ -78,10 +77,9 @@ class JobController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request, Job $job){
+    public function editAction(Request $request, Job $job, EntityManagerInterface $em)
+    {
         $session = new Session();
-
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(JobType::class, $job);
 
         $form->handleRequest($request);
@@ -110,13 +108,12 @@ class JobController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function removeAction(Request $request,Job $job)
+    public function removeAction(Request $request, Job $job, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getDeleteForm($job);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($job);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le poste a bien été supprimée !');

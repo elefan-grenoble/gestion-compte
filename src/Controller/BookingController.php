@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Beneficiary;
 use App\Entity\Job;
 use App\Entity\Shift;
 use App\Event\ShiftBookedEvent;
@@ -17,8 +18,10 @@ use App\Entity\ShiftBucket;
 use App\Entity\User;
 use App\Form\ShiftType;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -64,7 +67,7 @@ class BookingController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, MembershipService $membershipService, EntityManagerInterface $em, ShiftService $shiftService)
     {
         $session = new Session();
         $mode = null;
@@ -72,7 +75,7 @@ class BookingController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
-            $remainder = $this->get(MembershipService::class)->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+            $remainder = $membershipService->getRemainder($this->getUser()->getBeneficiary()->getMembership());
             if (intval($remainder->format("%R%a")) < 0) {
                 $session->getFlashBag()->add('warning', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
@@ -102,8 +105,6 @@ class BookingController extends Controller
 
         //beneficiary selected, or only one beneficiary
         if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
-
-            $em = $this->getDoctrine()->getManager();
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
             } else {
@@ -111,7 +112,7 @@ class BookingController extends Controller
             }
 
             $shifts = $em->getRepository('App:Shift')->findFutures();
-            $bucketsByDay = $this->get(ShiftService::class)->generateShiftBucketsByDayAndJob($shifts);
+            $bucketsByDay = $shiftService->generateShiftBucketsByDayAndJob($shifts);
             $dismissedShifts = array();
             foreach ($shifts as $shift) {
                 if ($shift->getIsDismissed()) {
@@ -146,7 +147,7 @@ class BookingController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET","POST"})
      */
-    public function adminAction(Request $request)
+    public function adminAction(Request $request, EntityManagerInterface $em)
     {
         $monday = strtotime('last monday', strtotime('tomorrow'));
         $defaultFrom = new DateTime();
@@ -180,8 +181,6 @@ class BookingController extends Controller
                 $to = new DateTime($to);
         }
 
-        /** @var EntityManager $em */
-        $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository(Job::class)->findByEnabled(true);
 
 
@@ -303,7 +302,7 @@ class BookingController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
      */
-    public function deleteBucketAction(Request $request)
+    public function deleteBucketAction(Request $request, EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher)
     {
 
         $session = new Session();
@@ -316,16 +315,13 @@ class BookingController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $shift_id = $form->get('shift_id')->getData();
             $shift = $em->getRepository('App:Shift')->find($shift_id);
             if ($shift) {
                 $shifts = $em->getRepository('App:Shift')->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
                 $count = 0;
                 foreach ($shifts as $s) {
-
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
+                    $eventDispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
 
                     $em->remove($s);
                     $count++;
@@ -345,21 +341,20 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Shift $shift,Request $request)
+    public function bookShiftAction(Shift $shift,Request $request, EntityManagerInterface $em, ShiftService $shiftService, EventDispatcherInterface $eventDispatcher)
     {
-        $session = new Session();
+        $session = $request->getSession();
 
         $content = json_decode($request->getContent());
-        $beneficiaryId = $content->beneficiaryId;
+        $beneficiaryId = $request->get("beneficiaryId");
         $isFixe = $content->typeService;
 
-        $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
 
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
-            || !$this->get(ShiftService::class)->isShiftBookable($shift, $beneficiary)
+            || !$shiftService->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
@@ -387,9 +382,7 @@ class BookingController extends Controller
         }
 
         $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $eventDispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
         $session->getFlashBag()->add("success", "Ce créneau a bien été résérvé");
         return new Response($this->generateUrl('homepage'), 200);
@@ -401,7 +394,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/dismiss", name="shift_dismiss")
      * @Method("POST")
      */
-    public function dismissShiftAction(Request $request, Shift $shift)
+    public function dismissShiftAction(Request $request, Shift $shift, EntityManagerInterface $em, EventDispatcherInterface $eventDispatcher)
     {
         if (!$this->isGranted('dismiss', $shift)) {
             $session = new Session();
@@ -410,7 +403,6 @@ class BookingController extends Controller
         }
 
         $beneficiary = $shift->getShifter();
-        $em = $this->getDoctrine()->getManager();
         $shift->setShifter(null);
         $shift->setBooker(null);
         $shift->setFixe(false);
@@ -418,8 +410,7 @@ class BookingController extends Controller
         $em->flush();
 
         $reason = $request->get("reason");
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
+        $eventDispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
 
         return $this->redirectToRoute('homepage');
     }
@@ -430,7 +421,7 @@ class BookingController extends Controller
      * @Route("/undismiss_shift/", name="undismiss_shift")
      * @Method("POST")
      */
-    public function undismissShift(Request $request)
+    public function undismissShift(Request $request, EventDispatcherInterface $eventDispatcher, EntityManagerInterface $em)
     {
 
         $session = new Session();
@@ -443,7 +434,6 @@ class BookingController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $shift_id = $form->get('shift_id')->getData();
             $shift = $em->getRepository('App:Shift')->find($shift_id);
             if ($shift) {
@@ -453,8 +443,7 @@ class BookingController extends Controller
                 $em->persist($shift);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+                $eventDispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
             } else {
                 $session->getFlashBag()->add('xarning', "shift not found");
@@ -469,7 +458,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/accept/", name="accept_reserved_shift")
      * @Method("GET")
      */
-    public function acceptReservedShift(Request $request, Shift $shift)
+    public function acceptReservedShift(Request $request, Shift $shift, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
 
         $session = new Session();
@@ -487,11 +476,9 @@ class BookingController extends Controller
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setLastShifter(null);
                 $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
                 $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
@@ -511,7 +498,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/reject/", name="reject_reserved_shift")
      * @Method("GET")
      */
-    public function rejectReservedShift(Request $request, Shift $shift)
+    public function rejectReservedShift(Request $request, Shift $shift, EntityManagerInterface $em)
     {
 
         $session = new Session();
@@ -525,7 +512,6 @@ class BookingController extends Controller
             if ($shift->getLastShifter()) {
                 $shift->setLastShifter(null);
                 $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
                 $session->getFlashBag()->add('success', "Créneau libéré");
@@ -547,7 +533,7 @@ class BookingController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
      */
-    public function bookShiftAdminAction(Request $request, Shift $shift)
+    public function bookShiftAdminAction(Request $request, Shift $shift, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
         $session = new Session();
 
@@ -560,7 +546,6 @@ class BookingController extends Controller
         $str = $content->beneficiary;
         $fixe = $content->typeService;
 
-        $em = $this->getDoctrine()->getManager();
         /**@var  Beneficiary $beneficiary*/
         $beneficiary = $em->getRepository('App:Beneficiary')->findFromAutoComplete($str);
 
@@ -597,7 +582,6 @@ class BookingController extends Controller
 
         $em->flush();
 
-        $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
 
         $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
@@ -611,7 +595,7 @@ class BookingController extends Controller
      * @Route("/free_shift/{id}", name="free_shift")
      * @Method("POST")
      */
-    public function freeShiftAction(Request $request, Shift $shift)
+    public function freeShiftAction(Request $request, Shift $shift,EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -619,12 +603,10 @@ class BookingController extends Controller
 
         $membership = $shift->getShifter()->getMembership();
 
-        $em = $this->getDoctrine()->getManager();
         $shift->free();
         $em->persist($shift);
         $em->flush();
 
-        $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
 
         $session->getFlashBag()->add('success', "Le shift a bien été libéré");
@@ -641,14 +623,12 @@ class BookingController extends Controller
      * @Route("/lock_shift/{id}", name="lock_shift")
      * @Method("GET")
      */
-    public function lockShiftAction(Request $request, Shift $shift)
+    public function lockShiftAction(Request $request, Shift $shift, EntityManagerInterface $em, ShiftService $shiftService)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
-        $em = $this->getDoctrine()->getManager();
-
         if ($shift) {
-            $bucket = $this->get(ShiftService::class)->getShiftBucketFromShift($shift);
+            $bucket = $shiftService->getShiftBucketFromShift($shift);
             foreach ($bucket->getShifts() as $s) {
                 $s->setLocked(true);
             }
@@ -664,14 +644,12 @@ class BookingController extends Controller
      * @Route("/unlock_shift/{id}", name="unlock_shift")
      * @Method("GET")
      */
-    public function unlockShiftAction(Request $request, Shift $shift)
+    public function unlockShiftAction(Request $request, Shift $shift,  EntityManagerInterface $em, ShiftService $shiftService)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
-        $em = $this->getDoctrine()->getManager();
-
         if ($shift) {
-            $bucket = $this->get(ShiftService::class)->getShiftBucketFromShift($shift);
+            $bucket = $shiftService->getShiftBucketFromShift($shift);
             foreach ($bucket->getShifts() as $s) {
                 $s->setLocked(false);
             }

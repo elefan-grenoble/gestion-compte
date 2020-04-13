@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Form\TaskType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -28,11 +29,11 @@ class TaskController extends Controller
      * @Route("/", name="tasks_list")
      * @Method("GET")
      */
-    public function listAction(Request $request){
+    public function listAction(Request $request, EntityManagerInterface $em)
+    {
 
         $this->denyAccessUnlessGranted('view', new Task());
 
-        $em = $this->getDoctrine()->getManager();
         $commissions = $em->getRepository('App:Commission')->findAll();
         return $this->render('default/task/list.html.twig', array(
             'commissions' => $commissions,
@@ -46,15 +47,13 @@ class TaskController extends Controller
      * @Route("/new", name="task_new")
      * @Method({"GET","POST"})
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request, EntityManagerInterface $em){
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
 
         $task = new Task();
 
         $this->denyAccessUnlessGranted('create',$task);
-
-        $em = $this->getDoctrine()->getManager();
 
         $task->setRegistrar($current_app_user);
         $task->setCreatedAt(new \DateTime('now'));
@@ -93,12 +92,12 @@ class TaskController extends Controller
      * @Route("/edit/{id}", name="task_edit")
      * @Method({"GET","POST"})
      */
-    public function editAction(Request $request,Task $task){
+    public function editAction(Request $request, Task $task, EntityManagerInterface $em)
+    {
         $session = new Session();
 
         $this->denyAccessUnlessGranted('edit',$task);
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
         $form->get('created_at')->setData($task->getCreatedAt()->format('Y-m-d'));
@@ -143,14 +142,13 @@ class TaskController extends Controller
      * @Route("/{id}", name="task_delete")
      * @Method({"DELETE"})
      */
-    public function removeAction(Request $request,Task $task)
+    public function removeAction(Request $request, Task $task, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('delete',$task);
         $session = new Session();
         $form = $this->getDeleteForm($task);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');

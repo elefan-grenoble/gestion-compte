@@ -10,6 +10,7 @@ use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -33,9 +34,8 @@ class PeriodController extends Controller
      * @Route("/", name="period")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $periods = array();
         for($i=0;$i<7;$i++){
             $periods[$i] = $em->getRepository('App:Period')->findBy(array('dayOfWeek'=>$i),array('start'=>'ASC'));
@@ -50,12 +50,11 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
         $period = new Period();
 
-        $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
@@ -90,7 +89,7 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET", "POST"})
      */
-    public function editAction(Request $request,Period $period)
+    public function editAction(Request $request, Period $period, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -104,7 +103,6 @@ class PeriodController extends Controller
             $time = $form->get('end')->getData();
             $period->setEnd(new \DateTime($time));
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le créneau type a bien été édité !');
@@ -141,7 +139,7 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"POST"})
      */
-    public function addPositionToPeriodAction(Request $request,Period $period)
+    public function addPositionToPeriodAction(Request $request, Period $period, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -150,7 +148,6 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $existingPosition = $em->getRepository('App:PeriodPosition')->findOneBy(array("formation"=>$position->getFormation(),"nbOfShifter"=>$position->getNbOfShifter()));
             if ($existingPosition){
                 $session->getFlashBag()->add('info', 'La position existe déjà');
@@ -171,7 +168,7 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"DELETE"})
      */
-    public function removePositionToPeriodAction(Request $request,Period $period,PeriodPosition $position)
+    public function removePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -182,7 +179,6 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $period->removePosition($position);
             $em->persist($period);
             $em->flush();
@@ -200,7 +196,7 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method("DELETE")
      */
-    public function deleteAction(Request $request, Period $period)
+    public function deleteAction(Request $request, Period $period, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -211,7 +207,6 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le créneau type a bien été supprimé !');
@@ -226,7 +221,8 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET","POST"})
      */
-    public function periodCopyAction(Request $request){
+    public function periodCopyAction(Request $request, EntityManagerInterface $em)
+    {
         $days = array(
             "Lundi" => 0,
             "Mardi" => 1,
@@ -248,7 +244,6 @@ class PeriodController extends Controller
             $from = $form->get('day_of_week_from')->getData();
             $to = $form->get('day_of_week_to')->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $periods = $em->getRepository('App:Period')->findBy(array('dayOfWeek'=>$from));
 
             $count = 0;

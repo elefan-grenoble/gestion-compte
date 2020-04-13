@@ -9,6 +9,7 @@ use App\Entity\Task;
 use App\Entity\User;
 use App\Form\NoteType;
 use App\Service\SearchUserFormHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -45,10 +46,10 @@ class AmbassadorController extends Controller
      * @Route("/membership", name="ambassador_membership_list")
      * @Method({"GET","POST"})
      */
-    public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
+    public function membershipAction(Request $request, EntityManagerInterface $em, SearchUserFormHelper $formHelper)
     {
 
-        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
+        $this->denyAccessUnlessGranted('view', $this->getUser());
 
         $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
         $form->handleRequest($request);
@@ -57,7 +58,7 @@ class AmbassadorController extends Controller
         $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
             ->where('lr.id IS NULL') //registration is the last one registere
             ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+            ->addSelect("(SELECT SUM(ti.time) FROM App\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
 
         $page = $request->get('page');
         if (!intval($page))
@@ -116,8 +117,6 @@ class AmbassadorController extends Controller
     /**
      * Lists all users with shift time logs older than 9 hours.
      *
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
      * @Method({"GET","POST"})
      */
@@ -135,7 +134,7 @@ class AmbassadorController extends Controller
         $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
             ->where('lr.id IS NULL') //registration is the last one registere
             ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+            ->addSelect("(SELECT SUM(ti.time) FROM App\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
 
         $page = $request->get('page');
         if (!intval($page))
@@ -166,7 +165,7 @@ class AmbassadorController extends Controller
             }
             $qb = $qb->andWhere('o.withdrawn = 0');
             $qb = $qb->andWhere('o.frozen = 0');
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM App\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $this->timeAfterWhichMembersAreLateWithShifts);
         }
 
@@ -228,7 +227,7 @@ class AmbassadorController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function newNoteAction(Membership $member, Request $request)
+    public function newNoteAction(Membership $member, Request $request, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('annotate', $member);
         $session = new Session();
@@ -238,9 +237,8 @@ class AmbassadorController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
 
             $note->setSubject($member);
-            $note->setAuthor($this->get('security.token_storage')->getToken()->getUser());
+            $note->setAuthor($this->getUser());
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($note);
             $em->flush();
 

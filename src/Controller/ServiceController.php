@@ -6,6 +6,9 @@ namespace App\Controller;
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ServiceType;
+use Doctrine\ORM\EntityManagerInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Liip\ImagineBundle\Imagine\Cache\CacheManagerAwareInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -16,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
+use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 
 
 /**
@@ -32,9 +36,8 @@ class ServiceController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function listAction(Request $request)
+    public function listAction(Request $request, EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('App:Service')->findAll();
         return $this->render('admin/service/list.html.twig', array(
             'services' => $services
@@ -49,9 +52,8 @@ class ServiceController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_USER')")
      */
-    public function navlistAction()
+    public function navlistAction(EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('App:Service')->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
             'services' => $services
@@ -65,13 +67,10 @@ class ServiceController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
-
         $service = new Service();
-
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
@@ -103,11 +102,10 @@ class ServiceController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Service $service)
+    public function editAction(Request $request, Service $service, EntityManagerInterface $em)
     {
         $session = new Session();
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(ServiceType::class, $service);
 
         $form->handleRequest($request);
@@ -142,7 +140,7 @@ class ServiceController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Service $service)
+    public function removeAction(Request $request, Service $service, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -151,8 +149,6 @@ class ServiceController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
             $em->remove($service);
             $em->flush();
 
@@ -182,11 +178,9 @@ class ServiceController extends Controller
      * @param Service $service
      * @return string
      */
-    protected function resolveLogo(Service $service)
+    protected function resolveLogo(Service $service, CacheManager $imagineCacheManager, UploaderHelper $helper)
     {
-        $helper = $this->container->get('vich_uploader.templating.helper.uploader_helper');
         $path = $helper->asset($service, 'logoFile');
-        $imagineCacheManager = $this->get('liip_imagine.cache.manager');
         $resolvedPath = $imagineCacheManager->getBrowserPath($path, 'service_logo');
         return $resolvedPath;
     }

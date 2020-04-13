@@ -7,6 +7,8 @@ use App\Entity\Client;
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ClientType;
+use Doctrine\ORM\EntityManagerInterface;
+use FOS\OAuthServerBundle\Entity\ClientManager;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -31,9 +33,9 @@ class ClientController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function listAction()
+    public function listAction(EntityManagerInterface $em)
     {
-        $clients = $this->getDoctrine()->getManager()->getRepository('App:Client')->findAll();
+        $clients = $em->getRepository('App:Client')->findAll();
         return $this->render('admin/client/list.html.twig',array('clients'=>$clients));
     }
 
@@ -44,7 +46,8 @@ class ClientController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request, ClientManager $clientManager)
+    {
 
         $session = new Session();
 
@@ -57,7 +60,6 @@ class ClientController extends Controller
 
             $service = $form->get('service')->getData();
 
-            $clientManager = $this->container->get('fos_oauth_server.client_manager.default');
             $client = $clientManager->createClient();
             $client->setRedirectUris(explode(',',$urls));
             $client->setAllowedGrantTypes($form->get('grant_types')->getData());
@@ -87,10 +89,10 @@ class ClientController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Client $client){
+    public function editAction(Request $request, Client $client, EntityManagerInterface $em)
+    {
         $session = new Session();
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(ClientType::class);
         $form->get('urls')->setData($client->getUrls());
         $form->get('grant_types')->setData($client->getAllowedGrantTypes());
@@ -139,7 +141,7 @@ class ClientController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Client $client)
+    public function removeAction(Request $request, Client $client, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->createFormBuilder()
@@ -149,7 +151,6 @@ class ClientController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($client);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le client a bien été supprimé !');

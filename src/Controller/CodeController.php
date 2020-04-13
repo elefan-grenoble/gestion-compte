@@ -5,11 +5,14 @@ namespace App\Controller;
 
 use App\Entity\Code;
 use App\Event\CodeNewEvent;
+use App\Helper\SwipeCard;
 use App\Security\CodeVoter;
+use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -19,6 +22,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use Symfony\Component\Security\Csrf\TokenStorage\TokenStorageInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
@@ -28,9 +33,8 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class CodeController extends Controller
 {
-    public function homepageDashboardAction()
+    public function homepageDashboardAction(EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $codes = $em->getRepository('App:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
         if (!$codes) {
             $codes[] = new Code();
@@ -45,12 +49,10 @@ class CodeController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request, LoggerInterface $logger)
+    public function listAction(Request $request, LoggerInterface $logger, EntityManagerInterface $em)
     {
         $session = new Session();
         $logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
-
-        $em = $this->getDoctrine()->getManager();
 
         if ($this->getUser()->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('App:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
@@ -80,10 +82,9 @@ class CodeController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
 
         $codeform = $this->createFormBuilder()
             ->setAction($this->generateUrl('code_edit'))
@@ -134,12 +135,10 @@ class CodeController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function generateAction(Request $request, LoggerInterface $logger)
+    public function generateAction(Request $request, LoggerInterface $logger, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
-        $em = $this->getDoctrine()->getManager();
+        $current_app_user = $this->getUser();
 
         $my_open_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $old_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
@@ -189,8 +188,6 @@ class CodeController extends Controller
         $em->flush();
 
         $logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
-
-        $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $old_codes));
 
         $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
@@ -209,15 +206,14 @@ class CodeController extends Controller
      * @Method({"GET"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function toggleAction(Request $request,Code $code){
+    public function toggleAction(Request $request, Code $code, EntityManagerInterface $em)
+    {
         $session = new Session();
 
         if ($code->getClosed())
             $this->denyAccessUnlessGranted('open',$code);
         else
             $this->denyAccessUnlessGranted('close',$code);
-
-        $em = $this->getDoctrine()->getManager();
 
         $code->setClosed(!$code->getClosed());
 
@@ -235,27 +231,24 @@ class CodeController extends Controller
      * @Route("/close_all", name="code_change_done")
      * @Method("GET")
      */
-    public function closeAllButMineAction(Request $request, LoggerInterface $logger)
+    public function closeAllButMineAction(Request $request, LoggerInterface $logger, EntityManagerInterface $em, AuthorizationCheckerInterface $authorizationChecker, TokenStorageInterface $tokenStorage, SwipeCard $swipeCard)
     {
         $session = new Session();
-        $securityContext = $this->container->get('security.authorization_checker');
-
-        $em = $this->getDoctrine()->getManager();
         $logged_out = false;
         $previousToken = null;
 
-        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-            $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            $current_app_user = $this->getUser();
             $logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
         }else{
             $token = $request->get('token');
-            $username = explode(',',$this->get('App\Helper\SwipeCard')->vigenereDecode($token))[0];
+            $username = explode(',', $swipeCard->vigenereDecode($token))[0];
             $current_app_user = $em->getRepository('App:User')->findOneBy(array('username'=>$username));
             if ($current_app_user){
-                $previousToken = $this->get("security.token_storage")->getToken();
+                $previousToken = $tokenStorage->getToken();
                 $logged_out = true;
                 $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
-                $this->get("security.token_storage")->setToken($token);
+                $tokenStorage->setToken($token);
                 $logger->info('CODE : confirm code change (logged out)',array('username'=>$current_app_user->getUsername()));
             }else{
                 //mute
@@ -269,7 +262,7 @@ class CodeController extends Controller
         foreach ($codes as $code){
             if ($myLastCode->getCreatedAt()>$code->getCreatedAt()){ // only older than mine
                 if ($code->getRegistrar() != $current_app_user){ // not mine
-                    if ($securityContext->isGranted(CodeVoter::VIEW, $code)) { //only the ones I can see
+                    if ($authorizationChecker->isGranted(CodeVoter::VIEW, $code)) { //only the ones I can see
                         $code->setClosed(true);
                         $em->persist($code);
                     }
@@ -279,7 +272,7 @@ class CodeController extends Controller
         $em->flush();
 
         if ($logged_out){
-            $this->get("security.token_storage")->setToken($previousToken);
+            $tokenStorage->setToken($previousToken);
         }
 
         $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
@@ -294,14 +287,13 @@ class CodeController extends Controller
      * @Route("/{id}", name="code_delete")
      * @Method({"DELETE"})
      */
-    public function removeAction(Request $request,Code $code)
+    public function removeAction(Request $request, Code $code, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('delete',$code);
         $session = new Session();
         $form = $this->getDeleteForm($code);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($code);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');

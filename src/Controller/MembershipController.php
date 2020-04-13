@@ -21,15 +21,18 @@ use App\Form\MembershipType;
 use App\Form\NoteType;
 use App\Form\RegistrationType;
 use App\Form\TimeLogType;
+use App\Helper\SwipeCard;
 use App\Security\MembershipVoter;
 use App\Service\MailerService;
 use App\Service\MembershipService;
 use App\Validator\Constraints\BeneficiaryCanHost;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\UserBundle\Event\FormEvent;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserBundle;
 use FOS\UserBundle\FOSUserEvents;
 use Spipu\Html2Pdf\Tag\Html\U;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -43,6 +46,8 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -51,6 +56,7 @@ use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Twig\Sandbox\SecurityError;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -61,19 +67,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MembershipController extends Controller
 {
-    private $_current_app_user;
-
-    /**
-     * @return User mixed
-     */
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * Finds and displays a membership entity.
      *
@@ -82,7 +75,7 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function showAction(Membership $member)
+    public function showAction(Membership $member, MembershipService $membershipService, AuthorizationCheckerInterface $authorizationChecker)
     {
         $session = new Session();
         if ($member->getMemberNumber() <= 0) {
@@ -114,17 +107,17 @@ class MembershipController extends Controller
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
         $newReg = new Registration();
-        $remainder = $this->get(MembershipService::class)->getRemainder($member);
+        $remainder = $membershipService->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get(MembershipService::class)->getExpire($member));
+            $newReg->setDate($membershipService->getExpire($member));
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
-        $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        $newReg->setRegistrar($this->getUser());
+        if ($authorizationChecker->isGranted('ROLE_ADMIN'))
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber()));
         else
-            $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
 
 
         $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
@@ -132,7 +125,7 @@ class MembershipController extends Controller
 
         $deleteBeneficiaryForms = array();
         foreach ($member->getBeneficiaries() as $beneficiary) {
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            if ($authorizationChecker->isGranted('ROLE_ADMIN'))
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
                     ->setMethod('DELETE')->getForm()->createView();
@@ -140,7 +133,7 @@ class MembershipController extends Controller
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array(
                         'id' => $beneficiary->getId(),
-                        'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
+                        'token' => $user->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())
                     )))
                     ->setMethod('DELETE')->getForm()->createView();
         }
@@ -180,18 +173,18 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function newRegistration(Request $request, Membership $member)
+    public function newRegistration(Request $request, Membership $member, MembershipService $membershipService, EntityManagerInterface $em)
     {
         $session = new Session();
         $this->denyAccessUnlessGranted('edit', $member);
         $newReg = new Registration();
-        $remainder = $this->get(MembershipService::class)->getRemainder($member);
+        $remainder = $membershipService->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get(MembershipService::class)->getExpire($member));
+            $newReg->setDate($membershipService->getExpire($member));
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
-        $newReg->setRegistrar($this->getCurrentAppUser());
+        $newReg->setRegistrar($this->getUser());
         $registrationForm = $this->createForm(RegistrationType::class, $newReg);
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
         $registrationForm->handleRequest($request);
@@ -202,21 +195,20 @@ class MembershipController extends Controller
                 return $this->redirectToShow($member);
             }
 
-            if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
+            if ($this->getUser()->getBeneficiary() && $this->getUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
                 $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
                 return $this->redirectToShow($member);
             }
-            $newReg->setRegistrar($this->getCurrentAppUser());
+            $newReg->setRegistrar($this->getUser());
 
             $date = $registrationForm->get('date')->getData();
-            if (!$this->get(MembershipService::class)->canRegister($member,$date)) {
+            if (!$membershipService->canRegister($member,$date)) {
                 $session->getFlashBag()->add('warning', 'l\'adhésion précédente est encore valable à cette date !');
                 return $this->redirectToShow($member);
             }
             $newReg->setMembership($member);
             $member->addRegistration($newReg);
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($newReg);
             $em->flush();
 
@@ -232,13 +224,12 @@ class MembershipController extends Controller
 
         $id = $request->request->get("registration_id");
         if ($id) {
-            $em = $this->getDoctrine()->getManager();
             $registration = $em->getRepository('App:Registration')->find($id);
             if ($registration) {
                 $form = $this->createForm(RegistrationType::class, $registration);
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
-                    if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
+                    if ($this->getUser()->getBeneficiary() && $this->getUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
                         $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
                         return $this->redirectToShow($member);
                     }
@@ -265,14 +256,14 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function newBeneficiary(Request $request, Membership $member)
+    public function newBeneficiary(Request $request, Membership $member, ValidatorInterface $validator, EventDispatcher $dispatcher, $maximumNbOfBeneficiariesInMembership)
     {
         $session = new Session();
         $this->denyAccessUnlessGranted(MembershipVoter::BENEFICIARY_ADD, $member);
 
         //check if member can host
         $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
-        $violations = $this->get('validator')->validate(
+        $violations = $validator->validate(
             $member->getMainBeneficiary(),
             $beneficiaryCanHostConstraint
         );
@@ -293,21 +284,20 @@ class MembershipController extends Controller
             $beneficiary = $beneficiaryForm->getData();
 
             $event = new FormEvent($beneficiaryForm->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
-            if (count($member->getBeneficiaries()) <= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+            if (count($member->getBeneficiaries()) <= $maximumNbOfBeneficiariesInMembership) {
                 $beneficiary->setMembership($member);
                 $member->addBeneficiary($beneficiary);
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($beneficiary);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
 
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
-                $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
+                $session->getFlashBag()->add('error', 'Maximum ' . $maximumNbOfBeneficiariesInMembership . ' beneficiaires enregistrés');
             }
             return $this->redirectToShow($member);
         } elseif ($beneficiaryForm->isSubmitted()) {
@@ -334,7 +324,7 @@ class MembershipController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
-    public function editFirewallAction(Request $request)
+    public function editFirewallAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -362,7 +352,6 @@ class MembershipController extends Controller
             $username = $form->get('username')->getData();
             $email = $form->get('email')->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $member = null;
             if ($username)
                 $member = $em->getRepository('App:User')->findOneBy(array('username' => $username));
@@ -393,18 +382,14 @@ class MembershipController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function setEmailAction(Beneficiary $beneficiary, Request $request)
+    public function setEmailAction(Beneficiary $beneficiary, Request $request, MailerService $mailerService, EntityManagerInterface $em)
     {
         $email = $request->request->get('email');
         $user = $beneficiary->getUser();
         $oldEmail = $user->getEmail();
 
-        /** @var MailerService $mailerService */
-        $mailerService = $this->get(MailerService::class);
-
         if ($mailerService->isTemporaryEmail($oldEmail) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
             $user->setEmail($email);
-            $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été enregistré');
@@ -439,7 +424,7 @@ class MembershipController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function activeUserAccountAction(Request $request)
+    public function activeUserAccountAction(Request $request, EntityManagerInterface $em)
     {
         $form = $this->createFormBuilder()
             ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'attr' => array(
@@ -451,7 +436,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $member_number = $form->get('member_number')->getData();
-            $em = $this->getDoctrine()->getManager();
             $ms = $em->getRepository('App:Membership')->findOneBy(array('member_number' => $member_number));
 
             if (!$ms){
@@ -479,11 +463,10 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function closeAction(Membership $member)
+    public function closeAction(Membership $member, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('close', $member);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         $member->setWithdrawn(true);
         $em->persist($member);
         $em->flush();
@@ -499,11 +482,10 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function openAction(Membership $member)
+    public function openAction(Membership $member, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('open', $member);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         $member->setWithdrawn(false);
         $em->persist($member);
         $em->flush();
@@ -519,11 +501,10 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeAction(Membership $member)
+    public function freezeAction(Membership $member, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         $member->setFrozen(true);
         $member->setFrozenChange(false);
         $em->persist($member);
@@ -540,11 +521,10 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function unfreezeAction(Membership $member)
+    public function unfreezeAction(Membership $member, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         $member->setFrozen(false);
         $member->setFrozenChange(false);
         $em->persist($member);
@@ -561,11 +541,10 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeChangeAction(Membership $member)
+    public function freezeChangeAction(Membership $member, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('freeze_change', $member);
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
         $member->setFrozenChange(!$member->getFrozenChange());
         $em->persist($member);
         $em->flush();
@@ -574,7 +553,7 @@ class MembershipController extends Controller
         } else {
             $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
         }
-        if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
+        if ($this->getUser()->getBeneficiary() && $member === $this->getUser()->getBeneficiary()->getMembership()) {
             return $this->redirectToRoute("fos_user_profile_show");
         } else {
             return $this->redirectToShow($member);
@@ -591,14 +570,13 @@ class MembershipController extends Controller
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function deleteAction(Request $request, Membership $member)
+    public function deleteAction(Request $request, Membership $member, EntityManagerInterface $em)
     {
         $form = $this->createDeleteForm($member);
         $form->handleRequest($request);
 
         $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($member);
             $em->flush();
 
@@ -617,15 +595,14 @@ class MembershipController extends Controller
      * @return Response
      * @throws
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em, SwipeCard $swipeCard, EventDispatcher $dispatcher, AuthorizationCheckerInterface $authorizationChecker)
     {
         $session = new Session();
 
         $code = $request->query->get('code');
-        $em = $this->getDoctrine()->getManager();
         $a_beneficiary = null;
         if ($code){
-            $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+            $email = $swipeCard->vigenereDecode($code);
             if ($email){
                 $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
             }
@@ -634,13 +611,13 @@ class MembershipController extends Controller
                 return $this->redirectToRoute("homepage");
             }else{
                 if ($a_beneficiary->getJoinTo()){ //adding beneficiary to an existing membership : wrong place
-                    return $this->redirectToRoute('member_add_beneficiary', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($email)));
+                    return $this->redirectToRoute('member_add_beneficiary', array('code' => $swipeCard->vigenereEncode($email)));
                 }
             }
         }
 
         if (!$a_beneficiary){
-            $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
+            $this->denyAccessUnlessGranted('create', $this->getUser());
         }
 
         $member = new Membership();
@@ -679,9 +656,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $dispatcher = $this->get('event_dispatcher');
-
             if (!$a_beneficiary) {
                 if (!$member->getLastRegistration()->getRegistrar())
                     $member->getLastRegistration()->setRegistrar($this->getUser());
@@ -694,7 +668,7 @@ class MembershipController extends Controller
             $member->setFrozenChange(false);
 
             $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($member);
             if ($a_beneficiary) {
@@ -715,8 +689,7 @@ class MembershipController extends Controller
 
             $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
 
-            $securityContext = $this->container->get('security.authorization_checker');
-            if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+            if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
                 $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. Verifie tes emails pour te connecter.');
                 return $this->redirectToRoute('homepage');
             } else {
@@ -745,15 +718,14 @@ class MembershipController extends Controller
      * @return Response
      * @throws
      */
-    public function addBeneficiaryAction(Request $request)
+    public function addBeneficiaryAction(Request $request, EntityManagerInterface $em, SwipeCard $swipeCard, ValidatorInterface $validator, EventDispatcher $dispatcher)
     {
         $session = new Session();
 
         $code = $request->query->get('code');
-        $em = $this->getDoctrine()->getManager();
         $a_beneficiary = null;
         if ($code) {
-            $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+            $email = $swipeCard->vigenereDecode($code);
             if ($email) {
                 $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(array('email' => $email));
             }
@@ -773,7 +745,7 @@ class MembershipController extends Controller
         $member = $a_beneficiary->getJoinTo()->getMembership();
 
         $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
-        $violations = $this->get('validator')->validate(
+        $violations = $validator->validate(
             $member->getMainBeneficiary(),
             $beneficiaryCanHostConstraint
         );
@@ -807,13 +779,12 @@ class MembershipController extends Controller
             $beneficiary->setMembership($member);
 
             $event = new FormEvent($form->get('beneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($beneficiary);
             $em->remove($a_beneficiary);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
 
             $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
@@ -838,7 +809,7 @@ class MembershipController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function joinAction(Request $request)
+    public function joinAction(Request $request, EntityManagerInterface $em)
     {
         $form = $this->createFormBuilder()
             ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
@@ -846,8 +817,6 @@ class MembershipController extends Controller
             ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);
-
-        $em = $this->getDoctrine()->getManager();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $session = new Session();
@@ -894,20 +863,18 @@ class MembershipController extends Controller
      * @Route("/office_tools", name="user_office_tools")
      * @Method({"GET","POST"})
      */
-    public function officeToolsAction(Request $request)
+    public function officeToolsAction(Request $request, EntityManagerInterface $em)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
+        $this->denyAccessUnlessGranted('access_tools', $this->getUser());
         $note = new Note();
-        $note->setAuthor($this->getCurrentAppUser());
+        $note->setAuthor($this->getUser());
         $note_form = $this->createForm(NoteType::class, $note);
         $note_form->handleRequest($request);
-
-        $em = $this->getDoctrine()->getManager();
 
         $session = $request->getSession();
         if ($note_form->isSubmitted()) {
             if ($note_form->isValid()) {
-                $existing_note = $em->getRepository('App:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
+                $existing_note = $em->getRepository('App:Note')->findOneBy(array("subject" => null, "author" => $this->getUser(), "text" => $note->getText()));
                 if ($existing_note) {
                     $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
                 } else {
@@ -981,16 +948,12 @@ class MembershipController extends Controller
      * @Method({"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function exportEmails(Request $request)
+    public function exportEmails(Request $request, EntityManagerInterface $em, MailerService $mailerService)
     {
-        $beneficiaries = $this->getDoctrine()->getRepository("App:Beneficiary")->findAll();
+        $beneficiaries = $em->getRepository("App:Beneficiary")->findAll();
         $return = '';
         if ($beneficiaries) {
             $d = ','; // this is the default but i like to be explicit
-            $e = '"'; // this is the default but i like to be explicit
-
-            /** @var MailerService $mailerService */
-            $mailerService = $this->get(MailerService::class);
 
             foreach ($beneficiaries as $beneficiary) {
                 if (!$beneficiary->getMembership()->isWithdrawn()) {
@@ -1007,16 +970,15 @@ class MembershipController extends Controller
         ));
     }
 
-    private function redirectToShow(Membership $member)
+    private function redirectToShow(Membership $member, AuthorizationCheckerInterface $authorizationChecker)
     {
-        $securityContext = $this->container->get('security.authorization_checker');
-        if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+        if (!$authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirectToRoute('homepage');
         }
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
+        if ($authorizationChecker->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
     }
 }

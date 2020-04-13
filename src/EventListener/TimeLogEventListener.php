@@ -11,11 +11,9 @@ use App\Event\ShiftBookedEvent;
 use App\Event\ShiftDeletedEvent;
 use App\Event\ShiftDismissedEvent;
 use App\Event\ShiftFreedEvent;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class TimeLogEventListener
 {
@@ -35,7 +33,7 @@ class TimeLogEventListener
      */
     private $cycleDuration;
 
-    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, string $dueDurationByCycle, string $registrationDuration, string $cycleDuration)
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, EventDispatcherInterface $eventDispatcher, string $dueDurationByCycle, string $registrationDuration, string $cycleDuration)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
@@ -120,9 +118,8 @@ class TimeLogEventListener
             $this->em->persist($member);
         }
 
-        $dispatcher = $this->container->get('event_dispatcher');
         if (!$member->getFrozen()) {
-            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date));
+            $this->eventDispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date));
         }
     }
 

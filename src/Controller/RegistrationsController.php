@@ -15,6 +15,7 @@ use App\Event\HelloassoEvent;
 use App\Form\BeneficiaryType;
 use App\Form\RegistrationType;
 use App\Service\SearchUserFormHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -66,7 +67,7 @@ class RegistrationsController extends Controller
      * @Method({"POST","GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function registrationsAction(Request $request)
+    public function registrationsAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -99,8 +100,6 @@ class RegistrationsController extends Controller
             $to = null;
         }
 
-
-        $em = $this->getDoctrine()->getManager();
         if (!($page = $request->get('page')))
             $page = 1;
         $limit = 25;
@@ -205,14 +204,13 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function editRegistrationAction(Request $request, Registration $registration)
+    public function editRegistrationAction(Request $request, Registration $registration, EntityManagerInterface $em)
     {
         $session = new Session();
         if ($registration->getId() && ($request->attributes->get('id') == $registration->getId())){
             $edit_form = $this->createForm(RegistrationType::class, $registration);
             $edit_form->handleRequest($request);
             if ($edit_form->isSubmitted() && $edit_form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($registration);
                 $em->flush();
                 $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
@@ -233,7 +231,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeRegistrationAction(Request $request, Registration $registration)
+    public function removeRegistrationAction(Request $request, Registration $registration, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getRegistrationDeleteForm($registration->getId());
@@ -242,7 +240,6 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
             if ($registration->getMembership() && count($registration->getMembership()->getRegistrations()) === 1 && $registration === $registration->getMembership()->getLastRegistration()) {
                 $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
             } else {
-                $em = $this->getDoctrine()->getManager();
                 if ($registration->getMembership()) {
                     $registration->getMembership()->removeRegistration($registration);
                     $em->persist($registration->getMembership());

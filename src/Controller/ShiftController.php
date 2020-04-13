@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Entity\Shift;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -23,12 +24,11 @@ class ShiftController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
         $shift = new Shift();
 
-        $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {

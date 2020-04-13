@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\Proxy;
 use App\Form\EventType;
 use App\Form\ProxyType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -31,9 +32,8 @@ class EventController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listAction(Request $request){
-
-        $em = $this->getDoctrine()->getManager();
+    public function listAction(Request $request, EntityManagerInterface $em)
+    {
         $events = $em->getRepository('App:Event')->findAll();
         return $this->render('admin/event/list.html.twig', array(
             'events' => $events,
@@ -47,8 +47,8 @@ class EventController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listProxiesAction(){
-        $em = $this->getDoctrine()->getManager();
+    public function listProxiesAction(EntityManagerInterface $em)
+    {
         $proxies = $em->getRepository('App:Proxy')->findAll();
         $delete_forms = array();
         foreach ($proxies as $proxy){
@@ -68,8 +68,8 @@ class EventController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listEventProxiesAction(Event $event,Request $request){
-
+    public function listEventProxiesAction(Event $event, Request $request)
+    {
         $proxies = $event->getProxies();
         $delete_forms = array();
         foreach ($proxies as $proxy){
@@ -89,11 +89,10 @@ class EventController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
         $event = new Event();
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -116,7 +115,7 @@ class EventController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Event $event)
+    public function editAction(Request $request, Event $event, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -124,9 +123,6 @@ class EventController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
-
             $em->persist($event);
             $em->flush();
 
@@ -150,14 +146,12 @@ class EventController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Event $event)
+    public function removeAction(Request $request, Event $event, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getDeleteForm($event);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-
             $em->remove($event);
             $em->flush();
             $session->getFlashBag()->add('success', 'L événement a bien été supprimée !');
@@ -172,13 +166,12 @@ class EventController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeProxyAction(Request $request,Proxy $proxy)
+    public function removeProxyAction(Request $request, Proxy $proxy, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getProxyDeleteForm($proxy);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
 
             $em->remove($proxy);
             $em->flush();
@@ -194,14 +187,13 @@ class EventController extends Controller
      * @Method({"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editProxyAction(Request $request,Proxy $proxy,\Swift_Mailer $mailer)
+    public function editProxyAction(Request $request,Proxy $proxy,\Swift_Mailer $mailer, EntityManagerInterface $em)
     {
         $session = new Session();
         $event = $proxy->getEvent();
         $form = $this->createForm(ProxyType::class, $proxy);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             if ($proxy->getOwner()){
                 $existing_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
                 if ($existing_proxy && $existing_proxy != $proxy){
@@ -297,10 +289,10 @@ class EventController extends Controller
      * @Route("/{id}/proxy/give", name="event_proxy_give")
      * @Method({"GET", "POST"})
      */
-    public function giveProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
+    public function giveProxyAction(Event $event, Request $request,\ Swift_Mailer $mailer, EntityManagerInterface $em)
+    {
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
         $myproxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>$current_app_user));
 
         if ($myproxy){
@@ -365,7 +357,6 @@ class EventController extends Controller
         }
 
         if ($request->get("beneficiary") > 0){
-            $em = $this->getDoctrine()->getManager();
             $beneficiary = $em->getRepository('App:Beneficiary')->find($request->get("beneficiary"));
             if ($beneficiary){
 
@@ -391,13 +382,12 @@ class EventController extends Controller
                     $proxy->setCreatedAt(new \DateTime());
                     $proxy->setOwner($beneficiary);
                 }
-                $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+                $current_app_user = $this->getUser();
                 $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
                 $confirm_form = $this->createForm(ProxyType::class, $proxy);
                 $confirm_form->handleRequest($request);
 
                 if ($confirm_form->isSubmitted() && $confirm_form->isValid()) {
-                    $em = $this->getDoctrine()->getManager();
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
@@ -438,7 +428,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary")
      * @Method({"POST"})
      */
-    public function findBeneficiaryAction(Event $event,Request $request){
+    public function findBeneficiaryAction(Event $event, Request $request, EntityManagerInterface $em){
         $search_form = $this->createFormBuilder()
             ->setAction($this->generateUrl('event_proxy_find_beneficiary', array('id' => $event->getId())))
             ->add('firstname', TextType::class, array('label' => 'le prénom'))
@@ -449,7 +439,6 @@ class EventController extends Controller
 
         if ($search_form->handleRequest($request)->isValid()) {
             $firstname = $search_form->get('firstname')->getData();
-            $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('App\Entity\Beneficiary', 'b')
                 ->join('b.user', 'u')
@@ -477,11 +466,10 @@ class EventController extends Controller
      * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove")
      * @Method({"GET"})
      */
-    public function removeProxyLiteAction(Event $event,Proxy $proxy,Request $request){
+    public function removeProxyLiteAction(Event $event, Proxy $proxy, Request $request, EntityManagerInterface $em){
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if ($proxy->getEvent() === $event && $proxy->getOwner()->getUser() == $current_app_user){
-            $em = $this->getDoctrine()->getManager();
+        $current_app_user = $this->getUser();
+        if ($proxy->getEvent() === $event && $proxy->getOwner()->getUser() == $current_app_user) {
             $em->remove($proxy);
             $em->flush();
             $session->getFlashBag()->add('success', 'Ok, bien reçu');
@@ -495,10 +483,9 @@ class EventController extends Controller
      * @Route("/{id}/proxy/take", name="event_proxy_take")
      * @Method({"GET","POST"})
      */
-    public function acceptProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
-
-        $em = $this->getDoctrine()->getManager();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+    public function acceptProxyAction(Event $event, Request $request, \Swift_Mailer $mailer, EntityManagerInterface $em)
+    {
+        $current_app_user = $this->getUser();
         $myproxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>$current_app_user));
         $session = new Session();
         if ($myproxy){
@@ -545,11 +532,9 @@ class EventController extends Controller
 
     }
 
-    public function sendProxyMail(Proxy $proxy,\Swift_Mailer $mailer){
+    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer, $memberEmail){
 
         $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
-
-        $memberEmail = $this->getParameter('emails.member');
         $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
             ->setFrom($memberEmail['address'], $memberEmail['from_name'])
             ->setTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
@@ -589,8 +574,8 @@ class EventController extends Controller
      * @Route("/{id}/signatures/", name="event_signatures")
      * @Method({"GET","POST"})
      */
-    public function signaturesListAction(Request $request,Event $event){
-        $em = $this->getDoctrine()->getManager();
+    public function signaturesListAction(Request $request, Event $event, EntityManagerInterface $em)
+    {
         return $this->render('admin/event/signatures.html.twig', array(
             'event' => $event,
             'beneficiaries' => $em->getRepository('App:Beneficiary')->findBy(array(),array('lastname'=>'ASC'))

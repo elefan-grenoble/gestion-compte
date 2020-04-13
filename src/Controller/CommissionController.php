@@ -10,8 +10,10 @@ use App\Event\CommissionJoinOrLeaveEvent;
 use App\Event\HelloassoEvent;
 use App\Form\AutocompleteBeneficiaryType;
 use App\Form\CommissionType;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -22,6 +24,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Csrf\TokenStorage\TokenStorageInterface;
 
 /**
  * User controller.
@@ -38,9 +41,9 @@ class CommissionController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, EntityManagerInterface $em)
     {
-        $commissions = $this->getDoctrine()->getManager()->getRepository('App:Commission')->findAll();
+        $commissions = $em->getRepository('App:Commission')->findAll();
         return $this->render('admin/commission/list.html.twig',array('commissions'=>$commissions));
     }
 
@@ -51,13 +54,12 @@ class CommissionController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
 
         $session = new Session();
 
         $commission = new Commission();
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(CommissionType::class, $commission);
         $form->handleRequest($request);
@@ -86,10 +88,10 @@ class CommissionController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function editAction(Request $request,Commission $commission)
+    public function editAction(Request $request, Commission $commission, EntityManagerInterface $em)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
         $beneficiary = $current_app_user->getBeneficiary();
 
         if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
@@ -100,8 +102,6 @@ class CommissionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
 
             foreach ($commission->getBeneficiaries() as $beneficiary){
                 $beneficiary->setOwn();
@@ -154,9 +154,9 @@ class CommissionController extends Controller
      * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary")
      * @Method({"POST"})
      */
-    public function addBeneficiaryAction(Request $request,Commission $commission)
+    public function addBeneficiaryAction(Request $request, Commission $commission, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
 
         if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
@@ -166,14 +166,12 @@ class CommissionController extends Controller
         $form = $this->getAddBeneficiaryForm($commission);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $beneficiary = $form->getData('beneficiary')['beneficiary'];
             if (!$commission->getBeneficiaries()->contains($beneficiary)) {
                 $beneficiary->addCommission($commission);
                 $em->persist($beneficiary);
                 $em->flush();
                 $message = $beneficiary->getFirstname().' a bien été ajouté à la commission';
-                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(
                     CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME,
                     new CommissionJoinOrLeaveEvent($beneficiary,$commission)
@@ -185,7 +183,7 @@ class CommissionController extends Controller
         }
 
         if ($request->isXmlHttpRequest()){
-            $html = $this->container->get('twig')->render('beneficiary/_partial/chip.html.twig', [
+            $html = $this->render('beneficiary/_partial/chip.html.twig', [
                 'beneficiary' => $beneficiary,
                 'close' => true,
             ]);
@@ -203,23 +201,21 @@ class CommissionController extends Controller
      * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary")
      * @Method({"POST"})
      */
-    public function removeBeneficiaryAction(Request $request,Commission $commission)
+    public function removeBeneficiaryAction(Request $request, Commission $commission, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_app_user = $this->getUser();
 
         if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 
-        $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('App:Beneficiary')->find($_POST['beneficiary']);
         /** @var Beneficiary $beneficiary */
         if ($beneficiary->getId()){
             $beneficiary->removeCommission($commission);
             $em->persist($beneficiary);
             $em->flush();
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(
                 CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME,
                 new CommissionJoinOrLeaveEvent($beneficiary,$commission)
@@ -241,13 +237,12 @@ class CommissionController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Commission $commission)
+    public function removeAction(Request $request, Commission $commission, EntityManagerInterface $em)
     {
         $session = new Session();
         $form = $this->getDeleteForm($commission);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             foreach ($commission->getBeneficiaries() as $beneficiary){
                 $beneficiary->removeCommission($commission);
                 $em->persist($beneficiary);

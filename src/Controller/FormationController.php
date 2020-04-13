@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Formation;
 use App\Form\FormationType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -27,9 +28,9 @@ class FormationController extends Controller
      * @Method("GET")
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function indexAction()
+    public function indexAction(EntityManagerInterface $em)
     {
-        $formations = $this->getDoctrine()->getManager()->getRepository('App:Formation')->findAll();
+        $formations = $em->getRepository('App:Formation')->findAll();
         return $this->render('admin/role/list.html.twig',array('formations'=>$formations));
     }
 
@@ -40,12 +41,11 @@ class FormationController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, EntityManagerInterface $em)
     {
         $session = new Session();
 
         $formation = new Formation();
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
@@ -74,7 +74,7 @@ class FormationController extends Controller
      * @Method({"GET", "POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Formation $formation)
+    public function editAction(Request $request, Formation $formation, EntityManagerInterface $em)
     {
         $session = new Session();
 
@@ -82,8 +82,6 @@ class FormationController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $em = $this->getDoctrine()->getManager();
             $em->persist($formation);
             $em->flush();
 
@@ -107,7 +105,7 @@ class FormationController extends Controller
      * @Method({"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Formation $formation)
+    public function removeAction(Request $request, Formation $formation)
     {
         $session = new Session();
         $form = $this->getDeleteForm($formation);
@@ -125,7 +123,8 @@ class FormationController extends Controller
      * @param Formation $formation
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Formation $formation){
+    protected function getDeleteForm(Formation $formation)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('formation_delete', array('id' => $formation->getId())))
             ->setMethod('DELETE')

@@ -13,6 +13,7 @@ use App\Entity\TimeLog;
 use App\Entity\User;
 use App\Form\BeneficiaryType;
 use App\Form\NoteType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -25,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -42,29 +44,19 @@ use Twig\Sandbox\SecurityError;
  */
 class NoteController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * reply to a note
      *
      * @Route("/note/{id}/reply", name="note_reply")
      * @Method({"POST"})
      */
-    public function noteReplyAction(Request $request, Note $note)
+    public function noteReplyAction(Request $request, Note $note, EntityManagerInterface $em)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
+        $this->denyAccessUnlessGranted('access_tools', $this->getUser());
 
         $new_note = new Note();
         $new_note->setParent($note);
-        $new_note->setAuthor($this->getCurrentAppUser());
+        $new_note->setAuthor($this->getUser());
         $new_note->setCreatedAt(new \DateTime());
         $new_note->setSubject($note->getSubject());
 
@@ -73,7 +65,6 @@ class NoteController extends Controller
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
             $session = new Session();
-            $em = $this->getDoctrine()->getManager();
             $em->persist($new_note);
             $em->flush();
             if ($new_note->getSubject()) {
@@ -91,7 +82,7 @@ class NoteController extends Controller
      * @Route("/note/{id}/edit", name="note_edit")
      * @Method({"GET","POST"})
      */
-    public function noteEditAction(Request $request, Note $note)
+    public function noteEditAction(Request $request, Note $note, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('edit', $note);
 
@@ -100,7 +91,6 @@ class NoteController extends Controller
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
             $session = new Session();
-            $em = $this->getDoctrine()->getManager();
             $em->persist($note);
             $em->flush();
             if ($note->getSubject()) {
@@ -133,7 +123,7 @@ class NoteController extends Controller
      * @Route("/note/{id}", name="note_delete")
      * @Method("DELETE")
      */
-    public function deleteNoteAction(Request $request, Note $note)
+    public function deleteNoteAction(Request $request, Note $note, EntityManagerInterface $em)
     {
         $this->denyAccessUnlessGranted('delete', $note);
 
@@ -144,7 +134,6 @@ class NoteController extends Controller
         $member = $note->getSubject();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($note);
             $em->flush();
             $session->getFlashBag()->add('success', "la note a bien été supprimée");
@@ -156,13 +145,13 @@ class NoteController extends Controller
         return $this->redirectToRoute('user_office_tools');
     }
 
-    private function redirectToShow(Membership $member)
+    private function redirectToShow(Membership $member, AuthorizationCheckerInterface $authorizationChecker)
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        if ($authorizationChecker->isGranted('ROLE_ADMIN'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
     }
 }

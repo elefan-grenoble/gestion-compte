@@ -6,7 +6,9 @@ use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\MarkdownEditorType;
+use App\Service\MailerService;
 use App\Service\SearchUserFormHelper;
+use Doctrine\ORM\EntityManagerInterface;
 use Michelf\Markdown;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -18,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use Twig\Environment;
 
 /**
  * Email controller.
@@ -34,9 +37,8 @@ class MailController extends Controller
      * @Route("/beneficiaries", name="mail_get_beneficiaries")
      * @Method({"GET"})
      */
-    public function allBeneficiariesAction()
+    public function allBeneficiariesAction(EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
         $r = array();
         foreach ($beneficiaries as $beneficiary) {
@@ -51,9 +53,8 @@ class MailController extends Controller
      * @Route("/non_members", name="mail_get_non_members")
      * @Method({"GET"})
      */
-    public function nonMembersListAction()
+    public function nonMembersListAction(EntityManagerInterface $em)
     {
-        $em = $this->getDoctrine()->getManager();
         $users = $em->getRepository("App:User")->findNonMember();
         $r = array();
         foreach ($users as $user) {
@@ -81,11 +82,10 @@ class MailController extends Controller
      * @Route("/to_bucket/{id}", name="mail_bucketshift")
      * @Method({"GET","POST"})
      */
-    public function mailBucketShift(Request $request, Shift $shift)
+    public function mailBucketShift(Request $request, Shift $shift, EntityManagerInterface $em)
     {
         $mailform = $this->getMailForm();
         if ($shift) {
-            $em = $this->getDoctrine()->getManager();
             $shifts = $em->getRepository(Shift::class)->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
             $beneficiary = array();
             foreach ($shifts as $shift) {
@@ -106,11 +106,11 @@ class MailController extends Controller
      * @Route("/", name="mail_edit")
      * @Method({"GET","POST"})
      */
-    public function editAction(Request $request, SearchUserFormHelper $formHelper)
+    public function editAction(Request $request, SearchUserFormHelper $formHelper,EntityManagerInterface $em)
     {
         $form = $formHelper->getSearchForm($this->createFormBuilder());
         $form->handleRequest($request);
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
+        $qb = $formHelper->initSearchQuery($em);
 
         $to = array();
         if ($form->isSubmitted() && $form->isValid()) {
@@ -123,7 +123,7 @@ class MailController extends Controller
             }
         }
         $non_members_users = array();
-        $non_members = $this->getDoctrine()->getManager()->getRepository("App:User")->findNonMember();
+        $non_members = $em->getRepository("App:User")->findNonMember();
         foreach ($non_members as $user) {
             $non_members_emails[] = $user;
         }
@@ -148,13 +148,12 @@ class MailController extends Controller
      * @Route("/send", name="mail_send")
      * @Method({"POST"})
      */
-    public function sendAction(Request $request, \Swift_Mailer $mailer)
+    public function sendAction(Request $request, \Swift_Mailer $mailer, EntityManagerInterface $em, MailerService $mailerService, Environment $twig)
     {
         $session = new Session();
         $mailform = $this->getMailForm();
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             //beneficiaries
             $to = $mailform->get('to')->getData();
             $chips = json_decode($to);
@@ -190,7 +189,6 @@ class MailController extends Controller
             $nb = 0;
             $errored = [];
 
-            $mailerService = $this->get('mailer_service');
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailerService->getAllowedEmails())) {
                 $from = array($from_email => array_search($from_email, $mailerService->getAllowedEmails()));
@@ -224,9 +222,9 @@ class MailController extends Controller
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
 
-            $template = $this->get('twig')->createTemplate($content);
+            $template = $twig->createTemplate($content);
             foreach ($beneficiaries as $beneficiary) {
-                $body = $this->get('twig')->render($template, array('beneficiary' => $beneficiary));
+                $body = $twig->render($template, array('beneficiary' => $beneficiary));
                 try {
                     $message = (new \Swift_Message($mailform->get('subject')->getData()))
                         ->setFrom($from)
@@ -253,9 +251,8 @@ class MailController extends Controller
         return $this->redirectToRoute('mail_edit');
     }
 
-    private function getMailForm()
+    private function getMailForm(MailerService $mailerService)
     {
-        $mailerService = $this->get('mailer_service');
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')

@@ -6,6 +6,7 @@ use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Form\BeneficiaryType;
 use App\Service\MembershipService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -18,6 +19,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 
 /**
@@ -27,15 +29,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class BeneficiaryController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser(){
-        if (!$this->_current_app_user){
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * Displays a form to edit an existing user entity.
      *
@@ -45,7 +38,7 @@ class BeneficiaryController extends Controller
      * @param Beneficiary $beneficiary
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
+    public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary, EntityManagerInterface $em)
     {
         $session = new Session();
         $member = $beneficiary->getMembership();
@@ -55,8 +48,6 @@ class BeneficiaryController extends Controller
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-
             $em->flush();
             $session->getFlashBag()->add('success', 'Mise à jour effectuée');
 
@@ -78,7 +69,7 @@ class BeneficiaryController extends Controller
      * @param Beneficiary $beneficiary
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
+    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary, EntityManagerInterface $em)
     {
         $member = $beneficiary->getMembership();
 
@@ -91,7 +82,6 @@ class BeneficiaryController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($beneficiary);
             $em->flush();
         }
@@ -125,10 +115,9 @@ class BeneficiaryController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function findMemberNumberAction(Request $request)
+    public function findMemberNumberAction(Request $request, EntityManagerInterface $em, AuthorizationCheckerInterface $authorizationChecker)
     {
-        $securityContext = $this->container->get('security.authorization_checker');
-        if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
+        if ($authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $form = $this->createFormBuilder()
                 ->add('firstname', TextType::class, array('label' => 'Le prénom', 'attr' => array(
                     'placeholder' => 'babar',
@@ -147,7 +136,6 @@ class BeneficiaryController extends Controller
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $firstname = $form->get('firstname')->getData();
-            $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
             $beneficiaries = $qb->select('b')->from('App\Entity\Beneficiary', 'b')
                 ->join('b.membership', 'm')
@@ -182,14 +170,14 @@ class BeneficiaryController extends Controller
         return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
     }
 
-    private function redirectToShow(Membership $member)
+    private function redirectToShow(Membership $member, AuthorizationCheckerInterface $authorizationChecker)
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        if ($authorizationChecker->isGranted('ROLE_ADMIN'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
     }
 
     /**
@@ -199,16 +187,15 @@ class BeneficiaryController extends Controller
      * @return \Symfony\Component\HttpFoundation\Response
      * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request){
+    public function listAction(Request $request, AuthorizationCheckerInterface $authorizationChecker, EntityManagerInterface $em, MembershipService $membershipService)
+    {
 
         $granted = false;
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
+        if ($authorizationChecker->isGranted('ROLE_USER_MANAGER'))
             $granted = true;
         if ($this->getUser()->getBeneficiary() && count($this->getUser()->getBeneficiary()->getOwnedCommissions()))
             $granted = true;
         if ($granted && $request->isXmlHttpRequest()){
-            $em = $this->getDoctrine()->getManager();
-            $userRepo = $em->getRepository(Beneficiary::class);
 
             $string = $request->get('string');
 
@@ -226,7 +213,7 @@ class BeneficiaryController extends Controller
                 if ($beneficiary->getMembership()->isWithdrawn()){
                     $dead = true;
                 }
-                if (!$this->get(MembershipService::class)->isUptodate($beneficiary->getMembership())){
+                if (!$membershipService->isUptodate($beneficiary->getMembership())){
                     $dead = true;
                 }
                 if (!$beneficiary->getMembership()){

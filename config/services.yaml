@@ -45,6 +45,7 @@ parameters:
     logging.swiftmailer.recipient: ~
 
     super_admin.username: admin
+    super_admin.initial_password: ~
 
     # The base domain used for mail addresses
     emails.base_domain: yourcoop.local
@@ -89,7 +90,6 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-        public: true
         bind:
             $localCurrency: '%local_currency_name%'
             $appSecret: 'test'
@@ -98,7 +98,9 @@ services:
             $helloAssoApiPassword: '%helloasso_api_password%'
             $registrationDuration: '%registration_duration%'
             $shiftEmail: '%emails.shift%'
+            $adminEmail: '%emails.admin%'
             $superAdminUsername: '%super_admin.username%'
+            $superAdminInitialPassword: '%super_admin.initial_password%'
             $baseDomain: '%emails.base_domain%'
             $memberEmail: "%emails.member%"
             $projectName: "%project_name%"
@@ -114,6 +116,7 @@ services:
             $unlimitedBookDuration: '%unlimited_book_duration%'
             $placeLocalIpAddress: '%place_local_ip_address%'
             $codeGenerationEnabled: '%code_generation_enabled%'
+            $kernelProjectDir: '%kernel.project_dir%'
             $useFlyAndFixed: '%use_fly_and_fixed%'
             $allowExtraShifts: '%allow_extra_shifts%'
             $maxTimeInAdvanceToBookExtraShifts: '%max_time_in_advance_to_book_extra_shifts%'
