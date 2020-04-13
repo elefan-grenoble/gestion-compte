@@ -2,13 +2,25 @@
 // src/App/Command/InitUsersFirstShiftDateCommand.php
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
+class InitUsersFirstShiftDateCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+    }
+
     protected function configure()
     {
         $this
@@ -20,8 +32,7 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $count = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();
+        $shifts = $this->entityManager->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();
         $last_member_id = null;
         foreach ($shifts as $shift) {
             $membership = $shift->getShifter()->getMembership();
@@ -30,11 +41,11 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
                 $membership->setFirstShiftDate($firstDate);
-                $em->persist($membership);
+                $this->entityManager->persist($membership);
                 $count++;
             }
         }
-        $em->flush();
+        $this->entityManager->flush();
         $message = $count . ' membre' . (($count > 1) ? 's' : '') . ' mis à jour';
         $output->writeln($message);
     }

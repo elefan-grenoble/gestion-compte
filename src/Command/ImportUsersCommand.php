@@ -9,17 +9,31 @@ use App\Entity\Membership;
 use App\Entity\Registration;
 use App\Entity\User;
 use App\Event\BeneficiaryCreatedEvent;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class ImportUsersCommand extends CsvCommand
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
+    }
 
     protected function configure()
     {
@@ -92,8 +106,6 @@ class ImportUsersCommand extends CsvCommand
 
         $progress = new ProgressBar($output,$lines);
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         $row = 0;
         if (($handle = fopen($file, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 10000, $delimiter)) !== FALSE) {
@@ -128,14 +140,14 @@ class ImportUsersCommand extends CsvCommand
 
                     $membership = new Membership();
                     if ($add_to){
-                        $parent_user = $em->getRepository(User::class)->findOneBy(array('email'=>$add_to));
+                        $parent_user = $this->entityManager->getRepository(User::class)->findOneBy(array('email'=>$add_to));
                         if ($parent_user && $parent_user->getId()){
                             $membership = $parent_user->getBeneficiary()->getMembership();
                             $output->writeln("<info>Membership found for parent email <fg=cyan>$add_to</> (#<fg=cyan>".$membership->getMemberNumber()."</>), using it</info>",OutputInterface::VERBOSITY_DEBUG);
                         }
                     }
                     if (!$membership->getId()){
-                        $membership = $em->getRepository(Membership::class)->findOneBy(array('member_number'=>$member_number));
+                        $membership = $this->entityManager->getRepository(Membership::class)->findOneBy(array('member_number'=>$member_number));
                         if ($membership && $membership->getId()){
                             $output->writeln("<info>Membership with number <fg=cyan>$member_number</> exist, using it</info>",OutputInterface::VERBOSITY_DEBUG);
                         }else{
@@ -146,11 +158,11 @@ class ImportUsersCommand extends CsvCommand
                             $membership->setWithdrawn(false);
                             $membership->setFrozen(false);
                             $membership->setFrozenChange(false);
-                            $em->persist($membership);
+                            $this->entityManager->persist($membership);
                         }
                     }
 
-                    $user = $em->getRepository(User::class)->findOneBy(array('email'=>$email));
+                    $user = $this->entityManager->getRepository(User::class)->findOneBy(array('email'=>$email));
                     $beneficiary = new Beneficiary();
 
                     if ($user && $user->getId()){
@@ -164,12 +176,11 @@ class ImportUsersCommand extends CsvCommand
                         $beneficiary->setLastname($last_name);
                         $beneficiary->setPhone($phone);
 
-                        $dispatcher = $this->getContainer()->get('event_dispatcher');
-                        $dispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
+                        $this->eventDispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
 
                         $beneficiary->setEmail($email);
 
-                        $em->persist($beneficiary);
+                        $this->entityManager->persist($beneficiary);
                     }
 
                     $address = new Address();
@@ -181,15 +192,15 @@ class ImportUsersCommand extends CsvCommand
                     $address->setStreet1($street1);
                     $address->setStreet2($street2);
                     $address->setZipcode($zip);
-                    $em->persist($address);
+                    $this->entityManager->persist($address);
 
                     $beneficiary->setAddress($address);
                     $beneficiary->setMembership($membership);
                     if ($membership_is_new){
                         $membership->setMainBeneficiary($beneficiary);
-                        $em->persist($membership);
+                        $this->entityManager->persist($membership);
                     }
-                    $em->persist($beneficiary);
+                    $this->entityManager->persist($beneficiary);
 
                     $registration = new Registration();
                     if (!$user_is_new){ //do not add registration
@@ -205,15 +216,15 @@ class ImportUsersCommand extends CsvCommand
                         $registration->setDate($date);
                         $registration->setMembership($membership);
                         $registration->setAmount($amount);
-                        $registrar = $em->getRepository(User::class)->findOneBy(array('id'=>$registrar));
+                        $registrar = $this->entityManager->getRepository(User::class)->findOneBy(array('id'=>$registrar));
                         $registration->setRegistrar($registrar);
                         $registration->setMode($mode);
-                        $em->persist($registration);
+                        $this->entityManager->persist($registration);
                     }
 
                     foreach ($commissions as $commission_id){
                         if ($commission_id){
-                            $commission =  $em->getRepository(Commission::class)->findOneBy(array('id'=>$commission_id));
+                            $commission =  $this->entityManager->getRepository(Commission::class)->findOneBy(array('id'=>$commission_id));
                             if ($commission){
                                 $beneficiary->addCommission($commission);
                             }else{
@@ -221,9 +232,9 @@ class ImportUsersCommand extends CsvCommand
                             }
                         }
                     }
-                    $em->persist($beneficiary);
+                    $this->entityManager->persist($beneficiary);
 
-                    $em->flush();
+                    $this->entityManager->flush();
 
                 }
             }

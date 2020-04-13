@@ -3,14 +3,41 @@
 namespace App\Command;
 
 use App\Entity\Code;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpClient\HttpClient;
 
-class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
+class UpdateIgloohomeCodeCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var \Swift_Mailer
+     */
+    private $mailer;
+    /**
+     * @var array
+     */
+    private $shiftEmail;
+    /**
+     * @var string
+     */
+    private $superAdminUsername;
+
+    public function __construct(EntityManagerInterface $entityManager, \Swift_Mailer $mailer, array $shiftEmail, string $superAdminUsername)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->mailer = $mailer;
+        $this->shiftEmail = $shiftEmail;
+        $this->superAdminUsername = $superAdminUsername;
+    }
+
     protected function configure()
     {
         $this
@@ -47,13 +74,11 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $content = $response->getContent();
         if ($status != 200) {
             $output->writeln('<fg=red;> Echec de la création du code (code http retourné : ' . $status . '). Réponse : ' . $content . '</>');
-            $mailer = $this->getContainer()->get('mailer');
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
             $mail = (new \Swift_Message('[ESPACE MEMBRES] Echec de création du code du boitier'))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($recipients)
                 ->setBody('Echec de génération du code du boitier Igloohome');
-            $mailer->send($mail);
+            $this->mailer->send($mail);
             return;
         }
 
@@ -62,17 +87,15 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
 
 
         // Get the old open codes
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $codeRepository = $em->getRepository('App:Code');
+        $codeRepository = $this->entityManager->getRepository('App:Code');
         $qb = $codeRepository->createQueryBuilder('c');
         $qb->where('c.closed = :closed')->setParameter('closed', 0);
         $open_codes = $qb->getQuery()->getResult();
 
 
         // Get the admin user
-        $adminUsername = $this->getContainer()->getParameter('super_admin.username');
-        $userRepository = $em->getRepository('App:User');
-        $adminUSer = $userRepository->findOneByUsername($adminUsername);
+        $userRepository = $this->entityManager->getRepository('App:User');
+        $adminUSer = $userRepository->findOneByUsername($this->superAdminUsername);
 
         // Insert the new code created from the Igloohome API
         $code = new Code();
@@ -81,15 +104,15 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $code->setCreatedAt(new \DateTime('now'));
         $code->setRegistrar($adminUSer);
         
-        $em->persist($code);
+        $this->entityManager->persist($code);
 
         // Close the old open codes
         foreach ($open_codes as $open_code) {
             $open_code->setClosed(true);
-            $em->persist($open_code);
+            $this->entityManager->persist($open_code);
         }
 
-        $em->flush();
+        $this->entityManager->flush();
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> Nouveau code généré avec succès </>');
     }

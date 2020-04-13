@@ -44,6 +44,8 @@ parameters:
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
 
+    super_admin.username: admin
+
     # The base domain used for mail addresses
     emails.base_domain: yourcoop.local
 
@@ -91,6 +93,14 @@ services:
             $helloAssoApiKey: '%helloasso_api_key%'
             $helloAssoApiBaseUrl: '%helloasso_api_base_url%'
             $helloAssoApiPassword: '%helloasso_api_password%'
+            $registrationDuration: '%registration_duration%'
+            $shiftEmail: '%emails.shift%'
+            $superAdminUsername: '%super_admin.username%'
+            $baseDomain: '%emails.base_domain%'
+            $memberEmail: "%emails.member%"
+            $project_name: "%project_name%"
+            $sendableEmails: '%emails.sendable%'
+            $useFlyAndFixed: '%use_fly_and_fixed%'
 
 
     # makes classes in src/ available to be used as services
@@ -122,7 +132,6 @@ services:
             - { name: twig.extension }
     app.twig.extensions.mail:
         class: App\Twig\Extension\MailExtension
-        arguments: ['@mailer_service']
         tags:
             - { name: twig.extension }
     app.twig.extensions.event:
@@ -258,19 +267,6 @@ services:
         arguments:
             - '@logging.handler.swiftmailer.inner'
             - '%logging.swiftmailer.enabled%'
-
-    mailer_service:
-        class: App\Service\MailerService
-        public: true
-        arguments:
-            $mailer: "@mailer"
-            $baseDomain: '%emails.base_domain%'
-            $memberEmail: "%emails.member%"
-            $project_name: "%project_name%"
-            $sendableEmails: '%emails.sendable%'
-            $entity_manager: "@doctrine.orm.entity_manager"
-            $router: "@router"
-            $templating: "@templating"
 
     membership_service:
         class: App\Service\MembershipService

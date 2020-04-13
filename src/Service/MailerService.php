@@ -2,11 +2,11 @@
 
 namespace App\Service;
 
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\UserBundle\Mailer\MailerInterface;
 use FOS\UserBundle\Model\UserInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Templating\EngineInterface;
 
 class MailerService implements MailerInterface
 {
@@ -20,14 +20,14 @@ class MailerService implements MailerInterface
     private $templating;
 
     public function __construct(
-        $mailer,
+        \Swift_Mailer $mailer,
         string $baseDomain,
         array $memberEmail,
         string $project_name,
         array $sendableEmails,
-        EntityManager $entity_manager,
-        Router $router,
-        $templating
+        EntityManagerInterface $entity_manager,
+        UrlGeneratorInterface $router,
+        EngineInterface $templating
     ) {
         $this->mailer = $mailer;
         $this->baseDomain = $baseDomain;

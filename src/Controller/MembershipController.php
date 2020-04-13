@@ -399,7 +399,7 @@ class MembershipController extends Controller
         $oldEmail = $user->getEmail();
 
         /** @var MailerService $mailerService */
-        $mailerService = $this->get('mailer_service');
+        $mailerService = $this->get(MailerService::class);
 
         if ($mailerService->isTemporaryEmail($oldEmail) && filter_var($email, FILTER_VALIDATE_EMAIL)) { //was a temp mail
             $user->setEmail($email);
@@ -989,7 +989,7 @@ class MembershipController extends Controller
             $e = '"'; // this is the default but i like to be explicit
 
             /** @var MailerService $mailerService */
-            $mailerService = $this->get('mailer_service');
+            $mailerService = $this->get(MailerService::class);
 
             foreach ($beneficiaries as $beneficiary) {
                 if (!$beneficiary->getMembership()->isWithdrawn()) {

@@ -3,17 +3,33 @@
 namespace App\Command;
 
 use App\Entity\HelloassoPayment;
-use App\Entity\Shift;
 use App\Event\HelloassoEvent;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class HelloassoPaymentCommand extends ContainerAwareCommand
+class HelloassoPaymentCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     protected function configure()
     {
         $this
@@ -30,10 +46,8 @@ class HelloassoPaymentCommand extends ContainerAwareCommand
         $save_after_id = $input->getArgument('save_after_id');
         $list_orphan = $input->getOption('list_orphan');
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         if ($list_orphan){
-            $orphans = $em->getRepository(HelloassoPayment::class)->findOrphan();
+            $orphans = $this->entityManager->getRepository(HelloassoPayment::class)->findOrphan();
             if (count($orphans)){
                 $output->writeln("<info>Listing orphan payments below (".count($orphans).")</info>");
                 /** @var HelloassoPayment $orphan */
@@ -51,11 +65,10 @@ class HelloassoPaymentCommand extends ContainerAwareCommand
         }
 
         if ($save_after_id){
-            $payment = $em->getRepository(HelloassoPayment::class)->findOneBy(array('id'=>$save_after_id));
+            $payment = $this->entityManager->getRepository(HelloassoPayment::class)->findOneBy(array('id'=>$save_after_id));
             if ($payment){
                 $output->writeln("<info>Event HelloassoEvent::PAYMENT_AFTER_SAVE (".HelloassoEvent::PAYMENT_AFTER_SAVE.") will be triggered on payment id #".$payment->getId()."</info>");
-                $dispatcher = $this->getContainer()->get('event_dispatcher');
-                $dispatcher->dispatch(
+                $this->eventDispatcher->dispatch(
                     HelloassoEvent::PAYMENT_AFTER_SAVE,
                     new HelloassoEvent($payment)
                 );

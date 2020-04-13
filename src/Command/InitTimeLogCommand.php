@@ -6,12 +6,24 @@ use App\Entity\Membership;
 use App\Entity\Shift;
 use App\Entity\TimeLog;
 use Doctrine\ORM\EntityManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitTimeLogCommand extends ContainerAwareCommand
+class InitTimeLogCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+    }
+
     protected function configure()
     {
         $this
@@ -30,8 +42,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
     {
         $countShiftLogs = 0;
         $countCycleBeginning = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $members = $em->getRepository('App:Membership')->findAll();
+        $members = $this->entityManager->getRepository('App:Membership')->findAll();
         $beginningOfLastCycle = new \DateTime('28 days ago');
         $beginningOfLastCycle->setTime(0, 0, 0);
         foreach ($members as $member) {
@@ -41,17 +52,17 @@ class InitTimeLogCommand extends ContainerAwareCommand
                 $currentCycleShifts = $member->getShiftsOfCycle(0, true)->toArray();
                 $shifts = array_merge($lastCycleShifts, $currentCycleShifts);
                 foreach ($shifts as $shift) {
-                    $this->createShiftLog($em, $shift, $member);
+                    $this->createShiftLog($shift, $member);
                     $countShiftLogs++;
                 }
 
                 if ($member->getFirstShiftDate() < $beginningOfLastCycle) {
-                    $this->createCurrentCycleBeginningLog($em, $member);
+                    $this->createCurrentCycleBeginningLog($member);
                     $countCycleBeginning++;
                 }
             }
         }
-        $em->flush();
+        $this->entityManager->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
         $output->writeln($countCycleBeginning . ' logs de début de cycle créés');
     }
@@ -62,7 +73,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
      * @param Membership $membership
      * @throws \Doctrine\ORM\ORMException
      */
-    private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
+    private function createShiftLog(Shift $shift, Membership $membership)
     {
         $log = new TimeLog();
         $log->setMembership($membership);
@@ -70,7 +81,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log->setShift($shift);
         $log->setDate($shift->getStart());
         $log->setType(TimeLog::TYPE_SHIFT);
-        $em->persist($log);
+        $this->entityManager->persist($log);
     }
 
     /**
@@ -78,7 +89,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
      * @param Membership $membership
      * @throws \Doctrine\ORM\ORMException
      */
-    private function createCurrentCycleBeginningLog(EntityManager $em, Membership $membership)
+    private function createCurrentCycleBeginningLog(Membership $membership)
     {
         $date = $membership->startOfCycle(0);
         $log = new TimeLog();
@@ -86,7 +97,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log->setTime(-180);
         $log->setDate($date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
-        $em->persist($log);
+        $this->entityManager->persist($log);
     }
 
 }

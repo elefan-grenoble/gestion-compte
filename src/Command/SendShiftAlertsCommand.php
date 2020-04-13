@@ -2,19 +2,44 @@
 // src/App/Command/SendShiftAlertsCommand.php
 namespace App\Command;
 
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use App\Entity\ShiftAlert;
 use App\Entity\ShiftBucket;
 use DateTime;
 use Swift_Message;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Templating\EngineInterface;
 use Symfony\Component\HttpClient\HttpClient;
 
-class SendShiftAlertsCommand extends ContainerAwareCommand
+class SendShiftAlertsCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var \Swift_Mailer
+     */
+    private $mailer;
+    /**
+     * @var EngineInterface
+     */
+    private $templating;
+    private $shiftEmail;
+
+    public function __construct(EntityManagerInterface $entityManager, \Swift_Mailer $mailer, EngineInterface $templating, array $shiftEmail)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->mailer = $mailer;
+        $this->templating = $templating;
+        $this->shiftEmail = $shiftEmail;
+    }
+
     protected function configure()
     {
         $this
@@ -51,8 +76,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     }
 
     private function computeAlerts(DateTime $date, $jobs) {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findAt($date, $jobs);
+        $shifts = $this->entityManager->getRepository('App:Shift')->findAt($date, $jobs);
 
         // Build buckets from shifts
         $buckets = array();
@@ -77,35 +101,31 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     }
 
     private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, DateTime $date, $alerts) {
-        $mailer = $this->getContainer()->get('mailer');
         $recipients = explode(',', $input->getOption('emails'));
         if ($recipients) {
             setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
             $subject = '[ALERTE CRENEAUX] ' . $dateFormatted;
 
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_ALERT_EMAIL");
+            $dynamicContent = $this->entityManager->getRepository('App:DynamicContent')->findOneByCode("SHIFT_ALERT_EMAIL");
             $template = null;
             if ($dynamicContent) {
-                $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent->getContent());
+                $template = $this->templating->createTemplate($dynamicContent->getContent());
             } else {
                 $template = 'emails/shift_alerts_default.html.twig';
             }
 
             $email = (new Swift_Message($subject))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($recipients)
                 ->setBody(
-                    $this->getContainer()->get('twig')->render(
+                    $this->templating->render(
                         $template,
                         array('alerts' => $alerts, 'date' => $date)
                     ),
                     'text/html'
                 );
-            $mailer->send($email);
+            $this->mailer->send($email);
             $output->writeln('<fg=cyan;>Email(s) sent</>');
         }
     }
@@ -113,15 +133,14 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     private function sendAlertsToMattermost(InputInterface $input, OutputInterface $output, DateTime $date, $alerts) {
         $mmHookUrl = $input->getOption('mattermostUrl');
         if ($mmHookUrl != null) {
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_ALERT_MARKDOWN");
+            $dynamicContent = $this->entityManager->getRepository('App:DynamicContent')->findOneByCode("SHIFT_ALERT_MARKDOWN");
             $template = null;
             if ($dynamicContent) {
-                $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent->getContent());
+                $template = $this->templating->createTemplate($dynamicContent->getContent());
             } else {
                 $template = 'markdown/shift_alerts_default.md.twig';
             }
-            $content = $this->getContainer()->get('twig')->render(
+            $content = $this->templating->render(
                 $template,
                 array('alerts' => $alerts, 'date' => $date)
             );

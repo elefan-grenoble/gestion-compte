@@ -3,13 +3,32 @@
 namespace App\Command;
 
 use App\Event\MemberCycleHalfEvent;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class CycleHalfCommand extends ContainerAwareCommand
+class CycleHalfCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var EventDispatcherInterface
+     */
+    private $eventDispatcher;
+
+    public function __construct(EntityManagerInterface $entityManager, EventDispatcherInterface $eventDispatcher)
+    {
+
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->eventDispatcher = $eventDispatcher;
+    }
+
     protected function configure()
     {
         $this
@@ -38,12 +57,10 @@ class CycleHalfCommand extends ContainerAwareCommand
 
         $output->writeln('<fg=green;>cycle start command for ' . $date->format('Y-m-d') . '</>');
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $members_with_half_cycle = $em->getRepository('App:Membership')->findWithHalfCyclePast($date);
+        $members_with_half_cycle = $this->entityManager->getRepository('App:Membership')->findWithHalfCyclePast($date);
         $count = 0;
         foreach ($members_with_half_cycle as $member) {
-            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date));
+            $this->eventDispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date));
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
             $count++;

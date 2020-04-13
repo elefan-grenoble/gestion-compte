@@ -5,13 +5,24 @@ namespace App\Command;
 use App\Entity\Membership;
 use App\Entity\Shift;
 use App\Entity\TimeLog;
-use Doctrine\ORM\EntityManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FixTimeLogCommand extends ContainerAwareCommand
+class FixTimeLogCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+    }
+
     protected function configure()
     {
         $this
@@ -23,8 +34,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $countShiftLogs = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $members = $em->getRepository('App:Membership')->findAll();
+        $members = $this->entityManager->getRepository('App:Membership')->findAll();
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
 
@@ -39,17 +49,17 @@ class FixTimeLogCommand extends ContainerAwareCommand
 
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $this->createShiftLog($em, $shift, $member);
+                        $this->createShiftLog($shift, $member);
                         $countShiftLogs++;
                     }
                 }
             }
         }
-        $em->flush();
+        $this->entityManager->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
     }
 
-    private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
+    private function createShiftLog(Shift $shift, Membership $membership)
     {
         $log = new TimeLog();
         $log->setMembership($membership);
@@ -57,7 +67,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
         $log->setShift($shift);
         $log->setDate($shift->getStart());
         $log->setDescription("Créneau réalisé");
-        $em->persist($log);
+        $this->entityManager->persist($log);
     }
 
 }

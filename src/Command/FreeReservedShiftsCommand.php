@@ -2,13 +2,25 @@
 // src/App/Command/FreeReservedShiftsCommand.php
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FreeReservedShiftsCommand extends ContainerAwareCommand
+class FreeReservedShiftsCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+    }
+
     protected function configure()
     {
         $this
@@ -30,14 +42,13 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
         $date->setTime(0,0);
         $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
         $count = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findReservedAt($date);
+        $shifts = $this->entityManager->getRepository('App:Shift')->findReservedAt($date);
         foreach ($shifts as $shift) {
             $shift->setLastShifter(null);
-            $em->persist($shift);
+            $this->entityManager->persist($shift);
             $count++;
         }
-        $em->flush();
+        $this->entityManager->flush();
         $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
         $output->writeln($message);
     }

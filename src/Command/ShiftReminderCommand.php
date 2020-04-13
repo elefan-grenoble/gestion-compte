@@ -3,14 +3,47 @@
 namespace App\Command;
 
 use App\Entity\Shift;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Templating\EngineInterface;
+use Twig\Environment;
 
-class ShiftReminderCommand extends ContainerAwareCommand
+class ShiftReminderCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var \Swift_Mailer
+     */
+    private $mailer;
+    /**
+     * @var EngineInterface
+     */
+    private $templating;
+    /**
+     * @var Environment
+     */
+    private $twig;
+    /**
+     * @var array
+     */
+    private $shiftEmail;
+
+    public function __construct(EntityManagerInterface $entityManager, \Swift_Mailer $mailer, array $shiftEmail, EngineInterface $templating, Environment $twig)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->mailer = $mailer;
+        $this->templating = $templating;
+        $this->twig = $twig;
+        $this->shiftEmail = $shiftEmail;
+    }
+
     protected function configure()
     {
         $this
@@ -34,9 +67,7 @@ class ShiftReminderCommand extends ContainerAwareCommand
 
         $output->writeln('<fg=cyan;>'.$from->format('d M Y').'</>');
         ////////////////////////
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $mailer = $this->getContainer()->get('mailer');
-        $shiftRepository = $em->getRepository('App:Shift');
+        $shiftRepository = $this->entityManager->getRepository('App:Shift');
         $qb = $shiftRepository
             ->createQueryBuilder('s');
         $qb->where('s.start >= :start')
@@ -45,21 +76,20 @@ class ShiftReminderCommand extends ContainerAwareCommand
             ->setParameter('end', $from->add(\DateInterval::createFromDateString('+1 day'))->format('Y-m-d'));
 
         $shifts = $qb->getQuery()->getResult();
-        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
 
-        $dynamicContent = $em->getRepository('App:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
+        $dynamicContent = $this->entityManager->getRepository('App:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
 
-        $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent);
+        $template = $this->twig->createTemplate($dynamicContent);
 
         /** @var Shift $shift */
         foreach ($shifts as $shift) {
             if ($shift->getShifter()){ //send reminder
-                $dynamicContent = $this->getContainer()->get('twig')->render($template, array('beneficiary' => $shift->getShifter()));
+                $dynamicContent = $this->templating->render($template, array('beneficiary' => $shift->getShifter()));
                 $reminder = (new \Swift_Message('[ESPACE MEMBRES] Ton créneau'))
-                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                    ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                     ->setTo($shift->getShifter()->getEmail())
                     ->setBody(
-                        $this->getContainer()->get('twig')->render(
+                        $this->templating->render(
                             'emails/shift_reminder.html.twig',
                             array(
                                 'shift' => $shift,
@@ -68,7 +98,7 @@ class ShiftReminderCommand extends ContainerAwareCommand
                         ),
                         'text/html'
                     );
-                $mailer->send($reminder);
+                $this->mailer->send($reminder);
                 $count++;
             }
         }

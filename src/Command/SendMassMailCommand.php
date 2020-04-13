@@ -3,16 +3,44 @@
 namespace App\Command;
 
 use App\Entity\Shift;
+use App\Service\MailerService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
 
-class SendMassMailCommand extends ContainerAwareCommand
+class SendMassMailCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var MailerService
+     */
+    private $mailerService;
+    /**
+     * @var \Swift_Mailer
+     */
+    private $mailer;
+    /**
+     * @var string
+     */
+    private $registrationDuration;
+
+    public function __construct(EntityManagerInterface $entityManager, MailerService $mailerService, \Swift_Mailer $mailer, string $registrationDuration)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->mailerService = $mailerService;
+        $this->mailer = $mailer;
+        $this->registrationDuration = $registrationDuration;
+    }
+
     protected function configure()
     {
         $this
@@ -40,8 +68,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         $frozen = $input->getOption('frozen');
         $exclude_non_member = $input->getOption('exclude_non_member');
 
-        $mailerService = $this->getContainer()->get('mailer_service');
-        $allowed_from_emails = $mailerService->getAllowedEmails();
+        $allowed_from_emails = $this->mailerService->getAllowedEmails();
 
         if (in_array($from_email,$allowed_from_emails)){
             $from = array($from_email => array_search($from_email, $allowed_from_emails));
@@ -56,19 +83,13 @@ class SendMassMailCommand extends ContainerAwareCommand
             return;
         }
 
-        $mailer = $this->getContainer()->get('mailer');
-
         $body = file_get_contents($file);
 
         if (!$body){
             $output->writeln('<fg=red;> file content not found ! </>');
             return;
-        }else{
-            /*$template = $this->getContainer()->get('twig')->createTemplate($body);
-            $body = $template->render(array());*/
         }
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("App:Membership")->createQueryBuilder('o');
+        $qb = $this->entityManager->getRepository("App:Membership")->createQueryBuilder('o');
         $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
@@ -78,7 +99,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         }
 
         $last_registration = new \DateTime();
-        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
+        $last_registration->modify("-" . $this->registrationDuration);
         if ($tolerance && $tolerance > 0){
             $last_registration->modify("-".$tolerance." days");
         }
@@ -100,7 +121,7 @@ class SendMassMailCommand extends ContainerAwareCommand
                 $to[] = $beneficiary->getEmail();
         }
         if (!$exclude_non_member){
-            $non_members = $em->getRepository("App:User")->findNonMember();
+            $non_members = $this->entityManager->getRepository("App:User")->findNonMember();
             foreach ($non_members as $user){
                 $to[] = $user->getEmail();
             }
@@ -121,7 +142,7 @@ class SendMassMailCommand extends ContainerAwareCommand
             $message->setTo($from);
             $message->setBcc($to);
         }
-        $mailer->send($message);
+        $this->mailer->send($message);
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> message envoyé à '.count($to).' beneficiaires ('.count($memberships).' comptes membre) </>');
     }

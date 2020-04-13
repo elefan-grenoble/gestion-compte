@@ -3,15 +3,53 @@
 namespace App\Command;
 
 use App\Entity\Shift;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Templating\EngineInterface;
 
-class ShiftGenerateCommand extends ContainerAwareCommand
+class ShiftGenerateCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var EngineInterface
+     */
+    private $templating;
+    /**
+     * @var string
+     */
+    private $shiftEmail;
+    /**
+     * @var \Swift_Mailer
+     */
+    private $mailer;
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+    /**
+     * @var bool
+     */
+    private $useFlyAndFixed;
+
+    public function __construct(EntityManagerInterface $entityManager, EngineInterface $templating, \Swift_Mailer $mailer, UrlGeneratorInterface $urlGenerator, array $shiftEmail, bool $useFlyAndFixed)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->templating = $templating;
+        $this->shiftEmail = $shiftEmail;
+        $this->mailer = $mailer;
+        $this->urlGenerator = $urlGenerator;
+        $this->useFlyAndFixed = $useFlyAndFixed;
+    }
+
     protected function configure()
     {
         $this
@@ -25,8 +63,6 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $use_fly_and_fixed = $this->getContainer()->getParameter('use_fly_and_fixed');
-
         $from_given = $input->getArgument('date');
         $to_given = $input->getOption('to');
         $from = date_create_from_format('Y-m-d',$from_given);
@@ -51,11 +87,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $reservedShifts = array();
         $oldShifts = array();
 
-        $router = $this->getContainer()->get('router');
-
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $mailer = $this->getContainer()->get('mailer');
-        $periodRepository = $em->getRepository('App:Period');
+        $periodRepository = $this->entityManager->getRepository('App:Period');
 
         foreach ( $period as $date ) {
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
@@ -80,14 +112,14 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                     $lastStart = $this->lastCycleDate($start);
                     $lastEnd = $this->lastCycleDate($end);
 
-                    $last_cycle_shifts = $em->getRepository('App:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
+                    $last_cycle_shifts = $this->entityManager->getRepository('App:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
                     $last_cycle_shifts =  array_filter($last_cycle_shifts, function($shift) {return $shift->getShifter();});
                     $last_cycle_shifters_array = array();
                     foreach ($last_cycle_shifts as $last_cycle_shift){
                         $last_cycle_shifters_array[] = $last_cycle_shift; //clean keys
                     }
 
-                    $existing_shifts = $em->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
+                    $existing_shifts = $this->entityManager->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
                     $count2 += count($existing_shifts);
                     for ($i=0; $i<$position->getNbOfShifter()-count($existing_shifts); $i++){
                         $current_shift = clone $shift;
@@ -96,7 +128,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         // si pas de precedent shifter
                         if (!isset($last_cycle_shifters_array[$i])
                             // ou que c'est un shift qui ne doit pas être repris
-                            || ($use_fly_and_fixed && !$last_cycle_shifters_array[$i]->isFixe())
+                            || ($this->useFlyAndFixed && !$last_cycle_shifters_array[$i]->isFixe())
                         ) {
                             $current_shift->setShifter(null);
                             $current_shift->setBookedTime(null);
@@ -108,32 +140,31 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $oldShifts[$count] = $last_cycle_shifters_array[$i];
                         }
 
-                        $em->persist($current_shift);
+                        $this->entityManager->persist($current_shift);
                         $count++;
                     }
                 }
             }
-            $em->flush();
+            $this->entityManager->flush();
 
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
             foreach ($reservedShifts as $i => $shift){
                 $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%d"));
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $oldShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
-                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                    ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                     ->setTo($shift->getLastShifter()->getEmail())
                     ->setBody(
-                        $this->getContainer()->get('twig')->render(
+                        $this->templating->render(
                             'emails/shift_reserved.html.twig',
                             array('shift' => $shift,
                                 'oldshift' => $oldShifts[$i],
                                 'days' => $d,
-                                'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                                'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                                'accept_url' => $this->urlGenerator->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                                'reject_url' => $this->urlGenerator->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
                             )
                         ),
                         'text/html'
                     );
-                $mailer->send($mail);
+                $this->mailer->send($mail);
             }
 
         }

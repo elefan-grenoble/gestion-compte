@@ -3,17 +3,32 @@
 namespace App\Command;
 
 use App\Entity\Beneficiary;
-use App\Entity\Shift;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Validator\Constraints\Date;
 
-class RandomSortMembersCommand extends ContainerAwareCommand
+class RandomSortMembersCommand extends Command
 {
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    /**
+     * @var string
+     */
+    private $registrationDuration;
+
+    public function __construct(EntityManagerInterface $entityManager, string $registrationDuration)
+    {
+        parent::__construct();
+        $this->entityManager = $entityManager;
+        $this->registrationDuration = $registrationDuration;
+    }
+
     protected function configure()
     {
         $this
@@ -47,8 +62,7 @@ class RandomSortMembersCommand extends ContainerAwareCommand
         $exclude_frozen = $input->getOption('exclude_frozen');
 
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository(Beneficiary::class)->createQueryBuilder('b');
+        $qb = $this->entityManager->getRepository(Beneficiary::class)->createQueryBuilder('b');
         $qb = $qb->leftJoin("b.membership", "m")->addSelect("m");
         $qb = $qb->leftJoin("m.registrations", "r")->addSelect("r"); //registrations
         $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
@@ -61,7 +75,7 @@ class RandomSortMembersCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> les comptes gelés sont inclus </>');
         }
 
-        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
+        $last_registration->modify("-" . $this->registrationDuration);
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière (re)adhésion après le </><fg=yellow;>'.$last_registration->format('D d M Y').' </>');
         $qb = $qb->andWhere('r.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
