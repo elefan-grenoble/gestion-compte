@@ -6,7 +6,7 @@ use App\Entity\Membership;
 use App\Entity\Shift;
 use App\Entity\User;
 use App\Service\ShiftService;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -20,18 +20,21 @@ class ShiftVoter extends Voter
     const ACCEPT = 'accept';
     const LOCK = 'lock';
     private $decisionManager;
-    private $container;
 
     /**
      * @var ShiftService
      */
     private $shiftService;
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
 
-    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, ShiftService $shiftService, RequestStack $requestStack)
     {
-        $this->container = $container;
         $this->decisionManager = $decisionManager;
-        $this->shiftService = $container->get("shift_service");
+        $this->shiftService = $shiftService;
+        $this->requestStack = $requestStack;
     }
 
     protected function supports($attribute, $subject)
@@ -124,7 +127,7 @@ class ShiftVoter extends Voter
         if ($user instanceof User) {  // the user is logged in
             return $user->getBeneficiary() === $shift->getLastShifter();
         } // the user is not logged in
-        $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
+        $token = $this->requestStack->getCurrentRequest()->get('token');
         if ($shift->getId()) {
             if ($shift->getLastShifter()) {
                 if ($token == $shift->getTmpToken($shift->getLastShifter()->getId())) {

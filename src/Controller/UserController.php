@@ -17,6 +17,7 @@ use App\Form\AnonymousBeneficiaryType;
 use App\Form\BeneficiaryType;
 use App\Form\NoteType;
 use App\Form\UserAdminType;
+use App\Service\MembershipService;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserEvents;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
@@ -280,7 +281,7 @@ class UserController extends Controller
     {
         $session = new Session();
         $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
-        if (!$this->get('membership_service')->canRegister($membership)) {
+        if (!$this->get(MembershipService::class)->canRegister($membership)) {
             $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }

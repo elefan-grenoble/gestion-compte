@@ -4,8 +4,7 @@ namespace App\Security;
 
 use App\Entity\Membership;
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -26,12 +25,17 @@ class MembershipVoter extends Voter
     const BENEFICIARY_ADD = 'beneficiary_add';
 
     private $decisionManager;
-    private $container;
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+    private $placeLocalIpAddress;
 
-    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, RequestStack $requestStack, $placeLocalIpAddress)
     {
-        $this->container = $container;
         $this->decisionManager = $decisionManager;
+        $this->requestStack = $requestStack;
+        $this->placeLocalIpAddress = $placeLocalIpAddress;
     }
 
     protected function supports($attribute, $subject)
@@ -135,8 +139,8 @@ class MembershipVoter extends Voter
             return true;
         }
 
-        $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
-        $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
+        $session = $this->requestStack->getCurrentRequest()->getSession();
+        $token = $this->requestStack->getCurrentRequest()->get('token');
         if ($token && $token == $subject->getTmpToken($session->get('token_key') . $user->getUsername())){
             return true;
         }
@@ -147,8 +151,8 @@ class MembershipVoter extends Voter
 
     private function isLocationOk()
     {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $ips = $this->container->getParameter('place_local_ip_address');
+        $ip = $this->requestStack->getCurrentRequest()->getClientIp();
+        $ips = $this->placeLocalIpAddress;
         $ips = explode(',', $ips);
         return (isset($ip) and in_array($ip, $ips));
     }

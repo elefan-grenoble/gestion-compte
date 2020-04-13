@@ -8,6 +8,7 @@ use App\Entity\Registration;
 use App\Entity\Shift;
 use App\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -15,12 +16,12 @@ class MembershipService
 {
 
     protected $em;
-    protected $registration_duration;
+    protected $registrationDuration;
 
-    public function __construct($em, $registration_duration)
+    public function __construct(EntityManagerInterface $em, $registrationDuration)
     {
         $this->em = $em;
-        $this->registration_duration = $registration_duration;
+        $this->registrationDuration = $registrationDuration;
     }
 
     /**
@@ -40,7 +41,7 @@ class MembershipService
             return date_diff($date,$expire);
         }
         $expire = clone $membership->getLastRegistration()->getDate();
-        $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+        $expire = $expire->add(\DateInterval::createFromDateString($this->registrationDuration));
         return date_diff($date,$expire);
     }
 
@@ -75,7 +76,7 @@ class MembershipService
     public function getExpire($membership): ?\DateTime
     {
         $expire = clone $membership->getLastRegistration()->getDate();
-        $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+        $expire = $expire->add(\DateInterval::createFromDateString($this->registrationDuration));
         return $expire;
     }
 

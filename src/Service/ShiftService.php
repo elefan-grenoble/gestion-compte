@@ -8,6 +8,7 @@ use App\Entity\Registration;
 use App\Entity\Shift;
 use App\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManagerInterface;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -20,11 +21,11 @@ class ShiftService
     private $newUserStartAsBeginner;
     private $allowExtraShifts;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts)
+    public function __construct(EntityManagerInterface $em, $dueDurationByCycle, $minShiftDuration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts)
     {
         $this->em = $em;
-        $this->due_duration_by_cycle = $due_duration_by_cycle;
-        $this->min_shift_duration = $min_shift_duration;
+        $this->due_duration_by_cycle = $dueDurationByCycle;
+        $this->min_shift_duration = $minShiftDuration;
         $this->newUserStartAsBeginner = $newUserStartAsBeginner;
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;

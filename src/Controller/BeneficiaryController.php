@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Form\BeneficiaryType;
+use App\Service\MembershipService;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -225,7 +226,7 @@ class BeneficiaryController extends Controller
                 if ($beneficiary->getMembership()->isWithdrawn()){
                     $dead = true;
                 }
-                if (!$this->get('membership_service')->isUptodate($beneficiary->getMembership())){
+                if (!$this->get(MembershipService::class)->isUptodate($beneficiary->getMembership())){
                     $dead = true;
                 }
                 if (!$beneficiary->getMembership()){

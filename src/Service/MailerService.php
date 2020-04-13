@@ -12,7 +12,7 @@ class MailerService implements MailerInterface
 {
     private $baseDomain;
     private $memberEmail;
-    private $project_name;
+    private $projectName;
     private $sendableEmails;
     private $entity_manager;
     private $mailer;
@@ -23,7 +23,7 @@ class MailerService implements MailerInterface
         \Swift_Mailer $mailer,
         string $baseDomain,
         array $memberEmail,
-        string $project_name,
+        string $projectName,
         array $sendableEmails,
         EntityManagerInterface $entity_manager,
         UrlGeneratorInterface $router,
@@ -32,7 +32,7 @@ class MailerService implements MailerInterface
         $this->mailer = $mailer;
         $this->baseDomain = $baseDomain;
         $this->memberEmail = $memberEmail;
-        $this->project_name = $project_name;
+        $this->projectName = $projectName;
         $this->sendableEmails = $sendableEmails;
         $this->entity_manager = $entity_manager;
         $this->router = $router;
@@ -75,7 +75,7 @@ class MailerService implements MailerInterface
         $dynamicContent = $this->entity_manager->getRepository('App:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
 
         $login_url = $url = $this->router->generate('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
-        $welcome = (new \Swift_Message('Bienvenue à '.$this->project_name))
+        $welcome = (new \Swift_Message('Bienvenue à ' . $this->projectName))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
             ->setTo($user->getEmail())
             ->setBody(

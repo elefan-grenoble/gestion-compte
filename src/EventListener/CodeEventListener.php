@@ -6,20 +6,18 @@ use App\Entity\User;
 use App\Entity\Code;
 use App\Event\CodeNewEvent;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Container;
 
 class CodeEventListener
 {
-    protected $em;
     protected $logger;
-    protected $container;
 
-    public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
+    public function __construct(LoggerInterface $logger)
     {
-        $this->em = $entityManager;
         $this->logger = $logger;
-        $this->container = $container;
     }
 
     /**
@@ -30,8 +28,6 @@ class CodeEventListener
     public function onCodeNew(CodeNewEvent $event)
     {
         $this->logger->info("Code Listener: onCodeNew");
-//        $code = $event->getCode();
-//        $display = $event->getDisplay();
     }
 
 }

@@ -2,25 +2,19 @@
 
 namespace App\EventListener;
 
-use App\Entity\User;
-use App\Entity\Code;
-use App\Event\CodeNewEvent;
 use App\Event\CommissionJoinOrLeaveEvent;
-use Doctrine\ORM\EntityManager;
-use Monolog\Logger;
-use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class CommissionEventListener
 {
     protected $em;
     protected $logger;
-    protected $container;
 
-    public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
-        $this->container = $container;
     }
 
     /**

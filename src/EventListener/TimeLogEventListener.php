@@ -12,7 +12,9 @@ use App\Event\ShiftDeletedEvent;
 use App\Event\ShiftDismissedEvent;
 use App\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Container;
 
 class TimeLogEventListener
@@ -20,18 +22,26 @@ class TimeLogEventListener
     protected $em;
     protected $logger;
     protected $container;
-    protected $due_duration_by_cycle;
-    protected $cycle_duration;
-    protected $registration_duration;
+    /**
+     * @var string
+     */
+    private $dueDurationByCycle;
+    /**
+     * @var string
+     */
+    private $registrationDuration;
+    /**
+     * @var string
+     */
+    private $cycleDuration;
 
-    public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
+    public function __construct(EntityManagerInterface $entityManager, LoggerInterface $logger, string $dueDurationByCycle, string $registrationDuration, string $cycleDuration)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
-        $this->container = $container;
-        $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
-        $this->cycle_duration = $this->container->getParameter('cycle_duration');
-        $this->registration_duration = $this->container->getParameter('registration_duration');
+        $this->dueDurationByCycle = $dueDurationByCycle;
+        $this->registrationDuration = $registrationDuration;
+        $this->cycleDuration = $cycleDuration;
     }
 
     /**
@@ -93,8 +103,8 @@ class TimeLogEventListener
         $date = $event->getDate();
 
         $registrationEnd = clone $member->getLastRegistration()->getDate();
-        $registrationEnd->modify('+'.$this->registration_duration);
-        $registrationEnd->modify('+'.$this->cycle_duration);
+        $registrationEnd->modify('+'.$this->registrationDuration);
+        $registrationEnd->modify('+'.$this->cycleDuration);
         
         if ($date > $registrationEnd) {
             $this->createRegistrationExpiredLog($member,$date);
@@ -159,16 +169,16 @@ class TimeLogEventListener
     {
         $log = new TimeLog();
         $log->setMembership($membership);
-        $log->setTime(-1 * $this->due_duration_by_cycle);
+        $log->setTime(-1 * $this->dueDurationByCycle);
         $log->setDate($date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
         $this->em->persist($log);
 
         $counter_today = $membership->getTimeCount($date);
-        if ($counter_today > $this->due_duration_by_cycle) { //surbook
+        if ($counter_today > $this->dueDurationByCycle) { //surbook
             $log = new TimeLog();
             $log->setMembership($membership);
-            $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
+            $log->setTime(-1 * ($counter_today - $this->dueDurationByCycle));
             $log->setDate($date);
             $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);

@@ -10,6 +10,8 @@ use App\Event\ShiftDismissedEvent;
 use App\Event\ShiftFreedEvent;
 use App\Security\MembershipVoter;
 use App\Security\ShiftVoter;
+use App\Service\MembershipService;
+use App\Service\ShiftService;
 use DateTime;
 use App\Entity\ShiftBucket;
 use App\Entity\User;
@@ -70,7 +72,7 @@ class BookingController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
-            $remainder = $this->get('membership_service')->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+            $remainder = $this->get(MembershipService::class)->getRemainder($this->getUser()->getBeneficiary()->getMembership());
             if (intval($remainder->format("%R%a")) < 0) {
                 $session->getFlashBag()->add('warning', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
@@ -109,7 +111,7 @@ class BookingController extends Controller
             }
 
             $shifts = $em->getRepository('App:Shift')->findFutures();
-            $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+            $bucketsByDay = $this->get(ShiftService::class)->generateShiftBucketsByDayAndJob($shifts);
             $dismissedShifts = array();
             foreach ($shifts as $shift) {
                 if ($shift->getIsDismissed()) {
@@ -357,7 +359,7 @@ class BookingController extends Controller
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
-            || !$this->get('shift_service')->isShiftBookable($shift, $beneficiary)
+            || !$this->get(ShiftService::class)->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
@@ -646,7 +648,7 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            $bucket = $this->get(ShiftService::class)->getShiftBucketFromShift($shift);
             foreach ($bucket->getShifts() as $s) {
                 $s->setLocked(true);
             }
@@ -669,7 +671,7 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            $bucket = $this->get(ShiftService::class)->getShiftBucketFromShift($shift);
             foreach ($bucket->getShifts() as $s) {
                 $s->setLocked(false);
             }

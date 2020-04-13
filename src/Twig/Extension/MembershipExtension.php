@@ -24,14 +24,12 @@ use Twig\TwigFunction;
 
 class MembershipExtension extends AbstractExtension
 {
-
-    private $container;
     /** @var MembershipService $membershipService */
     private $membershipService;
 
-    public function __construct(Container $container) {
-        $this->container = $container;
-        $this->membershipService = $this->container->get('membership_service');
+    public function __construct(MembershipService $membershipService)
+    {
+        $this->membershipService = $membershipService;
     }
 
     public function getFilters()

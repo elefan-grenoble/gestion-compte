@@ -3,13 +3,14 @@
 namespace App\EventListener;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use FOS\OAuthServerBundle\Event\OAuthEvent;
 
 class OAuthEventListener
 {
     protected $_em;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->_em = $entityManager;
     }

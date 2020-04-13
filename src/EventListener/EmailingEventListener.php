@@ -8,36 +8,70 @@ use App\Event\BeneficiaryAddEvent;
 use App\Event\CodeNewEvent;
 use App\Event\HelloassoEvent;
 use App\Event\MemberCreatedEvent;
-use App\Event\MemberCycleEndEvent;
 use App\Event\MemberCycleHalfEvent;
 use App\Event\MemberCycleStartEvent;
 use App\Event\ShiftBookedEvent;
 use App\Event\ShiftDeletedEvent;
 use App\Event\ShiftDismissedEvent;
-use Monolog\Logger;
+use App\Helper\SwipeCard;
+use Psr\Log\LoggerInterface;
 use Swift_Mailer;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Templating\EngineInterface;
 
 class EmailingEventListener
 {
     protected $mailer;
     protected $logger;
-    protected $container;
-    protected $due_duration_by_cycle;
     private $memberEmail;
     private $shiftEmail;
     private $wikiKeysUrl;
+    /**
+     * @var string
+     */
+    private $dueDurationByCycle;
+    /**
+     * @var EngineInterface
+     */
+    private $templating;
+    /**
+     * @var UrlGeneratorInterface
+     */
+    private $urlGenerator;
+    /**
+     * @var SwipeCard
+     */
+    private $swipeCard;
+    private $projectName;
+    /**
+     * @var string
+     */
+    private $transactionalMailerUser;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $shiftEmail, $wikiKeysUrl)
-    {
+    public function __construct(
+        Swift_Mailer $mailer,
+        LoggerInterface $logger,
+        array $memberEmail,
+        array $shiftEmail,
+        string $transactionalMailerUser,
+        $wikiKeysUrl,
+        string $dueDurationByCycle,
+        EngineInterface $templating,
+        UrlGeneratorInterface $urlGenerator,
+        SwipeCard $swipeCard,
+        $projectName
+    ) {
         $this->mailer = $mailer;
         $this->logger = $logger;
-        $this->container = $container;
-        $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->memberEmail = $memberEmail;
         $this->shiftEmail = $shiftEmail;
         $this->wikiKeysUrl = $wikiKeysUrl;
+        $this->dueDurationByCycle = $dueDurationByCycle;
+        $this->templating = $templating;
+        $this->urlGenerator = $urlGenerator;
+        $this->swipeCard = $swipeCard;
+        $this->projectName = $projectName;
+        $this->transactionalMailerUser = $transactionalMailerUser;
     }
 
     /**
@@ -51,12 +85,12 @@ class EmailingEventListener
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
-            $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $this->urlGenerator->generate('member_new', array('code' => $this->swipeCard->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
         }else{
-            $url = $this->container->get('router')->generate('member_add_beneficiary', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $this->urlGenerator->generate('member_add_beneficiary', array('code' => $this->swipeCard->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
-        $needInfo = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', tu te présentes ?'))
+        $needInfo = (new \Swift_Message('Bienvenue à ' . $this->projectName . ', tu te présentes ?'))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
             ->setTo($email)
             ->setBody(
@@ -83,12 +117,12 @@ class EmailingEventListener
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
-            $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $this->urlGenerator->generate('member_new', array('code' => $this->swipeCard->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
         }else{
-            $url = $this->container->get('router')->generate('member_add_beneficiary', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $this->urlGenerator->generate('member_add_beneficiary', array('code' => $this->swipeCard->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
-        $needInfoRecall = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', souhaites-tu te présenter ?'))
+        $needInfoRecall = (new \Swift_Message('Bienvenue à '. $this->projectName .', souhaites-tu te présenter ?'))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
             ->setTo($email)
             ->setBody(
@@ -114,7 +148,7 @@ class EmailingEventListener
         $beneficiary = $event->getBeneficiary();
 
         $owner = $beneficiary->getMembership()->getMainBeneficiary();
-        $newBuddy = (new \Swift_Message($beneficiary->getFirstname().' a été ajouté à ton compte '.$this->container->getParameter('project_name')))
+        $newBuddy = (new \Swift_Message($beneficiary->getFirstname() . ' a été ajouté à ton compte ' . $this->projectName))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
             ->setTo($owner->getEmail())
             ->setBody(
@@ -165,7 +199,7 @@ class EmailingEventListener
                 );
         }else{
             $thanks = (new \Swift_Message('[ESPACE MEMBRES] Adhésion helloasso bien reçue !'))
-                ->setFrom($this->container->getParameter('transactional_mailer_user'))
+                ->setFrom($this->transactionalMailerUser)
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -299,17 +333,16 @@ class EmailingEventListener
         $membership = $event->getMembership();
         $date = $event->getDate();
 
-        $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $this->urlGenerator->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
         // member wont be frozen for this cycle && not a fresh new member && member still have to book
-        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
+        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->dueDurationByCycle) {
             foreach ($membership->getBeneficiaries() as $beneficiary){
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                     ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                     ->setTo($beneficiary->getEmail())
                     ->setBody(
-                        $this->container->get('twig')->render(
+                        $this->templating->render(
                             'emails/cycle_start.html.twig',
                             array('beneficiary' => $beneficiary, 'home_url' => $home_url)
                         ),
@@ -332,10 +365,9 @@ class EmailingEventListener
         $membership = $event->getMembership();
         $date = $event->getDate();
 
-        $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $this->urlGenerator->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if member still have to book
+        if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->dueDurationByCycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($membership->getMainBeneficiary()->getEmail())
@@ -360,8 +392,7 @@ class EmailingEventListener
         $code = $event->getCode();
         $old_codes = $event->getOldCodes();
 
-        $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $this->urlGenerator->generate('code_change_done', array('token' => $this->swipeCard->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
         $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
@@ -393,14 +424,6 @@ class EmailingEventListener
      */
     protected function renderView($view, array $parameters = array())
     {
-        if ($this->container->has('templating')) {
-            return $this->container->get('templating')->render($view, $parameters);
-        }
-
-        if (!$this->container->has('twig')) {
-            throw new \LogicException('You can not use the "renderView" method if the Templating Component or the Twig Bundle are not available.');
-        }
-
-        return $this->container->get('twig')->render($view, $parameters);
+        return $this->templating->render($view, $parameters);
     }
 }

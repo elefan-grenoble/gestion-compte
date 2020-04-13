@@ -3,31 +3,36 @@ namespace App\Twig\Extension;
 
 use App\Entity\AbstractRegistration;
 use App\Entity\AnonymousBeneficiary;
-use App\Entity\Beneficiary;
 use App\Entity\Registration;
-use App\Entity\Shift;
-use App\Entity\SwipeCard;
+use App\Helper\SwipeCard;
 use App\Service\Picture\BasePathPicture;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
-use DateInterval;
 use App\Entity\Task;
+use Doctrine\ORM\EntityManagerInterface;
 use Michelf\Markdown;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Routing\Router;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 class AppExtension extends AbstractExtension
 {
-
-    private $container;
+    
     private $basePathPicture;
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+    private $localCurrencyName;
+    /**
+     * @var SwipeCard
+     */
+    private $swipeCard;
 
-    public function __construct(Container $container, BasePathPicture $basePathPicture) {
-        $this->container = $container;
+    public function __construct(BasePathPicture $basePathPicture, EntityManagerInterface $entityManager, $localCurrencyName, SwipeCard $swipeCard) {
         $this->basePathPicture = $basePathPicture;
+        $this->entityManager = $entityManager;
+        $this->localCurrencyName = $localCurrencyName;
+        $this->swipeCard = $swipeCard;
     }
 
     public function getFilters()
@@ -154,7 +159,7 @@ class AppExtension extends AbstractExtension
                 $name = '€ en CARTE CREDIT';
                 break;
             case Registration::TYPE_LOCAL :
-                $name = $this->container->getParameter('local_currency_name');
+                $name = $this->localCurrencyName;
                 break;
             case Registration::TYPE_CASH :
                 $name = '€ en ESPECE';
@@ -177,7 +182,7 @@ class AppExtension extends AbstractExtension
                 $name .= 'carte';
                 break;
             case Registration::TYPE_LOCAL :
-                $name = $this->container->getParameter('local_currency_name');
+                $name = $this->localCurrencyName;
                 break;
             case Registration::TYPE_CASH :
                 $name .= 'espèce';
@@ -239,17 +244,16 @@ class AppExtension extends AbstractExtension
     }
 
     public function vigenere_encode($text){
-        return $this->container->get('App\Helper\SwipeCard')->vigenereEncode($text);
+        return $this->swipeCard->vigenereEncode($text);
     }
 
     public function vigenere_decode($text){
-        return $this->container->get('App\Helper\SwipeCard')->vigenereDecode($text);
+        return $this->swipeCard->vigenereDecode($text);
     }
 
     public function get_recall_date(AbstractRegistration $ar){
         if ($ar->getType() == AbstractRegistration::TYPE_ANONYMOUS){
-            $em = $this->container->get('doctrine')->getManager();
-            $anonyB = $em->getRepository(AnonymousBeneficiary::class)->find($ar->getEntityId());
+            $anonyB = $this->entityManager->getRepository(AnonymousBeneficiary::class)->find($ar->getEntityId());
             if ($anonyB){
                 return $anonyB->getRecallDate();
             }

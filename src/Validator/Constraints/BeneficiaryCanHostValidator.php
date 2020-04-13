@@ -2,11 +2,7 @@
 // src/App/Validator/Constraints/BeneficiaryCanHostValidator.php
 namespace App\Validator\Constraints;
 
-use App\Entity\User;
 use App\Service\MembershipService;
-use App\Service\ShiftService;
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -15,19 +11,16 @@ use Symfony\Component\Validator\ConstraintValidator;
  */
 class BeneficiaryCanHostValidator extends ConstraintValidator
 {
-    private $maximum_nb_of_beneficiaries_in_membership;
-    private $container;
-
     /**
      * @var MembershipService
      */
-    private $memberService;
+    private $membershipService;
+    private $maximumNbOfBeneficiariesInMembership;
 
-    public function __construct(ContainerInterface $container, $maximum_nb_of_beneficiaries_in_membership)
+    public function __construct(MembershipService $membershipService, $maximumNbOfBeneficiariesInMembership)
     {
-        $this->maximum_nb_of_beneficiaries_in_membership = $maximum_nb_of_beneficiaries_in_membership;
-        $this->container = $container;
-        $this->memberService = $container->get("membership_service");
+        $this->membershipService = $membershipService;
+        $this->maximumNbOfBeneficiariesInMembership = $maximumNbOfBeneficiariesInMembership;
     }
 
     public function validate($value, Constraint $constraint)
@@ -45,12 +38,12 @@ class BeneficiaryCanHostValidator extends ConstraintValidator
                 ->setParameter('{{ host }}', '#'.$value->getMemberNumber().' de '.$value->getFirstname().' '.$value->getLastname())
                 ->setParameter('{{ reason }}', 'Son compte est fermé')
                 ->addViolation();
-        }else if (!$this->memberService->isUptodate($value->getMembership())) {
+        }else if (!$this->membershipService->isUptodate($value->getMembership())) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ host }}', '#'.$value->getMemberNumber().' de '.$value->getFirstname().' '.$value->getLastname())
                 ->setParameter('{{ reason }}', 'Son compte est n\'est plus à jour d\'adhésion')
                 ->addViolation();
-        }else if ($value->getMembership()->getBeneficiaries()->count() >= $this->maximum_nb_of_beneficiaries_in_membership) {
+        }else if ($value->getMembership()->getBeneficiaries()->count() >= $this->maximumNbOfBeneficiariesInMembership) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ host }}', '#'.$value->getMemberNumber().' de '.$value->getFirstname().' '.$value->getLastname())
                 ->setParameter('{{ reason }}', 'Ce compte accueil déjà le nombre maximum de béneficiaires')

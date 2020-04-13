@@ -3,7 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -23,12 +23,17 @@ class UserVoter extends Voter
     const ANNOTATE = 'annotate';
 
     private $decisionManager;
-    private $container;
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+    private $placeLocalIpAddress;
 
-    public function __construct(ContainerInterface $container,AccessDecisionManagerInterface $decisionManager)
+    public function __construct(AccessDecisionManagerInterface $decisionManager, RequestStack $requestStack, $placeLocalIpAddress)
     {
-        $this->container = $container;
         $this->decisionManager = $decisionManager;
+        $this->requestStack = $requestStack;
+        $this->placeLocalIpAddress = $placeLocalIpAddress;
     }
 
     protected function supports($attribute, $subject)
@@ -129,9 +134,8 @@ class UserVoter extends Voter
 
     private function isLocationOk()
     {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',',$ips);
+        $ip = $this->requestStack->getCurrentRequest()->getClientIp();
+        $ips = explode(',',$this->placeLocalIpAddress);
         return (isset($ip) and in_array($ip,$ips));
     }
 }

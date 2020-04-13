@@ -4,7 +4,7 @@ namespace App\Twig\Extension;
 use App\Entity\Beneficiary;
 use App\Entity\ProcessUpdate;
 use App\Entity\Shift;
-use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\EntityManagerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -12,10 +12,15 @@ use Twig\TwigFunction;
 class ProcessUpdateExtension extends AbstractExtension
 {
 
-    private $container;
 
-    public function __construct(Container $container) {
-        $this->container = $container;
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
     }
 
     public function getFilters()
@@ -29,7 +34,7 @@ class ProcessUpdateExtension extends AbstractExtension
     }
 
     public function last_shift_date(Beneficiary $beneficiary){
-        $lastShifted = $this->container->get('doctrine')->getManager()->getRepository(Shift::class)->findLastShifted($beneficiary);
+        $lastShifted = $this->entityManager->getRepository(Shift::class)->findLastShifted($beneficiary);
         if ($lastShifted)
             return $lastShifted->getStart();
         else
@@ -37,11 +42,11 @@ class ProcessUpdateExtension extends AbstractExtension
     }
 
     public function updates_list_from_date(\DateTime $date){
-        return $this->container->get('doctrine')->getManager()->getRepository(ProcessUpdate::class)->findFrom($date);
+        return $this->entityManager->getRepository(ProcessUpdate::class)->findFrom($date);
     }
 
     public function count_updates_list_from_date(\DateTime $date){
-        return $this->container->get('doctrine')->getManager()->getRepository(ProcessUpdate::class)->countFrom($date);
+        return $this->entityManager->getRepository(ProcessUpdate::class)->countFrom($date);
     }
 
     public function w3c_to_date($w3c){

@@ -16,7 +16,7 @@ twig:
         due_duration_by_cycle: '%due_duration_by_cycle%'
         support_email: '%transactional_mailer_user%'
         images_tmp_dir: '%images_tmp_dir%'
-        shift_service: "@shift_service"
+        shift_service: '@App\Service\ShiftService'
         maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
         unlimited_book_duration: '%unlimited_book_duration%'
         allow_extra_shifts: '%allow_extra_shifts%'

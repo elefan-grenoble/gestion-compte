@@ -4,7 +4,8 @@ namespace App\Security;
 
 use App\Entity\Code;
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\Service\ShiftService;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -19,12 +20,24 @@ class CodeVoter extends Voter
     const OPEN = 'open';
 
     private $decisionManager;
-    private $container;
+    private $codeGenerationEnabled;
+    /**
+     * @var ShiftService
+     */
+    private $shiftService;
+    /**
+     * @var RequestStack
+     */
+    private $requestStack;
+    private $placeLocalIpAddress;
 
-    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
+    public function __construct($codeGenerationEnabled, AccessDecisionManagerInterface $decisionManager, ShiftService $shiftService, RequestStack $requestStack, $placeLocalIpAddress)
     {
-        $this->container = $container;
         $this->decisionManager = $decisionManager;
+        $this->codeGenerationEnabled = $codeGenerationEnabled;
+        $this->shiftService = $shiftService;
+        $this->requestStack = $requestStack;
+        $this->placeLocalIpAddress = $placeLocalIpAddress;
     }
 
     protected function supports($attribute, $subject)
@@ -53,7 +66,7 @@ class CodeVoter extends Voter
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            if ($attribute == self::GENERATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
+            if ($attribute == self::GENERATE && !$this->codeGenerationEnabled) { //do not generate if fixed code
                 return false;
             }
             return true;
@@ -72,7 +85,7 @@ class CodeVoter extends Voter
                 }
                 return $this->canView($code, $user);
             case self::GENERATE:
-                if (!$this->container->getParameter('code_generation_enabled')) {
+                if (!$this->codeGenerationEnabled) {
                     return false;
                 }
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
@@ -119,7 +132,7 @@ class CodeVoter extends Voter
         }
 
         if ($user->getBeneficiary()) {
-            if ($this->container->get("shift_service")->isBeginner($user->getBeneficiary())) // not for beginner
+            if ($this->shiftService->isBeginner($user->getBeneficiary())) // not for beginner
                 return false;
             $shifts = $user->getBeneficiary()->getMembership()->getShiftsOfCycle(0);
             $y = new \DateTime('Yesterday');
@@ -148,9 +161,8 @@ class CodeVoter extends Voter
     //\App\Security\UserVoter::isLocationOk DUPLICATED
     private function isLocationOk()
     {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',', $ips);
+        $ip = $this->requestStack->getCurrentRequest()->getClientIp();
+        $ips = explode(',', $this->placeLocalIpAddress);
         return (isset($ip) and in_array($ip, $ips));
     }
 }
