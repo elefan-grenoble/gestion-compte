@@ -189,6 +189,10 @@ class EmailingEventListener
         $user = $event->getUser();
         $payment = $event->getPayment();
 
+        $membershipService = $this->container->get('membership_service');
+        $membership = $user->getBeneficiary()->getMembership();
+        $membershipExpiration = $membershipService->getExpire($membership);
+
         try {
             $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour réadhérer !'))
                 ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
@@ -196,8 +200,11 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/too_early_registration.html.twig',
-                        array('beneficiary' => $user->getBeneficiary(),
-                            'payment' => $payment)
+                        array(
+                            'beneficiary' => $user->getBeneficiary(),
+                            'payment' => $payment,
+                            'membershipExpiration' => $membershipExpiration
+                        )
                     ),
                     'text/html'
                 );
