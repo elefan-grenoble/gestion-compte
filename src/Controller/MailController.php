@@ -69,9 +69,9 @@ class MailController extends Controller
      * @Route("/to/{id}", name="mail_edit_one_beneficiary")
      * @Method({"GET","POST"})
      */
-    public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary)
+    public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary, MailerService $mailerService)
     {
-        $mailform = $this->getMailForm();
+        $mailform = $this->getMailForm($mailerService);
         return $this->render('admin/mail/edit.html.twig', array(
             'form' => $mailform->createView(),
             'to' => array($beneficiary),
@@ -82,9 +82,9 @@ class MailController extends Controller
      * @Route("/to_bucket/{id}", name="mail_bucketshift")
      * @Method({"GET","POST"})
      */
-    public function mailBucketShift(Request $request, Shift $shift, EntityManagerInterface $em)
+    public function mailBucketShift(Request $request, Shift $shift, EntityManagerInterface $em, MailerService $mailerService)
     {
-        $mailform = $this->getMailForm();
+        $mailform = $this->getMailForm($mailerService);
         if ($shift) {
             $shifts = $em->getRepository(Shift::class)->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
             $beneficiary = array();
@@ -106,7 +106,7 @@ class MailController extends Controller
      * @Route("/", name="mail_edit")
      * @Method({"GET","POST"})
      */
-    public function editAction(Request $request, SearchUserFormHelper $formHelper,EntityManagerInterface $em)
+    public function editAction(Request $request, SearchUserFormHelper $formHelper, EntityManagerInterface $em, MailerService $mailerService)
     {
         $form = $formHelper->getSearchForm($this->createFormBuilder());
         $form->handleRequest($request);
@@ -133,7 +133,7 @@ class MailController extends Controller
             $params[$k] = $param;
         }
 
-        $mailform = $this->getMailForm();
+        $mailform = $this->getMailForm($mailerService);
         return $this->render('admin/mail/edit.html.twig', array(
             'form' => $mailform->createView(),
             'to' => $to,
@@ -151,7 +151,7 @@ class MailController extends Controller
     public function sendAction(Request $request, \Swift_Mailer $mailer, EntityManagerInterface $em, MailerService $mailerService, Environment $twig)
     {
         $session = new Session();
-        $mailform = $this->getMailForm();
+        $mailform = $this->getMailForm($mailerService);
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
             //beneficiaries
