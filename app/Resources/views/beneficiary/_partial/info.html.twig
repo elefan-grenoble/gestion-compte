@@ -59,6 +59,10 @@
                     class="material-icons tiny">settings</i>&nbsp;{% for role in beneficiary.user.roles %}
             <div class="chip purple-text">{{ role }}</div>{% endfor %}</div>
     {% endif %}
-    <div class="col s12 truncate"><i
-                class="material-icons tiny">perm_contact_calendar</i>&nbsp;Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}</div>
+    {% if beneficiary.membership.lastRegistration %}
+        <div class="col s12 truncate">
+            <i class="material-icons tiny">perm_contact_calendar</i>&nbsp;
+            Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}
+        </div>
+    {% endif %}
 </div>
