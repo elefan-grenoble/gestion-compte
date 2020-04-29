@@ -69,7 +69,8 @@ class RegistrationType extends AbstractType
                             'label' => 'Enregistré par',
                             'class' => 'AppBundle:User',
                             'query_builder' => function (EntityRepository $er) {
-                                return $er->createQueryBuilder('u')
+                                return $er->createQueryBuilder('u,b')
+                                    ->leftJoin('u.beneficiary', 'b')
                                     ->orderBy('u.username', 'ASC');
                             },
                             'choice_label' => 'username',
@@ -111,6 +112,8 @@ class RegistrationType extends AbstractType
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
+                            ->select('u,b')
+                            ->leftJoin('u.beneficiary', 'b')
                             ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',
