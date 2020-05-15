@@ -1,12 +1,13 @@
 {% set nbShifts = bucket.shifts | length %}
 {% set nbBookableShifts = shift_service.bookableShifts(bucket, beneficiary) | length %}
+{% set availableShifts = shift_service.bookableShifts(bucket, beneficiary) %}
 {% set firstBookable = shift_service.firstBookable(bucket, beneficiary) %}
 <div id="book{{ firstBookable.id }}" class="modal">
-    <form action="{{ path('shift_book',{'id':firstBookable.id}) }}" method="post">
-        <div class="modal-content">
-            <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span>
-                {% if firstBookable.formation %}/ Formation {{ firstBookable.formation.name }}{% endif %}</h5>
-            <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
+    <div class="modal-content">
+        <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span></h5>
+        <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
+
+        {% if availableShifts | length == 1 %}
             {% if not firstBookable.formation and beneficiary.formations | length %}
                 <div class="row">
                     <div class="col s12">
@@ -14,8 +15,14 @@
                             <span class="white-text">
                                 <i class="material-icons">warning</i>
                                 Ce créneau n'est <b>pas</b> qualifié. {{ beneficiary.firstname }} a
-                                le{% if beneficiary.formations | length > 1 %}s{% endif %} formation{% if beneficiary.formations | length > 1 %}s{% endif %}
-                                {% for formation in beneficiary.formations  %}{% if loop.last and loop.index > 1 %} et {% endif %}<i>{{ formation.name }}</i>{% if not loop.last %}, {% endif %}{% endfor %}.<br>
+                                {% if beneficiary.formations | length %}la formations
+                                {% else %} les formations
+                                {% endif %}
+                                {% for formation in beneficiary.formations %}
+                                {% if loop.last and loop.index > 1 %} et {% endif %}
+                                        <i>{{ formation.name }}</i>
+                                    {% if not loop.last %}, {% endif %}
+                                {% endfor %}.<br>
                                 Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                             </span>
                         </div>
@@ -25,27 +32,55 @@
             {% if firstBookable.isDismissed %}
                 <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
             {% endif %}
-            {% if beneficiary.membership.beneficiaries | length < 1 %}
-                <p>Vous n'avez pas de bénéficiares</p>
-            {% else %}
-                <p><label>Nombre de places restantes : </label>{{ nbBookableShifts }}/{{ nbShifts }}</p>
-                <div class="" style="position: fixed;top:0;width: 100%;left: 0;">
-                    {% if nbBookableShifts < nbShifts %}
-                        {% for shifter in 1..(nbShifts - nbBookableShifts) %}
-                            <div class="green lighten-2 left" style="height:10px; width: {{ 100/(nbShifts) }}%"></div>
-                        {% endfor %}
-                    {% endif %}
+        {% endif %}
+
+        {% if beneficiary.membership.beneficiaries | length < 1 %}
+            <p>Vous n'avez pas de bénéficiares</p>
+        {% else %}
+            <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
+            {% for availableShift in availableShifts %}
+                <div>
+                    <input type="radio" id="{{ availableShift.id }}" class="checkedFormation" name="formation"
+                           value="{{ availableShift.id }}">
+                    <label for="{{ availableShift.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        {% if availableShift.formation %}
+                            {{ availableShift.formation.name }}
+                        {% else %}
+                            sans formation particulière
+                        {% endif %}
+                    </label>
                 </div>
-                <p>Attention ! Cette inscription vous engage. <br> Pour pouvoir annuler, votre créneau devra trouver repreneur. </p>
-                <input type="hidden" name="beneficiaryId" value="{{ beneficiary.id }}">
+            {% endfor %}
+            {% if use_fly_and_fixed %}
+                <p>Ce créneau sera fait en tant que :</p>
+                <div>
+                    <input type="radio" id="volant{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=0>
+                    <label for="volant{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">volant (une seule fois)</label>
+                </div>
+                <div>
+                    <input type="radio" id="fixe{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=1>
+                    <label for="fixe{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">fixe (reporté à chaque cycle)</label>
+                </div>
+            {% else %}
+                <input type="hidden" name="typeService" value=0>
             {% endif %}
-        </div>
-        <div class="modal-footer">
-            <a href="#!"
-               class="modal-action modal-close waves-effect waves-green btn-flat red-text ">Annuler</a>
-            {% if beneficiary.membership.beneficiaries | length >= 1 %}
-                <button class="modal-action modal-close waves-effect waves-green btn teal">Confirmer</button>
-            {% endif %}
-        </div>
-    </form>
+            <div class="" style="position: fixed;top:0;width: 100%;left: 0;">
+                {% if nbBookableShifts < nbShifts %}
+                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                        <div class="green lighten-2 left" style="height:10px; width: {{ 100/(nbShifts) }}%"></div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <p>Attention ! Cette inscription vous engage. <br>
+                Pour pouvoir annuler, votre créneau devra trouver repreneur.
+            </p>
+        {% endif %}
+    </div>
+    <div class="modal-footer">
+        <a href="#!"
+           class="modal-action modal-close waves-effect waves-green btn-flat red-text" onclick="cancelAll()">Annuler</a>
+        {% if beneficiary.membership.beneficiaries | length >= 1 %}
+            <button id="confirmButton" onclick="postSelectedId({{ beneficiary.id }})" class="waves-effect waves-green btn teal">Confirmer</button>
+        {% endif %}
+    </div>
 </div>

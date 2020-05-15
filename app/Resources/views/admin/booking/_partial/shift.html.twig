@@ -69,7 +69,12 @@
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                         <div class="collapsible-body">
-                            Réservé le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number':shift.booker.membership.memberNumber}) }}">{{ shift.booker }}</a>.
+                            {% if use_fly_and_fixed %}
+                                Créneau <b>{% if shift.fixe %} fixe {% else %} volant {% endif %} </b>, réservé
+                            {% else %}
+                                Réservé
+                            {% endif %}
+                                le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number':shift.booker.membership.memberNumber}) }}">{{ shift.booker }}</a>.
                             {% if is_granted('free',shift) %}
                                 <form action="{{ path('free_shift', {'id' : shift.id }) }}" method="post" id="free_shift_{{ shift.id }}">
                                     {% if shift.isPast %}
@@ -84,19 +89,48 @@
                 {% else %}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
-                            {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %} <span style="font-style: italic">{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }} {% else %}libre{% endif %}</span> {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                            {% if shift.formation %}
+                                <b data-formation="{{ shift.formation.name }}">
+                            {% else %}
+                                <b>
+                            {% endif %}
+                                <span style="font-style: italic">
+                            {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                            {% else %}libre
+                            {% endif %}
+                            </span>
+                            {% if shift.formation %}
+                                </b>&nbsp;({{ shift.formation.name }})
+                            {% else %}
+                                </b>&nbsp;(sans formation particulière)
+                            {% endif %}
                         </div>
                         <div class="collapsible-body">
-                            <form action="{{ path('admin_shift_book',{'id': shift.id }) }}" method="post">
                                 <div class="row">
-                                    <div class="input-field col s6">
-                                        <input type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
+                                    <div class="input-field col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                        <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
                                     </div>
-                                    <div class="col s4">
-                                        <button class="btn add" disabled="disabled">Ajouter</button>
+                                    {% if use_fly_and_fixed %}
+                                    <div class="col s2">
+                                        <div>
+                                            <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0>
+                                            <label for="volant{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">volant</label>
+                                        </div>
+                                        <div>
+                                            <input type="radio" id="fixe{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=1>
+                                            <label for="fixe{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">fixe</label>
+                                        </div>
                                     </div>
+                                    <div class="col s3">
+                                        <button class="btn add" disabled="disabled" onclick="postShift({{ shift.id }})">Ajouter</button>
+                                    </div>
+                                    {% else %}
+                                        <div class="col s3">
+                                            <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0>
+                                            <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                            </form>
                         </div>
                     </li>
                 {% endif %}

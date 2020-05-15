@@ -2,7 +2,10 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
+use AppBundle\Entity\Shift;
+use AppBundle\Entity\ShiftBucket;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
@@ -10,25 +13,19 @@ use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\ShiftBucket;
-use AppBundle\Entity\User;
-use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\EntityManager;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\Date;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Doctrine\ORM\EntityManager;
 
 /**
  * User controller.
@@ -296,7 +293,12 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Shift $shift,Request $request)
     {
-        $beneficiaryId = $request->get("beneficiaryId");
+        $content = json_decode($request->getContent());
+        $beneficiaryId = $content->beneficiaryId;
+        $isFixe = $content->typeService;
+
+        $session = new Session();
+
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
@@ -307,7 +309,7 @@ class BookingController extends Controller
             || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
         ) {
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
-            return $this->redirectToRoute("booking");
+            return new Response($this->generateUrl('booking'), 205);
         }
 
         if (!$shift->getBooker()) {
@@ -319,6 +321,7 @@ class BookingController extends Controller
         $shift->setDismissedReason(null);
         $shift->setDismissedTime(null);
         $shift->setLastShifter(null);
+        $shift->setFixe($isFixe);
         $em->persist($shift);
 
         $member = $beneficiary->getMembership();
@@ -356,6 +359,7 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shift->setShifter(null);
         $shift->setBooker(null);
+        $shift->setFixe(null);
         $em->persist($shift);
         $em->flush();
 
@@ -428,6 +432,7 @@ class BookingController extends Controller
                 $shift->setShifter($beneficiary);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setLastShifter(null);
+                $shift->setFixe(false);
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
@@ -493,51 +498,56 @@ class BookingController extends Controller
 
         if ($shift->getShifter() && !$shift->getIsDismissed()) {
             $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return $this->redirectToRoute("booking_admin");
+            return new Response($this->generateUrl("booking_admin"), 205);
         }
 
-        $str = $request->get('beneficiary');
+        $content = json_decode($request->getContent());
+        $str = $content->beneficiary;
+        $fixe = $content->typeService;
+
         $em = $this->getDoctrine()->getManager();
+        /**@var  Beneficiary $beneficiary*/
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
 
         if (!$beneficiary) {
             $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
-            return $this->redirectToRoute("booking_admin");
-        }else{
-
-            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
-                return $this->redirectToRoute("booking_admin");
-            }
-
-            if (!$shift->getBooker()) {
-                $shift->setBooker($beneficiary);
-                $shift->setBookedTime(new DateTime('now'));
-            }
-            $shift->setShifter($beneficiary);
-            $shift->setIsDismissed(false);
-            $shift->setDismissedReason(null);
-            $shift->setDismissedTime(null);
-            $shift->setLastShifter(null);
-
-            $em->persist($shift);
-
-            $member = $beneficiary->getMembership();
-            if ($member->getFirstShiftDate() == null) {
-                $firstDate = clone($shift->getStart());
-                $firstDate->setTime(0, 0, 0);
-                $member->setFirstShiftDate($firstDate);
-                $em->persist($member);
-            }
-
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
-
-            $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
-            return $this->redirectToRoute('booking_admin');
+            return new Response($this->generateUrl("booking_admin"), 205);
         }
+
+        if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+            $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
+            return new Response($this->generateUrl("booking_admin"), 205);
+        }
+
+        if (!$shift->getBooker()) {
+            $shift->setBooker($beneficiary);
+            $shift->setBookedTime(new DateTime('now'));
+        }
+        $shift->setShifter($beneficiary);
+        $shift->setIsDismissed(false);
+        $shift->setDismissedReason(null);
+        $shift->setDismissedTime(null);
+        $shift->setLastShifter(null);
+        $shift->setFixe($fixe);
+
+        $em->persist($shift);
+
+        $member = $beneficiary->getMembership();
+        if ($member->getFirstShiftDate() == null) {
+            $firstDate = clone($shift->getStart());
+            $firstDate->setTime(0, 0, 0);
+            $member->setFirstShiftDate($firstDate);
+            $em->persist($member);
+        }
+
+        $em->flush();
+
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+
+        $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
+        return new Response($this->generateUrl("booking_admin"), 200);
+
     }
 
     /**
