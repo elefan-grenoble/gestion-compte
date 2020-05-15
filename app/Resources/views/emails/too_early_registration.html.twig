@@ -1,5 +1,5 @@
 Bonjour {{ beneficiary.firstname }},<br>
 Nous avons bien reçu ton paiement d'un montant de {{ payment.amount }}€ via helloasso. <br>
 Merci beaucoup, mais il est trop tôt pour ré-adhérer, ton adhésion est encore valable jusqu'à
-{{ beneficiary.membership.expire | date_fr_full}}<br>
+{{ membershipExpiration | date_fr_full}}<br>
 Ta belle contribution sera donc considérée comme un don !
