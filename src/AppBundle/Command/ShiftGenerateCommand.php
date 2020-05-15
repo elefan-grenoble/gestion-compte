@@ -47,16 +47,19 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $count2 = 0;
 
         $reservedShifts = array();
+        $oldShifts = array();
 
         $router = $this->getContainer()->get('router');
+
+        $em = $this->getContainer()->get('doctrine')->getManager();
+        $mailer = $this->getContainer()->get('mailer');
+        $periodRepository = $em->getRepository('AppBundle:Period');
 
         foreach ( $period as $date ) {
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
             ////////////////////////
             $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $mailer = $this->getContainer()->get('mailer');
-            $periodRepository = $em->getRepository('AppBundle:Period');
+
             $qb = $periodRepository
                 ->createQueryBuilder('p');
             $qb->where('p.dayOfWeek = :dow')
@@ -79,7 +82,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                     $last_cycle_shifts =  array_filter($last_cycle_shifts, function($shift) {return $shift->getShifter();});
                     $last_cycle_shifters_array = array();
                     foreach ($last_cycle_shifts as $last_cycle_shift){
-                        $last_cycle_shifters_array[] = $last_cycle_shift->getShifter(); //clean keys
+                        $last_cycle_shifters_array[] = $last_cycle_shift; //clean keys
                     }
 
                     $existing_shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'formation' => $position->getFormation()));
@@ -108,6 +111,8 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         $this->getContainer()->get('twig')->render(
                             'emails/shift_reserved.html.twig',
                             array('shift' => $shift,
+                                'oldshift' => $oldShifts[$i],
+                                'days' => $d,
                                 'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
                                 'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
                             )

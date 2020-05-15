@@ -136,5 +136,41 @@
                 $('button.add:not(:disabled)').attr('disabled','disabled');
             });
         })
+
+        function postShift(shiftId) {
+
+            {% if use_fly_and_fixed %}
+            let selectedTypeService = document.querySelector('.checkedTypeService'+shiftId+':checked');
+            {% else %}
+            let selectedTypeService = document.querySelector('input[name="typeService'+shiftId+'"]');
+            {% endif %}
+            let selectedBenef = document.getElementById('benef'+shiftId);
+
+            if (selectedTypeService != null && selectedBenef != null) {
+                let url = "{{ path('admin_shift_book',{'id': 'tmpId'}) }}";
+                url = url.replace("tmpId", shiftId);
+
+                let body = {
+                    "typeService": selectedTypeService.value,
+                    "beneficiary": selectedBenef.value
+                };
+
+                // If using old IE version
+                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+
+                xhttp.open("POST", url, true);
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState > 3) {
+                        if (200 <= xhttp.status && xhttp.status < 300) {
+                            window.location.replace(xhttp.responseText);
+                        } else {
+                            alert("une erreur est survenue");
+                        }
+                    }
+                };
+                xhttp.send(JSON.stringify(body));
+                return xhttp;
+            }
+        }
     </script>
 {% endblock %}

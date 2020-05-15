@@ -93,6 +93,8 @@ parameters:
     maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
     unlimited_book_duration: false
+    display_gauge: true
+    use_fly_and_fixed: false
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
