@@ -289,11 +289,11 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Shift $shift,Request $request)
     {
+        $session = new Session();
+
         $content = json_decode($request->getContent());
         $beneficiaryId = $content->beneficiaryId;
         $isFixe = $content->typeService;
-
-        $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
