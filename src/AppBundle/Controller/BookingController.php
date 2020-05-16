@@ -296,6 +296,8 @@ class BookingController extends Controller
      */
     public function bookShiftAction(Shift $shift,Request $request)
     {
+        $session = new Session();
+        
         $beneficiaryId = $request->get("beneficiaryId");
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
