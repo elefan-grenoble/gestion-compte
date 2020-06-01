@@ -33,6 +33,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -346,6 +347,38 @@ class UserController extends Controller
         }
 
         return $this->redirectToRoute('user_index');
+    }
+
+    /**
+     * @Route("/pre_users", name="pre_user_index")
+     * @Security("has_role('ROLE_USER')")
+     * @Method({"GET"})
+     */
+    public function preUsersAction()
+    {
+        /** @var AnonymousBeneficiary[] $anonymousBeneficiaries */
+        $anonymousBeneficiaries = $this->getDoctrine()->getRepository(AnonymousBeneficiary::class)->findBy(
+            [],
+            ['created_at' => 'DESC']
+        );
+        return $this->render('admin/pre_user/list.html.twig', array(
+            'anonymousBeneficiaries' => $anonymousBeneficiaries,
+        ));
+    }
+
+    /**
+     * @Route("/pre_users/{id}/delete", name="pre_user_delete")
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Method({"GET"})
+     */
+    public function preUsersDeleteAction(AnonymousBeneficiary $beneficiary, SessionInterface $session)
+    {
+        $this->getDoctrine()->getManager()->remove($beneficiary);
+        $this->getDoctrine()->getManager()->flush();
+
+        $session->getFlashBag()->add('success', "L'adhésion a bien été supprimée");
+
+        return $this->redirectToRoute('pre_user_index');
     }
 
     /**

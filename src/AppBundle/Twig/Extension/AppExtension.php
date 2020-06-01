@@ -183,7 +183,7 @@ class AppExtension extends AbstractExtension
                 $name .= 'espèce';
                 break;
             case Registration::TYPE_CHECK :
-                $name .= 'chéque';
+                $name .= 'chèque';
                 break;
             case Registration::TYPE_DEFAULT :
                 $name .= 'autre';

@@ -1,0 +1,75 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>Liste des adhésions en attente
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        tr.myself{
+            background: rgba(50, 255, 0, 0.2);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Liste des adhésions en attente</h4>
+
+    <table class="responsive-table striped">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Email adhérent</th>
+            <th>Par qui ?</th>
+            <th>Mode de paiement</th>
+            <th>Type d'inscription</th>
+            {% if is_granted("ROLE_USER_MANAGER") %}
+                <th>Action</th>
+            {% endif %}
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for anonymousBeneficiary in anonymousBeneficiaries %}
+            <tr class="{% if app.user.id == anonymousBeneficiary.registrar.id %}myself{% endif %}">
+                <td>{{ anonymousBeneficiary.createdAt | date('d-m-Y H:i') }}</td>
+                <td>{{ anonymousBeneficiary.email }}</td>
+
+                <td>
+                    {% if anonymousBeneficiary.registrar %}
+                        {% if anonymousBeneficiary.registrar.beneficiary %}
+                            {{ anonymousBeneficiary.registrar.beneficiary.firstname }} {{ anonymousBeneficiary.registrar.beneficiary.lastname }}
+                        {% else %}
+                            {{ anonymousBeneficiary.registrar.username }}
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if anonymousBeneficiary.mode %}
+                        {% if anonymousBeneficiary.mode == constant('AppBundle\\Entity\\Registration::TYPE_HELLOASSO') %}
+                            A régler sur HelloAsso
+                        {% else %}
+                            {{ anonymousBeneficiary.amount }} {{ anonymousBeneficiary.mode | payment_mode }}
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if anonymousBeneficiary.joinTo is not null %}
+                        Nouveau bénéficiare pour #{{ anonymousBeneficiary.joinTo.memberNumber }}
+                    {% else %}
+                        Nouvelle adhésion
+                    {% endif %}
+                </td>
+                {% if is_granted("ROLE_USER_MANAGER") %}
+                <td>
+                    <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
