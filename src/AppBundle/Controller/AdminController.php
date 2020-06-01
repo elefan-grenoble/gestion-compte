@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Command\ImportUsersCommand;
 use AppBundle\Entity\AbstractRegistration;
 use AppBundle\Entity\Address;
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\HelloassoPayment;
