@@ -12,17 +12,12 @@ class ShiftAlert
 {
 
     var $bucket;
-    var $issues;
+    var $issue;
 
-    public function __construct(ShiftBucket $bucket)
+    public function __construct(ShiftBucket $bucket, string $issue)
     {
         $this->bucket = $bucket;
-        $this->issues = array();
-    }
-
-    public function addIssue($issue)
-    {
-        $this->issues[] = $issue;
+        $this->issue = $issue;
     }
 
     /**
@@ -34,11 +29,11 @@ class ShiftAlert
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getIssues()
+    public function getIssue()
     {
-        return $this->issues;
+        return $this->issue;
     }
 
 }

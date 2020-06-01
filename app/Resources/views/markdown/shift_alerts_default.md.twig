@@ -1,0 +1,9 @@
+:loudspeaker: **ALERTE REMPLISSAGE CRENEAUX** :loudspeaker:
+
+Bonjour à tous !
+Il manque du monde sur certains créneaux de demain ({{ date | date_fr_long }}) :
+{% for alert in alerts %}
+* Créneau de {{ alert.bucket.start | date('G\\hi') }} à {{ alert.bucket.end | date('G\\hi') }} : {{ alert.issue }}
+{% endfor %}
+
+File t'inscrire sur ton espace membre ! :wink: :elephant:

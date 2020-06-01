@@ -1,7 +1,5 @@
 {% for alert in alerts %}
     <strong>Créneau de {{ alert.bucket.start | date('G\\hi') }} à {{ alert.bucket.end | date('G\\hi') }}</strong><br>
-    {% for issue in alert.issues %}
-        {{ issue }}<br>
-    {% endfor %}
+    {{ alert.issue }}<br>
     <br>
 {% endfor %}
