@@ -26,8 +26,9 @@
             <th>Par qui ?</th>
             <th>Mode de paiement</th>
             <th>Type d'inscription</th>
+            <th>Relance</th>
             {% if is_granted("ROLE_USER_MANAGER") %}
-                <th>Action</th>
+                <th style="width: 200px">Action</th>
             {% endif %}
         </tr>
         </thead>
@@ -63,11 +64,21 @@
                         Nouvelle adhésion
                     {% endif %}
                 </td>
-                {% if is_granted("ROLE_USER_MANAGER") %}
+
                 <td>
-                    <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
+                    {% if anonymousBeneficiary.recallDate %}
+                        Dernière relance faite le {{ anonymousBeneficiary.recallDate | date_fr_with_time }}
+                    {% else %}
+                        Jamais relancé
+                    {% endif %}&nbsp;
                 </td>
-                {% endif %}
+
+                <td>
+                    {% if is_granted("ROLE_USER_MANAGER") %}
+                        <a href="{{ path('user_quick_new_recall',{'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
+                        <br> <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>
