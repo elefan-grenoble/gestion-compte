@@ -3,6 +3,11 @@
         <span class="card-title activator">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
         <p>
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
+            {% if use_fly_and_fixed %}
+                <br>
+                Type : <b>{% if shift.fixe %} Fixe {% else %} Volant {% endif %}</b>
+            {% endif %}
+            {% if shift.formation != null %}<br>Formation : <b>{{ shift.formation }}</b>{% endif %}
         </p>
     </div>
     {% if (shift.getIsCurrent()) %}

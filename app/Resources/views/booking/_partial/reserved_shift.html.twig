@@ -3,7 +3,13 @@
         <span class="card-title">{{ shift.start|date_fr_long }}</span>
         <p>De {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}<br>
             <i class="material-icons">person</i>{{ shift.lastShifter.firstname }} / <b
-                    class="{{ shift.job.color }}-text">{{ shift.job.name }}</b></p>
+                    class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
+            {% if use_fly_and_fixed %}
+                <br>
+                Type : <b>{% if shift.fixe %} Fixe {% else %} Volant {% endif %}</b>
+            {% endif %}
+            {% if shift.formation != null %}<br>Formation : <b>{{ shift.formation }}</b>{% endif %}
+        </p>
     </div>
     <div class="card-action">
         <a href="#accept{{ shift.id }}" class="modal-trigger btn waves-effect waves-green green">J'accepte</a>
