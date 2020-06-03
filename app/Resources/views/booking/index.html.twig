@@ -131,5 +131,53 @@
                 $('#dismissed').hide();
             }
         });
+        function cancelAll() {
+            let checkboxes = document.getElementsByTagName('input');
+
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type === 'radio') {
+                    checkboxes[i].checked = false;
+                }
+            }
+        }
+
+        function postSelectedId(beneficiaryId) {
+
+            let selectedFormation = document.querySelector('.checkedFormation:checked');
+            {% if use_fly_and_fixed %}
+            let selectedTypeService = document.querySelector('.checkedTypeService:checked');
+            {% else %}
+            let selectedTypeService = document.querySelector('input[name="typeService"]');
+            {% endif %}
+
+            if (selectedFormation !== null && selectedTypeService !== null) {
+
+                // let url = "/booking/shift/" + checkedValue +"/book";
+
+                let url = "{{ path('shift_book',{'id': 'tmpId'}) }}";
+                url = url.replace("tmpId", selectedFormation.value);
+
+                let body = {
+                    "typeService": selectedTypeService.value,
+                    "beneficiaryId": beneficiaryId,
+                };
+
+                // If using old IE version
+                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+
+                xhttp.open("POST", url, true);
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState > 3) {
+                        if (200 <= xhttp.status && xhttp.status < 300) {
+                            window.location.replace(xhttp.responseText);
+                        } else {
+                            alert("une erreur est survenue");
+                        }
+                    }
+                };
+                xhttp.send(JSON.stringify(body));
+                return xhttp;
+            }
+        }
     </script>
 {% endblock %}

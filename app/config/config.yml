@@ -59,6 +59,8 @@ twig:
     unlimited_book_duration: '%unlimited_book_duration%'
     code_generation_enabled: '%code_generation_enabled%'
     local_currency_name: '%local_currency_name%'
+    use_fly_and_fixed: '%use_fly_and_fixed%'
+    display_gauge: '%display_gauge%'
 
 # Doctrine Configuration
 doctrine:

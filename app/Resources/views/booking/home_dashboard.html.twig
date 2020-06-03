@@ -3,7 +3,8 @@
     {% set member = beneficiary.membership %}
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% set due_duration_hour = due_duration_by_cycle / 60 %}
-    {% if not member.frozen %}
+    {% if not member.frozen  %}
+        {% if display_gauge %}
         <div class="gauge_container">
             <canvas id="gauge"
                     data-type="radial-gauge"
@@ -37,6 +38,7 @@
                     data-animation-rule="linear"
             ></canvas>
         </div>
+        {% endif %}
         {% if  member.timeCount < 0 %}
             <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
             </p>
