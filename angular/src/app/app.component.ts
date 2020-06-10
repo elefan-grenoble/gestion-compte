@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {User} from './models/user';
-import {AuthService} from './services/auth.service';
-import {ServiceService} from './services/service.service';
-import {Service} from './models/service';
-import {ConfigService} from './services/config.service';
-import {Config} from './models/config';
+import {User} from './api/models/user';
+import {AuthService} from './core/services/auth.service';
+import {ServiceService} from './core/services/service.service';
+import {Service} from './api/models/service';
+import {ConfigService} from './core/services/config.service';
+import {Config} from './api/models/config';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   constructor(private authService: AuthService,
               private serviceService: ServiceService,
               private configService: ConfigService) {
-    this.config = configService.config;
+    this.config = configService.Config;
   }
 
   ngOnInit(): void {
