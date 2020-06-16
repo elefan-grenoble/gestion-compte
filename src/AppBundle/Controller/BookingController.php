@@ -357,7 +357,7 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shift->setShifter(null);
         $shift->setBooker(null);
-        $shift->setFixe(null);
+        $shift->setFixe(false);
         $em->persist($shift);
         $em->flush();
 
