@@ -1,12 +1,12 @@
-import {BrowserModule} from '@angular/platform-browser';
-import {APP_INITIALIZER, NgModule} from '@angular/core';
-
-import {AppRoutingModule} from './app-routing.module';
-import {AppComponent} from './app.component';
-import {MaterializeModule} from "angular2-materialize";
-import {HttpClientModule} from '@angular/common/http';
-import {TestComponent} from './components/test/test.component';
-import {ConfigService} from './services/config.service';
+import { BrowserModule, HammerModule } from '@angular/platform-browser';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { HttpClientModule } from '@angular/common/http';
+import { TestComponent } from './member/components/test/test.component';
+import { ConfigService } from './core/services/config.service';
+import { HomeModule } from './home/home.module';
+import { CoreModule } from './core/core.module';
 
 export function loadConfig(config: ConfigService) {
   return () => config.load();
@@ -19,9 +19,11 @@ export function loadConfig(config: ConfigService) {
   ],
   imports: [
     BrowserModule,
+    CoreModule,
     AppRoutingModule,
-    MaterializeModule,
-    HttpClientModule
+    HammerModule,
+    HttpClientModule,
+    HomeModule
   ],
   providers: [
     {

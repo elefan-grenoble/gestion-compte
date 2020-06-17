@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from '../../services/auth.service';
-import {Auth} from '../../models/auth';
+import {AuthService} from '../../../core/services/auth.service';
+import { Auth } from 'src/app/api/models/auth';
 
 @Component({
   selector: 'app-test',
