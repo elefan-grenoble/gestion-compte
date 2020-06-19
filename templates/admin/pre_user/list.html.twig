@@ -50,7 +50,7 @@
                 </td>
                 <td>
                     {% if anonymousBeneficiary.mode %}
-                        {% if anonymousBeneficiary.mode == constant('AppBundle\\Entity\\Registration::TYPE_HELLOASSO') %}
+                        {% if anonymousBeneficiary.mode == constant('App\\Entity\\Registration::TYPE_HELLOASSO') %}
                             A régler sur HelloAsso
                         {% else %}
                             {{ anonymousBeneficiary.amount }} {{ anonymousBeneficiary.mode | payment_mode }}

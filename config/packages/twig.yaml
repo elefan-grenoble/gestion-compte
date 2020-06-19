@@ -23,3 +23,5 @@ twig:
         max_time_in_advance_to_book_extra_shifts: '%max_time_in_advance_to_book_extra_shifts%'
         code_generation_enabled: '%code_generation_enabled%'
         local_currency_name: '%local_currency_name%'
+        use_fly_and_fixed: '%use_fly_and_fixed%'
+        display_gauge: '%display_gauge%'
