@@ -9,6 +9,63 @@
 {% block content %}
     <h4 class="">Ajouter un créneau ponctuel</h4>
     {{ form_start(form) }}
+    <div class="input-field col s12">
+        <div class="errors">
+            {{ form_errors(form.date) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.date) }}
+            {{ form_label(form.date) }}
+        </div>
+    </div>
+    <div class="input-field col s12">
+        <div class="errors">
+            {{ form_errors(form.start) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.start) }}
+            {{ form_label(form.start) }}
+        </div>
+    </div>
+    <div class="input-field col s12">
+        <div class="errors">
+            {{ form_errors(form.end) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.end) }}
+            {{ form_label(form.end) }}
+        </div>
+    </div>
+    <div class="row inline">
+        <div class="input-field col s8">
+            <div class="errors">
+                {{ form_errors(form.formation) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.formation) }}
+                {{ form_label(form.formation) }}
+            </div>
+        </div>
+        <div class="input-field col s4">
+            <div class="errors">
+                {{ form_errors(form.number) }}
+            </div>
+            <div class="input-field">
+                {{ form_widget(form.number) }}
+                {{ form_label(form.number) }}
+            </div>
+        </div>
+    </div>
+    <div class="input-field col s12">
+        <div class="errors">
+            {{ form_errors(form.job) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.job) }}
+            {{ form_label(form.job) }}
+        </div>
+    </div>
+
     {{ form_widget(form) }}
     <div>
         <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
