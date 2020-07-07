@@ -15,6 +15,7 @@
     },
     "require": {
         "php": ">=7.1",
+        "ext-json": "*",
         "codeitnowin/barcode": "^3.0",
         "components/jquery": "^3.2",
         "doctrine/doctrine-bundle": "^1.6",
@@ -27,6 +28,7 @@
         "incenteev/composer-parameter-handler": "^2.0",
         "liip/imagine-bundle": "^1.9",
         "michelf/php-markdown": "^1.7",
+        "nesbot/carbon": "^2.36",
         "ornicar/gravatar-bundle": "^1.1",
         "sensio/distribution-bundle": "^5.0.19",
         "sensio/framework-extra-bundle": "^3.0.2",
@@ -39,8 +41,7 @@
         "symfony/symfony": "~3.4",
         "symfony/validator": "^3.3",
         "twig/twig": "^1.0||^2.0",
-        "vich/uploader-bundle": "^1.4",
-        "ext-json": "*"
+        "vich/uploader-bundle": "^1.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.4",

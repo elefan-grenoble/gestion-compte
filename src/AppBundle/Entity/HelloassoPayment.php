@@ -314,6 +314,25 @@ class HelloassoPayment
         return $this;
     }
 
+    public function fromPaymentObj($paymentObject, $campaignId)
+    {
+        $date = new \DateTime();
+        $date->setTimestamp(strtotime($paymentObject->date));
+
+        $amount = $paymentObject->amount;
+
+        $this->setPaymentId($paymentObject->id);
+        $this->setDate($date);
+        $this->setAmount($amount);
+        $this->setCampaignId($campaignId);
+        $this->setPayerFirstName($paymentObject->payer_first_name);
+        $this->setPayerLastName($paymentObject->payer_last_name);
+        $this->setStatus($paymentObject->status);
+        $this->setEmail($paymentObject->payer_email);
+
+        return $this;
+    }
+
     /**
      * Set campaignId.
      *
