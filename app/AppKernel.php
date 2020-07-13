@@ -46,11 +46,6 @@ class AppKernel extends Kernel
         return __DIR__;
     }
 
-    public function getProjectDir()
-    {
-        return \realpath($this->getRootDir() . "/../");
-    }
-
     public function getCacheDir()
     {
         return dirname(__DIR__).'/var/cache/'.$this->getEnvironment();
