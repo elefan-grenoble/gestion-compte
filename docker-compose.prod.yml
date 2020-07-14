@@ -29,10 +29,11 @@ services:
   php:
     image: scopeli44/elefan-php
     env_file: docker-compose.prod.env
-    volumes:
-      - ./swarm/local-volumes/elefan/cache:/var/cache
-      - ./swarm/local-volumes/elefan/logs:/var/logs
-      - ./swarm/volumes/elefan/sessions:/var/sessions
+    ## Configure your own persistence
+    # volumes:
+    #   - /swarm/local-volumes/elefan/cache:/var/cache
+    #   - /swarm/local-volumes/elefan/logs:/var/logs
+    #   - /swarm/volumes/elefan/sessions:/var/sessions
     networks:
       - default
     deploy:
@@ -49,9 +50,11 @@ services:
   mysql:
     image: mysql:5.7
     command: mysqld --wait_timeout=36000 --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;'
-    env_file: docker-compose.env
+    env_file: docker-compose.prod.env
     restart: always
     
+  # Automatic migration 
+  # Not work at the first start, mysql must already be ready
   db-migration:
     image: scopeli44/elefan-php
     env_file: docker-compose.prod.env
@@ -60,6 +63,8 @@ services:
       replicas: 1
       restart_policy:
         condition: none
+    depends_on:
+      - mysql
     entrypoint:
       - "php"
       - "/elefan/bin/console"

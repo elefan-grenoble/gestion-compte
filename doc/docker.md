@@ -10,7 +10,7 @@ docker-compose push
 
 Pour builder une branch spécifique :
 <pre>
-export GIT_BRANCH=v1.19
+export GIT_BRANCH=v1.26.1
 docker-compose build --build-arg GIT_BRANCH=$GIT_BRANCH http php
 docker-compose push http php
 </pre>
@@ -19,24 +19,16 @@ docker-compose push http php
 
 Cloner le code du projet :
 <pre>
-git clone --branch v1.26.1 git@github.com:Scopeli44/gestion-compte.git elefan
+git clone --branch  scopeli-from-1.26.1-dev git@github.com:Scopeli44/gestion-compte.git elefan
 cd elefan/
 </pre>
 
-Cloner dépôt docker du projet :
-<pre>
-git clone git@gitlab.com:scopeli44/elefan-docker.git docker
-</pre>
 
-Lier les fichiers du répertoire docker/dev à la racine du projet (afin d'avoir composer et php dans les bonnes version sous Docker) :
+Verifier que les fichiers du répertoire docker/dev à la racine du projet sont bien present sous forme de liens symboliques
+(afin d'avoir composer et php dans les bonnes version sous Docker)
+Sinon :
 <pre>
 ln -s docker/dev/* ./
-</pre>
-
-Copier les fichiers :
-<pre>
-cp docker/build/php/config_prod.yml app/config/
-cp docker/build/php/parameters.yml.dist app/config/
 </pre>
 
 Lancer la configuration (ignorer les paramètres à configurer, ceux ci seront définis par les variables d'environnement docker dans le fichier ./docker-compose.yml) :
@@ -73,4 +65,5 @@ Lancer le serveur web :
 docker-compose up http
 </pre>
 
+Créer une redirection local (127.0.0.1 -> elefan)
 Aller sur http://elefan/user/install_admin pour créer l'utilisateur super admin (valeurs par défaut : admin:password)

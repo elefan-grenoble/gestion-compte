@@ -11,7 +11,7 @@ RUN apt-get update \
 
 WORKDIR /elefan/
 
-ADD https://github.com/Scopeli44/gestion-compte/archive/${GIT_BRANCH:-scopeli-dev}.zip /elefan/archive.zip
+ADD https://github.com/Scopeli44/gestion-compte/archive/${GIT_BRANCH:-scopeli-from-1.26.1-dev}.zip /elefan/archive.zip
 
 RUN bsdtar -xf /elefan/archive.zip -s'|[^/]*/||' && rm archive.zip
 
