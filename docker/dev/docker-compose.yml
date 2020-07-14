@@ -1,0 +1,72 @@
+version: '3.7'
+
+networks:
+  reverse-proxy:
+    external: true
+
+services:
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --wait_timeout=36000 --default-authentication-plugin=mysql_native_password --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;'
+    env_file: docker-compose.env
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 1
+    restart: always
+
+  dev:
+    image: scopeli44/elefan-dev
+    working_dir: $PWD
+    env_file: docker-compose.env
+    volumes:
+      - type: bind
+        source: ${__PROJECT_ROOT__}
+        target: ${__PROJECT_ROOT__}
+      - type: bind
+        source: ${HOME}
+        target: ${HOME}
+      - /tmp/:/tmp/
+    depends_on:
+      - mysql
+    networks:
+      - default
+
+  http:
+    image: scopeli44/elefan-http
+    ports: 
+      - 80:80
+    volumes:
+      - type: bind
+        source: ${__PROJECT_ROOT__-./}
+        target: /elefan/
+    depends_on:
+      - php
+    labels:
+      - 'traefik.enable=true'
+      - "traefik.http.routers.elefan.rule=Host(`elefan`)"
+      - "traefik.http.services.elefan.loadbalancer.server.port=80"
+    networks:
+      - default
+      - reverse-proxy
+    restart: always
+
+  php:
+    image: scopeli44/elefan-php
+    env_file: docker-compose.env
+    #secrets:
+      #- database_user_file
+    volumes:
+      - type: bind
+        source: ${__PROJECT_ROOT__-./}
+        target: /elefan/
+    depends_on:
+      - mysql
+    networks:
+      - default
+    restart: always
+
+#secrets:
+  #database_user_file:
+    #file: database_user_file.txt
