@@ -52,34 +52,18 @@ services:
     command: mysqld --wait_timeout=36000 --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;'
     env_file: docker-compose.prod.env
     restart: always
-    
-  # Automatic migration 
-  # Not work at the first start, mysql must already be ready
-  db-migration:
-    image: scopeli44/elefan-php
-    env_file: docker-compose.prod.env
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: none
-    depends_on:
-      - mysql
-    entrypoint:
-      - "php"
-      - "/elefan/bin/console"
-      - "doctrine:migration:migrate"
-    
-  cache-warmup:
-    image: scopeli44/elefan-php
-    env_file: docker-compose.prod.env
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy:
-        condition: none
-    entrypoint:
-      - "php"
-      - "/elefan/bin/console"
-      - "cache:warmup"
 
+  # lance les opérations d'initialisation/migration :
+  #   - db-migrate
+  #   - cache warmup
+  #   - mise à jour du mdp superadmin
+  startup:
+    image: elefan-php
+    env_file: docker-compose.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: none
+    entrypoint:
+      - "/elefan/startup.sh"
