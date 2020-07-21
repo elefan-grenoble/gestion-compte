@@ -74,12 +74,7 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
             ->getResult();
 
         if (count($usernames)) {
-            $count = 1;
-            $first = $usernames[0]->getUsername();
-            if(preg_match_all('/\d+/', $first, $numbers)) {
-                $count = end($numbers[0]) + 1;
-            }
-            $username = $username . + $count;
+            $username = $username . + count($usernames);
         }
         return $username;
     }
