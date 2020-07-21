@@ -29,7 +29,7 @@ class Membership
     protected $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="bigint")
      * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent")
      */
     protected $member_number;
