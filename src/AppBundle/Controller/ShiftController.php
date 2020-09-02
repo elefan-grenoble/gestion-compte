@@ -40,6 +40,18 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $data = $request->request->all();
+
+            if (count($data) === 1){
+                $number = array_values($data)[0]["number"];
+
+                while (1 < $number ){
+                    $s = clone($shift);
+                    $em->persist($s);
+                    $number --;
+                }
+            }
+
             $em->persist($shift);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le créneau a bien été créé !');
