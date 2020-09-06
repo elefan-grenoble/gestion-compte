@@ -7,11 +7,20 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use FOS\UserBundle\Model\UserManagerInterface;
 
 class ImportScopeliActifUsersCommand extends ImportUsersCommand
 {
 
     protected $filesystem;
+
+    private $userManager;
+
+    public function __construct(UserManagerInterface $userManager, $name = null)
+    {
+        $this->userManager = $userManager;
+        parent::__construct($name);
+    }
 
     protected function configure()
     {
@@ -52,14 +61,22 @@ class ImportScopeliActifUsersCommand extends ImportUsersCommand
         $users = [];
         $usersName = [];
         $row = 1;
+
+        $em = $this->getContainer()->get('doctrine')->getManager();
+
         if (($handle = fopen($userFile, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 10000, $input->getOption('delimiter'))) !== FALSE) {
+                $data[1] = str_replace(' ', '',$data[1]);
                 if (empty($data[1]) && empty($data[5])) {
                     // empty line
                 } elseif (array_key_exists($data[1],$users)) {
                     $this->WriteAndLog("$userFile line $row code kazo already exist ".$data[1]." ".$data[2]." ".$data[3], 'Kazo', $output);
                 } else if (in_array($data[5],$users)) {
                     $this->WriteAndLog("$userFile line $row email already exist ".$data[1]." ".$data[2]." ".$data[3], 'Email', $output);
+                } else if (!$em->getRepository('AppBundle:Membership')->findBy(['member_number' => $data[1]])) {
+                    $this->WriteAndLog("$userFile line $row code kazo ever import ".$data[1]." ".$data[2]." ".$data[3], 'Kazo', $output);
+                } else if (!$this->userManager->findUserByEmail($data[5])) {
+                    $this->WriteAndLog("$userFile line $row user email ever exist ".$data[1]." ".$data[2]." ".$data[3], 'Email', $output);
                 } elseif (empty($data[1])) {
                     $this->WriteAndLog("$userFile line $row code kazo not set ".$data[1]." ".$data[2]." ".$data[3], 'Kazo', $output);
                 } elseif (!intval($data[1])) {
@@ -159,6 +176,17 @@ class ImportScopeliActifUsersCommand extends ImportUsersCommand
 
         // execute import
         parent::execute($input,$output);
+
+        // active user
+        foreach ($contentForCsv as $importUser) {
+            $user = $this->userManager->findUserByEmail($importUser[8]);
+            if ($user){
+                $user->setEnabled(true);
+                $this->userManager->updateUser($user);
+            } else {
+                    $this->WriteAndLog("error with ".$data[1]." ".$data[2]." ".$data[3]." ".$data[8],'active user', $output);
+            }
+        }
     }
 
     public function writeAndLog($message, $field = '', $output)

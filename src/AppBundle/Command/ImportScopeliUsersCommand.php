@@ -64,9 +64,9 @@ class ImportScopeliUsersCommand extends ImportUsersCommand
                 if (empty($data[0]) && empty($data[1]) && empty($data[2])) {
                     // empty line
                 } elseif (array_key_exists($data[0],$users)) {
-                    $this->WriteAndLog("$userFile line $row mail already exist ".$data[0]." ".$data[1]." ".$data[2], 'Mail', $output);
+                    $this->WriteAndLog("$userFile line $row matricule already exist ".$data[0]." ".$data[1]." ".$data[2], 'Mail', $output);
                 } else if (in_array($data[8],$users)) {
-                    $this->WriteAndLog("$userFile line $row matricule already exist ".$data[0]." ".$data[1]." ".$data[2], 'Matricule', $output);
+                    $this->WriteAndLog("$userFile line $row mail already exist ".$data[0]." ".$data[1]." ".$data[2], 'Matricule', $output);
                 } elseif (empty($data[0])) {
                     $this->WriteAndLog("$userFile line $row matricule not set ".$data[0]." ".$data[1]." ".$data[2], 'Matricule', $output);
                 } elseif (empty($data[1])) {
