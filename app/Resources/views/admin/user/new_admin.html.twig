@@ -3,7 +3,43 @@
 {% block content %}
     <h3>Créer un utilisateur admin</h3>
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.email) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.username) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.username) }}
+                {{ form_widget(form.username) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.password) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password) }}
+            </div>
+        </div>
+    </div>
+
     <div>
         <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
     </div>
