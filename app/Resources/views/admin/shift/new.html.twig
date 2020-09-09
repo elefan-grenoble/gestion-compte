@@ -9,7 +9,67 @@
 {% block content %}
     <h4 class="">Ajouter un créneau ponctuel</h4>
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+    
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.date) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.date) }}
+                {{ form_widget(form.date) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.start) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.start) }}
+                {{ form_widget(form.start) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.end) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.end) }}
+                {{ form_widget(form.end) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.formation) }}
+            </div>
+            <div class="select-field">
+                {{ form_label(form.formation) }}
+                {{ form_widget(form.formation) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.job) }}
+            </div>
+            <div class="select-field">
+                {{ form_label(form.job) }}
+                {{ form_widget(form.job) }}
+            </div>
+        </div>
+    </div>
+
     <div>
         <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
     </div>
