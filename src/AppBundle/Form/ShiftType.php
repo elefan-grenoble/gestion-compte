@@ -6,9 +6,10 @@ use AppBundle\Entity\Shift;
 use AppBundle\Repository\JobRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\DataMapperInterface;
 
 class ShiftType extends AbstractType implements DataMapperInterface
 {
@@ -28,8 +29,16 @@ class ShiftType extends AbstractType implements DataMapperInterface
                 'multiple' => false,
                 'required' => false
             ))
+            ->add('number', IntegerType::class, [
+                'label' => 'Nombre de postes disponibles',
+                'required' => true,
+                'data' => 1,
+                'attr' => [
+                    'min' => 1
+                ]
+            ])
             ->add('job', EntityType::class, array(
-                'label' => 'Poste',
+                'label' => 'Type',
                 'class' => 'AppBundle:Job',
                 'choice_label' => 'name',
                 'multiple' => false,
