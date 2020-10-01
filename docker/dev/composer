@@ -1,0 +1,4 @@
+#!/bin/bash
+export __PROJECT_ROOT__=$(readlink -f $(pwd)"/"$(dirname "$0")"/")
+
+docker-compose -f $__PROJECT_ROOT__/docker-compose.yml run --rm --user `id -u`:`id -g` --no-deps --entrypoint composer dev "$@"

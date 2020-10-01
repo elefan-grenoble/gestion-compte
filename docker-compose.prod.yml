@@ -1,0 +1,69 @@
+version: '3.7'
+
+networks:
+  reverse-proxy:
+    external: true
+
+services:
+
+  http:
+    image: scopeli44/elefan-http
+    env_file: docker-compose.prod.env
+    ports:
+      - 80:80
+    networks:
+      - default
+      - reverse-proxy
+    depends_on:
+      - php
+    deploy:
+      mode: global
+      ## Scopeli Traefik v2.2 example 
+      # labels:
+      #   - "traefik.enable=true"
+      #   - "traefik.http.routers.elefan.rule=Host(`elefan.scopeli.fr`)"
+      #   - "traefik.http.routers.elefan.entrypoints=http"
+      #   - "traefik.http.routers.elefan.tls.domains[0].main=elefan.scopeli.fr"
+      #   - "traefik.http.routers.elefan.tls.domains[0].main=elefan.scopeli.fr"
+      #   - "traefik.http.services.elefan.loadbalancer.server.port=80"
+  php:
+    image: scopeli44/elefan-php
+    env_file: docker-compose.prod.env
+    ## Configure your own persistence
+    # volumes:
+    #   - /swarm/local-volumes/elefan/cache:/var/cache
+    #   - /swarm/local-volumes/elefan/logs:/var/logs
+    #   - /swarm/volumes/elefan/sessions:/var/sessions
+    networks:
+      - default
+    deploy:
+      mode: global
+
+
+  # for local test
+  # adminer:
+  #   image: adminer
+  #   restart: on-failure
+  #   ports:
+  #     - '8080:8080'
+
+  mysql:
+    image: mysql:5.7
+    command: mysqld --wait_timeout=36000 --character-set-server=utf8 --collation-server=utf8_unicode_ci --init-connect='SET NAMES UTF8;'
+    env_file: docker-compose.prod.env
+    restart: always
+
+  # lance les opérations d'initialisation/migration :
+  #   - db-migrate
+  #   - cache warmup
+  #   - mise à jour du mdp superadmin
+  startup:
+    image: scopeli44/elefan-php
+    env_file: docker-compose.env
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: none
+    entrypoint:
+      - "/elefan/bin/startup.sh"
