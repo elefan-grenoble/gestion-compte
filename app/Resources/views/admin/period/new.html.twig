@@ -10,7 +10,55 @@
 {% block content %}
     <h4 class="">Nouveau créneau type</h4>
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.day_of_week) }}
+            </div>
+            <div class="select-field">
+                {{ form_label(form.day_of_week) }}
+                {{ form_widget(form.day_of_week) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.start) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.start) }}
+                {{ form_widget(form.start) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.end) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.end) }}
+                {{ form_widget(form.end) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.job) }}
+            </div>
+            <div class="select-field">
+                {{ form_label(form.job) }}
+                {{ form_widget(form.job) }}
+            </div>
+        </div>
+    </div>
+
     <div>
         <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
     </div>
