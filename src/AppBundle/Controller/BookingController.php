@@ -468,6 +468,7 @@ class BookingController extends Controller
         if ($shift->getId()) {
             if ($shift->getLastShifter()) {
                 $shift->setLastShifter(null);
+                $shift->setFixe(false);
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
