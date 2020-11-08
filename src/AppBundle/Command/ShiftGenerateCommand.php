@@ -103,6 +103,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $current_shift->setBooker(null);
                         } else {
                             $current_shift->setLastShifter($last_cycle_shifters_array[$i]->getShifter());
+                            $current_shift->setFixe($last_cycle_shifters_array[$i]->isFixe());
                             $reservedShifts[$count] = $current_shift;
                             $oldShifts[$count] = $last_cycle_shifters_array[$i];
                         }
