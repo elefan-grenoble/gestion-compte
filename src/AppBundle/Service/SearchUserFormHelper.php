@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilder;
 
 class SearchUserFormHelper {
@@ -46,6 +47,8 @@ class SearchUserFormHelper {
             ->add('lastregistrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('compteurlt', NumberType::class, array('label' => 'inférieur','required' => false))
+            ->add('compteurgt', NumberType::class, array('label' => 'supérieur','required' => false))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
@@ -117,6 +120,8 @@ class SearchUserFormHelper {
      * @return QueryBuilder
      */
     public function processSearchFormData($form,&$qb){
+        $tlJoined = false;
+        
         if ($form->get('withdrawn')->getData() > 0){
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
@@ -149,6 +154,24 @@ class SearchUserFormHelper {
         if ($form->get('registrationdatelt')->getData()){
             $qb = $qb->andWhere('r.date < :registrationdatelt')
                 ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+        }
+        if ($form->get('compteurlt')->getData()){
+            if (!$tlJoined){
+                $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
+                $tlJoined = true;
+            }
+            $qb = $qb->andHaving('(sum (tl.time) - ((DATE_DIFF(current_date(), o.firstShiftDate) - MOD(DATE_DIFF(current_date(), o.firstShiftDate) , 28)) / 28  * 180 )) / 60 <= :compteurlt')
+                ->setParameter('compteurlt', $form->get('compteurlt')->getData())
+                ->addGroupBy('o.id');
+        }
+        if ($form->get('compteurgt')->getData()){
+            if (!$tlJoined){
+                $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
+                $tlJoined = true;
+            }
+            $qb = $qb->andHaving('(sum (tl.time) - ((DATE_DIFF(current_date(), o.firstShiftDate) - MOD(DATE_DIFF(current_date(), o.firstShiftDate) , 28)) / 28  * 180 )) / 60 >= :compteurgt')
+                ->setParameter('compteurgt', $form->get('compteurgt')->getData())
+                ->addGroupBy('o.id');
         }
         if ($form->get('lastregistrationdate')->getData()){
             $qb = $qb
