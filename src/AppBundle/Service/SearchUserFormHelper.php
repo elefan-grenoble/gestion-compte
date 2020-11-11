@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilder;
 
 class SearchUserFormHelper {
@@ -46,6 +47,8 @@ class SearchUserFormHelper {
             ->add('lastregistrationdate', TextType::class, array('label' => 'le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
             ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
+            ->add('compteurlt', NumberType::class, array('label' => 'compteur <','required' => false))
+            ->add('compteurgt', NumberType::class, array('label' => 'compteur >','required' => false))
             ->add('username', TextType::class, array('label' => 'username','required' => false))
             ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
@@ -149,6 +152,14 @@ class SearchUserFormHelper {
         if ($form->get('registrationdatelt')->getData()){
             $qb = $qb->andWhere('r.date < :registrationdatelt')
                 ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
+        }
+        if ($form->get('compteurlt')->getData()){
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+                ->setParameter('compteurlt', $form->get('compteurlt')->getData());
+        }
+        if ($form->get('compteurgt')->getData()){
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
+                ->setParameter('compteurgt', $form->get('compteurgt')->getData());
         }
         if ($form->get('lastregistrationdate')->getData()){
             $qb = $qb
