@@ -160,7 +160,7 @@ class SearchUserFormHelper {
                 $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
                 $tlJoined = true;
             }
-            $qb = $qb->andHaving('(sum (tl.time) - ((DATE_DIFF(current_date(), o.firstShiftDate) - MOD(DATE_DIFF(current_date(), o.firstShiftDate) , 28)) / 28  * 180 )) / 60 <= :compteurlt')
+            $qb = $qb->andHaving('sum(tl.time) / 60 <= :compteurlt')
                 ->setParameter('compteurlt', $form->get('compteurlt')->getData())
                 ->addGroupBy('o.id');
         }
@@ -169,7 +169,7 @@ class SearchUserFormHelper {
                 $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
                 $tlJoined = true;
             }
-            $qb = $qb->andHaving('(sum (tl.time) - ((DATE_DIFF(current_date(), o.firstShiftDate) - MOD(DATE_DIFF(current_date(), o.firstShiftDate) , 28)) / 28  * 180 )) / 60 >= :compteurgt')
+            $qb = $qb->andHaving('sum(tl.time) / 60 >= :compteurgt')
                 ->setParameter('compteurgt', $form->get('compteurgt')->getData())
                 ->addGroupBy('o.id');
         }
