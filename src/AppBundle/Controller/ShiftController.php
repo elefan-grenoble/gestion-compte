@@ -63,4 +63,31 @@ class ShiftController extends Controller
         ));
     }
 
+    /**
+     * remove a shift.
+     *
+     * @Route("/shift/{id}", name="shift_delete")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method("DELETE")
+     */
+    public function removeShiftAction(Request $request, Shift $shift)
+    {
+        $session = new Session();
+
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($shift);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Le créneau a bien été supprimé !');
+        }
+
+        return $this->redirectToRoute('booking_admin');
+    }
+
 }

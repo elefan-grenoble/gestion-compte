@@ -229,13 +229,22 @@ class BookingController extends Controller
                 ->add('shift_id', HiddenType::class)
                 ->getForm();
 
+            $shift_delete_form = array();
+            foreach ($shifts as $shift) {
+                $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+                    ->setMethod('DELETE')
+                    ->getForm()->createView();
+            }
+
             return $this->render('admin/booking/index.html.twig', [
                 'form' => $form->createView(),
                 'bucketsByDay' => $bucketsByDay,
                 'hours' => $hours,
                 'jobs' => $jobs,
                 'delete_bucket_form' => $delete_bucket_form->createView(),
-                'beneficiaries' => $beneficiaries
+                'beneficiaries' => $beneficiaries,
+                'shift_delete_form' => $shift_delete_form
             ]);
         }
     }

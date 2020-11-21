@@ -62,11 +62,13 @@
                 {% if shift.shifter %}{# is booked #}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
-                        {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
-                            #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                            {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
-                            {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
-                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                            <div class="col s12">
+                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
+                                #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                                {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
+                                {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                            </div>
                         </div>
                         <div class="collapsible-body">
                             {% if use_fly_and_fixed %}
@@ -89,25 +91,35 @@
                 {% else %}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
-                            {% if shift.formation %}
-                                <b data-formation="{{ shift.formation.name }}">
-                            {% else %}
-                                <b>
-                            {% endif %}
+                            <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
+                                {% if shift.formation %}
+                                    <b data-formation="{{ shift.formation.name }}">
+                                {% else %}
+                                    <b>
+                                {% endif %}
                                 <span style="font-style: italic">
-                            {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
-                            {% else %}libre
-                            {% endif %}
-                            </span>
-                            {% if shift.formation %}
-                                </b>&nbsp;({{ shift.formation.name }})
-                            {% else %}
-                                </b>&nbsp;(sans formation particulière)
+                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                                    {% else %}libre
+                                    {% endif %}
+                                </span>
+                                {% if shift.formation %}
+                                    </b>&nbsp;({{ shift.formation.name }})
+                                {% else %}
+                                    </b>&nbsp;(sans formation particulière)
+                                {% endif %}
+                            </div>
+                            {% if not shift.lastShifter %}
+                                <div class="col s1 right-align">
+                                    {{ form_start(shift_delete_form[shift.id]) }}
+                                    {{ form_widget(shift_delete_form[shift.id]) }}
+                                    <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
+                                    {{ form_end(shift_delete_form[shift.id]) }}
+                                </div>
                             {% endif %}
                         </div>
                         <div class="collapsible-body">
                                 <div class="row">
-                                    <div class="input-field col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
                                         <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
                                     </div>
                                     {% if use_fly_and_fixed %}
