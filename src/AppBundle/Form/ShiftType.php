@@ -10,6 +10,8 @@ use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 
 class ShiftType extends AbstractType implements DataMapperInterface
 {
@@ -22,21 +24,6 @@ class ShiftType extends AbstractType implements DataMapperInterface
             ->add('date', TextType::class, array('label' => 'Date', 'attr' => array('class' => 'datepicker')))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
-            ->add('formation', EntityType::class, array(
-                'label' => 'Formation',
-                'class' => 'AppBundle:Formation',
-                'choice_label' => 'name',
-                'multiple' => false,
-                'required' => false
-            ))
-            ->add('number', IntegerType::class, [
-                'label' => 'Nombre de postes disponibles',
-                'required' => true,
-                'data' => 1,
-                'attr' => [
-                    'min' => 1
-                ]
-            ])
             ->add('job', EntityType::class, array(
                 'label' => 'Type',
                 'class' => 'AppBundle:Job',
@@ -52,6 +39,31 @@ class ShiftType extends AbstractType implements DataMapperInterface
                 }
             ))
             ->setDataMapper($this);
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+            $shift = $event->getData();
+            $form = $event->getForm();
+
+            // checks if the Shift object is "new"
+            // If no data is passed to the form, the data is "null".
+            if (!$shift || null === $shift->getId()) {
+                $form->add('formation', EntityType::class, array(
+                    'label' => 'Formation',
+                    'class' => 'AppBundle:Formation',
+                    'choice_label' => 'name',
+                    'multiple' => false,
+                    'required' => false
+                ))
+                ->add('number', IntegerType::class, [
+                    'label' => 'Nombre de postes disponibles',
+                    'required' => true,
+                    'data' => 1,
+                    'attr' => [
+                        'min' => 1
+                    ]
+                ]);
+            }
+        });
     }
 
     /**
@@ -81,11 +93,14 @@ class ShiftType extends AbstractType implements DataMapperInterface
         $forms = iterator_to_array($forms);
 
         // initialize form field values
-        $forms['date']->setData($data->getStart());
-        $forms['start']->setData($data->getStart());
-        $forms['end']->setData($data->getEnd());
+        if (!is_null($data->getStart())) {
+            $forms['date']->setData($data->getStart()->format('Y-m-d'));
+            $forms['start']->setData($data->getStart()->format('H:i'));
+        }
+        if (!is_null($data->getEnd())) {
+            $forms['end']->setData($data->getEnd()->format('H:i'));
+        }
         $forms['job']->setData($data->getJob());
-        $forms['formation']->setData($data->getFormation());
     }
 
     public function mapFormsToData($forms, &$data)
@@ -107,6 +122,8 @@ class ShiftType extends AbstractType implements DataMapperInterface
         $data->setStart($start);
         $data->setEnd($end);
         $data->setJob($forms['job']->getData());
-        $data->setFormation($forms['formation']->getData());
+        if (array_key_exists('formation', $forms)) {
+            $data->setFormation($forms['formation']->getData());
+        }
     }
 }

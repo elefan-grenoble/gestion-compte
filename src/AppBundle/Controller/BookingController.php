@@ -12,6 +12,7 @@ use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Form\ShiftType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -247,6 +248,40 @@ class BookingController extends Controller
                 'shift_delete_form' => $shift_delete_form
             ]);
         }
+    }
+
+    /**
+     * @Route("/edit_bucket/{id}", name="shift_edit")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method({"GET", "POST"})
+     */
+    public function editBucketAction(Request $request,Shift $shift)
+    {
+        $session = new Session();
+
+        $form = $this->createForm(ShiftType::class, $shift);
+        // Keep a record of the shift before update
+        $bucket = clone($shift);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $bucket->getJob(), 'start' => $bucket->getStart(), 'end' => $bucket->getEnd()));
+            foreach ($shifts as $s) {
+                $s->setStart($shift->getStart());
+                $s->setEnd($shift->getEnd());
+                $s->setJob($shift->getJob());
+                $em->persist($s);
+            }
+            $em->flush();
+            $session->getFlashBag()->add('success', 'Le créneau a bien été édité !');
+            return $this->redirectToRoute('booking_admin');
+        }
+
+        return $this->render('admin/shift/edit.html.twig', array(
+            "form" => $form->createView(),
+            "shift" => $shift
+        ));
     }
 
     /**

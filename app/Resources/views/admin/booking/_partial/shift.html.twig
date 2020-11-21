@@ -153,13 +153,16 @@
         </a>
         {% if bucket.first.locked %}
             <a href="{{ path('unlock_shift', {'id':  bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">unlock</i>Déverrouiller ce créneau
+                <i class="material-icons left">unlock</i>Déverrouiller
             </a>
         {% else %}
             <a href="{{ path('lock_shift', {'id':  bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">lock</i>Verrouiller ce créneau
+                <i class="material-icons left">lock</i>Verrouiller
             </a>
         {% endif %}
+        <a href="{{ path('shift_edit', {'id':  bucket.first.id }) }}" class="btn deep-purple">
+            <i class="material-icons left">edit</i>Editer
+        </a>
         <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
             $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
             <i class="material-icons left">delete</i>Supprimer
