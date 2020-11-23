@@ -55,7 +55,7 @@ class ShiftController extends Controller
             $em->persist($shift);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le créneau a bien été créé !');
-            return $this->redirectToRoute('admin');
+            return $this->redirectToRoute('booking_admin');
         }
 
         return $this->render('admin/shift/new.html.twig', array(

@@ -148,6 +148,25 @@
                 {% endif %}
             {% endfor %}
         </ul>
+        {{ form_start(shift_add_form[bucket.first.id]) }}
+        {{ form_widget(shift_add_form[bucket.first.id].date) }}
+        {{ form_widget(shift_add_form[bucket.first.id].start) }}
+        {{ form_widget(shift_add_form[bucket.first.id].end) }}
+        {{ form_widget(shift_add_form[bucket.first.id].job) }}
+        <div class="row valign-wrapper">
+            <div class="col s3">
+                {{ form_label(shift_add_form[bucket.first.id].number) }}
+                {{ form_widget(shift_add_form[bucket.first.id].number) }}
+            </div>
+            <div class="col s6">
+                {{ form_label(shift_add_form[bucket.first.id].formation) }}
+                {{ form_widget(shift_add_form[bucket.first.id].formation) }}
+            </div>
+            <div class="col s3">
+                <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+            </div>
+        </div>
+        {{ form_end(shift_add_form[bucket.first.id]) }}
         <a href="{{ path('mail_bucketshift', {'id':  bucket.first.id }) }}" class="btn">
             <i class="material-icons left">mail</i>Envoyer un email aux membres
         </a>

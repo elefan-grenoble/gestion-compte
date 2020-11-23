@@ -231,11 +231,18 @@ class BookingController extends Controller
                 ->getForm();
 
             $shift_delete_form = array();
+            $shift_add_form = array();
             foreach ($shifts as $shift) {
                 $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
                     ->setMethod('DELETE')
                     ->getForm()->createView();
+                $shift_add_form[$shift->getId()] = $this->createForm(
+                    ShiftType::class,
+                    $shift,
+                    array('action' => $this->generateUrl('shift_new'), 'only_add_formation' => true)
+                  )
+                ->createView();
             }
 
             return $this->render('admin/booking/index.html.twig', [
@@ -245,7 +252,8 @@ class BookingController extends Controller
                 'jobs' => $jobs,
                 'delete_bucket_form' => $delete_bucket_form->createView(),
                 'beneficiaries' => $beneficiaries,
-                'shift_delete_form' => $shift_delete_form
+                'shift_delete_form' => $shift_delete_form,
+                'shift_add_form' => $shift_add_form
             ]);
         }
     }
