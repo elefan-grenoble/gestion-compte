@@ -1,0 +1,19 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('booking_admin') }}"><i class="material-icons">date_range</i>Créneaux admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">add</i>Editer
+{% endblock %}
+
+{% block content %}
+    <h4> Editer créneau / <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
+    <h5>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h5>
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
