@@ -62,11 +62,13 @@
                 {% if shift.shifter %}{# is booked #}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
-                        {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
-                            #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                            {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
-                            {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
-                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                            <div class="col s12">
+                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
+                                #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                                {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
+                                {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                            </div>
                         </div>
                         <div class="collapsible-body">
                             {% if use_fly_and_fixed %}
@@ -89,25 +91,35 @@
                 {% else %}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
-                            {% if shift.formation %}
-                                <b data-formation="{{ shift.formation.name }}">
-                            {% else %}
-                                <b>
-                            {% endif %}
+                            <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
+                                {% if shift.formation %}
+                                    <b data-formation="{{ shift.formation.name }}">
+                                {% else %}
+                                    <b>
+                                {% endif %}
                                 <span style="font-style: italic">
-                            {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
-                            {% else %}libre
-                            {% endif %}
-                            </span>
-                            {% if shift.formation %}
-                                </b>&nbsp;({{ shift.formation.name }})
-                            {% else %}
-                                </b>&nbsp;(sans formation particulière)
+                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                                    {% else %}libre
+                                    {% endif %}
+                                </span>
+                                {% if shift.formation %}
+                                    </b>&nbsp;({{ shift.formation.name }})
+                                {% else %}
+                                    </b>&nbsp;(sans formation particulière)
+                                {% endif %}
+                            </div>
+                            {% if not shift.lastShifter %}
+                                <div class="col s1 right-align">
+                                    {{ form_start(shift_delete_form[shift.id]) }}
+                                    {{ form_widget(shift_delete_form[shift.id]) }}
+                                    <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
+                                    {{ form_end(shift_delete_form[shift.id]) }}
+                                </div>
                             {% endif %}
                         </div>
                         <div class="collapsible-body">
                                 <div class="row">
-                                    <div class="input-field col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
                                         <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
                                     </div>
                                     {% if use_fly_and_fixed %}
@@ -136,18 +148,40 @@
                 {% endif %}
             {% endfor %}
         </ul>
+        {{ form_start(shift_add_form[bucket.first.id]) }}
+        {{ form_widget(shift_add_form[bucket.first.id].date) }}
+        {{ form_widget(shift_add_form[bucket.first.id].start) }}
+        {{ form_widget(shift_add_form[bucket.first.id].end) }}
+        {{ form_widget(shift_add_form[bucket.first.id].job) }}
+        <div class="row valign-wrapper">
+            <div class="col s3">
+                {{ form_label(shift_add_form[bucket.first.id].number) }}
+                {{ form_widget(shift_add_form[bucket.first.id].number) }}
+            </div>
+            <div class="col s6">
+                {{ form_label(shift_add_form[bucket.first.id].formation) }}
+                {{ form_widget(shift_add_form[bucket.first.id].formation) }}
+            </div>
+            <div class="col s3">
+                <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+            </div>
+        </div>
+        {{ form_end(shift_add_form[bucket.first.id]) }}
         <a href="{{ path('mail_bucketshift', {'id':  bucket.first.id }) }}" class="btn">
             <i class="material-icons left">mail</i>Envoyer un email aux membres
         </a>
         {% if bucket.first.locked %}
             <a href="{{ path('unlock_shift', {'id':  bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">unlock</i>Déverrouiller ce créneau
+                <i class="material-icons left">unlock</i>Déverrouiller
             </a>
         {% else %}
             <a href="{{ path('lock_shift', {'id':  bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">lock</i>Verrouiller ce créneau
+                <i class="material-icons left">lock</i>Verrouiller
             </a>
         {% endif %}
+        <a href="{{ path('shift_edit', {'id':  bucket.first.id }) }}" class="btn deep-purple">
+            <i class="material-icons left">edit</i>Editer
+        </a>
         <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
             $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
             <i class="material-icons left">delete</i>Supprimer
