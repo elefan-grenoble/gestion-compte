@@ -160,7 +160,7 @@ class SearchUserFormHelper {
                 $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
                 $tlJoined = true;
             }
-            $qb = $qb->andHaving('sum(tl.time) / 60 <= :compteurlt')
+            $qb = $qb->andHaving('sum(tl.time) / 60 <=  (SELECT count(o2) * :compteurlt FROM AppBundle\Entity\Membership o2 LEFT JOIN o2.beneficiaries b2 where o2.member_number = o.member_number)')
                 ->setParameter('compteurlt', $form->get('compteurlt')->getData())
                 ->addGroupBy('o.id');
         }
@@ -169,7 +169,7 @@ class SearchUserFormHelper {
                 $qb = $qb->innerJoin('o.timeLogs', 'tl')->addSelect('tl');
                 $tlJoined = true;
             }
-            $qb = $qb->andHaving('sum(tl.time) / 60 >= :compteurgt')
+            $qb = $qb->andHaving('sum(tl.time) / 60 >=  (SELECT count(o3) * :compteurgt FROM AppBundle\Entity\Membership o3 LEFT JOIN o3.beneficiaries b3 where o3.member_number = o.member_number)')
                 ->setParameter('compteurgt', $form->get('compteurgt')->getData())
                 ->addGroupBy('o.id');
         }
