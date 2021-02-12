@@ -432,8 +432,21 @@ class Shift
      * @return boolean
      */
     public function getIsUpcoming(){
-        $intwodays = new \DateTime('2 days');
-        return !$this->getIsPast() && !$this->getIsCurrent() && ($intwodays > $this->start);
+        return $this->isBefore('2 days');
+    }
+
+    /**
+     * Return true if the shift starts before the duration given as parameter
+     *
+     * @param string $duration
+     *
+     * @return boolean
+     */
+    public function isBefore($duration)
+    {
+        $futureDate = new \DateTime($duration);
+        $futureDate->setTime(23, 59, 59);
+        return !$this->getIsPast() && !$this->getIsCurrent() && ($futureDate > $this->start);
     }
 
     /**

@@ -18,15 +18,16 @@ class ShiftService
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
     private $newUserStartAsBeginner;
-    private $unlimitedBookDuration;
+    private $allowExtraShifts;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $unlimitedBookDuration)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
         $this->newUserStartAsBeginner = $newUserStartAsBeginner;
-        $this->unlimitedBookDuration = $unlimitedBookDuration;
+        $this->allowExtraShifts = $allowExtraShifts;
+        $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
     }
 
     /**
@@ -51,12 +52,40 @@ class ShiftService
     }
 
     /**
+     * Check if a beneficiary can book an extra shift
+     * @param Beneficiary $beneficiary
+     * @param Shift $shift
+     * @return bool
+     */
+    public function canBookExtraShift(Beneficiary $beneficiary, Shift $shift)
+    {
+        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+            return true;
+        }
+        return true === $this->allowExtraShifts && $shift->isBefore($this->maxTimeInAdvanceToBookExtraShifts);
+    }
+
+    /**
+     * Check if a beneficiary can book an extra shift bucket
+     * @param Beneficiary $beneficiary
+     * @param ShiftBucket $shiftBucket
+     * @return bool
+     */
+    public function canBookExtraShiftBucket(Beneficiary $beneficiary, ShiftBucket $shiftBucket)
+    {
+        return $this->canBookExtraShift($beneficiary, $shiftBucket->getFirst());
+    }
+
+    /**
      * Check if a beneficiary can book on the current and next cycles
      * @param Beneficiary $beneficiary
      * @return bool
      */
     public function canBookSomething(Beneficiary $beneficiary)
     {
+        if (true === $this->allowExtraShifts) {
+            return true;
+        }
         return $this->canBookOnCycle($beneficiary, 0) || $this->canBookOnCycle($beneficiary, 1);
     }
 
@@ -69,7 +98,7 @@ class ShiftService
      */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
-        if (true === $this->unlimitedBookDuration) {
+        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
             return true;
         }
 
@@ -176,7 +205,7 @@ class ShiftService
                 return false;
         }
 
-        return $this->canBookDuration($beneficiary, $shift->getDuration(), $current_cycle);
+        return $this->canBookDuration($beneficiary, $shift->getDuration(), $current_cycle) or $this->canBookExtraShift($beneficiary, $shift);
     }
 
     /**
@@ -373,4 +402,10 @@ class ShiftService
 
         return $shiftBucket;
     }
+
+    public function getMinimalShiftDuration()
+    {
+        return $this->min_shift_duration;
+    }
+
 }
