@@ -93,7 +93,8 @@ parameters:
     cycle_duration: '28 days'
     maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
-    unlimited_book_duration: false
+    allow_extra_shifts: true
+    max_time_in_advance_to_book_extra_shifts: '3 days'
     display_gauge: true
     use_fly_and_fixed: false
 
