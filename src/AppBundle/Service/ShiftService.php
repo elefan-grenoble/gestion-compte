@@ -408,4 +408,17 @@ class ShiftService
         return $this->min_shift_duration;
     }
 
+    /**
+     * Remove all empty shifts from an array of shift buckets
+     * @param $buckets
+     * @return array
+     */
+    public function removeEmptyShift($buckets)
+    {
+        foreach ($buckets as $bucket) {
+            $bucket->removeEmptyShift();
+        }
+        return $buckets;
+    }
+
 }

@@ -195,6 +195,7 @@ class DefaultController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findRemainingToday();
         $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
+        $buckets = $this->get('shift_service')->removeEmptyShift($buckets);
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 

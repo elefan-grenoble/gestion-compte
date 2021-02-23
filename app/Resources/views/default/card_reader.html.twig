@@ -29,10 +29,17 @@
                             {% for shift in bucket.shifts %}
                                 <li style="height: 30px">
                                     <div>
-                                        <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
-                                        {% if shift.formation %}<span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b>
-                                            </span>{% endif %}
-                                        {% if shift.shifter.shifts | length == 1 %}<span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>{% endif %}
+                                        {% if shift.shifter %}
+                                            <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
+                                            {% if shift.formation %}
+                                                <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
+                                            {% endif %}
+                                            {% if shift.shifter.shifts | length == 1 %}
+                                                <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span style="margin-right: 5px; font-size: 16px">&#10071&#10071 Personne n'est inscrit sur ce créneau &#10071&#10071</span>
+                                        {% endif %}
                                     </div>
                                 </li>
                             {% endfor %}
