@@ -30,6 +30,9 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
+    AppBundle\Controller\DefaultController:
+        arguments:
+            - '%swipe_card_logging%'
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
