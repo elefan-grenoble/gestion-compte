@@ -193,7 +193,7 @@ class DefaultController extends Controller
     {
         $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
+        $shifts = $em->getRepository('AppBundle:Shift')->findRemainingToday();
         $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
