@@ -43,7 +43,7 @@
                                 <a href="{{ path('homepage', {'_login_as':  beneficiary.user.username }) }}"
                                    class="btn btn-floating waves-effect waves-light grey" style="padding-top: 6px"
                                    title="Se connecter comme {{ beneficiary.user.username }}">
-                                    <img height="22px" class="emoticon" src="/images/605c500_072-ninja_1.svg" alt="ninja mode"></a>
+                                   {% image '@AppBundle/Resources/public/img/emoticons/072-ninja.svg' %}<img height="22px" class="emoticon" src="{{ asset_url }}" alt="ninja mode">{% endimage %}</a>
                             </div>
                             {% if not isTemporaryEmail(beneficiary.user.email) %}
                                 <div class="card-btn">
