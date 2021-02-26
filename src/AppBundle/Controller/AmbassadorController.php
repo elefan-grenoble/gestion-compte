@@ -8,6 +8,7 @@ use AppBundle\Entity\Note;
 use AppBundle\Entity\Task;
 use AppBundle\Entity\User;
 use AppBundle\Form\NoteType;
+use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -31,149 +32,65 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class AmbassadorController extends Controller
 {
+    private $timeAfterWhichMembersAreLateWithShifts;
+
+    public function __construct($timeAfterWhichMembersAreLateWithShifts)
+    {
+        $this->timeAfterWhichMembersAreLateWithShifts = $timeAfterWhichMembersAreLateWithShifts;
+    }
 
     /**
-     * Lists all tasks.
+     * Lists all users with a registration date older than one year.
      *
-     * @Route("/phone", name="ambassador_phone_list")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     * @Route("/membership", name="ambassador_membership_list")
      * @Method({"GET","POST"})
      */
-    public function phoneAction(Request $request)
+    public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
     {
 
         $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
 
-        $session = new Session();
-        $lastYear = new \DateTime('last year');
-        $form = $this->createFormBuilder()
-            ->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => true,'data' => 1,'choices'  => array(
-                'fermé' => 2,
-                'ouvert' => 1,
-            )))
-            ->add('frozen', ChoiceType::class, array('label' => 'gelé','required' => true,'data' => 1,'choices'  => array(
-                'Non gelé' => 1,
-                'gelé' => 2,
-            )))
-            ->add('membernumber', IntegerType::class, array('label' => '# =','required' => false))
-            ->add('membernumbergt', IntegerType::class, array('label' => '# >','required' => false))
-            ->add('membernumberlt', IntegerType::class, array('label' => '# <','required' => false))
-            ->add('compteurlt', NumberType::class, array('label' => 'max','required' => false))
-            ->add('compteurgt', NumberType::class, array('label' => 'min','required' => false))
-            ->add('lastregistrationdategt', TextType::class, array('label' => 'après le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le','required' => false, 'attr' => array( 'class' => 'datepicker')))
-            ->add('firstname', TextType::class, array('label' => 'prénom','required' => false))
-            ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
-            ->add('email', TextType::class, array('label' => 'email','required' => false))
-            ->add('action', HiddenType::class,array())
-            ->add('page', HiddenType::class,array())
-            ->add('dir', HiddenType::class,array())
-            ->add('sort', HiddenType::class,array())
-            ->add('submit', SubmitType::class, array('label' => 'Filtrer','attr' => array('class' => 'btn','value' => 'show')))
-            ->getForm();
-
+        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
         $form->handleRequest($request);
-
-        $em = $this->getDoctrine()->getManager();
 
         $action = $form->get('action')->getData();
 
-        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
-            ->leftJoin("b.user", "u")->addSelect("u")
-            ->leftJoin("o.registrations", "r")->addSelect("r") //registrations
-            ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registered
-            ->andWhere('o.withdrawn = false');
-
-        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
+        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+            ->where('lr.id IS NULL') //registration is the last one registere
+            ->leftJoin("o.timeLogs", "c")->addSelect("c")
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
 
         $page = $request->get('page');
         if (!intval($page))
             $page = 1;
-        $order = 'ASC';
-        $sort = 'o.member_number';
+        $order = 'DESC';
+        $sort = 'r.date';
+
+        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            if ($form->get('withdrawn')->getData() > 0){
-                $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                    ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
-            }
-            if ($form->get('frozen')->getData() > 0){
-                $qb = $qb->andWhere('o.frozen = :frozen')
-                    ->setParameter('frozen', $form->get('frozen')->getData()-1);
-            }
-
-            if ($form->get('page')->getData() > 0){
+            if ($form->get('page')->getData() > 0) {
                 $page = $form->get('page')->getData();
             }
-            if ($form->get('sort')->getData()){
+            if ($form->get('sort')->getData()) {
                 $sort = $form->get('sort')->getData();
             }
-            if ($form->get('dir')->getData()){
+            if ($form->get('dir')->getData()) {
                 $order = $form->get('dir')->getData();
             }
-            if ($form->get('compteurlt')->getData()){
-                $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-                    ->setParameter('compteurlt', $form->get('compteurlt')->getData());
-            }
-            if ($form->get('compteurgt')->getData()){
-                $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
-                    ->setParameter('compteurgt', $form->get('compteurgt')->getData());
-            }
-            if ($form->get('lastregistrationdategt')->getData()){
-                $date = $form->get('lastregistrationdategt')->getData();
-                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
-                if ($datetime > $lastYear){
-                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
-                    $date = $lastYear->format('Y-m-d') ;
-                }
-                $qb = $qb->andWhere('r.date > :lastregistrationdategt')
-                        ->setParameter('lastregistrationdategt', $date);
-            }
-            if ($form->get('lastregistrationdatelt')->getData()){
-                $date = $form->get('lastregistrationdatelt')->getData();
-                $datetime = \DateTime::createFromFormat('Y-m-d', $date);
-                if ($datetime > $lastYear){
-                    $session->getFlashBag()->add('warning','Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
-                    $date = $lastYear->format('Y-m-d') ;
-                }
-                $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                        ->setParameter('lastregistrationdatelt', $date);
-            }else{
-                $date = $lastYear->format('Y-m-d') ;
-                $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                    ->setParameter('lastregistrationdatelt', $date);
-            }
-            if ($form->get('membernumber')->getData()){
-                $qb = $qb->andWhere('o.member_number = :membernumber')
-                    ->setParameter('membernumber', $form->get('membernumber')->getData());
-            }
-            if ($form->get('membernumbergt')->getData()){
-                $qb = $qb->andWhere('o.member_number > :membernumbergt')
-                    ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
-            }
-            if ($form->get('membernumberlt')->getData()){
-                $qb = $qb->andWhere('o.member_number < :membernumberlt')
-                    ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
-            }
-            if ($form->get('firstname')->getData()){
-                $qb = $qb->andWhere('b.firstname LIKE :firstname')
-                    ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
-            }
-            if ($form->get('lastname')->getData()){
-                $qb = $qb->andWhere('b.lastname LIKE :lastname')
-                    ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
-            }
-            if ($form->get('email')->getData()){
-                $qb = $qb->andWhere('u.email LIKE :email')
-                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
-            }
+            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "membership");
         }else{
-            $form->get('sort')->setData($sort);
-            $form->get('dir')->setData($order);
+            $lastYear = new \DateTime('last year');
+            if (!$form->isSubmitted()) {
+                $form->get('sort')->setData($sort);
+                $form->get('dir')->setData($order);
+                $form->get('lastregistrationdatelt')->setData($lastYear->format('Y-m-d'));
+                $form->get('withdrawn')->setData(1);
+            }
             $qb = $qb->andWhere('o.withdrawn = 0');
-            $qb = $qb->andWhere('o.frozen = 0');
             $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                     ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
         }
@@ -189,6 +106,87 @@ class AmbassadorController extends Controller
         $members = new Paginator($qb->getQuery());
 
         return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "d'adhésion",
+            'path' => 'ambassador_membership_list',
+            'members' => $members,
+            'form' => $form->createView(),
+            'nb_of_result' => $max,
+            'page'=>$page,
+            'nb_of_pages'=>$nb_of_pages
+        ));
+
+    }
+
+    /**
+     * Lists all users with shift time logs older than 9 hours.
+     *
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
+     * @Method({"GET","POST"})
+     */
+    public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
+    {
+
+        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
+
+        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
+        $form->handleRequest($request);
+
+        $action = $form->get('action')->getData();
+
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
+        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+            ->where('lr.id IS NULL') //registration is the last one registere
+            ->leftJoin("o.timeLogs", "c")->addSelect("c")
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+
+        $page = $request->get('page');
+        if (!intval($page))
+            $page = 1;
+        $order = 'DESC';
+        $sort = 'time';
+
+        $session = new Session();
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if ($form->get('page')->getData() > 0) {
+                $page = $form->get('page')->getData();
+            }
+            if ($form->get('sort')->getData()) {
+                $sort = $form->get('sort')->getData();
+            }
+            if ($form->get('dir')->getData()) {
+                $order = $form->get('dir')->getData();
+            }
+            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "shifttimelog");
+        }else{
+            if (!$form->isSubmitted()) {
+                $form->get('sort')->setData($sort);
+                $form->get('dir')->setData($order);
+                $form->get('compteurlt')->setData($this->timeAfterWhichMembersAreLateWithShifts);
+                $form->get('withdrawn')->setData(1);
+                $form->get('frozen')->setData(1);
+            }
+            $qb = $qb->andWhere('o.withdrawn = 0');
+            $qb = $qb->andWhere('o.frozen = 0');
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+                ->setParameter('compteurlt', $this->timeAfterWhichMembersAreLateWithShifts);
+        }
+
+        $limit = 25;
+        $qb2 = clone $qb;
+        $max = $qb2->select('count(DISTINCT o.id)')->resetDQLPart('groupBy')->getQuery()->getSingleScalarResult();
+        $nb_of_pages = intval($max/$limit);
+        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+
+        $qb = $qb->orderBy($sort, $order);
+        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
+        $members = new Paginator($qb->getQuery());
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "de créneaux",
+            'path' => 'ambassador_shifttimelog_list',
             'members' => $members,
             'form' => $form->createView(),
             'nb_of_result' => $max,

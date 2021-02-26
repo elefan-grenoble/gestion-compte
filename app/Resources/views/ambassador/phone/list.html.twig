@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Liste des membres en retard d'adhésion ({{ nb_of_result }})</h1>
+    <h1>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h1>
 
     <ul class="collapsible" data-collapsible="accordion">
         <li>
@@ -116,7 +116,7 @@
             <th data-col="b.firstname">prénom</th>
             <th data-col="b.lastname">nom</th>
             <th data-col="r.date">Adhésion(s)</th>
-            <th>Compteur</th>
+            <th data-col="time">Compteur</th>
             <th>Note(s)</th>
             <th></th>
         </tr>
@@ -172,17 +172,17 @@
     {% if nb_of_pages > 1 %}
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page-1}) }}{% endif %}"
+                <a href="{% if(page==1) %}#!{% else %}{{ path(path,{'page':page-1}) }}{% endif %}"
                    data-page="{{ page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
                 <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                            href="{{ path("ambassador_phone_list",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                            href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page+1}) }}{% endif %}"
+                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}"
                    data-page="{{ page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
