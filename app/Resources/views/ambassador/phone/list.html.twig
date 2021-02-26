@@ -86,6 +86,22 @@
                             {{ form_label(form.email) }}
                         </div>
                     </div>
+                    <div class="col s12 m4">
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                <  &nbsp; compteur &nbsp; <
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {{ form_end(form) }}
@@ -100,6 +116,7 @@
             <th data-col="b.firstname">prénom</th>
             <th data-col="b.lastname">nom</th>
             <th data-col="r.date">Adhésion(s)</th>
+            <th>Compteur</th>
             <th>Note(s)</th>
             <th></th>
         </tr>
@@ -119,18 +136,11 @@
                     {% endfor %}
                 </td>
                 <td>
-                    {% for registration in member.registrations %}
-                        {% if member.lastregistration %}
-                            {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                            {{ registration.date | date('d/m/Y') }}
-                            {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                            <br/>
-                        {% else %}
-                            {{ registration.date | date('d/m/Y') }}
-                            /!\ need fix
-                        {% endif %}
-                    {% endfor %}
+                    <strong>
+                        {{ member.lastregistration.date | date('d/m/Y') }}
+                    </strong>
                     {% if member.lastregistration %}
+                        <br>
                         {% set difference = member.lastregistration.date.diff(date('now')) %}
                         {% set m = difference.m %}
                         {% set y = difference.y %}
@@ -138,6 +148,9 @@
                             <strong class="red-text">dépassé de {{ difference.days - 365 }} jours</strong>
                         {% endif %}
                     {% endif %}
+                </td>
+                <td class="center">
+                    {{ member.timeCount | duration_from_minutes }}
                 </td>
                 <td>
                     <blockquote class="truncate">
