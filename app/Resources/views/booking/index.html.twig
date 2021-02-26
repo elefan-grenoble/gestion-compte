@@ -46,10 +46,11 @@
                             </li>
                             <li class="row">
                                 {% for job in jobs %}
-                                <div class="col s12 m4">
+                                <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
                                     <div style="padding: 3px;margin:5px"
                                      class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
-                                    <p>{{ job.name }}</p></div>
+                                        <p>{{ job.name }}</p>
+                                    </div>
                                 </div>
                                 {% endfor %}
                             </li>
@@ -101,6 +102,16 @@
         {% endif %}
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
+
+
+    <div id="modallegend" class="modal">
+        <div class="modal-content">
+            <div id="modal_header"></div>
+            <div id="modal_content" class="row">
+            </div>
+        </div>
+    </div>
+
 {% endblock %}
 
 {% block stylesheets %}
@@ -108,12 +119,16 @@
         .collapsible-header.not-allowed{
             cursor: not-allowed;
         }
+        .legend_job {
+            cursor: pointer;
+        }
     </style>
 {% endblock %}
 {% block javascripts %}
     <script>
         jQuery(function () {
             $('.collapsible li').click();
+            $('.modal').modal();
             $('#legend .collapsible-header').on('click',function () {
                 var data_raw = Cookies.get("frontend");
                 var data = undefined;
@@ -130,7 +145,25 @@
             if ($('#dismissed .collapsible-header div').length < 1){
                 $('#dismissed').hide();
             }
+
+            //affichage de la description du job dans la modal
+            $('.legend_job').click(function () {
+                // recupere la description du job
+                const desc = $(this).data("description");
+
+                // rempli et ouvre la modal
+                if (desc != '') {
+                    $('#modal_header').html('<h4>Description du créneau</h4>');
+                    $('#modal_content').html(desc);
+                    $('#modallegend').modal('open');
+                }
+            });
+
         });
+        function getHtml() {
+            return '<div> ça charge bien gros </div>'
+        }
+
         function cancelAll() {
             let checkboxes = document.getElementsByTagName('input');
 
