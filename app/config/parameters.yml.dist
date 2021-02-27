@@ -99,7 +99,7 @@ parameters:
     use_fly_and_fixed: false
 
     # Swipe card configuration
-    swipe_card_logging: false
+    swipe_card_logging: true
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
