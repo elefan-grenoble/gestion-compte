@@ -33,6 +33,9 @@ services:
     AppBundle\Controller\DefaultController:
         arguments:
             - '%swipe_card_logging%'
+    AppBundle\Controller\AmbassadorController:
+        arguments:
+            - "%time_after_which_members_are_late_with_shifts%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']

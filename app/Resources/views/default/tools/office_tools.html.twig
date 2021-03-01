@@ -16,7 +16,8 @@
     {% if is_granted("view",app.user)  %}
     <div class="center">
         <a href="{{ path("pre_user_index") }}" class="waves-effect waves-light btn"><i class="material-icons left">people</i>Suivre les pré-adhésions</a>
-        <a href="{{ path('ambassador_phone_list') }}" class="waves-effect waves-light teal btn"><i class="material-icons left">phone</i>Relances réadhésions</a>
+        <a href="{{ path('ambassador_membership_list') }}" class="waves-effect waves-light teal btn"><i class="material-icons left">phone</i>Relances réadhésions</a>
+        <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light teal btn"><i class="material-icons left">phone</i>Relances créneaux</a>
     </div>
     {% endif %}
     {% if is_granted("access_tools",app.user)  %}

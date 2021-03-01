@@ -202,11 +202,6 @@ class AdminController extends Controller
         $formHelper->processSearchQueryData($request->getQueryString(), $qb);
 
         $limit = 25;
-        $qb2 = clone $qb;
-        $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
-        $nb_of_pages = intval($max / $limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-
 
         $qb = $qb->orderBy($sort, $order);
         if ($action == "csv") {
@@ -236,6 +231,9 @@ class AdminController extends Controller
         } else {
             $qb = $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
             $members = new Paginator($qb->getQuery());
+            $max = sizeof($members);
+            $nb_of_pages = intval($max / $limit);
+            $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
         }
 
         return $this->render('admin/user/list.html.twig', array(

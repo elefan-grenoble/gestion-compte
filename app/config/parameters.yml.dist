@@ -97,6 +97,7 @@ parameters:
     max_time_in_advance_to_book_extra_shifts: '3 days'
     display_gauge: true
     use_fly_and_fixed: false
+    time_after_which_members_are_late_with_shifts: -9
 
     # Swipe card configuration
     swipe_card_logging: true
