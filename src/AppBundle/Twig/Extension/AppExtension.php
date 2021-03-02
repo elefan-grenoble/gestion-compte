@@ -197,7 +197,9 @@ class AppExtension extends AbstractExtension
 
     public function duration_from_minutes(int $minutes)
     {
-        $formatted = gmdate("G\hi", abs($minutes) * 60);
+        $hours = intdiv(abs($minutes), 60);
+        $remaining_minutes = sprintf("%02d", abs($minutes) % 60);
+        $formatted = $hours.'h'.$remaining_minutes;
         if ($minutes < 0) {
             return "-".$formatted;
         } else {
