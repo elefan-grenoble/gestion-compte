@@ -63,15 +63,9 @@
                 e.preventDefault();
             });
         })
-        {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         var barcode_submit_url = "{{ path('check') }}";
-        {% endif %}
     </script>
-
-    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-        <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
-    {% endif %}
-
+    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
     <script type="text/javascript">
         setTimeout(function(){
             location.reload();
