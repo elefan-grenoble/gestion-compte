@@ -38,12 +38,10 @@ RUN cp /usr/local/etc/php/php.ini-production $PHP_INI_DIR/conf.d/php-dev.ini
 RUN sed -i 's#;date.timezone =#date.timezone= Europe/Paris#g' $PHP_INI_DIR/conf.d/*.ini
 
 COPY --chown=www-data:www-data . /var/www/html/
-COPY --chown=www-data:www-data ./app/config/parameters.yml /var/www/html/app/config/
-
 
 RUN mkdir /var/www/.composer && chown www-data:www-data /var/www/.composer
 
 USER www-data
 
-RUN COMPOSER_MEMORY_LIMIT=2G composer update && php bin/console assetic:dump --env=prod --no-debug
+RUN COMPOSER_MEMORY_LIMIT=2G composer install && php bin/console assetic:dump --env=prod --no-debug
 USER root
