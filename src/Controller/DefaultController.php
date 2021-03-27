@@ -44,16 +44,6 @@ use Symfony\Component\Serializer\Encoder\JsonDecode;
 class DefaultController extends Controller
 {
     /**
-     * @var boolean
-     */
-    private $swipeCardLogging;
-
-    public function __construct(string $swipeCardLogging)
-    {
-        $this->swipeCardLogging = $swipeCardLogging;
-    }
-
-    /**
      * @Route("/", name="homepage")
      */
     public function indexAction(
@@ -224,7 +214,7 @@ class DefaultController extends Controller
      * @Route("/check", name="check")
      * @Method({"POST","GET"})
      */
-    public function checkAction(Request $request, EntityManagerInterface $em, EventDispatcherInterface $dispatcher)
+    public function checkAction(Request $request, EntityManagerInterface $em, EventDispatcherInterface $dispatcher, $swipeCardLogging)
     {
         $session = new Session();
         $code = $request->get('swipe_code');
@@ -241,7 +231,7 @@ class DefaultController extends Controller
         } else {
             $beneficiary = $card->getBeneficiary();
             $counter = $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0));
-            if ($this->swipeCardLogging) {
+            if ($swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($counter));
             }

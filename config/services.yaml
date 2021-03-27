@@ -84,6 +84,8 @@ parameters:
     display_gauge: true
     allow_extra_shifts: true
     max_time_in_advance_to_book_extra_shifts: '3 days'
+    time_after_which_members_are_late_with_shifts: -9
+    swipe_card_logging: true
 
 services:
     # default configuration for services in *this* file
@@ -120,6 +122,7 @@ services:
             $useFlyAndFixed: '%use_fly_and_fixed%'
             $allowExtraShifts: '%allow_extra_shifts%'
             $maxTimeInAdvanceToBookExtraShifts: '%max_time_in_advance_to_book_extra_shifts%'
+            $swipeCardLogging: '%swipe_card_logging%'
 
 
     # makes classes in src/ available to be used as services
@@ -133,13 +136,6 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
-
-    App\Controller\DefaultController:
-        arguments:
-          - '%swipe_card_logging%'
-    App\Controller\AmbassadorController:
-        arguments:
-          - "%time_after_which_members_are_late_with_shifts%"
 
     app.form.registration:
         class: App\Form\RegistrationType

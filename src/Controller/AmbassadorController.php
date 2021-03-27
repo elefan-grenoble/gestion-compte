@@ -33,13 +33,6 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class AmbassadorController extends Controller
 {
-    private $timeAfterWhichMembersAreLateWithShifts;
-
-    public function __construct($timeAfterWhichMembersAreLateWithShifts)
-    {
-        $this->timeAfterWhichMembersAreLateWithShifts = $timeAfterWhichMembersAreLateWithShifts;
-    }
-
     /**
      * Lists all users with a registration date older than one year.
      *
@@ -120,7 +113,7 @@ class AmbassadorController extends Controller
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
      * @Method({"GET","POST"})
      */
-    public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
+    public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper, $timeAfterWhichMembersAreLateWithShifts)
     {
 
         $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
@@ -159,14 +152,14 @@ class AmbassadorController extends Controller
             if (!$form->isSubmitted()) {
                 $form->get('sort')->setData($sort);
                 $form->get('dir')->setData($order);
-                $form->get('compteurlt')->setData($this->timeAfterWhichMembersAreLateWithShifts);
+                $form->get('compteurlt')->setData($timeAfterWhichMembersAreLateWithShifts);
                 $form->get('withdrawn')->setData(1);
                 $form->get('frozen')->setData(1);
             }
             $qb = $qb->andWhere('o.withdrawn = 0');
             $qb = $qb->andWhere('o.frozen = 0');
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM App\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-                ->setParameter('compteurlt', $this->timeAfterWhichMembersAreLateWithShifts);
+                ->setParameter('compteurlt', $timeAfterWhichMembersAreLateWithShifts);
         }
 
         $limit = 25;

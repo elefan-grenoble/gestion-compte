@@ -76,13 +76,16 @@
         "version": "1.3.7"
     },
     "doctrine/reflection": {
-        "version": "1.2.1"
+        "version": "1.2.2"
     },
     "doctrine/sql-formatter": {
         "version": "1.1.0"
     },
     "egulias/email-validator": {
         "version": "2.1.17"
+    },
+    "friendsofphp/proxy-manager-lts": {
+        "version": "v1.0.3"
     },
     "friendsofsymfony/oauth-server-bundle": {
         "version": "1.6.2"
@@ -104,6 +107,15 @@
     },
     "jms/metadata": {
         "version": "2.1.0"
+    },
+    "laminas/laminas-code": {
+        "version": "3.4.1"
+    },
+    "laminas/laminas-eventmanager": {
+        "version": "3.3.1"
+    },
+    "laminas/laminas-zendframework-bridge": {
+        "version": "1.2.0"
     },
     "liip/imagine-bundle": {
         "version": "1.8",
@@ -152,18 +164,6 @@
         },
         "files": [
             "config/packages/sensio_framework_extra.yaml"
-        ]
-    },
-    "sensiolabs/security-checker": {
-        "version": "4.0",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "4.0",
-            "ref": "160c9b600564faa1224e8f387d49ef13ceb8b793"
-        },
-        "files": [
-            "config/packages/security_checker.yaml"
         ]
     },
     "spipu/html2pdf": {
@@ -265,9 +265,6 @@
             "src/Kernel.php"
         ]
     },
-    "symfony/http-client": {
-        "version": "v4.4.6"
-    },
     "symfony/http-foundation": {
         "version": "v4.4.6"
     },
@@ -347,6 +344,9 @@
     },
     "symfony/property-access": {
         "version": "v4.4.6"
+    },
+    "symfony/proxy-manager-bridge": {
+        "version": "v4.4.20"
     },
     "symfony/routing": {
         "version": "4.2",
