@@ -97,6 +97,8 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         if (!isset($last_cycle_shifters_array[$i])
                             // ou que c'est un shift qui ne doit pas être repris
                             || ($use_fly_and_fixed && !$last_cycle_shifters_array[$i]->isFixe())
+                            // ou qu'on ne reserve pas les shifts
+                            || !$this->getContainer()->getParameter('reserve_shift')
                         ) {
                             $current_shift->setShifter(null);
                             $current_shift->setBookedTime(null);
