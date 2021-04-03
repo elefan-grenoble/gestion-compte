@@ -98,6 +98,7 @@ parameters:
     display_gauge: true
     use_fly_and_fixed: false
     time_after_which_members_are_late_with_shifts: -9
+    reserve_shift: true
 
     # Swipe card configuration
     swipe_card_logging: true
