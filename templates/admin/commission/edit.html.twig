@@ -1,0 +1,172 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin_commissions') }}"><i class="material-icons">list</i>commissions</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">edit</i>
+{% endblock %}
+
+{% block content %}
+    <h4 class="">Editer commission</h4>
+
+    {{ form_start(form) }}
+    <div class="row">
+        {% if form.owners is defined %}
+            <div class="input-field name col s6">
+                <div class="errors">
+                    {{ form_errors(form.name) }}
+                </div>
+                <div class="input-field">
+                    {{ form_label(form.name) }}
+                    {{ form_widget(form.name) }}
+                </div>
+            </div>
+        {% else %}
+            <div class="input-field name col s6">
+                <div class="input-field">
+                    <label for="">Nom</label>
+                    <input type="text" value="{{ commission.name }}" disabled>
+                </div>
+            </div>
+
+        {% endif %}
+        <div class="input-field email col s6">
+            <div class="errors">
+                {{ form_errors(form.email) }}
+            </div>
+            <div class="input-field">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email) }}
+            </div>
+        </div>
+    </div>
+    <div class="card-panel teal lighten-5">
+        <div class="row">
+            <div class="input-field description col s6">
+                <div class="errors">
+                    {{ form_errors(form.next_meeting_desc) }}
+                </div>
+                <div class="input-field">
+                    {{ form_label(form.next_meeting_desc) }}
+                    {{ form_widget(form.next_meeting_desc) }}
+                </div>
+            </div>
+            <div class="input-field description col s6">
+                <div class="errors">
+                    {{ form_errors(form.next_meeting_date) }}
+                </div>
+                <div>
+                    {{ form_label(form.next_meeting_date) }}
+                </div>
+                <div class="input-field">
+                    {{ form_widget(form.next_meeting_date) }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="description col s12">
+            {{ form_row(form.description) }}
+        </div>
+    </div>
+    <div class="row">
+        {% if form.owners is defined %}
+        <div class="input-field owners col s12">
+            {{ form_widget(form.owners) }}
+        </div>
+        {% else %}
+            Référents :
+            {% for beneficiary in commission.owners %}
+                <div class="chip black-text {% if not commission.beneficiaries.contains(beneficiary) %}red{% endif %}">
+                    <img src="{{ gravatar(beneficiary.email) }}" alt="{{ beneficiary.displayname }}">
+                    {{ beneficiary.firstname }} {{ beneficiary.lastname }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+    {{ form_start(delete_form) }}
+    {{ form_widget(delete_form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
+    </div>
+    {{ form_end(delete_form) }}
+    {% endif %}
+
+    <a href="#users" class="btn waves-effect waves-light modal-trigger blue"><i class="material-icons left">people</i>gérer les membres de la commission</a>
+    <div id="users" class="modal">
+        <div class="modal-content">
+            <h5><i class="material-icons left small">people</i>membres de la commission</h5>
+            <div class="messages">
+
+            </div>
+            <div class="list">
+                {{ form_start(remove_beneficiary_form) }}
+                <div class="chips">
+                    {% for beneficiary in commission.beneficiaries %}
+                        {% include "beneficiary/_partial/chip.html.twig" with { close: true } %}
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="beneficiary" value="" />
+                {{ form_end(remove_beneficiary_form) }}
+            </div>
+
+            <script>
+                $(document).ready(function() {
+                    $('.list .chips').click(function (e) {
+                        if ($(e.target).is('.close')){
+                            e.preventDefault()
+                            $('input[name=beneficiary]').val($(e.target).data('target'));
+                            var $form = $(e.target).closest('form');
+                            var data = $form.serialize();
+                            $.ajax($form.attr('action'),{
+                                data: data,
+                                method: 'post'
+                            }).success(function (d) {
+                                //console.log(d);
+                                if (d.success){
+                                    Materialize.toast(d.message,2500,'green');
+                                }else{
+                                    Materialize.toast(d.message,2500,'red');
+                                }
+                            });
+                        }
+                    });
+                    $('#add_beneficiary').click(function (e) {
+                        e.preventDefault();
+                        var $form = $(this).closest('form');
+                        var data = $form.serialize();
+                        $.ajax($form.attr('action'),{
+                            data: data,
+                            method: 'post'
+                        }).success(function (d) {
+                            if (d.success){
+                                Materialize.toast(d.message,2500,'green');
+                                $('#users .chips').append(d.html);
+                            }else{
+                                Materialize.toast(d.message,2500,'red');
+                            }
+                            $('#form_beneficiary').val('');
+                        });
+                    });
+                });
+            </script>
+
+            {{ form_start(add_form) }}
+            {{ form_widget(add_form) }}
+            <div>
+                <button type="submit" id="add_beneficiary" class="btn waves-effect waves-light blue"><i class="material-icons left">add</i>ajouter</button>
+            </div>
+            {{ form_end(add_form) }}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,56 @@
+security:
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+    role_hierarchy:
+        ROLE_USER_VIEWER: ROLE_USER
+        ROLE_ADMIN_PANEL: ROLE_USER
+        ROLE_USER_MANAGER: [ ROLE_USER_VIEWER,ROLE_ADMIN_PANEL ]
+        ROLE_SHIFT_MANAGER: ROLE_ADMIN_PANEL
+        ROLE_FINANCE_MANAGER: ROLE_ADMIN_PANEL
+        ROLE_PROCESS_MANAGER: ROLE_ADMIN_PANEL
+        ROLE_ADMIN: [ ROLE_USER_MANAGER, ROLE_FINANCE_MANAGER, ROLE_SHIFT_MANAGER, ROLE_PROCESS_MANAGER ]
+        ROLE_SUPER_ADMIN: ROLE_ADMIN
+        ROLE_OAUTH_LOGIN: ROLE_USER
+    providers:
+        fos_userbundle:
+            id: fos_user.user_provider.username_email
+    firewalls:
+        main:
+            pattern: ^/
+            fos_oauth:  true
+            form_login:
+                provider: fos_userbundle
+                csrf_token_generator: security.csrf.token_manager
+            logout:       true
+            logout_on_user_change: true
+            anonymous:    true
+            switch_user:
+                role: ROLE_ADMIN
+                parameter: _login_as
+        oauth_token:
+            pattern:    ^/oauth/v2/token
+            security:   false
+        oauth_authorize:
+            pattern:    ^/oauth/v2/auth
+            form_login:
+                provider: fos_userbundle
+                csrf_token_generator: security.csrf.token_manager
+                check_path: fos_user_security_check
+                login_path: fos_user_security_login
+            anonymous: true
+            logout_on_user_change: true
+        api:
+            pattern:    ^/api
+            fos_oauth:  true
+            stateless:  true
+            anonymous:  false
+    access_control:
+        - { path: ^/oauth/v2/token, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_ANONYMOUSLY ] }
+        - { path: ^/oauth/v2/auth, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_ANONYMOUSLY ] }
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/member/new, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/, role: ROLE_ADMIN_PANEL }
+        - { path: ^/api, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_REMEMBERED] }
+        - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }

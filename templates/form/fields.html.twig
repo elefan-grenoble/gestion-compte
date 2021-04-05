@@ -1,0 +1,96 @@
+
+{%- block form_row -%}
+    <div>
+        {{ form_label(form) }}
+        <div class="errors">
+            {{ form_errors(form) }}
+        </div>
+        {{ form_widget(form) }}
+    </div>
+{%- endblock form_row -%}
+
+{% block autocomplete_beneficiary_widget %}
+    {% spaceless %}
+        {% set attr = attr|merge({class: (attr.class|default('') ~ 'email_membership_autocomplete')|trim}) %}
+        {{ form_label(form) }}
+        <input type="text" autocomplete="off" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% endspaceless %}
+    <script>
+        $(document).ready(function() {
+            //
+            $('#{{ id }}').on('keydown',function () {
+                if ($(this).val().length > 2){
+                    jQuery.ajax({
+                        type: 'POST',
+                        url: "{{ path('beneficiary_list') }}",
+                        data: {'string':$(this).val()},
+                        success: function (response) {
+                            var accounts = response;
+                            var data = {};
+                            for (var i = 0; i < accounts.length; i++) {
+                                data[accounts[i].name] = accounts[i].icon;
+                            }
+                            $('#{{ id }}').autocomplete({
+                                data: data,
+                                limit: 6, // The max amount of results that can be shown at once. Default: Infinity.
+                            }).trigger('keyup');
+                        }
+                    });
+                }
+            }).dblclick(function () {
+                $(this).val('');
+            })
+        });
+    </script>
+{% endblock %}
+
+
+{% block simplemde_editor_row %}
+    <div class="markdow-editor">
+        <div class="errors">
+            {{ form_errors(form) }}
+        </div>
+        {{ form_label(form) }}
+        {{ form_widget(form) }}
+    </div>
+{% endblock %}
+
+{% block simplemde_editor_widget %}
+    <div class="simplemde-container row" data-for="{{ id }}">
+    {{ block('textarea_widget') }}
+    </div>
+    <script type="text/javascript">
+        function onceSimpleMDEReady(method) {
+            if (window.SimpleMDE) {
+                method();
+            } else {
+                setTimeout(function() { onceSimpleMDEReady(method) }, 50);
+            }
+        }
+
+        onceSimpleMDEReady(function () {
+            var element = $("#{{ id }}")[0];
+            var config = {{ form.vars.editor_config|raw}};
+            var simplemde_{{ id }} = new SimpleMDE(Object.assign(config, {'element': element}));
+            var required = $("#{{ id }}").attr('required') === "required";
+            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () { //refresh
+                simplemde_{{ id }}.codemirror.refresh();
+            });
+            if (required){
+                $("#{{ id }}").removeAttr('required');
+                $("#{{ id }}").closest('form').submit(function (e) {
+                    if (!$("#{{ id }}").val()){ //required but no value
+                        $(".simplemde-container[data-for={{ id }}]").addClass('error'); //add error
+                        $(".simplemde-container[data-for={{ id }}]").find('.editor-statusbar').prepend('<span class="error-message">Ce champ est requis</span>'); //add message
+                        e.preventDefault(); //do not submit
+                        $(".simplemde-container[data-for={{ id }}] .CodeMirror textarea").one('keydown',function () { //remove error on change
+                            $(".simplemde-container[data-for={{ id }}]").removeClass('error');
+                            $(".simplemde-container[data-for={{ id }}]").find('.editor-statusbar .error-message').remove();
+                        });
+                        return false;
+                    }
+                })
+            }
+        });
+    </script>
+{% endblock %}

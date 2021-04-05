@@ -23,16 +23,16 @@ install:
 
 env:
   global:
-    - SYMFONY_ENV=test
+    - APP_ENV=test
 
 script:
-  - ./vendor/bin/phpunit
+  - ./bin/phpunit
   # this checks that the YAML config files contain no syntax errors
-  - ./bin/console lint:yaml app
+  - ./bin/console lint:yaml config
   # this checks that the Twig template files contain no syntax errors
-  - ./bin/console lint:twig app
+  - ./bin/console lint:twig templates
   # this checks that the XLIFF translations contain no syntax errors
-  - ./bin/console lint:xliff app
+  - ./bin/console lint:xliff translations
   # this checks that the application doesn't use dependencies with known security vulnerabilities
   - ./bin/console security:check
   # this checks that the composer.json and composer.lock files are valid

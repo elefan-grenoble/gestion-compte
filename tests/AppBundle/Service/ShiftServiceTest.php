@@ -2,12 +2,12 @@
 
 namespace Tests\AppBundle\Service;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Membership;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
-use AppBundle\Repository\ShiftRepository;
-use AppBundle\Service\ShiftService;
+use App\Entity\Beneficiary;
+use App\Entity\Membership;
+use App\Entity\Shift;
+use App\Entity\User;
+use App\Repository\ShiftRepository;
+use App\Service\ShiftService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +21,7 @@ class ShiftServiceTest extends TestCase
 
     private $em;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->em = $this
             ->getMockBuilder(EntityManager::class)
