@@ -392,8 +392,8 @@ strong {
 .btn .bubble_counter {
   display: block;
   position: absolute;
-  top: -13px;
-  left: -13px;
+  top: 13px;
+  left: 13px;
   width: 26px;
   height: 26px;
   line-height: 26px;
