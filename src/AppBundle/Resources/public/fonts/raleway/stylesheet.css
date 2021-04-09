@@ -19,6 +19,22 @@
     font-family: 'Raleway';
     src: url('raleway-extralightitalic-webfont.woff2') format('woff2'),
          url('raleway-extralightitalic-webfont.woff') format('woff');
+    font-weight: 200;
+    font-style: italic;
+
+}
+@font-face {
+    font-family: 'Raleway';
+    src: url('raleway-light-webfont.woff2') format('woff2'),
+         url('raleway-light-webfont.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'Raleway';
+    src: url('raleway-lightitalic-webfont.woff2') format('woff2'),
+         url('raleway-lightitalic-webfont.woff') format('woff');
     font-weight: 400;
     font-style: italic;
 
@@ -27,7 +43,7 @@
     font-family: 'Raleway';
     src: url('raleway-extralight-webfont.woff2') format('woff2'),
          url('raleway-extralight-webfont.woff') format('woff');
-    font-weight: 400;
+    font-weight: 200;
     font-style: normal;
 
 }
