@@ -40,7 +40,7 @@
                                              <b class="white-text">
                                                  {{ period.job.name }}
                                                  {% if (period.weekCycle is not null) and (period.weekCycle > -1) %}
-                                                    ({{ period.getWeekCycleName(period.weekCycle) }})
+                                                    ({{ period.getWeekCycleName() }})
                                                  {% endif %}
                                              </b>
                                          {% endif %}<br>

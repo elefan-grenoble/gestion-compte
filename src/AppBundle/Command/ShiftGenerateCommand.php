@@ -73,7 +73,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
                 // Semaine #A-B-C-D
                 // Ignorer les periodes en dehors du cycle semaine
-                if ($period->getWeekCycle() > -1 && $period->getWeekCycle() != $weekCycle) {
+                if (!in_array(strval($weekCycle), $period->getWeekCycle())) {
                     continue;
                 }
 
