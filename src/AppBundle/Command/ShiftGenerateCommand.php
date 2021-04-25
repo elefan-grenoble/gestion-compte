@@ -61,6 +61,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
             ////////////////////////
             $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+            $weekCycle = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51
 
             $qb = $periodRepository
                 ->createQueryBuilder('p');
@@ -69,6 +70,13 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 ->orderBy('p.start');
             $periods = $qb->getQuery()->getResult();
             foreach ($periods as $period) {
+
+                // Semaine #A-B-C-D
+                // Ignorer les periodes en dehors du cycle semaine
+                if ($period->getWeekCycle() > -1 && $period->getWeekCycle() != $weekCycle) {
+                    continue;
+                }
+
                 $shift = new Shift();
                 $start = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getStart()->format('H:i'));
                 $shift->setStart($start);
@@ -116,29 +124,28 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 }
             }
             $em->flush();
-
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-            foreach ($reservedShifts as $i => $shift){
-                $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%d"));
-                $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $oldShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
-                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                    ->setTo($shift->getLastShifter()->getEmail())
-                    ->setBody(
-                        $this->getContainer()->get('twig')->render(
-                            'emails/shift_reserved.html.twig',
-                            array('shift' => $shift,
-                                'oldshift' => $oldShifts[$i],
-                                'days' => $d,
-                                'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                                'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                            )
-                        ),
-                        'text/html'
-                    );
-                $mailer->send($mail);
-            }
-
         }
+        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+        foreach ($reservedShifts as $i => $shift){
+            $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%d"));
+            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $oldShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
+                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                ->setTo($shift->getLastShifter()->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('twig')->render(
+                        'emails/shift_reserved.html.twig',
+                        array('shift' => $shift,
+                        'oldshift' => $oldShifts[$i],
+                        'days' => $d,
+                        'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        )
+                    ),
+                    'text/html'
+                );
+            $mailer->send($mail);
+        }
+
         $message = $count.' créneau'.(($count>1) ? 'x':'').' généré'.(($count>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
         $message = $count2.' créneau'.(($count2>1) ? 'x':'').' existe'.(($count2>1) ? 'nt':'');

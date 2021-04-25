@@ -30,6 +30,13 @@ class Period
     private $dayOfWeek;
 
     /**
+     * @var \int
+     *
+     * @ORM\Column(name="week_cycle", type="smallint", options={"default" : -1})
+     */
+    private $weekCycle;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="start", type="time")
@@ -90,6 +97,51 @@ class Period
     public function getDayOfWeek()
     {
         return $this->dayOfWeek;
+    }
+
+    /**
+     * Set weekCycle
+     *
+     * @param integer $weekCycle
+     *
+     * @return Period
+     */
+    public function setWeekCycle($weekCycle)
+    {
+        $this->weekCycle = $weekCycle;
+
+        return $this;
+    }
+
+    /**
+     * Get weekCycle
+     *
+     * @return int
+     */
+    public function getWeekCycle()
+    {
+        return $this->weekCycle;
+    }
+
+    /**
+     * Get weekCycleName
+     *
+     * @return string
+     */
+    public static function getWeekCycleName($weekCycleNb)
+    {
+        switch ($weekCycleNb) {
+            case 0:
+                return "Semaine#A";
+            case 1:
+                return "Semaine#B";
+            case 2:
+                return "Semaine#C";
+            case 3:
+                return "Semaine#D";
+            default:
+                return "Chaque semaine";
+        }
     }
 
     /**
