@@ -28,6 +28,13 @@ class PeriodType extends AbstractType
                 "Samedi" => 5,
                 "Dimanche" => 6,
             )))
+            ->add('week_cycle', ChoiceType::class, array('label' => 'Cycle', 'choices' => array(
+                Period::getWeekCycleName(-1) => -1,
+                Period::getWeekCycleName(0) => 0,
+                Period::getWeekCycleName(1) => 1,
+                Period::getWeekCycleName(2) => 2,
+                Period::getWeekCycleName(3) => 3,
+            )))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
             ->add('job', EntityType::class, array(
