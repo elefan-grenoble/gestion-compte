@@ -19,8 +19,9 @@ class ShiftService
     protected $min_shift_duration;
     private $newUserStartAsBeginner;
     private $allowExtraShifts;
+    private $forbidShiftOverlapTime;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
@@ -28,6 +29,7 @@ class ShiftService
         $this->newUserStartAsBeginner = $newUserStartAsBeginner;
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
+        $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
     }
 
     /**
@@ -87,6 +89,27 @@ class ShiftService
             return true;
         }
         return $this->canBookOnCycle($beneficiary, 0) || $this->canBookOnCycle($beneficiary, 1);
+    }
+
+    /**
+     * Check if a beneficiary do not have booked a shift that overlaps the current
+     * @param Beneficiary $beneficiary
+     * @param Shift $currentShift
+     * @return bool
+     */
+    public function canBookShift(Beneficiary $beneficiary, Shift $currentShift) {
+        if ($this->forbidShiftOverlapTime < 0) {
+            return true;
+        }
+        $shifts = $beneficiary->getBookedShifts()->filter(function ($shift) use ($currentShift) {
+            $start = (clone $shift->getStart())->add(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
+            $end = (clone $shift->getEnd())->sub(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
+            return ($currentShift->getStart() < $end
+                && $currentShift->getEnd() >= $shift->getEnd())
+                || ($currentShift->getEnd() > $start
+                && $currentShift->getStart() <= $shift->getStart());
+        });
+        return $shifts->count() == 0;
     }
 
     /**
@@ -191,6 +214,11 @@ class ShiftService
 
         // First shift ever of the beneficiary, check he or she is not the first one to book the bucket
         if ($this->isBeginner($beneficiary) && $this->isShiftEmpty($shift)) {
+            return false;
+        }
+
+        // Check that beneficiary did not book a shift that overlaps the current
+        if (!$this->canBookShift($beneficiary, $shift)) {
             return false;
         }
 
