@@ -30,9 +30,9 @@ class Period
     private $dayOfWeek;
 
     /**
-     * @var \int
+     * @var array
      *
-     * @ORM\Column(name="week_cycle", type="smallint", options={"default" : -1})
+     * @ORM\Column(name="week_cycle", type="simple_array",  options={"default" : "0,1,2,3"})
      */
     private $weekCycle;
 
@@ -102,21 +102,18 @@ class Period
     /**
      * Set weekCycle
      *
-     * @param integer $weekCycle
+     * @param array $weekCycle
      *
-     * @return Period
      */
     public function setWeekCycle($weekCycle)
     {
         $this->weekCycle = $weekCycle;
-
-        return $this;
     }
 
     /**
      * Get weekCycle
      *
-     * @return int
+     * @return array
      */
     public function getWeekCycle()
     {
@@ -128,19 +125,22 @@ class Period
      *
      * @return string
      */
-    public static function getWeekCycleName($weekCycleNb)
+    public function getWeekCycleName()
     {
-        switch ($weekCycleNb) {
-            case 0:
-                return "Semaine#A";
-            case 1:
-                return "Semaine#B";
-            case 2:
-                return "Semaine#C";
-            case 3:
-                return "Semaine#D";
-            default:
-                return "Chaque semaine";
+        $weekCycleNb = count($this->weekCycle);
+        if ($weekCycleNb == 4) {
+            return "Chaque semaine";
+        } else {
+            $map = [ 'A', 'B', 'C', 'D'];
+            $output = "Semaine#";
+            sort($this->weekCycle);
+            for ($i = 0, $size = count($this->weekCycle); $i < $size; ++$i) {
+                $output .= $map[intval($this->weekCycle[$i])];
+                if ($i < $size-1) {
+                    $output .= '-';
+                }
+            }
+            return $output;
         }
     }
 
