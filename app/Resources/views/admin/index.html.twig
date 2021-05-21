@@ -39,15 +39,16 @@
                 <a href="{{ path("period") }}" class="waves-effect waves-light btn disabled orange"><i class="material-icons left">date_range</i>les exceptions</a>
                 <a href="{{ path("job_list") }}" class="waves-effect waves-light btn orange"><i class="material-icons left">person</i>les postes de bénévolat</a>
             {% endif %}
-
-            {% if is_granted("ROLE_ADMIN") %}
-                <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
-                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code(s)</a>
-                {% if code_generation_enabled %}
-                    <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
-                {% else %}
-                    <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Définir un nouveau code</a>
-                {% endif %}
+            {% if display_keys_shop %}
+              {% if is_granted("ROLE_ADMIN") %}
+                  <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
+                  <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1"><i class="material-icons left">vpn_key</i>Voir code(s)</a>
+                  {% if code_generation_enabled %}
+                      <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Déposer les clefs</a>
+                  {% else %}
+                      <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1"><i class="material-icons left">vpn_key</i>Définir un nouveau code</a>
+                  {% endif %}
+              {% endif %}
             {% endif %}
 
 
@@ -67,8 +68,8 @@
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>
             <h6>Membres</h6>
-            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_upload</i>Importer des adhérents en CSV</a>
-            <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_download</i>export emails as csv</a>
+            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_upload</i>Importer des adhérents au format CSV</a>
+            <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn"><i class="material-icons left">file_download</i>Exporter les adhérents au format CSV</a>
             <h6>Admins</h6>
             <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">add</i>Ajouter un admin</a>
             <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn deep-purple"><i class="material-icons left">list</i>Liste des utilisateurs admin</a>
