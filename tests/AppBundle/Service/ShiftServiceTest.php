@@ -86,7 +86,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
-            ->setConstructorArgs([$this->em, 180, 90, false, false])
+            ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30])
             ->getMock()
         ;
         $shiftService->expects($this->any())
@@ -130,7 +130,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
-            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false])
+            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false, '3 days', 30])
             ->getMock()
         ;
 
