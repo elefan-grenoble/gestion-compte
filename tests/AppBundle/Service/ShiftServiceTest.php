@@ -27,7 +27,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->shiftService = new ShiftService($this->em, 180, 90, false, false);
+        $this->shiftService = new ShiftService($this->em, 180, 90, false, false, '3 days', 30);
     }
 
     public function testShiftTimeByCycle()
