@@ -293,13 +293,14 @@ class AdminController extends Controller
             ))
             ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin'))
             ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides'))
+            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre'))
             ->add('generate', SubmitType::class, array('label' => 'generer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
             return $this->render('admin/widget/generate.html.twig', array(
-                'query_string' => 'job_id='.$data['job']->getId().'&display_end='.$data['display_end'].'&display_on_empty='.$data['display_on_empty'],
+                'query_string' => 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0),
                 'form' => $form->createView(),
             ));
         }
