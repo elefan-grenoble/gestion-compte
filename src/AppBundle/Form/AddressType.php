@@ -19,7 +19,7 @@ class AddressType extends AbstractType
         $builder
             ->add('street1',TextType::class,array('label'=>'Rue'))
             ->add('street2',TextType::class,array('label'=>'Rue 2','required'=>false))
-            ->add('zipcode',IntegerType::class,array('label'=>'Code postal'))
+            ->add('zipcode',TextType::class,array('label'=>'Code postal'))
             ->add('city',TextType::class,array('label'=>'Ville'));
     }
     
