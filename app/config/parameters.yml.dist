@@ -103,6 +103,7 @@ parameters:
 
     # Swipe card configuration
     swipe_card_logging: true
+    display_swipe_cards_settings: true
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
@@ -114,3 +115,5 @@ parameters:
     logging.swiftmailer.recipient: ~
 
     code_generation_enabled: true
+    display_freeze_account: true
+    display_keys_shop: true
