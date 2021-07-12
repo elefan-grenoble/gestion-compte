@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  http:
+    image: scopeli44/elefan-http:${GIT_BRANCH:-latest}
+    build:
+      context: .
+      target: http
+
+  php:
+    image: scopeli44/elefan-php:${GIT_BRANCH:-latest}
+    build:
+      context: .
+      target: php
+
+  dev:
+    image: scopeli44/elefan-dev
+    build:
+      context: .
+      target: dev
+    

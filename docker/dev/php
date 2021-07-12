@@ -1,0 +1,12 @@
+#!/bin/bash
+export __PROJECT_ROOT__=$(readlink -f $(pwd)"/"$(dirname "$0")"/")
+
+if [ "$1" = "--no-deps" ]; then
+  # pour éviter de démarrer un container mysql si on en a pas besoin (par exemple pour les scripts de compilations)
+  PARAMS="$1"
+  shift
+else
+  PARAMS=""
+fi
+
+docker-compose -f $__PROJECT_ROOT__/docker-compose.yml run --rm --user `id -u`:`id -g` $PARAMS --entrypoint php dev "$@"

@@ -27,6 +27,10 @@ Il est open source sous licence LGPL?
 
 * Suivez le [guide de mise en route](doc/start.md)
 
+# Docker
+
+* Suivez le [guide elefan sous docker](doc/docker.md)
+
 # Developpements
 
 * [Developer Guide](doc/dev.md)
