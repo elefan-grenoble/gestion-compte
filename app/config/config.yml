@@ -56,7 +56,8 @@ twig:
     images_tmp_dir: '%images_tmp_dir%'
     shift_service: "@shift_service"
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
-    unlimited_book_duration: '%unlimited_book_duration%'
+    allow_extra_shifts: '%allow_extra_shifts%'
+    max_time_in_advance_to_book_extra_shifts : '%max_time_in_advance_to_book_extra_shifts%'
     code_generation_enabled: '%code_generation_enabled%'
     local_currency_name: '%local_currency_name%'
     use_fly_and_fixed: '%use_fly_and_fixed%'

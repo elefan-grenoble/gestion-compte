@@ -19,6 +19,7 @@ class JobType extends AbstractType
         $builder
             ->add('name',TextType::class,array('label'=>'Nom du poste de bénévolat'))
             ->add('color',TextType::class,array('label'=>'Couleur des créneaux dans le planning'))
+            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
             ->add('enabled',CheckboxType::class,array('required' => false, 'label'=>'Poste activé'));
     }
 

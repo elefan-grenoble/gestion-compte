@@ -40,6 +40,12 @@ class Job
     private $color;
 
     /**
+     * @var string
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
+    /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="job", cascade={"persist", "remove"}), orphanRemoval=true)
      */
     private $shifts;
@@ -209,4 +215,21 @@ class Job
     {
         $this->enabled = $enabled;
     }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string {
+        return $this->description ? $this->description : '';
+    }
+
+    /**
+     * @param string $description
+     * @return Job
+     */
+    public function setDescription(string $description): Job {
+        $this->description = $description;
+        return $this;
+    }
+
 }

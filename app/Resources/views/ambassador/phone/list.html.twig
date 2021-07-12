@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Liste des membres en retard d'adhésion ({{ nb_of_result }})</h1>
+    <h1>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h1>
 
     <ul class="collapsible" data-collapsible="accordion">
         <li>
@@ -86,6 +86,22 @@
                             {{ form_label(form.email) }}
                         </div>
                     </div>
+                    <div class="col s12 m4">
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                <  &nbsp; compteur &nbsp; <
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {{ form_end(form) }}
@@ -100,6 +116,7 @@
             <th data-col="b.firstname">prénom</th>
             <th data-col="b.lastname">nom</th>
             <th data-col="r.date">Adhésion(s)</th>
+            <th data-col="time">Compteur</th>
             <th>Note(s)</th>
             <th></th>
         </tr>
@@ -119,18 +136,11 @@
                     {% endfor %}
                 </td>
                 <td>
-                    {% for registration in member.registrations %}
-                        {% if member.lastregistration %}
-                            {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                            {{ registration.date | date('d/m/Y') }}
-                            {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                            <br/>
-                        {% else %}
-                            {{ registration.date | date('d/m/Y') }}
-                            /!\ need fix
-                        {% endif %}
-                    {% endfor %}
+                    <strong>
+                        {{ member.lastregistration.date | date('d/m/Y') }}
+                    </strong>
                     {% if member.lastregistration %}
+                        <br>
                         {% set difference = member.lastregistration.date.diff(date('now')) %}
                         {% set m = difference.m %}
                         {% set y = difference.y %}
@@ -139,10 +149,13 @@
                         {% endif %}
                     {% endif %}
                 </td>
+                <td class="center">
+                    {{ member.timeCount | duration_from_minutes }}
+                </td>
                 <td>
                     <blockquote class="truncate">
                         {% for note in member.notes %}
-                            <i>{{ note.createdAt | date('d/m H:i') }}
+                            <i>{{ note.createdAt | date('d/m/y H:i') }}
                             : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}
                             <br>
                         {% endfor %}
@@ -159,17 +172,17 @@
     {% if nb_of_pages > 1 %}
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page-1}) }}{% endif %}"
+                <a href="{% if(page==1) %}#!{% else %}{{ path(path,{'page':page-1}) }}{% endif %}"
                    data-page="{{ page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
                 <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                            href="{{ path("ambassador_phone_list",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                            href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("ambassador_phone_list",{'page':page+1}) }}{% endif %}"
+                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}"
                    data-page="{{ page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>

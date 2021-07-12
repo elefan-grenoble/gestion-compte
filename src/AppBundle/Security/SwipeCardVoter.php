@@ -57,25 +57,27 @@ class SwipeCardVoter extends Voter
         /** @var SwipeCard $swipeCard */
         $swipeCard = $subject;
 
+        $allowedRoles = ['ROLE_ADMIN', 'ROLE_USER_MANAGER'];
+
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::DELETE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
                 return false;
             case self::DISABLE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
                 return $this->own($swipeCard, $user);
             case self::ENABLE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
                 return $this->own($swipeCard, $user);
             case self::PAIR:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
                 return $this->canPair($swipeCard, $user);

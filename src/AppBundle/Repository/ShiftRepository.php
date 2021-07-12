@@ -228,5 +228,24 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findRemainingToday()
+    {
+        $now = new \DateTime('now');
+        $end_of_day = new \DateTime('now');
+        $end_of_day->setTime(23, 59, 59);
+
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.isDismissed = 0')
+            ->andwhere('(s.start > :now AND s.end < :end_of_day) OR (s.start < :now AND s.end > :now)')
+            ->setParameter('now', $now)
+            ->setParameter('end_of_day', $end_of_day)
+            ->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 
 }

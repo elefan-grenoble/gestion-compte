@@ -61,6 +61,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
             ////////////////////////
             $dayOfWeek = $date->format('N') - 1; //0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+            $weekCycle = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51
 
             $qb = $periodRepository
                 ->createQueryBuilder('p');
@@ -69,6 +70,13 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 ->orderBy('p.start');
             $periods = $qb->getQuery()->getResult();
             foreach ($periods as $period) {
+
+                // Semaine #A-B-C-D
+                // Ignorer les periodes en dehors du cycle semaine
+                if (!in_array(strval($weekCycle), $period->getWeekCycle())) {
+                    continue;
+                }
+
                 $shift = new Shift();
                 $start = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getStart()->format('H:i'));
                 $shift->setStart($start);
@@ -93,18 +101,21 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
                         $current_shift->setFormation($position->getFormation());
-                        if ($use_fly_and_fixed){
-                            if (!$current_shift->isFixe()) {
-                                $current_shift->setShifter(null);
-                                $current_shift->setBookedTime(null);
-                                $current_shift->setBooker(null);
-                            }
-                        }else{
-                            if ($last_cycle_shifters_array && $i < count($last_cycle_shifters_array)) {
-                                $current_shift->setLastShifter($last_cycle_shifters_array[$i]->getShifter());
-                                $reservedShifts[$count] = $current_shift;
-                                $oldShifts[$count] = $last_cycle_shifters_array[$i];
-                            }
+                        // si pas de precedent shifter
+                        if (!isset($last_cycle_shifters_array[$i])
+                            // ou que c'est un shift qui ne doit pas être repris
+                            || ($use_fly_and_fixed && !$last_cycle_shifters_array[$i]->isFixe())
+                            // ou qu'on ne reserve pas les shifts
+                            || !$this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter')
+                        ) {
+                            $current_shift->setShifter(null);
+                            $current_shift->setBookedTime(null);
+                            $current_shift->setBooker(null);
+                        } else {
+                            $current_shift->setLastShifter($last_cycle_shifters_array[$i]->getShifter());
+                            $current_shift->setFixe($last_cycle_shifters_array[$i]->isFixe());
+                            $reservedShifts[$count] = $current_shift;
+                            $oldShifts[$count] = $last_cycle_shifters_array[$i];
                         }
 
                         $em->persist($current_shift);
@@ -113,29 +124,28 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 }
             }
             $em->flush();
-
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-            foreach ($reservedShifts as $i => $shift){
-                $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%d"));
-                $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $oldShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
-                    ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                    ->setTo($shift->getLastShifter()->getEmail())
-                    ->setBody(
-                        $this->getContainer()->get('twig')->render(
-                            'emails/shift_reserved.html.twig',
-                            array('shift' => $shift,
-                                'oldshift' => $oldShifts[$i],
-                                'days' => $d,
-                                'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                                'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                            )
-                        ),
-                        'text/html'
-                    );
-                $mailer->send($mail);
-            }
-
         }
+        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+        foreach ($reservedShifts as $i => $shift){
+            $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%d"));
+            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $oldShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
+                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
+                ->setTo($shift->getLastShifter()->getEmail())
+                ->setBody(
+                    $this->getContainer()->get('twig')->render(
+                        'emails/shift_reserved.html.twig',
+                        array('shift' => $shift,
+                        'oldshift' => $oldShifts[$i],
+                        'days' => $d,
+                        'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        )
+                    ),
+                    'text/html'
+                );
+            $mailer->send($mail);
+        }
+
         $message = $count.' créneau'.(($count>1) ? 'x':'').' généré'.(($count>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
         $message = $count2.' créneau'.(($count2>1) ? 'x':'').' existe'.(($count2>1) ? 'nt':'');

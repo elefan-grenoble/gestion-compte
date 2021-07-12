@@ -30,6 +30,12 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
+    AppBundle\Controller\DefaultController:
+        arguments:
+            - '%swipe_card_logging%'
+    AppBundle\Controller\AmbassadorController:
+        arguments:
+            - "%time_after_which_members_are_late_with_shifts%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
@@ -154,7 +160,9 @@ services:
                 - "%due_duration_by_cycle%"
                 - "%min_shift_duration%"
                 - "%new_users_start_as_beginner%"
-                - "%unlimited_book_duration%"
+                - "%allow_extra_shifts%"
+                - "%max_time_in_advance_to_book_extra_shifts%"
+                - "%forbid_shift_overlap_time%"
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor

@@ -30,6 +30,13 @@ class Period
     private $dayOfWeek;
 
     /**
+     * @var array
+     *
+     * @ORM\Column(name="week_cycle", type="simple_array",  options={"default" : "0,1,2,3"})
+     */
+    private $weekCycle;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="start", type="time")
@@ -90,6 +97,51 @@ class Period
     public function getDayOfWeek()
     {
         return $this->dayOfWeek;
+    }
+
+    /**
+     * Set weekCycle
+     *
+     * @param array $weekCycle
+     *
+     */
+    public function setWeekCycle($weekCycle)
+    {
+        $this->weekCycle = $weekCycle;
+    }
+
+    /**
+     * Get weekCycle
+     *
+     * @return array
+     */
+    public function getWeekCycle()
+    {
+        return $this->weekCycle;
+    }
+
+    /**
+     * Get weekCycleName
+     *
+     * @return string
+     */
+    public function getWeekCycleName()
+    {
+        $weekCycleNb = count($this->weekCycle);
+        if ($weekCycleNb == 4) {
+            return "Chaque semaine";
+        } else {
+            $map = [ 'A', 'B', 'C', 'D'];
+            $output = "Semaine#";
+            sort($this->weekCycle);
+            for ($i = 0, $size = count($this->weekCycle); $i < $size; ++$i) {
+                $output .= $map[intval($this->weekCycle[$i])];
+                if ($i < $size-1) {
+                    $output .= '-';
+                }
+            }
+            return $output;
+        }
     }
 
     /**

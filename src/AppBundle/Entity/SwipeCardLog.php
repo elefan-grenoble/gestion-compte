@@ -22,10 +22,10 @@ class SwipeCardLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="SwipeCard", inversedBy="logs")
-     * @ORM\JoinColumn(name="swipe_card_id", referencedColumnName="id", nullable=false)
+     * @var int
+     * @ORM\Column(name="counter", type="integer")
      */
-    private $swipeCard;
+    private $counter;
 
     /**
      * @var \DateTime
@@ -68,26 +68,26 @@ class SwipeCardLog
     }
 
     /**
-     * Set swipeCard.
+     * Set counter.
      *
-     * @param SwipeCard|null $swipeCard
+     * @param integer $counter
      *
      * @return SwipeCardLog
      */
-    public function setSwipeCard(?SwipeCard $swipeCard)
+    public function setCounter($counter)
     {
-        $this->swipeCard = $swipeCard;
+        $this->counter = $counter;
 
         return $this;
     }
 
     /**
-     * Get swipeCard.
+     * Get counter.
      *
-     * @return SwipeCard|null
+     * @return integer $counter
      */
-    public function getSwipeCard() : ?SwipeCard
+    public function getCounter()
     {
-        return $this->swipeCard;
+        return $this->counter;
     }
 }

@@ -71,7 +71,7 @@ class AppExtension extends AbstractExtension
 
         for ($i = 0; $i < strlen($text); $i++)
         {
-            $char = $text{$i};
+            $char = $text[$i];
             $r = rand(0, 100);
 
             # roughly 10% raw, 45% hex, 45% dec
@@ -197,7 +197,9 @@ class AppExtension extends AbstractExtension
 
     public function duration_from_minutes(int $minutes)
     {
-        $formatted = gmdate("G\hi", abs($minutes) * 60);
+        $hours = intdiv(abs($minutes), 60);
+        $remaining_minutes = sprintf("%02d", abs($minutes) % 60);
+        $formatted = $hours.'h'.$remaining_minutes;
         if ($minutes < 0) {
             return "-".$formatted;
         } else {

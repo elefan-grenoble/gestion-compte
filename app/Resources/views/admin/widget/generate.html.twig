@@ -26,6 +26,15 @@
                         tous les créneaux
                     </label>
                 </div>
+                Titre
+                <div class="switch">
+                    <label>
+                        masquer le titre
+                        {{ form_widget(form.title) }}
+                        <span class="lever"></span>
+                        afficher le titre
+                    </label>
+                </div>
                 {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
             {{ form_end(form) }}
         </div>

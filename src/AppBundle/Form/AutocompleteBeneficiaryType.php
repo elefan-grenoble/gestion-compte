@@ -28,7 +28,7 @@ class AutocompleteBeneficiaryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'invalid_message' => 'The selected data does not match any beneficiary',
+            'invalid_message' => 'Les données sélectionnées ne correspondent à aucun bénéficiaire',
         ]);
     }
 

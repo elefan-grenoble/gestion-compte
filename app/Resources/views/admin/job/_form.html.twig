@@ -25,6 +25,11 @@
     {{ form_widget(form.color) }}
 </div>
 <div class="row">
+    {{ form_label(form.description) }}
+    {{ form_errors(form.description) }}
+    {{ form_widget(form.description) }}
+</div>
+<div class="row">
     {{ form_errors(form.enabled) }}
     {{ form_widget(form.enabled) }}
     {{ form_label(form.enabled) }}

@@ -40,6 +40,15 @@ class ShiftBucket
         }
     }
 
+    public function removeEmptyShift()
+    {
+        foreach ($this->shifts as $shiftKey => $shift) {
+            if ($shift->getShifter() == NULL && count($this->shifts) > 1) {
+                unset($this->shifts[$shiftKey]);
+            }
+        }
+    }
+
     static public function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {

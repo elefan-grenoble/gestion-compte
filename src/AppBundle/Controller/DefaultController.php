@@ -36,6 +36,16 @@ use Symfony\Component\Serializer\Encoder\JsonDecode;
 class DefaultController extends Controller
 {
     /**
+     * @var boolean
+     */
+    private $swipeCardLogging;
+
+    public function __construct(string $swipeCardLogging)
+    {
+        $this->swipeCardLogging = $swipeCardLogging;
+    }
+
+    /**
      * @Route("/", name="homepage")
      */
     public function indexAction(Request $request)
@@ -183,8 +193,9 @@ class DefaultController extends Controller
     {
         $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findInProgress(new \DateTime('now'));
+        $shifts = $em->getRepository('AppBundle:Shift')->findRemainingToday();
         $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
+        $buckets = $this->get('shift_service')->removeEmptyShift($buckets);
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 
@@ -214,13 +225,15 @@ class DefaultController extends Controller
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
         } else {
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card));
-
             $beneficiary = $card->getBeneficiary();
+            $counter = $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0));
+            if ($this->swipeCardLogging) {
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($counter));
+            }
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,
-                'counter' => $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0))
+                'counter' => $counter
             ]);
         }
 
@@ -389,8 +402,9 @@ class DefaultController extends Controller
     {
         $job_id = $request->get('job_id');
         $buckets = array();
-        $display_end = $request->get('display_end') ? ($request->get('display_end') == 1) : false;
-        $display_on_empty = $request->get('display_on_empty') ? ($request->get('display_on_empty') == 1) : false;
+        $display_end = $request->query->has('display_end') ? ($request->get('display_end') == 1) : false;
+        $display_on_empty = $request->query->has('display_on_empty') ? ($request->get('display_on_empty') == 1) : false;
+        $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
         $job = null;
         if ($job_id) {
             $em = $this->getDoctrine()->getManager();
@@ -412,7 +426,8 @@ class DefaultController extends Controller
             'job' => $job,
             'buckets' => $buckets,
             'display_end' => $display_end,
-            'display_on_empty' => $display_on_empty
+            'display_on_empty' => $display_on_empty,
+            'title' => $title
         ]);
 
     }

@@ -36,7 +36,14 @@
                             <a href="{{ path("period_edit",{'id': period.id}) }}">
                                 <div class="card-panel {% if period.job %}{{ period.job.color }}{% else %}blue{% endif %} lighten-2">
                                      <p class="white-text">
-                                         {% if period.job %}<b class="white-text">{{ period.job.name }}</b>{% endif %}<br>
+                                         {% if period.job %}
+                                             <b class="white-text">
+                                                 {{ period.job.name }}
+                                                 {% if (period.weekCycle is not null) and (period.weekCycle > -1) %}
+                                                    ({{ period.getWeekCycleName() }})
+                                                 {% endif %}
+                                             </b>
+                                         {% endif %}<br>
                                           {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
                                           {% for position in period.positions %}
                                               <i class="material-icons">person</i>{{ position }}
