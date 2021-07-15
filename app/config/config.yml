@@ -65,6 +65,7 @@ twig:
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
     display_keys_shop: '%display_keys_shop%'
+    display_name_shifters: '%display_name_shifters%'
 
 # Doctrine Configuration
 doctrine:
