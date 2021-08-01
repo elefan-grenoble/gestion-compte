@@ -68,8 +68,13 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         $alerts = array();
         foreach ($buckets as $bucket) {
             $shifterCount = $bucket->getShifterCount();
-            if ($shifterCount < 2) {
-                $issue = $shifterCount . ' personnes inscrites sur ' . count($bucket->getShifts());
+            $shiftCount = count($bucket->getShifts());
+            if ($shifterCount < $bucket->getJob()->getMinShifterAlert() && $shifterCount != $shiftCount) {
+                if ($shifterCount < 2) {
+                    $issue = $shifterCount . " personne inscrite sur " . $shiftCount;
+                } else {
+                    $issue = $shifterCount . " personnes inscrites sur " . $shiftCount;
+                }
                 $alerts[] = new ShiftAlert($bucket, $issue);
             }
         }

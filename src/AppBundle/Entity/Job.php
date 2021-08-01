@@ -46,6 +46,12 @@ class Job
     private $description;
 
     /**
+     * @var int
+     * @ORM\Column(name="min_shifter_alert", type="integer", options={"default" : 2})
+     */
+    private $min_shifter_alert;
+
+    /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="job", cascade={"persist", "remove"}), orphanRemoval=true)
      */
     private $shifts;
@@ -120,6 +126,26 @@ class Job
     {
         return $this->color;
     }
+
+    /**
+     * Get min_shifter_alert
+     *
+     * @return int
+     */
+    public function getMinShifterAlert()
+    {
+        return $this->min_shifter_alert;
+    }
+
+    /**
+     * @param int $min_shifter_alert
+     * @return Job
+     */
+    public function setMinShifterAltert(int $min_shifter_alert): Job {
+        $this->min_shifter_alert = $min_shifter_alert;
+        return $this;
+    }
+
     /**
      * Constructor
      */

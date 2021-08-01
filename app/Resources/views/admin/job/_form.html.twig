@@ -5,6 +5,11 @@
     {{ form_widget(form.name) }}
 </div>
 <div class="row">
+    {{ form_errors(form.min_shifter_alert) }}
+    {{ form_widget(form.min_shifter_alert) }}
+    {{ form_label(form.min_shifter_alert) }}
+</div>
+<div class="row">
     {{ form_label(form.color) }}<br>
     <a href="https://materializecss.com/color.html" target="_blank"><i class="material-icons left">link</i> Couleur
         materialize</a>
