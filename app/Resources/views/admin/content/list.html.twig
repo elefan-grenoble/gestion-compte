@@ -12,25 +12,28 @@
 
 {% block content %}
     <h4 class="">Contenus dynamiques</h4>
-    <div class="row">
-        {% for dynamicContent in dynamicContents %}
-            <div class="col s12 m4">
-                <div class="card blue-grey darken-1 small">
-                    <div class="card-content white-text">
-                        <span class="card-title"><i class="material-icons left">content_paste</i>{{ dynamicContent.name }}</span>
-                        {{ dynamicContent.description }}
-                    </div>
-                    <div class="card-action">
-
-                        <div class="left">
-                            <a href="{{ path("dynamic_content_edit",{'id':dynamicContent.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+    {% for dynamicContents in dynamicContentsByType %}
+        <h5>{{ dynamicContents[0].getType }}</h5>
+        <div class="row">
+            {% for dynamicContent in dynamicContents %}
+                <div class="col s12 m4">
+                    <div class="card blue-grey darken-1 small">
+                        <div class="card-content white-text">
+                            <span class="card-title"><i class="material-icons left">content_paste</i>{{ dynamicContent.name }}</span>
+                            {{ dynamicContent.description }}
                         </div>
-                        <div>
-                            &nbsp;
+                        <div class="card-action">
+
+                            <div class="left">
+                                <a href="{{ path("dynamic_content_edit",{'id':dynamicContent.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+                            </div>
+                            <div>
+                                &nbsp;
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
 {% endblock %}
