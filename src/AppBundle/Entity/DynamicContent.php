@@ -32,6 +32,14 @@ class DynamicContent
     /**
      * @var string
      *
+     * @ORM\Column(name="type", type="string", length=64, options={"default" : "general"})
+     *
+     */
+    protected $type;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="name", type="string", length=64)
      *
      */
@@ -86,11 +94,38 @@ class DynamicContent
     }
 
     /**
+     * Set type
+     *
+     * @param string $type
+     *
+     * @return DynamicContent
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return string
+     */
+    public function getType(): string
+    {
+        if ($this->type == 'general') {
+            return 'Général';
+        }
+        return $this->type;
+    }
+
+    /**
      * Set name
      *
      * @param string $name
      *
-     * @return Formation
+     * @return DynamicContent
      */
     public function setName($name)
     {

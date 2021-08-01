@@ -39,8 +39,16 @@ class DynamicContentController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $dynamicContents = $em->getRepository('AppBundle:DynamicContent')->findAll();
+        $dynamicContentsByType = array();
+        foreach ($dynamicContents as $dynamicContent) {
+            $type = $dynamicContent->getType();
+            if (!isset($dynamicContentsByType[$type])) {
+                $dynamicContentsByType[$type] = array();
+            }
+            $dynamicContentsByType[$type][] = $dynamicContent;
+        }
         return $this->render('admin/content/list.html.twig', array(
-            'dynamicContents' => $dynamicContents,
+            'dynamicContentsByType' => $dynamicContentsByType,
         ));
     }
 

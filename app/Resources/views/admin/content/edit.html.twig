@@ -10,12 +10,8 @@
 {% block content %}
 
     <h4 class="">Modifier le contenu dynamique</h4>
-    <h5 class="">{{ dynamicContent.name }}</h5>
     {{ form_start(form) }}
-    <div class="errors">
-        {{ form_errors(form.content) }}
-    </div>
-    {{ form_widget(form.content) }}
+    {{ form_widget(form) }}
     <div>
         <button type="submit" class="btn"><i class="material-icons left">check</i>Enregistrer</button>
         <a href="{{ path("dynamic_content_list") }}" class="btn white blue-grey-text"><i class="material-icons left">arrow_back</i>Retour</a>
