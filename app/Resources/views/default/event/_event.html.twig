@@ -53,9 +53,17 @@
                 {% else %}
                     {% set proxy_given = event | givenProxy %}
                     {% set proxy_received = event | receivedProxy %}
-                    {% if app.user.beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration %}
-                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                    {% if (registration_duration is not null) %}
+                        {% set minDateOfLastRegistration = event.maxDateOfLastRegistration | date_modify('-' ~ registration_duration) %}
+                    {% else %}
+                        {% set minDateOfLastRegistration = null %}
+                    {% endif %}
+                    {% if (minDateOfLastRegistration is not null and app.user.beneficiary.membership.lastRegistration.date < minDateOfLastRegistration) %}
+                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br>Pense à mettre à jour ton adhésion pour participer ! :)
+                    {% elseif (app.user.beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
+                        <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à {{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                        <br>Pense à rattraper tes créneaux pour la prochaine fois ! :)
                     {% else %}
                         <ul>
                             {% if proxy_given is not null %}

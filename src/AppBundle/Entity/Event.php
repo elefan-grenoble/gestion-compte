@@ -89,9 +89,9 @@ class Event
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="min_date_of_last_registration", type="datetime", nullable=true)
+     * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
      */
-    private $min_date_of_last_registration;
+    private $max_date_of_last_registration;
 
     /**
      * @var bool
@@ -337,18 +337,32 @@ class Event
         return $this->need_proxy;
     }
 
+
     /**
-     * Set minDateOfLastRegistration
+     * Set maxDateOfLastRegistration
      *
-     * @param \DateTime $minDateOfLastRegistration
+     * @param \DateTime $maxDateOfLastRegistration
      *
      * @return Event
      */
-    public function setMinDateOfLastRegistration($minDateOfLastRegistration)
+    public function setMaxDateOfLastRegistration($maxDateOfLastRegistration)
     {
-        $this->min_date_of_last_registration = $minDateOfLastRegistration;
+        $this->max_date_of_last_registration = $maxDateOfLastRegistration;
 
         return $this;
+    }
+
+    /**
+     * Get maxDateOfLastRegistration
+     *
+     * @return \DateTime
+     */
+    public function getMaxDateOfLastRegistration()
+    {
+        if (is_null($this->max_date_of_last_registration)) {
+            return $this->date;
+        }
+        return $this->max_date_of_last_registration;
     }
 
     /**
@@ -358,7 +372,13 @@ class Event
      */
     public function getMinDateOfLastRegistration()
     {
-        return $this->min_date_of_last_registration;
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!is_null($registrationDuration)) {
+            $minDateOfLastRegistration = clone $this->getMaxDateOfLastRegistration();
+            $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            return $minDateOfLastRegistration;
+        }
+        return null;
     }
 
     /**

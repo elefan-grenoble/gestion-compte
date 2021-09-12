@@ -67,10 +67,10 @@ class EventType extends AbstractType
 
             if ($userData && $userData->getId()){
                 $form->add('need_proxy', CheckboxType::class,array('required' => false,'label'=>'Utilise des procurations (AG, ...)'));
-                $form->add('min_date_of_last_registration', DateType::class,array('required' => false,
+                $form->add('max_date_of_last_registration', DateType::class,array('required' => false,
                     'input' => 'datetime',
                     'widget' => 'single_text',
-                    'label' => 'Date minimale d\'adhésion pour voter',
+                    'label' => 'Date maximale d\'adhésion pour voter',
                     'attr' => [
                         'class' => 'datepicker'
                     ]
