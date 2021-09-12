@@ -56,11 +56,22 @@
         </div>
         <div class="col s6">
             <div class="errors">
-                {{ form_errors(form.min_date_of_last_registration) }}
+                {{ form_errors(form.anonymous_proxy) }}
+            </div>
+            <div class="">
+                {{ form_widget(form.anonymous_proxy) }}
+                {{ form_label(form.anonymous_proxy) }}
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(form.max_date_of_last_registration) }}
             </div>
             <div class="input-field">
-                {{ form_widget(form.min_date_of_last_registration) }}
-                {{ form_label(form.min_date_of_last_registration) }}
+                {{ form_widget(form.max_date_of_last_registration) }}
+                {{ form_label(form.max_date_of_last_registration) }}
             </div>
         </div>
     </div>

@@ -329,9 +329,21 @@ class EventController extends Controller
                 }
             }
         }
-        if ($membership->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
-            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
-                $event->getMinDateOfLastRegistration()->format('d M Y').
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!is_null($registrationDuration)) {
+            $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
+            $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            if ($membership->getLastRegistration()->getDate() < $minDateOfLastRegistration){
+                $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
+                    $minDateOfLastRegistration->format('d M Y').
+                    ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!$membership->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
+                $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
@@ -505,9 +517,21 @@ class EventController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
-        if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $event->getMinDateOfLastRegistration()){
-            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
-                $event->getMinDateOfLastRegistration()->format('d M Y').
+        $registrationDuration = $this->getParameter('registration_duration');
+        if ($registrationDuration) {
+            $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
+            $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $minDateOfLastRegistration ){
+                $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
+                    $minDateOfLastRegistration->format('d M Y').
+                    ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!$current_app_user->getBeneficiary()->getMembership()->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
+                $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
@@ -591,9 +615,28 @@ class EventController extends Controller
      */
     public function signaturesListAction(Request $request,Event $event){
         $em = $this->getDoctrine()->getManager();
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!is_null($registrationDuration)) {
+            $qb = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b');
+            $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
+            $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            $beneficiaries = $qb->leftJoin('b.membership', 'm')
+                ->leftJoin("m.registrations", "r")
+                ->andWhere('r.date >= :mindateoflastregistration')
+                         ->setParameter('mindateoflastregistration', $minDateOfLastRegistration)
+                ->andWhere('r.date < :maxdateoflastregistration')
+                         ->setParameter('maxdateoflastregistration', $event->getMaxDateOfLastRegistration())
+                ->orderBy("b.lastname", 'ASC')
+                ->getQuery()
+                ->getResult();
+        } else {
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'));
+            $minDateOfLastRegistration = null;
+        }
         return $this->render('admin/event/signatures.html.twig', array(
             'event' => $event,
-            'beneficiaries' => $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'))
+            'beneficiaries' => $beneficiaries,
+            'minDateOfLastRegistration' => $minDateOfLastRegistration,
         ));
     }
 }

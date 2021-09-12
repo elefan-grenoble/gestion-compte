@@ -89,9 +89,9 @@ class Event
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="min_date_of_last_registration", type="datetime", nullable=true)
+     * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
      */
-    private $min_date_of_last_registration;
+    private $max_date_of_last_registration;
 
     /**
      * @var bool
@@ -100,6 +100,12 @@ class Event
      */
     private $need_proxy;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="anonymous_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
+     */
+    private $anonymous_proxy;
 
     /**
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="event",cascade={"persist", "remove"})
@@ -338,17 +344,54 @@ class Event
     }
 
     /**
-     * Set minDateOfLastRegistration
+     * Set anonymousProxy
      *
-     * @param \DateTime $minDateOfLastRegistration
+     * @param boolean $anonymousProxy
      *
      * @return Event
      */
-    public function setMinDateOfLastRegistration($minDateOfLastRegistration)
+    public function setAnonymousProxy($anonymousProxy)
     {
-        $this->min_date_of_last_registration = $minDateOfLastRegistration;
+        $this->anonymous_proxy = $anonymousProxy;
 
         return $this;
+    }
+
+    /**
+     * Get anonymousProxy
+     *
+     * @return boolean
+     */
+    public function getAnonymousProxy()
+    {
+        return $this->anonymous_proxy;
+    }
+
+    /**
+     * Set maxDateOfLastRegistration
+     *
+     * @param \DateTime $maxDateOfLastRegistration
+     *
+     * @return Event
+     */
+    public function setMaxDateOfLastRegistration($maxDateOfLastRegistration)
+    {
+        $this->max_date_of_last_registration = $maxDateOfLastRegistration;
+
+        return $this;
+    }
+
+    /**
+     * Get maxDateOfLastRegistration
+     *
+     * @return \DateTime
+     */
+    public function getMaxDateOfLastRegistration()
+    {
+        if (is_null($this->max_date_of_last_registration)) {
+            return $this->date;
+        }
+        return $this->max_date_of_last_registration;
     }
 
     /**
@@ -358,7 +401,13 @@ class Event
      */
     public function getMinDateOfLastRegistration()
     {
-        return $this->min_date_of_last_registration;
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!is_null($registrationDuration)) {
+            $minDateOfLastRegistration = clone $this->getMaxDateOfLastRegistration();
+            $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            return $minDateOfLastRegistration;
+        }
+        return null;
     }
 
     /**

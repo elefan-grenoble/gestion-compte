@@ -32,7 +32,13 @@
                         {% endif %}
                     {% endif %}
                     {% if proxy_received is null and proxy_given is null %}
-                        <a class="activator waves-effect waves-light btn orange hide-on-small-only" href="#" onclick="return false;"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                        <a class="activator waves-effect waves-light btn orange hide-on-small-only" href="#" onclick="return false;"><i class="material-icons">list</i>
+                            {% if event.anonymousProxy %}
+                            Donner / recevoir une procuration
+                            {% else %}
+                            Donner procuration
+                            {% endif %}
+                        </a>
                         <a class="activator waves-effect waves-light btn orange hide-on-med-and-up" href="#" onclick="return false;"><i class="material-icons">list</i>Procurations</a>
                     {% endif %}
                 {% endif %}
@@ -53,9 +59,17 @@
                 {% else %}
                     {% set proxy_given = event | givenProxy %}
                     {% set proxy_received = event | receivedProxy %}
-                    {% if app.user.beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration %}
-                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ event.minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                    {% if (registration_duration is not null) %}
+                        {% set minDateOfLastRegistration = event.maxDateOfLastRegistration | date_modify('-' ~ registration_duration) %}
+                    {% else %}
+                        {% set minDateOfLastRegistration = null %}
+                    {% endif %}
+                    {% if (minDateOfLastRegistration is not null and app.user.beneficiary.membership.lastRegistration.date < minDateOfLastRegistration) %}
+                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br>Pense à mettre à jour ton adhésion pour participer ! :)
+                    {% elseif (app.user.beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
+                        <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à {{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                        <br>Pense à rattraper tes créneaux pour la prochaine fois ! :)
                     {% else %}
                         <ul>
                             {% if proxy_given is not null %}
@@ -77,8 +91,10 @@
                         {% if proxy_given is null and proxy_received is null %}
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only">Je ne peux pas venir, je fais une procuration</a>
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up">Je ne peux pas venir, je fais une procuration</a>
+                            {% if event.anonymousProxy %}
                             <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only">Je viens, j'accepte une procuration</a>
                             <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light green-text hide-on-med-and-up">Je viens, j'accepte une procuration</a>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}

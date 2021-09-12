@@ -118,6 +118,7 @@
                     <th class="center">&nbsp;&nbsp;Vote&nbsp;&nbsp;&nbsp;</th>
                 </tr>
                 {% set index = 1 %}
+                {% set numberOfVoters = 0 %}
                 {% set letter = "" %}
                 {% for beneficiary in beneficiaries %}
                 {% if beneficiary.membership.lastRegistration %}
@@ -159,6 +160,10 @@
                                         <br>
                                         <i class="fas fa-exclamation-triangle"></i>&nbsp;<b>NE PAS SIGNER ICI</b>&nbsp;<i class="fas fa-exclamation-triangle"></i>
                                     </td>
+                                {% elseif (beneficiary.membership.withdrawn) %}
+                                    <td colspan="2" class="wrong" style="background: gray; color: white;">Compte fermé<br><i class="fas fa-times-circle"></i>&nbsp;Vote impossible</td>
+                                {% elseif (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
+                                    <td colspan="2" class="wrong" style="background: gray; color: white;">Compteur de créneaux à {{beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}<br><i class="fas fa-times-circle"></i>&nbsp;Vote impossible</td>
                                 {% elseif (event.proxiesByGiver(beneficiary.membership) | length > 0) %}
                                     <td colspan="2" class="warning" style="background: gray; color: white;">Procuration donnée à
                                         {% if event.proxiesByGiver(beneficiary.membership).first.owner %}
@@ -168,9 +173,10 @@
                                             Membre inconnu
                                         {% endif %}
                                         <br><i class="fas fa-times-circle"></i>&nbsp;Vote déjà pris en compte</td>
-                                {% elseif ( beneficiary.membership.lastRegistration.date < event.minDateOfLastRegistration) %}
+                                {% elseif ((minDateOfLastRegistration is not null) and (beneficiary.membership.lastRegistration.date < minDateOfLastRegistration)) %}
                                     <td colspan="2" class="wrong" style="background: gray; color: white;"><i class="fas fa-times-circle"></i>&nbsp;Adhésion expirée - Vote impossible</td>
                                 {% else %}
+                                    {% set numberOfVoters = numberOfVoters + 1 %}
                                     <td class="sign"></td>
                                     <td class="sign"></td>
                                 {% endif %}
@@ -211,6 +217,10 @@
                 {% endif %}
                 {% endfor %}
             </table>
+            <br>
+            <center>
+                Nombre de votants : {{ numberOfVoters}}
+            <center>
         </div>
     </div>
 </div>

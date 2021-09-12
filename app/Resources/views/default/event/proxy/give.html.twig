@@ -50,6 +50,7 @@
     {{ form_end(confirm_form) }}
     {% endif %}
 
+    {% if event.anonymousProxy %}
     {% if confirm_form is not defined %}
     {{ form_start(form) }}
     <div>
@@ -57,6 +58,7 @@
         <button type="submit" class="btn-large waves-effect waves-light green" id="submit">Oui, Merci à elle !</button>
     </div>
     {{ form_end(form) }}
+    {% endif %}
     {% endif %}
 
 {% endblock %}
