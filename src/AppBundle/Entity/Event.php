@@ -100,6 +100,12 @@ class Event
      */
     private $need_proxy;
 
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="anonymous_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
+     */
+    private $anonymous_proxy;
 
     /**
      * @ORM\OneToMany(targetEntity="Proxy", mappedBy="event",cascade={"persist", "remove"})
@@ -337,6 +343,29 @@ class Event
         return $this->need_proxy;
     }
 
+    /**
+     * Set anonymousProxy
+     *
+     * @param boolean $anonymousProxy
+     *
+     * @return Event
+     */
+    public function setAnonymousProxy($anonymousProxy)
+    {
+        $this->anonymous_proxy = $anonymousProxy;
+
+        return $this;
+    }
+
+    /**
+     * Get anonymousProxy
+     *
+     * @return boolean
+     */
+    public function getAnonymousProxy()
+    {
+        return $this->anonymous_proxy;
+    }
 
     /**
      * Set maxDateOfLastRegistration

@@ -32,7 +32,13 @@
                         {% endif %}
                     {% endif %}
                     {% if proxy_received is null and proxy_given is null %}
-                        <a class="activator waves-effect waves-light btn orange hide-on-small-only" href="#" onclick="return false;"><i class="material-icons">list</i> Donner / recevoir une procuration</a>
+                        <a class="activator waves-effect waves-light btn orange hide-on-small-only" href="#" onclick="return false;"><i class="material-icons">list</i>
+                            {% if event.anonymousProxy %}
+                            Donner / recevoir une procuration
+                            {% else %}
+                            Donner procuration
+                            {% endif %}
+                        </a>
                         <a class="activator waves-effect waves-light btn orange hide-on-med-and-up" href="#" onclick="return false;"><i class="material-icons">list</i>Procurations</a>
                     {% endif %}
                 {% endif %}
@@ -85,8 +91,10 @@
                         {% if proxy_given is null and proxy_received is null %}
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only">Je ne peux pas venir, je fais une procuration</a>
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up">Je ne peux pas venir, je fais une procuration</a>
+                            {% if event.anonymousProxy %}
                             <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only">Je viens, j'accepte une procuration</a>
                             <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light green-text hide-on-med-and-up">Je viens, j'accepte une procuration</a>
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                 {% endif %}

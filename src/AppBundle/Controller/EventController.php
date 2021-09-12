@@ -336,6 +336,14 @@ class EventController extends Controller
             if ($membership->getLastRegistration()->getDate() < $minDateOfLastRegistration){
                 $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                     $minDateOfLastRegistration->format('d M Y').
+                    ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!$membership->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
+                $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
@@ -516,6 +524,14 @@ class EventController extends Controller
             if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $minDateOfLastRegistration ){
                 $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '.
                     $minDateOfLastRegistration->format('d M Y').
+                    ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!$current_app_user->getBeneficiary()->getMembership()->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+            $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
+                $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }

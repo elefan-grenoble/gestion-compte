@@ -67,6 +67,7 @@ class EventType extends AbstractType
 
             if ($userData && $userData->getId()){
                 $form->add('need_proxy', CheckboxType::class,array('required' => false,'label'=>'Utilise des procurations (AG, ...)'));
+                $form->add('anonymous_proxy', CheckboxType::class,array('required' => false,'label'=>'Autoriser les procurations anonymes'));
                 $form->add('max_date_of_last_registration', DateType::class,array('required' => false,
                     'input' => 'datetime',
                     'widget' => 'single_text',
