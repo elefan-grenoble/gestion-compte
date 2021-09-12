@@ -591,9 +591,35 @@ class EventController extends Controller
      */
     public function signaturesListAction(Request $request,Event $event){
         $em = $this->getDoctrine()->getManager();
+        $registrationDuration = $this->getParameter('registration_duration');
+        if (!is_null($registrationDuration)) {
+            $qb = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b');
+            if (is_null($event->getMinDateOfLastRegistration())) {
+                $maxDateOfLastRegistration = $event->getDate();
+                $minDateOfLastRegistration = clone $event->getDate();
+                $minDateOfLastRegistration->modify('-'.$registrationDuration);
+            } else {
+                $minDateOfLastRegistration = $event->getMinDateOfLastRegistration();
+                $maxDateOfLastRegistration = clone $event->getMinDateOfLastRegistration();
+                $maxDateOfLastRegistration->modify('+'.$registrationDuration);
+            }
+            $beneficiaries = $qb->leftJoin('b.membership', 'm')
+                ->leftJoin("m.registrations", "r")
+                ->andWhere('r.date >= :mindateoflastregistration')
+                         ->setParameter('mindateoflastregistration', $minDateOfLastRegistration)
+                ->andWhere('r.date < :maxdateoflastregistration')
+                         ->setParameter('maxdateoflastregistration', $maxDateOfLastRegistration)
+                ->orderBy("b.lastname", 'ASC')
+                ->getQuery()
+                ->getResult();
+        } else {
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'));
+            $maxDateOfLastRegistration = $event->getDate();
+        }
         return $this->render('admin/event/signatures.html.twig', array(
             'event' => $event,
-            'beneficiaries' => $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'))
+            'beneficiaries' => $beneficiaries,
+            'maxDateOfLastRegistration' => $maxDateOfLastRegistration
         ));
     }
 }
