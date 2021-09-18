@@ -141,7 +141,7 @@ class Job
      * @param int $min_shifter_alert
      * @return Job
      */
-    public function setMinShifterAltert(int $min_shifter_alert): Job {
+    public function setMinShifterAlert(int $min_shifter_alert): Job {
         $this->min_shifter_alert = $min_shifter_alert;
         return $this;
     }
