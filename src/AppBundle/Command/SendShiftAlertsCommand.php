@@ -33,8 +33,8 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     {
         $date_given = $input->getArgument('date');
         $jobs = explode(',', $input->getArgument('jobs'));
-        $email_template = $input->getArgument('emailTemplate');
-        $mattermost_template = $input->getArgument('mattermostTemplate');
+        $email_template = $input->getOption('emailTemplate');
+        $mattermost_template = $input->getOption('mattermostTemplate');
 
         $date = date_create_from_format('Y-m-d', $date_given);
         if (!$date || $date->format('Y-m-d') != $date_given) {
