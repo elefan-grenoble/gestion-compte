@@ -368,19 +368,12 @@ class Membership
      * Return if the member has a valid registration before the given date
      *
      * @param \DateTime $date
-     * @param $registrationDuration
      * @return \AppBundle\Entity\Registration
      */
-    public function hasValidRegistrationBefore($date, $registrationDuration)
+    public function hasValidRegistrationBefore($date)
     {
         foreach ($this->getRegistrations() as $registration) {
-            if (!is_null($registrationDuration)) {
-                $endOfRegistration = clone $registration->getDate();
-                $endOfRegistration->modify('+'.$registrationDuration);
-                if ($endOfRegistration < $date ) {
-                    return true;
-                }
-            } else {
+            if ($registration->getDate() < $date) {
                 return true;
             }
         }

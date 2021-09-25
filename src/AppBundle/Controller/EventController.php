@@ -330,7 +330,7 @@ class EventController extends Controller
             }
         }
         $registrationDuration = $this->getParameter('registration_duration');
-        if (!is_null($registrationDuration)) {
+        if ($registrationDuration) {
             $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
             $minDateOfLastRegistration->modify('-'.$registrationDuration);
             if ($membership->getLastRegistration()->getDate() < $minDateOfLastRegistration){
@@ -340,8 +340,7 @@ class EventController extends Controller
                 return $this->redirectToRoute('homepage');
             }
         }
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!$membership->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+        if (!$membership->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration())){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
                 $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
@@ -528,8 +527,7 @@ class EventController extends Controller
                 return $this->redirectToRoute('homepage');
             }
         }
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!$current_app_user->getBeneficiary()->getMembership()->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration(), $registrationDuration)){
+        if (!$current_app_user->getBeneficiary()->getMembership()->hasValidRegistrationBefore($event->getMaxDateOfLastRegistration())){
             $session->getFlashBag()->add('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré avant le '.
                 $event->getMaxDateOfLastRegistration()->format('d M Y').
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
