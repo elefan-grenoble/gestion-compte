@@ -108,7 +108,6 @@ parameters:
     # Registration
     registration_duration: '1 year'
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
-    helloasso_campaign_id:
     helloasso_api_key:
     helloasso_api_password:
     helloasso_api_base_url: https://api.helloasso.com/v3/
@@ -119,18 +118,9 @@ parameters:
     cycle_duration: '28 days'
     maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
-    allow_extra_shifts: true
-    max_time_in_advance_to_book_extra_shifts: '3 days'
+    unlimited_book_duration: false
     display_gauge: true
     use_fly_and_fixed: false
-    time_after_which_members_are_late_with_shifts: -9
-    reserve_new_shift_to_prior_shifter: true
-    forbid_shift_overlap_time: 30
-    display_name_shifters: false
-
-    # Swipe card configuration
-    swipe_card_logging: true
-    display_swipe_cards_settings: true
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
@@ -141,6 +131,5 @@ parameters:
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
 
+
     code_generation_enabled: true
-    display_freeze_account: true
-    display_keys_shop: true
