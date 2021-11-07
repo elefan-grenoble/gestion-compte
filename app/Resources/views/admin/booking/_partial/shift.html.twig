@@ -85,6 +85,17 @@
                                         <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
                                     {% endif %}
                                 </form>
+                                {% if  use_card_reader_to_validate_shifts %}
+                                    {% if shift.wasCarriedOut %}
+                                        <form action="{{ path('invalidate_shift', {'id' : shift.id }) }}" method="post" id="invalidate_shift_{{ shift.id }}">
+                                            <button type="submit" class="btn red"><i class="material-icons left">highlight_off</i>Invalider la participation</button>
+                                        </form>
+                                    {% else %}
+                                        <form action="{{ path('validate_shift', {'id' : shift.id }) }}" method="post" id="validate_shift_{{ shift.id }}">
+                                            <button type="submit" class="btn green"><i class="material-icons left">check_circle</i>Valider la participation</button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
                             {% endif %}
                         </div>
                     </li>

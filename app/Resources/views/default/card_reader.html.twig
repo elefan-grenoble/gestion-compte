@@ -30,6 +30,14 @@
                                 <li style="height: 30px">
                                     <div>
                                         {% if shift.shifter %}
+                                            {% if use_card_reader_to_validate_shifts %}
+                                                {% if shift.wasCarriedOut %}
+                                                    &#128994;
+                                                {% else %}
+                                                    &#9899;
+                                                {% endif %}
+                                                &nbsp;
+                                            {% endif %}
                                             <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
                                             {% if shift.formation %}
                                                 <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>

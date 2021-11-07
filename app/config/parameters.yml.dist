@@ -101,6 +101,7 @@ parameters:
     reserve_new_shift_to_prior_shifter: true
     forbid_shift_overlap_time: 30
     display_name_shifters: false
+    use_card_reader_to_validate_shifts: false
 
     # Swipe card configuration
     swipe_card_logging: true

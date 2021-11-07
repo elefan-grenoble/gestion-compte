@@ -68,6 +68,7 @@ twig:
     display_freeze_account: '%display_freeze_account%'
     display_keys_shop: '%display_keys_shop%'
     display_name_shifters: '%display_name_shifters%'
+    use_card_reader_to_validate_shifts: '%use_card_reader_to_validate_shifts%'
 
 # Doctrine Configuration
 doctrine:
