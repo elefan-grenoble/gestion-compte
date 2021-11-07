@@ -64,6 +64,13 @@ class Shift
     private $dismissedReason;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="was_carried_out", type="boolean", options={"default" : 0})
+     */
+    private $wasCarriedOut;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
@@ -117,6 +124,7 @@ class Shift
     public function __construct()
     {
         $this->isDismissed = false;
+        $this->wasCarriedOut = false;
     }
 
     public function __toString()
@@ -277,6 +285,52 @@ class Shift
     public function getDismissedReason()
     {
         return $this->dismissedReason;
+    }
+
+    /**
+     * Set wasCarriedOut
+     *
+     * @param boolean $wasCarriedOut
+     *
+     * @return BookedShift
+     */
+    public function setWasCarriedOut($wasCarriedOut)
+    {
+        $this->wasCarriedOut = $wasCarriedOut;
+
+        return $this;
+    }
+
+    /**
+     * Validate shift participation
+     *
+     * @return BookedShift
+     */
+    public function validateShiftParticipation()
+    {
+        $this->wasCarriedOut = 1;
+        return $this;
+    }
+
+    /**
+     * Invalidate shift participation
+     *
+     * @return BookedShift
+     */
+    public function invalidateShiftParticipation()
+    {
+        $this->wasCarriedOut = 0;
+        return $this;
+    }
+
+    /**
+     * Get wasCarriedOut
+     *
+     * @return bool
+     */
+    public function getWasCarriedOut()
+    {
+        return $this->wasCarriedOut;
     }
 
     /**

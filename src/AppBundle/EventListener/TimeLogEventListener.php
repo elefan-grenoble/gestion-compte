@@ -11,6 +11,8 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
+use AppBundle\Event\ShiftValidatedEvent;
+use AppBundle\Event\ShiftInvalidatedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
@@ -32,6 +34,7 @@ class TimeLogEventListener
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->cycle_duration = $this->container->getParameter('cycle_duration');
         $this->registration_duration = $this->container->getParameter('registration_duration');
+        $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
     }
 
     /**
@@ -42,8 +45,34 @@ class TimeLogEventListener
     public function onShiftBooked(ShiftBookedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftBooked");
-        $shift = $event->getShift();
-        $this->createShiftLog($shift);
+        if (!$this->use_card_reader_to_validate_shifts) {
+            $shift = $event->getShift();
+            $this->createShiftLog($shift);
+        }
+    }
+
+    /**
+     * @param ShiftValidatedEvent $event
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function onShiftValidated(ShiftValidatedEvent $event)
+    {
+        $this->logger->info("Time Log Listener: onShiftValidated");
+        if ($this->use_card_reader_to_validate_shifts) {
+            $shift = $event->getShift();
+            $this->createShiftLog($shift);
+        }
+    }
+
+    /**
+     * @param ShiftInvalidatedEvent $event
+     * @throws \Doctrine\ORM\ORMException
+     */
+    public function onShiftInvalidated(ShiftInvalidatedEvent $event)
+    {
+        $this->logger->info("Time Log Listener: onShiftInvalidated");
+        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
     }
 
     /**

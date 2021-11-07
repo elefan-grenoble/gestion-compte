@@ -110,6 +110,8 @@ services:
                 - { name: kernel.event_listener, event: shift.dismissed, method: onShiftDismissed }
                 - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
                 - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+                - { name: kernel.event_listener, event: shift.validated, method: onShiftValidated }
+                - { name: kernel.event_listener, event: shift.invalidated, method: onShiftInvalidated }
                 - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
     emailing_event_listener:
             class:  AppBundle\EventListener\EmailingEventListener

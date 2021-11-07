@@ -13,6 +13,7 @@ use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Event\SwipeCardEvent;
+use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Service\MembershipService;
 use AppBundle\Twig\Extension\AppExtension;
 use Psr\Log\LoggerInterface;
@@ -230,6 +231,16 @@ class DefaultController extends Controller
             if ($this->swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($counter));
+            }
+            $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
+            $dispatcher = $this->get('event_dispatcher');
+            foreach ($shifts as $shift) {
+                if ($shift->getWasCarriedOut() == 0) {
+                    $shift->validateShiftParticipation();
+                    $em->persist($shift);
+                    $em->flush();
+                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift, $beneficiary->getMembership()));
+                }
             }
             return $this->render('user/check.html.twig', [
                 'beneficiary' => $beneficiary,

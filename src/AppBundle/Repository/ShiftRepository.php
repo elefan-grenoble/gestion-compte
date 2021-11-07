@@ -248,4 +248,19 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function getOnGoingShifts($beneficiary)
+    {
+        $qb = $this->createQueryBuilder('s')
+                    ->where('s.end > :now')
+                    ->andwhere('s.start < :now_plus_ten')
+                    ->andwhere('s.shifter = :sid')
+                    ->setParameter('now', new \Datetime('now'))
+                    ->setParameter('now_plus_ten', new \Datetime('now +10 minutes'))
+                    ->setParameter('sid', $beneficiary->getId());
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
 }

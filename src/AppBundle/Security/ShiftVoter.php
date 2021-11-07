@@ -19,6 +19,8 @@ class ShiftVoter extends Voter
     const REJECT = 'reject';
     const ACCEPT = 'accept';
     const LOCK = 'lock';
+    const VALIDATE = 'validate';
+    const INVALIDATE = "invalidate";
     private $decisionManager;
     private $container;
 
@@ -37,7 +39,7 @@ class ShiftVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::BOOK, self::DISMISS, self::REJECT, self::FREE, self::ACCEPT, self::LOCK))) {
+        if (!in_array($attribute, array(self::BOOK, self::DISMISS, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE, self::INVALIDATE))) {
             return false;
         }
 
@@ -97,6 +99,12 @@ class ShiftVoter extends Voter
                     return true;
                 }
                 return $this->canAccept($shift, $user);
+            case self::VALIDATE:
+            case self::INVALIDATE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return false;
         }
 
         throw new \LogicException('This code should not be reached!');
