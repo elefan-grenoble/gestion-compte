@@ -375,7 +375,7 @@ class DefaultController extends Controller
                 $firstnames = $firstnames[0];
             }
 
-            $session->getFlashBag()->add('success', 'Ton message a été transmit à ' . $firstnames);
+            $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
             return $this->redirectToRoute('homepage');
         } else {
             $em = $this->getDoctrine()->getManager();
