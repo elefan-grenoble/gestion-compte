@@ -9,6 +9,10 @@
             {% endif %}
             {% if shift.formation != null %}<br>Formation : <b>{{ shift.formation }}</b>{% endif %}
         </p>
+        {% if (shift.getIsDismissed() ) %}
+            <br>
+            <b class="red-text text-darken-4">Créneau en attente d'être repris par un autre bénévole</b>
+        {% endif %}
     </div>
     {% if (shift.getIsCurrent()) %}
         <div class="card-action">

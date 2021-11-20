@@ -33,17 +33,24 @@
             <li class="active">
                 <div class="collapsible-header active"><i class="material-icons">event_busy</i>Mes créneaux annulés et repris par un autre bénévole</div>
                 <div class="collapsible-body">
-                    {% for bookedshift in member.getFutureRebookedShifts() %}
-                        <div class="col m6 s12 {% if (member.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
-                            <div class="card green lighten-5">
-                                <div class="card-content green-text">
-                                    <span class="card-title">{{ bookedshift.start|date_fr_long }}</span>
-                                    <p>De {{ bookedshift.start|date('H:i') }} à {{ bookedshift.end|date('H:i') }}</p>
-                                    <p>Créneau repris</p>
+                    <div class="row">
+                        {% for bookedshift in member.getFutureRebookedShifts() %}
+                            <div class="col m6 s12 {% if (member.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
+                                <div class="card green lighten-5">
+                                    <div class="card-content green-text">
+                                        <span class="card-title">{{ bookedshift.start|date_fr_long }} de {{ bookedshift.start|date('H:i') }} à {{ bookedshift.end|date('H:i') }}</span>
+                                        <i class="material-icons">person</i>{{ bookedshift.booker.firstname }} / <b class="{{ bookedshift.job.color }}-text">{{ bookedshift.job.name }}</b>
+                                        {% if use_fly_and_fixed %}
+                                            <br>
+                                            Type : <b>{% if bookedshift.fixe %} Fixe {% else %} Volant {% endif %}</b>
+                                        {% endif %}
+                                        {% if bookedshift.formation != null %}<br>Formation : <b>{{ bookedshift.formation }}</b>{% endif %}
+                                        <p>Créneau repris par {{ bookedshift.shifter.firstname }} {{ bookedshift.shifter.lastname|first|upper }}.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
             </li>
         {% endif %}
