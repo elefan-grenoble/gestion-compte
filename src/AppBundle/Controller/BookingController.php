@@ -409,9 +409,16 @@ class BookingController extends Controller
 
         $beneficiary = $shift->getShifter();
         $em = $this->getDoctrine()->getManager();
-        $shift->setShifter(null);
-        $shift->setBooker(null);
-        $shift->setFixe(false);
+        if($shift->isFixe()) {
+            $shift->setIsDismissed(true);
+            $shift->setDismissedTime(new DateTime('now'));
+            $shift->setDismissedReason($request->get("reason"));
+            $shift->setShifter($shift->getBooker());
+        } else {
+            $shift->setShifter(null);
+            $shift->setBooker(null);
+            $shift->setFixe(false);
+        }
         $em->persist($shift);
         $em->flush();
 
