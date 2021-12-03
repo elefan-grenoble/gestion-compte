@@ -59,6 +59,13 @@ class Beneficiary
     private $address;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="flying", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $flying;
+
+    /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
      * @Assert\NotNull
@@ -699,6 +706,20 @@ class Beneficiary
     public function setAddress($address)
     {
         $this->address = $address;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFlying(): ?bool {
+        return $this->flying;
+    }
+
+    /**
+     * @param bool $flying
+     */
+    public function setFlying(?bool $flying): void {
+        $this->flying = $flying;
     }
 
     public function getTimeCount($cycle = 0)

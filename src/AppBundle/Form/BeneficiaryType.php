@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -66,6 +67,14 @@ class BeneficiaryType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
             if (is_object($user)&&($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
+                $form->add('flying', ChoiceType::class, array(
+                    'choices'  => [
+                        'Oui' => true,
+                        'Non' => false,
+                    ],
+                    'required' => true,
+                    'label'=>'Equipe volante'
+                ));
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'placeholder' => '--- Commissions ---',

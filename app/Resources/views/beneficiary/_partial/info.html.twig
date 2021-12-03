@@ -44,6 +44,14 @@
             {% endif %})
             {% endif %}
         </div>
+        <div class="col s12 truncate">
+            <i class="material-icons tiny">accessibility</i>&nbsp;
+                {% if beneficiary.flying %}
+                    <div class="chip green-text">Equipe volante</div>
+                {% else %}
+                    <div class="chip green-text">Equipe fixe</div>
+                {% endif %}
+        </div>
     {% if beneficiary.formations | length %}
         <div class="col s12 truncate"><i
                     class="material-icons tiny">assignment_ind</i>&nbsp;{% for formation in beneficiary.formations %}
