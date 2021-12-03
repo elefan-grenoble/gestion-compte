@@ -94,6 +94,14 @@ class SearchUserFormHelper {
                 'multiple'     => true,
                 'required' => false,
                 'label'=>'Hors de la/les Commissions(s)'
+            ))
+            ->add('flying', ChoiceType::class, array(
+                'choices'  => [
+                    'Oui' => 2,
+                    'Non' => 1,
+                ],
+                'required' => false,
+                'label'=>'Equipe volante'
             ));
         }
         $formBuilder->add('action', HiddenType::class,array())
@@ -386,7 +394,10 @@ class SearchUserFormHelper {
                     ->setParameter('subQueryformations', $subQuery);
             }
         }
-
+        if ($form->get('flying')->getData() > 0){
+            $qb = $qb->andWhere('b.flying = :flying')
+                     ->setParameter('flying', $form->get('flying')->getData()-1);
+        }
         return $qb;
     }
 

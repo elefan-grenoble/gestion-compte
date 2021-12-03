@@ -73,16 +73,23 @@
             {{ form_label(form.address.city) }}
         </div>
     </div>
+    <div class="checkboxes col s12">
+        {% if form.children.flying is defined %}
+            {{ form_label(form.flying) }}
+            {{ form_errors(form.flying) }}
+            {{ form_widget(form.flying) }}
+        {% endif %}
+    </div>
     <div class="checkboxes col s6">
         {% if form.children.formations is defined %}
-            {{ form_widget(form.formations) }}
             {{ form_label(form.formations) }}
+            {{ form_widget(form.formations) }}
         {% endif %}
     </div>
     <div class="checkboxes col s6">
         {% if form.children.commissions is defined %}
-            {{ form_widget(form.commissions) }}
             {{ form_label(form.commissions) }}
+            {{ form_widget(form.commissions) }}
         {% endif %}
     </div>
 </div>
