@@ -410,10 +410,9 @@ class BookingController extends Controller
         $beneficiary = $shift->getShifter();
         $em = $this->getDoctrine()->getManager();
         if($shift->isFixe()) {
-            $shift->setIsDismissed(true);
-            $shift->setDismissedTime(new DateTime('now'));
-            $shift->setDismissedReason($request->get("reason"));
-            $shift->setShifter($shift->getBooker());
+            $session = new Session();
+            $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
+            return $this->redirectToRoute("booking");
         } else {
             $shift->setShifter(null);
             $shift->setBooker(null);
