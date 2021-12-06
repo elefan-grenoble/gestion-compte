@@ -395,7 +395,7 @@ class Membership
     /**
      * Get all shifts for all beneficiaries
      */
-    public function getAllShifts($excludeDismissed = false)
+    public function getAllShifts($excludeDismissed = false, $orderByAscending = false)
     {
         $shifts = new ArrayCollection();
         foreach ($this->getBeneficiaries() as $beneficiary) {
@@ -404,12 +404,16 @@ class Membership
             }
         }
         if ($excludeDismissed) {
-            return $shifts->filter(function($shift) {
+            $shifts = $shifts->filter(function($shift) {
                 return !$shift->getIsDismissed();
             });
-        } else {
-            return $shifts;
         }
+        if ($orderByAscending) {
+            usort($shifts, function($shift1, $shift2) {
+                return $shift1.start - $shift2.start;
+            })
+        }
+        return $shifts;
     }
 
     /**
@@ -447,9 +451,9 @@ class Membership
      * @param bool $excludeDismissed
      * @return ArrayCollection|\Doctrine\Common\Collections\Collection
      */
-    public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false)
+    public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false, $orderByAscending = false)
     {
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleOffset) {
+        return $this->getAllShifts($excludeDismissed, $orderByAscending)->filter(function($shift) use ($cycleOffset) {
             return $shift->getStart() > $this->startOfCycle($cycleOffset) &&
                 $shift->getEnd() < $this->endOfCycle($cycleOffset);
         });
