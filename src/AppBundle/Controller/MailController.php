@@ -179,6 +179,7 @@ class MailController extends Controller
                 $user = $em->getRepository(User::class)->findOneBy(array('email' => $nonMember));
                 if (is_object($user)) {
                     $fake_beneficiary = new Beneficiary();
+                    $fake_beneficiary->setFlying(false);
                     $fake_beneficiary->setUser($user);
                     $fake_beneficiary->setFirstname($user->getUsername());
                     $fake_beneficiary->setLastname(' ');
