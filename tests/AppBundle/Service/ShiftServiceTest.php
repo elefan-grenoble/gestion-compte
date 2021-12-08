@@ -34,6 +34,7 @@ class ShiftServiceTest extends TestCase
     {
         $member = new Membership();
         $beneficiary = new Beneficiary();
+        $beneficiary->setFlying(false);
         $member->setMainBeneficiary($beneficiary);
 
         $this->assertEquals(true, $this->shiftService->canBookOnCycle($beneficiary, 0));
@@ -72,6 +73,7 @@ class ShiftServiceTest extends TestCase
     private function doIsShiftBookableTest($beginner, $emptyShift)
     {
         $beneficiary = new Beneficiary();
+        $beneficiary->setFlying(false);
         $member = new Membership();
         $member->setMainBeneficiary($beneficiary);
         $user = new User();
@@ -126,6 +128,7 @@ class ShiftServiceTest extends TestCase
     private function doTestIsBeginner($beginner, $newUserStartAsBeginner)
     {
         $beneficiary = new Beneficiary();
+        $beneficiary->setFlying(false);
 
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
