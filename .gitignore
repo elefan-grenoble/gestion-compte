@@ -43,6 +43,8 @@ LICENSE
 .env
 .settings/
 
+/mysql
+
 #script to download and import last prod DB to develop in local env
 /updateLocalDbFromProd.sh
 

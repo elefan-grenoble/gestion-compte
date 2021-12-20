@@ -1,6 +1,36 @@
 #May the magic be!
 
-## Prérequis
+## Utilisation via docker-compose
+
+### Prérequis
+
+* docker
+* docker-compose
+
+### Lancer l'instance
+
+Lancer le docker-compose pour deployer un conteneur de base de données (mariadb) et un conteneur symfony
+<pre>docker-compose up</pre>
+Ajouter ``127.0.0.1 membres.yourcoop.local`` au fichier _/etc/hosts_.
+Créer l'utilisateur super admin (valeurs par défaut : admin:password)
+Visiter [http://membres.yourcoop.local:8000/user/install_admin](http://membres.yourcoop.local:8000/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
+
+Note: le premier lancement du docker-compose peut être long (~30s) du fait de plusieurs étapes : initialisation de la db, creation du fichier parameters.yml, ... La ligne <pre>PHP 7.4.27 Development Server (http://0.0.0.0:8000) started</pre> indique que le deploiement de l'espace membre est fonctionnel. La base de données est montée dans docker avec un volume, elle est donc persistente. Le fichier parameters.yml doit être modifié suivant la configuration voulue.
+
+
+### Charger la base de donénes à partir d'un dump
+
+Supprimer une base de données existante (si elle existe)
+<pre>docker exec -it database mysql -uroot -psecret -e 'DROP DATABASE IF EXISTS symfony;'</pre>
+Recréer la base de données
+<pre>docker exec -it database mysql -uroot -psecret -e 'CREATE DATABASE IF NOT EXISTS symfony;'</pre>
+Charger la base données depuis une sauvegarde
+<pre>docker exec -i database mysql -uroot -psecret symfony < espace_membres.sql</pre>
+
+
+## Installation sur une serveur
+
+### Prérequis
 
 * PHP (version 7.2 et supérieure)
 * [Composer](https://getcomposer.org/)
@@ -9,7 +39,7 @@
 * php-xml
 * php-gd
 
-## Installation
+### Installation
 
 Clone code
 <pre>git clone https://github.com/elefan-grenoble/gestion-compte.git</pre>
@@ -35,6 +65,8 @@ Ajouter ``127.0.0.1 membres.yourcoop.local`` au fichier _/etc/hosts_.
 Visiter [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
 
 
+## Autres
+
 ### En Prod
 Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode (au lieu de 404) 
 <pre>location ~* ^/sw/(.*)/(qr|br)\.png$ {
@@ -43,7 +75,7 @@ Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode 
 </pre>
 
 
-## <a name="crontab"></a>crontab
+### <a name="crontab"></a>crontab
 
 <pre>
 #generate shifts in 27 days (same weekday as yesterday)
@@ -60,6 +92,6 @@ Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode 
 45 21 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:code:verify_change --last_run 24
 </pre>
 
-## mise en route
+### mise en route
 
 * Suivez le [guide de mise en route](start.md)

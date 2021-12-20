@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: database
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: symfony
+      MARIADB_USER: symfony
+      MARIADB_PASSWORD: symfony
+    volumes:
+      - ./mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", '-u', 'root', '-psecret']
+      timeout: 20s
+      retries: 10
+
+  php:
+    container_name: php
+    build:
+      context: .
+    command: >
+      bash -c "./wait-for -t 60 database:3306 -- composer install -n
+      && php bin/console doctrine:migration:migrate
+      && php bin/console server:run *:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - database

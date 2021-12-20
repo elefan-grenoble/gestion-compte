@@ -1,8 +1,4 @@
-FROM php:7.4-apache
-
-ENV APP_ENV prod
-ENV SYMFONY_ENV prod
-ENV APP_DEBUG 0
+FROM php:7.4
 
 # Paramétrage de l'heure du conteneur
 ENV TZ=Europe/Paris
@@ -29,19 +25,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 # Installation des extensions nécessaires
 RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
 
-# Activation du Rewrite Mode pour Apache
-RUN a2enmod rewrite
-RUN sed -i 's#/var/www/html#/var/www/html/web#g' /etc/apache2/sites-available/000-default.conf
+WORKDIR /app
+COPY . .
 
-# Copie du fichier de configuration de PHP
-RUN cp /usr/local/etc/php/php.ini-production $PHP_INI_DIR/conf.d/php-dev.ini
-RUN sed -i 's#;date.timezone =#date.timezone= Europe/Paris#g' $PHP_INI_DIR/conf.d/*.ini
+RUN COMPOSER_MEMORY_LIMIT=2G composer install --no-interaction --optimize-autoloader
 
-COPY --chown=www-data:www-data . /var/www/html/
-
-RUN mkdir /var/www/.composer && chown www-data:www-data /var/www/.composer
-
-USER www-data
-
-RUN COMPOSER_MEMORY_LIMIT=2G composer install && php bin/console assetic:dump --env=prod --no-debug
-USER root

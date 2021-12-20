@@ -20,14 +20,8 @@ final class Version20191021000000_home_dynamic_content extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
-        $em = $this->container->get('doctrine.orm.entity_manager');
-        $dynamicContent = new DynamicContent();
-        $dynamicContent->setCode('HOME');
-        $dynamicContent->setName('Page d\'accueil');
-        $dynamicContent->setDescription('Bandeau sur la page d\'accueil d\'un membre connecté');
-        $dynamicContent->setContent('');
-        $em->persist($dynamicContent);
-        $em->flush();
+
+        $this->addSql("INSERT INTO dynamic_content (code, name, description, content) VALUES ('HOME', 'Page d\'accueil', 'Bandeau sur la page d\'accueil d\'un membre connect\u00e9', '')");
     }
 
     public function down(Schema $schema) : void
