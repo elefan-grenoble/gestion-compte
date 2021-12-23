@@ -1,12 +1,20 @@
 </div> <!-- end div.section -->
 </div> <!-- end div.container -->
 <div style="padding: 5px;">
-    <ul class="collapsible" data-collapsible="expandable">
-        {% set current_cycle = 0 %}
-        {% if beneficiary is not defined %}
-            {% set beneficiary = null %}
+    {% set current_cycle = 0 %}
+    {% if beneficiary is not defined %}
+        {% set beneficiary = null %}
+    {% endif %}
+    {% set weekCycle = ["A", "B", "C", "D"] %}
+    {% set previousWeekIndex = -1 %}
+    {% for bucketsByjob in bucketsByDay %}
+        {% set weekIndex = (((bucketsByjob|first|first).start | date('W') - 1) % 4) %}
+        {% if previousWeekIndex != weekIndex %}
+            {% if previousWeekIndex != -1 %}</ul>{% endif %}
+            <h5 style="margin-left: 3px;">Semaine {{weekCycle[((bucketsByjob|first|first).start | date('W') - 1) % 4]}}</h5>
+            {% set previousWeekIndex = weekIndex %}
+            <ul class="collapsible" data-collapsible="expandable">
         {% endif %}
-        {% for bucketsByjob in bucketsByDay %}
         <li>
             <div class="collapsible-header {% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}active {% else %}not-allowed {% endif %}"><i class="material-icons">{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle)  or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}</div>
             <div class="collapsible-body" style="padding: 1rem 0">

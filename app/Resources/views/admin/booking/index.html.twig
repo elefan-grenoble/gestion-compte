@@ -67,16 +67,25 @@
                 </div>
             </div>
         </div>
+        {% set previousWeekIndex = -1 %}
         {% for bucketsByjob in bucketsByDay %}
             {% set date = false %}
+            {% set weekCycle = ["A", "B", "C", "D"] %}
             {% for buckets in bucketsByjob %}
+                {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
+                {% if not date and previousWeekIndex != weekIndex %}
+                    <h5>Semaine {{weekCycle[((buckets|first).start | date('W') - 1) % 4]}}</h5>
+                    {% set previousWeekIndex = weekIndex %}
+                {% endif %}
                 <div class="row center show-on-small hide-on-med-and-up ">
                     {% if not date %}{{ (buckets|first).start|date_fr_long }}{% endif %}
                 </div>
                 <div class="row" style="display: flex;min-height: 60px;">
                     <div class="col m2 hide-on-small-only valign-wrapper">
                         <div>
-                            {% if not date %}<b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}{% endif %}
+                            {% if not date %}
+                                <b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}
+                            {% endif %}
                         </div>
                     </div>
                     <div class="col m10 s12">
