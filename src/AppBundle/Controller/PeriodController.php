@@ -20,6 +20,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -32,7 +33,7 @@ class PeriodController extends Controller
 {
     /**
      * @Route("/", name="period")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function indexAction(Request $request)
     {
@@ -48,7 +49,7 @@ class PeriodController extends Controller
 
     /**
      * @Route("/new", name="period_new")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
@@ -74,7 +75,6 @@ class PeriodController extends Controller
             $time = $form->get('end')->getData();
             $period->setEnd(new \DateTime($time));
 
-
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le nouveau creneau type a bien été créé !');
@@ -88,7 +88,7 @@ class PeriodController extends Controller
 
     /**
      * @Route("/edit/{id}", name="period_edit")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request,Period $period)
@@ -98,6 +98,7 @@ class PeriodController extends Controller
         $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
+        $em = $this->getDoctrine()->getManager();
         if ($form->isSubmitted() && $form->isValid()) {
 
             $time = $form->get('start')->getData();
@@ -105,12 +106,18 @@ class PeriodController extends Controller
             $time = $form->get('end')->getData();
             $period->setEnd(new \DateTime($time));
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le créneau type a bien été édité !');
             return $this->redirectToRoute('period');
         }
+
+        $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
+            ->createQueryBuilder('b')
+            ->select('b, m')
+            ->join('b.user', 'u')
+            ->join('b.membership', 'm');
+        $beneficiaries = $beneficiariesQb->getQuery()->getResult();
 
         $form->get('start')->setData($period->getStart()->format('H:i'));
         $form->get('end')->setData($period->getEnd()->format('H:i'));
@@ -131,6 +138,7 @@ class PeriodController extends Controller
         return $this->render('admin/period/edit.html.twig', array(
             "form" => $form->createView(),
             "period" => $period,
+            "beneficiaries" => $beneficiaries,
             "position_form" => $this->createForm(PeriodPositionType::class, new PeriodPosition(), array('action' => $this->generateUrl('add_position_to_period', array('id' => $period->getId()))))->createView(),
             "delete_form" => $delete_form->createView(),
             "positions_delete_form" => $positions_delete_form
@@ -139,7 +147,7 @@ class PeriodController extends Controller
 
     /**
      * @Route("/{id}/add_position/", name="add_position_to_period")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"POST"})
      */
     public function addPositionToPeriodAction(Request $request,Period $period)
@@ -152,12 +160,16 @@ class PeriodController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $existingPosition = $em->getRepository('AppBundle:PeriodPosition')->findOneBy(array("formation"=>$position->getFormation(),"nbOfShifter"=>$position->getNbOfShifter()));
-            if ($existingPosition){
-                $session->getFlashBag()->add('info', 'La position existe déjà');
-                $position = $existingPosition;
+            foreach ($form["week_cycle"]->getData() as $week_cycle) {
+                $position->setWeekCycle($week_cycle);
+                $nb_of_shifter = $form["nb_of_shifter"]->getData();
+                while (0 < $nb_of_shifter ){
+                    $p = clone($position);
+                    $period->addPosition($p);
+                    $em->persist($p);
+                    $nb_of_shifter--;
+                }
             }
-            $period->addPosition($position);
             $em->persist($period);
             $em->flush();
             $session->getFlashBag()->add('success', 'La position '.$position.' a bien été ajoutée');
@@ -169,7 +181,7 @@ class PeriodController extends Controller
 
     /**
      * @Route("/{period}/remove_position/{position}", name="remove_position_from_period")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"DELETE"})
      */
     public function removePositionToPeriodAction(Request $request,Period $period,PeriodPosition $position)
@@ -184,14 +196,81 @@ class PeriodController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $period->removePosition($position);
-            $em->persist($period);
+            $em->remove($position);
             $em->flush();
             $session->getFlashBag()->add('success', 'La position '.$position.' a bien été supprimée');
             return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
+    }
+
+    /**
+     * Book a period.
+     *
+     * @Route("/book/{id}", name="book_position_from_period")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method("POST")
+     */
+    public function bookPositionToPeriodAction(Request $request, PeriodPosition $position)
+    {
+        $session = new Session();
+        $period = $position->getPeriod();
+
+        if ($position->getShifter()) {
+            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
+            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+        }
+
+        $content = json_decode($request->getContent());
+        $str = $content->beneficiary;
+
+        $em = $this->getDoctrine()->getManager();
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
+
+        if (!$beneficiary) {
+            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
+            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+        }
+
+        if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
+            $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $position->getFormation()->getName() . ")");
+            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+        }
+
+        if (!$position->getBooker()) {
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $current_beneficiary = $current_user->getBeneficiary();
+            $position->setBooker($current_beneficiary);
+            $position->setBookedTime(new \DateTime('now'));
+        }
+        $position->setShifter($beneficiary);
+        $em->persist($position);
+        $em->flush();
+
+        $session->getFlashBag()->add("success", "Créneau fixe réservé avec succès pour " . $position->getShifter());
+        return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 200);
+
+    }
+
+    /**
+     * free a position.
+     *
+     * @Route("/free/{id}", name="free_position_from_period")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method("POST")
+     */
+    public function freePositionToPeriodAction(Request $request, PeriodPosition $position)
+    {
+        $session = new Session();
+
+        $em = $this->getDoctrine()->getManager();
+        $position->free();
+        $em->persist($position);
+        $em->flush();
+
+        $session->getFlashBag()->add('success', "Le poste a bien été libéré");
+        return $this->redirectToRoute('period_edit',array('id'=>$position->getPeriod()->getId()));
     }
 
     /**

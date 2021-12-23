@@ -103,6 +103,13 @@ class Shift
     private $job;
 
     /**
+     * One shift may have been created from One PeriodPosition.
+     * @ORM\ManyToOne(targetEntity="PeriodPosition")
+     * @ORM\JoinColumn(name="position_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $position;
+
+    /**
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift")
      */
     private $timeLogs;
@@ -595,5 +602,18 @@ class Shift
         $this->fixe = $fixe;
     }
 
+    /**
+     * Set job
+     *
+     * @param \AppBundle\Entity\PeriodPosition $position
+     *
+     * @return Shift
+     */
+    public function setPosition(\AppBundle\Entity\PeriodPosition $position = null)
+    {
+        $this->position = $position;
+
+        return $this;
+    }
 
 }

@@ -30,13 +30,6 @@ class Period
     private $dayOfWeek;
 
     /**
-     * @var array
-     *
-     * @ORM\Column(name="week_cycle", type="simple_array",  options={"default" : "0,1,2,3"})
-     */
-    private $weekCycle;
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(name="start", type="time")
@@ -58,10 +51,8 @@ class Period
     private $job;
 
     /**
-     * Many Period have Many Positions.
-     * @ORM\ManyToMany(targetEntity="PeriodPosition", mappedBy="periods",cascade={"persist"})
-     * @OrderBy({"nbOfShifter" = "ASC"})
-     * @ORM\JoinTable(name="period_positions")
+     * One Period have Many Positions.
+     * @ORM\OneToMany(targetEntity="PeriodPosition", mappedBy="period", cascade={"persist", "remove"}), orphanRemoval=true)
      */
     private $positions;
 
@@ -99,50 +90,6 @@ class Period
         return $this->dayOfWeek;
     }
 
-    /**
-     * Set weekCycle
-     *
-     * @param array $weekCycle
-     *
-     */
-    public function setWeekCycle($weekCycle)
-    {
-        $this->weekCycle = $weekCycle;
-    }
-
-    /**
-     * Get weekCycle
-     *
-     * @return array
-     */
-    public function getWeekCycle()
-    {
-        return $this->weekCycle;
-    }
-
-    /**
-     * Get weekCycleName
-     *
-     * @return string
-     */
-    public function getWeekCycleName()
-    {
-        $weekCycleNb = count($this->weekCycle);
-        if ($weekCycleNb == 4) {
-            return "Chaque semaine";
-        } else {
-            $map = [ 'A', 'B', 'C', 'D'];
-            $output = "Semaine#";
-            sort($this->weekCycle);
-            for ($i = 0, $size = count($this->weekCycle); $i < $size; ++$i) {
-                $output .= $map[intval($this->weekCycle[$i])];
-                if ($i < $size-1) {
-                    $output .= '-';
-                }
-            }
-            return $output;
-        }
-    }
 
     /**
      * Set start
@@ -234,7 +181,7 @@ class Period
      */
     public function addPosition(\AppBundle\Entity\PeriodPosition $position)
     {
-        $position->addPeriod($this);
+        $position->setPeriod($this);
         $this->positions[] = $position;
 
         return $this;
@@ -247,7 +194,6 @@ class Period
      */
     public function removePosition(\AppBundle\Entity\PeriodPosition $position)
     {
-        $position->removePeriod($this);
         $this->positions->removeElement($position);
     }
 
@@ -259,5 +205,63 @@ class Period
     public function getPositions()
     {
         return $this->positions;
+    }
+
+    /**
+     * Get periodPositions per week cycle
+     *
+     * @return array
+     */
+    public function getPositionsPerWeekCycle()
+    {
+        $positions_per_week_cycle = array();
+        foreach ($this->positions as $position) {
+            if (!array_key_exists($position->getWeekCycle(), $positions_per_week_cycle)) {
+                $positions_per_week_cycle[$position->getWeekCycle()] = array();
+            }
+            $positions_per_week_cycle[$position->getWeekCycle()][] = $position;
+        }
+        ksort($positions_per_week_cycle);
+        return $positions_per_week_cycle;
+    }
+
+    /**
+     * Get periodPositions grouped per week cycle
+     *
+     * @return array
+     */
+    public function getGroupedPositionsPerWeekCycle()
+    {
+        $aggregate_per_formation = array();
+        foreach ($this->positions as $position) {
+            if (!array_key_exists($position->getWeekCycle(), $aggregate_per_formation)) {
+                $aggregate_per_formation[$position->getWeekCycle()] = array();
+            }
+            if ($position->getFormation()) {
+                $formation = $position->getFormation()->getName();
+            } else {
+                $formation = "Membre";
+            }
+            if (array_key_exists($formation, $aggregate_per_formation[$position->getWeekCycle()])) {
+                $aggregate_per_formation[$position->getWeekCycle()][$formation] += 1;
+            } else {
+                $aggregate_per_formation[$position->getWeekCycle()][$formation] = 1;
+            }
+        }
+        ksort($aggregate_per_formation);
+        $aggregate_per_week_cycle = array();
+        foreach ($aggregate_per_formation as $week => $position) {
+            $key = $week;
+            foreach ($aggregate_per_week_cycle as $w => $p) {
+                if ($p == $position) {
+                    $key = $w.", ".$week;
+                    unset($aggregate_per_week_cycle[$w]);
+                    break;
+                }
+            }
+            $aggregate_per_week_cycle[$key] = $position;
+        }
+        ksort($aggregate_per_week_cycle);
+        return $aggregate_per_week_cycle;
     }
 }

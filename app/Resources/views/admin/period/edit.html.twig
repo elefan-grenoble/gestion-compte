@@ -16,37 +16,167 @@
     </div>
     {{ form_end(form) }}
 
-    <h5>Formations liés</h5>
-    <ul>
-        {% for position in period.positions %}
-            <li>
-                {{ form_start(positions_delete_form[position.id]) }}
-                {{ form_widget(positions_delete_form[position.id]) }}
-                {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
-                {{ form_end(positions_delete_form[position.id]) }}</li>
-        {% endfor %}
-    </ul>
-    {{ form_start(position_form) }}
-    <div class="row">
-        <div class="col s3">
-            {{ form_label(position_form.nb_of_shifter) }}
-            {{ form_widget(position_form.nb_of_shifter) }}
-        </div>
-        <div class="col s6">
-            {{ form_label(position_form.formation) }}
-            {{ form_widget(position_form.formation) }}
-        </div>
-        <div class="col s3">
-            <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
-        </div>
-    </div>
-    {{ form_end(position_form) }}
-
-
+    {% if is_granted("ROLE_ADMIN") %}
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
     <div>
         <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
     </div>
     {{ form_end(delete_form) }}
+    {% endif %}
+
+    <h5>Postes disponibles</h5>
+
+    {% if use_fly_and_fixed %}
+        {% if (period.positionsperweekcycle | length == 0) %}
+            Aucun poste n'existe pour ce créneau
+        {% endif %}
+        {% for week, positions in period.positionsperweekcycle %}
+            <h6>Semaine {{week}}</h6>
+            <ul class="collapsible" data-collapsible="accordion">
+                {% for position in positions %}
+                    {% if position.shifter %}
+                        <li id="position{{ position.id }}">
+                            <div class="collapsible-header">
+                                <div class="col s12">
+                                    {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
+                                    #{{ position.shifter.membership.memberNumber }}&nbsp;{{ position.shifter.firstname }}&nbsp;{{ position.shifter.lastname }}
+                                    {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
+                                    {% if not position.formation and position.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>{% endif %}
+                                </div>
+                            </div>
+                            <div class="collapsible-body">
+                                Créneau fixe réservé le <i>{{ position.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number': position.booker.membership.memberNumber}) }}">{{ position.booker }}</a>.
+                                <form action="{{ path('free_position_from_period', {'id' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
+                                    <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li id="position{{ position.id }}">
+                            <div class="collapsible-header">
+                                <div class="row" style="margin-bottom: 0px; width: 100%;">
+                                    <div class="col s11">
+                                        <b>
+                                            <span style="font-style: italic">libre</span>
+                                        </b>
+                                        {% if position.formation %}
+                                            &nbsp;({{ position.formation.name }})
+                                        {% else %}
+                                            &nbsp;(sans formation particulière)
+                                        {% endif %}
+                                    </div>
+                                    <div class="col s1 right-align">
+                                        {{ form_start(positions_delete_form[position.id]) }}
+                                        {{ form_widget(positions_delete_form[position.id]) }}
+                                        <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
+                                        {{ form_end(positions_delete_form[position.id]) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="collapsible-body">
+                                <div class="row">
+                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                        <input id ="benef{{ position.id }}" type="text" class="empty-position" name="beneficiary" placeholder="Beneficiaire">
+                                    </div>
+                                    <div class="col s3">
+                                        <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0>
+                                        <button class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+           </ul>
+        {% endfor %}
+    {% else %}
+        {% for week, positions in period.positionsperweekcycle %}
+            <h6>Semaine {{week}}</h6>
+            <ul>
+            {% for position in positions %}
+                <li>
+                    {{ form_start(positions_delete_form[position.id]) }}
+                    {{ form_widget(positions_delete_form[position.id]) }}
+                    {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
+                    {{ form_end(positions_delete_form[position.id]) }}
+                </li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
+    <h5>Ajouter un poste</h5>
+    {{ form_start(position_form) }}
+    <div class="row">
+        <div class="col s3">
+            {{ form_label(position_form.nb_of_shifter) }}
+            {{ form_widget(position_form.nb_of_shifter) }}
+        </div>
+        <div class="col s3">
+            {{ form_label(position_form.week_cycle) }}
+            {{ form_widget(position_form.week_cycle) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(position_form.formation) }}
+            {{ form_widget(position_form.formation) }}
+        </div>
+        <div class="col s6">
+            <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+        </div>
+    </div>
+    {{ form_end(position_form) }}
+
+
+{% endblock %}
+{% block javascripts %}
+    <script>
+        jQuery(function ($) {
+            $('input.empty-position').autocomplete({
+                data: {
+                    {% for beneficiary in beneficiaries %}
+                        "{{ beneficiary.autocompleteLabel }}" : null,
+                    {% endfor %}
+                },
+                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
+                onAutocomplete: function(val) {
+                    // Callback function when value is autcompleted.
+                    $('button.add').removeAttr('disabled');
+                },
+                minLength: 2, // The minimum length of the input for the autocomplete to start. Default: 1.
+            });
+            $('input.empty-shift').keydown(function () {
+                $('button.add:not(:disabled)').attr('disabled','disabled');
+            });
+        })
+
+        function postPosition(positionId) {
+
+            let selectedBenef = document.getElementById('benef'+positionId);
+
+            if (selectedBenef != null) {
+                let url = "{{ path('book_position_from_period',{'id': 'tmpId'}) }}";
+                url = url.replace("tmpId", positionId);
+
+                let body = {
+                    "beneficiary": selectedBenef.value
+                };
+
+                // If using old IE version
+                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+
+                xhttp.open("POST", url, true);
+                xhttp.onreadystatechange = function () {
+                    if (xhttp.readyState > 3) {
+                        if (200 <= xhttp.status && xhttp.status < 300) {
+                            window.location.replace(xhttp.responseText);
+                        } else {
+                            alert("une erreur est survenue");
+                        }
+                    }
+                };
+                xhttp.send(JSON.stringify(body));
+                return xhttp;
+            }
+        }
+    </script>
 {% endblock %}

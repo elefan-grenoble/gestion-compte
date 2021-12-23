@@ -22,13 +22,6 @@ class PeriodPosition
     private $id;
 
     /**
-     * @var int
-     *
-     * @ORM\Column(name="nb_of_shifter", type="integer")
-     */
-    private $nbOfShifter;
-
-    /**
      * One Period has One Formation.
      * @ORM\ManyToOne(targetEntity="Formation")
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
@@ -36,10 +29,36 @@ class PeriodPosition
     private $formation;
 
     /**
-     * Many Positions have Many Periods.
-     * @ORM\ManyToMany(targetEntity="Period", inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions")
+     * @ORM\JoinColumn(name="period_id", referencedColumnName="id", onDelete="CASCADE")
      */
-    private $periods;
+    private $period;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
+     */
+    private $shifter;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
+     */
+    private $booker;
+
+    /**
+     * @var string
+     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=false)
+     */
+    private $weekCycle;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="booked_time", type="datetime", nullable=true)
+     */
+    private $bookedTime;
+
 
     /**
      * Get id
@@ -52,29 +71,28 @@ class PeriodPosition
     }
 
     /**
-     * Set nbOfShifter
+     * Set period
      *
-     * @param integer $nbOfShifter
+     * @param \AppBundle\Entity\Period $period
      *
      * @return PeriodPosition
      */
-    public function setNbOfShifter($nbOfShifter)
+    public function setPeriod(\AppBundle\Entity\Period $period = null)
     {
-        $this->nbOfShifter = $nbOfShifter;
+        $this->period = $period;
 
         return $this;
     }
 
     /**
-     * Get nbOfShifter
+     * Get period
      *
-     * @return int
+     * @return Period
      */
-    public function getNbOfShifter()
+    public function getPeriod()
     {
-        return $this->nbOfShifter;
+        return $this->period;
     }
-
 
     /**
      * Set formation
@@ -100,12 +118,120 @@ class PeriodPosition
         return $this->formation;
     }
 
+    /**
+     * Set weekCycle
+     *
+     * @param string $weekCycle
+     *
+     * @return PeriodPosition
+     */
+    public function setWeekCycle($weekCycle)
+    {
+        $this->weekCycle = $weekCycle;
+        return $this;
+    }
+
+    /**
+     * Get weekCycle
+     *
+     * @return array
+     */
+    public function getWeekCycle()
+    {
+        return $this->weekCycle;
+    }
+
+    /**
+     * Set shifter
+     *
+     * @param \AppBundle\Entity\Beneficiary $shifter
+     *
+     * @return PeriodPosition
+     */
+    public function setShifter(\AppBundle\Entity\Beneficiary $shifter = null)
+    {
+        $this->shifter = $shifter;
+
+        return $this;
+    }
+
+    /**
+     * Get shifter
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getShifter()
+    {
+        return $this->shifter;
+    }
+
+    /**
+     * Set booker
+     *
+     * @param \AppBundle\Entity\Beneficiary $booker
+     *
+     * @return BookedShift
+     */
+    public function setBooker(\AppBundle\Entity\Beneficiary $booker = null)
+    {
+        $this->booker = $booker;
+
+        return $this;
+    }
+
+    /**
+     * Get booker
+     *
+     * @return \AppBundle\Entity\Beneficiary
+     */
+    public function getBooker()
+    {
+        return $this->booker;
+    }
+
+    /**
+     * Set bookedTime
+     *
+     * @param \DateTime $bookedTime
+     *
+     * @return BookedShift
+     */
+    public function setBookedTime($bookedTime)
+    {
+        $this->bookedTime = $bookedTime;
+
+        return $this;
+    }
+
+    /**
+     * Get bookedTime
+     *
+     * @return \DateTime
+     */
+    public function getBookedTime()
+    {
+        return $this->bookedTime;
+    }
+
+    /**
+     * free
+     *
+     * @return \AppBundle\Entity\PeriodPosition
+     */
+    public function free()
+    {
+        $this->setBooker(null);
+        $this->setBookedTime(null);
+        $this->setShifter(null);
+        return $this;
+    }
+
     public function __toString()
     {
         if ($this->getFormation())
-            return $this->getNbOfShifter()." x ".$this->getFormation()->getName();
+            return $this->getFormation()->getName();
         else
-            return $this->getNbOfShifter()." x Membre";
+            return "Membre";
     }
     /**
      * Constructor
@@ -115,37 +241,4 @@ class PeriodPosition
         $this->periods = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    /**
-     * Add period
-     *
-     * @param \AppBundle\Entity\Period $period
-     *
-     * @return PeriodPosition
-     */
-    public function addPeriod(\AppBundle\Entity\Period $period)
-    {
-        $this->periods[] = $period;
-
-        return $this;
-    }
-
-    /**
-     * Remove period
-     *
-     * @param \AppBundle\Entity\Period $period
-     */
-    public function removePeriod(\AppBundle\Entity\Period $period)
-    {
-        $this->periods->removeElement($period);
-    }
-
-    /**
-     * Get periods
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getPeriods()
-    {
-        return $this->periods;
-    }
 }

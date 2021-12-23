@@ -14,11 +14,6 @@ use AppBundle\Repository\JobRepository;
 class PeriodType extends AbstractType
 {
 
-    const WEEKA = '0';
-    const WEEKB = '1';
-    const WEEKC = '2';
-    const WEEKD = '3';
-
     /**
      * {@inheritdoc}
      */
@@ -34,17 +29,6 @@ class PeriodType extends AbstractType
                 "Samedi" => 5,
                 "Dimanche" => 6,
             )))
-            ->add('week_cycle', ChoiceType::class, array(
-                'label' => 'Cycle', 'choices' => array(
-                    "Semaine A" => self::WEEKA,
-                    "Semaine B" => self::WEEKB,
-                    "Semaine C" => self::WEEKC,
-                    "Semaine D" => self::WEEKD,
-                ),
-                'expanded'  => false,
-                'multiple'  => true,
-                'empty_data' => [self::WEEKA, self::WEEKB, self::WEEKC, self::WEEKD]
-            ))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
             ->add('job', EntityType::class, array(

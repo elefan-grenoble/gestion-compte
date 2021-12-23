@@ -11,9 +11,18 @@
 
     <a href="{{ path("period_new") }}" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Nouveau créneau type</a>
     <br>
+    {% if is_granted("ROLE_ADMIN") %}
     <a href="{{ path("period_copy") }}" class="btn waves-effect waves-light"><i class="material-icons left">content_copy</i>Dupliquer les créneaux types d'un jour vers un autre</a>
     <br>
     <a href="{{ path("shifts_generation") }}" class="btn waves-effect waves-light purple"><i class="material-icons left">date_range</i>Generer des créneaux</a>
+    {% endif %}
+    {% if use_fly_and_fixed %}
+    <br>
+    <a id="shifter" style="display: None;" onClick="showShifters()" class="btn waves-effect waves-light purple"><i class="material-icons left">accessibility</i>Afficher les membres</a>
+    <a id="formation" onClick="hideShifters()" class="btn waves-effect waves-light purple"><i class="material-icons left">accessibility</i>Afficher les formations</a>
+    {% endif %}
+    </div>
+    </div>
 
 
     <table>
@@ -34,21 +43,38 @@
                     <td>
                         {% for period in periods[i] %}
                             <a href="{{ path("period_edit",{'id': period.id}) }}">
-                                <div class="card-panel {% if period.job %}{{ period.job.color }}{% else %}blue{% endif %} lighten-2">
-                                     <p class="white-text">
-                                         {% if period.job %}
-                                             <b class="white-text">
-                                                 {{ period.job.name }}
-                                                 {% if (period.weekCycle is not null) and (period.weekCycle > -1) %}
-                                                    ({{ period.getWeekCycleName() }})
-                                                 {% endif %}
-                                             </b>
-                                         {% endif %}<br>
-                                          {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}<br>
-                                          {% for position in period.positions %}
-                                              <i class="material-icons">person</i>{{ position }}
-                                          {% endfor %}
-                                      </p>
+                                <div class="card {% if period.job %}{{ period.job.color }}{% else %}blue{% endif %} lighten-2">
+                                    <div class="card-content white-text">
+                                        <span style="margin-bottom:1em;">
+                                             {% if period.job %}
+                                                 <b>{{ period.job.name }}</b>
+                                             {% endif %}<br>
+                                             {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+                                        </span>
+                                        <div id="formation" style="margin-top:2em;{% if use_fly_and_fixed %}display: None;{% endif %}">
+                                            {% for week, positions in period.groupedpositionsperweekcycle %}
+                                                <h6 class="white-text">Semaine {{ week }}</h6>
+                                                {% for formation, nb_shifters in positions %}
+                                                    <i class="material-icons">person</i>{{ nb_shifters }} x {{ formation }}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                        {% if use_fly_and_fixed %}
+                                            <div id="shifter" style="margin-top:2em;">
+                                                {% for week, positions in period.positionsperweekcycle %}
+                                                    <h6 class="white-text">Semaine {{ week }}</h6>
+                                                    {% for position in positions %}
+                                                        <i class="material-icons">person</i>
+                                                        {% if position.shifter %}
+                                                            {{ position.shifter }}
+                                                        {% else %}
+                                                            Libre
+                                                        {% endif %}<br>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </a>
                         {% endfor %}
@@ -58,4 +84,23 @@
         </tbody>
     </table>
 
-  {% endblock %}
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        function showShifters() {
+            $('div[id="formation"]').hide();
+            $('div[id="shifter"]').show();
+            $('a[id="formation"]').show();
+            $('a[id="shifter"]').hide();
+        }
+        function hideShifters() {
+            $('div[id="formation"]').show();
+            $('div[id="shifter"]').hide();
+            $('a[id="formation"]').hide();
+            $('a[id="shifter"]').show();
+        }
+    </script>
+
+{% endblock %}
