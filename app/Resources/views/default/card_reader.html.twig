@@ -31,12 +31,9 @@
                                     <div>
                                         {% if shift.shifter %}
                                             {% if use_card_reader_to_validate_shifts %}
-                                                {% if shift.wasCarriedOut %}
-                                                    &#128994;
-                                                {% else %}
-                                                    &#9899;
-                                                {% endif %}
-                                                &nbsp;
+                                                <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">
+                                                    &#9673;
+                                                </span>&nbsp;
                                             {% endif %}
                                             <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
                                             {% if shift.formation %}

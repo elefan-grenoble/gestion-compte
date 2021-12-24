@@ -20,7 +20,14 @@
         </div>
     {% elseif (shift.getIsPast()) %}
         <div class="card-action">
-            <i class="material-icons tiny">check</i><span>effectué</span>
+            <i class="material-icons tiny">check</i>
+            <span>
+                {% if (shift.wasCarriedOut) %}
+                    effectué
+                {% else %}
+                    non effectué
+                {% endif %}
+            </span>
         </div>
     {% else %}
         {% if (shift.getIsDismissed() ) %}

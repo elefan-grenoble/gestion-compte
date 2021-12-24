@@ -9,7 +9,7 @@
     <a href="#edit{{ bucket.first.id }}"
        class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
         <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %} "
-             style="position: relative;height: 60px;">
+             style="position: relative;height: 70px;">
             <div style="height:2px; width: 100%;position: absolute;">
                 {% if nbBookableShifts < nbShifts %}
                     {% for shifter in 1..(nbShifts - nbBookableShifts) %}
@@ -18,20 +18,28 @@
                 {% endif %}
             </div>
             <div >
-                <div style="position: absolute;width:60px;height: 60px;top: 0;left: 2px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
+                <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
                         &nbsp;{{ bucket.end|date('G\\hi') }}</div>
-                <ul style="font-size: 9px; padding-left: 20px;">
+                <ul style="font-size: 9px; padding-left: 15px;">
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.sortedShifts() %}
                         {% if (shift.shifter) %}{# is booked #}
-                            {% if (shiftercount < 3) %}
-                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">{% if shift.formation %}<b
-                                            data-formation="{{ shift.formation.name }}">{% endif %}{{ shift.shifter.firstname|lower|capitalize }}
-                                        &nbsp;{{ shift.shifter.lastname|first|upper }}{% if shift.formation %}</b>{% endif %}
+                            {% if (shiftercount < 4) %}
+                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">
+                                    {% if use_card_reader_to_validate_shifts %}
+                                        {% if shift.formation %}
+                                            <b data-formation="{{ shift.formation.name }}">
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if shift.end < date() %}
+                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                                    {% endif %}
+                                    {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
+                                    {% if shift.formation %}</b>{% endif %}
                                     {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                                 </li>
                                 {% set shiftercount = shiftercount + 1 %}
-                            {% elseif shiftercount == 3 %}
+                            {% elseif shiftercount == 4 %}
                                 <li>( ... )</li>
                                 {% set shiftercount = shiftercount + 1 %}
                             {% endif %}
@@ -63,6 +71,11 @@
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                             <div class="col s12">
+                                {% if  use_card_reader_to_validate_shifts %}
+                                    {% if shift.end < date() %}
+                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                                    {% endif %}
+                                {% endif %}
                                 {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                                 {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
