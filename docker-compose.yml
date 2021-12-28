@@ -30,3 +30,12 @@ services:
       - .:/app
     depends_on:
       - database
+      - mailcatcher
+
+  mailcatcher:
+    container_name: mailcatcher
+    image: lelefan/mailcatcher:0.8.1
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
