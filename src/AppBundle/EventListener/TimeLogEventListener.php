@@ -25,6 +25,7 @@ class TimeLogEventListener
     protected $due_duration_by_cycle;
     protected $cycle_duration;
     protected $registration_duration;
+    protected $maxTimeAtEndOfShift ;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -35,6 +36,7 @@ class TimeLogEventListener
         $this->cycle_duration = $this->container->getParameter('cycle_duration');
         $this->registration_duration = $this->container->getParameter('registration_duration');
         $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
+        $this->maxTimeAtEndOfShift = $this->container->getParameter('max_time_at_end_of_shift');
     }
 
     /**
@@ -194,10 +196,13 @@ class TimeLogEventListener
         $this->em->persist($log);
 
         $counter_today = $membership->getTimeCount($date);
-        if ($counter_today > $this->due_duration_by_cycle) { //surbook
+
+        $allowed_cumul = $this->maxTimeAtEndOfShift;
+
+        if ($counter_today > ($this->due_duration_by_cycle + $allowed_cumul)) { //surbook
             $log = new TimeLog();
             $log->setMembership($membership);
-            $log->setTime(-1 * ($counter_today - $this->due_duration_by_cycle));
+            $log->setTime(-1 * ($counter_today - ($this->due_duration_by_cycle + $allowed_cumul)));
             $log->setDate($date);
             $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);
