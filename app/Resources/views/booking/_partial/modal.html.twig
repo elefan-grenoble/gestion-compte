@@ -51,18 +51,24 @@
         {% if beneficiary.membership.beneficiaries | length < 1 %}
             <p>Vous n'avez pas de bénéficiares</p>
         {% else %}
-            <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
             {% if display_name_shifters %}
-              {% if nbBookableShifts < nbShifts %}
-                <ul>Personnes inscrites pour le moment :
-                  {% for shift in bucket.shifts %}
-                    {% if shift.shifter is not null %}
-                      <li>{{ shift.shifter.firstname }} {{ shift.shifter.lastname }}</li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
-              {% endif %}
+                {% if nbBookableShifts < nbShifts %}
+                    <p>Places déjà occupées : </p>
+                    {% for shift in bucket.sortedShifts() %}
+                        <div>
+                            {% if shift.shifter and not shift.isDismissed() %}
+                                <i style="color: #5f5a5a; font-weight: 400;">
+                                    {{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname|first|upper }}.
+                                    {% if shift.formation %}
+                                        ({{ shift.formation.name }})
+                                    {% endif %}
+                                </i>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
+            <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
             {% for availableShift in availableShifts %}
                 <div>
                     <input type="radio" id="{{ availableShift.id }}" class="checkedFormation" name="formation"
