@@ -104,7 +104,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         } else if ($last_cycle_shift && $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter')) {
                             $current_shift->setLastShifter($last_cycle_shift->getShifter());
                             $reservedShifts[$count] = $current_shift;
-                            $formerShifts[$count] = $last_cycle_shifters_array[$i];
+                            $formerShifts[$count] = $last_cycle_shift;
                         } else {
                             $current_shift->setShifter(null);
                             $current_shift->setBookedTime(null);
