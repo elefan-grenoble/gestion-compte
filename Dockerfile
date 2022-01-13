@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
     locales \
     libpng-dev \
     libfreetype6-dev \
-    libjpeg-dev
+    libjpeg-dev \
+    netcat
 
 # Paramétrage de locale pour le Français
 RUN sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
