@@ -7,14 +7,14 @@
 
 ### Activer l'utilisateur
 
-L'activation passe par un envoi de mail. En dev, il est conseillé d'installer [un mail catcher](./dev.md#mailcatcher) pour pouvoir faire fonctionner l'envoi de mail en local.
+L'activation passe par un envoi de mail. En dev, il est conseillé d'installer [un mail catcher](dev.md#mailcatcher) pour pouvoir faire fonctionner l'envoi de mail en local.
 
-Sinon, il est possible d'activer un utilisateur via cette procédure:
+Sinon, il est possible d'activer un utilisateur via cette procédure :
 
 * Activer l'utilisateur avec la commande suivante ``php bin/console fos:user:activate $username``
 * Changer le mot de passe avec la commande suivante ``php bin/console fos:user:change-password $username newp@ssword``
 
-Documentation Symfony pour manipuler les utilisateurs: http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
+Documentation Symfony pour manipuler les utilisateurs : http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
 
 ## Mise en route des créneaux
 
