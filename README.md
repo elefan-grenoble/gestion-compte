@@ -31,10 +31,12 @@ Il est open source sous licence LGPL?
 
 * [Developer Guide](doc/dev.md)
 
-# Liste des fonctionnalités 
+# Liste des fonctionnalités
+
 travail en cours
 
 ## Fonctions "Admin"
+
 (some features in video (18 sept 2018))
 [![Some features demo](http://img.youtube.com/vi/7rKr5UjAI-w/0.jpg)](https://www.youtube.com/watch?v=7rKr5UjAI-w "admin demo")
 * Gestion des membres
@@ -62,11 +64,11 @@ travail en cours
     * Espace "post it" pour bureau des membres
 * Gestion des créneaux
     * Formation
-        * créer une formation        
+        * créer une formation
         * éditer une formation
         * supprimer une formation
     * Job
-        * créer un job (poste de travail)        
+        * créer un job (poste de travail)
         * éditer une job
         * supprimer une job
     * Semaine type
@@ -98,6 +100,7 @@ travail en cours
         * rendre publique / privé un service
 
 ## Fonctions "Membre"
+
 * Usages
     * Se connecter pour la toute première fois avec son numéro d'adhérent ou son prénom
     * Voir et modifier ces informations
@@ -123,5 +126,6 @@ travail en cours
     * contacter les autres membres de son créneau
     
 ## Fonctions logged out
+
 * Visualisation anonyme du "planning" des prochains jours
 * Scan de carte membre avec scannette sur l'écran d'accueil (info sur a jour, en retard, ...)

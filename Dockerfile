@@ -30,4 +30,3 @@ WORKDIR /app
 COPY . .
 
 RUN COMPOSER_MEMORY_LIMIT=2G composer install --no-interaction --optimize-autoloader
-

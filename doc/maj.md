@@ -6,11 +6,15 @@
 
 1. Déplacement à la racine du projet
 
-```cd /var/www/html/gestion-compte```
+```shell
+cd /var/www/html/gestion-compte
+```
 
 2. Récupérer la dernière version
 
-```git pull```
+```shell
+git pull
+```
 
 3. Servez vous à boire.
 
@@ -18,26 +22,36 @@
 
 1. Téléchargez la dernière version de l'application via https://github.com/elefan-grenoble
 2. Déplacez l'intégralité du code téléchargé sur votre serveur afin d'écraser les anciens fichiers
-3. Connectez-vous en ligne de commande sur votre serveur et déplacez vous dans le dossier
+3. Connectez-vous en ligne de commande sur votre serveur et déplacez vous dans le dossier
 
-```cd /var/www/html/gestion-compte```
+```shell
+cd /var/www/html/gestion-compte
+```
 
 ### suite : les étapes communes
+
 4. Exécution de l'installation des dépendances
 
-```composer install```
+```shell
+composer install
+```
 
 5. Mise à jour de la base de données
 
-```php bin/console doctrine:migrations:migrate```
+```shell
+php bin/console doctrine:migrations:migrate
+```
 
 6. Installer les nouveaux media
 
-```php bin/console assetic:dump```
+```shell
+php bin/console assetic:dump
+```
 
 7. Vider le cache de production
 
-```php bin/console cache:clear --env=prod```
+```shell
+php bin/console cache:clear --env=prod
+```
 
 **Voilà ! Votre application est maintenant à jour**
-
