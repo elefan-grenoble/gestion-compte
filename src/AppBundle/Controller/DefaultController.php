@@ -390,7 +390,7 @@ class DefaultController extends Controller
             return $this->redirectToRoute('homepage');
         } else {
             $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $shift->getStart(), 'end' => $shift->getEnd()));
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $shift->getStart(), 'end' => $shift->getEnd(), 'job' => $shift->getJob()));
             $coShifts = array();
             foreach ($shifts as $s) {
                 if ($s->getBooker() != null && $s->getId() != $shift->getId()) {
