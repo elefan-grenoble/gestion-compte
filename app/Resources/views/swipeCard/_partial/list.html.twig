@@ -2,13 +2,12 @@
     <div class="hide-on-med-and-up">
     {% for swipeCard in swipeCards %}
         <div>
-            <hr>
+            <hr />
             <h5>Badge n°{{ swipeCard.number }}</h5>
-            <img
-                    src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}"
-                    alt="barecode">
-            <p><b>assococié :</b> {{ swipeCard.createdAt | date_time }}<br>
-            {% if swipeCard.disabledAt %}<b>désactivé :</b> {{ swipeCard.disabledAt | date_time }}{% endif %}
+            <img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}" alt="barecode">
+            <p>
+                <b>associé :</b> {{ swipeCard.createdAt | date_time }}<br>
+                {% if swipeCard.disabledAt %}<b>désactivé :</b> {{ swipeCard.disabledAt | date_time }}{% endif %}
             </p>
             <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
                 <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
@@ -39,8 +38,7 @@
         {% for swipeCard in swipeCards %}
             <tr>
                 <td>{{ swipeCard.number }}</td>
-                <td><img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}"
-                         alt="barecode"></td>
+                <td><img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}" alt="barecode"></td>
                 <td>{{ swipeCard.createdAt | date_fr_with_time }}</td>
                 <td>{% if swipeCard.disabledAt %}{{ swipeCard.disabledAt | date_fr_with_time }}{% endif %}</td>
                 <td>
