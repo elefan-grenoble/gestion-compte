@@ -6,7 +6,6 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
-use AppBundle\Repository\ShiftRepository;
 use AppBundle\Service\ShiftService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
@@ -89,8 +88,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
             ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30])
-            ->getMock()
-        ;
+            ->getMock();
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
             ->willReturn($emptyShift);
@@ -100,7 +98,6 @@ class ShiftServiceTest extends TestCase
         $shiftService->expects($this->any())
             ->method('isBeginner')
             ->willReturn($beginner);
-
 
         return $shiftService->isShiftBookable($shift, $beneficiary);
     }
@@ -134,8 +131,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
             ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false, '3 days', 30])
-            ->getMock()
-        ;
+            ->getMock();
 
         $shiftService->expects($this->any())
             ->method('hasPreviousValidShifts')
@@ -191,8 +187,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->setMethodsExcept(['hasPreviousValidShifts'])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
         return $shiftService->hasPreviousValidShifts($beneficiary);
     }
