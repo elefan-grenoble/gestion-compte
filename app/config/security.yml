@@ -7,7 +7,7 @@ security:
     role_hierarchy:
       ROLE_USER_VIEWER: ROLE_USER
       ROLE_ADMIN_PANEL: ROLE_USER
-      ROLE_USER_MANAGER: [ ROLE_USER_VIEWER,ROLE_ADMIN_PANEL ]
+      ROLE_USER_MANAGER: [ ROLE_USER_VIEWER, ROLE_ADMIN_PANEL ]
       ROLE_SHIFT_MANAGER: ROLE_ADMIN_PANEL
       ROLE_FINANCE_MANAGER: ROLE_ADMIN_PANEL
       ROLE_PROCESS_MANAGER: ROLE_ADMIN_PANEL
@@ -22,13 +22,13 @@ security:
         pattern: ^/
         fos_oauth:  true
         form_login:
-            provider: fos_userbundle
-            csrf_token_generator: security.csrf.token_manager
+          provider: fos_userbundle
+          csrf_token_generator: security.csrf.token_manager
         logout:       true
         anonymous:    true
         switch_user:
-            role: ROLE_ADMIN
-            parameter: _login_as
+          role: ROLE_ADMIN
+          parameter: _login_as
       oauth_token:
         pattern:    ^/oauth/v2/token
         security:   false
