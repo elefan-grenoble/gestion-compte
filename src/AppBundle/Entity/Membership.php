@@ -287,7 +287,8 @@ class Membership
         return $this->withdrawn;
     }
 
-    public function getCommissions(){
+    public function getCommissions()
+    {
         $commissions = array();
         foreach ($this->getBeneficiaries() as $beneficiary){
             $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
@@ -295,7 +296,8 @@ class Membership
         return new ArrayCollection($commissions);
     }
 
-    public function getOwnedCommissions(){
+    public function getOwnedCommissions()
+    {
         return $this->getCommissions()->filter(function($commission) {
             $r = false;
             foreach ($commission->getOwners() as $owner){

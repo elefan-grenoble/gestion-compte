@@ -100,7 +100,7 @@ class DefaultController extends Controller
                         $remainder = $this->get('membership_service')->getRemainder($membership);
                         $remainingDays = intval($remainder->format("%R%a"));
                         if ($remainingDays < 0)
-                            $session->getFlashBag()->add('error', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
+                            $session->getFlashBag()->add('error', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
                         else {
                             $session->getFlashBag()->add('warning',
                                 'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .

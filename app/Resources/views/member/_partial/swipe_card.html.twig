@@ -1,5 +1,7 @@
 {% if app.user.beneficiary.getSwipeCards | length %}
-    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards"><i class="material-icons left">credit_card</i>{% if app.user.beneficiary.getSwipeCards | length > 1 %}Mes badges{% else %}Mon badge{% endif %}</a>
+    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
+        <i class="material-icons left">credit_card</i>{% if app.user.beneficiary.getSwipeCards | length > 1 %}Mes badges{% else %}Mon badge{% endif %}
+    </a>
     <br>
     <div id="all_swipecards" class="modal bottom-sheet">
         <div class="modal-content">
@@ -20,13 +22,13 @@
         <br>
     {% endif %}
     <a href="#swipe_disable_{{ card.id }}" class="red-text modal-trigger">Badge perdu ?</a>
+    <br>
+    <br>
     <div id="swipe_disable_{{ card.id }}" class="modal">
         <div class="modal-content">
             <h4>Badge n°{{ card.number }}</h4>
             <div class="badge">
-                <img
-                        src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}"
-                        alt="barecode">
+                <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">
             </div>
             <p>
                 Alors comme ça tu ne retrouves plus ton badge ? Désactive le ici.
@@ -41,12 +43,14 @@
         </div>
     </div>
 {% else %}
-    <a href="#swipe_add" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à mon compte</a>
+    <a href="#swipe_add" class="btn waves-effect waves-light modal-trigger">
+        <i class="material-icons left">add</i>Associer un badge à mon compte
+    </a>
     <div id="swipe_add" class="modal">
         <div class="modal-content">
             <h3>Entrez votre numéro de badge</h3>
             <div class="swiftcard_exemple">
-                {{ ( "421234567890" | barcode | raw) }}
+                {{ ("421234567890" | barcode | raw) }}
                 <canvas id="badge_canvas" class="focus" width="300" height="60"></canvas>
             </div>
             <script>
