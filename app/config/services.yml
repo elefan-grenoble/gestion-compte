@@ -206,6 +206,7 @@ services:
             arguments:
                 - "@doctrine.orm.entity_manager"
                 - "%registration_duration%"
+                - "%registration_every_civil_year%"
 
     event_service:
             class: AppBundle\Service\EventService
