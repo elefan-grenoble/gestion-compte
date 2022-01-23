@@ -75,7 +75,7 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
      *
      * @return array
      */
-    public function findWithExpiredRegistrationFrom($from,$delay)
+    public function findWithExpiredRegistrationFrom($from)
     {
         $qb = $this->createQueryBuilder('m');
         $qb = $qb->leftJoin("m.registrations", "r")->addSelect("r"); //registrations
@@ -83,7 +83,7 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->addSelect("lr")
             ->where('lr.id IS NULL') //registration is the last one registered
             ->andWhere('m.withdrawn = false')
-            ->andWhere("DATE_ADD(r.date, ".$delay.", 'YEAR') < :from")
+            ->andWhere("r.date <= :from")
             ->setParameter('from', $from);
 
         return $qb->getQuery()->getResult();

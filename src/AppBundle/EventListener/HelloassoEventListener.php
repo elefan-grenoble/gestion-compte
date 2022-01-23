@@ -105,7 +105,8 @@ class HelloassoEventListener
 
                 if ($membership->getLastRegistration()){
                     $expire = clone $this->container->get('membership_service')->getExpire($membership);
-                    if ($expire > $payment->getDate()) // not yet expired
+                    if ($expire >= $payment->getDate()) // not yet expired
+                        $expire->modify('+1 day');
                         $registration->setDate($expire);
                     else
                         $registration->setDate($payment->getDate());

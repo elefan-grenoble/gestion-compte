@@ -23,14 +23,24 @@ class CloseMembershipCommand extends ContainerAwareCommand
         $output->writeln('<fg=green;>close accounts command</>');
 
         $delay = $input->getArgument('delay');
+
+        $registration_every_civil_year = $this->getContainer()->getParameter('registration_every_civil_year');
         $date = new \DateTime('now');
-        $date->modify('-'.$delay);
+        if ($registration_every_civil_year) {
+            $date->modify('-1 year');
+            $date->modify('-'.$delay);
+            $date = new \DateTime('last day of December '.$date->format('Y'));
+        } else {
+            $registration_duration = \DateInterval::createFromDateString(
+                $this->getContainer()->getParameter('registration_duration'));
+            $date->sub($registration_duration);
+            $date->modify('-1 day');
+            $date->modify('-'.$delay);
+        }
 
         $em = $this->getContainer()->get('doctrine')->getManager();
 
-        $registration_duration = $this->getContainer()->getParameter('registration_duration');
-        $delay = \DateInterval::createFromDateString($registration_duration);
-        $members = $em->getRepository('AppBundle:Membership')->findWithExpiredRegistrationFrom($date,$delay->y);
+        $members = $em->getRepository('AppBundle:Membership')->findWithExpiredRegistrationFrom($date);
         $count = 0;
         /** @var Membership $member */
         foreach ($members as $member) {

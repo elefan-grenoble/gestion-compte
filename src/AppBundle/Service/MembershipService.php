@@ -17,10 +17,11 @@ class MembershipService
     protected $em;
     protected $registration_duration;
 
-    public function __construct($em, $registration_duration)
+    public function __construct($em, $registration_duration, $registration_every_civil_year)
     {
         $this->em = $em;
         $this->registration_duration = $registration_duration;
+        $this->registration_every_civil_year = $registration_every_civil_year;
     }
 
     /**
@@ -37,10 +38,9 @@ class MembershipService
         }
         if (!$membership->getLastRegistration()){
             $expire = new \DateTime('-1 day');
-            return date_diff($date,$expire);
+        } else {
+            $expire = $this->getExpire($membership);
         }
-        $expire = clone $membership->getLastRegistration()->getDate();
-        $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
         return date_diff($date,$expire);
     }
 
@@ -75,7 +75,12 @@ class MembershipService
     public function getExpire($membership): ?\DateTime
     {
         $expire = clone $membership->getLastRegistration()->getDate();
-        $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+        if ($this->registration_every_civil_year) {
+            $expire = new \DateTime('last day of December '.$expire->format('Y'));
+        } else {
+            $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+            $expire->modify('-1 day');
+        }
         return $expire;
     }
 
