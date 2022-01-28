@@ -24,9 +24,9 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
             ->addArgument('jobs', InputArgument::REQUIRED, 'Jobs ids (comma separated)')
             ->addOption('emails', null, InputOption::VALUE_OPTIONAL, 'Email recipients (comma separated)')
-            ->addOption('emailTemplate', 'SHIFT_ALERT_EMAIL', InputOption::VALUE_OPTIONAL, 'Template used in email alerts')
+            ->addOption('emailTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in email alerts', 'SHIFT_ALERT_EMAIL')
             ->addOption('mattermostUrl', null, InputOption::VALUE_OPTIONAL, 'Mattermost webhook URL')
-            ->addOption('mattermostTemplate', 'SHIFT_ALERT_MARKDOWN', InputOption::VALUE_OPTIONAL, 'Template used in Mattermost alerts');
+            ->addOption('mattermostTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in Mattermost alerts', 'SHIFT_ALERT_MARKDOWN');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
