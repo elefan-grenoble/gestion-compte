@@ -90,7 +90,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                     if (!$already_generated) {
                         $lastStart = $this->lastCycleDate($start);
                         $lastEnd = $this->lastCycleDate($end);
-                        $last_cycle_shift = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
+                        $last_cycle_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
                         $current_shift = clone $shift;
                         $current_shift->setJob($period->getJob());
                         $current_shift->setFormation($position->getFormation());
@@ -101,7 +101,9 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $current_shift->setShifter($position->getShifter());
                             $current_shift->setBookedTime(new \DateTime('now'));
                             $current_shift->setBooker($position->getShifter());
-                        } else if ($last_cycle_shift && $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter')) {
+                        } else if ($last_cycle_shift &&
+                            $last_cycle_shift->getShifter() &&
+                            $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter')) {
                             $current_shift->setLastShifter($last_cycle_shift->getShifter());
                             $reservedShifts[$count] = $current_shift;
                             $formerShifts[$count] = $last_cycle_shift;
