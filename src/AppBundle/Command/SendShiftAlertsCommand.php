@@ -87,7 +87,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
 
     private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, DateTime $date, $alerts, $template) {
         $mailer = $this->getContainer()->get('mailer');
-        $recipients = explode(',', $input->getOption('emails'));
+        $recipients = $input->getOption('emails') ? explode(',', $input->getOption('emails')) : null;
         if ($recipients) {
             setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
