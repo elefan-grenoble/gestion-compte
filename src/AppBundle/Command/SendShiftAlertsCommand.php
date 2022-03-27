@@ -61,12 +61,12 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         // Build buckets from shifts
         $buckets = array();
         foreach ($shifts as $shift) {
-            $interval = $shift->getIntervalCode();
-            if (!isset($buckets[$interval])) {
+            $key = $shift->getIntervalCode().$shift->getJob()->getId();
+            if (!isset($buckets[$key])) {
                 $bucket = new ShiftBucket();
-                $buckets[$interval] = $bucket;
+                $buckets[$key] = $bucket;
             }
-            $buckets[$interval]->addShift($shift);
+            $buckets[$key]->addShift($shift);
         }
 
         $alerts = array();
