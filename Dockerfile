@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y \
 RUN sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 
 # Installation de Composer
-COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 
 # Configuration de gd avec FreeType
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
