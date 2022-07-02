@@ -16,6 +16,8 @@ class DefaultControllerTest extends WebTestCase
     {
         $this->client = static::createClient();
 
+        $em = $this->getDoctrine()->getManager();
+
         $this->beneficiary = new Beneficiary();
         $this->beneficiary->setFlying(false);
         $member = new Membership();
@@ -25,18 +27,23 @@ class DefaultControllerTest extends WebTestCase
         $user->setEmail('user@test.com');
         $user->setPlainPassword('password');
         $user->setEnabled(true);
+        // $user->addRole('ROLE_ADMIN');
         $this->beneficiary->setUser($user);
     }
 
     // https://stackoverflow.com/a/44745635/4293684
+    // https://symfony.com/doc/4.4/testing/http_authentication.html#creating-the-authentication-token
     private function logIn(Beneficiary $beneficiary)
     {
-        $session = $this->client->getContainer()->get('session');
+        $container = $this->client->getContainer();
+        $session = $container->get('session');
 
         // the firewall context defaults to the firewall name
+        $firewallName = 'main';
         $firewallContext = 'main';
+        var_dump($container->getParameter('fos_user.firewall_name'));
 
-        $token = new UsernamePasswordToken($beneficiary->getUser(), $beneficiary->getUser()->getPassword(), $firewallContext, $beneficiary->getUser()->getRoles());
+        $token = new UsernamePasswordToken($beneficiary->getUser(), $beneficiary->getUser()->getPassword(), $firewallName, $beneficiary->getUser()->getRoles());
         $session->set('_security_'.$firewallContext, serialize($token));
         $session->save();
 
