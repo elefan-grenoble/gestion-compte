@@ -36,3 +36,27 @@ Si la dernière commande ne marche pas, vérifiez que vous avez le dossier des g
 Un _docker-compose.yml_ existe pour permettre le développement sous Docker. Suivez le [guide d'installation](install.md).
 
 N'oubliez pas de définir la variable d'environnement `DEV_MODE_ENABLED` dans le container qui exécute le code de l'application.
+
+## Tests
+
+### Sans Docker
+
+```shell
+// créer la base de donnée de test + initialiser avec le schema
+php bin/console --env=test doctrine:database:create
+php bin/console --env=test doctrine:schema:create
+// lancer les tests
+php ./vendor/bin/phpunit
+```
+
+### Avec Docker
+
+Prérequis : avoir le docker-compose qui tourne en local.
+
+```shell
+// créer la base de donnée de test + initialiser avec le schema
+docker exec -i php php bin/console --env=test doctrine:database:create
+docker exec -i php php bin/console --env=test doctrine:schema:create
+// lancer les tests
+docker exec -i php php ./vendor/bin/phpunit
+```

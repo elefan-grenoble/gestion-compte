@@ -17,13 +17,11 @@ docker-compose up
 
 Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
 
-Créer l'utilisateur super admin (valeurs par défaut : admin:password)
-
-Visiter [http://membres.yourcoop.local:8000/user/install_admin](http://membres.yourcoop.local:8000/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
-
 Note: le premier lancement du docker-compose peut être long (~30s) du fait de plusieurs étapes : initialisation de la db, creation du fichier parameters.yml, ... La ligne `PHP 7.4.27 Development Server (http://0.0.0.0:8000) started` indique que le deploiement de l'espace membre est fonctionnel. La base de données est montée dans docker avec un volume, elle est donc persistente. Le fichier _parameters.yml_ doit être modifié suivant la configuration voulue.
 
-### Charger la base de donénes à partir d'un dump
+### Charger la donnée
+
+#### Charger la base de données à partir d'un dump
 
 Supprimer une base de données existante (si elle existe)
 
@@ -43,7 +41,11 @@ Charger la base données depuis une sauvegarde
 docker exec -i database mysql -uroot -psecret symfony < espace_membres.sql
 ```
 
-## Installation sur une serveur
+#### Créer la donnée en local
+
+Pour créer l'utilisateur super admin (valeurs par défaut : admin:password), visiter [http://membres.yourcoop.local:8000/user/install_admin](http://membres.yourcoop.local:8000/user/install_admin).
+
+## Installation sur un serveur
 
 ### Prérequis
 
