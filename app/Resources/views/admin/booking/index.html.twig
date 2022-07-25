@@ -1,121 +1,86 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Créneaux ADMIN - {{ site_name }}{% endblock %}
+{% block title %}Administration des Créneaux - {{ site_name }}{% endblock %}
 
 {% block breadcrumps %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">date_range</i><span>Créneaux ADMIN</span>
+    <i class="material-icons">date_range</i><span>Administration des Créneaux</span>
 {% endblock %}
 
 {% block content %}
-
-        <div class="row center">
-            <h4 class="header">Admin créneaux</h4>
-        </div>
-        <div class="row">
-            {#<ul class="collapsible" data-collapsible="accordion">#}
-                {#<li>#}
-                    {#<div class="collapsible-header"><i class="material-icons">help_outline</i>Outils</div>#}
-                    {#<div class="collapsible-body">#}
-                        {#<ul>#}
-                            {#<li>#}
-                            {#</li>#}
-                        {#</ul>#}
-                    {#</div>#}
-                {#</li>#}
-            {#</ul>#}
-        </div>
-
-
+    {# Title --------- #}
+    <div class="row center">
+        <h4 class="header">Administration des Créneaux</h4>
+    </div>
+    {# Filter form  --------- #}
+    {{ form_start(filterForm) }}
     <ul class="collapsible" data-collapsible="accordion">
         <li>
             <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
             <div class="collapsible-body">
-                {{ form_start(form) }}
-
                 <div class="row">
                     <div class="input-field col m3">
-                        {{ form_widget(form.from) }}
-                        {{ form_label(form.from) }}
+                        {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox'}) }}
+                        {{ form_label(filterForm.type) }}
                     </div>
-                    <div class="input-field col m3">
-                        {{ form_widget(form.to) }}
-                        {{ form_label(form.to) }}
+                    <div id="dateSelectionType">
+                        <div class="input-field col m3">
+                            {{ form_widget(filterForm.from) }}
+                            {{ form_label(filterForm.from) }}
+                        </div>
+                        <div class="input-field col m3">
+                            {{ form_widget(filterForm.to) }}
+                            {{ form_label(filterForm.to) }}
+                        </div>
+                    </div>
+                    <div id="weekSelectionType">
+                        <div class="input-field col m3">
+                            {{ form_widget(filterForm.week) }}
+                            {{ form_label(filterForm.week) }}
+                        </div>
+                        <div class="input-field col m3">
+                            {{ form_widget(filterForm.year) }}
+                            {{ form_label(filterForm.year) }}
+                        </div>
                     </div>
                 </div>
-                {{ form_widget(form.filter) }}
-                {{ form_widget(form.booker) }}
-                {{ form_end(form) }}
-            </div>
+                <div>
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.job) }}
+                        {{ form_label(filterForm.job) }}
+                    </div>
+                </div>
+                <div>
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.filling) }}
+                        {{ form_label(filterForm.filling) }}
+                    </div>
+                </div>
+
+                {{ form_widget(filterForm.filter) }}
         </li>
     </ul>
+    {{ form_end(filterForm) }}
 
-
-        <div class="row">
-            <div class="col m2 hide-on-small-only">
-            </div>
-            <div class="col s12 m10">
-                <div style="display: flex;">
-                    {% for i in hours %}
-                        {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
-                        <div style="flex: 1">
-                            <div style="text-align: center;width: 100%;margin-left: -50%;">
-                                {{ i }}h
-                            </div>
+    {# Calandar form hour line --------- #}
+    <div class="row">
+        <div class="col m2 hide-on-small-only">
+        </div>
+        <div class="col s12 m10">
+            <div style="display: flex;">
+                {% for i in range(6, 22) %}
+                    <div style="flex: 1">
+                        <div style="text-align: center;width: 100%;margin-left: -50%;">
+                            {{ i }}h
                         </div>
-                    {% endfor %}
-                </div>
+                    </div>
+                {% endfor %}
             </div>
         </div>
-        {% set previousWeekIndex = -1 %}
-        {% for bucketsByjob in bucketsByDay %}
-            {% set date = false %}
-            {% set weekCycle = ["A", "B", "C", "D"] %}
-            {% for buckets in bucketsByjob %}
-                {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
-                {% if not date and previousWeekIndex != weekIndex %}
-                    <h5>Semaine {{weekCycle[((buckets|first).start | date('W') - 1) % 4]}}</h5>
-                    {% set previousWeekIndex = weekIndex %}
-                {% endif %}
-                <div class="row center show-on-small hide-on-med-and-up ">
-                    {% if not date %}{{ (buckets|first).start|date_fr_long }}{% endif %}
-                </div>
-                <div class="row" style="display: flex;min-height: 70px;">
-                    <div class="col m2 hide-on-small-only valign-wrapper">
-                        <div>
-                            {% if not date %}
-                                <b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col m10 s12">
-                        <div style="position: relative">
-                            {% set lignes = {} %}
-                            {% for bucket in buckets %}
-                                {#compute lines #}
-                                {% set l = 0 %}
-                                {% set break = false %}
-                                {% for i in 0..100 if not break %}
-                                    {% if lignes[i~'_'] is not defined %}
-                                        {% set l = i %}
-                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                        {% set break = true %}
-                                    {% else %}
-                                        {% if lignes[i~'_'] < bucket.start  %}
-                                            {% set l = i %}
-                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                            {% set break = true %}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                {# / compute lines #}
-                                {% include "admin/booking/_partial/shift.html.twig" with { bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        {% endfor %}
+    </div>
+
+
+    {% include "admin/booking/_partial/bucket_calandar.html.twig" with { bucketsByDay: bucketsByDay } %}
 
     {{ form_start(delete_bucket_form,{ 'attr' : { 'id' : 'delete_bucket'}}) }}
     {{ form_widget(delete_bucket_form) }}
@@ -127,23 +92,44 @@
 {% endblock %}
 {% block javascripts %}
     <script>
-        jQuery(function ($) {
-            $('input.empty-shift').autocomplete({
-                data: {
-                    {% for beneficiary in beneficiaries %}
-                        "{{ beneficiary.autocompleteLabel }}" : null,
-                    {% endfor %}
-                },
-                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
-                onAutocomplete: function(val) {
-                    // Callback function when value is autcompleted.
-                    $('button.add').removeAttr('disabled');
-                },
-                minLength: 2, // The minimum length of the input for the autocomplete to start. Default: 1.
-            });
-            $('input.empty-shift').keydown(function () {
-                $('button.add:not(:disabled)').attr('disabled','disabled');
-            });
+
+        $(document).ready(function ($) {
+            // for the filter form ------------------
+            $('#SelectionTypeDropBox')
+                .on('change', function () {
+
+                    if (this.value === "0") {
+                        $('#weekSelectionType').show();
+                        $('#dateSelectionType').hide();
+                    } else {
+                        $('#weekSelectionType').hide();
+                        $('#dateSelectionType').show();
+                    }
+                })
+                .trigger('change');
+
+            // for the bucket modification popup----------------
+            $('input.empty-shift')
+                .autocomplete({
+                    data: {
+                        {% for beneficiary in beneficiaries %}
+                        "{{ beneficiary.autocompleteLabel }}": null,
+                        {% endfor %}
+                    },
+                    // The max amount of results that
+                    // can be shown at once. Default: Infinity.
+                    limit: 10,
+                    onAutocomplete: function (val) {
+                        // Callback function when value is autocomplete.
+                        $('button.add').removeAttr('disabled');
+                    },
+                    // The minimum length of the input for
+                    // the autocomplete to start. Default: 1.
+                    minLength: 2,
+                })
+                .keydown(function () {
+                    $('button.add:not(:disabled)').attr('disabled', 'disabled');
+                });
         })
 
         function postShift(shiftId) {

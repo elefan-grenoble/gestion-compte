@@ -1,70 +1,17 @@
+{#
+Template for the modal popup used to change the user register for a shift bucket in  /booking/admin
+It use the materialize modal class https://materializecss.com/modals.html
+#}
 {% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
 {% set nbShifts = (bucket.shifts() | length) %}
-<div
-        data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
-        data-length="{{ (100/(end-start+1)) }}"
-        style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
-                left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
-                top: {{ line*10 }}px;">
-    <a href="#edit{{ bucket.first.id }}"
-       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
-        <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %} "
-             style="position: relative;height: 70px;">
-            <div style="height:2px; width: 100%;position: absolute;">
-                {% if nbBookableShifts < nbShifts %}
-                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
-                        <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            <div >
-                <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
-                        &nbsp;{{ bucket.end|date('G\\hi') }}</div>
-                <ul style="font-size: 9px; padding-left: 15px;">
-                    {% set shiftercount = 0 %}
-                    {% for shift in bucket.sortedShifts() %}
-                        {% if (shift.shifter) %}{# is booked #}
-                            {% if (shiftercount < 4) %}
-                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">
-                                    {% if use_card_reader_to_validate_shifts %}
-                                        {% if shift.formation %}
-                                            <b data-formation="{{ shift.formation.name }}">
-                                        {% endif %}
-                                    {% endif %}
-                                    {% if shift.end < date() %}
-                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                    {% endif %}
-                                    {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
-                                    {% if shift.formation %}</b>{% endif %}
-                                    {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
-                                </li>
-                                {% set shiftercount = shiftercount + 1 %}
-                            {% elseif shiftercount == 4 %}
-                                <li>( ... )</li>
-                                {% set shiftercount = shiftercount + 1 %}
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% if bucket.first.locked %}
-                <span class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;Verrouillé</span>
-            {% elseif (shiftercount == 0) %}
-                <span class="red-text red lighten-5 truncate admin-shift-warning" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
-            {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
-                <span class="orange-text orange lighten-4 truncate admin-shift-warnin" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
-            {% endif %}
-        </div>
-    </a>
-</div>
-<div id="edit{{ bucket.first.id }}" class="modal">
+<div id="edit{{ bucket.first.id }}" class="modal" data-source="edit{{ bucket.first.id }}">
     <div class="modal-content">
         {% if bucket.first.locked %}
             <i class="material-icons left large">lock</i>
         {% endif %}
         <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
         <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
-        remplissage {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)
+        remplissage {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ (((nbShifts-nbBookableShifts) / nbShifts)*100)|round(0, 'floor') }}%)
         <ul class="collapsible" data-collapsible="accordion">
             {% for shift in bucket.sortedShifts() %}
                 {% if shift.shifter %}{# is booked #}
@@ -77,10 +24,14 @@
                                     {% endif %}
                                 {% endif %}
                                 {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
-                                #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                                {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
-                                {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
-                                {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
+                                    #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}
+                                    &nbsp;{{ shift.shifter.lastname }}
+                                    {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b
+                                        class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
+                                {% if shift.isDismissed() %}
+                                    <div class="red-text" style="padding-left: 5px">(en attente de reprise)
+                                    </div>{% endif %}
                             </div>
                         </div>
                         <div class="collapsible-body">
@@ -117,62 +68,72 @@
                         <div class="collapsible-header">
                             <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
                                 {% if shift.formation %}
-                                    <b data-formation="{{ shift.formation.name }}">
-                                {% else %}
+                                <b data-formation="{{ shift.formation.name }}">
+                                    {% else %}
                                     <b>
-                                {% endif %}
-                                <span style="font-style: italic">
+                                        {% endif %}
+                                        <span style="font-style: italic">
                                     {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
                                     {% else %}libre
                                     {% endif %}
                                 </span>
-                                {% if shift.formation %}
+                                        {% if shift.formation %}
                                     </b>&nbsp;({{ shift.formation.name }})
-                                {% else %}
-                                    </b>&nbsp;(sans formation particulière)
+                                    {% else %}
+                                </b>&nbsp;(sans formation particulière)
                                 {% endif %}
                             </div>
                             {% if not shift.lastShifter %}
                                 <div class="col s1 right-align">
                                     {{ form_start(shift_delete_form[shift.id]) }}
                                     {{ form_widget(shift_delete_form[shift.id]) }}
-                                    <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
+                                    <a href="#"
+                                       onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();"
+                                       title="Supprimer ce poste" class="red-text">✗</a>
                                     {{ form_end(shift_delete_form[shift.id]) }}
                                 </div>
                             {% endif %}
                         </div>
                         <div class="collapsible-body">
-                                <div class="row">
-                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                        <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
-                                    </div>
-                                    {% if use_fly_and_fixed %}
+                            <div class="row">
+                                <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                    <input id="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary"
+                                           placeholder="Beneficiaire">
+                                </div>
+                                {% if use_fly_and_fixed %}
                                     <div class="col s2">
                                         <div>
-                                            <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0>
+                                            <input type="radio" id="volant{{ shift.id }}"
+                                                   class="checkedTypeService{{ shift.id }}"
+                                                   name="typeService{{ shift.id }}" checked value=0>
                                             <label for="volant{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">volant</label>
                                         </div>
                                         <div>
-                                            <input type="radio" id="fixe{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=1>
+                                            <input type="radio" id="fixe{{ shift.id }}"
+                                                   class="checkedTypeService{{ shift.id }}"
+                                                   name="typeService{{ shift.id }}" value=1>
                                             <label for="fixe{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">fixe</label>
                                         </div>
                                     </div>
                                     <div class="col s3">
-                                        <button class="btn add" disabled="disabled" onclick="postShift({{ shift.id }})">Ajouter</button>
+                                        <button class="btn add" disabled="disabled" onclick="postShift({{ shift.id }})">
+                                            Ajouter
+                                        </button>
                                     </div>
-                                    {% else %}
-                                        <div class="col s3">
-                                            <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0>
-                                            <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
-                                        </div>
-                                    {% endif %}
-                                </div>
+                                {% else %}
+                                    <div class="col s3">
+                                        <input type="hidden" class="checkedTypeService{{ shift.id }}"
+                                               name="typeService{{ shift.id }}" value=0>
+                                        <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </li>
                 {% endif %}
             {% endfor %}
         </ul>
-        {{ form_start(shift_add_form[bucket.first.id]) }}
+        {{ form_start(shift_add_form[bucket.first.id], {'name': 'shift_add_form_'~bucket.first.id}) }}
         {{ form_widget(shift_add_form[bucket.first.id].date) }}
         {{ form_widget(shift_add_form[bucket.first.id].start) }}
         {{ form_widget(shift_add_form[bucket.first.id].end) }}

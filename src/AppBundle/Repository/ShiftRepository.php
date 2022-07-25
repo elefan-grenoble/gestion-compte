@@ -3,6 +3,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
 
 /**
@@ -52,7 +53,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFrom(\DateTime $from, \DateTime $max = null)
+    public function findFrom(\DateTime $from, \DateTime $max = null, Job $job=null)
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -65,6 +66,11 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
+        }
+        if ($job) {
+            $qb
+                ->andWhere('s.job = :job')
+                ->setParameter('job', $job);
         }
 
         $qb->orderBy('s.start', 'ASC');

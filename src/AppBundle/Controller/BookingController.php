@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
 use AppBundle\Event\ShiftBookedEvent;
@@ -10,14 +11,18 @@ use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
+use AppBundle\Repository\JobRepository;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Form\ShiftType;
+use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -35,12 +40,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class BookingController extends Controller
 {
-    public function homepageDashboardAction()
+    /**
+     * @return Response
+     */
+    public function homepageDashboardAction(): Response
     {
         return $this->render('booking/home_dashboard.html.twig');
     }
 
-    public function homepageShiftsAction()
+    /**
+     * @return Response
+     */
+    public function homepageShiftsAction(): Response
     {
         $undismissShiftForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('undismiss_shift'))
@@ -54,13 +65,13 @@ class BookingController extends Controller
     }
 
 
-
     /**
      * @Route("/", name="booking")
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
      * @Method({"GET","POST"})
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
+     * @throws \Exception
      */
     public function indexAction(Request $request)
     {
@@ -76,7 +87,7 @@ class BookingController extends Controller
                 return $this->redirectToRoute('homepage');
             }
             if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
-                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ ! Dégel pour reserver 😉');
+                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ ! Dégel pour réserver 😉');
                 return $this->redirectToRoute('homepage');
             }
         }
@@ -140,125 +151,272 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/admin", name="booking_admin")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET","POST"})
+     * Build the filter form for the admin main page (route /booking/admin)
+     * and rerun an array with  the form object and the date range and the action
+     *
+     * the return object :
+     * array(
+     *      "form":FormBuilderInterface
+     *      "from" => DateTime,
+     *      "to" => DateTime,
+     *      "job"=> Job|null,
+     *      "filling"=>str|null,
+     *      )
      */
-    public function adminAction(Request $request)
+    private function adminFilterFormFactory(Request $request): array
     {
-        $monday = strtotime('last monday', strtotime('tomorrow'));
+        // filter creation ----------------------
         $defaultFrom = new DateTime();
-        $defaultFrom->setTimestamp($monday);
+        $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
 
-        $form = $this->createFormBuilder()
+        $defaultTo = new DateTime();
+        $defaultTo->setTimestamp(strtotime('next sunday', strtotime('tomorrow')));
+
+        $defaultWeek = (new DateTime())->format('W');
+        $defaultYear = (new DateTime())->format('Y');
+
+        $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
+            ->add('type', ChoiceType::class, [
+                'label' => 'Type de filtre',
+                'required' => true,
+                'data' => "Date",
+                'choices' => [
+                    'Date' => true,
+                    'Semaine' => false,
+                ],
+            ])
             ->add('from', TextType::class, [
                 'label' => 'A partir de',
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
-                'attr' => array('class' => 'datepicker')])
+                'attr' => array('class' => 'datepicker'),
+            ])
             ->add('to', TextType::class, [
                 'label' => 'Jusqu\'à',
                 'required' => false,
-                'data' => '',
-                'attr' => array('class' => 'datepicker')])
-            ->add('action', HiddenType::class, array())
-            ->add('filter', SubmitType::class, array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer')))
-            ->add('booker', SubmitType::class, array('label' => 'Voir les booker', 'attr' => array('class' => 'btn', 'value' => 'booker')))
+                'data' => $defaultTo->format('Y-m-d'),
+                'attr' => array('class' => 'datepicker'),
+            ])
+            ->add('year', IntegerType::class, [
+                'required' => false,
+                'label' => 'Année',
+                'scale' => 0,
+                'data' => $defaultYear,
+                'attr' => [
+                    'min' => 2000,
+                    'max' => (int)$defaultYear + 10,
+                ],
+            ])
+            ->add('week', IntegerType::class, [
+                'required' => false,
+                'label' => 'Numéro de semaine',
+                'scale' => 0,
+                'data' => $defaultWeek,
+                'attr' => [
+                    'min' => 1,
+                    'max' => 52,
+                ],
+            ])
+            ->add('job', EntityType::class, array(
+                'label' => 'Type',
+                'class' => 'AppBundle:Job',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'query_builder' => function(JobRepository $repository) {
+                    $qb = $repository->createQueryBuilder('j');
+                    return $qb
+                        ->where($qb->expr()->eq('j.enabled', '?1'))
+                        ->setParameter('1', '1')
+                        ->orderBy('j.name', 'ASC');
+                }
+            ))
+            ->add('filling', ChoiceType::class, [
+                    'label' => 'Remplissage',
+                    'required' => false,
+                    'choices' => [
+                        'Complet'=>"full",
+                        'Partiel'=>"partial",
+                        'Vide'=>'empty',
+                    ],
+            ])
+            ->add(
+                'filter',
+                SubmitType::class,
+                array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer'))
+            )
             ->getForm();
-        $form->handleRequest($request);
 
+        $filterForm->handleRequest($request);
         $from = $defaultFrom;
-        $to = null;
-        if ($form->isSubmitted() && $form->isValid()) {
-            $dateStr = $form->get('from')->getData();
-            $from = new DateTime($dateStr);
-            $to = $form->get('to')->getData();
-            if ($to)
-                $to = new DateTime($to);
+        $to = $defaultTo;
+        $job = null;
+        $filling=null;
+
+        try {
+            if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+
+                $job = $filterForm->get("job")->getData();
+                $filling = $filterForm->get("filling")->getData();
+
+                if ($filterForm->get("type")->getData()) {
+                    // selection mode based on dates
+
+                    $from = new DateTime($filterForm->get('from')->getData());
+                    $to = $filterForm->get('to')->getData();
+                    if ($to) {
+                        $to = new DateTime($to);
+                    }
+
+                } else {
+                    // selection mode based on week number
+
+                    $week = $filterForm->get("week")->getData();
+                    $year = $filterForm->get("year")->getData();
+
+                    $dateTime = new DateTime();
+                    $dateTime->setISODate($year, $week, 1);
+                    $from = clone $dateTime;
+                    $dateTime->modify('+6 days');
+                    $to = $dateTime;
+
+                }
+            }
+        } catch (Exception $ex) {
+            $from = $defaultFrom;
+            $to = $defaultTo;
+            $job = null;
         }
 
+
+        return array(
+            "form" => $filterForm,
+            "from" => $from,
+            "to" => $to,
+            "job"=> $job,
+            "filling"=>$filling,
+        );
+    }
+
+    /**
+     * build the bucket (regrouping all the shift at the same time
+     * with the same job)
+     * @param array $shifts
+     * @param string|null $filling
+     * @return array
+     */
+    private function bucketFactory(array $shifts, string $filling = null): array
+    {
+        // TODO Maybe it should be but in the BucketRepository...
+
+        $bucketsByDay = array();
+        foreach ($shifts as $shift) {
+
+            $day = $shift->getStart()->format("d m Y");
+            $jobId = $shift->getJob()->getId();
+
+            $interval = $shift->getIntervalCode();
+            if (!isset($bucketsByDay[$day])) {
+                $bucketsByDay[$day] = array();
+            }
+            if (!isset($bucketsByDay[$day][$jobId])) {
+                $bucketsByDay[$day][$jobId] = array();
+            }
+            if (!isset($bucketsByDay[$day][$jobId][$interval])) {
+                $bucket = new ShiftBucket();
+                $bucketsByDay[$day][$jobId][$interval] = $bucket;
+            }
+            $bucketsByDay[$day][$jobId][$interval]->addShift($shift);
+        }
+
+        if ($filling) {
+            $shiftService = $this->container->get('shift_service');
+            foreach ($bucketsByDay as $day => $bucketsByJob) {
+                foreach ($bucketsByJob as $jobId => $bucketByInterval) {
+                    foreach ($bucketByInterval as $interval => $bucket) {
+                        $nbShifts = count($bucket->getShifts());
+                        $bookableShifts = count($shiftService->getBookableShifts($bucket));
+                        if  (($filling == 'empty' and  $bookableShifts != $nbShifts  )
+                          or ($filling == 'full' and $bookableShifts !=  0)
+                            or ( $filling == 'partial' and ($bookableShifts == $nbShifts  or $bookableShifts ==  0))) {
+
+                            unset($bucketsByDay[$day][$jobId][$interval]);
+                            if (count($bucketsByDay[$day][$jobId])==0){
+                                unset($bucketsByDay[$day][$jobId]);
+                                if (count($bucketsByDay[$day])==0){
+                                    unset($bucketsByDay[$day]);
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        return $bucketsByDay;
+    }
+
+    /**
+     * main administration page for booking shift
+     * @Route("/admin", name="booking_admin")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method({"GET","POST"})
+     */
+    public function adminAction(Request $request): Response
+    {
+
+        $filter = $this->adminFilterFormFactory($request);
+
+        // calendar creation
         /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManager();
         $jobs = $em->getRepository(Job::class)->findByEnabled(true);
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
+        $shifts = $em
+            ->getRepository(Shift::class)
+            ->findFrom($filter["from"], $filter["to"], $filter["job"]);
 
+        $bucketsByDay = $this->bucketFactory($shifts, $filter["filling"]);
 
-        $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
-            ->createQueryBuilder('b')
-            ->select('b, m')
-            ->join('b.user', 'u')
-            ->join('b.membership', 'm');
-        $beneficiaries = $beneficiariesQb->getQuery()->getResult();
-
-        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
-
-        $action = $form->get('action')->getData();
-
-        if ($action == "booker") {
-            $mm = array();
-            foreach ($shifts as $shift) {
-                if ($shift->getBooker()) {
-                    $mm[] = $shift->getBooker()->getMembership()->getMemberNumber();
-                }
-            }
-            return $this->redirectToRoute('user_index', array('membernumber' => implode(',', $mm)));
-        } else {
-            $hours = array();
-            for ($i = 6; $i < 22; $i++) { //todo put this in conf
-                $hours[] = $i;
-            }
-
-            $bucketsByDay = array();
-            foreach ($shifts as $shift) {
-                $day = $shift->getStart()->format("d m Y");
-                $job = $shift->getJob()->getId();
-                $interval = $shift->getIntervalCode();
-                if (!isset($bucketsByDay[$day])) {
-                    $bucketsByDay[$day] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job])) {
-                    $bucketsByDay[$day][$job] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job][$interval])) {
-                    $bucket = new ShiftBucket();
-                    $bucketsByDay[$day][$job][$interval] = $bucket;
-                }
-                $bucketsByDay[$day][$job][$interval]->addShift($shift);
-            }
-
-            $delete_bucket_form = $this->createFormBuilder()
-                ->setAction($this->generateUrl('delete_bucket'))
+        $shift_delete_form = array();
+        $shift_add_form = array();
+        foreach ($shifts as $shift) {
+            $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
+                ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
                 ->setMethod('DELETE')
-                ->add('shift_id', HiddenType::class)
-                ->getForm();
+                ->getForm()->createView();
 
-            $shift_delete_form = array();
-            $shift_add_form = array();
-            foreach ($shifts as $shift) {
-                $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
-                    ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-                    ->setMethod('DELETE')
-                    ->getForm()->createView();
-                $shift_add_form[$shift->getId()] = $this->createForm(
-                    ShiftType::class,
-                    $shift,
-                    array('action' => $this->generateUrl('shift_new'), 'only_add_formation' => true)
-                  )
+            $shift_add_form[$shift->getId()] = $this->createForm(
+                ShiftType::class,
+                $shift,
+                array(
+                    'action' => $this->generateUrl('shift_new'),
+                    'only_add_formation' => true,
+                )
+            )
                 ->createView();
-            }
-
-            return $this->render('admin/booking/index.html.twig', [
-                'form' => $form->createView(),
-                'bucketsByDay' => $bucketsByDay,
-                'hours' => $hours,
-                'jobs' => $jobs,
-                'delete_bucket_form' => $delete_bucket_form->createView(),
-                'beneficiaries' => $beneficiaries,
-                'shift_delete_form' => $shift_delete_form,
-                'shift_add_form' => $shift_add_form
-            ]);
         }
+
+        $delete_bucket_form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('delete_bucket'))
+            ->setMethod('DELETE')
+            ->add('shift_id', HiddenType::class)
+            ->getForm();
+
+        return $this->render('admin/booking/index.html.twig', [
+            'filterForm' => $filter["form"]->createView(),
+            'bucketsByDay' => $bucketsByDay,
+            'jobs' => $jobs,
+            'beneficiaries' => $beneficiaries,
+            'shift_delete_form' => $shift_delete_form,
+            'shift_add_form' => $shift_add_form,
+            'delete_bucket_form' => $delete_bucket_form->createView(),
+        ]);
+
     }
+
 
     /**
      * @Route("/edit_bucket/{id}", name="shift_edit")
@@ -343,7 +501,7 @@ class BookingController extends Controller
      * @Route("/shift/{id}/book", name="shift_book")
      * @Method("POST")
      */
-    public function bookShiftAction(Shift $shift,Request $request)
+    public function bookShiftAction(Shift $shift,Request $request): Response
     {
         $session = new Session();
 

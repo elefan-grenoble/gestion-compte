@@ -32,7 +32,7 @@ class ShiftController extends Controller
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
-            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénevolat');
+            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
