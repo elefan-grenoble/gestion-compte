@@ -16,7 +16,7 @@
     "require": {
         "php": ">=7.1",
         "ext-json": "*",
-        "codeitnowin/barcode": "^3.0",
+        "asmshaon/easy-barcode-generator" : "dev-master",
         "components/jquery": "^3.2",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/doctrine-migrations-bundle": "^2.0",
