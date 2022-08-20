@@ -8,6 +8,9 @@
 /app/config/parameters.yml
 /app/config/parameters.ini
 
+# PHP & Symfony
+composer-setup.php
+composer.phar
 /bin
 /web/bundles
 /web/css
