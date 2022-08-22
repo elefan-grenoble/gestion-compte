@@ -1,11 +1,11 @@
-<div class="card sticky-action {% if (shift.getIsDismissed()) %}orange lighten-2{% elseif (shift.getIsCurrent()) %} deep-purple white-text {% elseif (shift.getIsPast()) %} {% else %} cyan darken-4 white-text{% endif %}">
+<div class="card sticky-action {% if (shift.getIsDismissed()) %}orange lighten-2{% elseif (shift.getIsCurrent()) %}deep-purple white-text{% elseif (shift.getIsPast()) %}{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
-        <span class="card-title activator">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
+        <span class="card-title">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
         <p>
             <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
             {% if use_fly_and_fixed %}
                 <br>
-                Type : <b>{% if shift.fixe %} Fixe {% else %} Volant {% endif %}</b>
+                Type : <b>{% if shift.fixe %}Fixe{% else %}Volant{% endif %}</b>
             {% endif %}
             {% if shift.formation != null %}
                 <br>
@@ -23,17 +23,16 @@
         </div>
     {% elseif (shift.getIsPast()) %}
         <div class="card-action">
-            <i class="material-icons tiny">check</i>
-            <span>
-                {% if (shift.wasCarriedOut) %}
-                    effectué
-                {% else %}
-                    non effectué
-                {% endif %}
-            </span>
+            {% if (shift.wasCarriedOut) %}
+                <i class="material-icons tiny">check</i>
+                <span>effectué</span>
+            {% else %}
+                <i class="material-icons tiny">close</i>
+                <span>non effectué</span>
+            {% endif %}
         </div>
     {% else %}
-        {% if (shift.getIsDismissed() ) %}
+        {% if (shift.getIsDismissed()) %}
             <div class="card-action">
                 <a href="#undismiss{{ shift.id }}" class="modal-trigger btn-flat green truncate white-text">reprendre<span class="hide-on-med-and-down"> mon créneau</span></a>
             </div>
@@ -80,7 +79,6 @@
             </div>
         {% endif %}
     {% endif %}
-
 </div>
 {% if (shift.getIsUpcoming() or shift.getIsCurrent()) %}
     {{ render(controller("AppBundle:Default:shiftContactForm",{'shift':shift})) }}

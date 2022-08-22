@@ -21,7 +21,7 @@
                         <div class="row">
                             {% for shift in shiftsOfCycle %}
                                 <div class="col m6 s12 {% if shiftsOfCycle | length == 1 %}push-m3{% endif %}">
-                                    {% include "booking/_partial/home_shift.html.twig" with { shift: shift  } %}
+                                    {% include "booking/_partial/home_shift.html.twig" with { shift: shift } %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -58,7 +58,7 @@
             </li>
         {% endif %}
         {% if (shift_service.hasCycle(member, -1) or shift_service.hasCycle(member, -2)) %}
-            <li >
+            <li>
                 <div class="collapsible-header"><i class="material-icons">event_available</i>Mes créneaux passés</div>
                 <div class="collapsible-body">
                     {# Shift history #}
@@ -85,4 +85,3 @@
         {% endif %}
     </ul>
 {% endif %}
-
