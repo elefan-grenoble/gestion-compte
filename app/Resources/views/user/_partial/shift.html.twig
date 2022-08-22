@@ -25,6 +25,9 @@
                 <i class="material-icons tiny">close</i>
                 <span>non effectué</span>
             {% endif %}
+            {% if shift.isCurrent %}
+                <span>(créneau en cours)</span>
+            {% endif %}
         </div>
     {% endif %}
     <div class="card-action">

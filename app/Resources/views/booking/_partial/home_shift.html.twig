@@ -1,4 +1,4 @@
-<div class="card sticky-action {% if (shift.isDismissed) %}orange lighten-2{% elseif (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}{% else %}cyan darken-4 white-text{% endif %}">
+<div class="card sticky-action {% if (shift.isDismissed) %}orange lighten-2{% elseif (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         <span class="card-title">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
         <p>
