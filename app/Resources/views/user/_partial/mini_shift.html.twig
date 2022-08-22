@@ -1,8 +1,8 @@
-<div class="card mini-shift {% if (shift.getIsDismissed()) %}orange darken-4{% elseif shift.isPast %}grey lighten-2{% else %}cyan darken-4{% endif %}">
+<div class="card mini-shift {% if (shift.isDismissed) %}orange darken-4{% elseif shift.isPast %}grey lighten-2{% else %}cyan darken-4{% endif %}">
     <div class="card-content{% if not shift.isPast %} white-text{% endif %}">
         <span class="card-title">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
         <p>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b> </p>
-        {% if (shift.getIsDismissed()) %}
+        {% if (shift.isDismissed) %}
             <p>Créneau annulé, en attente de repreneur</p>
         {% endif %}
     </div>

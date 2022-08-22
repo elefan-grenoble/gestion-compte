@@ -41,11 +41,11 @@
                                         <span class="card-title">{{ bookedshift.start|date_fr_long }} de {{ bookedshift.start|date('H:i') }} à {{ bookedshift.end|date('H:i') }}</span>
                                         <i class="material-icons">person</i>{{ bookedshift.booker.firstname }} / <b class="{{ bookedshift.job.color }}-text">{{ bookedshift.job.name }}</b>
                                         {% if use_fly_and_fixed %}
-                                            <br>
-                                            Type : <b>{% if bookedshift.fixe %} Fixe {% else %} Volant {% endif %}</b>
+                                            <br />
+                                            Type : <b>{% if bookedshift.fixe %}Fixe{% else %}Volant{% endif %}</b>
                                         {% endif %}
                                         {% if bookedshift.formation != null %}
-                                            <br>
+                                            <br />
                                             Formation : <b>{{ bookedshift.formation }}</b>
                                         {% endif %}
                                         <p>Créneau repris par {{ bookedshift.shifter.firstname }} {{ bookedshift.shifter.lastname|first|upper }}.</p>
