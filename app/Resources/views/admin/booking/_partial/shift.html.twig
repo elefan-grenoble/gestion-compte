@@ -6,20 +6,19 @@
         style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
                 left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
                 top: {{ line*10 }}px;">
-    <a href="#edit{{ bucket.first.id }}"
-       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
-        <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %} "
-             style="position: relative;height: 70px;">
-            <div style="height:2px; width: 100%;position: absolute;">
+    <a href="#edit{{ bucket.first.id }}" class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
+        <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
+            <div style="height:2px; width: 100%; position: absolute;">
                 {% if nbBookableShifts < nbShifts %}
                     {% for shifter in 1..(nbShifts - nbBookableShifts) %}
                         <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
                     {% endfor %}
                 {% endif %}
             </div>
-            <div >
-                <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">{{ bucket.start|date('G\\hi') }}
-                        &nbsp;{{ bucket.end|date('G\\hi') }}</div>
+            <div>
+                <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">
+                    {{ bucket.start|date('G\\hi') }}&nbsp;{{ bucket.end|date('G\\hi') }}
+                </div>
                 <ul style="font-size: 9px; padding-left: 15px;">
                     {% set shiftercount = 0 %}
                     {% for shift in bucket.sortedShifts() %}
@@ -27,16 +26,14 @@
                             {% if (shiftercount < 4) %}
                                 <li class="{% if shift.isDismissed() %}red-text{% endif %}">
                                     {% if use_card_reader_to_validate_shifts %}
-                                        {% if shift.formation %}
-                                            <b data-formation="{{ shift.formation.name }}">
+                                        {% if shift.end < date() %}
+                                            <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                         {% endif %}
                                     {% endif %}
-                                    {% if shift.end < date() %}
-                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                    {% endif %}
                                     {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
-                                    {% if shift.formation %}</b>{% endif %}
-                                    {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
+                                    {% if not shift.formation and shift.shifter.formations | length > 0 %}
+                                        &nbsp;<b class="orange-text">(q)</b>
+                                    {% endif %}
                                 </li>
                                 {% set shiftercount = shiftercount + 1 %}
                             {% elseif shiftercount == 4 %}
@@ -50,9 +47,9 @@
             {% if bucket.first.locked %}
                 <span class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;Verrouillé</span>
             {% elseif (shiftercount == 0) %}
-                <span class="red-text red lighten-5 truncate admin-shift-warning" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
+                <span class="red-text red lighten-5 truncate admin-shift-warning"><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
             {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
-                <span class="orange-text orange lighten-4 truncate admin-shift-warnin" ><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
+                <span class="orange-text orange lighten-4 truncate admin-shift-warnin"><i class="material-icons tiny left">warning</i>&nbsp;sous-effectif</span>
             {% endif %}
         </div>
     </a>
@@ -64,28 +61,27 @@
         {% endif %}
         <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
         <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
-        remplissage {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)
+        <span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)</span>
         <ul class="collapsible" data-collapsible="accordion">
             {% for shift in bucket.sortedShifts() %}
                 {% if shift.shifter %}{# is booked #}
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                             <div class="col s12">
-                                {% if  use_card_reader_to_validate_shifts %}
+                                {% if use_card_reader_to_validate_shifts %}
                                     {% if shift.end < date() %}
                                         <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                     {% endif %}
                                 {% endif %}
-                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                                {% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
                                 {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                             </div>
                         </div>
                         <div class="collapsible-body">
                             {% if use_fly_and_fixed %}
-                                Créneau <b>{% if shift.fixe %} fixe {% else %} volant {% endif %} </b>, réservé
+                                Créneau <b>{% if shift.fixe %} fixe {% else %} volant {% endif %}</b>, réservé
                             {% else %}
                                 Réservé
                             {% endif %}
@@ -98,7 +94,7 @@
                                         <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
                                     {% endif %}
                                 </form>
-                                {% if  use_card_reader_to_validate_shifts %}
+                                {% if use_card_reader_to_validate_shifts %}
                                     {% if shift.wasCarriedOut %}
                                         <form action="{{ path('invalidate_shift', { 'id' : shift.id }) }}" method="POST" id="invalidate_shift_{{ shift.id }}">
                                             <button type="submit" class="btn red"><i class="material-icons left">highlight_off</i>Invalider la participation</button>
@@ -116,16 +112,13 @@
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                             <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
-                                {% if shift.formation %}
-                                    <b data-formation="{{ shift.formation.name }}">
-                                {% else %}
-                                    <b>
-                                {% endif %}
-                                <span style="font-style: italic">
-                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
-                                    {% else %}libre
-                                    {% endif %}
-                                </span>
+                                <b>
+                                    <span style="font-style: italic">
+                                        {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                                        {% else %}libre
+                                        {% endif %}
+                                    </span>
+                                </b>
                                 {% if shift.formation %}
                                     </b>&nbsp;({{ shift.formation.name }})
                                 {% else %}
