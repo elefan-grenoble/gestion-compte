@@ -28,15 +28,10 @@
                         <div class="card-panel teal warning">
                             <span class="white-text">
                                 <i class="material-icons">warning</i>
-                                Ce créneau n'est <b>pas</b> qualifié. {{ beneficiary.firstname }} a
-                                {% if beneficiary.formations | length %}la formations
-                                {% else %} les formations
-                                {% endif %}
-                                {% for formation in beneficiary.formations %}
-                                {% if loop.last and loop.index > 1 %} et {% endif %}
-                                        <i>{{ formation.name }}</i>
-                                    {% if not loop.last %}, {% endif %}
-                                {% endfor %}.<br>
+                                Ce créneau n'est <b>pas</b> qualifié.
+                                <br>
+                                {{ beneficiary.firstname }} a {% if beneficiary.formations | length == 1 %}une formation{% else %}des formations{% endif %} ({{ beneficiary.formations | join(', ')}}).
+                                <br>
                                 Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                             </span>
                         </div>
@@ -102,7 +97,9 @@
                     {% endfor %}
                 {% endif %}
             </div>
-            <p>Attention ! Cette inscription vous engage. <br>
+            <p>
+                Attention ! Cette inscription vous engage.
+                <br>
                 Pour pouvoir annuler, votre créneau devra trouver repreneur.
             </p>
         {% endif %}
