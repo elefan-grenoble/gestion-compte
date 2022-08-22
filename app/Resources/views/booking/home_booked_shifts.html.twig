@@ -44,7 +44,10 @@
                                             <br>
                                             Type : <b>{% if bookedshift.fixe %} Fixe {% else %} Volant {% endif %}</b>
                                         {% endif %}
-                                        {% if bookedshift.formation != null %}<br>Formation : <b>{{ bookedshift.formation }}</b>{% endif %}
+                                        {% if bookedshift.formation != null %}
+                                            <br>
+                                            Formation : <b>{{ bookedshift.formation }}</b>
+                                        {% endif %}
                                         <p>Créneau repris par {{ bookedshift.shifter.firstname }} {{ bookedshift.shifter.lastname|first|upper }}.</p>
                                     </div>
                                 </div>

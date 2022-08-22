@@ -7,7 +7,10 @@
                 <br>
                 Type : <b>{% if shift.fixe %} Fixe {% else %} Volant {% endif %}</b>
             {% endif %}
-            {% if shift.formation != null %}<br>Formation : <b>{{ shift.formation }}</b>{% endif %}
+            {% if shift.formation != null %}
+                <br>
+                Formation : <b>{{ shift.formation }}</b>
+            {% endif %}
         </p>
         {% if (shift.getIsDismissed() ) %}
             <br>
