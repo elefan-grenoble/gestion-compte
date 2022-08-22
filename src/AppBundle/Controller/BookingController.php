@@ -682,7 +682,7 @@ class BookingController extends Controller
         $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
         $session = new Session();
 
-        if ($shift->getWasCarriedOut() == 0) {
+        if ($shift->getWasCarriedOut() == 1) {
             $membership = $shift->getShifter()->getMembership();
 
             $em = $this->getDoctrine()->getManager();
