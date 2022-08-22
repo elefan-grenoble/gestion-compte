@@ -484,7 +484,17 @@ class Shift
     public function getIsCurrent()
     {
         $now = new \DateTime('now');
-        return ($this->start < $now) && ($now < $this->end );
+        return ($this->start < $now) && ($now < $this->end);
+    }
+
+    /**
+     * Return true if the shift is now or in the past
+     *
+     * @return boolean
+     */
+    public function getIsPastOrCurrent()
+    {
+        return ($this->getIsPast() or $this->getIsCurrent());
     }
 
     /**
@@ -492,7 +502,8 @@ class Shift
      *
      * @return boolean
      */
-    public function getIsUpcoming(){
+    public function getIsUpcoming()
+    {
         return $this->isBefore('2 days');
     }
 

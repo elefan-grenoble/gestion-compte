@@ -25,10 +25,8 @@
                         {% if (shift.shifter) %}{# is booked #}
                             {% if (shiftercount < 4) %}
                                 <li class="{% if shift.isDismissed() %}red-text{% endif %}">
-                                    {% if use_card_reader_to_validate_shifts %}
-                                        {% if shift.end < date() %}
-                                            <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                        {% endif %}
+                                    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                     {% endif %}
                                     {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
                                     {% if not shift.formation and shift.shifter.formations | length > 0 %}
@@ -68,10 +66,8 @@
                     <li id="shift{{ shift.id }}">
                         <div class="collapsible-header">
                             <div class="col s12">
-                                {% if use_card_reader_to_validate_shifts %}
-                                    {% if shift.end < date() %}
-                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                    {% endif %}
+                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                    <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                 {% endif %}
                                 #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
                                 {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
@@ -87,14 +83,7 @@
                             {% endif %}
                                 le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number':shift.booker.membership.memberNumber}) }}">{{ shift.booker }}</a>.
                             {% if is_granted('free',shift) %}
-                                <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
-                                    {% if shift.isPast %}
-                                        <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
-                                    {% else %}
-                                        <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
-                                    {% endif %}
-                                </form>
-                                {% if use_card_reader_to_validate_shifts %}
+                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     {% if shift.wasCarriedOut %}
                                         <form action="{{ path('invalidate_shift', { 'id' : shift.id }) }}" method="POST" id="invalidate_shift_{{ shift.id }}">
                                             <button type="submit" class="btn red"><i class="material-icons left">highlight_off</i>Invalider la participation</button>
@@ -105,6 +94,13 @@
                                         </form>
                                     {% endif %}
                                 {% endif %}
+                                <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
+                                    {% if shift.isPast %}
+                                        <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
+                                    {% else %}
+                                        <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
+                                    {% endif %}
+                                </form>
                             {% endif %}
                         </div>
                     </li>
