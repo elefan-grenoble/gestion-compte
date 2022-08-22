@@ -13,7 +13,7 @@
     </div>
     <div class="card-action">
         {% if is_granted('free',shift) %}
-        <form action="{{ path('free_shift', {'id' : shift.id }) }}" method="Post">
+        <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST">
             {% if shift.isPast %}
                 <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer</button>
             {% else %}
