@@ -1,4 +1,5 @@
 {% trans_default_domain 'FOSUserBundle' %}
+
 {% if app.user.beneficiary %}
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
@@ -15,19 +16,6 @@
                 <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
             </div>
         </li>
-
-        {% if use_fly_and_fixed %}
-            <li>
-                <div class="collapsible-header"><i class="material-icons">date_range</i>Créneau fixe</div>
-                <div class="collapsible-body">
-                    {% if beneficiary.flying %}
-                        <div class="chip green-text">Equipe volante</div>
-                    {% else %}
-                        <div class="chip green-text">Equipe fixe</div>
-                    {% endif %}
-                </div>
-            </li>
-        {% endif %}
 
         <li>
             <div class="collapsible-header"><i class="material-icons">ac_unit</i>Gel du compte</div>

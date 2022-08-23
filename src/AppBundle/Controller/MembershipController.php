@@ -148,6 +148,9 @@ class MembershipController extends Controller
 
         $timeLogForm = $this->createNewTimeLogForm($member);
 
+        $em = $this->getDoctrine()->getManager();
+        $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
+
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
@@ -159,7 +162,8 @@ class MembershipController extends Controller
             'new_notes_form' => $new_notes_form,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'delete_form' => $deleteForm->createView(),
-            'time_log_form' => $timeLogForm->createView()
+            'time_log_form' => $timeLogForm->createView(),
+            'period_positions' => $period_positions,
         ));
     }
 
