@@ -33,7 +33,7 @@
             {% set shiftsOfCycle = member.getShiftsOfCycle(cycle) %}
             {% if shiftsOfCycle | length > 0 %}
                 <li class="active">
-                    <div class="collapsible-header active"><i class="material-icons">date_range</i>Mes créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %}  (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})</div>
+                    <div class="collapsible-header active"><i class="material-icons">date_range</i>Mes créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})</div>
                     <div class="collapsible-body">
                         <div class="row">
                             {% for shift in shiftsOfCycle %}
