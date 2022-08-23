@@ -1,33 +1,47 @@
 {% trans_default_domain 'FOSUserBundle' %}
 {% if app.user.beneficiary %}
-<h5 class="center-align">
-    <img src="{{ gravatar(app.user.beneficiary.email,100) }}" alt="{{ app.user.beneficiary.firstname | lower | capitalize }}" class="circle responsive-img"><br>
-    {{ app.user }}
-</h5>
-<ul class="collapsible">
-        {% set member = app.user.beneficiary.membership %}
+    {% set beneficiary = app.user.beneficiary %}
+    {% set member = beneficiary.membership %}
+    <h5 class="center-align">
+        <img src="{{ gravatar(beneficiary.email,100) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
+        <br />
+        {{ app.user }}
+    </h5>
+    <ul class="collapsible">
         <li>
             <div class="collapsible-header"><i class="material-icons">person</i>Mes informations</div>
             <div class="collapsible-body">
-                {% if app.user.beneficiary %}
-                    {% include "beneficiary/_partial/info.html.twig" with { beneficiary: app.user.beneficiary } %}
-                    <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
-                {% endif %}
-            </div>
-        </li>
-        <li>
-            <div class="collapsible-header"><i class="material-icons">ac_unit</i>Gel du compte</div>
-            <div class="collapsible-body">
-                {% include "member/_partial/frozen.html.twig" with { member: member  } %}
+                {% include "beneficiary/_partial/info.html.twig" with { beneficiary: beneficiary } %}
+                <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
             </div>
         </li>
 
+        {% if use_fly_and_fixed %}
             <li>
-                <div class="collapsible-header"><i class="material-icons">credit_card</i>Badge{% if app.user.beneficiary.swipeCards | length > 1%}s{% endif %}</div>
+                <div class="collapsible-header"><i class="material-icons">date_range</i>Créneau fixe</div>
                 <div class="collapsible-body">
-                    {% include "member/_partial/swipe_card.html.twig" with { member: member, showBadgeImage: true  } %}
+                    {% if beneficiary.flying %}
+                        <div class="chip green-text">Equipe volante</div>
+                    {% else %}
+                        <div class="chip green-text">Equipe fixe</div>
+                    {% endif %}
                 </div>
             </li>
+        {% endif %}
+
+        <li>
+            <div class="collapsible-header"><i class="material-icons">ac_unit</i>Gel du compte</div>
+            <div class="collapsible-body">
+                {% include "member/_partial/frozen.html.twig" with { member: member } %}
+            </div>
+        </li>
+
+        <li>
+            <div class="collapsible-header"><i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1%}s{% endif %}</div>
+            <div class="collapsible-body">
+                {% include "member/_partial/swipe_card.html.twig" with { member: member, showBadgeImage: true } %}
+            </div>
+        </li>
 
         {% if app.user.clients | length %}
             <li>
@@ -35,12 +49,12 @@
                 <div class="collapsible-body">
                     <table>
                         <thead>
-                        <tr>
-                            <th></th>
-                            <th>Service</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
+                            <tr>
+                                <th></th>
+                                <th>Service</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
                         </thead>
                         <tbody>
                         {% for client in app.user.clients %}
@@ -48,9 +62,9 @@
                                 <td>
                                     {% if client.service.logo %}
                                         <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
-                                             alt="{{ client.service.name }}"
-                                             class="circle responsive-img"
-                                             style="background: white">
+                                            alt="{{ client.service.name }}"
+                                            class="circle responsive-img"
+                                            style="background: white">
                                     {% endif %}
                                 </td>
                                 <td>
@@ -61,15 +75,14 @@
                                 </td>
                                 <td>
                                     <a href="{{ path('user_client_remove',{'username':app.user.username,'client_id':client.id}) }}"
-                                       class="btn-floating red left"><i class="material-icons">close</i></a>
+                                    class="btn-floating red left"><i class="material-icons">close</i></a>
                                 </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
-
                 </div>
             </li>
         {% endif %}
-</ul>
+    </ul>
 {% endif %}
