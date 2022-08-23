@@ -12,7 +12,7 @@
                 Formation : <b>{{ shift.formation }}</b>
             {% endif %}
         </p>
-        {% if (shift.isDismissed ) %}
+        {% if (shift.isDismissed) %}
             <br>
             <b class="red-text text-darken-4">Créneau en attente d'être repris par un autre bénévole</b>
         {% endif %}
@@ -51,11 +51,10 @@
             {{ form_start(undismiss_shift_form,{ 'attr' : { 'id' : 'undismiss_shift'}}) }}
             {{ form_widget(undismiss_shift_form) }}
             {{ form_end(undismiss_shift_form) }}
-
         {% else %}
             <div class="card-action">
                 {% if not shift.fixe %}
-                    <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text">Annuler</a>
+                    <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
                 {% endif %}
                 {% if (shift.isUpcoming) %}
                     <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
