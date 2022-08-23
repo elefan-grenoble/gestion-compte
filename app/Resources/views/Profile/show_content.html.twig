@@ -11,9 +11,7 @@
             <div class="collapsible-body">
                 {% if app.user.beneficiary %}
                     {% include "beneficiary/_partial/info.html.twig" with { beneficiary: app.user.beneficiary } %}
-
                     <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
-
                 {% endif %}
             </div>
         </li>

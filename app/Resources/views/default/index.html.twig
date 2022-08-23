@@ -2,40 +2,53 @@
 
 {% block beforecontainer %}
 {% endblock %}
+
 {% block aftercontainer %}
     <div class="center-align">
         {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-            <img class="responsive-img" src="{{ asset_url }}" alt="elefan"/>
+            <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
         {% endimage %}
     </div>
 {% endblock %}
+
 {% block content %}
-    <div class="section no-pad-bot" id="index-banner">
+    <div class="section" id="index-banner">
     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
         <div class="container center">
             <div class="announcement">{{ dynamicContent | markdown | raw }}</div>
 
-            <div class="section no-pad-bot">
-                <h3 class="header">
-                    Bonjour {% if app.user.beneficiary %}{{ app.user.beneficiary.firstname }}<br />
-                    #{{ app.user.beneficiary.membership.memberNumber }}{% else %}{{ app.user.username }}{% endif %}
-                </h3>
+            <div class="row">
+                <div class="col s12">
+                    <h3 class="header">
+                        Bonjour
+                        {% if app.user.beneficiary %}
+                            {{ app.user.beneficiary.firstname }}
+                            <br />
+                            #{{ app.user.beneficiary.membership.memberNumber }}
+                        {% else %}
+                            {{ app.user.username }}
+                        {% endif %}
+                    </h3>
+                </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
-                    <p class="col s12">
-                        <span class="orange-text">&lt;warning&gt;</span>
-                        <span>With great power comes great responsibility</span>
-                        <span class="orange-text">&lt;/warning&gt;</span>
-                    </p>
+                    <div class="col s12">
+                        <p>
+                            <span class="orange-text">&lt;warning&gt;</span>
+                            <span>With great power comes great responsibility</span>
+                            <span class="orange-text">&lt;/warning&gt;</span>
+                        </p>
+                    </div>
                 {% endif %}
                 {% if app.user.beneficiary %}
-                    <p class="col s12">Bienvenue sur ton espace personnel à {{ project_name }}</p>
-                    {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
-                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
-                        <br />
-                        <br />
-                    {% endif %}
+                    <div class="col s12">
+                        <p>Bienvenue sur ton espace personnel à {{ project_name }}</p>
+                        {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
+                            <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
+                            <br />
+                            <br />
+                        {% endif %}
+                    </div>
                 {% endif %}
-                <br />
             </div>
 
             <div class="row">
@@ -44,7 +57,7 @@
                         <div class="col s12 l12 xl6">
                             <div class="homebox">
                                 <h5><span class="white">Mon Bénévolat</span></h5>
-                                {{ render(controller("AppBundle:Booking:homepageDashboard")) }}
+                                {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
                             </div>
                         </div>
                     {% else %}
@@ -133,13 +146,13 @@
                 {% endif %}
                 {% if not app.user.beneficiary or app.user.beneficiary.membership | uptodate %}
                     <div class="col s12">
-                        {{ render(controller("AppBundle:Booking:homepageShifts")) }}
+                        {{ render(controller("AppBundle:Booking:homepageShifts")) }}{# use include instead?#}
                     </div>
                     <div class="col offset-xl3 xl6 m8 offset-m2 s12">
                         <div class="homebox">
                             <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action !</span></h5>
 
-                            {{ render(controller("AppBundle:Code:homepageDashboard")) }}
+                            {{ render(controller("AppBundle:Code:homepageDashboard")) }}{# use include instead?#}
 
                             {% if is_granted("access_tools",app.user) %}
                                 <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
@@ -186,6 +199,7 @@
 
 {% block stylesheets %}
 {% endblock %}
+
 {% block javascripts %}
     <script>
         jQuery(function () {
