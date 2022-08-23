@@ -14,17 +14,18 @@
 
 {% block content %}
     <h4>
-        {% if member.withdrawn %}
-        <del>{% endif %}
-            Membre #{{ member.memberNumber }}
-            {% if member.withdrawn %}</del>{% endif %}
+        {% if member.withdrawn %}<del>{% endif %}
+        Membre #{{ member.memberNumber }}
+        {% if member.withdrawn %}</del>{% endif %}
         {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
     </h4>
+
     <div class="row">
         {% for beneficiary in member.beneficiaries %}
             {% include "beneficiary/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
         {% endfor %}
     </div>
+
     {% if member.notes | length %}
         <h5>Note{% if member.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
         <div class="row">
@@ -52,7 +53,6 @@
                 </div>
             </li>
         </ul>
-        {#{% else %}#}
     {% endif %}
 
     <ul class="collapsible" data-collapsible="expandable">
@@ -61,7 +61,6 @@
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
-
                 <ul class="collapsible" data-collapsible="accordion">
                     {% for registration in member.registrations %}
                         <li>
@@ -71,8 +70,9 @@
                                     <i class="material-icons tiny">attach_money</i>
                                 {% endif %}
                                 {{ registration.date | date('d F Y') }}
-                                {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}<span
-                                        class="badge right">Helloasso</span>{% endif %}
+                                {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}
+                                    <span class="badge right">Helloasso</span>
+                                {% endif %}
                             </div>
                         </li>
                     {% endfor %}
@@ -108,14 +108,14 @@
                 {% endif %}
             </div>
         </li>
-        {% if is_granted("create",note) %}
+        {% if is_granted("create", note) %}
             <li id="note">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
                     <i class="material-icons">add</i>Ajouter une note
                 </div>
                 <div class="collapsible-body white">
                     {{ form_start(note_form) }}
-                        {{ form_row(note_form.text) }}
+                    {{ form_row(note_form.text) }}
                     <div>
                         <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
                     </div>
@@ -148,59 +148,55 @@
                     <i class="material-icons">credit_card</i>Badges
                 </div>
                 <div class="collapsible-body white">
-                    <ul>
+                    <div class="row">
                         {% for beneficiary in member.beneficiaries %}
-                            <div class="row">
-                                <div class="col">
-                                    <h4>{{ beneficiary.firstname }}</h4>
-                                    {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
-                                        <p><b class="red-text">Aucun badges actif</b></p>
-                                        <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
-                                        <div id="swipe_add_b{{ beneficiary.id }}" class="modal">
-                                            <div class="modal-content">
-                                                <h4>Associer un badge</h4>
-                                                <form action="{{ path('active_swipe_for_beneficiary',{id:beneficiary.id})}}" method="post">
-                                                    <div class="row">
-                                                        <div class="input-field col s6">
-                                                            <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
-                                                            <input pattern=".{13,13}" type="text" name="code" autocomplete="off"/>
-                                                            <label for="code">Code du badge à 13 chiffres</label>
-                                                        </div>
-                                                        <div class="col s6">
-                                                            <br>
-                                                            <button type="submit" class="waves-effect waves-light btn-flat green white-text"><i class="material-icons left">check</i>Associer le badge</button>
-                                                        </div>
+                            <div class="col s12 m6">
+                                <h4>{{ beneficiary.firstname }}</h4>
+                                {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
+                                    <p><b class="red-text">Aucun badge actif</b></p>
+                                    <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
+                                    <div id="swipe_add_b{{ beneficiary.id }}" class="modal">
+                                        <div class="modal-content">
+                                            <h4>Associer un badge</h4>
+                                            <form action="{{ path('active_swipe_for_beneficiary',{id:beneficiary.id})}}" method="post">
+                                                <div class="row">
+                                                    <div class="col s12 m6 input-field">
+                                                        <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                                                        <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
+                                                        <label for="code">Code du badge à 13 chiffres</label>
                                                     </div>
-                                                </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <a href="#!" class="modal-close waves-effect red-text btn-flat">Fermer</a>
-                                            </div>
+                                                    <div class="col s12 m6">
+                                                        <br />
+                                                        <button type="submit" class="waves-effect waves-light btn-flat green white-text"><i class="material-icons left">check</i>Associer le badge</button>
+                                                    </div>
+                                                </div>
+                                            </form>
                                         </div>
-                                    {% else %}
-                                        <div class="badge">
-                                            <img
-                                                    src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}"
-                                                    alt="barecode">
+                                        <div class="modal-footer">
+                                            <a href="#!" class="modal-close waves-effect red-text btn-flat">Fermer</a>
                                         </div>
-                                        <br>
-                                    {% endif %}
-                                    {% if beneficiary.getSwipeCards | length %}
-                                        <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
-                                        <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
-                                            <div class="modal-content">
-                                                <h4>Tous les badges {{ beneficiary.firstname }}</h4>
-                                                {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
-                                            </div>
-                                            <div class="modal-footer">
-                                                <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
-                                            </div>
+                                    </div>
+                                {% else %}
+                                    <div class="badge">
+                                        <img src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}" alt="barecode" />
+                                    </div>
+                                    <br>
+                                {% endif %}
+                                {% if beneficiary.getSwipeCards | length %}
+                                    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
+                                    <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
+                                        <div class="modal-content">
+                                            <h4>Tous les badges {{ beneficiary.firstname }}</h4>
+                                            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
                                         </div>
-                                    {% endif %}
-                                </div>
+                                        <div class="modal-footer">
+                                            <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
+                                        </div>
+                                    </div>
+                                {% endif %}
                             </div>
                         {% endfor %}
-                    </ul>
+                    </div>
                 </div>
             </li>
         {% endif %}
@@ -211,31 +207,35 @@
                     <i class="material-icons">ac_unit</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
                 </div>
                 <div class="collapsible-body white">
-
-                    {% if is_granted("freeze_change",member) %}
+                    {% if is_granted("freeze_change", member) %}
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                    <i class="material-icons left">cancel</i>Annuler la demande de gel du compte</a>
+                                    <i class="material-icons left">cancel</i>Annuler la demande de gel du compte
+                                </a>
                             {% else %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
-                                    <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
+                                    <i class="material-icons left">paused</i>Geler le compte à la fin du cycle
+                                </a>
                             {% endif %}
                         {% else %}
                             {% if member.frozenChange %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                    <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte</a>
+                                    <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte
+                                </a>
                             {% else %}
                                 <a href="{{ path("member_freeze_change",{"id":member.id}) }}"
                                    class="waves-effect waves-light btn waves-purple purple lighten-2">
-                                    <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle</a>
+                                    <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle
+                                </a>
                             {% endif %}
                         {% endif %}
                     {% endif %}
-                    {% if is_granted("freeze",member) %}
+                    {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
                             <a href="#pause" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
-                                <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement</a>
+                                <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
+                            </a>
                             <div id="pause" class="modal">
                                 <div class="modal-content">
                                     <h5><i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte</h5>
@@ -244,15 +244,15 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange"
-                                       href="{{ path('member_freeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce que
-                                        je fais !</a>
+                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_freeze',{ 'id' : member.id }) }}">
+                                        <i class="material-icons left">check</i>Je sais ce que je fais !
+                                    </a>
                                 </div>
                             </div>
                         {% else %}
                             <a href="#unpause" class="waves-effect waves-light btn modal-trigger purple lighten-3">
-                                <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte
-                                immédiatement</a>
+                                <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
+                            </a>
                             <div id="unpause" class="modal">
                                 <div class="modal-content">
                                     <h5><i class="material-icons left small">play_arrow</i>Dégel immédiat du compte</h5>
@@ -261,18 +261,16 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange"
-                                       href="{{ path('member_unfreeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                        que je fais !</a>
+                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_unfreeze',{ 'id' : member.id }) }}">
+                                        <i class="material-icons left">check</i>Je sais ce que je fais !
+                                    </a>
                                 </div>
                             </div>
                         {% endif %}
-                        <br>
                     {% endif %}
                 </div>
             </li>
         {% endif %}
-
 
         {% if is_granted("ROLE_USER_MANAGER") and is_granted("close",member) %}
             <li id="close">
@@ -282,7 +280,8 @@
                 <div class="collapsible-body white">
                     {% if not member.withdrawn %}
                         <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
-                            <i class="material-icons left">close</i>Fermer le compte</a>
+                            <i class="material-icons left">close</i>Fermer le compte
+                        </a>
                         <div id="close-member" class="modal">
                             <div class="modal-content">
                                 <h5><i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre</h5>
@@ -290,14 +289,15 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange"
-                                   href="{{ path('member_close',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                    que je fais !</a>
+                                <a class="btn waves-effect waves-light orange" href="{{ path('member_close',{ 'id' : member.id }) }}">
+                                    <i class="material-icons left">check</i>Je sais ce que je fais !
+                                </a>
                             </div>
                         </div>
                     {% else %}
                         <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
-                            <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
+                            <i class="material-icons left">check</i>Ré-ouvrir le compte
+                        </a>
                         <div id="reopen-member" class="modal">
                             <div class="modal-content">
                                 <h5><i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre</h5>
@@ -305,9 +305,9 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange"
-                                   href="{{ path('member_open',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                    que je fais !</a>
+                                <a class="btn waves-effect waves-light orange" href="{{ path('member_open',{ 'id' : member.id }) }}">
+                                    <i class="material-icons left">check</i>Je sais ce que je fais !
+                                </a>
                             </div>
                         </div>
                     {% endif %}
@@ -332,7 +332,6 @@
             </li>
         {% endif %}
     </ul>
-
 {% endblock %}
 
 {% block javascripts %}
