@@ -1,0 +1,25 @@
+<div class="card">
+    <div class="card-content">
+        <span class="card-title">
+            {{ period_position.period.getDayOfWeekString() }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
+            <small>(Semaine {{ period_position.weekCycle }})</small>
+        </span>
+        <p>
+            <b class="{{ period_position.period.job.color }}-text">{{ period_position.period.job.name }}</b>
+            {% if period_position.formation != null %}
+                <br />
+                Formation : <b>{{ period_position.formation }}</b>
+            {% endif %}
+        </p>
+    </div>
+    <div class="card-action center">
+        <i class="material-icons">person</i>{{ period_position.shifter.firstname }}
+    </div>
+    {% if is_granted("ROLE_SHIFT_MANAGER") %}
+        <div class="card-action">
+            <a href="{{ path("period_edit", { 'id': period_position.period.id }) }}" class="waves-effect waves-light btn white black-text" target="_blank">
+                <i class="material-icons left orange-text">date_range</i>Voir le créneau
+            </a>
+        </div>
+    {% endif %}
+</div>

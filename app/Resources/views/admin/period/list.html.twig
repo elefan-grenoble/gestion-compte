@@ -42,7 +42,7 @@
                 {% for i in 0..6 %}
                     <td>
                         {% for period in periods[i] %}
-                            <a href="{{ path("period_edit",{'id': period.id}) }}">
+                            <a href="{{ path("period_edit", { 'id': period.id }) }}">
                                 <div class="card {% if period.job %}{{ period.job.color }}{% else %}blue{% endif %} lighten-2">
                                     <div class="card-content white-text">
                                         <span style="margin-bottom:1em;">

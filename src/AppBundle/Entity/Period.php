@@ -57,6 +57,14 @@ class Period
     private $positions;
 
     /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -90,6 +98,16 @@ class Period
         return $this->dayOfWeek;
     }
 
+    /**
+     * Get dayOfWeekString
+     *
+     * @return int
+     */
+    public function getDayOfWeekString()
+    {
+        // return jddayofweek($this->dayOfWeek, CAL_DOW_LONG);  # in english...
+        return date('l', strtotime("Monday + {$this->dayOfWeek} days"));
+    }
 
     /**
      * Set start
@@ -137,15 +155,6 @@ class Period
     public function getEnd()
     {
         return $this->end;
-    }
-
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**

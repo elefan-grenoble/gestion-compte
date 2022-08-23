@@ -634,7 +634,7 @@ class Beneficiary
     }
 
     /**
-     * Add swipeCard.
+     * Add swipeCard
      *
      * @param \AppBundle\Entity\SwipeCard $swipeCard
      *
@@ -648,7 +648,7 @@ class Beneficiary
     }
 
     /**
-     * Remove swipeCard.
+     * Remove swipeCard
      *
      * @param \AppBundle\Entity\SwipeCard $swipeCard
      *
@@ -660,7 +660,7 @@ class Beneficiary
     }
 
     /**
-     * Get swipeCards.
+     * Get swipeCards
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -669,6 +669,11 @@ class Beneficiary
         return $this->swipe_cards;
     }
 
+    /**
+     * Get enabled swipeCards
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
     public function getEnabledSwipeCards()
     {
         return $this->swipe_cards->filter(function ($card) {
