@@ -4,18 +4,18 @@
 {% set nextShifts = member.getShiftsOfCycle(1) %}
 
 {% if use_fly_and_fixed %}
-<div class="row">
-    <h6>Créneau fixe</h6>
-    {% if period_positions %}
-        {% for period_position in period_positions %}
-            <div class="col m4 s6">
-                {% include "user/_partial/period_position.html.twig" with { period_position: period_position } %}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Pas de créneau fixe</p>
-    {% endif %}
-</div>
+    <div class="row">
+        <h6>Créneau fixe</h6>
+        {% if period_positions %}
+            {% for period_position in period_positions %}
+                <div class="col m4 s6">
+                    {% include "user/_partial/period_position.html.twig" with { period_position: period_position, show_actions: true } %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Pas de créneau fixe</p>
+        {% endif %}
+    </div>
 {% endif %}
 
 <div class="row">

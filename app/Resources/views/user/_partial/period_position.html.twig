@@ -15,7 +15,7 @@
     <div class="card-action center">
         <i class="material-icons">person</i>{{ period_position.shifter.firstname }}
     </div>
-    {% if is_granted("ROLE_SHIFT_MANAGER") %}
+    {% if show_actions is defined and show_actions and is_granted("ROLE_SHIFT_MANAGER") %}
         <div class="card-action">
             <a href="{{ path("period_edit", { 'id': period_position.period.id }) }}" class="waves-effect waves-light btn white black-text" target="_blank">
                 <i class="material-icons left orange-text">date_range</i>Voir le créneau

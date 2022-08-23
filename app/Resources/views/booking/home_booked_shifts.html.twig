@@ -2,6 +2,23 @@
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
     <ul class="collapsible expandable">
+        {% if use_fly_and_fixed %}
+            <li class="active">
+                <div class="collapsible-header"><i class="material-icons">event</i>Créneau fixe</div>
+                <div class="collapsible-body">
+                {% if period_positions %}
+                    <div class="row">
+                        {% for period_position in period_positions %}
+                            <div class="col m4 s6">
+                                {% include "user/_partial/period_position.html.twig" with { period_position: period_position } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                        <p>Pas de créneau fixe</p>
+                    {% endif %}
+            </li>
+        {% endif %}
         {% if (member.reservedShifts | length) > 0 %}
             <li class="active">
                 <div class="collapsible-header active"><i class="material-icons">event_note</i>Mes créneaux à accepter</div>
