@@ -22,15 +22,17 @@
             <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>créneau en cours</span>
         </div>
     {% elseif (shift.isPast) %}
-        <div class="card-action">
-            {% if (shift.wasCarriedOut) %}
-                <i class="material-icons tiny">check</i>
-                <span>effectué</span>
-            {% else %}
-                <i class="material-icons tiny">close</i>
-                <span>non effectué</span>
-            {% endif %}
-        </div>
+        {% if use_card_reader_to_validate_shifts %}
+            <div class="card-action">
+                {% if (shift.wasCarriedOut) %}
+                    <i class="material-icons tiny">check</i>
+                    <span>effectué</span>
+                {% else %}
+                    <i class="material-icons tiny">close</i>
+                    <span>non effectué</span>
+                {% endif %}
+            </div>
+        {% endif %}
     {% else %}
         {% if (shift.isDismissed) %}
             <div class="card-action">
