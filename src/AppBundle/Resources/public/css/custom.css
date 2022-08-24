@@ -126,7 +126,15 @@ footer.page-footer {
 }
 /* Links */
 .card .card-action a.btn {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
   color: white;
+}
+.card .card-action button.btn {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 .btn,
 .btn-large {

@@ -4,27 +4,27 @@
 {% set nextShifts = member.getShiftsOfCycle(1) %}
 
 {% if use_fly_and_fixed %}
-<div class="row">
-    <h6>Créneau fixe</h6>
-    {% if period_positions %}
-        {% for period_position in period_positions %}
-            <div class="col m4 s6">
-                {% include "user/_partial/period_position.html.twig" with { period_position: period_position } %}
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Pas de créneau fixe</p>
-    {% endif %}
-</div>
+    <div class="row">
+        <h6>Créneau fixe</h6>
+        {% if period_positions %}
+            {% for period_position in period_positions %}
+                <div class="col s12 m6 l4">
+                    {% include "user/_partial/period_position.html.twig" with { period_position: period_position, show_actions: true } %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Pas de créneau fixe</p>
+        {% endif %}
+    </div>
 {% endif %}
 
 <div class="row">
     <h6>Cycle précédent (du {{ member.startOfCycle(-1) | date_fr_long }} au {{ member.endOfCycle(-1) | date_fr_long }})</h6>
-    {% if previousShifts|length == 0 %}
+    {% if previousShifts | length == 0 %}
         Pas de créneau
     {% endif %}
     {% for shift in previousShifts %}
-        <div class="col m4 s6">
+        <div class="col s12 m6 l4">
             {% include "user/_partial/shift.html.twig" with { shift: shift } %}
         </div>
     {% endfor %}
@@ -32,11 +32,11 @@
 
 <div class="row">
     <h6>Cycle en cours (du {{ member.startOfCycle | date_fr_long }} au {{ member.endOfCycle | date_fr_long }})</h6>
-    {% if currentShifts|length == 0 %}
+    {% if currentShifts | length == 0 %}
         Pas de créneau
     {% endif %}
     {% for shift in currentShifts %}
-        <div class="col m4 s6">
+        <div class="col s12 m6 l4">
             {% include "user/_partial/shift.html.twig" with { shift: shift } %}
         </div>
     {% endfor %}
@@ -44,11 +44,11 @@
 
 <div class="row">
     <h6>Prochain cycle (du {{ member.startOfCycle(1) | date_fr_long }} au {{ member.endOfCycle(1) | date_fr_long }})</h6>
-    {% if nextShifts|length == 0 %}
+    {% if nextShifts | length == 0 %}
         Pas de créneau
     {% endif %}
     {% for shift in nextShifts %}
-        <div class="col m4 s6">
+        <div class="col s12 m6 l4">
             {% include "user/_partial/shift.html.twig" with { shift: shift } %}
         </div>
     {% endfor %}

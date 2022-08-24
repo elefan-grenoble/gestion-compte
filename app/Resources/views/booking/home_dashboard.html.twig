@@ -49,7 +49,7 @@
                 <p>
                     <i class="material-icons">warning</i> Pense à réserver tes créneaux.
                     <br>
-                    Tu as encore {{ remaining | duration_from_minutes }} à réserver.
+                    Tu as encore {{ remaining | duration_from_minutes }} à effectuer.
                 </p>
             {% else %}
                 {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
@@ -85,13 +85,11 @@
         {% endif %}
     {% endif %}
 
-    <a href="{{ path("booking") }}" class="btn teal hide-on-small-only"
-        {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+    <a href="{{ path("booking") }}" class="btn teal hide-on-small-only" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         <i class="material-icons left">schedule</i>
-        Je réserve un créneau
+        Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}
     </a>
-    <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up"
-        {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+    <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         Réserver
     </a>
 
