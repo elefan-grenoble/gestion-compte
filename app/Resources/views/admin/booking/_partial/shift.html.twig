@@ -76,12 +76,14 @@
                             </div>
                         </div>
                         <div class="collapsible-body">
-                            {% if use_fly_and_fixed %}
-                                Créneau <b>{% if shift.fixe %}fixe{% else %}volant{% endif %}</b>, réservé
-                            {% else %}
-                                Réservé
-                            {% endif %}
+                            <p>
+                                {% if use_fly_and_fixed %}
+                                    Créneau <b>{% if shift.fixe %}fixe{% else %}volant{% endif %}</b>, réservé
+                                {% else %}
+                                    Réservé
+                                {% endif %}
                                 le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number':shift.booker.membership.memberNumber}) }}">{{ shift.booker }}</a>.
+                            </p>
                             {% if is_granted('free',shift) %}
                                 {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     {% if shift.wasCarriedOut %}

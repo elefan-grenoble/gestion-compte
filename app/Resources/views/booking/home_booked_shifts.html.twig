@@ -6,17 +6,18 @@
             <li class="active">
                 <div class="collapsible-header"><i class="material-icons">event</i>Créneau fixe</div>
                 <div class="collapsible-body">
-                {% if period_positions %}
-                    <div class="row">
-                        {% for period_position in period_positions %}
-                            <div class="col s12 m6 l4">
-                                {% include "user/_partial/period_position.html.twig" with { period_position: period_position } %}
-                            </div>
-                        {% endfor %}
-                    </div>
+                    {% if period_positions %}
+                        <div class="row">
+                            {% for period_position in period_positions %}
+                                <div class="col s12 m6 l4">
+                                    {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position } %}
+                                </div>
+                            {% endfor %}
+                        </div>
                     {% else %}
                         <p>Pas de créneau fixe</p>
                     {% endif %}
+                </div>
             </li>
         {% endif %}
         {% if (member.reservedShifts | length) > 0 %}
@@ -24,7 +25,7 @@
                 <div class="collapsible-header active"><i class="material-icons">event_note</i>Mes créneaux à accepter</div>
                 <div class="collapsible-body">
                     {% for shift in member.reservedShifts %}
-                        {% include "booking/_partial/reserved_shift.html.twig" with { shift: shift } %}
+                        {% include "booking/_partial/reserved_shift_card.html.twig" with { shift: shift } %}
                     {% endfor %}
                 </div>
             </li>
@@ -38,7 +39,7 @@
                         <div class="row">
                             {% for shift in shiftsOfCycle %}
                                 <div class="col s12 m6 l4 {% if shiftsOfCycle | length == 1 %}push-m3{% endif %}">
-                                    {% include "booking/_partial/home_shift.html.twig" with { shift: shift } %}
+                                    {% include "booking/_partial/home_shift_card.html.twig" with { shift: shift } %}
                                 </div>
                             {% endfor %}
                         </div>
@@ -90,7 +91,7 @@
                                     {% endif %}
                                     {% for shift in previousShifts %}
                                         <div class="col s12 m12">
-                                            {% include "user/_partial/mini_shift.html.twig" with { shift: shift } %}
+                                            {% include "user/_partial/mini_shift_card.html.twig" with { shift: shift } %}
                                         </div>
                                     {% endfor %}
                                 </div>
