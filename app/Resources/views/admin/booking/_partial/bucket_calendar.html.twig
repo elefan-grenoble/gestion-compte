@@ -49,7 +49,7 @@
                             {% endif %}
                         {% endfor %}
                         {# / compute lines #}
-                        {% include "admin/booking/_partial/bucket_line.html.twig" with { bucket: bucket, start: 6, end: 22, line: l } %}
+                        {% include "admin/booking/_partial/bucket_card.html.twig" with { bucket: bucket, start: 6, end: 22, line: l } %}
                         {% include "admin/booking/_partial/bucket_popup.html.twig" with { bucket: bucket } %}
                     {% endfor %}
                 </div>
