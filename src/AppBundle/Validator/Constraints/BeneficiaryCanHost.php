@@ -9,5 +9,5 @@ use Symfony\Component\Validator\Constraint;
  */
 class BeneficiaryCanHost extends Constraint
 {
-    public $message = 'Le compte {{ host }} ne peux pas heberger un nouveau beneficiaire. {{ reason }}';
+    public $message = 'Le compte {{ host }} ne peux pas héberger un nouveau bénéficiaire. {{ reason }}';
 }

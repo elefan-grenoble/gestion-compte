@@ -589,14 +589,68 @@ class Beneficiary
         return $this->received_proxies;
     }
 
-    public function getAutocompleteLabel()
+    /**
+     * return a string with emoji between brackets depending on the
+     * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
+     * or an empty string if none of those
+     *
+     * @param bool $includeLeadingSpace if true add a space at the beginning
+     * @return string with ether emoji(s) for the beneficiary's status or empty
+     */
+    public function getStatusIcon(bool $includeLeadingSpace = false):string{
+
+
+        $symbols = array();
+
+        if($this->getMembership()->getWithdrawn()){
+            $symbols[]= "&#x26A0;";
+        }
+        if ($this->getMembership()->getFrozen()){
+            $symbols[]= "&#x2744;";
+        }
+        if($this->isFlying()){
+            $symbols[]= "&#9992;";
+        }
+
+        if (count($symbols)){
+            $res = '[' . implode("/", $symbols) . ']';
+
+            if($includeLeadingSpace){
+                $res = " " . $res;
+            }
+        }else{
+            $res =  "";
+        }
+        // 	for dispensed beneficiary &#127989;
+        return $res;
+
+    }
+    public function getAutocompleteLabel(): string
     {
-        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' (' . $this->getId() . ')';
+        $label = '#' . $this->getMembership()->getMemberNumber();
+
+        $label .= $this->getStatusIcon(true);
+
+        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        $label .=  ' (' . $this->getId() . ')';
+        return $label;
+
     }
 
-    public function getAutocompleteLabelFull()
+    public function getAutocompleteLabelFull(): string
     {
-        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
+        $label = '#' . $this->getMembership()->getMemberNumber();
+
+        if($this->getMembership()->getWithdrawn()){
+            $label .= " [&#x26A0;]";
+        }elseif ($this->getMembership()->getFrozen()){
+            $label .= " [&#x2744;]";
+        }
+
+        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        $label .=   ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
+        return $label;
+
     }
 
     /**

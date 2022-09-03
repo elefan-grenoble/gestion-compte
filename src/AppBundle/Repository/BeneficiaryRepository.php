@@ -20,4 +20,23 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
         }
         return null;
     }
+    /**
+     * findAllActive
+     *
+     * return all the active beneficiaries meaning with
+     * an active membership
+     */
+    public function findAllActive()
+    {
+
+        $qb = $this->createQueryBuilder('beneficiary');
+
+
+        $qb->select('beneficiary, membership')
+            ->join('beneficiary.user', 'user')
+            ->join('beneficiary.membership', 'membership')
+            ->where('membership.withdrawn=0');
+
+        return $qb->getQuery()->getResult();
+    }
 }
