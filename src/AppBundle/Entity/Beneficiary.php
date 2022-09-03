@@ -640,13 +640,7 @@ class Beneficiary
     public function getAutocompleteLabelFull(): string
     {
         $label = '#' . $this->getMembership()->getMemberNumber();
-
-        if($this->getMembership()->getWithdrawn()){
-            $label .= " [&#x26A0;]";
-        }elseif ($this->getMembership()->getFrozen()){
-            $label .= " [&#x2744;]";
-        }
-
+        $label .= $this->getStatusIcon(true);
         $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
         $label .=   ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
         return $label;

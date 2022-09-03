@@ -208,60 +208,167 @@ class Period
     }
 
     /**
-     * Get periodPositions per week cycle
+     * Get all the positions per week cycle
      *
      * @return array
      */
-    public function getPositionsPerWeekCycle()
+    public function getPositionsPerWeekCycle(): array
     {
-        $positions_per_week_cycle = array();
+        $positionsPerWeekCycle = array();
         foreach ($this->positions as $position) {
-            if (!array_key_exists($position->getWeekCycle(), $positions_per_week_cycle)) {
-                $positions_per_week_cycle[$position->getWeekCycle()] = array();
+            if (!array_key_exists($position->getWeekCycle(), $positionsPerWeekCycle)) {
+                $positionsPerWeekCycle[$position->getWeekCycle()] = array();
             }
-            $positions_per_week_cycle[$position->getWeekCycle()][] = $position;
+            $positionsPerWeekCycle[$position->getWeekCycle()][] = $position;
         }
-        ksort($positions_per_week_cycle);
-        return $positions_per_week_cycle;
+        ksort($positionsPerWeekCycle);
+        return $positionsPerWeekCycle;
+    }
+
+    /**
+     * Return true if at least one shifter (a.k.a. beneficiary) registered for
+     * this period is "problematic", meaning with a withdrawn or frozen membership
+     * of if the shifter is member of the flying team.
+     *
+     * useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekFilter a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isProblematic(?String $weekFilter=null): bool
+    {
+
+        foreach ($this->positions as $position) {
+            if($shifter = $position->getShifter()){
+                if((($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter)
+                    and ($shifter->isFlying()
+                    or $shifter->getMembership()->isFrozen()
+                    or $shifter->getMembership()->isWithdrawn())){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if no shifter (a.k.a. beneficiary) are registered for the period
+     *
+     * useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekFilter a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isEmpty(?String $weekFilter=null): bool
+    {
+        // false at the first position with a shifter
+        foreach ($this->positions as $position) {
+            if($position->getShifter()){
+                if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
+                    return false;
+                }
+            }
+        }
+        // is empty if there are actually some position
+        return count ($this->getGroupedPositionsPerWeekCycle($weekFilter)) != 0;
+    }
+
+    /**
+     * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
+     *
+     * useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekFilter a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isFull(?String $weekFilter=null): bool
+    {
+        // false at the first position without a shifter
+        foreach ($this->positions as $position) {
+            if(! $position->getShifter()){
+                if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
+                    return false;
+                }
+            }
+        }
+        // is empty if there are actually some position
+        return count ($this->getGroupedPositionsPerWeekCycle($weekFilter)) != 0;
+    }
+
+    /**
+     * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
+     *
+     * useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekFilter a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isPartial(?String $weekFilter=null): bool
+    {
+        // false at the first position with a shifter
+        $slotEmpty = false;
+        $slotTaken = false;
+
+        foreach ($this->positions as $position) {
+            if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
+                if($position->getShifter()){
+                    $slotTaken = True;
+                }else{
+                    $slotEmpty = True;
+                }
+            }
+            if ($slotTaken and $slotEmpty){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
      * Get periodPositions grouped per week cycle
      *
+     * @param String|null $weekFilter a string of the week to keep or null if no filter
      * @return array
      */
-    public function getGroupedPositionsPerWeekCycle()
+    public function getGroupedPositionsPerWeekCycle(?String $weekFilter=null): array
     {
-        $aggregate_per_formation = array();
+        $aggregatePerFormation = array();
         foreach ($this->positions as $position) {
-            if (!array_key_exists($position->getWeekCycle(), $aggregate_per_formation)) {
-                $aggregate_per_formation[$position->getWeekCycle()] = array();
+            if (!array_key_exists($position->getWeekCycle(), $aggregatePerFormation)) {
+                $aggregatePerFormation[$position->getWeekCycle()] = array();
             }
             if ($position->getFormation()) {
                 $formation = $position->getFormation()->getName();
             } else {
                 $formation = "Membre";
             }
-            if (array_key_exists($formation, $aggregate_per_formation[$position->getWeekCycle()])) {
-                $aggregate_per_formation[$position->getWeekCycle()][$formation] += 1;
+            if (array_key_exists($formation, $aggregatePerFormation[$position->getWeekCycle()])) {
+                $aggregatePerFormation[$position->getWeekCycle()][$formation] += 1;
             } else {
-                $aggregate_per_formation[$position->getWeekCycle()][$formation] = 1;
+                $aggregatePerFormation[$position->getWeekCycle()][$formation] = 1;
             }
         }
-        ksort($aggregate_per_formation);
-        $aggregate_per_week_cycle = array();
-        foreach ($aggregate_per_formation as $week => $position) {
-            $key = $week;
-            foreach ($aggregate_per_week_cycle as $w => $p) {
-                if ($p == $position) {
-                    $key = $w.", ".$week;
-                    unset($aggregate_per_week_cycle[$w]);
-                    break;
+        ksort($aggregatePerFormation);
+        $aggregatePerWeekCycle = array();
+
+
+        foreach ($aggregatePerFormation as $week => $position) {
+            if($weekFilter && $week==$weekFilter or !$weekFilter){
+                //week_filter not null and in the filter list or week_filter null
+                $key = $week;
+                foreach ($aggregatePerWeekCycle as $w => $p) {
+                    if ($p == $position) {
+                        $key = $w.", ".$week;
+                        unset($aggregatePerWeekCycle[$w]);
+                        break;
+                    }
                 }
+                $aggregatePerWeekCycle[$key] = $position;
             }
-            $aggregate_per_week_cycle[$key] = $position;
         }
-        ksort($aggregate_per_week_cycle);
-        return $aggregate_per_week_cycle;
+
+        ksort($aggregatePerWeekCycle);
+        return $aggregatePerWeekCycle;
     }
 }
