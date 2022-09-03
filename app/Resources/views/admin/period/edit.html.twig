@@ -48,7 +48,9 @@
                             <div class="collapsible-body">
                                 Créneau fixe réservé le <i>{{ position.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number': position.booker.membership.memberNumber}) }}">{{ position.booker }}</a>.
                                 <form action="{{ path('free_position_from_period', {'id' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
-                                    <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
+                                    <button type="submit" class="btn orange">
+                                        <i class="material-icons left">lock_open</i>Libérer
+                                    </button>
                                 </form>
                             </div>
                         </li>

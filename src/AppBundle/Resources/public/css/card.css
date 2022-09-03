@@ -1,8 +1,8 @@
-.card-content .card-btn-bar {
+.card .card-btn-bar {
   position: absolute;
   bottom: -20px;
 }
-.card-content .card-btn-bar .card-btn {
+.card .card-btn-bar .card-btn {
   display: inline-block;
 }
 .homebox .card.event .btn {

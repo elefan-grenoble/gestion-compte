@@ -59,9 +59,15 @@ class BookingController extends Controller
             ->add('shift_id', HiddenType::class)
             ->getForm();
 
-        return $this->render('booking/home_booked_shifts.html.twig', [
-            'undismiss_shift_form' => $undismissShiftForm->createView()
-        ]);
+        $beneficiaries = $this->getUser()->getBeneficiary()->getMembership()->getBeneficiaries();
+
+        $em = $this->getDoctrine()->getManager();
+        $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
+
+        return $this->render('booking/home_booked_shifts.html.twig', array(
+            'undismiss_shift_form' => $undismissShiftForm->createView(),
+            'period_positions' => $period_positions,
+        ));
     }
 
 
@@ -840,7 +846,7 @@ class BookingController extends Controller
         $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
         $session = new Session();
 
-        if ($shift->getWasCarriedOut() == 0) {
+        if ($shift->getWasCarriedOut() == 1) {
             $membership = $shift->getShifter()->getMembership();
 
             $em = $this->getDoctrine()->getManager();

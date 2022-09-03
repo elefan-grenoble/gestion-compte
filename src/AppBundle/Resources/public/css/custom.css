@@ -34,7 +34,7 @@
 .admin-shift-warning {
   position: absolute;
   bottom: 0;
-  right: 0;
+  left: 0;
   opacity: 0.6;
   text-align: right;
   font-size: small;
@@ -60,11 +60,11 @@
 .time-counter div span {
   padding-right: 10px;
 }
-.card-content .card-btn-bar {
+.card .card-btn-bar {
   position: absolute;
   bottom: -20px;
 }
-.card-content .card-btn-bar .card-btn {
+.card .card-btn-bar .card-btn {
   display: inline-block;
 }
 .homebox .card.event .btn {
@@ -126,7 +126,15 @@ footer.page-footer {
 }
 /* Links */
 .card .card-action a.btn {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
   color: white;
+}
+.card .card-action button.btn {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 .btn,
 .btn-large {
