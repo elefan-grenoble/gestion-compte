@@ -8,88 +8,88 @@
 {% endblock %}
 
 {% block content %}
-    {# Title --------- #}
-    <div class="row center">
-        <h4 class="header">Administration des Créneaux</h4>
-    </div>
-    {# Filter form  --------- #}
-    {{ form_start(filterForm) }}
-    <ul class="collapsible" data-collapsible="accordion">
-        <li>
-            <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
-            <div class="collapsible-body">
-                <div class="row">
-                    <div class="input-field col m3">
-                        {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox'}) }}
-                        {{ form_label(filterForm.type) }}
-                    </div>
-                    <div id="dateSelectionType">
-                        <div class="input-field col m3">
-                            {{ form_widget(filterForm.from) }}
-                            {{ form_label(filterForm.from) }}
-                        </div>
-                        <div class="input-field col m3">
-                            {{ form_widget(filterForm.to) }}
-                            {{ form_label(filterForm.to) }}
-                        </div>
-                    </div>
-                    <div id="weekSelectionType">
-                        <div class="input-field col m3">
-                            {{ form_widget(filterForm.week) }}
-                            {{ form_label(filterForm.week) }}
-                        </div>
-                        <div class="input-field col m3">
-                            {{ form_widget(filterForm.year) }}
-                            {{ form_label(filterForm.year) }}
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <div class="input-field col m3">
-                        {{ form_widget(filterForm.job) }}
-                        {{ form_label(filterForm.job) }}
-                    </div>
-                </div>
-                <div>
-                    <div class="input-field col m3">
-                        {{ form_widget(filterForm.filling) }}
-                        {{ form_label(filterForm.filling) }}
-                    </div>
-                </div>
+{# Title --------- #}
+<div class="row center">
+    <h4 class="header">Administration des créneaux</h4>
+</div>
 
-                {{ form_widget(filterForm.filter) }}
-        </li>
-    </ul>
-    {{ form_end(filterForm) }}
-
-    {# Calandar form hour line --------- #}
-    <div class="row">
-        <div class="col m2 hide-on-small-only">
-        </div>
-        <div class="col s12 m10">
-            <div style="display: flex;">
-                {% for i in range(6, 22) %}
-                    <div style="flex: 1">
-                        <div style="text-align: center;width: 100%;margin-left: -50%;">
-                            {{ i }}h
-                        </div>
+{# Filter form  --------- #}
+{{ form_start(filterForm) }}
+<ul class="collapsible" data-collapsible="accordion">
+    <li>
+        <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
+        <div class="collapsible-body">
+            <div class="row">
+                <div class="input-field col m3">
+                    {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox'}) }}
+                    {{ form_label(filterForm.type) }}
+                </div>
+                <div id="dateSelectionType">
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.from) }}
+                        {{ form_label(filterForm.from) }}
                     </div>
-                {% endfor %}
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.to) }}
+                        {{ form_label(filterForm.to) }}
+                    </div>
+                </div>
+                <div id="weekSelectionType">
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.week) }}
+                        {{ form_label(filterForm.week) }}
+                    </div>
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.year) }}
+                        {{ form_label(filterForm.year) }}
+                    </div>
+                </div>
             </div>
+            <div>
+                <div class="input-field col m3">
+                    {{ form_widget(filterForm.job) }}
+                    {{ form_label(filterForm.job) }}
+                </div>
+            </div>
+            <div>
+                <div class="input-field col m3">
+                    {{ form_widget(filterForm.filling) }}
+                    {{ form_label(filterForm.filling) }}
+                </div>
+            </div>
+
+            {{ form_widget(filterForm.filter) }}
+    </li>
+</ul>
+{{ form_end(filterForm) }}
+
+{# Calendar hour line --------- #}
+<div class="row">
+    <div class="col m2 hide-on-small-only">
+    </div>
+    <div class="col s12 m10">
+        <div style="display: flex;">
+            {% for i in range(6, 22) %}
+                <div style="flex: 1">
+                    <div style="text-align: center;width: 100%;margin-left: -50%;">
+                        {{ i }}h
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
+</div>
 
+{% include "admin/booking/_partial/bucket_calendar.html.twig" with { bucketsByDay: bucketsByDay } %}
 
-    {% include "admin/booking/_partial/bucket_calandar.html.twig" with { bucketsByDay: bucketsByDay } %}
-
-    {{ form_start(delete_bucket_form,{ 'attr' : { 'id' : 'delete_bucket'}}) }}
-    {{ form_widget(delete_bucket_form) }}
-    {{ form_end(delete_bucket_form) }}
-
+{{ form_start(delete_bucket_form, { 'attr' : { 'id' : 'delete_bucket' }}) }}
+{{ form_widget(delete_bucket_form) }}
+{{ form_end(delete_bucket_form) }}
 {% endblock %}
 
 {% block stylesheets %}
 {% endblock %}
+
 {% block javascripts %}
     <script>
 
