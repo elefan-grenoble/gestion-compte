@@ -40,9 +40,11 @@
                     <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
                     <ul id="nav-desktop" class="right hide-on-med-and-down">
                         {% if is_granted("ROLE_ADMIN_PANEL") %}
-                            <li class="highlight"><a href="{{ path("admin") }}" class=""><i class="material-icons left">build</i>
-                                    <span class="show-on-xl-only">administration</span>
-                                </a></li>
+                            <li class="highlight">
+                                <a href="{{ path("admin") }}" class="">
+                                    <i class="material-icons left">build</i><span class="show-on-xl-only">administration</span>
+                                </a>
+                            </li>
                         {% endif %}
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {{ render(controller("AppBundle:Service:navlist")) }}

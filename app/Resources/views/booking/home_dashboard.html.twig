@@ -1,57 +1,62 @@
-{% if  app.user.beneficiary %}
+{% if app.user.beneficiary %}
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% set due_duration_hour = due_duration_by_cycle / 60 %}
-    {% if not member.frozen  %}
+    {% if not member.frozen %}
         {% if display_gauge %}
-        <div class="gauge_container">
-            <canvas id="gauge"
-                    data-type="radial-gauge"
-                    data-width="300"
-                    data-height="300"
-                    data-units="{{ member.timeCount / 60 }}h"
-                    data-min-value="{{ due_duration_hour * -3 }}"
-                    data-start-angle="90"
-                    data-ticks-angle="180"
-                    data-value-box="false"
-                    data-value="{{ member.timeCount / 60 }}"
-                    data-max-value="{{ ((member.beneficiaries | length) * due_duration_by_cycle) / 60 }}"
-                    data-major-ticks="{{ due_duration_hour * -3 }}h,{{ due_duration_hour * -2 }}h,{{ due_duration_hour * -1}}h,0,{{ due_duration_hour }}h{% if (member.beneficiaries | length) > 1 %},{{ due_duration_hour *2 }}h{% endif %}"
-                    data-minor-ticks="2"
-                    data-stroke-ticks="true"
-                    data-highlights='[
-        {"from": {{ due_duration_hour * -3 }}, "to": {{ due_duration_hour * -2 }}, "color": "rgba(200, 50, 50, .95)"},
-        {"from": {{ due_duration_hour * -2 }}, "to": {{ due_duration_hour * -1 }}, "color": "rgba(200, 50, 50, .75)"},
-        {"from": {{ due_duration_hour * -1 }}, "to": 0, "color": "yellow"},
-        {"from": 0, "to": {{ due_duration_hour }}, "color": "#8bc34a55"}{% if (member.beneficiaries | length) > 1 %},{"from": {{ due_duration_hour }}, "to": {{ due_duration_hour * 2 }}, "color": "#8bc34a"}{% endif %}
-    ]'
-                    data-color-plate="#fff"
-                    data-border-shadow-width="0"
-                    data-borders="false"
-                    data-needle-type="arrow"
-                    data-needle-width="2"
-                    data-needle-circle-size="7"
-                    data-needle-circle-outer="true"
-                    data-needle-circle-inner="false"
-                    data-animation-duration="1500"
-                    data-animation-rule="linear"
-            ></canvas>
-        </div>
+            <div class="gauge_container">
+                <canvas id="gauge"
+                        data-type="radial-gauge"
+                        data-width="300"
+                        data-height="300"
+                        data-units="{{ member.timeCount / 60 }}h"
+                        data-min-value="{{ due_duration_hour * -3 }}"
+                        data-start-angle="90"
+                        data-ticks-angle="180"
+                        data-value-box="false"
+                        data-value="{{ member.timeCount / 60 }}"
+                        data-max-value="{{ ((member.beneficiaries | length) * due_duration_by_cycle) / 60 }}"
+                        data-major-ticks="{{ due_duration_hour * -3 }}h,{{ due_duration_hour * -2 }}h,{{ due_duration_hour * -1}}h,0,{{ due_duration_hour }}h{% if (member.beneficiaries | length) > 1 %},{{ due_duration_hour *2 }}h{% endif %}"
+                        data-minor-ticks="2"
+                        data-stroke-ticks="true"
+                        data-highlights='[
+                            {"from": {{ due_duration_hour * -3 }}, "to": {{ due_duration_hour * -2 }}, "color": "rgba(200, 50, 50, .95)"},
+                            {"from": {{ due_duration_hour * -2 }}, "to": {{ due_duration_hour * -1 }}, "color": "rgba(200, 50, 50, .75)"},
+                            {"from": {{ due_duration_hour * -1 }}, "to": 0, "color": "yellow"},
+                            {"from": 0, "to": {{ due_duration_hour }}, "color": "#8bc34a55"}{% if (member.beneficiaries | length) > 1 %},{"from": {{ due_duration_hour }}, "to": {{ due_duration_hour * 2 }}, "color": "#8bc34a"}{% endif %}
+                        ]'
+                        data-color-plate="#fff"
+                        data-border-shadow-width="0"
+                        data-borders="false"
+                        data-needle-type="arrow"
+                        data-needle-width="2"
+                        data-needle-circle-size="7"
+                        data-needle-circle-outer="true"
+                        data-needle-circle-inner="false"
+                        data-animation-duration="1500"
+                        data-animation-rule="linear">
+                </canvas>
+            </div>
         {% endif %}
-        {% if  member.timeCount < 0 %}
-            <p><i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
+        {% if member.timeCount < 0 %}
+            <p>
+                <i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
             </p>
         {% else %}
             {% set remaining = shift_service.remainingToBook(member) %}
-            {% if  remaining > 0 %}
-                <p><i class="material-icons">warning</i> Pense à réserver tes créneaux. <br>Tu as
-                    encore {{ remaining | duration_from_minutes }} à réserver.</p>
+            {% if remaining > 0 %}
+                <p>
+                    <i class="material-icons">warning</i> Pense à réserver tes créneaux.
+                    <br>
+                    Tu as encore {{ remaining | duration_from_minutes }} à effectuer.
+                </p>
             {% else %}
                 {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
-                <p>Bravo
-                    ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
-                    ont été planifiées sur le cycle actuel.</p>
+                <p>
+                    Bravo ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
+                    ont été planifiées sur le cycle actuel.
+                </p>
                 {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0 and not allow_extra_shifts %}
                     <p>
                         {% if beneficiariesWhoCanBook | length > 1 %}
@@ -59,8 +64,8 @@
                         {% else %}
                             {{ (beneficiariesWhoCanBook | first).firstname }} peut
                         {% endif %} encore
-                        effectuer {{ (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) | duration_from_minutes }}
-                        .</p>
+                        effectuer {{ (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) | duration_from_minutes }}.
+                    </p>
                 {% elseif (allow_extra_shifts) %}
                     <p>
                         {% if member.beneficiaries | length %}
@@ -71,25 +76,22 @@
                         encore effectuer des créneaux.
                     </p>
                 {% else %}
-                    <p><i class="material-icons">stars</i> Bravo !
-                        Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été
-                        planifiés
-                        sur le cycle actuel !</p>
+                    <p>
+                        <i class="material-icons">stars</i> Bravo !
+                        Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été planifiés sur le cycle actuel !
+                    </p>
                 {% endif %}
             {% endif %}
         {% endif %}
     {% endif %}
 
-    <a href="{{ path("booking") }}" class="btn teal hide-on-small-only"
-       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+    <a href="{{ path("booking") }}" class="btn teal hide-on-small-only" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         <i class="material-icons left">schedule</i>
-        Je réserve un créneau
+        Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}
     </a>
-    <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up"
-       {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
+    <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         Réserver
     </a>
 
     <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
-
 {% endif %}
