@@ -11,7 +11,7 @@ It use the materialize modal class https://materializecss.com/modals.html
         {% endif %}
         <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
         <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
-        <span>Remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)</span>
+        <span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ ((nbShifts-nbBookableShifts) / nbShifts)*100 }}%)</span>
         <ul class="collapsible" data-collapsible="accordion">
             {% for shift in bucket.sortedShifts() %}
                 {% if shift.shifter %}{# is booked #}

@@ -16,7 +16,7 @@
         {# New day --------- #}
         {% if not date %}
             {% set date = true %}
-            <div class="row center show-on-small hide-on-med-and-up ">
+            <div class="row center show-on-small hide-on-med-and-up">
                 {{ (buckets|first).start|date_fr_long }}
             </div>
 
