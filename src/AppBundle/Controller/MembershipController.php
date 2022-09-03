@@ -840,7 +840,7 @@ class MembershipController extends Controller
      *
      * @Route("/join", name="member_join")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function joinAction(Request $request)
     {

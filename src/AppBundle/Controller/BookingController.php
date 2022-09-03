@@ -367,8 +367,8 @@ class BookingController extends Controller
     /**
      * main administration page for booking shift
      * @Route("/admin", name="booking_admin")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function adminAction(Request $request): Response
     {
