@@ -1,63 +1,60 @@
-{#
-Template for the bucket calandar
-#}
-    {# Calandar form "hour line" --------- #}
-    {% set previousWeekIndex = -1 %}
-    {% set weekCycle = ["A", "B", "C", "D"] %}
-    {% for bucketsByjob in bucketsByDay %}
-        {% set date = false %}
+{# Calandar form "hour line" --------- #}
+{% set previousWeekIndex = -1 %}
+{% set weekCycle = ["A", "B", "C", "D"] %}
 
-        {% for buckets in bucketsByjob %}
-            {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
+{% for bucketsByjob in bucketsByDay %}
+    {% set date = false %}
 
-            {# New week --------- #}
-            {% if not date and previousWeekIndex != weekIndex %}
-                <h5>Semaine {{ weekCycle[((buckets|first).start | date('W') - 1) % 4] }}</h5>
-                {% set previousWeekIndex = weekIndex %}
-            {% endif %}
+    {% for buckets in bucketsByjob %}
+        {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
 
-            {# New day --------- #}
-            {% if not date %}
-                {% set date = true %}
-                <div class="row center show-on-small hide-on-med-and-up ">
-                    {{ (buckets|first).start|date_fr_long }}
+        {# New week --------- #}
+        {% if not date and previousWeekIndex != weekIndex %}
+            <h5>Semaine {{ weekCycle[((buckets|first).start | date('W') - 1) % 4] }}</h5>
+            {% set previousWeekIndex = weekIndex %}
+        {% endif %}
+
+        {# New day --------- #}
+        {% if not date %}
+            {% set date = true %}
+            <div class="row center show-on-small hide-on-med-and-up ">
+                {{ (buckets|first).start|date_fr_long }}
+            </div>
+
+            <div class="col m2 hide-on-small-only valign-wrapper">
+                <div>
+                    <b>{{ (buckets|first).start|date_fr_long }}</b><br>
                 </div>
+            </div>
+        {% endif %}
 
-                <div class="col m2 hide-on-small-only valign-wrapper">
-                    <div>
-                        <b>{{ (buckets|first).start|date_fr_long }}</b><br>
-                    </div>
-                </div>
-            {% endif %}
-
-            <div class="row" style="display: flex;min-height: 70px;">
-                <div class="col m10 s12">
-                    <div style="position: relative">
-                        {% set lignes = {} %}
-                        {% for bucket in buckets %}
-                            {# compute lines #}
-                            {% set l = 0 %}
-                            {% set break = false %}
-                            {% for i in 0..100 if not break %}
-                                {% if lignes[i~'_'] is not defined %}
+        <div class="row" style="display: flex;min-height: 70px;">
+            <div class="col m10 s12">
+                <div style="position: relative">
+                    {% set lignes = {} %}
+                    {% for bucket in buckets %}
+                        {# compute lines #}
+                        {% set l = 0 %}
+                        {% set break = false %}
+                        {% for i in 0..100 if not break %}
+                            {% if lignes[i~'_'] is not defined %}
+                                {% set l = i %}
+                                {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                {% set break = true %}
+                            {% else %}
+                                {% if lignes[i~'_'] < bucket.start %}
                                     {% set l = i %}
                                     {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
                                     {% set break = true %}
-                                {% else %}
-                                    {% if lignes[i~'_'] < bucket.start %}
-                                        {% set l = i %}
-                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                        {% set break = true %}
-                                    {% endif %}
                                 {% endif %}
-                            {% endfor %}
-                            {# / compute lines #}
-                            {% include "admin/booking/_partial/bucket_line.html.twig" with { bucket: bucket, start: 6, end: 22, line:l  } %}
-                            {% include "admin/booking/_partial/bucket_popup.html.twig" with { bucket: bucket } %}
-
+                            {% endif %}
                         {% endfor %}
-                    </div>
+                        {# / compute lines #}
+                        {% include "admin/booking/_partial/bucket_line.html.twig" with { bucket: bucket, start: 6, end: 22, line: l } %}
+                        {% include "admin/booking/_partial/bucket_popup.html.twig" with { bucket: bucket } %}
+                    {% endfor %}
                 </div>
             </div>
-        {% endfor %}
+        </div>
     {% endfor %}
+{% endfor %}
