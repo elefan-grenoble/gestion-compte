@@ -1,20 +1,21 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer une formation - {{ site_name }}{% endblock %}
+
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin_formations') }}"><i class="material-icons">list</i>formations</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i>edit
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_formations') }}"><i class="material-icons">list</i>Liste des formations</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>Editer
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Editer formation</h4>
+    <h4>Editer une formation</h4>
 
     {{ form_start(form) }}
     <div class="row">
         <div class="col s6">
-            {{ form_label(form.name) }}
-            {{ form_widget(form.name) }}
+            {{ form_row(form.name) }}
         </div>
     </div>
     <div>
@@ -31,5 +32,4 @@
         </div>
         {{ form_end(delete_form) }}
     {% endif %}
-
 {% endblock %}

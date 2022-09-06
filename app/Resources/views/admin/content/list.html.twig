@@ -1,17 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    Contenus dynamiques
-{% endblock %}
+{% block title %}Contenus dynamiques - {{ site_name }}{% endblock %}
 
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>contenus dynamiques
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>Contenus dynamiques
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Contenus dynamiques</h4>
+    <h4>Contenus dynamiques</h4>
+
     {% for dynamicContents in dynamicContentsByType %}
         <h5>{{ dynamicContents[0].getType }}</h5>
         <div class="row">
@@ -23,12 +22,8 @@
                             {{ dynamicContent.description }}
                         </div>
                         <div class="card-action">
-
                             <div class="left">
                                 <a href="{{ path("dynamic_content_edit",{'id':dynamicContent.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                            </div>
-                            <div>
-                                &nbsp;
                             </div>
                         </div>
                     </div>
