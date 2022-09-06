@@ -1,0 +1,47 @@
+@keyframes warning-animation {
+    0%,
+    100% {
+        transform: scale3d(1, 1, 1)
+    }
+
+    20% {
+        transform: scale3d(.8, .8, .8) rotate3d(0, 0, 1, -3deg)
+    }
+
+    90% {
+        transform: scale3d(1.0, 1.0, 1.0) rotate3d(0, 0, 1, 3deg)
+    }
+
+    80% {
+        transform: scale3d(1.0, 1.0, 1.0) rotate3d(0, 0, 1, -3deg)
+    }
+}
+
+.warning-animation {
+    animation-duration: 1.5s;
+    animation-iteration-count: infinite;
+    animation-fill-mode: both;
+    animation-name: warning-animation;
+}
+
+@keyframes warning-animation {
+    0%,
+    100% {
+        transform: scale3d(1, 1, 1)
+    }
+    10%,
+    20% {
+        transform: scale3d(.8, .8, .8) rotate3d(0, 0, 1, -3deg)
+    }
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: scale3d(1.0, 1.0, 1.0) rotate3d(0, 0, 1, 3deg)
+    }
+    40%,
+    60%,
+    80% {
+        transform: scale3d(1.0, 1.0, 1.0) rotate3d(0, 0, 1, -3deg)
+    }
+}

@@ -1,0 +1,292 @@
+{% extends 'layout.html.twig' %}
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/app/css/custom_animation.css') }}?060820191303">
+    <style>
+        .material-icons {
+            display: inline-flex;
+            vertical-align: top;
+        }
+
+        .member-box {
+            transition: box-shadow 1s, background-color 1s;
+            transition-timing-function: ease-in;
+            border-radius: 5px 2px 10px 2px;
+        }
+
+        .member-box:hover {
+            box-shadow: 2px 2px 2px 2px rgba(255, 255, 255, 0.1);
+            border-radius: 5px 2px 10px 2px;
+            background-color: rgba(255, 255, 255, 0.24);
+        }
+
+    </style>
+{% endblock %}
+
+{% block macro %}
+    {# generate a imput form #}
+    {% macro input(input_obj, hidden=false) %}
+        <div class="input-field col m3">
+            {% if hidden %}
+                {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
+
+            {% else %}
+                {{ form_widget(input_obj) }}
+                {{ form_label(input_obj) }}
+            {% endif %}
+
+        </div>
+    {% endmacro %}
+
+
+    {# generate a card for all positions in a period
+     # period: a period object
+     # week_filter: a string with the week to keep or null if no filter
+     #}
+    {% macro period_card(period, week_filter, pb_filter) %}
+
+        {# generate one line with the icon and the member
+         # name and id and if needed a warning icon
+         # take a shifter (a benificiary object or null)
+         #}
+        {% macro one_line_shifter(position) %}
+            {% set shifter = position.shifter %}
+            {% set formation = position.formation??"Membre" %}
+
+            {% if shifter %}
+                {# sombody is registered to this period #}
+                {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
+                <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
+                   class="black-text">
+                    <div class="tooltipped member-box truncate "
+                         data-position="bottom" data-html="true"
+                         data-tooltip="{{ shifter.getAutocompleteLabel()  | raw }} <br/> ({{ formation }})">
+
+                        {% if  warning %}
+                            <i class="red-text material-icons warning-animation">warning</i>
+                        {% else %}
+                            <i class="material-icons">person</i>
+                        {% endif %}
+                        {{ shifter.getFirstname() }}  {{ shifter.getLastname()|first }}
+                    </div>
+                </a>
+            {% else %}
+
+                <div class="tooltipped member-box truncate black-text"
+                     data-position="bottom"
+                     data-tooltip="{{ formation }}">
+                    <i class="material-icons">person</i> Libre
+                </div>
+            {% endif %}
+        {% endmacro one_line_shifter %}
+
+        {# generate the card itself #}
+        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+            <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable"
+                 style="padding: 0;">
+                {# Card header #}
+                <div class="card-content blue-grey-text text-darken-4">
+                    <div class="black-text">
+                        {% if period.job %}
+                        <b>{{ period.job.name }}</b>
+                        {% endif %}<br>
+                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+                    </div>
+
+                    {# if display by job/training #}
+                    <div id="training" style="margin-top:1em;">
+                        {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
+                            <h6>Semaine {{ week }}</h6>
+                            {% for training, nb_shifters in positions %}
+                                <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                                <br/>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+
+                    {# if display by member name  #}
+                    {% if use_fly_and_fixed %}
+                        <div id="shifter" style="margin-top:1em;">
+                            {% for week, positions in period.positionsperweekcycle %}
+                                {% if (week in week_filter) or not week_filter %}
+                                    <h6>Semaine {{ week }}</h6>
+                                    {% for position in positions %}
+                                        {{ _self.one_line_shifter(position) }}
+                                    {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    {% endmacro %}
+
+{% endblock macro %}
+
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i
+        class="material-icons">chevron_right</i>
+    <i class="material-icons">date_range</i>Semaine type
+{% endblock breadcrumps %}
+
+
+{% block container %}
+    <div class="container">
+        <div class="section">
+
+            {# Title Section --------------------------------------------------- #}
+            <div class="row center">
+                <h4 class="header">Semaine type</h4>
+            </div>
+
+            {# Header section -------------------------------------------------- #}
+            <ul class="collapsible" data-collapsible="accordion">
+                {# Filters  ---------------------------------- #}
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
+                    <div class="collapsible-body">
+                        {{ form_start(filter_form) }}
+                        <div class="row">
+                            {{ _self.input(filter_form.job) }}
+                            {{ _self.input(filter_form.week) }}
+                            {{ _self.input(filter_form.filling, not use_fly_and_fixed) }}
+                        </div>
+                        <div class="row">
+                            {{ form_widget(filter_form.filter) }}
+                        </div>
+                        {{ form_end(filter_form) }}
+                    </div>
+                </li>
+                {# Actions ----------------------------------- #}
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">build</i>Action</div>
+                    <div class="collapsible-body">
+                        <div class="row">
+                            <a href="{{ path("period_new") }}"
+                               class="btn col m4 waves-effect waves-light tooltipped"
+                               data-position="bottom" data-html="true"
+                               data-tooltip="Créer un groupe de créneaux type <br/> à une heure et un jour donné">
+                                <i class="material-icons left">note_add</i>Nouveau créneau type</a>
+                        </div>
+
+                        {% if is_granted("ROLE_ADMIN") %}
+                            <div class="row">
+                                <a href="{{ path("period_copy") }}"
+                                   class="btn col m4 offset-m1 waves-effect waves-light tooltipped"
+                                   data-position="bottom" data-html="true"
+                                   data-tooltip="<b>Admin :</b>Dupliquer Des créneaux types d'un jour vers un autre">
+                                    <i class="material-icons left">content_copy</i>Dupliquer des créneaux
+                                </a>
+                            </div>
+                            <div class="row">
+                                <a href="{{ path("shifts_generation") }}"
+                                   class="btn col m4 offset-m1 waves-effect waves-light tooltipped"
+                                   data-position="bottom" data-html="true"
+                                   data-tooltip="<b>Admin :</b> Générer automatiquement des créneaux à partir de la semaine type">
+                                    <i class="material-icons left">date_range</i> <i
+                                            class="material-icons left">build</i>
+                                    Générer des créneaux
+                                </a>
+                            </div>
+                        {% endif %}
+
+
+                        <div class="row">
+                            {% if use_fly_and_fixed %}
+                            <a id="shifter" style="display: None;" onClick="showShifters()"
+                               class="btn col m4 waves-effect waves-light purple tooltipped"
+                               data-position="bottom" data-html="true"
+                               data-tooltip="Afficher le nom des membres inscrits en créneaux fix">
+                                <i class="material-icons left">accessibility</i>Afficher les membres
+                            </a>
+
+                            <a id="training" onClick="showTraining()"
+                               class="btn col m4 waves-effect waves-light purple tooltipped"
+                               data-position="bottom" data-html="true"
+                               data-tooltip="Afficher la formation demandée pour étre inscrit à un créneaux">
+                                <i class="material-icons left">accessibility</i>Afficher les formations
+                            </a>
+                        </div>
+                        {% endif %}
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {# Table with all the periods in a schedule --------- #}
+    <div class="container" style="width: 90%; max-width: 1880px;">
+        <div class="section">
+            <table>
+                <thead>
+                <tr>
+                    {% for day in ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] %}
+                        {% if periods_by_day[loop.index0]|length %}
+                            <th> {{ day }} </th>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    {% for i in 0..6 %}
+                        {# for the 7 days of a week #}
+                        <td>
+                            {% if periods_by_day[0]|length %}
+                                {% for period in periods_by_day[i] %}
+                                    {% if filling_filter == null
+                                        or (filling_filter == "problematic" and period.isProblematic(week_filter))
+                                        or (filling_filter == "empty" and period.isEmpty(week_filter))
+                                        or (filling_filter == "full" and period.isFull(week_filter))
+                                        or (filling_filter == "partial" and period.isPartial(week_filter)) %}
+                                        {{ _self.period_card(period, week_filter) }}
+
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% endblock container %}
+
+{% block javascripts %}
+    {% if use_fly_and_fixed %}
+        <script>
+            $(document).ready(function ($) {
+                    showShifters();
+                }
+            )
+
+            /**
+             * when user click on the showShifters
+             * ("Afficher les membres") bottom
+             */
+            function showShifters() {
+                $('div[id="training"]').hide();
+                $('div[id="shifter"]').show();
+                $('a[id="training"]').show();
+                $('a[id="shifter"]').hide();
+            }
+
+            /**
+             * when user click on the showTraining
+             * ("Afficher les formations") bottom
+             */
+            function showTraining() {
+                $('div[id="training"]').show();
+                $('div[id="shifter"]').hide();
+                $('a[id="training"]').hide();
+                $('a[id="shifter"]').show();
+            }
+        </script>
+    {% endif %}
+{% endblock javascripts %}

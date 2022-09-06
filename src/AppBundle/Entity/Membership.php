@@ -324,7 +324,7 @@ class Membership
 
     /**
      * Get frozen
-     *
+     * @deprecated illogic isFlying, isWithdrawn but getFrozen
      * @return boolean
      */
     public function getFrozen()
@@ -332,6 +332,15 @@ class Membership
         return $this->frozen;
     }
 
+    /**
+     * return if the member is frozen
+     *
+     * @return boolean
+     */
+    public function isFrozen()
+    {
+        return $this->frozen;
+    }
 
     /**
      * Set frozen_change
@@ -370,7 +379,7 @@ class Membership
      * Return if the member has a valid registration before the given date
      *
      * @param \DateTime $date
-     * @return \AppBundle\Entity\Registration
+     * @return bool
      */
     public function hasValidRegistrationBefore($date)
     {

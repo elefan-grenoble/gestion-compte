@@ -153,15 +153,17 @@
                     {% endfor %}
                 {% endfor %}
             {% endif %}
-            
-            {% block beforecontainer %}{% endblock %}
-            <div class="container">
-                <div class="section">
-                    {% block fos_user_content %}{% endblock fos_user_content %}
-                    {% block content %}{% endblock %}
+            {% block container %}
+                {# overload block container only if it is nneded to have a larger page #}
+                {% block beforecontainer %}{% endblock %}
+                <div class="container">
+                    <div class="section">
+                        {% block fos_user_content %}{% endblock fos_user_content %}
+                        {% block content %}{% endblock %}
+                    </div>
                 </div>
-            </div>
-            {% block aftercontainer %}{% endblock %}
+                {% block aftercontainer %}{% endblock %}
+            {% endblock %}
         </main>
 
         <footer class="page-footer" style="background-color: {{ main_color }}">

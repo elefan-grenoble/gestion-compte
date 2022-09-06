@@ -2,21 +2,22 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\AppBundle;
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
 use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
+use AppBundle\Repository\JobRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -24,7 +25,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
 * @Route("period")
@@ -32,18 +32,107 @@ use Symfony\Component\Validator\Constraints\DateTime;
 class PeriodController extends Controller
 {
     /**
+     * Build the filter form for the admin main page (route /booking/admin)
+     * and rerun an array with  the form object and the date range and the action
+     *
+     * the return object :
+     * array(
+     *      "form":FormBuilderInterface
+     *      "from" => DateTime,
+     *      "to" => DateTime,
+     *      "job"=> Job|null,
+     *      "filling"=>str|null,
+     *      )
+     */
+    private function filterFormFactory(Request $request): array
+    {
+        // default values
+        $res = [
+            "job" => null,
+            "filling"=>null,
+            "week"=>null,
+        ];
+
+        // filter creation ----------------------
+        $res["form"] = $this->createFormBuilder()
+            ->setAction($this->generateUrl('period'))
+            ->add('job', EntityType::class, array(
+                'label' => 'Type',
+                'class' => 'AppBundle:Job',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'query_builder' => function(JobRepository $repository) {
+                    $qb = $repository->createQueryBuilder('j');
+                    return $qb
+                        ->where($qb->expr()->eq('j.enabled', '?1'))
+                        ->setParameter('1', '1')
+                        ->orderBy('j.name', 'ASC');
+                }
+            ))
+            ->add('filling', ChoiceType::class, [
+                'label' => 'Remplissage',
+                'required' => false,
+                'choices' => [
+                    'Complet'=>"full",
+                    'Partiel'=>"partial",
+                    'Vide'=>'empty',
+                    'Problématique' =>'problematic'
+                ],
+            ])
+            ->add('week', ChoiceType::class, [
+                'label' => 'Semaine',
+                'required' => false,
+                'choices' => [
+                    'A'=>'A',
+                    'B'=>'B',
+                    'C'=>'C',
+                    'D'=>'D',
+                ],
+            ])
+            ->add(
+                'filter',
+                SubmitType::class,
+                array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer'))
+            )
+            ->getForm();
+
+        $res["form"]->handleRequest($request);
+
+        if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
+            $res["job"] = $res["form"]->get("job")->getData();
+            $res["filling"] = $res["form"]->get("filling")->getData();
+            $res["week"] = $res["form"]->get("week")->getData();
+
+        }
+
+        return $res;
+    }
+
+
+    /**
      * @Route("/", name="period")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $periods = array();
+        $filter = $this->filterFormFactory($request);
+        $periodsByDay = array();
         for($i=0;$i<7;$i++){
-            $periods[$i] = $em->getRepository('AppBundle:Period')->findBy(array('dayOfWeek'=>$i),array('start'=>'ASC'));
+            $findByFilter = array('dayOfWeek'=>$i);
+
+            if($filter["job"]){
+                $findByFilter["job"]=$filter["job"];
+            }
+
+            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+                ->findBy($findByFilter,array('start'=>'ASC'));
         }
-        return $this->render('admin/period/list.html.twig',array(
-            "periods" => $periods
+        return $this->render('admin/period/index.html.twig',array(
+            "periods_by_day" => $periodsByDay,
+            "filter_form" => $filter['form']->createView(),
+            "week_filter" => $filter['week'],
+            "filling_filter" => $filter["filling"]
         ));
     }
 
@@ -61,7 +150,7 @@ class PeriodController extends Controller
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
-            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénevolat');
+            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
@@ -77,7 +166,7 @@ class PeriodController extends Controller
 
             $em->persist($period);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le nouveau creneau type a bien été créé !');
+            $session->getFlashBag()->add('success', 'Le nouveau créneau type a bien été créé !');
             return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 

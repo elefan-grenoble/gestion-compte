@@ -625,6 +625,7 @@ class Beneficiary
         return $res;
 
     }
+
     public function getAutocompleteLabel(): string
     {
         $label = '#' . $this->getMembership()->getMemberNumber();
@@ -643,7 +644,7 @@ class Beneficiary
 
         if($this->getMembership()->getWithdrawn()){
             $label .= " [&#x26A0;]";
-        }elseif ($this->getMembership()->getFrozen()){
+        }elseif ($this->getMembership()->isFrozen()){
             $label .= " [&#x2744;]";
         }
 
