@@ -1,9 +1,18 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Gestion des clients (Oauth) - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+    <i class="material-icons">list</i>Gestion des clients (Oauth)
+{% endblock %}
+
 {% block beforecontainer %}
 {% endblock %}
 {% block aftercontainer %}
 {% endblock %}
+
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         {% if is_granted("ROLE_ADMIN") %}
@@ -18,7 +27,7 @@
                         </div>
                     {% endfor %}
                 </div>
-                <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Nouveau client Oauth</a>
+                <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Ajouter un client Oauth</a>
             </div>
         {% endif %}
     </div>
