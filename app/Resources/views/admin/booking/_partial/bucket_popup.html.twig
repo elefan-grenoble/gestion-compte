@@ -1,58 +1,10 @@
+{#
+Template for the modal popup used to change the user register for a shift bucket in  /booking/admin
+It use the materialize modal class https://materializecss.com/modals.html
+#}
 {% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
 {% set nbShifts = (bucket.shifts() | length) %}
-<div
-        data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
-        data-length="{{ (100/(end-start+1)) }}"
-        style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
-                left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
-                top: {{ line*10 }}px;">
-    <a href="#edit{{ bucket.first.id }}" class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
-        <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
-            <div style="height:2px; width: 100%; position: absolute;">
-                {% if nbBookableShifts < nbShifts %}
-                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
-                        <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-            <div>
-                <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">
-                    {{ bucket.start|date('G\\hi') }}&nbsp;{{ bucket.end|date('G\\hi') }}
-                </div>
-                <ul style="font-size: 9px; padding-left: 15px;">
-                    {% set shiftercount = 0 %}
-                    {% for shift in bucket.sortedShifts() %}
-                        {% if (shift.shifter) %}{# is booked #}
-                            {% if (shiftercount < 4) %}
-                                <li class="{% if shift.isDismissed() %}red-text{% endif %}">
-                                    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                    {% endif %}
-                                    {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
-                                    {% if not shift.formation and shift.shifter.formations | length > 0 %}
-                                        &nbsp;<b class="orange-text">(q)</b>
-                                    {% endif %}
-                                </li>
-                                {% set shiftercount = shiftercount + 1 %}
-                            {% elseif shiftercount == 4 %}
-                                <li>( ... )</li>
-                                {% set shiftercount = shiftercount + 1 %}
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </ul>
-            </div>
-            {% if bucket.first.locked %}
-                <span class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
-            {% elseif (shiftercount == 0) %}
-                <span class="red-text red lighten-5 truncate admin-shift-warning"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
-            {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
-                <span class="orange-text orange lighten-4 truncate admin-shift-warnin"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
-            {% endif %}
-        </div>
-    </a>
-</div>
-<div id="edit{{ bucket.first.id }}" class="modal">
+<div id="edit{{ bucket.first.id }}" class="modal" data-source="edit{{ bucket.first.id }}">
     <div class="modal-content">
         {% if bucket.first.locked %}
             <i class="material-icons left large">lock</i>
@@ -141,11 +93,11 @@
                             {% endif %}
                         </div>
                         <div class="collapsible-body">
-                                <div class="row">
-                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                        <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
-                                    </div>
-                                    {% if use_fly_and_fixed %}
+                            <div class="row">
+                                <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
+                                    <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
+                                </div>
+                                {% if use_fly_and_fixed %}
                                     <div class="col s2">
                                         <div>
                                             <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0>
@@ -159,13 +111,13 @@
                                     <div class="col s3">
                                         <button class="btn add" disabled="disabled" onclick="postShift({{ shift.id }})">Ajouter</button>
                                     </div>
-                                    {% else %}
-                                        <div class="col s3">
-                                            <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0>
-                                            <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
-                                        </div>
-                                    {% endif %}
-                                </div>
+                                {% else %}
+                                    <div class="col s3">
+                                        <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0>
+                                        <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </li>
                 {% endif %}
@@ -206,7 +158,7 @@
             <i class="material-icons left">edit</i>Editer
         </a>
         <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
-            $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
+                $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
             <i class="material-icons left">delete</i>Supprimer
         </a>
     </div>
