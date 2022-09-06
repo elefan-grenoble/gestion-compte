@@ -170,51 +170,46 @@
                                class="btn col m4 waves-effect waves-light tooltipped"
                                data-position="bottom" data-html="true"
                                data-tooltip="Créer un groupe de créneaux type <br/> à une heure et un jour donné">
-                                <i class="material-icons left">note_add</i>Nouveau créneau type</a>
+                                <i class="material-icons left">note_add</i>Nouveau créneau type
+                            </a>
                         </div>
 
                         {% if is_granted("ROLE_ADMIN") %}
                             <div class="row">
                                 <a href="{{ path("period_copy") }}"
-                                   class="btn col m4 offset-m1 waves-effect waves-light tooltipped"
+                                   class="btn col m4 waves-effect waves-light tooltipped"
                                    data-position="bottom" data-html="true"
-                                   data-tooltip="<b>Admin :</b>Dupliquer Des créneaux types d'un jour vers un autre">
+                                   data-tooltip="<b>Admin :</b> Dupliquer des créneaux types d'un jour vers un autre">
                                     <i class="material-icons left">content_copy</i>Dupliquer des créneaux
                                 </a>
                             </div>
                             <div class="row">
                                 <a href="{{ path("shifts_generation") }}"
-                                   class="btn col m4 offset-m1 waves-effect waves-light tooltipped"
+                                   class="btn col m4 waves-effect waves-light tooltipped"
                                    data-position="bottom" data-html="true"
                                    data-tooltip="<b>Admin :</b> Générer automatiquement des créneaux à partir de la semaine type">
-                                    <i class="material-icons left">date_range</i> <i
-                                            class="material-icons left">build</i>
-                                    Générer des créneaux
+                                    <i class="material-icons left">date_range</i> <i class="material-icons left">build</i>Générer des créneaux
                                 </a>
                             </div>
                         {% endif %}
 
-
-                        <div class="row">
-                            {% if use_fly_and_fixed %}
-                            <a id="shifter" style="display: None;" onClick="showShifters()"
-                               class="btn col m4 waves-effect waves-light purple tooltipped"
-                               data-position="bottom" data-html="true"
-                               data-tooltip="Afficher le nom des membres inscrits en créneaux fix">
-                                <i class="material-icons left">accessibility</i>Afficher les membres
-                            </a>
-
-                            <a id="training" onClick="showTraining()"
-                               class="btn col m4 waves-effect waves-light purple tooltipped"
-                               data-position="bottom" data-html="true"
-                               data-tooltip="Afficher la formation demandée pour étre inscrit à un créneaux">
-                                <i class="material-icons left">accessibility</i>Afficher les formations
-                            </a>
-                        </div>
+                        {% if use_fly_and_fixed %}
+                            <div class="row">
+                                <a id="shifter" style="display: None;" onClick="showShifters()"
+                                class="btn col m4 waves-effect waves-light purple tooltipped"
+                                data-position="bottom" data-html="true"
+                                data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
+                                    <i class="material-icons left">accessibility</i>Afficher les membres
+                                </a>
+                                <a id="training" onClick="showTraining()"
+                                class="btn col m4 waves-effect waves-light purple tooltipped"
+                                data-position="bottom" data-html="true"
+                                data-tooltip="Afficher la formation demandée pour étre inscrit à un créneau">
+                                    <i class="material-icons left">accessibility</i>Afficher les formations
+                                </a>
+                            </div>
                         {% endif %}
-
                     </div>
-
                 </li>
             </ul>
         </div>
