@@ -2,6 +2,12 @@
 
 {% block title %}Nouveau code boîtier - {{ site_name }}{% endblock %}
 
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">vpn_key</i>Nouveau code boîtier
+{% endblock %}
+
 {% block content %}
     {% if not code is defined %}
         <h4 class="row center">

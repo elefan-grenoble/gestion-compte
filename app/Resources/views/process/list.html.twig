@@ -1,16 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    Mises à jour de procédures
-{% endblock %}
+{% block title %}Listes des procédures / nouveautés - {{ site_name }}{% endblock %}
 
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>mises à jour de procédures
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>Liste des procédures / nouveautés
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Mises à jour de procédures / nouveautés</h4>
+    <h4>Liste des procédures / nouveautés</h4>
+
     {% if nbOfNew %}
         <h5 class="">{{ nbOfNew }} nouveauté{% if nbOfNew | length > 1 %}s{% endif %} depuis mon dernier creneau</h5>
     {% endif %}
@@ -24,27 +24,17 @@
         {% set check_date = date('now')  %}
     {% endif %}
     <div class="row">
-        <table class="process-update-list">
+        <table class="process-update-list" style="table-layout:fixed">
             <thead>
-            <tr>
-                <th>
-                    date
-                </th>
-                <th>
-                    titre
-                </th>
-                {% if is_granted("ROLE_PROCESS_MANAGER") %}
-                <th>
-                    auteur
-                </th>
-                <th>
-                    lien
-                </th>
-                {% endif %}
-                <th>
-                    action
-                </th>
-            </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Titre</th>
+                    {% if is_granted("ROLE_PROCESS_MANAGER") %}
+                    <th>Auteur</th>
+                    <th>Lien</th>
+                    {% endif %}
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
             {% set new = true %}

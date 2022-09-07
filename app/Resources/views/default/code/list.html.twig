@@ -1,6 +1,16 @@
 {% extends 'layout.html.twig' %}
+
+{% block title %}Code(s) - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">vpn_key</i>Code(s)
+{% endblock %}
+
 {% block content %}
     {% include "default/code/_list.html.twig" with { codes: codes } %}
+
     {% if not code_generation_enabled and is_granted('edit',codes | first) %}
         <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn teal lighten-2"><i class="material-icons left">add</i>Mettre à jour le code</a>
     {% endif %}

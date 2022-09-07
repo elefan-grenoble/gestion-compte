@@ -1,17 +1,19 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer le service - {{ site_name }}{% endblock %}
+
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin_services') }}"><i class="material-icons">extension</i>services</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i>edit
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_services') }}"><i class="material-icons">extension</i>Liste des services</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>Editer
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Editer service</h4>
+    <h4>Editer le service</h4>
 
     {{ form_start(form) }}
-    {% include "/admin/service/_form.html.twig" with { form: form  } %}
+    {% include "/admin/service/_form.html.twig" with { form: form } %}
     <div>
         <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
@@ -23,5 +25,4 @@
         <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
     </div>
     {{ form_end(delete_form) }}
-
 {% endblock %}

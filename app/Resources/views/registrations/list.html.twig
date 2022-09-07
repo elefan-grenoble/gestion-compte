@@ -1,7 +1,16 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des dernières adhésions - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">attach_money</i>Liste des dernières adhésions
+{% endblock %}
+
 {% block content %}
-    <h4 class="">Liste des dernières adhésions / ré-adhésions</h4>
+    <h4>Liste des dernières adhésions / ré-adhésions</h4>
+
     <h5>par date de saisie</h5>
 
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
@@ -182,5 +191,4 @@
             {% endif %}
         </ul>
     {% endif %}
-
 {% endblock %}

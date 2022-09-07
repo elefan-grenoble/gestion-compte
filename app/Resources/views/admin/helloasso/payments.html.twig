@@ -1,10 +1,17 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des paiements Helloasso - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">settings_ethernet</i>Liste des paiements Helloasso
+{% endblock %}
+
 {% block content %}
-    <h4 class="">Liste des paiements Helloasso</h4>
+    <h4>Liste des paiements Helloasso</h4>
 
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
-
         <table>
             <thead>
                 <tr>
@@ -47,9 +54,6 @@
             </tbody>
         </table>
 
-
-        </ul>
-                        <br>
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
                 <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_payments",{'page':page-1}) }}{% endif %}">
@@ -68,5 +72,4 @@
 
         <a href="{{ path("helloasso_browser") }}" class="btn">Parcourir les paiments Helloasso (API)</a>
     {% endif %}
-
 {% endblock %}

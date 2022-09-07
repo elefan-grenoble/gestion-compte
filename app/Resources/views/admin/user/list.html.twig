@@ -1,7 +1,17 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des membres - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}">Admin</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">people</i>Liste des membres
+{% endblock %}
+
 {% block content %}
-    <h3 class="center-align">Liste des membres ({{ nb_of_result }})</h3>
+    <div class="row center">
+        <h4 class="header">Liste des membres ({{ nb_of_result }})</h4>
+    </div>
 
     <ul class="collapsible" data-collapsible="accordion">
         <li>

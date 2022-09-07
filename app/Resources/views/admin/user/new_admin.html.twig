@@ -1,7 +1,16 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Créer un utilisateur admin - {{ site_name }}{% endblock %}
+
+{% block breadcrumps %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>Créer un utilisateur admin
+{% endblock %}
+
 {% block content %}
-    <h3>Créer un utilisateur admin</h3>
+    <h4>Créer un utilisateur admin</h4>
+
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
@@ -9,5 +18,6 @@
     </div>
     {{ form_end(form) }}
 {% endblock %}
+
 {% block javascripts %}
 {% endblock %}

@@ -1,14 +1,16 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Ajouter un service - {{ site_name }}{% endblock %}
+
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin_services') }}"><i class="material-icons">extension</i>services</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>service
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_services') }}"><i class="material-icons">extension</i>Liste des services</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>Ajouter
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Nouveau Service</h4>
+    <h4>Nouveau service</h4>
 
     {{ form_start(form) }}
     {% include "/admin/service/_form.html.twig" with { form: form  } %}
@@ -16,5 +18,4 @@
         <button type="submit" class="btn waves-effect waves-light">Créer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}
