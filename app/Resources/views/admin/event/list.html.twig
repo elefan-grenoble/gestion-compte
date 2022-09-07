@@ -10,6 +10,7 @@
 
 {% block content %}
     <h4>Liste des événements</h4>
+
     <div class="row">
         {% for event in events %}
             {% if event.date < date() %}
@@ -60,9 +61,9 @@
             {% endif %}
         {% endfor %}
     </div>
-    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
     {% endif %}
-
+    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
 {% endblock %}

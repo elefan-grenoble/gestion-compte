@@ -22,7 +22,7 @@
             <div class="collection-item">
                 {% if client.service %}<h5>{{ client.service.name }}</h5>{% endif %}
                 public: <input type="text" value="{{ client.publicId }}"> secret:<input type="text" value="{{ client.secret }}">
-                <a href="{{ path('client_edit',{'id':client.id}) }}">editer</a>
+                <a href="{{ path('client_edit', { 'id': client.id }) }}"><i class="material-icons">edit</i>editer</a>
             </div>
         {% endfor %}
     </div>

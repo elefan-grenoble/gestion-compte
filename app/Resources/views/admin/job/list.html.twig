@@ -1,13 +1,15 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des postes de bénévolat - {{ site_name }}{% endblock %}
+
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>postes
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>Liste des postes de bénévolat
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des postes</h4>
+    <h4>Liste des postes de bénévolat</h4>
 
     <table class="responsive-table striped">
         <thead>
@@ -27,12 +29,12 @@
                 <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
                 <td class="{{ job.color }} white-text">{{ job.color }}</td>
                 <td class="center-align">{% if job.description is not empty %} <i class="material-icons">playlist_add_check</i> {% endif %}</td>
-                <td><a href="{{ path("job_edit",{'id':job.id}) }}"><i class="material-icons">edit</i>editer</a></td>
+                <td><a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>editer</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
     <br>
     <a href="{{ path('job_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un poste</a>
-
 {% endblock %}
