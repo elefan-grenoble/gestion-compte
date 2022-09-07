@@ -33,7 +33,7 @@ class EmailTemplateController extends Controller
      *
      * @Route("/", name="email_template_list")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
@@ -51,7 +51,7 @@ class EmailTemplateController extends Controller
      *
      * @Route("/new", name="email_template_new")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -78,7 +78,7 @@ class EmailTemplateController extends Controller
      *
      * @Route("/{id}/edit", name="email_template_edit")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, EmailTemplate $emailTemplate)
     {

@@ -61,9 +61,10 @@
             {% endif %}
         {% endfor %}
     </div>
-
+    {% if is_granted("ROLE_ADMIN") %}
+        <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+    {% endif %}
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
     {% endif %}
-    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
 {% endblock %}

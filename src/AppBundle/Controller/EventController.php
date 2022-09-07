@@ -29,10 +29,9 @@ class EventController extends Controller
      *
      * @Route("/", name="event_list")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
-    public function listAction(Request $request){
-
+    public function listAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $events = $em->getRepository('AppBundle:Event')->findAll();
         return $this->render('admin/event/list.html.twig', array(
@@ -83,7 +82,7 @@ class EventController extends Controller
     }
 
     /**
-     * Comission new
+     * Event new
      *
      * @Route("/new", name="event_new")
      * @Method({"GET", "POST"})
@@ -110,7 +109,7 @@ class EventController extends Controller
     }
 
     /**
-     * Comission edit
+     * Event edit
      *
      * @Route("/{id}/edit", name="event_edit")
      * @Method({"GET", "POST"})

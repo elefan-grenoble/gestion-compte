@@ -32,14 +32,14 @@ class DynamicContentController extends Controller
      *
      * @Route("/", name="dynamic_content_list")
      * @Method("GET")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
-
         $em = $this->getDoctrine()->getManager();
         $dynamicContents = $em->getRepository('AppBundle:DynamicContent')->findAll();
         $dynamicContentsByType = array();
+
         foreach ($dynamicContents as $dynamicContent) {
             $type = $dynamicContent->getType();
             if (!isset($dynamicContentsByType[$type])) {
@@ -47,6 +47,7 @@ class DynamicContentController extends Controller
             }
             $dynamicContentsByType[$type][] = $dynamicContent;
         }
+
         return $this->render('admin/content/list.html.twig', array(
             'dynamicContentsByType' => $dynamicContentsByType,
         ));
@@ -57,7 +58,7 @@ class DynamicContentController extends Controller
      *
      * @Route("/{id}/edit", name="dynamic_content_edit")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)
     {
