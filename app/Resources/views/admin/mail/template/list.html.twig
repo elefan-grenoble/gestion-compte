@@ -1,17 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    Modèles d'emails
-{% endblock %}
+{% block title %}Modèles d'emails - {{ site_name }}{% endblock %}
 
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>modèles d'emails
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>Modèles d'emails
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Modèles d'emails</h4>
+    <h4>Modèles d'emails</h4>
+
     <div class="row">
         {% for emailTemplate in emailTemplates %}
             <div class="col s12 m4">
@@ -21,17 +20,12 @@
                         {{ emailTemplate.description }}
                     </div>
                     <div class="card-action">
-
-                        <div class="left">
-                            <a href="{{ path("email_template_edit",{'id':emailTemplate.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                        </div>
-                        <div>
-                            &nbsp;
-                        </div>
+                        <a href="{{ path("email_template_edit", {'id': emailTemplate.id}) }}"><i class="material-icons left">edit</i>Editer</a>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
-    <a href="{{ path('email_template_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un modèle</a>
+
+    <a href="{{ path('email_template_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un modèle d'email</a>
 {% endblock %}

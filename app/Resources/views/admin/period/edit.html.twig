@@ -1,18 +1,21 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer le créneau type - {{ site_name }}{% endblock %}
+
 {% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('period') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>Nouveau
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>Admin</a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('period') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>Editer
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Editer créneau type</h4>
+    <h4>Editer le créneau type</h4>
+
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button
     </div>
     {{ form_end(form) }}
 
@@ -127,9 +130,8 @@
         </div>
     </div>
     {{ form_end(position_form) }}
-
-
 {% endblock %}
+
 {% block javascripts %}
     <script>
         jQuery(function ($) {
