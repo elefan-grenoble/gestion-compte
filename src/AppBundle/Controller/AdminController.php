@@ -169,6 +169,9 @@ class AdminController extends Controller
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), false, $current_app_user->hasRole('ROLE_SUPER_ADMIN'));
         $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString());
         $form->handleRequest($request);
 

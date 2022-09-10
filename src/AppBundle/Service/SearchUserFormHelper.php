@@ -16,9 +16,10 @@ use Symfony\Component\Form\FormBuilder;
 
 class SearchUserFormHelper {
 
-    public function getSearchForm($formBuilder, $params_string = '', $ambassador = false) {
+    public function getSearchForm($formBuilder, $params_string = '', $ambassador = false, $super_admin = false) {
         $params = array();
         parse_str($params_string,$params);
+
         $formBuilder->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
             'fermé' => 2,
             'ouvert' => 1,
@@ -110,6 +111,16 @@ class SearchUserFormHelper {
                 ],
                 'required' => false,
                 'label'=>'Equipe volante'
+            ));
+        }
+        if ($super_admin) {
+            $formBuilder->add('roles', ChoiceType::class, array(
+                'choices'  => [
+                    'ROLE_USER' => 1,
+                    'ROLE_ADMIN' => 2,
+                ],
+                'required' => false,
+                'label'=>'Avec le rôle'
             ));
         }
         $formBuilder->add('action', HiddenType::class,array())
