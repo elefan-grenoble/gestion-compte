@@ -225,7 +225,7 @@ class BookingController extends Controller
                 ],
             ])
             ->add('job', EntityType::class, array(
-                'label' => 'Type',
+                'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
                 'choice_label' => 'name',
                 'multiple' => false,

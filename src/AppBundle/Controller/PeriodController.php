@@ -57,7 +57,7 @@ class PeriodController extends Controller
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('period'))
             ->add('job', EntityType::class, array(
-                'label' => 'Type',
+                'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
                 'choice_label' => 'name',
                 'multiple' => false,

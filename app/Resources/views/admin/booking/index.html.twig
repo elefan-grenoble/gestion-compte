@@ -14,14 +14,16 @@
 </div>
 
 {# Filter form  --------- #}
-{{ form_start(filterForm) }}
 <ul class="collapsible" data-collapsible="accordion">
     <li>
-        <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
+        <div class="collapsible-header">
+            <i class="material-icons">tune</i>Filtres
+        </div>
         <div class="collapsible-body">
+            {{ form_start(filterForm) }}
             <div class="row">
                 <div class="input-field col m3">
-                    {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox'}) }}
+                    {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox' }) }}
                     {{ form_label(filterForm.type) }}
                 </div>
                 <div id="dateSelectionType">
@@ -45,14 +47,12 @@
                     </div>
                 </div>
             </div>
-            <div>
-                <div class="input-field col m3">
+            <div class="row">
+                <div class="input-field col m6">
                     {{ form_widget(filterForm.job) }}
                     {{ form_label(filterForm.job) }}
                 </div>
-            </div>
-            <div>
-                <div class="input-field col m3">
+                <div class="input-field col m6">
                     {{ form_widget(filterForm.filling) }}
                     {{ form_label(filterForm.filling) }}
                 </div>
