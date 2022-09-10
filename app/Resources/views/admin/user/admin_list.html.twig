@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">add</i>&nbsp;Liste des utilisateurs admin
+<i class="material-icons">list</i>&nbsp;Liste des utilisateurs admin
 {% endblock %}
 
 {% block content %}
@@ -15,9 +15,9 @@
         <thead>
         <tr>
             <th data-col="o.member_number">#</th>
-            <th data-col="o.username">username</th>
-            <th data-col="b.email">email</th>
-            <th></th>
+            <th data-col="o.username">Username</th>
+            <th data-col="b.email">Email</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -36,12 +36,14 @@
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
                     {% if admin.beneficiary %}
-                        <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
-                           class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
+                        <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small" title="Enlever le rôle">
+                            <i class="material-icons left">arrow_downward</i>
+                        </a>
 
                     {% else %}
-                        <button type="submit" class="btn-floating waves-effect waves-light red"><i
-                                    class="material-icons left">close</i></button>
+                        <button type="submit" class="btn-floating waves-effect waves-light red" title="⚠️ Supprimer l'utilisateur ⚠️">
+                            <i class="material-icons left">close</i>
+                        </button>
                     {% endif %}
                     {{ form_end(delete_forms[admin.id]) }}
                 </td>
