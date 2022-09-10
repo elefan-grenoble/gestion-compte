@@ -1,8 +1,10 @@
 {% trans_default_domain 'FOSUserBundle' %}
+
 <h5 class="center-align">
     <img src="{{ gravatar(app.user.beneficiary.email,60) }}" alt="{{ app.user.beneficiary.firstname | lower | capitalize }}" class="circle responsive-img"><br>
     {{ app.user }}
 </h5>
+
 <ul class="collapsible">
     {% if app.user.beneficiary %}
         {% set member = app.user.beneficiary.membership %}
@@ -16,8 +18,7 @@
                 {{ form_row(form.email) }}
                 {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: form.beneficiary } %}
                 <div>
-                    <button type="submit"
-                            class="btn-large waves-effect waves-light btn">{{ 'profile.edit.submit'|trans }}</button>
+                    <button type="submit" class="btn waves-effect waves-light btn">{{ 'profile.edit.submit'|trans }}</button>
                 </div>
                 {{ form_end(form) }}
             </div>

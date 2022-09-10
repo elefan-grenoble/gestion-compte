@@ -1,5 +1,7 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer un adhérent - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
@@ -7,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Editer un adhérent</h3>
+    <h4>Editer un adhérent</h4>
 
     {{ form_start(form) }}
         {{ form_widget(form) }}

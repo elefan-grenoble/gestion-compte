@@ -553,7 +553,7 @@ class BookingController extends Controller
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
-        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé");
+        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
         return new Response($this->generateUrl('homepage'), 200);
     }
 

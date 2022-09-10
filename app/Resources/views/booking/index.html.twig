@@ -1,12 +1,13 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Créneaux - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <i class="material-icons">date_range</i>&nbsp;Créneaux
 {% endblock %}
 
 {% block content %}
-
     {% if beneficiary is not defined %}
         <div class="row center">
             <h5 class="col s12">Qui programme son bénévolat ?</h5>
@@ -19,10 +20,13 @@
         </div>
     {% else %}
         <div class="row center">
-            <h4 class="header">Créneaux disponibles pour <span
-                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (beneficiary.membership.beneficiaries | length > 1) %}
-                <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
-                    ]</a>{% endif %}</h4>
+            <h4 class="header">
+                Créneaux disponibles pour
+                <span class="teal-text">{{ beneficiary.firstname }}</span>
+                {% if (beneficiary.membership.beneficiaries | length > 1) %}
+                    <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer ]</a>
+                {% endif %}
+            </h4>
             {% if not shift_service.canBookSomething(beneficiary) %}
                 <span class="red-text">NB: {{ beneficiary.firstname }} ne peut plus réserver de créneau sur le cycle actuel</span>
             {% endif %}
@@ -103,7 +107,6 @@
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
 
-
     <div id="modallegend" class="modal">
         <div class="modal-content">
             <div id="modal_header"></div>
@@ -111,7 +114,6 @@
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block stylesheets %}

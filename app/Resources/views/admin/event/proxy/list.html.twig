@@ -1,8 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    Procurations {% if event %}pour {{ event.title }}{% endif %} - {{ site_name }}
-{% endblock %}
+{% block title %}Procurations {% if event %}pour {{ event.title }}{% endif %} - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>

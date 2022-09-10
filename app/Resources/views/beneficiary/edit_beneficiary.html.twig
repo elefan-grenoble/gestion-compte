@@ -1,14 +1,17 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer un bénéficiaire - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
 <a href="{{ path('member_show', { 'member_number': beneficiary.membership.memberNumber }) }}"><i class="material-icons">person</i>nbsp;{{ beneficiary.membership.autocompleteLabel }}</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">edit</i>&nbsp;Editer bénéficiaire
+<i class="material-icons">edit</i>&nbsp;Editer un bénéficiaire
 {% endblock %}
 
 {% block content %}
-    <h3>&Eacute;diter un beneficiaire</h3>
+    <h4>Editer un beneficiaire</h4>
+
     {{ form_start(edit_form) }}
     {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: edit_form } %}
     <div class="col s3">

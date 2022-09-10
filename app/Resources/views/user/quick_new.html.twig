@@ -1,5 +1,7 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Adhésion rapide - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a><i class="material-icons">chevron_right</i>
@@ -7,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Adhésion rapide</h3>
+    <h4>Adhésion rapide</h4>
 
     {#<p>Pour une adhésion <span style="text-decoration: underline;">future</span>, choisir <span style="text-decoration: underline;">Helloasso</span> : la personne recevra un lien pour finaliser et payer son adhésion en ligne.</p>#}
     {{ form_start(form) }}
