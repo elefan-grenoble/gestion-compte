@@ -2,7 +2,7 @@
 
 {% block title %}{{ member.autocompleteLabel }} - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
+{% block breadcrumbs %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
     {% if is_granted("ROLE_ADMIN") %}
         <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
