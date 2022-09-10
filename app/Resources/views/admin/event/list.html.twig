@@ -1,17 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    evenements
-{% endblock %}
+{% block title %}Liste des événements - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>evenements
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des événements
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des evenements</h4>
+    <h4>Liste des événements</h4>
+
     <div class="row">
         {% for event in events %}
             {% if event.date < date() %}
@@ -62,9 +61,9 @@
             {% endif %}
         {% endfor %}
     </div>
-    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
     {% endif %}
-
+    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
 {% endblock %}

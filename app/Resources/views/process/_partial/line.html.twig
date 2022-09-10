@@ -13,9 +13,9 @@
             {{ processUpdate.author }}
         {% endif %}
     </td>
-    <td>
+    <td style="overflow:hidden">
         {% if processUpdate.link %}
-            <a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
+            <a href="{{ processUpdate.link }}" title="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
         {% endif %}
     </td>
     {% endif %}

@@ -1,4 +1,7 @@
 {% extends 'layout.html.twig' %}
+
+{% block title %}Semaine type - {{ site_name }}{% endblock %}
+
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('bundles/app/css/custom_animation.css') }}?060820191303">
     <style>
@@ -120,17 +123,13 @@
             </div>
         </a>
     {% endmacro %}
-
 {% endblock macro %}
 
-
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i
-        class="material-icons">chevron_right</i>
-    <i class="material-icons">date_range</i>Semaine type
-{% endblock breadcrumps %}
-
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">date_range</i>&nbsp;Semaine type
+{% endblock breadcrumbs %}
 
 {% block container %}
     <div class="container">
@@ -252,7 +251,6 @@
             </table>
         </div>
     </div>
-
 {% endblock container %}
 
 {% block javascripts %}

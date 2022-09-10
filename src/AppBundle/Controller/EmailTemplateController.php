@@ -66,10 +66,9 @@ class EmailTemplateController extends Controller
             $em->flush();
             $session->getFlashBag()->add('success', "Modèle d'email créé");
             return $this->redirectToRoute('email_template_list');
-
         }
 
-        return $this->render('admin/mail/template/edit.html.twig', array(
+        return $this->render('admin/mail/template/new.html.twig', array(
             'form' => $form->createView()
         ));
     }

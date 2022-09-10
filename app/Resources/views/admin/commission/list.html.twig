@@ -1,13 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>commissions
+{% block title %}Liste des commissions - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des commissions
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des commissions</h4>
+    <h4>Liste des commissions</h4>
+
     <div class="row">
         {% for commission in commissions %}
             <div class="col s12 m6">
@@ -33,5 +36,4 @@
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <a href="{{ path('commission_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une commission</a>
     {% endif %}
-
 {% endblock %}

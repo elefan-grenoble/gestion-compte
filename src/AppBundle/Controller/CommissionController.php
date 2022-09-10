@@ -138,7 +138,7 @@ class CommissionController extends Controller
     private function getAddBeneficiaryForm(Commission $commission){
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
-            ->add('beneficiary',AutocompleteBeneficiaryType::class,array('label'=>'Email ou nom de la personne','required'=>true))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, array('label'=>'Email ou nom de la personne', 'required'=>true))
             ->setMethod('POST')
             ->getForm();
     }

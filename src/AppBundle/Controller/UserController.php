@@ -319,7 +319,7 @@ class UserController extends Controller
             $session->getFlashBag()->add('error', 'ce client n\'existe pas');
         }
 
-        return $this->redirectToRoute('fos_user_profile_edit');
+        return $this->redirectToRoute('fos_user_profile_show');
     }
 
     /**

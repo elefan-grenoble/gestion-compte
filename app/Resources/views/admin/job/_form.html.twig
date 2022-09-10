@@ -6,8 +6,8 @@
 </div>
 <div class="row">
     {{ form_errors(form.min_shifter_alert) }}
-    {{ form_widget(form.min_shifter_alert) }}
     {{ form_label(form.min_shifter_alert) }}
+    {{ form_widget(form.min_shifter_alert) }}
 </div>
 <div class="row">
     {{ form_label(form.color) }}<br>
@@ -39,6 +39,5 @@
     {{ form_widget(form.enabled) }}
     {{ form_label(form.enabled) }}
 </div>
-<button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+<button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
 {{ form_end(form) }}
-

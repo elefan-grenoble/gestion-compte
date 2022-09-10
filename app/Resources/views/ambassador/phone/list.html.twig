@@ -1,10 +1,9 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a>
-    <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i><span>Liste des retardataires</span>
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des retardataires
 {% endblock %}
 
 {% block content %}

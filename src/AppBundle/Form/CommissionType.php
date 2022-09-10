@@ -67,6 +67,7 @@ class CommissionType extends AbstractType
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')) {
                 $form->add('owners', EntityType::class, array(
                     'class' => Beneficiary::class,
+                    'label' => 'Référent(s)',
                     'choice_label' => 'display_name',
                     'choices' => $commission->getBeneficiaries(),
                     'multiple' => true,

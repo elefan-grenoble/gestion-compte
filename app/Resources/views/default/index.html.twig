@@ -154,9 +154,10 @@
 
                             {{ render(controller("AppBundle:Code:homepageDashboard")) }}{# use include instead?#}
 
-                            {% if is_granted("access_tools",app.user) %}
+                            {% if is_granted("access_tools", app.user) %}
                                 <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
-                                    <i class="material-icons left">folder_shared</i>adhésion / ré-adhésion</a>
+                                    <i class="material-icons left">folder_shared</i>adhésion / ré-adhésion
+                                </a>
                                 <br>
                             {% endif %}
 

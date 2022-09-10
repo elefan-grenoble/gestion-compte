@@ -1,10 +1,10 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('booking_admin') }}"><i class="material-icons">date_range</i>Créneaux admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>Editer
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('booking_admin') }}"><i class="material-icons">date_range</i>&nbsp;Créneaux admin</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;&nbsp;Editer
 {% endblock %}
 
 {% block content %}
@@ -13,7 +13,7 @@
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button
     </div>
     {{ form_end(form) }}
 {% endblock %}

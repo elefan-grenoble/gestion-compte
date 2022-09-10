@@ -1,13 +1,13 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('process_update_list') }}"><i class="material-icons">list</i>mises à jour de procédures</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('process_update_list') }}"><i class="material-icons">list</i>Liste des procédures / nouveautés</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>Ajouter
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Nouvelle mise à jour de procédure / nouveauté</h4>
+    <h4>Nouvelle procédure / nouveauté</h4>
 
     {{ form_start(form) }}
     <div class="errors">
@@ -27,8 +27,7 @@
 
     {{ form_widget(form.description) }}
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
+        <button type="submit" class="btn waves-effect waves-light">Créer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}

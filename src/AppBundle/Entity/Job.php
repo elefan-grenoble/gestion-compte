@@ -30,7 +30,6 @@ class Job
      */
     private $name;
 
-
     /**
      * @var string
      *
@@ -56,7 +55,6 @@ class Job
      */
     private $shifts;
 
-
     /**
      * @ORM\OneToMany(targetEntity="Period", mappedBy="job", cascade={"persist", "remove"}), orphanRemoval=true)
      */
@@ -68,6 +66,7 @@ class Job
      * @ORM\Column(name="enabled", type="boolean", nullable=false, options={"default" : 1})
      */
     private $enabled;
+
 
     /**
      * Get id

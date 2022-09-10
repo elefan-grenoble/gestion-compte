@@ -1,20 +1,23 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('period') }}"><i class="material-icons">date_range</i>semaine type</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">content_copy</i>Dupliquer les créneaux types d'un jour vers un autre
+{% block title %}Dupliquer les créneaux types - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('period') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">content_copy</i>&nbsp;Dupliquer les créneaux types d'un jour vers un autre
 {% endblock %}
 
 {% block content %}
+    <h4>Dupliquer les créneaux types d'un jour vers un autre</h4>
+
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
         <button type="submit" class="btn waves-effect waves-light">Copier les créneaux type</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}
 
 {% block javascripts %}

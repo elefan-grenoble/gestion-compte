@@ -1,13 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>formations
+{% block title %}Liste des formations - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des formations
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des Formations</h4>
+    <h4>Liste des formations</h4>
 
     <table class="responsive-table striped">
         <thead>
@@ -23,12 +25,11 @@
             <tr>
                 <td>{{ formation.name }}</td>
                 <td>{{ formation.beneficiaries | length }}</td>
-                <td><a href="{{ path("formation_edit",{'id':formation.id}) }}">editer</a></td>
+                <td><a href="{{ path("formation_edit", { 'id': formation.id }) }}">editer</a></td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
     <br>
     <a href="{{ path('formation_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une formation</a>
-
 {% endblock %}

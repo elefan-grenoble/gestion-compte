@@ -1,16 +1,21 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
+{% block title %}Générer des créneaux - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('period') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Générer
 {% endblock %}
 
 {% block content %}
+    <h4>Générer des créneaux</h4>
+
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
         <button type="submit" class="btn waves-effect waves-light">Générer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}

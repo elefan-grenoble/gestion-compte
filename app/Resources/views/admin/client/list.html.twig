@@ -1,27 +1,33 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Gestion des clients (Oauth) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Gestion des clients (Oauth)
+{% endblock %}
+
 {% block beforecontainer %}
 {% endblock %}
 {% block aftercontainer %}
 {% endblock %}
+
 {% block content %}
-    <div class="section no-pad-bot" id="index-banner">
-        {% if is_granted("ROLE_ADMIN") %}
-            <div class="container">
-                <h3 class=" enter">Gestion des clients (Oauth)</h3>
-                <div class="collection">
-                    {% for client in clients %}
-                        <div class="collection-item">
-                            {% if client.service %}{{ client.service.name }}<br>{% endif %}
-                            public: <input type="text" value="{{ client.publicId }}"> secret:<input type="text" value="{{ client.secret }}">
-                            <a href="{{ path('client_edit',{'id':client.id}) }}">editer</a>
-                        </div>
-                    {% endfor %}
-                </div>
-                <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Nouveau client Oauth</a>
+{% if is_granted("ROLE_ADMIN") %}
+    <h4>Gestion des clients (Oauth)</h4>
+
+    <div class="collection">
+        {% for client in clients %}
+            <div class="collection-item">
+                {% if client.service %}<h5>{{ client.service.name }}</h5>{% endif %}
+                public: <input type="text" value="{{ client.publicId }}"> secret:<input type="text" value="{{ client.secret }}">
+                <a href="{{ path('client_edit', { 'id': client.id }) }}"><i class="material-icons">edit</i>editer</a>
             </div>
-        {% endif %}
+        {% endfor %}
     </div>
+    <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Ajouter un client Oauth</a>
+{% endif %}
 {% endblock %}
 
 {% block stylesheets %}
