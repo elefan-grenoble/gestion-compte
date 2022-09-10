@@ -73,8 +73,8 @@ class BookingController extends Controller
 
     /**
      * @Route("/", name="booking")
-     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
      * @Method({"GET","POST"})
+     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
      * @param Request $request
      * @return RedirectResponse|Response
      * @throws \Exception
@@ -367,8 +367,8 @@ class BookingController extends Controller
     /**
      * main administration page for booking shift
      * @Route("/admin", name="booking_admin")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function adminAction(Request $request): Response
     {
@@ -426,8 +426,8 @@ class BookingController extends Controller
 
     /**
      * @Route("/edit_bucket/{id}", name="shift_edit")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function editBucketAction(Request $request,Shift $shift)
     {
@@ -462,8 +462,8 @@ class BookingController extends Controller
      * delete all shifts in bucket.
      *
      * @Route("/delete_bucket/", name="delete_bucket")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function deleteBucketAction(Request $request)
     {
@@ -712,8 +712,8 @@ class BookingController extends Controller
      * Book a shift admin.
      *
      * @Route("/admin/shift/{id}/book", name="admin_shift_book")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
