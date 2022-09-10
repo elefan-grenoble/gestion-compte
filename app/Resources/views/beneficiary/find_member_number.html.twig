@@ -1,11 +1,11 @@
 {% extends 'layout.html.twig' %}
 
 {% block breadcrumbs %}
-    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">search</i><span>Recherche numéro d'adhérent</span>
-    {% endif %}
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+    <i class="material-icons">search</i>&nbsp;Recherche numéro d'adhérent
+{% endif %}
 {% endblock %}
 
 {% block aftercontainer %}

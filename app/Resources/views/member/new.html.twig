@@ -1,9 +1,9 @@
 {% extends 'layout.html.twig' %}
 
 {% block breadcrumbs %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i><span>Nouvelle adhésion</span>
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Nouvelle adhésion
 {% endblock %}
 
 {% block content %}
@@ -15,5 +15,4 @@
         <button type="submit" class="btn-large waves-effect waves-light">Adhérer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}

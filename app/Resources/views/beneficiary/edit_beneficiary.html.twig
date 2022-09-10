@@ -1,13 +1,10 @@
 {% extends 'layout.html.twig' %}
 
 {% block breadcrumbs %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i
-        class="material-icons">chevron_right</i>
-    <i class="material-icons">person</i><a
-        href="{{ path('member_show', { 'member_number': beneficiary.membership.memberNumber }) }}">{{ beneficiary.membership.autocompleteLabel }}</a>
-    <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i><span>Editer bénéficiaire</span>
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
+<a href="{{ path('member_show', { 'member_number': beneficiary.membership.memberNumber }) }}"><i class="material-icons">person</i>nbsp;{{ beneficiary.membership.autocompleteLabel }}</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer bénéficiaire
 {% endblock %}
 
 {% block content %}

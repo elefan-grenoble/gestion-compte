@@ -1,13 +1,14 @@
 {% extends 'layout.html.twig' %}
 
 {% block breadcrumbs %}
-        <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">edit</i><span>Editer une fiche adhérent</span>
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer une fiche adhérent
 {% endblock %}
 
 {% block content %}
-    <h3>&Eacute;diter un adhérent</h3>
+    <h3>Editer un adhérent</h3>
+
     {{ form_start(form) }}
         {{ form_widget(form) }}
     {{ form_end(form) }}

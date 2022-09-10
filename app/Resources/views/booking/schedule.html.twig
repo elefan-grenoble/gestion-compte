@@ -5,11 +5,12 @@
 {% endblock %}
 
 {% block breadcrumbs %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>planning
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Planning
 {% endblock %}
 
 {% block content %}
     <h4>Planning</h4>
+
     {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
 {% endblock %}
