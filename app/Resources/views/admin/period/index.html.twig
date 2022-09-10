@@ -22,11 +22,25 @@
             background-color: rgba(255, 255, 255, 0.24);
         }
 
+        .member-box-header::after {
+            content: "\e8b8";
+            font-family: "Material Icons";
+            font-size: small;
+            visibility: hidden;
+            display: inline-block;
+        }
+        .member-box-header:hover::after {
+            content: "\e8b8";
+            font-family: "Material Icons";
+            font-size: small;
+            visibility: visible;
+            display: inline-block;
+        }
     </style>
 {% endblock %}
 
 {% block macro %}
-    {# generate a imput form #}
+    {# generate a imput form, used for the filters #}
     {% macro input(input_obj, hidden=false) %}
         <div class="input-field col m3">
             {% if hidden %}
@@ -40,88 +54,92 @@
         </div>
     {% endmacro %}
 
+    {# generate one line with the icon and the member
+         # name and id and if needed a warning icon
+         # take a shifter (a benificiary object or null)
+    #}
+    {% macro one_line_shifter(position) %}
+        {% set shifter = position.shifter %}
+        {% set formation = position.formation??"Membre" %}
+
+        {% if shifter %}
+            {# sombody is registered to this period #}
+            {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
+            <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
+               class="black-text">
+                <div class="tooltipped member-box truncate "
+                     data-position="bottom" data-html="true"
+                     data-tooltip="{{ shifter.getAutocompleteLabel()  | raw }} <br/> ({{ formation }})">
+
+                    {% if  warning %}
+                        <i class="red-text material-icons warning-animation">warning</i>
+                    {% else %}
+                        <i class="material-icons">person</i>
+                    {% endif %}
+                    {{ shifter.getFirstname() }}  {{ shifter.getLastname()|first }}
+                </div>
+            </a>
+        {% else %}
+
+            <div class="tooltipped member-box truncate black-text"
+                 data-position="bottom"
+                 data-tooltip="{{ formation }}">
+                <i class="material-icons">person</i> Libre
+            </div>
+        {% endif %}
+    {% endmacro one_line_shifter %}
 
     {# generate a card for all positions in a period
      # period: a period object
      # week_filter: a string with the week to keep or null if no filter
-     #}
+    #}
     {% macro period_card(period, week_filter, pb_filter) %}
+        <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable"
+             style="padding: 15px;">
 
-        {# generate one line with the icon and the member
-         # name and id and if needed a warning icon
-         # take a shifter (a benificiary object or null)
-         #}
-        {% macro one_line_shifter(position) %}
-            {% set shifter = position.shifter %}
-            {% set formation = position.formation??"Membre" %}
+                {# Card header #}
+                <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
 
-            {% if shifter %}
-                {# sombody is registered to this period #}
-                {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
-                <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
-                   class="black-text">
-                    <div class="tooltipped member-box truncate "
-                         data-position="bottom" data-html="true"
-                         data-tooltip="{{ shifter.getAutocompleteLabel()  | raw }} <br/> ({{ formation }})">
+                    <div class="black-text member-box-header member-box">
 
-                        {% if  warning %}
-                            <i class="red-text material-icons warning-animation">warning</i>
+                        {% if period.job %}
+                            <b>{{ period.job.name}}</b>
+                            <br>
+                            {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
                         {% else %}
-                            <i class="material-icons">person</i>
+                            {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+                            <br>
                         {% endif %}
-                        {{ shifter.getFirstname() }}  {{ shifter.getLastname()|first }}
+
                     </div>
                 </a>
-            {% else %}
-
-                <div class="tooltipped member-box truncate black-text"
-                     data-position="bottom"
-                     data-tooltip="{{ formation }}">
-                    <i class="material-icons">person</i> Libre
+                {# if display by job/training #}
+                <div id="training" style="margin-top:1em;">
+                    {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
+                        <h6>Semaine {{ week }}</h6>
+                        {% for training, nb_shifters in positions %}
+                            <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                            <br/>
+                        {% endfor %}
+                    {% endfor %}
                 </div>
-            {% endif %}
-        {% endmacro one_line_shifter %}
 
-        {# generate the card itself #}
-        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
-            <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable"
-                 style="padding: 0;">
-                {# Card header #}
-                <div class="card-content blue-grey-text text-darken-4">
-                    <div class="black-text">
-                        {% if period.job %}
-                        <b>{{ period.job.name }}</b>
-                        {% endif %}<br>
-                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-                    </div>
-
-                    {# if display by job/training #}
-                    <div id="training" style="margin-top:1em;">
-                        {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-                            <h6>Semaine {{ week }}</h6>
-                            {% for training, nb_shifters in positions %}
-                                <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
-                                <br/>
-                            {% endfor %}
+                {# if display by member name  #}
+                {% if use_fly_and_fixed %}
+                    <div id="shifter" style="margin-top:1em;">
+                        {% for week, positions in period.positionsperweekcycle %}
+                            {% if (week in week_filter) or not week_filter %}
+                                <h6>Semaine {{ week }}</h6>
+                                {% for position in positions %}
+                                    {{ _self.one_line_shifter(position) }}
+                                {% endfor %}
+                            {% endif %}
                         {% endfor %}
                     </div>
-
-                    {# if display by member name  #}
-                    {% if use_fly_and_fixed %}
-                        <div id="shifter" style="margin-top:1em;">
-                            {% for week, positions in period.positionsperweekcycle %}
-                                {% if (week in week_filter) or not week_filter %}
-                                    <h6>Semaine {{ week }}</h6>
-                                    {% for position in positions %}
-                                        {{ _self.one_line_shifter(position) }}
-                                    {% endfor %}
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+                {% endif %}
             </div>
-        </a>
+        </div>
+
     {% endmacro %}
 {% endblock macro %}
 
@@ -282,6 +300,12 @@
                 $('a[id="training"]').hide();
                 $('a[id="shifter"]').show();
             }
+
+            function truncate(str, maxlength) {
+                return (str.length > maxlength) ?
+                    str.slice(0, maxlength - 1) + '…' : str;
+            }
+
         </script>
     {% endif %}
 {% endblock javascripts %}
