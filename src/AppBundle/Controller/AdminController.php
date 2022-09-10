@@ -283,21 +283,23 @@ class AdminController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $roles_hierarchy = $this->container->getParameter('security.role_hierarchy.roles');
-        $roles_list = array();
+        $roles_list = array_merge(["ROLE_USER"], array_keys($roles_hierarchy));
+        $roles_list_enriched = array();
 
-        foreach (array_keys($roles_hierarchy) as $role_code) {
+        foreach ($roles_list as $role_code) {
             $role = array();
             $role_icon_key = strtolower($role_code) . "_icon";
             $role_name_key = strtolower($role_code) . "_name";
             $role["code"] = $role_code;
             $role["icon"] = $this->get("twig")->getGlobals()[strtolower($role_icon_key)] ?? "";
             $role["name"] = $this->get("twig")->getGlobals()[strtolower($role_name_key)] ?? "";
+            $role["children"] = in_array($role_code, array_keys($roles_hierarchy)) ? implode(", ", $roles_hierarchy[$role_code]) : "";
             $role["user_count"] = count($em->getRepository("AppBundle:User")->findByRole($role_code));
-            array_push($roles_list, $role);
+            array_push($roles_list_enriched, $role);
         }
 
         return $this->render('admin/user/roles_list.html.twig', array(
-            'roles' => $roles_list,
+            'roles' => $roles_list_enriched,
         ));
     }
 
