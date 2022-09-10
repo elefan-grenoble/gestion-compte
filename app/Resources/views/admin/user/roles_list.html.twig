@@ -9,6 +9,7 @@
                 <th data-col="o.icon">Icône</th>
                 <th data-col="b.email">Code</th>
                 <th data-col="b.email">Nom</th>
+                <th data-col="b.email">Hiérarchie</th>
                 <th data-col="b.email">Nombre de membres</th>
             </tr>
         </thead>
@@ -17,11 +18,12 @@
             <tr>
                 <td>
                     {% if role['icon'] %}
-                    <i class="material-icons left">{{ role['icon'] }}</i>
+                        <i class="material-icons left">{{ role['icon'] }}</i>
                     {% endif %}
                 </td>
                 <td>{{ role['code'] }}</td>
                 <td>{{ role['name'] }}</td>
+                <td>{{ role['children'] }}</td>
                 <td>{{ role['user_count'] }}</td>
             </tr>
         {% endfor %}
