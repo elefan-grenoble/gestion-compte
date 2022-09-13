@@ -16,7 +16,7 @@ use Symfony\Component\Form\FormBuilder;
 
 class SearchUserFormHelper {
 
-    public function getSearchForm($formBuilder,$params_string = '', $ambassador = false){
+    public function getSearchForm($formBuilder, $params_string = '', $ambassador = false) {
         $params = array();
         parse_str($params_string,$params);
         $formBuilder->add('withdrawn', ChoiceType::class, array('label' => 'fermé','required' => false,'choices'  => array(
@@ -59,41 +59,49 @@ class SearchUserFormHelper {
             ->add('lastname', TextType::class, array('label' => 'nom','required' => false))
             ->add('email', TextType::class, array('label' => 'email','required' => false));
         if (!$ambassador) {
-            $formBuilder->add('phone', ChoiceType::class, array('label' => 'téléphone','required' => false,'choices'  => array(
-                'Renseigné' => 2,
-                'Non renseigné' => 1,
-            )))
+            $formBuilder->add('phone', ChoiceType::class, array(
+                'label' => 'Téléphone renseigné ?',
+                'required' => false,
+                'choices'  => array(
+                    'Renseigné' => 2,
+                    'Non renseigné' => 1,
+                )
+            ))
             ->add('formations', EntityType::class, array(
                 'class' => 'AppBundle:Formation',
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
-                'label'=>'Avec le(s) Role(s)'
+                'label'=>'Avec le(s) formations(s)'
             ))
-            ->add('or_and_exp_formations', ChoiceType::class, array('label' => 'Tous ?','required' => true,'choices'  => array(
-                'Au moins un role' => 1,
-                'Tous ces roles' => 2,
-            )))
-            ->add('commissions',EntityType::class, array(
+            ->add('or_and_exp_formations', ChoiceType::class, array(
+                'label' => 'Toutes ?',
+                'required' => true,
+                'choices'  => array(
+                    'Au moins une formation' => 1,
+                    'Toutes ces formations' => 2,
+                )
+            ))
+            ->add('commissions', EntityType::class, array(
                 'class' => 'AppBundle:Commission',
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
                 'label'=>'Dans la/les commissions(s)'
             ))
-            ->add('not_formations',EntityType::class, array(
+            ->add('not_formations', EntityType::class, array(
                 'class' => 'AppBundle:Formation',
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
-                'label'=>'Sans le(s) Role(s)'
+                'label'=>'Sans le(s) formations(s)'
             ))
-            ->add('not_commissions',EntityType::class, array(
+            ->add('not_commissions', EntityType::class, array(
                 'class' => 'AppBundle:Commission',
                 'choice_label'     => 'name',
                 'multiple'     => true,
                 'required' => false,
-                'label'=>'Hors de la/les Commissions(s)'
+                'label'=>'Hors de la/les commissions(s)'
             ))
             ->add('flying', ChoiceType::class, array(
                 'choices'  => [

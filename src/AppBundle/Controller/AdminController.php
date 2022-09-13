@@ -280,7 +280,7 @@ class AdminController extends Controller
      *
      * @Route("/widget", name="widget_generator")
      * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function widgetBuilderAction(Request $request){
         $form = $this->createFormBuilder()

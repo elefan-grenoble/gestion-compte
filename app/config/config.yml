@@ -69,6 +69,17 @@ twig:
     display_keys_shop: '%display_keys_shop%'
     display_name_shifters: '%display_name_shifters%'
     use_card_reader_to_validate_shifts: '%use_card_reader_to_validate_shifts%'
+    # role names & icons
+    role_admin_name: Administrateur
+    role_admin_icon: verified_user
+    role_user_manager_name: Gestion des utilisateurs
+    role_user_manager_icon: group
+    role_finance_manager_name: Gestion financiaire
+    role_finance_manager_icon: attach_money
+    role_shift_manager_name: Gestion des créneaux
+    role_shift_manager_icon: date_range
+    role_process_manager_name: Gestion des procédures
+    role_process_manager_icon: assignment
 
 # Doctrine Configuration
 doctrine:
