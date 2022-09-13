@@ -150,16 +150,9 @@
                     </div>
                     <div class="col offset-xl3 xl6 m8 offset-m2 s12">
                         <div class="homebox">
-                            <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action !</span></h5>
+                            <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action</span></h5>
 
                             {{ render(controller("AppBundle:Code:homepageDashboard")) }}{# use include instead?#}
-
-                            {% if is_granted("access_tools", app.user) %}
-                                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
-                                    <i class="material-icons left">folder_shared</i>adhésion / ré-adhésion
-                                </a>
-                                <br>
-                            {% endif %}
 
                             {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
                                 <h5>Mes commissions</h5>

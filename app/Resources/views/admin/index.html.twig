@@ -15,6 +15,13 @@
                 <i class="material-icons">build</i>&nbsp;Administration
             </h4>
 
+            {% if is_granted("ROLE_USER_VIEWER") %}
+                <h6><i class="material-icons">person_add</i>&nbsp;Adhésions</h6>
+                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light teal btn">
+                    <i class="material-icons left">folder_shared</i>Adhésion / ré-adhésion
+                </a>
+            {% endif %}
+
             {% if is_granted("ROLE_USER_MANAGER") %}
                 <h6><i class="material-icons">people</i>&nbsp;Membres</h6>
                 <a href="{{ path("user_index") }}" class="waves-effect waves-light btn">
