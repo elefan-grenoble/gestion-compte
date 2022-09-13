@@ -892,10 +892,10 @@ class MembershipController extends Controller
      *
      * @Route("/office_tools", name="user_office_tools")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function officeToolsAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
         $note = new Note();
         $note->setAuthor($this->getCurrentAppUser());
         $note_form = $this->createForm(NoteType::class, $note);
