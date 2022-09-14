@@ -8,12 +8,12 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion
+<i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion
 {% endblock %}
 
 {% block content %}
 <div class="row">
-    <a href="{{ path('member_new') }}" class="waves-effect waves-light green btn {% if not is_granted("ROLE_USER_MANAGER") %}disabled{% endif %}"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
+    <a href="{{ path('member_new') }}" class="waves-effect waves-light green btn {% if not is_granted("ROLE_SUPER_ADMIN") %}title='Utiliser l\'autre bouton' disabled{% endif %}"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
     <a href="{{ path('user_quick_new') }}" class="waves-effect waves-light green btn"><i class="material-icons left">person_add</i>Nouvelle adhésion réunion info</a>
     <a href="{{ path('member_edit_firewall') }}" class="waves-effect waves-light btn"><i class="material-icons left">edit</i>Editer un adhérent</a>
 </div>

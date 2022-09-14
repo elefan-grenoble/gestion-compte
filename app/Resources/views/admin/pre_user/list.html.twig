@@ -1,9 +1,10 @@
 {% extends 'layout.html.twig' %}
 
 {% block breadcrumbs %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a><i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>Liste des adhésions en attente
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des adhésions en attente
 {% endblock %}
 
 {% block stylesheets %}
@@ -75,7 +76,7 @@
 
                 <td>
                     {% if is_granted("ROLE_USER_MANAGER") %}
-                        <a href="{{ path('user_quick_new_recall',{'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
+                        <a href="{{ path('user_quick_new_recall', { 'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
                         <br> <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
                     {% endif %}
                 </td>
