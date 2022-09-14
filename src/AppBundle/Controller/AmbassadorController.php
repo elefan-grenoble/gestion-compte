@@ -41,6 +41,7 @@ class AmbassadorController extends Controller
      * @return response
      * @Route("/membership", name="ambassador_membership_list")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -119,6 +120,7 @@ class AmbassadorController extends Controller
      * @return response
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {

@@ -109,7 +109,7 @@ travail en cours
     [![OAuth2 demo](http://img.youtube.com/vi/sghxx1VqIp4/0.jpg)](https://www.youtube.com/watch?v=sghxx1VqIp4 "OAuth 2 demo")
 * Gestion associative
     * Activer son badge
-    * Réadhérer via HelloAsso (API)
+    * Ré-adhérer via HelloAsso (API)
     * Evénements
         * Voir les prochains événement
         * Faire une procuration pour un événement à venir (je suis absent)

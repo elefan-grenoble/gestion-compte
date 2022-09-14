@@ -201,7 +201,7 @@ class MembershipController extends Controller
             }
 
             if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
-                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
+                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre ré-adhésion, demande à un autre adhérent :)');
                 return $this->redirectToShow($member);
             }
             $newReg->setRegistrar($this->getCurrentAppUser());
@@ -329,6 +329,7 @@ class MembershipController extends Controller
      *
      * @Route("/edit", name="member_edit_firewall")
      * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
@@ -336,14 +337,14 @@ class MembershipController extends Controller
     {
         $session = new Session();
 
-        if ($this->isGranted('view', new User())) {
+        if ($this->isGranted('ROLE_USER_VIEWER')) {
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
                 ->add('email', HiddenType::class, array('label' => 'email'))
                 ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
-        } else {
+        } else {  # higher privileges
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
@@ -606,13 +607,11 @@ class MembershipController extends Controller
     }
 
     /**
-     * Creates a new membership entity.
+     * Creates a new membership entity
      *
      * @Route("/new", name="member_new")
      * @Method({"GET", "POST"})
-     * @param Request $request
-     * @return Response
-     * @throws
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -621,16 +620,16 @@ class MembershipController extends Controller
         $code = $request->query->get('code');
         $em = $this->getDoctrine()->getManager();
         $a_beneficiary = null;
-        if ($code){
+        if ($code) {
             $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
-            if ($email){
+            if ($email) {
                 $a_beneficiary = $em->getRepository('AppBundle:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
             }
-            if (!$a_beneficiary){
+            if (!$a_beneficiary) {
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
                 return $this->redirectToRoute("homepage");
-            }else{
-                if ($a_beneficiary->getJoinTo()){ //adding beneficiary to an existing membership : wrong place
+            } else {
+                if ($a_beneficiary->getJoinTo()) { //adding beneficiary to an existing membership : wrong place
                     return $this->redirectToRoute('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)));
                 }
             }
@@ -641,7 +640,7 @@ class MembershipController extends Controller
         }
 
         $member = new Membership();
-        if ($a_beneficiary){
+        if ($a_beneficiary) {
             $user = new User();
             $user->setEmail($a_beneficiary->getEmail());
             $beneficiary = new Beneficiary();
@@ -657,15 +656,15 @@ class MembershipController extends Controller
         $member->setMemberNumber($mm);
 
         $registration = new Registration();
-        if ($a_beneficiary){
+        if ($a_beneficiary) {
             $registration->setDate($a_beneficiary->getCreatedAt());
             $registration->setRegistrar($a_beneficiary->getRegistrar());
             $registration->setAmount($a_beneficiary->getAmount());
             $registration->setMode($a_beneficiary->getMode());
-            if ($a_beneficiary->getMode()===Registration::TYPE_HELLOASSO){
+            if ($a_beneficiary->getMode()===Registration::TYPE_HELLOASSO) {
                 $registration->setAmount('--');
             }
-        }else{
+        } else {
             $registration->setDate(new DateTime('now'));
             $registration->setRegistrar($this->getUser());
         }
@@ -888,7 +887,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * Lists all user entities.
+     * Office tools: membership creation & management
      *
      * @Route("/office_tools", name="user_office_tools")
      * @Method({"GET","POST"})

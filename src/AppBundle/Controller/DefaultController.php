@@ -104,7 +104,7 @@ class DefaultController extends Controller
                         else {
                             $session->getFlashBag()->add('warning',
                                 'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
-                                'Tu peux réadhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou ' .
+                                'Tu peux ré-adhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou ' .
                                 $this->getParameter('local_currency_name') .
                                 '.');
                         }

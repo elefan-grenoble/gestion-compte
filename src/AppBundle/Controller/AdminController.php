@@ -124,7 +124,7 @@ class AdminController extends Controller
                 'id' => 'A'.'DYNAMIC_CONTENT'
             );
             $admin_actions[] = array(
-                'name' => 'ACTION : adhésions - réadhésions',
+                'name' => 'ACTION : adhésions - ré-adhésions',
                 'icon' => null,
                 'url' => $this->generateUrl('registrations'),
                 'id' => 'A'.'REGISTRATION_LIST'

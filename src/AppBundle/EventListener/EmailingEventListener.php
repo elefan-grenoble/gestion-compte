@@ -194,7 +194,7 @@ class EmailingEventListener
         $membershipExpiration = $membershipService->getExpire($membership);
 
         try {
-            $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour réadhérer !'))
+            $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour ré-adhérer !'))
                 ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
                 ->setTo($user->getEmail())
                 ->setBody(
