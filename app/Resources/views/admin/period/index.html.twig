@@ -5,31 +5,31 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('bundles/app/css/custom_animation.css') }}?060820191303">
     <style>
-        .material-icons {
+        .card .material-icons {
             display: inline-flex;
             vertical-align: top;
         }
 
-        .member-box {
-            transition: box-shadow 1s, background-color 1s;
+        .editable-box {
+            transition: box-shadow 0.2s, background-color 0.2s;
             transition-timing-function: ease-in;
             border-radius: 5px 2px 10px 2px;
         }
 
-        .member-box:hover {
+        .editable-box:hover {
             box-shadow: 2px 2px 2px 2px rgba(255, 255, 255, 0.1);
             border-radius: 5px 2px 10px 2px;
             background-color: rgba(255, 255, 255, 0.24);
         }
 
-        .member-box-header::after {
+        .editable-box::after {
             content: "\e8b8";
             font-family: "Material Icons";
             font-size: small;
             visibility: hidden;
             display: inline-block;
         }
-        .member-box-header:hover::after {
+        .editable-box:hover::after {
             content: "\e8b8";
             font-family: "Material Icons";
             font-size: small;
@@ -60,14 +60,14 @@
     #}
     {% macro one_line_shifter(position) %}
         {% set shifter = position.shifter %}
-        {% set formation = position.formation??"Membre" %}
+        {% set formation = position.formation??"Sans formation" %}
 
         {% if shifter %}
             {# sombody is registered to this period #}
             {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
                class="black-text">
-                <div class="tooltipped member-box truncate "
+                <div class="tooltipped editable-box truncate "
                      data-position="bottom" data-html="true"
                      data-tooltip="{{ shifter.getAutocompleteLabel()  | raw }} <br/> ({{ formation }})">
 
@@ -81,7 +81,7 @@
             </a>
         {% else %}
 
-            <div class="tooltipped member-box truncate black-text"
+            <div class="tooltipped truncate black-text"
                  data-position="bottom"
                  data-tooltip="{{ formation }}">
                 <i class="material-icons">person</i> Libre
@@ -97,47 +97,46 @@
         <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable"
              style="padding: 15px;">
 
-                {# Card header #}
-                <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+            {# Card header #}
+            <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
 
-                    <div class="black-text member-box-header member-box">
+                <div class="black-text editable-box">
 
-                        {% if period.job %}
-                            <b>{{ period.job.name}}</b>
-                            <br>
-                            {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-                        {% else %}
-                            {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-                            <br>
+                    {% if period.job %}
+                        <b>{{ period.job.name }}</b>
+                        <br>
+                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+                    {% else %}
+                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+                        <br>
+                    {% endif %}
+
+                </div>
+            </a>
+            {# if display by job/training #}
+            <div id="training" style="margin-top:1em;">
+                {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
+                    <h6>Semaine {{ week }}</h6>
+                    {% for training, nb_shifters in positions %}
+                        <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                        <br/>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+
+            {# if display by member name  #}
+            {% if use_fly_and_fixed %}
+                <div id="shifter" style="margin-top:1em;">
+                    {% for week, positions in period.positionsperweekcycle %}
+                        {% if (week in week_filter) or not week_filter %}
+                            <h6>Semaine {{ week }}</h6>
+                            {% for position in positions %}
+                                {{ _self.one_line_shifter(position) }}
+                            {% endfor %}
                         {% endif %}
-
-                    </div>
-                </a>
-                {# if display by job/training #}
-                <div id="training" style="margin-top:1em;">
-                    {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-                        <h6>Semaine {{ week }}</h6>
-                        {% for training, nb_shifters in positions %}
-                            <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
-                            <br/>
-                        {% endfor %}
                     {% endfor %}
                 </div>
-
-                {# if display by member name  #}
-                {% if use_fly_and_fixed %}
-                    <div id="shifter" style="margin-top:1em;">
-                        {% for week, positions in period.positionsperweekcycle %}
-                            {% if (week in week_filter) or not week_filter %}
-                                <h6>Semaine {{ week }}</h6>
-                                {% for position in positions %}
-                                    {{ _self.one_line_shifter(position) }}
-                                {% endfor %}
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+            {% endif %}
         </div>
 
     {% endmacro %}
