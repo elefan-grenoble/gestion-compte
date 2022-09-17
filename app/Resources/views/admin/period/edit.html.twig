@@ -15,7 +15,7 @@
     {{ form_start(form) }}
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
     {{ form_end(form) }}
 
@@ -60,7 +60,7 @@
                     {% else %}
                         <li id="position{{ position.id }}">
                             <div class="collapsible-header">
-                                <div class="row" style="margin-bottom: 0px; width: 100%;">
+                                <div class="row" style="margin-bottom: 0; width: 100%;">
                                     <div class="col s11">
                                         <b>
                                             <span style="font-style: italic">libre</span>
@@ -86,7 +86,7 @@
                                     </div>
                                     <div class="col s3">
                                         <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0>
-                                        <button class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
+                                        <button type="button" class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
                                     </div>
                                 </div>
                             </div>

@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
@@ -10,6 +11,7 @@ use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
 use AppBundle\Repository\JobRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -189,7 +191,6 @@ class PeriodController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         if ($form->isSubmitted() && $form->isValid()) {
-
             $time = $form->get('start')->getData();
             $period->setStart(new \DateTime($time));
             $time = $form->get('end')->getData();
@@ -201,36 +202,39 @@ class PeriodController extends Controller
             return $this->redirectToRoute('period');
         }
 
-        $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
-            ->createQueryBuilder('b')
-            ->select('b, m')
-            ->join('b.user', 'u')
-            ->join('b.membership', 'm');
-        $beneficiaries = $beneficiariesQb->getQuery()->getResult();
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
 
         $form->get('start')->setData($period->getStart()->format('H:i'));
         $form->get('end')->setData($period->getEnd()->format('H:i'));
 
-        $delete_form = $this->createFormBuilder()
+        $deleteForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('period_delete', array('id' => $period->getId())))
             ->setMethod('DELETE')
             ->getForm();
 
-        $positions_delete_form = array();
+        $positionsDeleteForm = array();
         foreach($period->getPositions() as $position){
-            $positions_delete_form[$position->getId()] = $this->createFormBuilder()
+            $positionsDeleteForm[$position->getId()] = $this->createFormBuilder()
                 ->setAction($this->generateUrl('remove_position_from_period', array('period' => $period->getId(),'position' => $position->getId())))
                 ->setMethod('DELETE')
                 ->getForm()->createView();
         }
 
+        $positionForm = $this->createForm(
+            PeriodPositionType::class,
+            new PeriodPosition(),
+            array('action' => $this->generateUrl(
+                'add_position_to_period',
+                array('id' => $period->getId())))) ;
+
+
         return $this->render('admin/period/edit.html.twig', array(
             "form" => $form->createView(),
             "period" => $period,
             "beneficiaries" => $beneficiaries,
-            "position_form" => $this->createForm(PeriodPositionType::class, new PeriodPosition(), array('action' => $this->generateUrl('add_position_to_period', array('id' => $period->getId()))))->createView(),
-            "delete_form" => $delete_form->createView(),
-            "positions_delete_form" => $positions_delete_form
+            "position_form" => $positionForm->createView(),
+            "delete_form" => $deleteForm->createView(),
+            "positions_delete_form" => $positionsDeleteForm
         ));
     }
 
@@ -301,8 +305,9 @@ class PeriodController extends Controller
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
      */
-    public function bookPositionToPeriodAction(Request $request, PeriodPosition $position)
+    public function bookPositionToPeriodAction(Request $request, PeriodPosition $position): Response
     {
+
         $session = new Session();
         $period = $position->getPeriod();
 
@@ -323,7 +328,9 @@ class PeriodController extends Controller
         }
 
         if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
-            $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $position->getFormation()->getName() . ")");
+            $session
+                ->getFlashBag()
+                ->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
             return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
         }
 
