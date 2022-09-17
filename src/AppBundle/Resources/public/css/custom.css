@@ -126,10 +126,10 @@ footer.page-footer {
 }
 /* Links */
 .card .card-action a.btn {
+  color: white;
   overflow: hidden;
   white-space: nowrap;
   width: 100%;
-  color: white;
 }
 .card .card-action button.btn {
   overflow: hidden;
@@ -155,6 +155,7 @@ footer.page-footer {
 }
 .breadcrumbs i.material-icons {
   font-size: 15px;
+  vertical-align: top;
 }
 .breadcrumbs a,
 .breadcrumbs span {
@@ -489,3 +490,4 @@ strong {
 .hover-toggle-text-icon a:hover span {
   display: none;
 }
+/*# sourceMappingURL=custom.css.map */
