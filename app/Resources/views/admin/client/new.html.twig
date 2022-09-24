@@ -9,11 +9,6 @@
 <i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
-{% block beforecontainer %}
-{% endblock %}
-{% block aftercontainer %}
-{% endblock %}
-
 {% block content %}
     {% if is_granted("ROLE_ADMIN") %}
         <h4>Ajouter un client (Oauth)</h4>
@@ -25,9 +20,4 @@
         </div>
         {{ form_end(form) }}
     {% endif %}
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}

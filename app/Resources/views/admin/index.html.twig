@@ -2,10 +2,11 @@
 
 {% block title %}Administration - {{ site_name }}{% endblock %}
 
-{% block beforecontainer %}
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">build</i>&nbsp;Administration
 {% endblock %}
-{% block aftercontainer %}
-{% endblock %}
+
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
@@ -129,9 +130,4 @@
         {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}
