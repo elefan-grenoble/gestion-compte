@@ -1,5 +1,5 @@
 
-jQuery.extend( jQuery.fn.pickadate.defaults, {
+jQuery.extend( jQuery.fn.datepicker.defaults, {
     monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
     monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
     weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
@@ -18,13 +18,13 @@ jQuery.extend( jQuery.fn.pickadate.defaults, {
 
 jQuery(function(){
     // Date only datepicker
-    $('input.datepicker').pickadate({
+    $('input.datepicker').datepicker({
         selectMonths: true, // Creates a dropdown to control month
         selectYears: 2, // Creates a dropdown of 15 years to control year,
         close: 'Ok',
         closeOnSelect: true // Close upon selecting a date,
     });
-    $('input.timepicker').pickatime({
+    $('input.timepicker').timepicker({
         default: 'now', // Set default time: 'now', '1:30AM', '16:30'
         fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
         twelvehour: false, // Use AM/PM or 24-hour format
@@ -37,13 +37,13 @@ jQuery(function(){
     });
 
     // Splitted DateTime datepicker
-    $('div.datepicker > input[type=date]').pickadate({
+    $('div.datepicker > input[type=date]').datepicker({
         selectMonths: true, // Creates a dropdown to control month
         selectYears: 2, // Creates a dropdown of 15 years to control year,
         close: 'Ok',
         closeOnSelect: true // Close upon selecting a date,
     });
-    $('div.datepicker > input[type=time]').pickatime({
+    $('div.datepicker > input[type=time]').timepicker({
         twelvehour: false, // Use AM/PM or 24-hour format
         donetext: 'OK', // text for done-button
         cleartext: 'Effacer', // text for clear-button
