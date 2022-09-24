@@ -46,17 +46,18 @@ class EventType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            $form->add('title',TextType::class,array('label'=>'titre'))
-                ->add('date',DateTimeType::class,array('required' => true,
+            $form->add('title', TextType::class,array('label' => 'Titre'))
+                ->add('date', DateTimeType::class,array(
+                    'required' => true,
                     'input'  => 'datetime',
                     'date_widget' => 'single_text',
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
-                    'attr' => [
+                    'attr' => array(
                         'class' => 'datepicker'
-                    ]
+                    )
                 ))
-                ->add('description',MarkdownEditorType::class,array('label'=>'Description','required' => false));
+                ->add('description',MarkdownEditorType::class,array('label'=>'Description', 'required' => false));
             $form->add('imgFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,

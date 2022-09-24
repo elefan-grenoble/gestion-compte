@@ -1,5 +1,5 @@
 
-jQuery.extend( jQuery.fn.datepicker.defaults, {
+jQuery.extend(jQuery.fn.datepicker.defaults, {
     monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
     monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
     weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
@@ -10,13 +10,13 @@ jQuery.extend( jQuery.fn.datepicker.defaults, {
     firstDay: 1,
     format: 'yyyy-mm-dd',
     formatSubmit: 'yyyy-mm-dd',
-    labelMonthNext:"Mois suivant",
-    labelMonthPrev:"Mois précédent",
-    labelMonthSelect:"Sélectionner un mois",
-    labelYearSelect:"Sélectionner une année"
+    labelMonthNext: 'Mois suivant',
+    labelMonthPrev: 'Mois précédent',
+    labelMonthSelect: 'Sélectionner un mois',
+    labelYearSelect: 'Sélectionner une année'
 });
 
-jQuery(function(){
+jQuery(function() {
     // Date only datepicker
     $('input.datepicker').datepicker({
         selectMonths: true, // Creates a dropdown to control month
@@ -26,7 +26,7 @@ jQuery(function(){
     });
     $('input.timepicker').timepicker({
         default: 'now', // Set default time: 'now', '1:30AM', '16:30'
-        fromnow: 0,       // set default time to * milliseconds from now (using with default = 'now')
+        fromnow: 0, // set default time to * milliseconds from now (using with default = 'now')
         twelvehour: false, // Use AM/PM or 24-hour format
         donetext: 'OK', // text for done-button
         cleartext: 'Effacer', // text for clear-button

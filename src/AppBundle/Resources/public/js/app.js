@@ -1,5 +1,6 @@
 $(document).ready(function() {
     $('select').formSelect();
+    // $('datepicker').datepicker();  // see datepicker.js
     $('.sidenav').sidenav({
         menuWidth: 300, // Default is 300
         edge: 'left', // Choose the horizontal origin

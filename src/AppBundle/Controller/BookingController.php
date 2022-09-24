@@ -183,15 +183,15 @@ class BookingController extends Controller
 
         $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
-            ->add('type', ChoiceType::class, [
+            ->add('type', ChoiceType::class, array(
                 'label' => 'Type de filtre',
                 'required' => true,
                 'data' => "Date",
-                'choices' => [
+                'choices' => array(
                     'Date' => true,
                     'Semaine' => false,
-                ],
-            ])
+                ),
+            ))
             ->add('from', TextType::class, [
                 'label' => 'A partir de',
                 'required' => true,
@@ -238,15 +238,15 @@ class BookingController extends Controller
                         ->orderBy('j.name', 'ASC');
                 }
             ))
-            ->add('filling', ChoiceType::class, [
+            ->add('filling', ChoiceType::class, array(
                     'label' => 'Remplissage',
                     'required' => false,
-                    'choices' => [
-                        'Complet'=>"full",
-                        'Partiel'=>"partial",
-                        'Vide'=>'empty',
-                    ],
-            ])
+                    'choices' => array(
+                        'Complet' => 'full',
+                        'Partiel' => 'partial',
+                        'Vide' => 'empty',
+                    ),
+            ))
             ->add(
                 'filter',
                 SubmitType::class,

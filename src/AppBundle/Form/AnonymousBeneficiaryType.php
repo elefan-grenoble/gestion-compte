@@ -46,14 +46,24 @@ class AnonymousBeneficiaryType extends AbstractType
                 'required'=>false,
                 'entry_type' => EmailType::class,
                 'entry_options'  => array('label'=>'Email beneficiaire','attr'=>array('placehoder'=>'email@domain.fr'),'required'=>false,'constraints' => [new UniqueEmail()]),
-                'allow_add'=>true))
-            ->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),'required'=>false))
-            ->add('mode', ChoiceType::class, array('choices'  => array(
-                'Espèce' => Registration::TYPE_CASH,
-                'Chèque' => Registration::TYPE_CHECK,
-                $this->localCurrency => Registration::TYPE_LOCAL,
-                'Helloasso' => Registration::TYPE_HELLOASSO,
-            ),'label' => 'Mode de réglement','placeholder' => '','required' => false)); //todo, make it dynamic
+                'allow_add'=>true
+            ))
+            ->add('amount', TextType::class, array(
+                'label' => 'Montant',
+                'attr'=> array('placeholder' => '15'),
+                'required'=>false
+            ))
+            ->add('mode', ChoiceType::class, array(  // todo, make it dynamic
+                'label' => 'Mode de réglement',
+                'placeholder' => '',
+                'required' => false,
+                'choices' => array(
+                    'Espèce' => Registration::TYPE_CASH,
+                    'Chèque' => Registration::TYPE_CHECK,
+                    $this->localCurrency => Registration::TYPE_LOCAL,
+                    'Helloasso' => Registration::TYPE_HELLOASSO,
+                )
+            ));
 
         $builder->get('beneficiaries_emails')->addModelTransformer(new CallbackTransformer(
             function ($beneficiariesAsString) {

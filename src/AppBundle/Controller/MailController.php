@@ -254,13 +254,16 @@ class MailController extends Controller
         return $this->redirectToRoute('mail_edit');
     }
 
-    private function getMailForm()
-    {
+    private function getMailForm() {
         $mailerService = $this->get('mailer_service');
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
-            ->add('from', ChoiceType::class, array('label' => 'Depuis', 'required' => false, 'choices' => $mailerService->getAllowedEmails()))
+            ->add('from', ChoiceType::class, array(
+                'label' => 'Depuis',
+                'required' => false,
+                'choices' => $mailerService->getAllowedEmails()
+            ))
             ->add('to', HiddenType::class, array('label' => 'Destinataires', 'required' => true))
             ->add('cci', HiddenType::class, array('label' => 'Non-membres', 'required' => false))
             ->add('template', EntityType::class, array(

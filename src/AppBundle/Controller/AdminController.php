@@ -28,15 +28,10 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -321,9 +316,13 @@ class AdminController extends Controller
     {
         $form = $this->createFormBuilder()
             ->add('submitFile', FileType::class, array('label' => 'File to Submit'))
-            ->add('delimiter', ChoiceType::class, array('label' => 'delimiter','choices'  => array(
-                'virgule ,' => ',',
-                'point virgule ;' => ';',)))
+            ->add('delimiter', ChoiceType::class, array(
+                'label' => 'delimiter',
+                'choices'  => array(
+                    'virgule ,' => ',',
+                    'point virgule ;' => ';',
+                )
+            ))
             //->add('persist', CheckboxType::class, array('required' => false, 'label' => 'Sauver en base'))
             //->add('compute', SubmitType::class, array('label' => 'Importer les données'))
             ->getForm();
