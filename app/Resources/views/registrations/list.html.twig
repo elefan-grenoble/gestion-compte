@@ -41,7 +41,7 @@
         </ul>
 
         <h5>Total sur toute la période : {{ grand_total['grand_total'] }}€</h5>
-        <ul class="collapsible" data-collapsible="accordion">
+        <ul class="collapsible">
             <li>
                 <div class="row">
                     {% for i in 1..6 %}
@@ -76,7 +76,7 @@
                 {% set date = (registration.date | date('d F Y')) %}
                 {% set datekey = (registration.date | date('Y-m-d')) %}
                 <h5>{{ registration.date | date_fr_long }}</h5>
-                <ul class="collapsible" data-collapsible="accordion">
+                <ul class="collapsible">
             {% endif %}
             <li class="">
                 <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">

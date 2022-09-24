@@ -52,7 +52,7 @@
                     for (var i = 0; i < userArray.length; i++) {
                         dataUsers[userArray[i]] = null;
                     }
-                    $('.beneficiaries').material_chip({
+                    $('.beneficiaries').chips({
                         placeholder: 'Beneficiaire',
                         data: [
                             {% for beneficiary in to %}
@@ -65,7 +65,7 @@
                             minLength: 1
                         }
                     });
-                    $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').material_chip('data')));
+                    $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
                 }
             });
             $.ajax({
@@ -77,7 +77,7 @@
                     for (var i = 0; i < userArray.length; i++) {
                         dataUsers[userArray[i]] = null;
                     }
-                    $('.non-members').material_chip({
+                    $('.non-members').chips({
                         placeholder: 'Non-membre',
                         data: [],
                         autocompleteOptions: {
@@ -86,17 +86,17 @@
                             minLength: 1
                         }
                     });
-                    $("input[name='form[cci]']").val(JSON.stringify($('.non-members').material_chip('data')));
+                    $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
                 }
             });
             $('.chips').on('chip.add', function(e, chip){
-                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').material_chip('data')));
-                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').material_chip('data')));
+                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
+                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
             });
 
             $('.chips').on('chip.delete', function(e, chip){
-                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').material_chip('data')));
-                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').material_chip('data')));
+                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
+                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
             });
         });
     </script>

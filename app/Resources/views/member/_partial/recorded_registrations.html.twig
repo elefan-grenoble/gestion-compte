@@ -1,6 +1,6 @@
 {% if member.mainBeneficiary.user.recordedRegistrations | length %}
 <h6>Recorded registrations</h6>
-<ul class="collapsible" data-collapsible="accordion">
+<ul class="collapsible">
     {% for registration in member.mainBeneficiary.user.recordedRegistrations %}
         <li>
             <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
