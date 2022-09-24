@@ -287,14 +287,14 @@ class AdminController extends Controller
             ->add('job', EntityType::class, array(
                 'label' => 'Quel poste ?',
                 'class' => 'AppBundle:Job',
-                'choice_label'=> 'name',
-                'multiple'     => false,
+                'choice_label' => 'name',
+                'multiple' => false,
                 'required' => true
             ))
             ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin ?'))
             ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides ?'))
             ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre ?'))
-            ->add('generate', SubmitType::class, array('label' => 'generer'))
+            ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {

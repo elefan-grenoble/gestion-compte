@@ -15,12 +15,12 @@
         <h4 class="">Liste des codes {% if not is_granted("ROLE_ADMIN") %}en cours{% endif %}</h4>
         <table>
             <thead>
-            <tr>
-                <th>Code</th>
-                <th>Créé le</th>
-                <th>Membre</th>
-                <th></th>
-            </tr>
+                <tr>
+                    <th>Code</th>
+                    <th>Créé le</th>
+                    <th>Membre</th>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
             {% for code in codes %}

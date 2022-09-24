@@ -89,7 +89,10 @@ class CodeController extends Controller
             ->setAction($this->generateUrl('code_edit'))
             ->setMethod('POST')
             ->add('code', TextType::class, array('label' => 'code', 'required' => true))
-            ->add('close_old_codes', CheckboxType::class, array('label' => 'fermer les anciens codes ?', 'required' => false))
+            ->add('close_old_codes', CheckboxType::class, array(
+                'label' => 'fermer les anciens codes ?',
+                'required' => false,
+                'attr' => array('class' => 'filled-in')))
             ->getForm();
 
         $codeform->handleRequest($request);

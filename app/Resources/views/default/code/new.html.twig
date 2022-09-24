@@ -18,18 +18,16 @@
             {{ form_widget(form.code) }}
             {{ form_label(form.code) }}
         </div>
-        <div class="col s12">
-            <div class="errors">
-                {{ form_errors(form.close_old_codes) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.close_old_codes) }}
-                {{ form_label(form.close_old_codes) }}
-            </div>
-        </div>
+    </div>
+    <div class="row">
+        {{ form_errors(form.close_old_codes) }}
+        <label>
+            {{ form_widget(form.close_old_codes) }}
+            <span>{{ form.close_old_codes.vars.label }}</span>
+        </label>
     </div>
 
-    <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">add</i>Valider</button>
+    <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">save</i>Enregistrer</button>
     {{ form_widget(form) }}
     {{ form_end(form) }}
 {% endblock %}
