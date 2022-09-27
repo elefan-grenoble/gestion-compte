@@ -41,8 +41,9 @@
                     <ul id="nav-desktop" class="right hide-on-med-and-down">
                         {% if is_granted("ROLE_ADMIN_PANEL") %}
                             <li class="highlight">
-                                <a href="{{ path("admin") }}" class="">
-                                    <i class="material-icons left">build</i><span class="show-on-xl-only">Administration</span>
+                                <a href="{{ path("admin") }}" title="Administration">
+                                    <i class="material-icons left">build</i>
+                                    <span class="show-on-xl-only">Administration</span>
                                 </a>
                             </li>
                         {% endif %}
@@ -50,18 +51,22 @@
                             {{ render(controller("AppBundle:Service:navlist")) }}
                             {% if app.user.beneficiary %}
                                 <li>
-                                    <a href="{{ path('fos_user_profile_show') }}">
+                                    <a href="{{ path('fos_user_profile_show') }}" title="{{ app.user.firstname }}">
                                         <i class="material-icons small left">settings</i>
-                                        <small class="show-on-xl-only">{{ app.user.firstname }}</small>
+                                        <span class="show-on-xl-only">{{ app.user.firstname }}</span>
                                     </a>
                                 </li>
                             {% endif %}
                             <li>
-                                <a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small right">exit_to_app</i></a>
+                                <a href="{{ path('fos_user_security_logout') }}">
+                                    <i class="material-icons small right">exit_to_app</i>
+                                </a>
                             </li>
                         {% else %}
                             <li>
-                                <a href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+                                <a href="{{ path('fos_user_security_login') }}">
+                                    {{ 'layout.login'|trans({}, 'FOSUserBundle') }}
+                                </a>
                             </li>
                         {% endif %}
                     </ul>
