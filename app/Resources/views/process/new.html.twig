@@ -2,6 +2,9 @@
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+{% if is_granted("ROLE_ADMIN_PANEL") %}
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+{% endif %}
 <a href="{{ path('process_update_list') }}"><i class="material-icons">list</i>Liste des procédures / nouveautés</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>Ajouter
 {% endblock %}
