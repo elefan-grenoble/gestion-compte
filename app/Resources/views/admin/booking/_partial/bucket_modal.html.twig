@@ -95,7 +95,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                         <div class="collapsible-body">
                             <div class="row">
                                 <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                    <input id="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire" />
+                                    <input id="benef{{ shift.id }}" type="text" class="autocomplete" name="beneficiary" placeholder="Beneficiaire" />
                                 </div>
                                 {% if use_fly_and_fixed %}
                                     <div class="col s2">
