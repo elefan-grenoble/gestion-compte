@@ -40,10 +40,11 @@ timepickerSettings = {
 }
 
 jQuery(function() {
+    // Note: preventDefault? to avoid having the native date/time picker to popup (happens on some browsers...)
     // Date only datepicker
-    $('input.datepicker').datepicker(datepickerSettings);
-    $('input.timepicker').timepicker(timepickerSettings);
+    $('input.datepicker').on('click', function(e) { e.preventDefault(); }).datepicker(datepickerSettings);
+    $('input.timepicker').on('click', function(e) { e.preventDefault(); }).timepicker(timepickerSettings);
     // Splitted DateTime datepicker
-    $('div.datepicker > input[type=date]').datepicker(datepickerSettings);
-    $('div.datepicker > input[type=time]').timepicker(timepickerSettings);
+    $('div.datepicker > input[type=date]').on('click', function(e) {e.preventDefault(); }).datepicker(datepickerSettings);
+    $('div.datepicker > input[type=time]').on('click', function(e) { e.preventDefault(); }).timepicker(timepickerSettings);
 });
