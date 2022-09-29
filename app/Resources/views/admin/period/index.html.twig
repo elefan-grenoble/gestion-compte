@@ -66,7 +66,7 @@
             {# sombody is registered to this period #}
             {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
-               class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter.getAutocompleteLabel() | raw }} &#010; ({{ formation }})">
+               class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter.getAutocompleteLabel() | raw }} &#013;&#010; ({{ formation }})">
                 {% if warning %}
                     <i class="red-text material-icons warning-animation">warning</i>
                 {% else %}
