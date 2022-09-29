@@ -1,6 +1,7 @@
 $(document).ready(function() {
-    $('select').material_select();
-    $('.button-collapse').sideNav({
+    $('select').formSelect();
+    // $('datepicker').datepicker();  // see datepicker.js
+    $('.sidenav').sidenav({
         menuWidth: 300, // Default is 300
         edge: 'left', // Choose the horizontal origin
         closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
@@ -13,6 +14,7 @@ $(document).ready(function() {
             $(modal).find('.simplemde-container').trigger('modalOpen'); //tell markdown editor to refresh
             },
     });
+    $('.collapsible').collapsible();
     $('.tooltipped').tooltip();
     $(".dropdown-button").dropdown();
 });

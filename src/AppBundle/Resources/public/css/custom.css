@@ -490,4 +490,7 @@ strong {
 .hover-toggle-text-icon a:hover span {
   display: none;
 }
+.material-tooltip {
+  white-space: pre-wrap;
+}
 /*# sourceMappingURL=custom.css.map */

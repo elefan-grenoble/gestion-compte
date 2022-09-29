@@ -8,11 +8,6 @@
 <i class="material-icons">list</i>&nbsp;Gestion des clients (Oauth)
 {% endblock %}
 
-{% block beforecontainer %}
-{% endblock %}
-{% block aftercontainer %}
-{% endblock %}
-
 {% block content %}
 {% if is_granted("ROLE_ADMIN") %}
     <h4>Gestion des clients (Oauth)</h4>
@@ -28,9 +23,4 @@
     </div>
     <a href="{{ path('client_new') }}" class="btn waves-effect"><i class="material-icons left">add</i>Ajouter un client Oauth</a>
 {% endif %}
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}

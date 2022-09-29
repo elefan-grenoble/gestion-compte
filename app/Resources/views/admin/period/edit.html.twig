@@ -36,7 +36,7 @@
         {% endif %}
         {% for week, positions in period.positionsperweekcycle %}
             <h6>Semaine {{week}}</h6>
-            <ul class="collapsible" data-collapsible="accordion">
+            <ul class="collapsible">
                 {% for position in positions %}
                     {% if position.shifter %}
                         <li id="position{{ position.id }}">

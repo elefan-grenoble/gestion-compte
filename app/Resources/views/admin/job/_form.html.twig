@@ -36,8 +36,10 @@
 </div>
 <div class="row">
     {{ form_errors(form.enabled) }}
-    {{ form_widget(form.enabled) }}
-    {{ form_label(form.enabled) }}
+    <label>
+        {{ form_widget(form.enabled) }}
+        <span>{{ form.enabled.vars.label }}</span>
+    </label>
 </div>
 <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
 {{ form_end(form) }}

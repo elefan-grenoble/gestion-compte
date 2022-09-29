@@ -61,7 +61,7 @@
         $('#contactform{{ shift.id }} textarea').val('Bonjour,');
 
         var allIds = [{% for shift in coShifts %}{{ shift.shifter.id }},{% endfor %}];
-        $('#to{{ shift.id }}').material_chip({ autocompleteOptions: {data : chipsAcFromIds(allIds)} });
+        $('#to{{ shift.id }}').chips({ autocompleteOptions: {data : chipsAcFromIds(allIds)} });
         $('#to{{ shift.id }}').on('chip.add', function(e, chip){
             updateFromChips();
         });
@@ -90,7 +90,7 @@
             return chips;
         }
         function addChip(text) {
-            var chips = $('#to{{ shift.id }}').material_chip('data');
+            var chips = $('#to{{ shift.id }}').chips('data');
 
             var ids_json = $("#contactform{{ shift.id }} input[name='form[to]']").val();
             if (ids_json.length > 3){
@@ -113,12 +113,12 @@
                     image: '',
                 };
                 chips.push(chip);
-                $('#to{{ shift.id }}').material_chip({data:chips, autocompleteOptions: {data : chipsAcFromIds(allIds)} });
+                $('#to{{ shift.id }}').chips({data:chips, autocompleteOptions: {data : chipsAcFromIds(allIds)} });
             }
         }
         function updateFromChips() {
             $("#contact{{ shift.id }} .list .chip").addClass('blue-grey').removeClass('green');
-            var chips = $('#to{{ shift.id }}').material_chip('data');
+            var chips = $('#to{{ shift.id }}').chips('data');
             var ids = [];
             for (var i = 0; i < chips.length; i++) {
                 var $name = $("#contact{{ shift.id }} .list .chip > a[data-chip='"+chips[i].tag.trim()+"']");

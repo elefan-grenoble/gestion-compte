@@ -42,7 +42,7 @@
                         {% if is_granted("ROLE_ADMIN_PANEL") %}
                             <li class="highlight">
                                 <a href="{{ path("admin") }}" class="">
-                                    <i class="material-icons left">build</i><span class="show-on-xl-only">administration</span>
+                                    <i class="material-icons left">build</i><span class="show-on-xl-only">Administration</span>
                                 </a>
                             </li>
                         {% endif %}
@@ -66,7 +66,7 @@
                         {% endif %}
                     </ul>
 
-                    <ul id="nav-mobile" class="side-nav">
+                    <ul id="nav-mobile" class="sidenav">
                         {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                             {% set frozen = app.user.beneficiary and app.user.beneficiary.membership.frozen %}
                             <li>
@@ -103,18 +103,13 @@
                             <li>
                                 <a href="{{ path('fos_user_security_logout') }}"><i class="material-icons small">exit_to_app</i>{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
                             </li>
-                            {% if is_granted("ROLE_ADMIN_PANEL") %}
-                                <li>
-                                    <a href="{{ path("admin") }}" class="waves-effect waves-light btn"><i class="material-icons left">settings</i>Administration</a>
-                                </li>
-                            {% endif %}
                         {% else %}
                             <li>
                                 <a href="{{ path('fos_user_security_login') }}"><span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
                             </li>
                         {% endif %}
                     </ul>
-                    <a href="#" data-activates="nav-mobile" class="button-collapse"><i class="material-icons">menu</i></a>
+                    <a href="#" data-target="nav-mobile" class="sidenav-trigger hide-on-large-and-up"><i class="material-icons">menu</i></a>
                 </div>
             </nav>
         </header>
@@ -134,11 +129,11 @@
             {% endif %}
             {% set _breadcrumbs = block('breadcrumbs') %}
             {% if _breadcrumbs is not empty %}
-            <div class="wrapper breadcrumbs blue-grey lighten-5">
-                <div class="col s12">
-                    {% block breadcrumbs %}{% endblock breadcrumbs %}
+                <div class="wrapper breadcrumbs blue-grey lighten-5">
+                    <div class="col s12">
+                        {% block breadcrumbs %}{% endblock breadcrumbs %}
+                    </div>
                 </div>
-            </div>
             {% endif %}
             {% if app.request.hasPreviousSession %}
                 {% for type, messages in app.session.flashBag.all %}

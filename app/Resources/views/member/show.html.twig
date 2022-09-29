@@ -6,7 +6,7 @@
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
     {% if is_granted("ROLE_ADMIN") %}
         <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-        <a href="{{ path('user_index') }}"><i class="material-icons">list</i>&nbsp;Liste membres</a><i class="material-icons">chevron_right</i>
+        <a href="{{ path('user_index') }}"><i class="material-icons">list</i>&nbsp;Liste des membres</a><i class="material-icons">chevron_right</i>
     {% else %}
         <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i>&nbsp;Outils adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
     {% endif %}
@@ -41,7 +41,7 @@
     {% endif %}
 
     {% if is_granted("beneficiary_add", member) and member.beneficiaries|length < 2 %}{#todo put this value in conf#}
-        <ul class="collapsible" data-collapsible="accordion">
+        <ul class="collapsible">
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
                 <div class="collapsible-body new_registration_form">
@@ -62,7 +62,7 @@
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
-                <ul class="collapsible" data-collapsible="accordion">
+                <ul class="collapsible">
                     {% for registration in member.registrations %}
                         <li>
                             <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
@@ -79,7 +79,7 @@
                     {% endfor %}
                 </ul>
                 {% if member | can_register and member.mainBeneficiary.user != app.user %}
-                    <ul class="collapsible" data-collapsible="accordion">
+                    <ul class="collapsible">
                         <li>
                             {% if not member.lastRegistration %}
                                 <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
@@ -94,7 +94,7 @@
                         </li>
                     </ul>
                 {% elseif (member.mainBeneficiary.user != app.user ) %}
-                    <ul class="collapsible" data-collapsible="accordion">
+                    <ul class="collapsible">
                         <li>
                             {% if not member.lastRegistration %}
                                 <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>

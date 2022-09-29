@@ -2,11 +2,14 @@
 
 {% block beforecontainer %}
 {% endblock %}
+
 {% block aftercontainer %}
     <div class="center-align solo-logo">
-        <a href="https://www.helloasso.com" target="_blank">{% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
-                <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
-            {% endimage %}</a>
+        <a href="https://www.helloasso.com" target="_blank">
+            {% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
+            <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
+            {% endimage %}
+        </a>
     </div>
 {% endblock %}
 
@@ -27,9 +30,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}

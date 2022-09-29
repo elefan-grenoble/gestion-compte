@@ -36,34 +36,19 @@
         </div>
     </div>
     <div class="row">
-        <div class="col s12">
-            <div class="errors">
-                {{ form_errors(form.imgFile) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.imgFile) }}
-                {{ form_label(form.imgFile) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
         <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.need_proxy) }}
-            </div>
-            <div class="">
+            {{ form_errors(form.need_proxy) }}
+            <label>
                 {{ form_widget(form.need_proxy) }}
-                {{ form_label(form.need_proxy) }}
-            </div>
+                <span>{{ form.need_proxy.vars.label }}</span>
+            </label>
         </div>
         <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.anonymous_proxy) }}
-            </div>
-            <div class="">
+            {{ form_errors(form.anonymous_proxy) }}
+            <label>
                 {{ form_widget(form.anonymous_proxy) }}
-                {{ form_label(form.anonymous_proxy) }}
-            </div>
+                <span>{{ form.anonymous_proxy.vars.label }}</span>
+            </label>
         </div>
     </div>
     <div class="row">
@@ -82,6 +67,18 @@
     </div>
     {{ form_label(form.description) }}
     {{ form_widget(form.description) }}
+    <div class="row">
+        <div class="col s12">
+            <div class="errors">
+                {{ form_errors(form.imgFile) }}
+            </div>
+            <div class="">
+                {{ form_widget(form.imgFile) }}
+                {{ form_label(form.imgFile) }}
+            </div>
+        </div>
+    </div>
+    <br />
     <div>
         <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>

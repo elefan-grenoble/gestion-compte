@@ -9,10 +9,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -48,17 +46,18 @@ class EventType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            $form->add('title',TextType::class,array('label'=>'titre'))
-                ->add('date',DateTimeType::class,array('required' => true,
+            $form->add('title', TextType::class,array('label' => 'Titre'))
+                ->add('date', DateTimeType::class,array(
+                    'required' => true,
                     'input'  => 'datetime',
                     'date_widget' => 'single_text',
                     'time_widget' => 'single_text',
                     'label' => 'Date & heure',
-                    'attr' => [
+                    'attr' => array(
                         'class' => 'datepicker'
-                    ]
+                    )
                 ))
-                ->add('description',MarkdownEditorType::class,array('label'=>'Description','required' => false));
+                ->add('description',MarkdownEditorType::class,array('label'=>'Description', 'required' => false));
             $form->add('imgFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,
@@ -66,15 +65,20 @@ class EventType extends AbstractType
             ));
 
             if ($userData && $userData->getId()){
-                $form->add('need_proxy', CheckboxType::class,array('required' => false,'label'=>'Utilise des procurations (AG, ...)'));
-                $form->add('anonymous_proxy', CheckboxType::class,array('required' => false,'label'=>'Autoriser les procurations anonymes'));
-                $form->add('max_date_of_last_registration', DateType::class,array('required' => false,
+                $form->add('need_proxy', CheckboxType::class, array(
+                    'required' => false,
+                    'label' => 'Utilise des procurations (AG, ...)',
+                    'attr' => array('class' => 'filled-in')));
+                $form->add('anonymous_proxy', CheckboxType::class, array(
+                    'required' => false,
+                    'label' => 'Autoriser les procurations anonymes',
+                    'attr' => array('class' => 'filled-in')));
+                $form->add('max_date_of_last_registration', DateType::class, array(
+                    'required' => false,
                     'input' => 'datetime',
                     'widget' => 'single_text',
                     'label' => 'Date maximale d\'adhésion pour voter',
-                    'attr' => [
-                        'class' => 'datepicker'
-                    ]
+                    'attr' => array('class' => 'datepicker')
                 ));
             }
 

@@ -43,7 +43,7 @@ class TaskType extends AbstractType
             $form = $event->getForm();
             $taskData = $event->getData();
 
-            if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
+            if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')){
                 $form->add('commissions',EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'choice_label'     => 'name',
@@ -76,9 +76,17 @@ class TaskType extends AbstractType
                 ));
 
             if ($taskData && $taskData->getId()){
-                $form->add('created_at',TextType::class,array('required' => true,'attr'=>array('class'=>'datepicker'),'label'=>'Début'));
-                $form->add('closed', CheckboxType::class,array('required' => false,'label'=>'Terminée'));
-                $form->add('status', TextType::class,array('required' => false,'label'=>'Status'));
+                $form->add('created_at', TextType::class,array(
+                    'required' => true,
+                    'label' => 'Début',
+                    'attr' => array('class' => 'datepicker')
+                ));
+                $form->add('closed', CheckboxType::class,array(
+                    'required' => false,
+                    'label' => 'Terminée',
+                    'attr' => array('class' => 'filled-in')
+                ));
+                $form->add('status', TextType::class, array('required' => false, 'label' => 'Status'));
                 if ($taskData->getCommissions()->count() > 0){
                     $collection = array();
                     foreach ($taskData->getCommissions() as $commission){

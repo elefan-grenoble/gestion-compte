@@ -72,31 +72,30 @@ class PeriodController extends Controller
                         ->orderBy('j.name', 'ASC');
                 }
             ))
-            ->add('filling', ChoiceType::class, [
+            ->add('filling', ChoiceType::class, array(
                 'label' => 'Remplissage',
                 'required' => false,
-                'choices' => [
-                    'Complet'=>"full",
-                    'Partiel'=>"partial",
-                    'Vide'=>'empty',
-                    'Problématique' =>'problematic'
-                ],
-            ])
-            ->add('week', ChoiceType::class, [
+                'choices' => array(
+                    'Complet' => 'full',
+                    'Partiel' => 'partial',
+                    'Vide' => 'empty',
+                    'Problématique' => 'problematic'
+                ),
+            ))
+            ->add('week', ChoiceType::class, array(
                 'label' => 'Semaine',
                 'required' => false,
-                'choices' => [
-                    'A'=>'A',
-                    'B'=>'B',
-                    'C'=>'C',
-                    'D'=>'D',
-                ],
-            ])
-            ->add(
-                'filter',
-                SubmitType::class,
-                array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer'))
-            )
+                'choices' => array(
+                    'A' => 'A',
+                    'B' => 'B',
+                    'C' => 'C',
+                    'D' => 'D',
+                ),
+            ))
+            ->add('filter', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
             ->getForm();
 
         $res["form"]->handleRequest($request);
@@ -414,8 +413,8 @@ class PeriodController extends Controller
         );
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('period_copy'))
-            ->add('day_of_week_from',ChoiceType::class,array('label'=>'Jour de la semaine référence','choices' => $days))
-            ->add('day_of_week_to',ChoiceType::class,array('label'=>'Jour de la semaine destination','choices' => $days))
+            ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => $days))
+            ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => $days))
             ->getForm();
 
         $form->handleRequest($request);

@@ -17,8 +17,7 @@
         {% endif %}
     </div>
     <a href="#{% if firstBookableShift %}book{{ firstBookableShift.id }}{% endif %}"
-       class="modal-trigger tooltipped" data-position="top" data-delay="100"
-       data-tooltip="{{ bucket.sortedShifts.first.job.name }}">
+       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.sortedShifts.first.job.name }}">
         <div class="z-depth-1 {{ bucket.sortedShifts.first.job.color }} lighten-5 black-text"
              style="position: relative">
             <div class="shift-block">

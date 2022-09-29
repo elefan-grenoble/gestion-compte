@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -68,16 +67,15 @@ class BeneficiaryType extends AbstractType
             $form = $event->getForm();
             if (is_object($user)&&($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 $form->add('flying', ChoiceType::class, array(
-                    'choices'  => [
+                    'choices'  => array(
                         'Oui' => true,
                         'Non' => false,
-                    ],
+                    ),
                     'required' => true,
-                    'label'=>'Equipe volante'
+                    'label' => 'Equipe volante'
                 ));
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
-                    'placeholder' => '--- Commissions ---',
                     'choice_label' => 'name',
                     'multiple' => true,
                     'required' => false,
@@ -85,7 +83,6 @@ class BeneficiaryType extends AbstractType
                 ));
                 $form->add('formations', EntityType::class, array(
                     'class' => 'AppBundle:Formation',
-                    'placeholder' => '--- Formations ---',
                     'choice_label' => 'name',
                     'multiple' => true,
                     'required' => false,
@@ -94,7 +91,6 @@ class BeneficiaryType extends AbstractType
             } else if (is_object($user) && ($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions()))) {
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
-                    'placeholder' => '--- Commissions ---',
                     'choices' => $user->getBeneficiary()->getOwnedCommissions(),
                     'choice_label' => 'name',
                     'multiple' => true,
