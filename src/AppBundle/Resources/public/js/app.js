@@ -12,11 +12,12 @@ $(document).ready(function() {
     $('.modal').modal({
         ready: function (modal) {
             $(modal).find('.simplemde-container').trigger('modalOpen'); //tell markdown editor to refresh
-            },
+        },
     });
     $('.collapsible').collapsible();
     $('.tooltipped').tooltip();
     $(".dropdown-button").dropdown();
+    // $('input.autocomplete').autocomplete({});  // see specific files
 });
 
 function myCookieInit(defaultData){
