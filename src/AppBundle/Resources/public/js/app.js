@@ -1,23 +1,22 @@
 $(document).ready(function() {
+    // initialize Materialize behavior - https://materializecss.com/
     $('select').formSelect();
     // $('datepicker').datepicker();  // see datepicker.js
     $('.sidenav').sidenav({
         menuWidth: 300, // Default is 300
         edge: 'left', // Choose the horizontal origin
         closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-        draggable: true, // Choose whether you can drag to open on touch screens,
-        onOpen: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is opened
-        onClose: function(el) { /* Do Stuff */ }, // A function to be called when sideNav is closed
+        draggable: true, // Choose whether you can drag to open on touch screens
     });
     $('.modal').modal({
         ready: function (modal) {
-            $(modal).find('.simplemde-container').trigger('modalOpen'); //tell markdown editor to refresh
+            $(modal).find('.simplemde-container').trigger('modalOpen'); // tell markdown editor to refresh
         },
     });
     $('.collapsible').collapsible();
     $('.tooltipped').tooltip();
-    $(".dropdown-button").dropdown();
-    // $('input.autocomplete').autocomplete({});  // see specific files
+    $(".dropdown-trigger").dropdown();
+    // $('input.autocomplete').autocomplete();  // see specific files for initialization & configuration
 });
 
 function myCookieInit(defaultData){
