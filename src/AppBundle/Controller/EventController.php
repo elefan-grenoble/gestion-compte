@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 
@@ -411,7 +412,7 @@ class EventController extends Controller
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
-                    $session->getFlashBag()->add('success', 'Votre réquète a bien été acceptée !');
+                    $session->getFlashBag()->add('success', 'Votre requête a bien été acceptée !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()){
                         $this->sendProxyMail($proxy,$mailer);
@@ -445,10 +446,22 @@ class EventController extends Controller
     }
 
     /**
+     * Generate a page for a beneficiary to choose a proxy able to vote for an event.
+     * Automatically remove the withdrawn members and if a registration_duration
+     * is defined, the member with an expired registration.
+     *
+     * Goes with the Twig template views/beneficiary/find_member_number.html.twig
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary")
      * @Method({"POST"})
      */
     public function findBeneficiaryAction(Event $event,Request $request){
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $membership = $current_app_user->getBeneficiary()->getMembership();
+
+        $minLastRegistration = clone $event->getMaxDateOfLastRegistration();
+        $registrationDuration = $this->getParameter('registration_duration');
+        $minLastRegistration->modify('-'.$registrationDuration);
+
         $search_form = $this->createFormBuilder()
             ->setAction($this->generateUrl('event_proxy_find_beneficiary', array('id' => $event->getId())))
             ->add('firstname', TextType::class, array('label' => 'le prénom'))
@@ -461,17 +474,43 @@ class EventController extends Controller
             $firstname = $search_form->get('firstname')->getData();
             $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
-            $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
+            $beneficiaries_request = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
                 ->join('b.user', 'u')
                 ->join('b.membership', 'm')
+                ->leftJoin("m.registrations", "r")
                 ->where( $qb->expr()->like('b.firstname', $qb->expr()->literal('%'.$firstname.'%')))
                 ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" )
+                ->andWhere("m != :current_member" )
+                    ->setParameter('current_member',$membership);
+
+            if(!is_null($registrationDuration)){
+                $beneficiaries_request = $beneficiaries_request
+                    ->andWhere('r.date >= :min_last_registration')
+                        ->setParameter('min_last_registration', $minLastRegistration)
+                    ->andWhere('r.date < :max_last_registration')
+                        ->setParameter('max_last_registration', $event->getMaxDateOfLastRegistration()) ;
+            }
+
+            $beneficiaries = $beneficiaries_request
                 ->orderBy("m.member_number", 'ASC')
                 ->getQuery()
                 ->getResult();
+
+            $min_time_count = $this->container->getParameter("time_after_which_members_are_late_with_shifts");
+
+            $filtered_beneficiaries = array_filter(
+                $beneficiaries,
+                function($b) use ($min_time_count) {return $b->getMembership()->getTimeCount()>$min_time_count*60;}
+            );
+
+            if(count($filtered_beneficiaries) != count($beneficiaries)){
+                $session->getFlashBag()->add('notice',"Certains bénéficiaires ne sont pas présents dans " .
+                    "cette liste, car leur compte est en dessous de la limite d'heure de retard.");
+            }
+
             return $this->render('beneficiary/find_member_number.html.twig', array(
                 'form' => null,
-                'beneficiaries' => $beneficiaries,
+                'beneficiaries' => $filtered_beneficiaries,
                 'return_path' => 'event_proxy_give',
                 'routeParam' => 'beneficiary',
                 'params' => ['id' => $event->getId()]
@@ -605,35 +644,43 @@ class EventController extends Controller
     }
 
     /**
-     * signatures list
+     * Generate a printable list Signatures list. Automatically remove the
+     * withdrawn members and if a registration_duration is defined, the
+     * member with an expired registration.
+     *
+     * Goes with the twig template views/admin/event/signatures.html.twig
      *
      * @Route("/{id}/signatures/", name="event_signatures")
      * @Method({"GET","POST"})
      */
-    public function signaturesListAction(Request $request,Event $event){
+    public function signaturesListAction(Request $request,Event $event): Response
+    {
         $em = $this->getDoctrine()->getManager();
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!is_null($registrationDuration)) {
-            $qb = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b');
-            $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
-            $minDateOfLastRegistration->modify('-'.$registrationDuration);
-            $beneficiaries = $qb->leftJoin('b.membership', 'm')
+        $qb = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b');
+        $beneficiaries_request = $qb->leftJoin('b.membership', 'm')
                 ->leftJoin("m.registrations", "r")
-                ->andWhere('r.date >= :mindateoflastregistration')
-                         ->setParameter('mindateoflastregistration', $minDateOfLastRegistration)
-                ->andWhere('r.date < :maxdateoflastregistration')
-                         ->setParameter('maxdateoflastregistration', $event->getMaxDateOfLastRegistration())
-                ->orderBy("b.lastname", 'ASC')
-                ->getQuery()
-                ->getResult();
-        } else {
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array(),array('lastname'=>'ASC'));
-            $minDateOfLastRegistration = null;
+                ->andWhere("r.date is NOT NULL" )
+                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" );
+
+        if (!is_null($registrationDuration = $this->getParameter('registration_duration'))) {
+            $minLastRegistration = clone $event->getMaxDateOfLastRegistration();
+            $minLastRegistration->modify('-'.$registrationDuration);
+
+            $beneficiaries_request = $beneficiaries_request
+                ->andWhere('r.date >= :min_last_registration')
+                ->setParameter('min_last_registration', $minLastRegistration)
+                ->andWhere('r.date < :max_last_registration')
+                ->setParameter('max_last_registration', $event->getMaxDateOfLastRegistration());
         }
+
+        $beneficiaries =$beneficiaries_request
+            ->orderBy("b.lastname", 'ASC')
+            ->getQuery()
+            ->getResult();
+
         return $this->render('admin/event/signatures.html.twig', array(
             'event' => $event,
             'beneficiaries' => $beneficiaries,
-            'minDateOfLastRegistration' => $minDateOfLastRegistration,
         ));
     }
 }
