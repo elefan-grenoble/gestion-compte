@@ -840,8 +840,8 @@ class MembershipController extends Controller
     public function joinAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
-            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre', 'attr' => array('class' => 'autocomplete')))
+            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent', 'attr' => array('class' => 'autocomplete')))
             ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);

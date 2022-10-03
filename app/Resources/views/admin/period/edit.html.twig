@@ -81,11 +81,11 @@
                             </div>
                             <div class="collapsible-body">
                                 <div class="row">
-                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                        <input id ="benef{{ position.id }}" type="text" class="empty-position" name="beneficiary" placeholder="Beneficiaire">
+                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                                        <input id ="benef{{ position.id }}" type="text" class="autocomplete" name="beneficiary" placeholder="Beneficiaire" />
                                     </div>
                                     <div class="col s3">
-                                        <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0>
+                                        <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0 />
                                         <button type="button" class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
                                     </div>
                                 </div>
@@ -134,8 +134,8 @@
 
 {% block javascripts %}
     <script>
-        jQuery(function ($) {
-            $('input.empty-position').autocomplete({
+        $(document).ready(function ($) {
+            $('input.autocomplete').autocomplete({
                 data: {
                     {% for beneficiary in beneficiaries %}
                         "{{ beneficiary.autocompleteLabel }}" : null,
@@ -154,7 +154,6 @@
         })
 
         function postPosition(positionId) {
-
             let selectedBenef = document.getElementById('benef'+positionId);
 
             if (selectedBenef != null) {

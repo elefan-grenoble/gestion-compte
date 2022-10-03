@@ -94,18 +94,22 @@ It use the materialize modal class https://materializecss.com/modals.html
                         </div>
                         <div class="collapsible-body">
                             <div class="row">
-                                <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                    <input id ="benef{{ shift.id }}" type="text" class="empty-shift" name="beneficiary" placeholder="Beneficiaire">
+                                <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                                    <input id="benef{{ shift.id }}" type="text" class="autocomplete" name="beneficiary" placeholder="Beneficiaire" />
                                 </div>
                                 {% if use_fly_and_fixed %}
                                     <div class="col s2">
                                         <div>
-                                            <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0>
-                                            <label for="volant{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">volant</label>
+                                            <label for="volant{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">
+                                                <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0 />
+                                                <span>volant</span>
+                                            </label>
                                         </div>
                                         <div>
-                                            <input type="radio" id="fixe{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=1>
-                                            <label for="fixe{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">fixe</label>
+                                            <label for="fixe{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">
+                                                <input type="radio" id="fixe{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=1 />
+                                                <span>fixe</span>
+                                            </label>
                                         </div>
                                     </div>
                                     <div class="col s3">
@@ -113,7 +117,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                                     </div>
                                 {% else %}
                                     <div class="col s3">
-                                        <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0>
+                                        <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0 />
                                         <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
                                     </div>
                                 {% endif %}

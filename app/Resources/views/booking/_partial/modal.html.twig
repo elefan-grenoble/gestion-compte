@@ -66,13 +66,12 @@
             <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
             {% for availableShift in availableShifts %}
                 <div>
-                    <input type="radio" id="{{ availableShift.id }}" class="checkedFormation" name="formation"
-                           value="{{ availableShift.id }}">
                     <label for="{{ availableShift.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        <input type="radio" id="{{ availableShift.id }}" class="checkedFormation" name="formation" value="{{ availableShift.id }}" />
                         {% if availableShift.formation %}
-                            {{ availableShift.formation.name }}
+                            <span>{{ availableShift.formation.name }}</span>
                         {% else %}
-                            sans formation particulière
+                            <span>sans formation particulière</span>
                         {% endif %}
                     </label>
                 </div>
@@ -80,15 +79,19 @@
             {% if use_fly_and_fixed %}
                 <p>Ce créneau sera fait en tant que :</p>
                 <div>
-                    <input type="radio" id="volant{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=0>
-                    <label for="volant{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">volant (une seule fois)</label>
+                    <label for="volant{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        <input type="radio" id="volant{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=0 />
+                        <span>volant (une seule fois)</span>
+                    </label>
                 </div>
                 <div>
-                    <input type="radio" id="fixe{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=1>
-                    <label for="fixe{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">fixe (reporté à chaque cycle)</label>
+                    <label for="fixe{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        <input type="radio" id="fixe{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=1 />
+                        <span>fixe (reporté à chaque cycle)</span>
+                    </label>
                 </div>
             {% else %}
-                <input type="hidden" name="typeService" value=0>
+                <input type="hidden" name="typeService" value=0 />
             {% endif %}
             <div class="" style="position: fixed;top:0;width: 100%;left: 0;">
                 {% if nbBookableShifts < nbShifts %}

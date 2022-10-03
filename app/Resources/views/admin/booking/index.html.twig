@@ -9,7 +9,6 @@
 {% endblock %}
 
 {% block content %}
-{# Title --------- #}
 <div class="row center">
     <h4 class="header">Administration des créneaux</h4>
 </div>
@@ -58,8 +57,8 @@
                     {{ form_label(filterForm.filling) }}
                 </div>
             </div>
-
             {{ form_widget(filterForm.filter) }}
+        </div>
     </li>
 </ul>
 {{ form_end(filterForm) }}
@@ -93,48 +92,43 @@
 
 {% block javascripts %}
     <script>
-
         $(document).ready(function ($) {
             // for the filter form ------------------
-            $('#SelectionTypeDropBox')
-                .on('change', function () {
-
-                    if (this.value === "0") {
-                        $('#weekSelectionType').show();
-                        $('#dateSelectionType').hide();
-                    } else {
-                        $('#weekSelectionType').hide();
-                        $('#dateSelectionType').show();
-                    }
-                })
-                .trigger('change');
+            $('#SelectionTypeDropBox').on('change', function () {
+                if (this.value === "0") {
+                    $('#weekSelectionType').show();
+                    $('#dateSelectionType').hide();
+                } else {
+                    $('#weekSelectionType').hide();
+                    $('#dateSelectionType').show();
+                }
+            })
+            .trigger('change');
 
             // for the bucket modification popup----------------
-            $('input.empty-shift')
-                .autocomplete({
-                    data: {
-                        {% for beneficiary in beneficiaries %}
+            $('input.autocomplete').autocomplete({
+                data: {
+                    {% for beneficiary in beneficiaries %}
                         "{{ beneficiary.autocompleteLabel }}": null,
-                        {% endfor %}
-                    },
-                    // The max amount of results that
-                    // can be shown at once. Default: Infinity.
-                    limit: 10,
-                    onAutocomplete: function (val) {
-                        // Callback function when value is autocomplete.
-                        $('button.add').removeAttr('disabled');
-                    },
-                    // The minimum length of the input for
-                    // the autocomplete to start. Default: 1.
-                    minLength: 2,
-                })
-                .keydown(function () {
-                    $('button.add:not(:disabled)').attr('disabled', 'disabled');
-                });
+                    {% endfor %}
+                },
+                // The max amount of results that
+                // can be shown at once. Default: Infinity.
+                limit: 10,
+                onAutocomplete: function (val) {
+                    // Callback function when value is autocomplete.
+                    $('button.add').removeAttr('disabled');
+                },
+                // The minimum length of the input for
+                // the autocomplete to start. Default: 1.
+                minLength: 2,
+            })
+            .keydown(function () {
+                $('button.add:not(:disabled)').attr('disabled', 'disabled');
+            });
         })
 
         function postShift(shiftId) {
-
             {% if use_fly_and_fixed %}
             let selectedTypeService = document.querySelector('.checkedTypeService'+shiftId+':checked');
             {% else %}
