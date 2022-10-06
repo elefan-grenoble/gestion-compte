@@ -13,10 +13,12 @@
             {% if previousWeekIndex != -1 %}</ul>{% endif %}
             <h5 style="margin-left: 3px;">Semaine {{weekCycle[((bucketsByjob|first|first).start | date('W') - 1) % 4]}}</h5>
             {% set previousWeekIndex = weekIndex %}
-            <ul class="collapsible" data-collapsible="expandable">
+            <ul class="collapsible collapsible-expandable">
         {% endif %}
-        <li>
-            <div class="collapsible-header {% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}active {% else %}not-allowed {% endif %}"><i class="material-icons">{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle)  or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}</div>
+        <li class="{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}active{% endif %}">
+            <div class="collapsible-header {% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}{% else %}not-allowed{% endif %}">
+                <i class="material-icons">{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}
+            </div>
             <div class="collapsible-body" style="padding: 1rem 0">
                 {% for buckets in bucketsByjob %}
                     <div class="row" style="display: flex;min-height: 40px;">
@@ -56,18 +58,18 @@
         {% if beneficiary and (( beneficiary.membership.endOfCycle(current_cycle) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') )) %}
                 {% set current_cycle = current_cycle + 1 %}
             </ul>
-            <ul class="collapsible" data-collapsible="expandable">
+            <ul class="collapsible" accordion="false">
         {% endif %}
-        {% endfor %}
-                {% if (bucketsByDay | length) > 7 %}
-                <li>
-                    <div class="collapsible-header active"><i class="material-icons">event_busy</i> et après ?</div>
-                    <div class="collapsible-body">
-                        Seuls les 27 prochains jours sont ouverts à la réservation, si tu veux voir plus loin, reviens un peu plus tard :)
-                    </div>
-                </li>
-                {% endif %}
-            </ul>
+    {% endfor %}
+    {% if (bucketsByDay | length) > 7 %}
+        <li class="active">
+            <div class="collapsible-header">
+                <i class="material-icons">event_busy</i> et après ?
+            </div>
+            <div class="collapsible-body">
+                Seuls les 27 prochains jours sont ouverts à la réservation, si tu veux voir plus loin, reviens un peu plus tard :)
+            </div>
+        </li>
+    {% endif %}
+    </ul>
 </div>
-<div class="container">
-    <div class="section">

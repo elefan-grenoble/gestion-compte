@@ -56,9 +56,9 @@
         </ul>
     {% endif %}
 
-    <ul class="collapsible" data-collapsible="expandable">
-        <li id="registration">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
+    <ul class="collapsible collapsible-expandable">
+        <li id="registration" class="{% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
+            <div class="collapsible-header">
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">

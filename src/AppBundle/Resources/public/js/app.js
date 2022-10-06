@@ -14,6 +14,7 @@ $(document).ready(function() {
         },
     });
     $('.collapsible').collapsible();
+    $('.collapsible.collapsible-expandable').collapsible({ accordion: false });
     $('.tooltipped').tooltip();
     $(".dropdown-trigger").dropdown();
     // $('input.autocomplete').autocomplete();  // see specific files for initialization & configuration
