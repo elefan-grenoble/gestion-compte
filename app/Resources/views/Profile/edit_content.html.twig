@@ -9,7 +9,9 @@
     {% if app.user.beneficiary %}
         {% set member = app.user.beneficiary.membership %}
         <li class="active">
-            <div class="collapsible-header active"><i class="material-icons">edit</i>Mes informations</div>
+            <div class="collapsible-header active">
+                <i class="material-icons">edit</i>Mes informations
+            </div>
             <div class="collapsible-body">
                 {{ form_start(form) }}
                 <div class="errors">

@@ -1,10 +1,12 @@
 {% if app.user.beneficiary %}
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
-    <ul class="collapsible expandable">
+    <ul class="collapsible collapsible-expandable">
         {% if use_fly_and_fixed %}
             <li class="active">
-                <div class="collapsible-header"><i class="material-icons">event</i>Créneau fixe</div>
+                <div class="collapsible-header">
+                    <i class="material-icons">event</i>Créneau fixe
+                </div>
                 <div class="collapsible-body">
                     {% if period_positions %}
                         <div class="row">
@@ -22,7 +24,9 @@
         {% endif %}
         {% if (member.reservedShifts | length) > 0 %}
             <li class="active">
-                <div class="collapsible-header active"><i class="material-icons">event_note</i>Mes créneaux à accepter</div>
+                <div class="collapsible-header">
+                    <i class="material-icons">event_note</i>Mes créneaux à accepter
+                </div>
                 <div class="collapsible-body">
                     {% for shift in member.reservedShifts %}
                         {% include "booking/_partial/reserved_shift_card.html.twig" with { shift: shift } %}
@@ -34,7 +38,9 @@
             {% set shiftsOfCycle = member.getShiftsOfCycle(cycle) %}
             {% if shiftsOfCycle | length > 0 %}
                 <li class="active">
-                    <div class="collapsible-header active"><i class="material-icons">date_range</i>Mes créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})</div>
+                    <div class="collapsible-header">
+                        <i class="material-icons">date_range</i>Mes créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})
+                    </div>
                     <div class="collapsible-body">
                         <div class="row">
                             {% for shift in shiftsOfCycle %}
@@ -49,7 +55,9 @@
         {% endfor %}
         {% if (member.getFutureRebookedShifts() | length) != 0 %}
             <li class="active">
-                <div class="collapsible-header active"><i class="material-icons">event_busy</i>Mes créneaux annulés et repris par un autre bénévole</div>
+                <div class="collapsible-header">
+                    <i class="material-icons">event_busy</i>Mes créneaux annulés et repris par un autre bénévole
+                </div>
                 <div class="collapsible-body">
                     <div class="row">
                         {% for bookedshift in member.getFutureRebookedShifts() %}
@@ -77,7 +85,9 @@
         {% endif %}
         {% if (shift_service.hasCycle(member, -1) or shift_service.hasCycle(member, -2)) %}
             <li>
-                <div class="collapsible-header"><i class="material-icons">event_available</i>Mes créneaux passés</div>
+                <div class="collapsible-header">
+                    <i class="material-icons">event_available</i>Mes créneaux passés
+                </div>
                 <div class="collapsible-body">
                     {# Shift history #}
                     <div class="row">
