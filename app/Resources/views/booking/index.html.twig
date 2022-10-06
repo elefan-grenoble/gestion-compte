@@ -30,13 +30,17 @@
             {% if not shift_service.canBookSomething(beneficiary) %}
                 <span class="red-text">NB: {{ beneficiary.firstname }} ne peut plus réserver de créneau sur le cycle actuel</span>
             {% endif %}
-            <p>Mon cycle actuel commence le <b>{{ beneficiary.membership.startOfCycle |date_fr_long }}</b> et termine
-                le <b>{{ beneficiary.membership.endOfCycle |date_fr_long }}</b></p>
+            <p>
+                Mon cycle actuel commence le <b>{{ beneficiary.membership.startOfCycle |date_fr_long }}</b> et termine
+                le <b>{{ beneficiary.membership.endOfCycle |date_fr_long }}</b>
+            </p>
         </div>
         <div class="row">
             <ul class="collapsible" id="legend">
                 <li>
-                    <div class="collapsible-header {% if frontend_cookie is defined and frontend_cookie.booking is defined and frontend_cookie.booking.legend_closed is defined and frontend_cookie.booking.legend_closed %}{% else %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-header {% if frontend_cookie is defined and frontend_cookie.booking is defined and frontend_cookie.booking.legend_closed is defined and frontend_cookie.booking.legend_closed %}{% else %}active{% endif %}">
+                        <i class="material-icons">help_outline</i>legende
+                    </div>
                     <div class="collapsible-body">
                         <ul>
                             <li>
@@ -50,12 +54,12 @@
                             </li>
                             <li class="row">
                                 {% for job in jobs %}
-                                <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
-                                    <div style="padding: 3px;margin:5px"
-                                     class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
-                                        <p>{{ job.name }}</p>
+                                    <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
+                                        <div style="padding: 3px;margin:5px"
+                                        class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
+                                            <p>{{ job.name }}</p>
+                                        </div>
                                     </div>
-                                </div>
                                 {% endfor %}
                             </li>
                             <li class="row">
@@ -87,22 +91,24 @@
             </ul>
         </div>
         {% if dismissedShifts | length %}
-        <div class="row">
-            <ul class="collapsible" data-collapsible="expandable" id="dismissed">
-                <li>
-                    <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
-                    <div class="collapsible-body row">
-                        {% for shift in dismissedShifts %}
-                            {% if shift_service.isShiftBookable(shift, beneficiary) %}
-                            <div class="col s6 m3">
-                                {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </div>
+            <div class="row">
+                <ul class="collapsible" data-collapsible="expandable" id="dismissed">
+                    <li class="active">
+                        <div class="collapsible-header">
+                            <i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !
+                        </div>
+                        <div class="collapsible-body row">
+                            {% for shift in dismissedShifts %}
+                                {% if shift_service.isShiftBookable(shift, beneficiary) %}
+                                <div class="col s6 m3">
+                                    {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </li>
+                </ul>
+            </div>
         {% endif %}
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
@@ -126,9 +132,10 @@
         }
     </style>
 {% endblock %}
+
 {% block javascripts %}
     <script>
-        jQuery(function () {
+        $(document).ready(function () {
             $('.collapsible li').click();
             $('#legend .collapsible-header').on('click',function () {
                 var data_raw = Cookies.get("frontend");
