@@ -20,7 +20,8 @@
     {% if shift.isPastOrCurrent %}
         {% if shift.isCurrent %}
             <div class="card-action">
-                <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>créneau en cours</span>
+                <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger" title="Contacter les bénévoles du créneau"><i class="material-icons right">email</i></a>
+                <span>créneau en cours</span>
             </div>
             {% endif %}
         {% if use_card_reader_to_validate_shifts %}
