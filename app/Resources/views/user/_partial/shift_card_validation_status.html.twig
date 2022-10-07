@@ -1,0 +1,12 @@
+<div class="card-action center">
+    {% if (shift.wasCarriedOut) %}
+        <i class="material-icons tiny">check</i>
+        <span>effectué</span>
+    {% else %}
+        <i class="material-icons tiny">close</i>
+        <span>non effectué</span>
+    {% endif %}
+    {% if shift.isCurrent %}
+        <strong>(créneau en cours)</strong>
+    {% endif %}
+</div>
