@@ -1,20 +1,6 @@
 <div class="card {% if (shift.isDismissed) %}orange darken-4{% elseif shift.isPast %}grey lighten-2{% else %}cyan darken-4{% endif %}">
     <div class="card-content{% if not shift.isPast %} white-text{% endif %}">
-        <span class="card-title">{{ shift.start | date_fr_long }} de {{ shift.start | date('H:i') }} à {{ shift.end | date('H:i') }}</span>
-        <p>
-            <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
-            {% if use_fly_and_fixed %}
-                <br />
-                Type : <b>{% if shift.fixe %}Fixe{% else %}Volant{% endif %}</b>
-            {% endif %}
-            {% if shift.formation != null %}
-                <br />
-                Formation : <b>{{ shift.formation }}</b>
-            {% endif %}
-        </p>
-        {% if (shift.isDismissed) %}
-            <p>Créneau annulé, en attente de repreneur</p>
-        {% endif %}
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
     </div>
     {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
         {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
