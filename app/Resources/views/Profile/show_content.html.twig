@@ -24,7 +24,13 @@
                 <i class="material-icons">ac_unit</i>Gel du compte
             </div>
             <div class="collapsible-body">
-                {% include "member/_partial/frozen.html.twig" with { member: member } %}
+                {% if display_freeze_account %}
+                    {% include "member/_partial/frozen.html.twig" with { member: member } %}
+                {% else %}
+                    <p class="red-text">
+                        {{ display_freeze_account_false_message }}
+                    </p>
+                {% endif %}
             </div>
         </li>
 
