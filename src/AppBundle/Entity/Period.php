@@ -105,8 +105,8 @@ class Period
      */
     public function getDayOfWeekString()
     {
-        // return jddayofweek($this->dayOfWeek, CAL_DOW_LONG);  # in english...
-        return date('l', strtotime("Monday + {$this->dayOfWeek} days"));
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A", strtotime("Monday + {$this->dayOfWeek} days"));
     }
 
     /**
