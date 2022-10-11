@@ -1,37 +1,16 @@
-<div class="card sticky-action {% if (shift.isDismissed) %}orange lighten-2{% elseif (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+<div class="card center sticky-action {% if (shift.isDismissed) %}orange darken-4 white-text{% elseif (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
-        <span class="card-title">{{ shift.start|date_fr_long }} de {{ shift.start|date('H:i') }} à {{ shift.end|date('H:i') }}</span>
-        <p>
-            <i class="material-icons">person</i>{{ shift.shifter.firstname }} / <b class="{{ shift.job.color }}-text">{{ shift.job.name }}</b>
-            {% if use_fly_and_fixed %}
-                <br>
-                Type : <b>{% if shift.fixe %}Fixe{% else %}Volant{% endif %}</b>
-            {% endif %}
-            {% if shift.formation != null %}
-                <br>
-                Formation : <b>{{ shift.formation }}</b>
-            {% endif %}
-        </p>
-        {% if shift.isDismissed %}
-            <br>
-            <b class="red-text text-darken-4">Créneau en attente d'être repris par un autre bénévole</b>
-        {% endif %}
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
     </div>
-    {% if shift.isCurrent %}
-        <div class="card-action">
-            <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger"><i class="material-icons right">more</i></a><span>créneau en cours</span>
-        </div>
-    {% elseif shift.isPast %}
-        {% if use_card_reader_to_validate_shifts %}
+    {% if shift.isPastOrCurrent %}
+        {% if shift.isCurrent %}
             <div class="card-action">
-                {% if (shift.wasCarriedOut) %}
-                    <i class="material-icons tiny">check</i>
-                    <span>effectué</span>
-                {% else %}
-                    <i class="material-icons tiny">close</i>
-                    <span>non effectué</span>
-                {% endif %}
+                <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger" title="Contacter les bénévoles du créneau"><i class="material-icons right">email</i></a>
+                <span>créneau en cours</span>
             </div>
+            {% endif %}
+        {% if use_card_reader_to_validate_shifts %}
+            {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
         {% endif %}
     {% else %}
         {% if shift.isDismissed %}
@@ -44,13 +23,11 @@
                 </div>
                 <div class="modal-footer">
                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-                    <a href="#"
-                       class="modal-action modal-close waves-effect waves-green btn teal"
+                    <a href="#" class="modal-action modal-close waves-effect waves-green btn teal"
                        onclick="$('#form_shift_id').val({{ shift.id }});$('#undismiss_shift').submit();">Oui, je reprends<span class="hide-on-med-and-down"> mon créneau</span></a>
                 </div>
             </div>
-
-            {{ form_start(undismiss_shift_form,{ 'attr' : { 'id' : 'undismiss_shift'}}) }}
+            {{ form_start(undismiss_shift_form,{ 'attr' : { 'id' : 'undismiss_shift' } }) }}
             {{ form_widget(undismiss_shift_form) }}
             {{ form_end(undismiss_shift_form) }}
         {% else %}
@@ -73,8 +50,7 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a href="#!"
-                            class="modal-action modal-close waves-effect waves-green btn-flat grey-text ">Retour à la raison</a>
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text ">Retour à la raison</a>
                             <button class="modal-action modal-close waves-effect waves-green btn red ">Oui, je me désiste !</button>
                         </div>
                     </form>
@@ -84,5 +60,5 @@
     {% endif %}
 </div>
 {% if (shift.isUpcoming or shift.isCurrent) %}
-    {{ render(controller("AppBundle:Default:shiftContactForm", { 'shift':shift })) }}
+    {{ render(controller("AppBundle:Default:shiftContactForm", { "shift": shift })) }}
 {% endif %}
