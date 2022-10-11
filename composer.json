@@ -1,8 +1,8 @@
 {
-    "name": "symfony/framework-standard-edition",
-    "license": "MIT",
+    "name": "elefan-grenoble/gestion-compte",
+    "license": "GPLv3",
     "type": "project",
-    "description": "The \"Symfony Standard Edition\" distribution",
+    "description": "Web site to manage the cooperative grocery shop l'Elefan",
     "autoload": {
         "psr-4": {
             "AppBundle\\": "src/AppBundle"
@@ -17,12 +17,10 @@
         "php": ">=7.1",
         "ext-json": "*",
         "asmshaon/easy-barcode-generator" : "dev-master",
-        "components/jquery": "^3.2",
         "doctrine/doctrine-bundle": "^1.6",
         "doctrine/doctrine-migrations-bundle": "^2.0",
         "doctrine/orm": "^2.5",
         "egulias/email-validator": "^2.1",
-        "evheniy/materialize-bundle": "^1.2",
         "friendsofsymfony/oauth-server-bundle": "^1.5",
         "friendsofsymfony/user-bundle": "^2.0",
         "incenteev/composer-parameter-handler": "^2.0",
