@@ -1,19 +1,18 @@
-<div class="card">
+<div class="card center">
     <div class="card-content">
         <span class="card-title">
             {{ period_position.period.getDayOfWeekString() }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
             <small>(Semaine {{ period_position.weekCycle }})</small>
         </span>
         <p>
+            <i class="material-icons">person</i>{{ period_position.shifter.firstname }}
+            <br />
             <b class="{{ period_position.period.job.color }}-text">{{ period_position.period.job.name }}</b>
             {% if period_position.formation != null %}
                 <br />
                 Formation : <b>{{ period_position.formation }}</b>
             {% endif %}
         </p>
-    </div>
-    <div class="card-action center">
-        <i class="material-icons">person</i>{{ period_position.shifter.firstname }}
     </div>
     {% if show_actions is defined and show_actions and is_granted("ROLE_SHIFT_MANAGER") %}
         <div class="card-action">
