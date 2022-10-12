@@ -30,7 +30,7 @@ class FormationController extends Controller
     public function indexAction()
     {
         $formations = $this->getDoctrine()->getManager()->getRepository('AppBundle:Formation')->findAll();
-        return $this->render('admin/role/list.html.twig',array('formations'=>$formations));
+        return $this->render('admin/formation/list.html.twig',array('formations'=>$formations));
     }
 
     /**
@@ -61,7 +61,7 @@ class FormationController extends Controller
 
         }
 
-        return $this->render('admin/role/new.html.twig', array(
+        return $this->render('admin/formation/new.html.twig', array(
             'role' => $formation,
             'form' => $form->createView(),
         ));
@@ -93,7 +93,7 @@ class FormationController extends Controller
 
         }
 
-        return $this->render('admin/role/edit.html.twig', array(
+        return $this->render('admin/formation/edit.html.twig', array(
             'role' => $formation,
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($formation)->createView(),
