@@ -106,7 +106,7 @@ class JobController extends Controller
      *
      * @Route("/{id}", name="job_delete")
      * @Method({"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Job $job)
     {
