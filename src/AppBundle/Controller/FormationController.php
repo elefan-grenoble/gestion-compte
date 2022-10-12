@@ -62,7 +62,7 @@ class FormationController extends Controller
         }
 
         return $this->render('admin/formation/new.html.twig', array(
-            'role' => $formation,
+            'formation' => $formation,
             'form' => $form->createView(),
         ));
     }
@@ -94,7 +94,7 @@ class FormationController extends Controller
         }
 
         return $this->render('admin/formation/edit.html.twig', array(
-            'role' => $formation,
+            'formation' => $formation,
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($formation)->createView(),
         ));
