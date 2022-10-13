@@ -225,8 +225,7 @@
                                     <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte
                                 </a>
                             {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}"
-                                   class="waves-effect waves-light btn waves-purple purple lighten-2">
+                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
                                     <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle
                                 </a>
                             {% endif %}
@@ -239,7 +238,9 @@
                             </a>
                             <div id="pause" class="modal">
                                 <div class="modal-content">
-                                    <h5><i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte</h5>
+                                    <h5>
+                                        <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
+                                    </h5>
                                     <p>Attention, le gel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin</p>
                                     <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
                                 </div>
@@ -256,7 +257,9 @@
                             </a>
                             <div id="unpause" class="modal">
                                 <div class="modal-content">
-                                    <h5><i class="material-icons left small">play_arrow</i>Dégel immédiat du compte</h5>
+                                    <h5>
+                                        <i class="material-icons left small">play_arrow</i>Dégel immédiat du compte
+                                    </h5>
                                     <p>Attention, le dégel immédiat sera effectif dés aujourd'hui, réautorisant l'accès au magasin</p>
                                     <p>De plus, les heures de bénévolat sont dues pour ce cycle.</p>
                                 </div>
@@ -285,7 +288,9 @@
                         </a>
                         <div id="close-member" class="modal">
                             <div class="modal-content">
-                                <h5><i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre</h5>
+                                <h5>
+                                    <i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre
+                                </h5>
                                 <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
                             </div>
                             <div class="modal-footer">
@@ -301,7 +306,9 @@
                         </a>
                         <div id="reopen-member" class="modal">
                             <div class="modal-content">
-                                <h5><i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre</h5>
+                                <h5>
+                                    <i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre
+                                </h5>
                                 <p>Attention, vous êtes sur le point de ré-ouvrir le compte du membre.</p>
                             </div>
                             <div class="modal-footer">

@@ -10,7 +10,9 @@
     </h5>
     <ul class="collapsible">
         <li>
-            <div class="collapsible-header"><i class="material-icons">person</i>Mes informations</div>
+            <div class="collapsible-header">
+                <i class="material-icons">person</i>Mes informations
+            </div>
             <div class="collapsible-body">
                 {% include "beneficiary/_partial/info.html.twig" with { beneficiary: beneficiary } %}
                 <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
@@ -18,14 +20,24 @@
         </li>
 
         <li>
-            <div class="collapsible-header"><i class="material-icons">ac_unit</i>Gel du compte</div>
+            <div class="collapsible-header">
+                <i class="material-icons">ac_unit</i>Gel du compte
+            </div>
             <div class="collapsible-body">
-                {% include "member/_partial/frozen.html.twig" with { member: member } %}
+                {% if display_freeze_account %}
+                    {% include "member/_partial/frozen.html.twig" with { member: member } %}
+                {% else %}
+                    <p class="red-text">
+                        {{ display_freeze_account_false_message }}
+                    </p>
+                {% endif %}
             </div>
         </li>
 
         <li>
-            <div class="collapsible-header"><i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1%}s{% endif %}</div>
+            <div class="collapsible-header">
+                <i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1%}s{% endif %}
+            </div>
             <div class="collapsible-body">
                 {% include "member/_partial/swipe_card.html.twig" with { member: member, showBadgeImage: true } %}
             </div>
@@ -33,7 +45,9 @@
 
         {% if app.user.clients | length %}
             <li>
-                <div class="collapsible-header"><i class="material-icons">extension</i>Services</div>
+                <div class="collapsible-header">
+                    <i class="material-icons">extension</i>Services
+                </div>
                 <div class="collapsible-body">
                     <table>
                         <thead>

@@ -120,4 +120,5 @@ parameters:
 
     code_generation_enabled: true
     display_freeze_account: true
+    display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
     display_keys_shop: true
