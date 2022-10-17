@@ -40,7 +40,7 @@
             {% block aftercontainer %}{% endblock %}
 
         </main>
-        {% include "JqueryBundle:Jquery:jquery.html.twig" %}
+        <script src="{{ asset('bundles/app/js/jquery-3.6.min.js') }}"></script>
         <script src="{{ asset('bundles/app/materialize/js/materialize-1.1.0.min.js') }}"></script>
         {% block javascripts %}{% endblock %}
     </body>
