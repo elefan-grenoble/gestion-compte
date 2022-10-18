@@ -148,7 +148,7 @@ class EventController extends Controller
      *
      * @Route("/{id}", name="event_delete")
      * @Method({"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function removeAction(Request $request,Event $event)
     {
