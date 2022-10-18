@@ -12,7 +12,6 @@ parameters:
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
 
 framework:
-  #esi: ~
   translator: { fallbacks: ['%locale%'] }
   secret: '%secret%'
   router:
@@ -21,7 +20,6 @@ framework:
   form: ~
   csrf_protection: ~
   validation: { enable_annotations: true }
-  #serializer: { enable_annotations: true }
   templating:
     engines: ['twig']
   default_locale: '%locale%'
@@ -152,19 +150,10 @@ assetic:
       node_paths: [/usr/local/lib/node_modules]
       apply_to: '\.less$'
     cssrewrite: ~
-  bundles: [ JqueryBundle, MaterializeBundle ]
-  assets:
-    jquery:
-      inputs:
-        - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
-      output: js/jquery.js
-materialize:
-  version: 1.0.0-beta
 ornicar_gravatar:
   rating: g
   size: 80
   default: robohash
-jquery: ~
 
 fos_oauth_server:
   db_driver:            orm   # Drivers available: orm, mongodb, or propel
