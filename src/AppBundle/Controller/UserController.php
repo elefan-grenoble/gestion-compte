@@ -240,6 +240,7 @@ class UserController extends Controller
      * add role of user
      *
      * @Route("/{id}/addRole/{role}", name="user_add_role")
+     * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
      * @param User $user
      * @param $role
@@ -247,17 +248,16 @@ class UserController extends Controller
      */
     public function addRoleAction(User $user, $role)
     {
-        $this->denyAccessUnlessGranted('role_add', $user);
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         if ($user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le role ' . $role);
+            $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->addRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le Role ' . $role . ' a bien été ajouté');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté');
         return $this->redirectToShow($user);
     }
 
