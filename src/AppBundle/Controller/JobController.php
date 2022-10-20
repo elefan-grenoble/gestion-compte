@@ -2,9 +2,7 @@
 
 namespace AppBundle\Controller;
 
-
 use AppBundle\Entity\Job;
-use AppBundle\Entity\Task;
 use AppBundle\Form\JobType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -15,7 +13,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
- * Task controller.
+ * Job controller.
  *
  * @Route("admin/job")
  */
@@ -23,7 +21,7 @@ class JobController extends Controller
 {
 
     /**
-     * Lists all tasks.
+     * Lists all jobs.
      *
      * @Route("/", name="job_list")
      * @Method("GET")
@@ -108,7 +106,7 @@ class JobController extends Controller
      *
      * @Route("/{id}", name="job_delete")
      * @Method({"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Job $job)
     {

@@ -13,34 +13,36 @@
 
     <table class="responsive-table striped">
         <thead>
-        <tr>
-            <th>id</th>
-            <th>Poste</th>
-            <th>Couleur</th>
-            <th>Description</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>id</th>
+                <th>Poste</th>
+                <th>Couleur</th>
+                <th>Description</th>
+                <th>Nombre de créneaux<br />(semaine type)</th>
+                <th>Actions</th>
+            </tr>
         </thead>
 
         <tbody>
-        {% for job in jobs %}
-            <tr>
-                <td>{{ job.id }}</td>
-                <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
-                <td class="{{ job.color }} white-text">{{ job.color }}</td>
-                <td class="center-align">
-                    {% if job.description is not empty %}
-                        <i class="material-icons" title="{{ job.description }}">playlist_add_check</i>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>editer</a>
-                </td>
-            </tr>
-        {% endfor %}
+            {% for job in jobs %}
+                <tr>
+                    <td>{{ job.id }}</td>
+                    <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
+                    <td class="{{ job.color }} white-text">{{ job.color }}</td>
+                    <td class="center-align">
+                        {% if job.description is not empty %}
+                            <i class="material-icons" title="{{ job.description }}">playlist_add_check</i>
+                        {% endif %}
+                    </td>
+                    <td>{{ job.periods | length }}</td>
+                    <td>
+                        <a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>editer</a>
+                    </td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 
-    <br>
+    <br />
     <a href="{{ path('job_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un poste</a>
 {% endblock %}
