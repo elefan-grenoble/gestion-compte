@@ -3,15 +3,22 @@
 
     {% set icons = {'ROLE_ADMIN': role_admin_icon, 'ROLE_USER_MANAGER': role_user_manager_icon, 'ROLE_FINANCE_MANAGER': role_finance_manager_icon, 'ROLE_SHIFT_MANAGER': role_shift_manager_icon, 'ROLE_PROCESS_MANAGER': role_process_manager_icon} %}
     {% set names = {'ROLE_ADMIN': role_admin_name, 'ROLE_USER_MANAGER': role_user_manager_name, 'ROLE_FINANCE_MANAGER': role_finance_manager_name, 'ROLE_SHIFT_MANAGER': role_shift_manager_name, 'ROLE_PROCESS_MANAGER': role_process_manager_name} %}
-    {% for role in ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER', 'ROLE_PROCESS_MANAGER'] %}
-        {% if beneficiary.user.hasRole(role) %}
-            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn light-green">
+    {% set roles_list = ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER', 'ROLE_PROCESS_MANAGER'] %}
+    
+    {% for role in roles_list %}
+        {% if role == 'ROLE_ADMIN' and not is_granted("ROLE_SUPER_ADMIN") %}
+            <button class="btn {% if beneficiary.user.hasRole(role) %}light-green{% else %}blue-grey{% endif %}" title="Vous n'avez pas les droits pour modifier ce rôle">
+                {{ names[role] }}
+                <i class="material-icons right">{{ icons[role] }}</i>
+            </button>
+        {% elseif beneficiary.user.hasRole(role) %}
+            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn light-green" title="Retirer ce rôle">
                 <i class="material-icons left">clear</i>
                 {{ names[role] }}
                 <i class="material-icons right">{{ icons[role] }}</i>
             </a>
         {% else %}
-            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn blue-grey">
+            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn blue-grey" title="Ajouter ce rôle">
                 <i class="material-icons left">add</i>
                 {{ names[role] }}
                 <i class="material-icons right">{{ icons[role] }}</i>
