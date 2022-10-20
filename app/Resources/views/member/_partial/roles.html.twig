@@ -1,7 +1,5 @@
-<h5>Roles</h5>
-
 {% for beneficiary in member.beneficiaries %}
-    <h6>Les roles de {{ beneficiary.user.firstname }}</h6>
+    <h6>Les rôles de {{ beneficiary.user.firstname }}</h6>
 
     {% set icons = {'ROLE_ADMIN': role_admin_icon, 'ROLE_USER_MANAGER': role_user_manager_icon, 'ROLE_FINANCE_MANAGER': role_finance_manager_icon, 'ROLE_SHIFT_MANAGER': role_shift_manager_icon, 'ROLE_PROCESS_MANAGER': role_process_manager_icon} %}
     {% set names = {'ROLE_ADMIN': role_admin_name, 'ROLE_USER_MANAGER': role_user_manager_name, 'ROLE_FINANCE_MANAGER': role_finance_manager_name, 'ROLE_SHIFT_MANAGER': role_shift_manager_name, 'ROLE_PROCESS_MANAGER': role_process_manager_name} %}
