@@ -218,21 +218,21 @@ class UserController extends Controller
      * remove role of user
      *
      * @Route("/{id}/removeRole/{role}", name="user_remove_role")
+     * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
      */
     public function removeRoleAction(User $user, $role)
     {
-        $this->denyAccessUnlessGranted('role_remove', $user);
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         if (!$user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le role ' . $role);
+            $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->removeRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le Role ' . $role . ' a bien été retiré');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré');
         return $this->redirectToShow($user);
     }
 
