@@ -495,7 +495,7 @@ class BookingController extends Controller
                 $em->flush();
                 $session->getFlashBag()->add('success', $count . " shifts removed");
             } else {
-                $session->getFlashBag()->add('xarning', "shift not found");
+                $session->getFlashBag()->add('warning', "shift not found");
             }
         }
         return $this->redirectToRoute('booking_admin');
@@ -625,7 +625,7 @@ class BookingController extends Controller
                 $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
 
             } else {
-                $session->getFlashBag()->add('xarning', "shift not found");
+                $session->getFlashBag()->add('warning', "shift not found");
             }
         }
         return $this->redirectToRoute('homepage');

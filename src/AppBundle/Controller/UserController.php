@@ -220,19 +220,22 @@ class UserController extends Controller
      * @Route("/{id}/removeRole/{role}", name="user_remove_role")
      * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
+     * @param User $user
+     * @param $role
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function removeRoleAction(User $user, $role)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         if (!$user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le rôle ' . $role);
+            $session->getFlashBag()->add('warning', $user . ' ne possède pas le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->removeRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré à ' . $user);
         return $this->redirectToShow($user);
     }
 
@@ -251,13 +254,13 @@ class UserController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         if ($user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le rôle ' . $role);
+            $session->getFlashBag()->add('warning', $user . ' possède déjà le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->addRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté à ' . $user);
         return $this->redirectToShow($user);
     }
 
