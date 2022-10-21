@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des rôles
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des rôles</h4>
+
+    <table class="striped">
+        <thead>
+            <tr>
+                <th data-col="o.icon">Icône</th>
+                <th data-col="b.code">Code</th>
+                <th data-col="b.name">Nom</th>
+                <th data-col="b.hierarchy">Hiérarchie</th>
+                <th data-col="b.member_count">Nombre de membres</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for role in roles %}
+            <tr>
+                <td>
+                    {% if role['icon'] %}
+                        <i class="material-icons left">{{ role['icon'] }}</i>
+                    {% endif %}
+                </td>
+                <td>{{ role['code'] }}</td>
+                <td>{{ role['name'] }}</td>
+                <td>{{ role['children'] }}</td>
+                <td>{% if role['code'] == 'ROLE_USER' %}-{% else %}{{ role['user_count'] }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block javascripts %}
+{% endblock %}
