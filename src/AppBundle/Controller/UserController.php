@@ -218,21 +218,30 @@ class UserController extends Controller
      * remove role of user
      *
      * @Route("/{id}/removeRole/{role}", name="user_remove_role")
+     * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
+     * @param User $user
+     * @param $role
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
     public function removeRoleAction(User $user, $role)
     {
-        $this->denyAccessUnlessGranted('role_remove', $user);
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        // cannot remove a nonexistant role
         if (!$user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur ne possède pas le role ' . $role);
+            $session->getFlashBag()->add('warning', $user . ' ne possède pas le rôle ' . $role);
+            return $this->redirectToShow($user);
+        }
+        // only ROLE_SUPER_ADMIN can remove ROLE_ADMIN to users
+        if ($role == 'ROLE_ADMIN' && !$user->hasRole('ROLE_SUPER_ADMIN')) {
+            $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour retirer le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->removeRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le Role ' . $role . ' a bien été retiré');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré à ' . $user);
         return $this->redirectToShow($user);
     }
 
@@ -240,6 +249,7 @@ class UserController extends Controller
      * add role of user
      *
      * @Route("/{id}/addRole/{role}", name="user_add_role")
+     * @Security("has_role('ROLE_ADMIN')")
      * @Method({"GET"})
      * @param User $user
      * @param $role
@@ -247,17 +257,22 @@ class UserController extends Controller
      */
     public function addRoleAction(User $user, $role)
     {
-        $this->denyAccessUnlessGranted('role_add', $user);
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        // cannot add an existing role
         if ($user->hasRole($role)) {
-            $session->getFlashBag()->add('success', 'Cet utilisateur possède déjà le role ' . $role);
+            $session->getFlashBag()->add('warning', $user . ' possède déjà le rôle ' . $role);
+            return $this->redirectToShow($user);
+        }
+        // only ROLE_SUPER_ADMIN can add ROLE_ADMIN to users
+        if ($role == 'ROLE_ADMIN' && !$user->hasRole('ROLE_SUPER_ADMIN')) {
+            $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour ajouter le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         $user->addRole($role);
         $em->persist($user);
         $em->flush();
-        $session->getFlashBag()->add('success', 'Le Role ' . $role . ' a bien été ajouté');
+        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté à ' . $user);
         return $this->redirectToShow($user);
     }
 
