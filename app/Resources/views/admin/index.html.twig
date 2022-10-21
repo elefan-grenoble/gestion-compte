@@ -102,6 +102,13 @@
             {% endif %}
         {% endif %}
 
+        {% if is_granted("ROLE_ADMIN") %}
+            <h6><i class="material-icons">verified_user</i>&nbsp;Rôles utilisateurs</h6>
+            <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn deep-purple">
+                <i class="material-icons left">list</i>Liste des roles
+            </a>
+        {% endif %}
+
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <h5>Actions super admin</h5>
             <h6>Membres</h6>
@@ -113,9 +120,6 @@
             </a>
 
             <h6>Admins</h6>
-            <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn deep-purple">
-                <i class="material-icons left">list</i>Liste des roles
-            </a>
             <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple">
                 <i class="material-icons left">add</i>Ajouter un admin
             </a>
