@@ -47,11 +47,10 @@ class NoteController extends Controller
      *
      * @Route("/note/{id}/reply", name="note_reply")
      * @Method({"POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function noteReplyAction(Request $request, Note $note)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
-
         $new_note = new Note();
         $new_note->setParent($note);
         $new_note->setAuthor($this->getCurrentAppUser());

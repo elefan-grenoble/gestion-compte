@@ -348,7 +348,7 @@ class MembershipController extends Controller
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                ->add('email', EmailType::class, array('label' => 'email'))
+                ->add('email', EmailType::class, array('label' => 'email'))  # visible
                 ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
         }
@@ -918,7 +918,6 @@ class MembershipController extends Controller
             }
         }
 
-
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
         $notes_form = array();
         $notes_delete_form = array();
@@ -934,6 +933,7 @@ class MembershipController extends Controller
 
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
+
         return $this->render('default/tools/office_tools.html.twig', array(
             'note_form' => $note_form->createView(),
             'notes_form' => $notes_form,
