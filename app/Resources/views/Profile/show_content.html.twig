@@ -34,14 +34,16 @@
             </div>
         </li>
 
-        <li>
-            <div class="collapsible-header">
-                <i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1%}s{% endif %}
-            </div>
-            <div class="collapsible-body">
-                {% include "member/_partial/swipe_card.html.twig" with { member: member, showBadgeImage: true } %}
-            </div>
-        </li>
+        {% if display_swipe_cards_settings %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1%}s{% endif %}
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/swipe_card.html.twig" with { member: member, showBadgeImage: true } %}
+                </div>
+            </li>
+        {% endif %}
 
         {% if app.user.clients | length %}
             <li>
