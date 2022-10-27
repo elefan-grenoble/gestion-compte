@@ -230,7 +230,7 @@ class DefaultController extends Controller
             $counter = $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0));
             if ($this->swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($counter));
+                $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
             }
             $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
             $dispatcher = $this->get('event_dispatcher');

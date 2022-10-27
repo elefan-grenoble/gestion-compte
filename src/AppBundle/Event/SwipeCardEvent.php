@@ -13,9 +13,18 @@ class SwipeCardEvent extends Event
      */
     private $beneficiaryCounter;
 
-    public function __construct($beneficiaryCounter)
+    public function __construct(SwipeCard $swipeCard, $beneficiaryCounter)
     {
+        $this->swipeCard = $swipeCard;
         $this->beneficiaryCounter = $beneficiaryCounter;
+    }
+
+    /**
+     * @return SwipeCard
+     */
+    public function getSwipeCard(): SwipeCard
+    {
+        return $this->swipeCard;
     }
 
     /**
