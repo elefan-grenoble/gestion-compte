@@ -33,6 +33,7 @@ services:
     AppBundle\Controller\DefaultController:
         arguments:
             - '%swipe_card_logging%'
+            - '%swipe_card_logging_anonymous%'
     AppBundle\Controller\AmbassadorController:
         arguments:
             - "%time_after_which_members_are_late_with_shifts%"
