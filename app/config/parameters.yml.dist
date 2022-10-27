@@ -107,6 +107,7 @@ parameters:
 
     # Swipe card configuration
     swipe_card_logging: true
+    swipe_card_logging_anonymous: true
     display_swipe_cards_settings: true
 
     logging.mattermost.enabled: false

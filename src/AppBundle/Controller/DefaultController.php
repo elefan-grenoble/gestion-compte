@@ -40,10 +40,12 @@ class DefaultController extends Controller
      * @var boolean
      */
     private $swipeCardLogging;
+    private $swipeCardLoggingAnonymous;
 
-    public function __construct(string $swipeCardLogging)
+    public function __construct(string $swipeCardLogging, string $swipeCardLoggingAnonymous)
     {
         $this->swipeCardLogging = $swipeCardLogging;
+        $this->swipeCardLoggingAnonymous = $swipeCardLoggingAnonymous;
     }
 
     /**
@@ -230,6 +232,9 @@ class DefaultController extends Controller
             $counter = $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0));
             if ($this->swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
+                if ($this->$swipeCardLoggingAnonymous) {
+                    $card = null;
+                }
                 $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
             }
             $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
