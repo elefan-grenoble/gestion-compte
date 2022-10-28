@@ -31,7 +31,7 @@ class EventService
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function getReceivedProxyOfBeneficiaryForAnEvent(Event $event, Beneficiary $beneficiary)
+    public function getReceivedProxiesOfBeneficiaryForAnEvent(Event $event, Beneficiary $beneficiary)
     {
         $qb = $this->em->getRepository('AppBundle:Proxy')->createQueryBuilder('p');
 
@@ -40,6 +40,7 @@ class EventService
             ->setParameter('event', $event)
             ->setParameter('beneficiary', $beneficiary);
 
-        return $qb->getQuery()->getOneOrNullResult();
+        // can have multiple proxies (%max_event_proxy_per_user%)
+        return $qb->getQuery()->getResult();
     }
 }
