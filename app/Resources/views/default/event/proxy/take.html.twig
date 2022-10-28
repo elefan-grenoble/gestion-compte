@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-
     <h4 class="">Accepter une procuration</h4>
     <h5 class="">{{ event.title }}&nbsp;<i>{{ event.date | date('d F Y H:i') }}</i></h5>
 
@@ -21,5 +20,4 @@
         <button type="submit" class="btn-large waves-effect waves-light green">J'accepte une procuration</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}
