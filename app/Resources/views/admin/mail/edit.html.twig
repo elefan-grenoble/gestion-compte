@@ -47,11 +47,10 @@
                 type: 'GET',
                 url: '{{ path('mail_get_beneficiaries') }}',
                 success: function(response) {
-                    var userArray = response;
-                    var dataUsers = {};
-                    for (var i = 0; i < userArray.length; i++) {
-                        dataUsers[userArray[i]] = null;
-                    }
+                    var dataUsers = response.reduce(function(map, obj) {
+                        map[obj] = null;
+                        return map;
+                    }, {});
                     $('.beneficiaries').chips({
                         placeholder: 'Beneficiaire',
                         data: [
@@ -63,20 +62,25 @@
                             data: dataUsers,
                             limit: Infinity,
                             minLength: 1
+                        },
+                        onChipAdd: () => {
+                            $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
+                        },
+                        onChipDelete: () => {
+                            $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
                         }
                     });
-                    $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
+                    $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
                 }
             });
             $.ajax({
                 type: 'GET',
                 url: '{{ path('mail_get_non_members') }}',
                 success: function(response) {
-                    var userArray = response;
-                    var dataUsers = {};
-                    for (var i = 0; i < userArray.length; i++) {
-                        dataUsers[userArray[i]] = null;
-                    }
+                    var dataUsers = response.reduce(function(map, obj) {
+                        map[obj] = null;
+                        return map;
+                    }, {});
                     $('.non-members').chips({
                         placeholder: 'Non-membre',
                         data: [],
@@ -84,19 +88,16 @@
                             data: dataUsers,
                             limit: Infinity,
                             minLength: 1
+                        },
+                        onChipAdd: () => {
+                            $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
+                        },
+                        onChipDelete: () => {
+                            $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
                         }
                     });
-                    $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
+                    $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
                 }
-            });
-            $('.chips').on('chip.add', function(e, chip){
-                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
-                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
-            });
-
-            $('.chips').on('chip.delete', function(e, chip){
-                $("input[name='form[to]']").val(JSON.stringify($('.beneficiaries').chips('data')));
-                $("input[name='form[cci]']").val(JSON.stringify($('.non-members').chips('data')));
             });
         });
     </script>
