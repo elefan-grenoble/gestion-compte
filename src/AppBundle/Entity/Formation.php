@@ -84,7 +84,7 @@ class Formation extends Group
     }
 
     /**
-     * Get created_at
+     * Get createdAt
      *
      * @return \DateTime
      */

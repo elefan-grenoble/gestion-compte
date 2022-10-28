@@ -292,7 +292,7 @@ class Job
     }
 
     /**
-     * Get created_at
+     * Get createdAt
      *
      * @return \DateTime
      */
