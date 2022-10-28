@@ -23,16 +23,17 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 class EventController extends Controller
 {
-
     /**
      * Lists all events.
      *
      * @Route("/", name="event_list", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
-    public function listAction(Request $request) {
+    public function listAction(Request $request)
+    {
         $em = $this->getDoctrine()->getManager();
         $events = $em->getRepository('AppBundle:Event')->findAll();
+
         return $this->render('admin/event/list.html.twig', array(
             'events' => $events,
         ));
@@ -44,13 +45,15 @@ class EventController extends Controller
      * @Route("/proxies_list", name="proxies_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listProxiesAction(){
+    public function listProxiesAction()
+    {
         $em = $this->getDoctrine()->getManager();
         $proxies = $em->getRepository('AppBundle:Proxy')->findAll();
         $delete_forms = array();
         foreach ($proxies as $proxy){
             $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
         }
+
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
             'delete_forms' => $delete_forms,
@@ -64,13 +67,14 @@ class EventController extends Controller
      * @Route("/{id}/proxies_list", name="event_proxies_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listEventProxiesAction(Event $event,Request $request){
-
+    public function listEventProxiesAction(Event $event, Request $request)
+    {
         $proxies = $event->getProxies();
         $delete_forms = array();
         foreach ($proxies as $proxy){
             $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
         }
+
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
             'delete_forms' => $delete_forms,
@@ -97,6 +101,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');
             return $this->redirectToRoute('event_edit', array('id' => $event->getId()));
         }
+
         return $this->render('admin/event/new.html.twig', array(
             'commission' => $event,
             'form' => $form->createView(),
@@ -110,7 +115,7 @@ class EventController extends Controller
      * @Route("/{id}/edit", name="event_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Event $event)
+    public function editAction(Request $request, Event $event)
     {
         $session = new Session();
 
@@ -118,7 +123,6 @@ class EventController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em = $this->getDoctrine()->getManager();
 
             $em->persist($event);
@@ -127,7 +131,6 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'L\'événement a bien été édité !');
 
             return $this->redirectToRoute('event_list');
-
         }
 
         return $this->render('admin/event/edit.html.twig', array(
@@ -148,13 +151,14 @@ class EventController extends Controller
         $session = new Session();
         $form = $this->getDeleteForm($event);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-
             $em->remove($event);
             $em->flush();
             $session->getFlashBag()->add('success', 'L événement a bien été supprimée !');
         }
+
         return $this->redirectToRoute('event_list');
     }
 
@@ -164,19 +168,20 @@ class EventController extends Controller
      * @Route("/proxy/{id}", name="proxy_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeProxyAction(Request $request,Proxy $proxy)
+    public function removeProxyAction(Request $request, Proxy $proxy)
     {
         $session = new Session();
         $form = $this->getProxyDeleteForm($proxy);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-
             $em->remove($proxy);
             $em->flush();
             $session->getFlashBag()->add('success', 'La procuration a bien été supprimée !');
         }
-        return $this->redirectToRoute('event_proxies_list',array('id'=>$proxy->getEvent()->getId()));
+
+        return $this->redirectToRoute('event_proxies_list', array('id'=>$proxy->getEvent()->getId()));
     }
 
     /**
@@ -287,11 +292,12 @@ class EventController extends Controller
      *
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
      */
-    public function giveProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
+    public function giveProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
+    {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>$current_app_user));
+        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "giver"=>$current_app_user));
 
         if ($myproxy){
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
@@ -356,7 +362,7 @@ class EventController extends Controller
             $em->persist($proxy);
             $em->flush();
             $session = new Session();
-            $session->getFlashBag()->add('success', 'Votre réquète a bien été acceptée !');
+            $session->getFlashBag()->add('success', 'Votre réquête a bien été acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()){
                 $this->sendProxyMail($proxy,$mailer);
@@ -437,8 +443,9 @@ class EventController extends Controller
 
     /**
      * Generate a page for a beneficiary to choose a proxy able to vote for an event.
-     * Automatically remove the withdrawn members and if a registration_duration
-     * is defined, the member with an expired registration.
+     * Automatically remove:
+     * - the withdrawn members
+     * - and if a registration_duration is defined, the members with an expired registration
      *
      * Goes with the Twig template views/beneficiary/find_member_number.html.twig
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary", methods={"POST"})
@@ -472,7 +479,7 @@ class EventController extends Controller
                 ->andWhere("m != :current_member" )
                     ->setParameter('current_member',$membership);
 
-            if(!is_null($registrationDuration)){
+            if (!is_null($registrationDuration)){
                 $beneficiaries_request = $beneficiaries_request
                     ->andWhere('r.date >= :min_last_registration')
                         ->setParameter('min_last_registration', $minLastRegistration)
@@ -492,8 +499,8 @@ class EventController extends Controller
                 function($b) use ($min_time_count) {return $b->getMembership()->getTimeCount()>$min_time_count*60;}
             );
 
-            if(count($filtered_beneficiaries) != count($beneficiaries)){
-                $session->getFlashBag()->add('notice',"Certains bénéficiaires ne sont pas présents dans " .
+            if (count($filtered_beneficiaries) != count($beneficiaries)){
+                $session->getFlashBag()->add('notice', "Certains bénéficiaires ne sont pas présents dans " .
                     "cette liste, car leur compte est en dessous de la limite d'heure de retard.");
             }
 
@@ -505,8 +512,9 @@ class EventController extends Controller
                 'params' => ['id' => $event->getId()]
             ));
         }
-        $session->getFlashBag()->add('error',"oups, quelque chose c'est mal passé");
-        return $this->redirectToRoute("event_proxy_give",array('id'=>$event->getId()));
+
+        $session->getFlashBag()->add('error', "oups, quelque chose c'est mal passé");
+        return $this->redirectToRoute("event_proxy_give", array('id'=>$event->getId()));
     }
 
     /**
@@ -535,12 +543,16 @@ class EventController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>$current_app_user));
+        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "giver"=>$current_app_user));
         $session = new Session();
-        if ($myproxy){
+
+        // check if proxy already given by user
+        if ($myproxy) {
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
+
+        // check if user is allowed to vote (membership)
         $registrationDuration = $this->getParameter('registration_duration');
         if ($registrationDuration) {
             $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
@@ -558,7 +570,8 @@ class EventController extends Controller
                 ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
             return $this->redirectToRoute('homepage');
         }
-        $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
+
+        $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "owner"=>null));
         if (!$proxy){
             $proxy = new Proxy();
             $proxy->setEvent($event);
@@ -568,21 +581,21 @@ class EventController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>$form->getData()->getOwner()));
-            if ($myproxy){
-                $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà une procuration.');
-                return $this->redirectToRoute('event_proxy_take',array('id'=>$event->getId()));
+            $max_event_proxy_per_user = $this->container->getParameter("max_event_proxy_per_user");
+            $myproxy = $em->getRepository('AppBundle:Proxy')->findBy(array("event"=>$event, "owner"=>$form->getData()->getOwner()));
+            if (count($myproxy) == $max_event_proxy_per_user) {
+                $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_user .' procuration.');
+                return $this->redirectToRoute('event_proxy_take', array('id'=>$event->getId()));
             }
             $em->persist($proxy);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Votre réquète a bien été acceptée !');
+            $session->getFlashBag()->add('success', 'Votre réquête a bien été acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()){
                 $this->sendProxyMail($proxy,$mailer);
             }
 
             return $this->redirectToRoute('homepage');
-
         }
 
         return $this->render('default/event/proxy/take.html.twig', array(
@@ -592,7 +605,7 @@ class EventController extends Controller
 
     }
 
-    public function sendProxyMail(Proxy $proxy,\Swift_Mailer $mailer){
+    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer){
 
         $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
 
