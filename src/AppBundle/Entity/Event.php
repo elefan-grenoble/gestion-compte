@@ -26,13 +26,6 @@ class Event
     private $id;
 
     /**
-     * @ORM\Column(type="datetime")
-     *
-     * @var \DateTime
-     */
-    private $updatedAt;
-
-    /**
      * @var string
      *
      * @Assert\NotBlank()
@@ -113,11 +106,33 @@ class Event
     private $proxies;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->proxies = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -137,7 +152,6 @@ class Event
     {
         return $this->id;
     }
-
 
     /**
      * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
@@ -245,7 +259,6 @@ class Event
     {
         $this->proxys->removeElement($proxy);
     }
-
 
     public function getProxiesByOwner(Beneficiary $beneficiary)
     {
@@ -459,17 +472,13 @@ class Event
     }
 
     /**
-     * Set updatedAt.
+     * Get createdAt
      *
-     * @param \DateTime $updatedAt
-     *
-     * @return Event
+     * @return \DateTime
      */
-    public function setUpdatedAt($updatedAt)
+    public function getCreatedAt()
     {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
+        return $this->createdAt;
     }
 
     /**
