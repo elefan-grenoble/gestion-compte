@@ -42,64 +42,70 @@
 
 {% block javascripts %}
     <script>
-        jQuery(function() {
-            $.ajax({
-                type: 'GET',
-                url: '{{ path('mail_get_beneficiaries') }}',
-                success: function(response) {
-                    var dataUsers = response.reduce(function(map, obj) {
-                        map[obj] = null;
-                        return map;
-                    }, {});
-                    $('.beneficiaries').chips({
-                        placeholder: 'Beneficiaire',
-                        data: [
-                            {% for beneficiary in to %}
-                            {
-                            tag: "{{ beneficiary.autocompleteLabel }}",
-                        },{% endfor %} ],
-                        autocompleteOptions: {
-                            data: dataUsers,
-                            limit: Infinity,
-                            minLength: 1
-                        },
-                        onChipAdd: () => {
-                            $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
-                        },
-                        onChipDelete: () => {
-                            $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
-                        }
-                    });
-                    $("input[name='form[to]']").val(JSON.stringify(M.Chips.getInstance($('.beneficiaries')).chipsData));
-                }
-            });
-            $.ajax({
-                type: 'GET',
-                url: '{{ path('mail_get_non_members') }}',
-                success: function(response) {
-                    var dataUsers = response.reduce(function(map, obj) {
-                        map[obj] = null;
-                        return map;
-                    }, {});
-                    $('.non-members').chips({
-                        placeholder: 'Non-membre',
-                        data: [],
-                        autocompleteOptions: {
-                            data: dataUsers,
-                            limit: Infinity,
-                            minLength: 1
-                        },
-                        onChipAdd: () => {
-                            $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
-                        },
-                        onChipDelete: () => {
-                            $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
-                        }
-                    });
-                    $("input[name='form[cci]']").val(JSON.stringify(M.Chips.getInstance($('.non-members')).chipsData));
-                }
-            });
-        });
+        jQuery(
+            function() {
+                function updateBeneficiaries() {
+                    var chipsData = M.Chips.getInstance($('.beneficiaries')).chipsData;
+                    console.log(chipsData);
+                    var ids = chipsData.map((member) => (member['tag'].split(' ')[0].substring(1)));
+                    console.log(ids);
+                    $("input[name='form[to]']").val(JSON.stringify(ids));
+                };
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ path('mail_get_beneficiaries') }}',
+                    success: function(response) {
+                        var dataUsers = response.reduce(function(map, obj) {
+                            map[obj] = null;
+                            return map;
+                        }, {});
+                        $('.beneficiaries').chips({
+                            placeholder: 'Beneficiaire',
+                            data: [
+                                {% for beneficiary in to %}
+                                {
+                                tag: "{{ beneficiary.autocompleteLabel }}",
+                            },{% endfor %} ],
+                            autocompleteOptions: {
+                                data: dataUsers,
+                                limit: Infinity,
+                                minLength: 1
+                            },
+                            onChipAdd: updateBeneficiaries,
+                            onChipDelete: updateBeneficiaries
+                        });
+                        updateBeneficiaries();
+                    }
+                });
+                function updateNonMembers() {
+                    var chipsData = M.Chips.getInstance($('.non-members')).chipsData;
+                    var emails = chipsData.map((member) => (member['tag']));
+                    $("input[name='form[cci]']").val(JSON.stringify(emails));
+                };
+                $.ajax({
+                    type: 'GET',
+                    url: '{{ path('mail_get_non_members') }}',
+                    success: function(response) {
+                        var dataUsers = response.reduce(function(map, obj) {
+                            map[obj] = null;
+                            return map;
+                        }, {});
+                        $('.non-members').chips({
+                            placeholder: 'Non-membre',
+                            data: [],
+                            autocompleteOptions: {
+                                data: dataUsers,
+                                limit: Infinity,
+                                minLength: 1
+                            },
+                            onChipAdd: updateNonMembers,
+                            onChipDelete: updateNonMembers
+                        });
+                        updateNonMembers();
+                    }
+                });
+            }
+        );
     </script>
 
 {% endblock %}

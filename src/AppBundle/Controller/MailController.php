@@ -157,11 +157,8 @@ class MailController extends Controller
             $em = $this->getDoctrine()->getManager();
             //beneficiaries
             $to = $mailform->get('to')->getData();
-            $chips = json_decode($to);
-            $beneficiaries = array();
-            foreach ($chips as $chip) {
-                $beneficiaries[] = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($chip->tag);
-            }
+            $to = json_decode($to);
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id' => $to));
             //end beneficiaries
             //non-member
             $cci = $mailform->get('cci')->getData();
@@ -170,7 +167,7 @@ class MailController extends Controller
             $re = '/\[(?<email>.*?)\]/';
             foreach ($chips as $chip) {
                 $matches = array();
-                preg_match($re, $chip->tag, $matches);
+                preg_match($re, $chip, $matches);
                 if (isset($matches['email']))
                     $nonMembers[] = $matches['email'];
             }
