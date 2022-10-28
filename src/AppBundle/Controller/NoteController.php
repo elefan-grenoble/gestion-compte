@@ -54,7 +54,6 @@ class NoteController extends Controller
         $new_note = new Note();
         $new_note->setParent($note);
         $new_note->setAuthor($this->getCurrentAppUser());
-        $new_note->setCreatedAt(new \DateTime());
         $new_note->setSubject($note->getSubject());
 
         $note_form = $this->createForm(NoteType::class, $new_note);

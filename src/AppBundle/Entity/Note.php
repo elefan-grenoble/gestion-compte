@@ -32,13 +32,6 @@ class Note
     private $text;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $created_at;
-
-    /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="annotations")
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      */
@@ -62,11 +55,26 @@ class Note
     private $children;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
     {
-        $this->created_at = new \DateTime();
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -109,27 +117,13 @@ class Note
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $created_at
-     *
-     * @return Note
-     */
-    public function setCreatedAt($created_at)
-    {
-        $this->created_at = $created_at;
-
-        return $this;
-    }
-
-    /**
      * Get createdAt
      *
      * @return \DateTime
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
@@ -201,13 +195,6 @@ class Note
     public function getParent()
     {
         return $this->parent;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
