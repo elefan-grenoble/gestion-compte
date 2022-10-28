@@ -27,13 +27,6 @@ class SwipeCard
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $created_at;
-
-    /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="disabled_at", type="datetime", nullable=true)
      */
     private $disabled_at;
@@ -71,11 +64,18 @@ class SwipeCard
     private $logs;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
     {
-        $this->created_at = new \DateTime();
+        $this->createdAt = new \DateTime();
         $this->disabled_at = null;
     }
 
@@ -203,7 +203,7 @@ class SwipeCard
      */
     public function setCreatedAt($createdAt)
     {
-        $this->created_at = $createdAt;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
@@ -215,7 +215,7 @@ class SwipeCard
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
