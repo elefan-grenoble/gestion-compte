@@ -199,24 +199,9 @@ class MailController extends Controller
             }
             $contentType = 'text/html';
             $content = $mailform->get('message')->getData();
-            $re = '/({(?>{|%)[^%}]*(?>}|%)})/m';
-            preg_match_all($re, $content, $matches, PREG_SET_ORDER, 0);
-            if (count($matches)) {
-                $content = preg_replace($re, '{{TWIG}}', $content);
-            }
-            $content = Markdown::defaultTransform($content);
-            $re = '/[^>](\n)/m';
-            preg_match_all($re, $content, $matches2, PREG_SET_ORDER, 0);
-            if (count($matches2)) {
-                $content = preg_replace($re, '<br/>', $content);
-            }
-            if (count($matches)) {
-                foreach ($matches as $match) {
-                    $twig_code = $match[1];
-                    $re = '/({{TWIG}})/m';
-                    $content = preg_replace($re, $twig_code, $content, 1);
-                }
-            }
+            $parser = new Markdown;
+            $parser->hard_wrap=true;
+            $content = $parser->transform($content);
             $emailTemplate = $mailform->get('template')->getData();
             if ($emailTemplate) {
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
