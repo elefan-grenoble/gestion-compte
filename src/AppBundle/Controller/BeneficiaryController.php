@@ -69,6 +69,27 @@ class BeneficiaryController extends Controller
     }
 
     /**
+     * Set as main beneficiary
+     *
+     * @Route("/beneficiary/{id}", name="beneficiary_set_main")
+     * @Method("GET")
+     * @param Beneficiary $beneficiary
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function setAsMainBeneficiaryAction(Beneficiary $beneficiary)
+    {
+        $session = new Session();
+        $member = $beneficiary->getMembership();
+        $this->denyAccessUnlessGranted('edit', $member);
+        $em = $this->getDoctrine()->getManager();
+        $member->setMainBeneficiary($beneficiary);
+        $em->persist($member);
+        $em->flush();
+        $session->getFlashBag()->add('success', 'Le changement de bénéficiaire principal a été effectué');
+        return $this->redirectToShow($member);
+    }
+
+    /**
      * Deletes a beneficiary entity.
      *
      * @Route("/beneficiary/{id}", name="beneficiary_delete")
