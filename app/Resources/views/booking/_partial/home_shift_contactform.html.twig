@@ -2,131 +2,57 @@
 {% if not shifter %}
 {% set shifter = shift.booker %}
 {% endif %}
-<div id="contact{{ shift.id }}" class="modal black-text">
+<div id="contact{{ shift.id }}" class="modal modal-fixed-footer left-align">
     <div class="modal-content">
-        <h4>{{ shift.start|date_fr_long }}</h4>
-        <p>Tu partages ton créneau {{ shift.start|date('H:i') }} - {{ shift.end|date('H:i') }} avec</p>
-        <div class="list">
-        {% for shift in coShifts %}
-            <div class="chip {% if shift.isDismissed %}red{% else %}blue-grey{% endif %} lighten-4">
-                <a href="#!" class="black-text"
-                   data-chip="{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}"
-                   data-id="{{ shift.shifter.id }}">{{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
-                {% if shift.formation %}(<strong>{{ shift.formation.name }}</strong>){% endif %}
-                </a>
-            </div>
-        {% endfor %}
-        </div>
+        <h5>Envoyer un mail aux membres du créneau <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h5>
+        <h6>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h6>
+        {{ form_start(form, {'attr': {'id': 'contactform'~shift.id}})}}
         <div class="row left-align">
             <div class="col s12">
-                {{ form_start(form, {'attr': {'id': 'contactform'~shift.id}})}}
-                    <div class="row">
-                        <div class="col s3">
-                            <br>
-                            De <strong>{{ shifter.firstname }}</strong> à
-                            {{ form_widget(form.from) }}
-                            {{ form_widget(form.to) }}
-                        </div>
-                        <div class="col s9">
-                            <div id="to{{ shift.id }}"></div>
-                        </div>
-                        <div class="input-field col s12">
-                            <div class="errors">
-                                {{ form_errors(form.message) }}
-                            </div>
-                            <div class="input-field">
-                                {{ form_widget(form.message) }}
-                                {{ form_label(form.message) }}
-                            </div>
-                        </div>
-                    </div>
-                {{ form_end(form) }}
+                <div class="errors">
+                    {{ form_errors(form.to) }}
+                </div>
+                {{ form_widget(form.to) }}
+                {{ form_label(form.to) }}
+                <div id="to{{ shift.id }}"></div>
+            </div>
+            <div class="col s12">
+                <div class="errors">
+                    {{ form_errors(form.message) }}
+                </div>
+                {{ form_label(form.message) }}
+                {{ form_widget(form.message) }}
             </div>
         </div>
-        <div class="responses row">
-            <div class="chip orange lighten-4"><a href="#!" class="grey-text">Je suis en retard</a></div>
-            <div class="chip blue lighten-4"><a href="#!" class="grey-text">Est-ce que tout va bien ?</a></div>
-        </div>
+        {{ form_end(form) }}
     </div>
     <div class="modal-footer">
-        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+        <a href="#!" class=" modal-close waves-effect waves-green btn-flat red-text">Retour</a>
         <a href="#"
-           class="modal-action modal-close waves-effect waves-green btn-flat teal white-text"
+           class="modal-close waves-effect waves-green btn-flat teal white-text"
            onclick="javascript:$('#contactform{{ shift.id }}').submit();return false;"><i class="material-icons right">send</i>Envoyer</a>
     </div>
 </div>
 <script>
+    function updateForm{{ shift.id}}() {
+        var chipsData = M.Chips.getInstance($('#to{{ shift.id }}')).chipsData;
+        var ids = chipsData.map((member) => (member['tag'].split(' ')[0].substring(1)));
+        $("#contactform{{ shift.id }} input[name='form[to]']").val(JSON.stringify(ids));
+    }
     function toto{{ shift.id }}() {
-
-        $('#contactform{{ shift.id }} textarea').val('Bonjour,');
-
-        var allIds = [{% for shift in coShifts %}{{ shift.shifter.id }},{% endfor %}];
-        $('#to{{ shift.id }}').chips({ autocompleteOptions: {data : chipsAcFromIds(allIds)} });
-        $('#to{{ shift.id }}').on('chip.add', function(e, chip){
-            updateFromChips();
+        var allMembers = [{% for shift in coShifts %}"#{{shift.shifter.id}} {{ shift.shifter.firstname|lower|capitalize }} {{ shift.shifter.lastname|first|upper }}",{% endfor %}];
+        $('#to{{ shift.id }}').chips({
+            autocompleteOptions: {
+                data: allMembers.reduce(function(map, obj) {
+                    map[obj] = null;
+                    return map;
+                }, {}),
+            },
+            data: allMembers.map((member) => ({tag: member})),
+            onChipAdd: updateForm{{ shift.id}},
+            onChipDelete: updateForm{{ shift.id}}
         });
-        $('#to{{ shift.id }}').on('chip.delete', function(e, chip){
-            updateFromChips();
-        });
-        $("#contact{{ shift.id }} .responses a").click(function (e) {
-            e.preventDefault();
-            var textarea = $('#contactform{{ shift.id }} textarea');
-            textarea.val(textarea.val()+'\n'+$(this).text());
-            textarea.focus();
-        });
-        $("#contact{{ shift.id }} .list .chip > a").click(function (e) {
-            e.preventDefault();
-            addChip($(this).data('chip'));
-            updateFromChips();
-        });
-        function chipsAcFromIds(ids) {
-            // console.log(ids);
-            var chips = {};
-            for (var i = 0; i < ids.length; i++) {
-                var tag = $("#contact{{ shift.id }} .list .chip > a[data-id='"+ids[i]+"']").data('chip')
-                chips[tag] = '';
-            }
-            // console.log(chips);
-            return chips;
-        }
-        function addChip(text) {
-            var chips = $('#to{{ shift.id }}').chips('data');
-
-            var ids_json = $("#contactform{{ shift.id }} input[name='form[to]']").val();
-            if (ids_json.length > 3){
-                var ids = JSON.parse(ids_json);
-                for (var i = 0; i < ids.length; i++) {
-                    if (ids[i] == $("#contact{{ shift.id }} .list .chip > a[data-chip='"+text+"']").data('id')){
-                        return; //exist
-                    }
-                }
-            }
-            var found = false;
-            for (var i = 0; i < chips.length; i++) {
-                if (chips[i].tag.trim() === text.trim()){
-                    found = i;
-                }
-            }
-            if (!found){
-                var chip = {
-                    tag: text,
-                    image: '',
-                };
-                chips.push(chip);
-                $('#to{{ shift.id }}').chips({data:chips, autocompleteOptions: {data : chipsAcFromIds(allIds)} });
-            }
-        }
-        function updateFromChips() {
-            $("#contact{{ shift.id }} .list .chip").addClass('blue-grey').removeClass('green');
-            var chips = $('#to{{ shift.id }}').chips('data');
-            var ids = [];
-            for (var i = 0; i < chips.length; i++) {
-                var $name = $("#contact{{ shift.id }} .list .chip > a[data-chip='"+chips[i].tag.trim()+"']");
-                $name.parent().removeClass('blue-grey').addClass('green');
-                ids.push($name.data('id'));
-            }
-            $("#contactform{{ shift.id }} input[name='form[to]']").val(JSON.stringify(ids));
-        }
+        updateForm{{ shift.id}}();
     }
     setTimeout(toto{{ shift.id }},500);
 </script>

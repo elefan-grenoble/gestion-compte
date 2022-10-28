@@ -348,8 +348,12 @@ class DefaultController extends Controller
 
         $formBuilder = $this->createFormBuilder();
         $formBuilder->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()));
-        $formBuilder->add('to', HiddenType::class);
-        $formBuilder->add('message', TextareaType::class, array('attr' => array('class' => 'materialize-textarea', 'label' => 'message')));
+        $formBuilder->add('to', HiddenType::class, array('label' => 'A'));
+        $formBuilder->add('message', TextareaType::class, [
+            'attr' => ['class' => 'materialize-textarea'],
+            'label' => 'Message',
+            'data' => 'Bonjour XX,'.PHP_EOL."Tu n'es toujours pas arrivé pour notre créneau.".PHP_EOL."Est-ce que tout va bien ?".PHP_EOL."A très vite,".PHP_EOL.$shift->getShifter()->getFirstName().PHP_EOL.PHP_EOL."Bonjour à tou.te.s,".PHP_EOL."Je vais en être en retard pour mon créneau.".PHP_EOL."Je serai à l'épicerie d'ici XX minutes.".PHP_EOL."A tout de suite,".PHP_EOL.$shift->getShifter()->getFirstName()
+        ]);
         $formBuilder->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())));
         $formBuilder->setMethod('POST');
         $form = $formBuilder->getForm();
@@ -367,9 +371,9 @@ class DefaultController extends Controller
                 $emails[] = $beneficiary->getEmail();
                 $firstnames[] = $beneficiary->getFirstname();
             }
-            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName()))
+            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1)))
                 ->setFrom($this->getParameter('transactional_mailer_user'))
-                ->setReplyTo($this->getParameter('transactional_mailer_user'))
+                ->setReplyTo($from->getEmail())
                 ->setBcc($emails)
                 ->setBody(
                     $this->renderView(
@@ -377,6 +381,7 @@ class DefaultController extends Controller
                         array(
                             'message' => trim($form->get('message')->getData()),
                             'from' => $from,
+                            'firstnames' => $firstnames,
                             'shift' => $shift)
                     ),
                     'text/html'
