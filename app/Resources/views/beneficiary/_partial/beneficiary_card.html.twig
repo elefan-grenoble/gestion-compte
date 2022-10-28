@@ -37,6 +37,13 @@
                         </a>
                     </div>
                 {% endif %}
+                {% if not beneficiary.isMain %}
+                    <div class="card-btn">
+                        <a href="{{ path('beneficiary_set_main', { 'id': beneficiary.id }) }}" class="modal-trigger btn btn-floating waves-effect waves-light purple" title="mettre en beneficiaire principal">
+                            <i class="material-icons">flag</i>
+                        </a>
+                    </div>
+                {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <div class="card-btn">
                         <a href="{{ path('homepage', { '_login_as':  beneficiary.user.username }) }}"
