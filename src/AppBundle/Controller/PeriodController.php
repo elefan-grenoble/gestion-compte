@@ -335,8 +335,7 @@ class PeriodController extends Controller
 
         if (!$position->getBooker()) {
             $current_user = $this->get('security.token_storage')->getToken()->getUser();
-            $current_beneficiary = $current_user->getBeneficiary();
-            $position->setBooker($current_beneficiary);
+            $position->setBooker($current_user);
             $position->setBookedTime(new \DateTime('now'));
         }
         $position->setShifter($beneficiary);
