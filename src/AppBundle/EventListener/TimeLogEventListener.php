@@ -126,11 +126,11 @@ class TimeLogEventListener
         $registrationEnd = clone $member->getLastRegistration()->getDate();
         $registrationEnd->modify('+'.$this->registration_duration);
         $registrationEnd->modify('+'.$this->cycle_duration);
-        
+
         if ($date > $registrationEnd) {
-            $this->createRegistrationExpiredLog($member,$date);
+            $this->createRegistrationExpiredLog($member);
         } else if ($member->getFrozen()) {
-            $this->createFrozenLog($member,$date);
+            $this->createFrozenLog($member);
         } else {
             $this->createCycleBeginningLog($member, $date);
         }
@@ -158,7 +158,7 @@ class TimeLogEventListener
         $log->setMembership($shift->getShifter()->getMembership());
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
-        $log->setDate($shift->getStart());
+        $log->setCreatedAt($shift->getStart());
         $log->setType(TimeLog::TYPE_SHIFT);
         $this->em->persist($log);
         $this->em->flush();
@@ -191,7 +191,6 @@ class TimeLogEventListener
         $log = new TimeLog();
         $log->setMembership($membership);
         $log->setTime(-1 * $this->due_duration_by_cycle);
-        $log->setDate($date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
         $this->em->persist($log);
 
@@ -203,7 +202,6 @@ class TimeLogEventListener
             $log = new TimeLog();
             $log->setMembership($membership);
             $log->setTime(-1 * ($counter_today - ($this->due_duration_by_cycle + $allowed_cumul)));
-            $log->setDate($date);
             $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);
         }
@@ -212,16 +210,14 @@ class TimeLogEventListener
 
     /**
      * @param Membership $membership
-     * @param \DateTime $date
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createFrozenLog(Membership $membership, \DateTime $date)
+    private function createFrozenLog(Membership $membership)
     {
         $log = new TimeLog();
         $log->setMembership($membership);
         $log->setTime(0);
-        $log->setDate($date);
         $log->setType(TimeLog::TYPE_CYCLE_END_FROZEN);
         $this->em->persist($log);
         $this->em->flush();
@@ -229,16 +225,14 @@ class TimeLogEventListener
 
     /**
      * @param Membership $membership
-     * @param \DateTime $date
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createRegistrationExpiredLog(Membership $membership, \DateTime $date)
+    private function createRegistrationExpiredLog(Membership $membership)
     {
         $log = new TimeLog();
         $log->setMembership($membership);
         $log->setTime(0);
-        $log->setDate($date);
         $log->setType(TimeLog::TYPE_CYCLE_END_EXPIRED_REGISTRATION);
         $this->em->persist($log);
         $this->em->flush();

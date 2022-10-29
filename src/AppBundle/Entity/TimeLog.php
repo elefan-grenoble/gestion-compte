@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * TimeLog
  *
  * @ORM\Table(name="time_log")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\TimeLogRepository")
  */
 class TimeLog
@@ -33,9 +34,9 @@ class TimeLog
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $date;
+    private $createdAt;
 
     /**
      * @var int
@@ -81,27 +82,13 @@ class TimeLog
     }
 
     /**
-     * Set date
-     *
-     * @param \DateTime $date
-     *
-     * @return TimeLog
-     */
-    public function setDate($date)
-    {
-        $this->date = $date;
-
-        return $this;
-    }
-
-    /**
-     * Get date
+     * Get createdAt
      *
      * @return \DateTime
      */
-    public function getDate()
+    public function getCreatedAt()
     {
-        return $this->date;
+        return $this->createdAt;
     }
 
     /**
@@ -198,6 +185,27 @@ class TimeLog
     public function getType(): int
     {
         return $this->type;
+    }
+
+    /**
+     * Set created_at
+     *
+     * @param \DateTime $created_at
+     *
+     * @return TimeLog
+     */
+    public function setCreatedAt($created_at)
+    {
+        $this->createdAt = $date;
+        return $this;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
