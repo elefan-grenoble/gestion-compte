@@ -47,7 +47,7 @@
                 <td>{{ timeLog.time | duration_from_minutes }}</td>
                 <td>{{ timeLog.computedDescription }}</td>
                 <td>
-                    {% if from_admin is defined and is_granted("ROLE_SHIFT_MANAGER") %}
+                    {% if from_admin is defined and is_granted("ROLE_SUPER_ADMIN") %}
                         <a href="{{ path('member_timelog_delete',{ "id":member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
                     {% endif %}
                 </td>

@@ -26,7 +26,7 @@ class TimeLogController extends Controller
      *
      * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Membership $member
      * @param $timelog_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
