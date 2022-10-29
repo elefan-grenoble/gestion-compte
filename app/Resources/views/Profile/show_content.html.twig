@@ -19,6 +19,17 @@
             </div>
         </li>
 
+        {% if profile_display_time_log %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">access_time</i>Compteur de temps
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/time_logs.html.twig" with { member: member } %}
+                </div>
+            </li>
+        {% endif %}
+
         <li>
             <div class="collapsible-header">
                 <i class="material-icons">ac_unit</i>Gel du compte
