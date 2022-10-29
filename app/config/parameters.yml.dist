@@ -105,6 +105,9 @@ parameters:
     use_card_reader_to_validate_shifts: false
     max_time_at_end_of_shift: 0
 
+    # Profile configuration
+    profile_display_time_log: false
+
     # Swipe card configuration
     swipe_card_logging: true
     swipe_card_logging_anonymous: true

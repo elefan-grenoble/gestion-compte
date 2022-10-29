@@ -62,6 +62,7 @@ twig:
     local_currency_name: '%local_currency_name%'
     use_fly_and_fixed: '%use_fly_and_fixed%'
     display_gauge: '%display_gauge%'
+    profile_display_time_log: '%profile_display_time_log%'
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
     display_freeze_account_false_message: '%display_freeze_account_false_message%'
