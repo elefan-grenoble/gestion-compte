@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer le motif d'exemption de bénévolat - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_shiftexemption_index') }}"><i class="material-icons">list</i>&nbsp;Liste des exemptions de bénévolat</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
+{% endblock %}
+
+{% block content %}
+    <h4>Editer le motif d'exemption de bénévolat</h4>
+
+    {% include "/admin/shiftexemption/_form.html.twig" with { form: form } %}
+
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        {{ form_start(delete_form) }}
+        <button type="submit" class="btn waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
+        {{ form_end(delete_form) }}
+    {% endif %}
+{% endblock %}
