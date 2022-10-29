@@ -67,6 +67,8 @@ class TimeLogController extends Controller
 
             $timeLog->setMembership($member);
             $timeLog->setTime($form->get('time')->getData());
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $timeLog->setCreatedBy($current_user);
             $timeLog->setDescription($form->get('description')->getData());
             $timeLog->setType(TimeLog::TYPE_CUSTOM);
 

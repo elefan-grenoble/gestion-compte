@@ -35,6 +35,7 @@
     <thead>
         <tr class="grey lighten-2">
             <th>Date du log</th>
+            <th>Auteur</th>
             <th>Temps</th>
             <th>Motif</th>
             <th></th>
@@ -44,6 +45,7 @@
         {% for timeLog in member.timeLogs %}
             <tr class="{% if timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
                 <td>{{ timeLog.createdAt | date_fr_full }}</td>
+                <td>{{ timeLog.createdBy }}</td>
                 <td>{{ timeLog.time | duration_from_minutes }}</td>
                 <td>{{ timeLog.computedDescription }}</td>
                 <td>
