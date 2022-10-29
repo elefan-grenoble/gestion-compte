@@ -29,6 +29,9 @@
                 <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">phone</i>Relances créneaux
                 </a>
+                <a href="{{ path("admin_membershipshiftexemption_index") }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">beach_access</i>Gérer les exemptions de bénévolat
+                </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
                 <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">

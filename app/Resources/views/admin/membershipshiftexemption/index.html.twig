@@ -1,0 +1,75 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des membres exempté.e.s de bénévolat - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des membres exempté.e.s de bénévolat
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des membres exempté.e.s de bénévolat</h4>
+
+    <table class="responsive-table striped">
+        <thead>
+            <tr>
+                <th>Date de création</th>
+                <th>Par</th>
+                <th>Membre</th>
+                <th>Raison</th>
+                <th>Description</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for membershipShiftExemption in membershipShiftExemptions %}
+            <tr>
+                <td>{% if membershipShiftExemption.createdAt %}{{ membershipShiftExemption.createdAt|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>
+                    {% if membershipShiftExemption.createdBy and membershipShiftExemption.createdBy.beneficiary %}
+                        <a href="{{ path("member_show",{'member_number': membershipShiftExemption.createdBy.beneficiary.membership.memberNumber}) }}">
+                            {{ membershipShiftExemption.createdBy.beneficiary }}
+                        </a>
+                    {% else %}
+                        {{membershipShiftExemption.createdBy}}
+                    {% endif %}
+                </td>
+                <td>{{ membershipShiftExemption.membership.beneficiaries | map(b => "<a href=\'#{path('member_show',{'member_number': b.membership.memberNumber})}\'>#{b}</a>") | join('<br/>') | raw }}</td>
+                <td>{{ membershipShiftExemption.shiftExemption }}</td>
+                <td>{{ membershipShiftExemption.description }}</td>
+                <td>{% if membershipShiftExemption.start %}{{ membershipShiftExemption.start|date('Y-m-d') }}{% endif %}</td>
+                <td>{% if membershipShiftExemption.end %}{{ membershipShiftExemption.end|date('Y-m-d') }}{% endif %}</td>
+                <td>
+                    <a href="{{ path('admin_membershipshiftexemption_edit', { 'id': membershipShiftExemption.id }) }}"><i class="material-icons">edit</i>editer</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul class="pagination">
+        <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_membershipshiftexemption_index",{'page':current_page-1}) }}{% endif %}">
+                <i class="material-icons">chevron_left</i>
+            </a>
+        </li>
+        {% for i in range(1,max_page) %}
+        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("admin_membershipshiftexemption_index",{'page':i}) }}">{{ i }}</a></li>
+        {% endfor %}
+        <li class="{% if(current_page==max_page) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==max_page) %}#!{% else %}{{ path("admin_membershipshiftexemption_index",{'page':current_page+1}) }}{% endif %}">
+                <i class="material-icons">chevron_right</i>
+            </a>
+        </li>
+    </ul>
+
+    <ul>
+        <li>
+            <a href="{{ path('admin_membershipshiftexemption_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une exemption</a>
+        </li>
+    </ul>
+{% endblock %}
