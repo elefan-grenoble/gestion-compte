@@ -49,7 +49,7 @@ class MembershipShiftExemption
     private $description;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Membership")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="membershipShiftExemptions")
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
      */
     private $membership;
@@ -234,5 +234,16 @@ class MembershipShiftExemption
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * Return if the membershipShiftExemption is valid for a given date
+     *
+     * @param \DateTime $date
+     * @return \DateTime
+     */
+    public function isValid($date)
+    {
+        return ($date >= $this->start) && ($date <= $this->end);
     }
 }
