@@ -1,5 +1,9 @@
-Bonjour,<br />
-<strong>{{ from.firstname }}</strong> vous a envoyé un message à propos du créneau {{ shift.job.name }} du {{ shift.start | date('d-m-Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}<br />
+Bonjour {{ firstnames | join(', ') }},<br /></br>
+<strong>{{ shift.shifter.firstname|lower|capitalize }} {{ shift.shifter.lastname|first|upper }}</strong> t'a envoyé un message à propos du créneau {{ shift.job.name }} du {{ shift.start | date('d-m-Y') }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br />
 <blockquote>
-    {{ message }}
+    {{ message |nl2br }}
 </blockquote>
+<br />
+Tu peux lui répondre en répondant directement à cet email.<br /><br />
+Bonne journée,</br />
+Céleste, la petite fée des créneaux :)

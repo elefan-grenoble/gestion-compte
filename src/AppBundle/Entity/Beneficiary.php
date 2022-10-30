@@ -198,6 +198,14 @@ class Beneficiary
         return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
+    public function getDisplayNameWithStatusIcon(): string
+    {
+        $label = '#' . $this->getMembership()->getMemberNumber();
+        $label .= $this->getStatusIcon(true);
+        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        return $label;
+    }
+
     public function getPublicDisplayName()
     {
         return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
@@ -628,14 +636,7 @@ class Beneficiary
 
     public function getAutocompleteLabel(): string
     {
-        $label = '#' . $this->getMembership()->getMemberNumber();
-
-        $label .= $this->getStatusIcon(true);
-
-        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
-        $label .=  ' (' . $this->getId() . ')';
-        return $label;
-
+        return '#' . $this->getId() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     public function getAutocompleteLabelFull(): string
