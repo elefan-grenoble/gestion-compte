@@ -2,7 +2,8 @@
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
-<a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">list</i>&nbsp;Liste des retardataires
 {% endblock %}
 
@@ -112,8 +113,8 @@
         <thead>
         <tr>
             <th data-col="o.member_number">#</th>
-            <th data-col="b.firstname">prénom</th>
-            <th data-col="b.lastname">nom</th>
+            <th data-col="b.firstname">Prénom</th>
+            <th data-col="b.lastname">Nom</th>
             <th data-col="r.date">Adhésion(s)</th>
             <th data-col="time">Compteur</th>
             <th>Note(s)</th>

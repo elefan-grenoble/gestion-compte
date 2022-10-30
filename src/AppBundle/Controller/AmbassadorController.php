@@ -37,16 +37,14 @@ class AmbassadorController extends Controller
     /**
      * Lists all users with a registration date older than one year.
      *
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
      * @Route("/membership", name="ambassador_membership_list")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
      */
     public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
     {
-
-        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
-
         $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
         $form->handleRequest($request);
 
@@ -115,16 +113,14 @@ class AmbassadorController extends Controller
     /**
      * Lists all users with shift time logs older than 9 hours.
      *
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
      * @Method({"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
      */
     public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
-
-        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
-
         $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
         $form->handleRequest($request);
 

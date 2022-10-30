@@ -154,8 +154,8 @@ class UserController extends Controller
      * Creates a new user entity.
      *
      * @Route("/quick_new", name="user_quick_new")
-     * @Security("has_role('ROLE_USER')")
      * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function quickNewAction(Request $request, \Swift_Mailer $mailer)
     {
@@ -196,7 +196,6 @@ class UserController extends Controller
      */
     public function quickNewRecallAction(Request $request,AnonymousBeneficiary $anonymousBeneficiary)
     {
-
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
 
@@ -212,7 +211,6 @@ class UserController extends Controller
 
         return new RedirectResponse($referer);
     }
-
 
     /**
      * remove role of user
@@ -287,7 +285,7 @@ class UserController extends Controller
         $session = new Session();
         $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
         if (!$this->get('membership_service')->canRegister($membership)) {
-            $session->getFlashBag()->add('warning', 'Pas besoin de réadhérer pour le moment :)');
+            $session->getFlashBag()->add('warning', 'Pas besoin de ré-adhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }
         return $this->render('user/self_register.html.twig');
@@ -357,8 +355,8 @@ class UserController extends Controller
 
     /**
      * @Route("/pre_users", name="pre_user_index")
-     * @Security("has_role('ROLE_USER')")
      * @Method({"GET"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function preUsersAction()
     {
