@@ -26,6 +26,9 @@
                 <a href="{{ path("user_index") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">people</i>Gérer les adhérents
                 </a>
+                <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">phone</i>Relances créneaux
+                </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
                 <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">
