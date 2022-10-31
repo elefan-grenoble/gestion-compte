@@ -2,6 +2,7 @@
 
 namespace AppBundle\Event;
 
+use AppBundle\Entity\SwipeCard;
 use Symfony\Component\EventDispatcher\Event;
 
 class SwipeCardEvent extends Event
@@ -13,16 +14,16 @@ class SwipeCardEvent extends Event
      */
     private $beneficiaryCounter;
 
-    public function __construct(SwipeCard $swipeCard, $beneficiaryCounter)
+    public function __construct(SwipeCard $swipeCard = null, $beneficiaryCounter)
     {
         $this->swipeCard = $swipeCard;
         $this->beneficiaryCounter = $beneficiaryCounter;
     }
 
     /**
-     * @return SwipeCard
+     * @return SwipeCard|null
      */
-    public function getSwipeCard(): SwipeCard
+    public function getSwipeCard(): ?SwipeCard
     {
         return $this->swipeCard;
     }
