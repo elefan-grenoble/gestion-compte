@@ -128,9 +128,10 @@ It use the materialize modal class https://materializecss.com/modals.html
             {% endfor %}
         </ul>
         {{ form_start(shift_add_form[bucket.first.id]) }}
-        {{ form_widget(shift_add_form[bucket.first.id].date) }}
-        {{ form_widget(shift_add_form[bucket.first.id].start) }}
-        {{ form_widget(shift_add_form[bucket.first.id].end) }}
+        <input type="hidden" id="{{ shift_add_form[bucket.first.id].start.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.date.vars.value }}">
+        <input type="hidden" id="{{ shift_add_form[bucket.first.id].start.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.time.vars.value }}">
+        <input type="hidden" id="{{ shift_add_form[bucket.first.id].end.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.date.vars.value }}">
+        <input type="hidden" id="{{ shift_add_form[bucket.first.id].end.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.time.vars.value }}">
         {{ form_widget(shift_add_form[bucket.first.id].job) }}
         <div class="row valign-wrapper">
             <div class="col s3">
@@ -145,7 +146,8 @@ It use the materialize modal class https://materializecss.com/modals.html
                 <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
             </div>
         </div>
-        {{ form_end(shift_add_form[bucket.first.id]) }}
+        {{ form_row(shift_add_form[bucket.first.id]._token) }}
+        {{ form_end(shift_add_form[bucket.first.id],  {'render_rest': false}) }}
         <a href="{{ path('mail_bucketshift', { 'id': bucket.first.id }) }}" class="btn">
             <i class="material-icons left">mail</i>Envoyer un email aux membres
         </a>

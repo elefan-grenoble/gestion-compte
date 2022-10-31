@@ -389,20 +389,11 @@ class BookingController extends Controller
         $shift_delete_form = array();
         $shift_add_form = array();
         foreach ($shifts as $shift) {
-            $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
-                ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-                ->setMethod('DELETE')
-                ->getForm()->createView();
-
-            $shift_add_form[$shift->getId()] = $this->createForm(
-                ShiftType::class,
-                $shift,
-                array(
-                    'action' => $this->generateUrl('shift_new'),
-                    'only_add_formation' => true,
-                )
-            )
-                ->createView();
+            $shift_delete_form[$shift->getId()] = $this->createDeleteForm($shift)->createView();
+            $shift_add_form[$shift->getId()] = $this->createForm('AppBundle\Form\ShiftType', $shift, [
+                'action' => $this->generateUrl('shift_new'),
+                'only_add_formation' => true
+            ])->createView();
         }
 
         $delete_bucket_form = $this->createFormBuilder()
@@ -910,5 +901,21 @@ class BookingController extends Controller
         }
 
         return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
+     * Creates a form to delete a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Shift $shift)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+        ;
     }
 }
