@@ -420,7 +420,7 @@ class EventController extends Controller
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
-                    $session->getFlashBag()->add('success', 'Procuration acceptée !');
+                    $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()){
                         $this->sendProxyMail($proxy,$mailer);

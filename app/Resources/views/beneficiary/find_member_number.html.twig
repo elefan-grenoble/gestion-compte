@@ -1,13 +1,12 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Recherche numéro d'adhérent - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
     <i class="material-icons">search</i>&nbsp;Recherche numéro d'adhérent
 {% endif %}
-{% endblock %}
-
-{% block aftercontainer %}
 {% endblock %}
 
 {% block content %}
@@ -48,7 +47,6 @@
                 <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
             </div>
             {% endif %}
-
         </div>
     </div>
 {% endblock %}
