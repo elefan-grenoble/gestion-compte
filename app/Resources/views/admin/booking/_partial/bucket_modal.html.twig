@@ -2,30 +2,29 @@
 Template for the modal popup used to change the user register for a shift bucket in  /booking/admin
 It use the materialize modal class https://materializecss.com/modals.html
 #}
-{% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
-{% set nbShifts = (bucket.shifts() | length) %}
-<div id="edit{{ bucket.first.id }}" class="modal" data-source="edit{{ bucket.first.id }}">
-    <div class="modal-content">
-        {% if bucket.first.locked %}
-            <i class="material-icons left large">lock</i>
-        {% endif %}
-        <h4>Créneaux / <span class="{{ bucket.first.job.color }}-text">{{ bucket.first.job.name }}</span></h4>
-        <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
-        <span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ (((nbShifts-nbBookableShifts) / nbShifts)*100) | round }}%)</span>
-        <ul class="collapsible">
-            {% for shift in bucket.sortedShifts() %}
-                {% if shift.shifter %}{# is booked #}
-                    <li id="shift{{ shift.id }}">
-                        <div class="collapsible-header">
-                            <div class="col s12">
-                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                    <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
-                                {% endif %}
-                                #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
-                                {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
-                                {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
-                                {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
-                            </div>
+{% set nbBookableShifts = shifts | filter ( shift => shift.isDismissed or not shift.shifter) | length %}
+{% set nbShifts = (shifts | length) %}
+{% set bucket = (shifts | first) %}
+{% if bucket.locked %}
+    <i class="material-icons left large">lock</i>
+{% endif %}
+<h4>Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span></h4>
+<h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
+<span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ (((nbShifts-nbBookableShifts) / nbShifts)*100) | round }}%)</span>
+<ul class="collapsible">
+    {% for shift in shifts %}
+        {% if shift.shifter %}{# is booked #}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px">
+                        <div class="col s12">
+                            {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                            {% endif %}
+                            #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                            {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
+                            {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
+                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                         <div class="collapsible-body">
                             <p>
@@ -64,108 +63,129 @@ It use the materialize modal class https://materializecss.com/modals.html
                                     {% endif %}
                                 </form>
                             {% endif %}
+                        {% endif %}
+                        <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
+                            {% if shift.isPast %}
+                                <button type="submit" class="btn red">
+                                    <i class="material-icons left">delete</i>Supprimer
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn orange">
+                                    <i class="material-icons left">lock_open</i>Libérer
+                                </button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+        {% else %}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px;">
+                        <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
+                            <b>
+                                <span style="font-style: italic">
+                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                                    {% else %}libre
+                                    {% endif %}
+                                </span>
+                            </b>
+                            {% if shift.formation %}
+                                </b>&nbsp;({{ shift.formation.name }})
+                            {% else %}
+                                </b>&nbsp;(sans formation particulière)
+                            {% endif %}
                         </div>
-                    </li>
-                {% else %}
-                    <li id="shift{{ shift.id }}">
-                        <div class="collapsible-header">
-                            <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
-                                <b>
-                                    <span style="font-style: italic">
-                                        {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
-                                        {% else %}libre
-                                        {% endif %}
-                                    </span>
-                                </b>
-                                {% if shift.formation %}
-                                    </b>&nbsp;({{ shift.formation.name }})
-                                {% else %}
-                                    </b>&nbsp;(sans formation particulière)
-                                {% endif %}
+                        {% if not shift.lastShifter %}
+                            <div class="col s1">
+                                <form name="form" method="post" action="{{ path('shift_delete', {'id': shift.id}) }}" onsubmit="return confirm('Etes-vous sûr de supprimer ce poste ?!');">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
+                                    <a href="#" onclick="$(this).closest('form').submit(); event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
+                                </form>
                             </div>
-                            {% if not shift.lastShifter %}
-                                <div class="col s1 right-align">
-                                    {{ form_start(shift_delete_form[shift.id]) }}
-                                    {{ form_widget(shift_delete_form[shift.id]) }}
-                                    <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
-                                    {{ form_end(shift_delete_form[shift.id]) }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="collapsible-body">
+                    <form method="post" action="{{ path('admin_shift_book',{'id': shift.id}) }}">
+                        <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
+                        <div class="row">
+                            <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                                <label for="appbundle_shift_booker{{ shift.id}}">Bénéficiaire</label>
+                                <input id="appbundle_shift_booker{{ shift.id }}" name="form[booker]" type="text" class="autocomplete" />
+                            </div>
+                            {% if use_fly_and_fixed %}
+                                <div class="col s2">
+                                    <div>
+                                        <label style="color: #5f5a5a; font-weight: 600;">
+                                            <input type="radio" name="form[fixe]" checked value="0">
+                                            <span>volant</span>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label style="color: #5f5a5a; font-weight: 600;">
+                                            <input type="radio" name="form[fixe]" value="1">
+                                            <span>fixe</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col s3">
+                                    <button class="btn add" disabled="disabled">Ajouter</button>
+                                </div>
+                            {% else %}
+                                <div class="col s3">
+                                    <input type="hidden" id="appbundle_shift_fixe" name="appbundle_shift[fixe]" checked value="0">
+                                    <button class="btn add">Ajouter</button>
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="collapsible-body">
-                            <div class="row">
-                                <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                                    <input id="benef{{ shift.id }}" type="text" class="autocomplete" name="beneficiary" placeholder="Beneficiaire" />
-                                </div>
-                                {% if use_fly_and_fixed %}
-                                    <div class="col s2">
-                                        <div>
-                                            <label for="volant{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">
-                                                <input type="radio" id="volant{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" checked value=0 />
-                                                <span>volant</span>
-                                            </label>
-                                        </div>
-                                        <div>
-                                            <label for="fixe{{ shift.id }}" style="color: #5f5a5a; font-weight: 600;">
-                                                <input type="radio" id="fixe{{ shift.id }}" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=1 />
-                                                <span>fixe</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col s3">
-                                        <button class="btn add" disabled="disabled" onclick="postShift({{ shift.id }})">Ajouter</button>
-                                    </div>
-                                {% else %}
-                                    <div class="col s3">
-                                        <input type="hidden" class="checkedTypeService{{ shift.id }}" name="typeService{{ shift.id }}" value=0 />
-                                        <button class="btn add" onclick="postShift({{ shift.id }})">Ajouter</button>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
-        {{ form_start(shift_add_form[bucket.first.id]) }}
-        <input type="hidden" id="{{ shift_add_form[bucket.first.id].start.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.date.vars.value }}">
-        <input type="hidden" id="{{ shift_add_form[bucket.first.id].start.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.time.vars.value }}">
-        <input type="hidden" id="{{ shift_add_form[bucket.first.id].end.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.date.vars.value }}">
-        <input type="hidden" id="{{ shift_add_form[bucket.first.id].end.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.time.vars.value }}">
-        {{ form_widget(shift_add_form[bucket.first.id].job) }}
-        <div class="row valign-wrapper">
-            <div class="col s3">
-                {{ form_label(shift_add_form[bucket.first.id].number) }}
-                {{ form_widget(shift_add_form[bucket.first.id].number) }}
-            </div>
-            <div class="col s6">
-                {{ form_label(shift_add_form[bucket.first.id].formation) }}
-                {{ form_widget(shift_add_form[bucket.first.id].formation) }}
-            </div>
-            <div class="col s3">
-                <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
-            </div>
-        </div>
-        {{ form_row(shift_add_form[bucket.first.id]._token) }}
-        {{ form_end(shift_add_form[bucket.first.id],  {'render_rest': false}) }}
-        <a href="{{ path('mail_bucketshift', { 'id': bucket.first.id }) }}" class="btn">
-            <i class="material-icons left">mail</i>Envoyer un email aux membres
-        </a>
-        {% if bucket.first.locked %}
-            <a href="{{ path('unlock_shift', { 'id': bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">unlock</i>Déverrouiller
-            </a>
-        {% else %}
-            <a href="{{ path('lock_shift', { 'id': bucket.first.id }) }}" class="btn orange">
-                <i class="material-icons left">lock</i>Verrouiller
-            </a>
+                    </form>
+                </div>
+            </li>
         {% endif %}
-        <a href="{{ path('shift_edit', { 'id': bucket.first.id }) }}" class="btn deep-purple">
-            <i class="material-icons left">edit</i>Editer
-        </a>
-        <a href="#" title="Supprimer tous les créneaux à cette heure et ce poste" onclick="var r = confirm('Supprimer les créneaux et les réservations ?!'); if (r == true) {
-                $('#form_shift_id').val({{ bucket.first.id }});$('#delete_bucket').submit();}" class="red btn">
-            <i class="material-icons left">delete</i>Supprimer
-        </a>
+    {% endfor %}
+</ul>
+{{ form_start(shift_add_form[bucket.first.id]) }}
+<input type="hidden" id="{{ shift_add_form[bucket.first.id].start.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.date.vars.value }}">
+<input type="hidden" id="{{ shift_add_form[bucket.first.id].start.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].start.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].start.time.vars.value }}">
+<input type="hidden" id="{{ shift_add_form[bucket.first.id].end.date.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.date.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.date.vars.value }}">
+<input type="hidden" id="{{ shift_add_form[bucket.first.id].end.time.vars.id }}" name="{{ shift_add_form[bucket.first.id].end.time.vars.full_name }}" value="{{ shift_add_form[bucket.first.id].end.time.vars.value }}">
+{{ form_widget(shift_add_form[bucket.first.id].job) }}
+<div class="row valign-wrapper">
+    <div class="col s3">
+        {{ form_label(shift_add_form[bucket.first.id].number) }}
+        {{ form_widget(shift_add_form[bucket.first.id].number) }}
+    </div>
+    <div class="col s6">
+        {{ form_label(shift_add_form[bucket.first.id].formation) }}
+        {{ form_widget(shift_add_form[bucket.first.id].formation) }}
+    </div>
+    <div class="col s3">
+        <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
     </div>
 </div>
+{{ form_row(shift_add_form[bucket.first.id]._token) }}
+{{ form_end(shift_add_form[bucket.first.id],  {'render_rest': false}) }}
+<a href="{{ path('mail_bucketshift', { 'id': bucket.first.id }) }}" class="btn">
+    <i class="material-icons left">mail</i>Envoyer un email aux membres
+</a>
+{% if bucket.locked %}
+    <a href="{{ path('unlock_shift', { 'id': bucket.id }) }}" class="btn orange">
+        <i class="material-icons left">unlock</i>Déverrouiller
+    </a>
+{% else %}
+    <a href="{{ path('lock_shift', { 'id': bucket.id }) }}" class="btn orange">
+        <i class="material-icons left">lock</i>Verrouiller
+    </a>
+{% endif %}
+<a href="{{ path('shift_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
+    <i class="material-icons left">edit</i>Editer
+</a>
+<form method="post" action="{{ path('delete_bucket', {'id': bucket.id}) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');">
+    <input type="hidden" name="_method" value="DELETE">
+    <input type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
+    <button type="submit" title="Supprimer tous les créneaux à cette heure et ce poste" class="red btn">
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
+</form>

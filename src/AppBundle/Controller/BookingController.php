@@ -24,6 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -386,34 +387,42 @@ class BookingController extends Controller
 
         $bucketsByDay = $this->bucketFactory($shifts, $filter["filling"]);
 
-        $shift_delete_form = array();
-        $shift_add_form = array();
-        foreach ($shifts as $shift) {
-            $shift_delete_form[$shift->getId()] = $this->createDeleteForm($shift)->createView();
-            $shift_add_form[$shift->getId()] = $this->createForm('AppBundle\Form\ShiftType', $shift, [
-                'action' => $this->generateUrl('shift_new'),
-                'only_add_formation' => true
-            ])->createView();
-        }
-
-        $delete_bucket_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket'))
-            ->setMethod('DELETE')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
         return $this->render('admin/booking/index.html.twig', [
             'filterForm' => $filter["form"]->createView(),
             'bucketsByDay' => $bucketsByDay,
             'jobs' => $jobs,
             'beneficiaries' => $beneficiaries,
-            'shift_delete_form' => $shift_delete_form,
-            'shift_add_form' => $shift_add_form,
-            'delete_bucket_form' => $delete_bucket_form->createView(),
         ]);
 
     }
 
+    /**
+     * @Route("/show_bucket/{id}", name="shift_show")
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Method({"GET"})
+     */
+    public function showBucketAction(Request $request, Shift $bucket)
+    {
+
+        $em = $this->getDoctrine()->getManager();
+        $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
+
+        $shift_add_form = $this->createForm(
+            ShiftType::class,
+            $bucket,
+            array(
+                'action' => $this->generateUrl('shift_new'),
+                'only_add_formation' => true,
+            )
+        )
+            ->createView();
+
+        return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
+            'shifts' => $shifts,
+            'shift_add_form' => $shift_add_form
+        ]);
+
+    }
 
     /**
      * @Route("/edit_bucket/{id}", name="shift_edit")
@@ -431,11 +440,15 @@ class BookingController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $bucket->getJob(), 'start' => $bucket->getStart(), 'end' => $bucket->getEnd()));
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy([
+                'job' => $bucket->getJob(),
+                'start' => $bucket->getStart(),
+                'end' => $bucket->getEnd()
+            ]);
             foreach ($shifts as $s) {
-                $s->setStart($shift->getStart());
-                $s->setEnd($shift->getEnd());
-                $s->setJob($shift->getJob());
+                $s->setStart($bucket->getStart());
+                $s->setEnd($bucket->getEnd());
+                $s->setJob($bucket->getJob());
                 $em->persist($s);
             }
             $em->flush();
@@ -452,44 +465,50 @@ class BookingController extends Controller
     /**
      * delete all shifts in bucket.
      *
-     * @Route("/delete_bucket/", name="delete_bucket")
+     * @Route("/delete_bucket/{id}", name="delete_bucket")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
      */
-    public function deleteBucketAction(Request $request)
+    public function deleteBucketAction(Request $request, Shift $bucket)
     {
-
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket'))
-            ->setMethod('DELETE')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
+        $form = $this->createDeleteBucketForm($bucket);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
-                $count = 0;
-                foreach ($shifts as $s) {
-
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
-
-                    $em->remove($s);
-                    $count++;
-                }
-                $em->flush();
-                $session->getFlashBag()->add('success', $count . " shifts removed");
-            } else {
-                $session->getFlashBag()->add('warning', "shift not found");
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy([
+                'job' => $bucket->getJob(),
+                'start' => $bucket->getStart(),
+                'end' => $bucket->getEnd()
+            ]);
+            $count = 0;
+            foreach ($shifts as $s) {
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
+                $em->remove($s);
+                $count++;
             }
+            $em->flush();
+            $session->getFlashBag()->add('success', $count . " shifts removed");
         }
         return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
+     * Creates a form to delete a bucket entity.
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteBucketForm(Shift $bucket)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('delete_bucket', array('id' => $bucket->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+        ;
     }
 
     /**
@@ -712,59 +731,66 @@ class BookingController extends Controller
     {
         $session = new Session();
 
-        if ($shift->getShifter() && !$shift->getIsDismissed()) {
-            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return new Response($this->generateUrl("booking_admin"), 205);
+        $form = $this->createFormBuilder()
+            ->add('booker', TextType::class)
+            ->add('fixe', RadioType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+                $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
+                return new Response($this->generateUrl("booking_admin"), 205);
+            }
+
+            $fixe = $form->get("fixe")->getData();
+            $str = $form->get("booker")->getData();
+            $em = $this->getDoctrine()->getManager();
+            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
+
+            if (!$beneficiary) {
+                $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
+                return $this->redirectToRoute('booking_admin');
+            }
+
+            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
+                return $this->redirectToRoute('booking_admin');
+            }
+
+            if (!$shift->getBooker()) {
+                $current_user = $this->get('security.token_storage')->getToken()->getUser();
+                $shift->setBooker($current_user);
+                $shift->setBookedTime(new DateTime('now'));
+            }
+            $shift->setShifter($beneficiary);
+            $shift->setIsDismissed(false);
+            $shift->setDismissedReason(null);
+            $shift->setDismissedTime(null);
+            $shift->setLastShifter(null);
+            $shift->setFixe($fixe);
+
+            $em->persist($shift);
+
+            $member = $beneficiary->getMembership();
+            if ($member->getFirstShiftDate() == null) {
+                $firstDate = clone($shift->getStart());
+                $firstDate->setTime(0, 0, 0);
+                $member->setFirstShiftDate($firstDate);
+                $em->persist($member);
+            }
+            $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+
+            $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
+            return $this->redirectToRoute('booking_admin');
         }
-
-        $content = json_decode($request->getContent());
-        $str = $content->beneficiary;
-        $fixe = $content->typeService;
-
-        $em = $this->getDoctrine()->getManager();
-        /**@var  Beneficiary $beneficiary*/
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
-
-        if (!$beneficiary) {
-            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
-            return new Response($this->generateUrl("booking_admin"), 205);
-        }
-
-        if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
-            $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
-            return new Response($this->generateUrl("booking_admin"), 205);
-        }
-
-        if (!$shift->getBooker()) {
-            $current_user = $this->get('security.token_storage')->getToken()->getUser();
-            $shift->setBooker($current_user);
-            $shift->setBookedTime(new DateTime('now'));
-        }
-        $shift->setShifter($beneficiary);
-        $shift->setIsDismissed(false);
-        $shift->setDismissedReason(null);
-        $shift->setDismissedTime(null);
-        $shift->setLastShifter(null);
-        $shift->setFixe($fixe);
-
-        $em->persist($shift);
-
-        $member = $beneficiary->getMembership();
-        if ($member->getFirstShiftDate() == null) {
-            $firstDate = clone($shift->getStart());
-            $firstDate->setTime(0, 0, 0);
-            $member->setFirstShiftDate($firstDate);
-            $em->persist($member);
-        }
-
-        $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
-
-        $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
-        return new Response($this->generateUrl("booking_admin"), 200);
-
+        $session->getFlashBag()->add('error', "Une erreur est survenue...");
+        return $this->redirectToRoute('booking_admin');
     }
 
     /**
