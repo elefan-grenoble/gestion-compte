@@ -40,16 +40,6 @@
                 </a>
             {% endif %}
 
-            {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
-                <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
-                    <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
-                </a>
-                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
-                    <i class="material-icons left">settings_ethernet</i>Paiements helloasso
-                </a>
-            {% endif %}
-
             {% if is_granted("ROLE_SHIFT_MANAGER") %}
                 <h6><i class="material-icons">date_range</i>&nbsp;Créneaux</h6>
                 <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn white black-text">
@@ -71,24 +61,6 @@
                 </a>
             {% endif %}
 
-            {% if display_keys_shop %}
-                {% if is_granted("ROLE_ADMIN") %}
-                    <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
-                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1">
-                        <i class="material-icons left">vpn_key</i>Voir code(s)
-                    </a>
-                    {% if code_generation_enabled %}
-                        <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1">
-                            <i class="material-icons left">vpn_key</i>Déposer les clefs
-                        </a>
-                    {% else %}
-                        <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1">
-                            <i class="material-icons left">vpn_key</i>Définir un nouveau code
-                        </a>
-                    {% endif %}
-                {% endif %}
-            {% endif %}
-
             {% if is_granted("ROLE_PROCESS_MANAGER") %}
                 <h6><i class="material-icons">content_paste</i>&nbsp;Contenus</h6>
                 <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
@@ -106,6 +78,34 @@
                 <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">mail</i>Modèles d'emails
                 </a>
+            {% endif %}
+        {% endif %}
+
+        {% if is_granted("ROLE_FINANCE_MANAGER") %}
+            <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
+            <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
+                <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
+            </a>
+            <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
+                <i class="material-icons left">settings_ethernet</i>Paiements helloasso
+            </a>
+        {% endif %}
+
+        {% if display_keys_shop %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
+                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1">
+                    <i class="material-icons left">vpn_key</i>Voir code(s)
+                </a>
+                {% if code_generation_enabled %}
+                    <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1">
+                        <i class="material-icons left">vpn_key</i>Déposer les clefs
+                    </a>
+                {% else %}
+                    <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1">
+                        <i class="material-icons left">vpn_key</i>Définir un nouveau code
+                    </a>
+                {% endif %}
             {% endif %}
         {% endif %}
 
