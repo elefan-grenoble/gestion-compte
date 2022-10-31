@@ -10,7 +10,6 @@
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
-        {% if is_granted("ROLE_ADMIN_PANEL") %}
             <h4 class="row center">
                 <i class="material-icons">build</i>&nbsp;Administration
             </h4>
@@ -79,69 +78,68 @@
                     <i class="material-icons left">mail</i>Modèles d'emails
                 </a>
             {% endif %}
-        {% endif %}
 
-        {% if is_granted("ROLE_FINANCE_MANAGER") %}
-            <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
-            <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
-                <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
-            </a>
-            <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
-                <i class="material-icons left">settings_ethernet</i>Paiements helloasso
-            </a>
-        {% endif %}
-
-        {% if display_keys_shop %}
-            {% if is_granted("ROLE_ADMIN") %}
-                <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
-                <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1">
-                    <i class="material-icons left">vpn_key</i>Voir code(s)
+            {% if is_granted("ROLE_FINANCE_MANAGER") %}
+                <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
+                <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
+                    <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
                 </a>
-                {% if code_generation_enabled %}
-                    <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1">
-                        <i class="material-icons left">vpn_key</i>Déposer les clefs
+                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
+                    <i class="material-icons left">settings_ethernet</i>Paiements helloasso
+                </a>
+            {% endif %}
+
+            {% if display_keys_shop %}
+                {% if is_granted("ROLE_ADMIN") %}
+                    <h6><i class="material-icons">vpn_key</i>&nbsp;Boîtier cles</h6>
+                    <a href="{{ path("codes_list") }}" class="waves-effect waves-light btn deep-purple lighten-1">
+                        <i class="material-icons left">vpn_key</i>Voir code(s)
                     </a>
-                {% else %}
-                    <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1">
-                        <i class="material-icons left">vpn_key</i>Définir un nouveau code
-                    </a>
+                    {% if code_generation_enabled %}
+                        <a href="{{ path("code_generate") }}" class="waves-effect waves-light btn deep-purple darken-1">
+                            <i class="material-icons left">vpn_key</i>Déposer les clefs
+                        </a>
+                    {% else %}
+                        <a href="{{ path("code_edit") }}" class="waves-effect waves-light btn deep-purple darken-1">
+                            <i class="material-icons left">vpn_key</i>Définir un nouveau code
+                        </a>
+                    {% endif %}
                 {% endif %}
             {% endif %}
-        {% endif %}
 
-        {% if is_granted("ROLE_ADMIN") %}
-            <h6><i class="material-icons">verified_user</i>&nbsp;Rôles utilisateurs</h6>
-            <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn deep-purple">
-                <i class="material-icons left">list</i>Liste des roles
-            </a>
-        {% endif %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <h6><i class="material-icons">verified_user</i>&nbsp;Rôles utilisateurs</h6>
+                <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn deep-purple">
+                    <i class="material-icons left">list</i>Liste des roles
+                </a>
+            {% endif %}
 
-        {% if is_granted("ROLE_SUPER_ADMIN") %}
-            <h5>Actions super admin</h5>
-            <h6>Membres</h6>
-            <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn">
-                <i class="material-icons left">file_upload</i>Importer des adhérents (CSV)
-            </a>
-            <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn">
-                <i class="material-icons left">file_download</i>Exporter les adhérents (CSV)
-            </a>
+            {% if is_granted("ROLE_SUPER_ADMIN") %}
+                <h5>Actions super admin</h5>
+                <h6>Membres</h6>
+                <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">file_upload</i>Importer des adhérents (CSV)
+                </a>
+                <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">file_download</i>Exporter les adhérents (CSV)
+                </a>
 
-            <h6>Admins</h6>
-            <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple">
-                <i class="material-icons left">add</i>Ajouter un admin
-            </a>
-            <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn deep-purple">
-                <i class="material-icons left">list</i>Liste des utilisateurs admin
-            </a>
+                <h6>Admins</h6>
+                <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple">
+                    <i class="material-icons left">add</i>Ajouter un admin
+                </a>
+                <a href="{{ path("admins_list") }}" class="waves-effect waves-light btn deep-purple">
+                    <i class="material-icons left">list</i>Liste des utilisateurs admin
+                </a>
 
-            <h6>Divers</h6>
-            <a href="{{ path("admin_clients") }}" class="waves-effect waves-light btn">
-                <i class="material-icons left">vpn_key</i>Gérer les clients Oauth
-            </a>
-            <a href="{{ path("admin_services") }}" class="waves-effect waves-light btn">
-                <i class="material-icons left">extension</i>Gérer les services
-            </a>
-        {% endif %}
+                <h6>Divers</h6>
+                <a href="{{ path("admin_clients") }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">vpn_key</i>Gérer les clients Oauth
+                </a>
+                <a href="{{ path("admin_services") }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">extension</i>Gérer les services
+                </a>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
