@@ -301,7 +301,7 @@ class EventController extends Controller
         $max_event_proxy_per_user = $this->container->getParameter("max_event_proxy_per_user");
 
         // check if user has already given a proxy
-        if ($myproxy){
+        if ($myproxy) {
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
@@ -312,19 +312,18 @@ class EventController extends Controller
         $beneficiariesId = array_map(function(Beneficiary $beneficiary) {
             return $beneficiary->getId();
         }, $beneficiaries->toArray());
-        $received_proxy = $em->getRepository('AppBundle:Proxy')->findBy(
+        $member_received_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
             array(
                 "owner" => $beneficiariesId,
                 "event" => $event
             )
         );
-        var_dump($received_proxy);
-        if ($received_proxy){
-            foreach ($received_proxy as $rp){
+        if ($member_received_proxies) {
+            foreach ($member_received_proxies as $rp) {
                 if ($rp->getGiver()){ //someone give a proxy
                     $session->getFlashBag()->add('error', 'Oups, '. $rp->getGiver() .' a donné une procuration à '. $rp->getOwner() .', il compte dessus !');
                     return $this->redirectToRoute('homepage');
-                }else{ //no-one give a proxy, lets remove the waiting one
+                } else { // no-one give a proxy, lets remove the waiting one
                     $em->remove($rp);
                     //$em->flush();
                 }
@@ -389,7 +388,7 @@ class EventController extends Controller
                     $beneficiaries_ids[] = $b;
                 }
 
-                // check if beneficiary hasn't already given a procuration
+                // check if beneficiary (member) hasn't already given a procuration
                 $beneficiary_giver_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
@@ -398,22 +397,13 @@ class EventController extends Controller
                     return $this->redirectToRoute('homepage');
                 }
 
-                // check if beneficiary doesn't already have maximum number of procuration(s)
+                // check if beneficiary (member) doesn't already have maximum number of procuration(s)
                 $beneficiary_owner_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
                 if (count($beneficiary_owner_proxies) == $max_event_proxy_per_user) {
-                    if ($max_event_proxy_per_user == 1) {
-                        if ($beneficiary_owner_proxies->first()->getGiver() !== null) {
-                            $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre une procuration d\'une autre personne');
-                        } else if ($beneficiary_owner_proxies->first()->getOwner() != $beneficiary) {
-                            $session->getFlashBag()->add('notice', $beneficiary->getUser()->getFirstName() . ' partage son adhésion #' . $beneficiary->getMemberNumber() . ' avec ' . $proxy->getOwner()->getUser()->getFirstname() . ' qui accepte de prendre une procuration pour cet événement !');
-                        }
-                        return $this->redirectToRoute('homepage');
-                    } else {
-                        $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_user .')');
-                        return $this->redirectToRoute('homepage');
-                    }
+                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_user .')');
+                    return $this->redirectToRoute('homepage');
                 }
 
                 // create proxy

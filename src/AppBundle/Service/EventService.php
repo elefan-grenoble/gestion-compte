@@ -36,11 +36,11 @@ class EventService
         $qb = $this->em->getRepository('AppBundle:Proxy')->createQueryBuilder('p');
 
         $qb->where('p.event = :event')
-            ->andWhere( 'p.owner = :beneficiary')
+            ->andWhere('p.owner IN (:beneficiaries)')
             ->setParameter('event', $event)
-            ->setParameter('beneficiary', $beneficiary);
+            ->setParameter('beneficiaries', $beneficiary->getMembership()->getBeneficiaries());
 
-        // can have multiple proxies (%max_event_proxy_per_user%)
+        // getResult instead of getOneOrNullResult? member can have multiple proxies (%max_event_proxy_per_user%)
         return $qb->getQuery()->getResult();
     }
 }
