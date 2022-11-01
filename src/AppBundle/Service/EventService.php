@@ -40,7 +40,7 @@ class EventService
             ->setParameter('event', $event)
             ->setParameter('beneficiaries', $beneficiary->getMembership()->getBeneficiaries());
 
-        // getResult instead of getOneOrNullResult? member can have multiple proxies (%max_event_proxy_per_user%)
+        // getResult instead of getOneOrNullResult? member can have multiple proxies (%max_event_proxy_per_member%)
         return $qb->getQuery()->getResult();
     }
 }

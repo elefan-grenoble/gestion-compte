@@ -297,8 +297,8 @@ class EventController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "giver"=>$current_app_user));
-        $max_event_proxy_per_user = $this->container->getParameter("max_event_proxy_per_user");
+        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user));
+        $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
 
         // check if user has already given a proxy
         if ($myproxy) {
@@ -379,30 +379,29 @@ class EventController extends Controller
         }
 
         // proxy with a given beneficiary
-        if ($request->get("beneficiary") > 0){
+        if ($request->get("beneficiary") > 0) {
             $em = $this->getDoctrine()->getManager();
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($request->get("beneficiary"));
             if ($beneficiary) {
-                $beneficiaries_ids = [];
-                foreach ($beneficiary->getMembership()->getBeneficiaries() as $b) {
-                    $beneficiaries_ids[] = $b;
-                }
-
-                // check if beneficiary (member) hasn't already given a procuration
-                $beneficiary_giver_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
+                // check if member hasn't already given a procuration
+                $member_giver_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
-                if (count($beneficiary_giver_proxies) > 0) {
+                if (count($member_giver_proxies) > 0) {
                     $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' a déjà donné sa procuration');
                     return $this->redirectToRoute('homepage');
                 }
 
-                // check if beneficiary (member) doesn't already have maximum number of procuration(s)
-                $beneficiary_owner_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
+                // check if member doesn't already have maximum number of procuration(s)
+                $beneficiaries_ids = [];
+                foreach ($beneficiary->getMembership()->getBeneficiaries() as $b) {
+                    $beneficiaries_ids[] = $b;
+                }
+                $member_owner_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
-                if (count($beneficiary_owner_proxies) == $max_event_proxy_per_user) {
-                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_user .')');
+                if (count($member_owner_proxies) == $max_event_proxy_per_member) {
+                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -554,14 +553,16 @@ class EventController extends Controller
      *
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
      */
-    public function acceptProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
-
+    public function acceptProxyAction(Event $event,Request $request,\Swift_Mailer $mailer)
+    {
         $em = $this->getDoctrine()->getManager();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "giver"=>$current_app_user));
         $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        // check if user has already given a proxy
+        // check if member hasn't already given a proxy
+        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(
+            array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership())
+        );
         if ($myproxy) {
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
@@ -586,7 +587,7 @@ class EventController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
-        $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "owner"=>null));
+        $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event" => $event, "owner" => null));
         if (!$proxy){
             $proxy = new Proxy();
             $proxy->setEvent($event);
@@ -596,12 +597,15 @@ class EventController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $max_event_proxy_per_user = $this->container->getParameter("max_event_proxy_per_user");
-            $myproxy = $em->getRepository('AppBundle:Proxy')->findBy(array("event"=>$event, "owner"=>$form->getData()->getOwner()));
-            if (count($myproxy) == $max_event_proxy_per_user) {
-                $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_user .' procuration.');
+            // check if member doesn't already have the maximum nomber of proxies (%max_event_proxy_per_member%)
+            $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
+            $myproxy = $em->getRepository('AppBundle:Proxy')->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
+            if (count($myproxy) == $max_event_proxy_per_member) {
+                $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_member .' procuration.');
                 return $this->redirectToRoute('event_proxy_take', array('id'=>$event->getId()));
             }
+
+            // save proxy
             $em->persist($proxy);
             $em->flush();
             $session->getFlashBag()->add('success', 'Procuration acceptée !');

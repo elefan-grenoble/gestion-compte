@@ -121,7 +121,7 @@ parameters:
     display_swipe_cards_settings: true
 
     # Events
-    max_event_proxy_per_user: 1
+    max_event_proxy_per_member: 1
 
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
