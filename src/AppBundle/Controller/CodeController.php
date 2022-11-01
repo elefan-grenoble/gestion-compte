@@ -34,7 +34,7 @@ class CodeController extends Controller
         if (!$codes) {
             $codes[] = new Code();
         }
-        return $this->render('default/code/home_dashboard.html.twig',array('codes'=>$codes));
+        return $this->render('default/code/home_dashboard.html.twig', array('codes' => $codes));
     }
 
     /**

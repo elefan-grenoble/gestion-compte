@@ -145,31 +145,31 @@
                         {% endif %}
                     </div>
                 </div>
+                {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
+                    <div class="homebox">
+                        <h5><span class="white">Mes commissions</h5>
+                        {% for commission in app.user.beneficiary.ownedCommissions %}
+                            <a href="{{ path("commission_edit",{'id': commission.id }) }}" class="waves-effect waves-light btn blue-grey">
+                                Gérer la commission {{ commission.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% if app.user.beneficiary and (app.user.beneficiary.membership | uptodate) and display_keys_shop %}
+                    <div class="homebox">
+                        <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>
+                        {% if display_keys_shop %}
+                            {{ render(controller("AppBundle:Code:homepageDashboard")) }}
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </div>
     {% endif %}
     {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
         <div id="home-shifts" class="row">
             <div class="col s12">
-                {{ render(controller("AppBundle:Booking:homepageShifts")) }}{# use include instead?#}
-            </div>
-        </div>
-        <div class="row center">
-            <div class="col offset-xl3 xl6 m8 offset-m2 s12">
-                <div class="homebox">
-                    <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action</span></h5>
-
-                    {{ render(controller("AppBundle:Code:homepageDashboard")) }}{# use include instead?#}
-
-                    {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
-                        <h5>Mes commissions</h5>
-                        {% for com in app.user.beneficiary.ownedCommissions %}
-                            <a href="{{ path("commission_edit",{'id': com.id }) }}" class="waves-effect waves-light btn blue-grey">
-                                Gérer la commission {{ com.name }}
-                            </a>
-                        {% endfor %}
-                    {% endif %}
-                </div>
+                {{ render(controller("AppBundle:Booking:homepageShifts")) }}{# use include instead? #}
             </div>
         </div>
     {% endif %}
