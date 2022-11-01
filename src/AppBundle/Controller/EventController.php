@@ -297,16 +297,16 @@ class EventController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $myproxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user));
         $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
 
-        // check if user has already given a proxy
-        if ($myproxy) {
+        // check if member hasn't already given a proxy
+        $member_given_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership()));
+        if ($member_given_proxy) {
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
         }
 
-        // check if member has already received a proxy
+        // check if member hasn't already received a proxy
         $membership = $current_app_user->getBeneficiary()->getMembership();
         $beneficiaries = $membership->getBeneficiaries();
         $beneficiariesId = array_map(function(Beneficiary $beneficiary) {
@@ -383,7 +383,7 @@ class EventController extends Controller
             $em = $this->getDoctrine()->getManager();
             $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($request->get("beneficiary"));
             if ($beneficiary) {
-                // check if member hasn't already given a procuration
+                // check if member hasn't already given a proxy
                 $member_giver_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
