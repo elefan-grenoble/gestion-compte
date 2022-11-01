@@ -85,11 +85,6 @@
                                     </a>
                                 {% else %}
                                     <div>
-                                        <div>
-                                            {% if display_swipe_cards_settings %}
-                                                {% include "member/_partial/swipe_card.html.twig" with { member: app.user.beneficiary.membership, showBadgeImage: false } %}
-                                            {% endif %}
-                                        </div>
                                         <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
                                             <i class="material-icons left">settings</i>Gérer mon compte
                                         </a>
