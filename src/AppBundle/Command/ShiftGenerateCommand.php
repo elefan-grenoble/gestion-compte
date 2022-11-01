@@ -56,6 +56,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $em = $this->getContainer()->get('doctrine')->getManager();
         $mailer = $this->getContainer()->get('mailer');
         $periodRepository = $em->getRepository('AppBundle:Period');
+        $admin = $em->getRepository('AppBundle:User')->findSuperAdminAccount();
 
         $weekCycle = array("A", "B", "C", "D");
         foreach ( $period as $date ) {
@@ -100,7 +101,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $current_shift->setFixe(True);
                             $current_shift->setShifter($position->getShifter());
                             $current_shift->setBookedTime(new \DateTime('now'));
-                            $current_shift->setBooker($position->getShifter());
+                            $current_shift->setBooker($admin);
                         } else if ($last_cycle_shift &&
                             $last_cycle_shift->getShifter() &&
                             $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter')) {

@@ -1,7 +1,4 @@
 {% set shifter = shift.shifter %}
-{% if not shifter %}
-{% set shifter = shift.booker %}
-{% endif %}
 <div id="contact{{ shift.id }}" class="modal modal-fixed-footer left-align">
     <div class="modal-content">
         <h5>Envoyer un mail aux membres du créneau <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h5>

@@ -529,7 +529,8 @@ class BookingController extends Controller
         }
 
         if (!$shift->getBooker()) {
-            $shift->setBooker($beneficiary);
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $shift->setBooker($current_user);
             $shift->setBookedTime(new DateTime('now'));
         }
         $shift->setShifter($beneficiary);
@@ -649,8 +650,9 @@ class BookingController extends Controller
 
         if ($shift->getId()) {
             if ($shift->getLastShifter()) {
+                $current_user = $this->get('security.token_storage')->getToken()->getUser();
+                $shift->setBooker($current_user);
                 $beneficiary = $shift->getLastShifter();
-                $shift->setBooker($beneficiary);
                 $shift->setShifter($beneficiary);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setLastShifter(null);
@@ -743,7 +745,8 @@ class BookingController extends Controller
         }
 
         if (!$shift->getBooker()) {
-            $shift->setBooker($beneficiary);
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $shift->setBooker($current_user);
             $shift->setBookedTime(new DateTime('now'));
         }
         $shift->setShifter($beneficiary);
