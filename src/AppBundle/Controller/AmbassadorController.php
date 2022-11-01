@@ -114,8 +114,8 @@ class AmbassadorController extends Controller
      * Lists all users with shift time logs older than 9 hours.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
-     * @Method({"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Method({"GET", "POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -184,7 +184,6 @@ class AmbassadorController extends Controller
             'page'=>$page,
             'nb_of_pages'=>$nb_of_pages
         ));
-
     }
 
     /**
