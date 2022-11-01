@@ -106,7 +106,8 @@ parameters:
     max_time_at_end_of_shift: 0
 
     # Profile configuration
-    profile_display_time_log: false
+    profile_display_task_list: true
+    profile_display_time_log: true
 
     # Swipe card configuration
     swipe_card_logging: true
