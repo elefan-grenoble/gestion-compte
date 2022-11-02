@@ -77,7 +77,7 @@ class Membership
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "ASC"})
+     * @OrderBy({"createdAt" = "ASC"})
      */
     private $notes;
 
