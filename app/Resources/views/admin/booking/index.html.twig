@@ -82,9 +82,11 @@
 
 {% include "admin/booking/_partial/bucket_calendar.html.twig" with { bucketsByDay: bucketsByDay } %}
 
-{{ form_start(delete_bucket_form, { 'attr': { 'id': 'delete_bucket' }}) }}
-{{ form_widget(delete_bucket_form) }}
-{{ form_end(delete_bucket_form) }}
+<div id="modal-bucket" class="modal">
+    <div class="modal-content">
+    </div>
+</div>
+
 {% endblock %}
 
 {% block stylesheets %}
@@ -104,63 +106,32 @@
                 }
             })
             .trigger('change');
-
-            // for the bucket modification popup----------------
-            $('input.autocomplete').autocomplete({
-                data: {
-                    {% for beneficiary in beneficiaries %}
-                        "{{ beneficiary.autocompleteLabel }}": null,
-                    {% endfor %}
+            $('.modal').modal({
+                onCloseEnd: function() {
+                    $( ".modal-content" ).html('');
                 },
-                // The max amount of results that
-                // can be shown at once. Default: Infinity.
-                limit: 10,
-                onAutocomplete: function (val) {
-                    // Callback function when value is autocomplete.
-                    $('button.add').removeAttr('disabled');
-                },
-                // The minimum length of the input for
-                // the autocomplete to start. Default: 1.
-                minLength: 2,
-            })
-            .keydown(function () {
-                $('button.add:not(:disabled)').attr('disabled', 'disabled');
+                onOpenStart: function(modal, trigger) {
+                    var url = $(trigger).attr('data-source');
+                    $.get( url, function( data ) {
+                        $( ".modal-content" ).html(data);
+                        $('.collapsible').collapsible();
+                        $('input.autocomplete').autocomplete({
+                            data: {
+                                {% for beneficiary in beneficiaries %}
+                                    "{{ beneficiary.autocompleteLabel }}": null,
+                                {% endfor %}
+                            },
+                            limit: 10,
+                            onAutocomplete: function (val) {
+                                // Callback function when value is autocomplete.
+                                $('button.add').removeAttr('disabled');
+                            },
+                            minLength: 2,
+                        });
+                        $('select').formSelect();
+                    });
+                }
             });
-        })
-
-        function postShift(shiftId) {
-            {% if use_fly_and_fixed %}
-            let selectedTypeService = document.querySelector('.checkedTypeService'+shiftId+':checked');
-            {% else %}
-            let selectedTypeService = document.querySelector('input[name="typeService'+shiftId+'"]');
-            {% endif %}
-            let selectedBenef = document.getElementById('benef'+shiftId);
-
-            if (selectedTypeService != null && selectedBenef != null) {
-                let url = "{{ path('admin_shift_book',{'id': 'tmpId'}) }}";
-                url = url.replace("tmpId", shiftId);
-
-                let body = {
-                    "typeService": selectedTypeService.value,
-                    "beneficiary": selectedBenef.value
-                };
-
-                // If using old IE version
-                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-
-                xhttp.open("POST", url, true);
-                xhttp.onreadystatechange = function () {
-                    if (xhttp.readyState > 3) {
-                        if (200 <= xhttp.status && xhttp.status < 300) {
-                            window.location.replace(xhttp.responseText);
-                        } else {
-                            alert("une erreur est survenue");
-                        }
-                    }
-                };
-                xhttp.send(JSON.stringify(body));
-                return xhttp;
-            }
-        }
+        });
     </script>
 {% endblock %}

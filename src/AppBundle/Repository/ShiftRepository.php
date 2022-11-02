@@ -15,6 +15,29 @@ use AppBundle\Entity\Shift;
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
 
+    public function findBucket($shift)
+    {
+        $qb = $this->createQueryBuilder('s');
+        $qb
+            ->leftJoin('s.shifter', 'u')
+            ->addSelect('u')
+            ->leftJoin('u.formations', 'f')
+            ->addSelect('f')
+            ->leftJoin('u.membership', 'm')
+            ->addSelect('m')
+            ->where('s.start = :start')
+            ->andWhere('s.end = :end')
+            ->andWhere('s.job = :job')
+            ->setParameter('start', $shift->getStart())
+            ->setParameter('end', $shift->getEnd())
+            ->setParameter('job', $shift->getJob())
+            ->orderBy('s.shifter', 'DESC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findFutures()
     {
         $qb = $this->createQueryBuilder('s');
@@ -60,6 +83,10 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb
             ->select('s, f')
             ->leftJoin('s.formation', 'f')
+            ->leftJoin('s.shifter', 'u')
+            ->addSelect('u')
+            ->leftJoin('u.formations', 'f1')
+            ->addSelect('f1')
             ->where('s.start > :from')
             ->setParameter('from', $from);
         if ($max) {
