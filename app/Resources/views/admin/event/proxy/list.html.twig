@@ -13,9 +13,16 @@
 {% block content %}
     <h4>Liste des procurations en cours <small>({{ proxies | length }})</small></h4>
 
-    <p class="red-text">
-        Rappel : chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
-    </p>
+    {% if max_event_proxy_per_member > 0 %}
+    <blockquote class="red-text">
+        chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
+    </blockquote>
+    {% endif %}
+    {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+    <blockquote class="red-text">
+        si un membre a <strong>plusieurs</strong> bénéficiaires, c'est le bénéficiaire <strong>principal</strong> qui sera affiché à droite
+    </blockquote>
+    {% endif %}
 
     {% if event %}
         <h5>{{ event.title }}</h5>
@@ -33,9 +40,11 @@
                     {% if not proxy.owner %}
                         porté par le premier volontaire
                     {% else %}
-                        porté par &nbsp;<b>{{ proxy.owner }}</b>&nbsp;
+                        porté par &nbsp;<b>{{ proxy.owner.membership.mainBeneficiary }}</b>&nbsp;
                     {% endif %}
-                    {% if  not event and proxy.event  %}[{{ proxy.event.title }}]{% endif %}
+                    {% if not event and proxy.event %}
+                        [{{ proxy.event.title }}]
+                    {% endif %}
                 </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <div class="collapsible-body">

@@ -7,12 +7,11 @@
 
 {% block macro %}
     {#########################################################################
-     # Compute and output the 2 last cells of a table_line depending of the beneficiary status.
+     # Compute and output the 2 last cells of a table_line depending on the beneficiary status.
      # @param beneficiary: beneficiary entity for this line
      # @param event: The event entity object signature sheet
      #########################################################################}
     {% macro sign_cells(beneficiary, event) %}
-
         {% if not beneficiary.isMain %}
             {# Not main benificiary, only one vote per memeber whatever the beneficiries number -----#}
             <td colspan="2" class="warning" style="background: gray; color: white;">
@@ -34,8 +33,12 @@
             <td colspan="2" class="warning" style="background: gray; color: white;">
                 Procuration donnée à
                 <br />
-                {% if event.proxiesByGiver(beneficiary.membership).first.owner %}
-                    <strong>{{ event.proxiesByGiver(beneficiary.membership).first.owner.lastname }}&nbsp;{{ event.proxiesByGiver(beneficiary.membership).first.owner.firstname }}&nbsp;#{{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}</strong>
+                {% if event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary  %}
+                    <strong>
+                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary.lastname }}
+                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary.firstname }}
+                        #{{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}
+                    </strong>
                 {% else %}
                     Membre supprimé
                 {% endif %}
@@ -46,11 +49,10 @@
             <td></td>
             <td></td>
         {% endif %}
-
     {% endmacro sign_cells %}
 
     {#########################################################################
-     # Compute and output a line for a beneficiary
+     # Compute and output a line for each beneficiary
      # @param beneficiary: beneficiary entity for this line
      # @param event: The event entity object signature sheet
      #########################################################################}
@@ -64,8 +66,8 @@
         </tr>
 
         {# this beneficiary designated a proxy so generation of a additional line for this proxy to sign #}
-        {% if (((event.proxiesByOwner(beneficiary) | length) > 0) and (event.proxiesByOwner(beneficiary).first.giver)) %}
-            {% set proxied_beneficiary = event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary %}
+        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
+            {% set proxied_beneficiary = event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver.mainBeneficiary %}
             <tr>
                 <td>
                     <spam class="smaller">&#8618;&nbsp;A une procuration pour</spam>
@@ -119,7 +121,7 @@
         {% for beneficiary in beneficiaries %}
             {% set time_count_ok = not (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
 
-            {% if ((event.proxiesByGiver(beneficiary.membership) | length > 0) and beneficiary.isMain) %}
+            {% if (event.proxiesByGiver(beneficiary.membership) | length > 0) and beneficiary.isMain %}
                 {% set number_of_proxy = number_of_proxy + 1 %}
             {% endif %}
 
@@ -313,8 +315,7 @@
                         {# generate a benificiary line -------------------- #}
                         {{ _self.table_line(beneficiary, event) }}
                         {# if proxy, a line is added, so index++ ----------- #}
-                        {% if ((event.proxiesByOwner(beneficiary) | length) > 0)
-                            and (event.proxiesByOwner(beneficiary).first.giver) %}
+                        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
                             {% set index = index + 1 %}
                         {% endif %}
                         {% set index = index + 1 %}
