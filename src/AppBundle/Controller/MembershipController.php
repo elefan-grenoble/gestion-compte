@@ -611,7 +611,6 @@ class MembershipController extends Controller
      *
      * @Route("/new", name="member_new")
      * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
     {
