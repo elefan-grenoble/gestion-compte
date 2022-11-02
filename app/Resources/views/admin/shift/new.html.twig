@@ -9,66 +9,47 @@
 {% block content %}
     <h4 class="">Ajouter un créneau ponctuel</h4>
     {{ form_start(form) }}
-    <div class="input-field col s12">
-        <div class="errors">
-            {{ form_errors(form.date) }}
+    <div class="row">
+        <div class="col s12">
+            {{ form_label(form.start.date) }}
+            {{ form_errors(form.start.date) }}
+            {{ form_widget(form.start.date, { attr: { class: 'datepicker' } }) }}
         </div>
-        <div class="input-field">
-            {{ form_widget(form.date) }}
-            {{ form_label(form.date) }}
+        <div class="col s12">
+            {{ form_label(form.start.time, 'Heure de début') }}
+            {{ form_errors(form.start.time) }}
+            {{ form_widget(form.start.time, { attr: { class: 'timepicker' } }) }}
         </div>
-    </div>
-    <div class="input-field col s12">
-        <div class="errors">
-            {{ form_errors(form.start) }}
+        <div class="col s12">
+            <input type="hidden" id="{{ form.end.date.vars.id }}" name="{{ form.end.date.vars.full_name }}">
+            {{ form_label(form.end.time, 'Heure de fin') }}
+            {{ form_errors(form.end.date) }}
+            {{ form_errors(form.end.time) }}
+            {{ form_widget(form.end.time, { attr: { class: 'timepicker' } }) }}
         </div>
-        <div class="input-field">
-            {{ form_widget(form.start) }}
-            {{ form_label(form.start) }}
+        <div class="col s8">
+            {{ form_label(form.formation) }}
+            {{ form_errors(form.formation) }}
+            {{ form_widget(form.formation) }}
         </div>
-    </div>
-    <div class="input-field col s12">
-        <div class="errors">
-            {{ form_errors(form.end) }}
+        <div class="col s4">
+            {{ form_label(form.number) }}
+            {{ form_errors(form.number) }}
+            {{ form_widget(form.number) }}
         </div>
-        <div class="input-field">
-            {{ form_widget(form.end) }}
-            {{ form_label(form.end) }}
-        </div>
-    </div>
-    <div class="row inline">
-        <div class="input-field col s8">
-            <div class="errors">
-                {{ form_errors(form.formation) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.formation) }}
-                {{ form_label(form.formation) }}
-            </div>
-        </div>
-        <div class="input-field col s4">
-            <div class="errors">
-                {{ form_errors(form.number) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.number) }}
-                {{ form_label(form.number) }}
-            </div>
-        </div>
-    </div>
-    <div class="input-field col s12">
-        <div class="errors">
-            {{ form_errors(form.job) }}
-        </div>
-        <div class="input-field">
-            {{ form_widget(form.job) }}
+        <div class="col s12">
             {{ form_label(form.job) }}
+            {{ form_errors(form.job) }}
+            {{ form_widget(form.job) }}
         </div>
     </div>
-
-    {{ form_widget(form) }}
     <div>
         <button type="submit" class="btn waves-effect waves-light">Créer</button>
     </div>
-    {{ form_end(form) }}
+    {{ form_row(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
+{% endblock %}
+
+{% block javascripts %}
+    {% include "/admin/shift/_form_js.html.twig" %}
 {% endblock %}

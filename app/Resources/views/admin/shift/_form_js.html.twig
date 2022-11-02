@@ -1,0 +1,10 @@
+<script>
+    $(document).ready(function() {
+        $('#appbundle_shift_start_date.datepicker').datepicker({
+            format: 'yyyy-mm-dd'
+        });
+        $("form[name='appbundle_shift']").submit(function(event) {
+            $("input[id='appbundle_shift_end_date']").val($("input[id='appbundle_shift_start_date']").val());
+        });
+    });
+</script>
