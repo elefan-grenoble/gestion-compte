@@ -35,11 +35,18 @@ class Membership
     protected $member_number;
 
     /**
-     * @var bool
+     * @var \DateTime
      *
      * @ORM\Column(name="withdrawn", type="boolean", nullable=false, options={"default" : 0})
      */
     private $withdrawn;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="withdrawn_date", type="date", nullable=true)
+     */
+    private $withdrawnDate;
 
     /**
      * @var bool
@@ -111,6 +118,11 @@ class Membership
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
         $this->timeLogs = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return '#'.$this->getMemberNumber();
     }
 
     public function getTmpToken($key = ''){
@@ -216,11 +228,6 @@ class Membership
         return $this->beneficiaries;
     }
 
-    public function __toString()
-    {
-        return '#'.$this->getMemberNumber();
-    }
-
     /**
      * Set mainBeneficiary
      *
@@ -285,6 +292,29 @@ class Membership
     public function getWithdrawn()
     {
         return $this->withdrawn;
+    }
+
+    /**
+     * Set withdrawnDate
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Membership
+     */
+    public function setWithdrawnDate($withdrawnDate)
+    {
+        $this->withdrawnDate = $withdrawnDate;
+        return $this;
+    }
+
+    /**
+     * Get withdrawnDate
+     *
+     * @return \DateTime
+     */
+    public function getWithdrawnDate()
+    {
+        return $this->withdrawnDate;
     }
 
     public function getCommissions()
