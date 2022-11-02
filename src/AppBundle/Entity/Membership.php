@@ -99,7 +99,7 @@ class Membership
 
     /**
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
-     * @OrderBy({"date" = "DESC"})
+     * @OrderBy({"createdAt" = "DESC"})
      */
     private $timeLogs;
 
@@ -676,7 +676,7 @@ class Membership
         };
         if ($before)
             $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
-                return ($log->getDate() < $before);
+                return ($log->getCreatedAt() < $before);
             });
         else
             $logs = $this->getTimeLogs();

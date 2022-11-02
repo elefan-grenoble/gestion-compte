@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * TimeLog
  *
  * @ORM\Table(name="time_log")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\TimeLogRepository")
  */
 class TimeLog
@@ -33,9 +34,15 @@ class TimeLog
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $date;
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
 
     /**
      * @var int
@@ -81,27 +88,36 @@ class TimeLog
     }
 
     /**
-     * Set date
+     * Get createdAt
      *
-     * @param \DateTime $date
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
      *
      * @return TimeLog
      */
-    public function setDate($date)
+    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
     {
-        $this->date = $date;
-
+        $this->createdBy = $createdBy;
         return $this;
     }
 
     /**
-     * Get date
+     * Get booker
      *
-     * @return \DateTime
+     * @return \AppBundle\Entity\User
      */
-    public function getDate()
+    public function getCreatedBy()
     {
-        return $this->date;
+        return $this->createdBy;
     }
 
     /**
@@ -198,6 +214,27 @@ class TimeLog
     public function getType(): int
     {
         return $this->type;
+    }
+
+    /**
+     * Set created_at
+     *
+     * @param \DateTime $created_at
+     *
+     * @return TimeLog
+     */
+    public function setCreatedAt($created_at)
+    {
+        $this->createdAt = $date;
+        return $this;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**

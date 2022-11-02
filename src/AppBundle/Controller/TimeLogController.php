@@ -26,7 +26,7 @@ class TimeLogController extends Controller
      *
      * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
      * @Method({"GET"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Membership $member
      * @param $timelog_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -65,9 +65,10 @@ class TimeLogController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $timeLog->setDate(new \DateTime());
             $timeLog->setMembership($member);
             $timeLog->setTime($form->get('time')->getData());
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $timeLog->setCreatedBy($current_user);
             $timeLog->setDescription($form->get('description')->getData());
             $timeLog->setType(TimeLog::TYPE_CUSTOM);
 

@@ -68,7 +68,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log->setMembership($membership);
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
-        $log->setDate($shift->getStart());
+        $log->setCreatedAt($shift->getStart());
         $log->setType(TimeLog::TYPE_SHIFT);
         $em->persist($log);
     }
@@ -84,7 +84,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $log = new TimeLog();
         $log->setMembership($membership);
         $log->setTime(-180);
-        $log->setDate($date);
+        $log->setCreatedAt($date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
         $em->persist($log);
     }
