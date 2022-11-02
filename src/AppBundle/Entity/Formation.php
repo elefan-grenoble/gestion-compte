@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * Formation
  *
  * @ORM\Table(name="formation")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\FormationRepository")
  * @UniqueEntity(fields={"name"}, message="Ce nom est déjà utilisé par une autre formation")
  */
@@ -31,6 +32,38 @@ class Formation extends Group
     private $beneficiaries;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct(null);
+        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -40,17 +73,24 @@ class Formation extends Group
         return $this->id;
     }
 
-    public function __toString()
-    {
-        return $this->getName();
-    }
     /**
-     * Constructor
+     * Get roles
+     *
+     * @return array
      */
-    public function __construct()
+    public function getRoles()
     {
-        parent::__construct(null);
-        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->roles;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 
     /**

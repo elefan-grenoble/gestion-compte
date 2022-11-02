@@ -40,13 +40,6 @@ class Task
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="due_date", type="date", nullable=true)
      */
     private $dueDate;
@@ -92,6 +85,22 @@ class Task
      */
     private $status;
 
+    /**
+     * @var \DateTime
+     *
+     * Used as start date...
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->owners = new \Doctrine\Common\Collections\ArrayCollection();
+    }
 
     /**
      * Get id
@@ -197,14 +206,6 @@ class Task
     public function getStatus()
     {
         return $this->status;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->owners = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**

@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Job
  *
  * @ORM\Table(name="job")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\JobRepository")
  */
 class Job
@@ -40,12 +41,14 @@ class Job
 
     /**
      * @var string
+     * 
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
     /**
      * @var int
+     * 
      * @ORM\Column(name="min_shifter_alert", type="integer", options={"default" : 2})
      */
     private $min_shifter_alert;
@@ -67,6 +70,36 @@ class Job
      */
     private $enabled;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     /**
      * Get id
@@ -137,24 +170,19 @@ class Job
     }
 
     /**
+     * Set min_shifter_alert
+     * 
      * @param int $min_shifter_alert
      * @return Job
      */
-    public function setMinShifterAlert(int $min_shifter_alert): Job {
+    public function setMinShifterAlert(int $min_shifter_alert): Job
+    {
         $this->min_shifter_alert = $min_shifter_alert;
         return $this;
     }
 
     /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
-     * Add shift.
+     * Add shift
      *
      * @param \AppBundle\Entity\Shift $shift
      *
@@ -168,7 +196,7 @@ class Job
     }
 
     /**
-     * Remove shift.
+     * Remove shift
      *
      * @param \AppBundle\Entity\Shift $shift
      *
@@ -180,7 +208,7 @@ class Job
     }
 
     /**
-     * Get shifts.
+     * Get shifts
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -190,7 +218,7 @@ class Job
     }
 
     /**
-     * Add period.
+     * Add period
      *
      * @param \AppBundle\Entity\Period $period
      *
@@ -204,7 +232,7 @@ class Job
     }
 
     /**
-     * Remove period.
+     * Remove period
      *
      * @param \AppBundle\Entity\Period $period
      *
@@ -216,7 +244,7 @@ class Job
     }
 
     /**
-     * Get periods.
+     * Get periods
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -242,19 +270,34 @@ class Job
     }
 
     /**
+     * Get description
+     * 
      * @return string
      */
-    public function getDescription(): string {
+    public function getDescription(): string
+    {
         return $this->description ? $this->description : '';
     }
 
     /**
+     * Set description
+     * 
      * @param string $description
      * @return Job
      */
-    public function setDescription(string $description): Job {
+    public function setDescription(string $description): Job
+    {
         $this->description = $description;
         return $this;
     }
 
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
 }

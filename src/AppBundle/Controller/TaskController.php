@@ -28,8 +28,8 @@ class TaskController extends Controller
      * @Route("/", name="tasks_list")
      * @Method("GET")
      */
-    public function listAction(Request $request){
-
+    public function listAction(Request $request)
+    {
         $this->denyAccessUnlessGranted('view', new Task());
 
         $em = $this->getDoctrine()->getManager();
@@ -46,7 +46,8 @@ class TaskController extends Controller
      * @Route("/new", name="task_new")
      * @Method({"GET","POST"})
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request)
+    {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -57,7 +58,6 @@ class TaskController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $task->setRegistrar($current_app_user);
-        $task->setCreatedAt(new \DateTime('now'));
 
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
@@ -75,7 +75,7 @@ class TaskController extends Controller
 
             return $this->redirectToRoute('task_edit',array('id'=>$task->getId()));
 
-        }elseif ($form->isSubmitted()){
+        } elseif ($form->isSubmitted()){
             foreach ($this->getErrorMessages($form) as $key => $errors){
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);
@@ -84,7 +84,6 @@ class TaskController extends Controller
         return $this->render('default/task/new.html.twig', array(
             'form' => $form->createView()
         ));
-
     }
 
     /**
@@ -93,7 +92,8 @@ class TaskController extends Controller
      * @Route("/edit/{id}", name="task_edit")
      * @Method({"GET","POST"})
      */
-    public function editAction(Request $request,Task $task){
+    public function editAction(Request $request,Task $task)
+    {
         $session = new Session();
 
         $this->denyAccessUnlessGranted('edit',$task);
@@ -122,7 +122,7 @@ class TaskController extends Controller
 
             return $this->redirectToRoute('tasks_list');
 
-        }elseif ($form->isSubmitted()){
+        } elseif ($form->isSubmitted()){
             foreach ($this->getErrorMessages($form) as $key => $errors){
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);

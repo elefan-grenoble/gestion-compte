@@ -80,7 +80,6 @@ class AnonymousBeneficiary
      */
     private $created_at;
 
-
     /**
      * @var \DateTime
      *
@@ -193,7 +192,8 @@ class AnonymousBeneficiary
      *
      * @return \DateTime
      */
-    public function getCreatedAt(){
+    public function getCreatedAt()
+    {
         return $this->created_at;
     }
 

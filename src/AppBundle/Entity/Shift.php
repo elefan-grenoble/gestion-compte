@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Shift
  *
  * @ORM\Table(name="shift")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ShiftRepository")
  */
 class Shift
@@ -89,21 +90,21 @@ class Shift
     private $lastShifter;
 
     /**
-     * One Period has One Formation.
+     * One Shift has one Formation.
      * @ORM\ManyToOne(targetEntity="Formation")
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $formation;
 
     /**
-     * One Period has One Job.
+     * One Shift has One Job.
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
 
     /**
-     * One shift may have been created from One PeriodPosition.
+     * One Shift may have been created from One PeriodPosition.
      * @ORM\ManyToOne(targetEntity="PeriodPosition")
      * @ORM\JoinColumn(name="position_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -128,6 +129,13 @@ class Shift
      */
     private $fixe = false;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
     public function __construct()
     {
         $this->isDismissed = false;
@@ -138,6 +146,14 @@ class Shift
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B de %R", $this->getStart()->getTimestamp()).' à '.strftime("%R", $this->getEnd()->getTimestamp()).' ['.$this->getShifter().']';
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -614,7 +630,7 @@ class Shift
     }
 
     /**
-     * Set job
+     * Set position
      *
      * @param \AppBundle\Entity\PeriodPosition $position
      *
@@ -627,4 +643,13 @@ class Shift
         return $this;
     }
 
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
 }
