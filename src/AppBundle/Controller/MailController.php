@@ -12,6 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -155,12 +156,13 @@ class MailController extends Controller
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            //beneficiaries
+
+            // beneficiaries
             $to = $mailform->get('to')->getData();
             $to = json_decode($to);
             $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id' => $to));
-            //end beneficiaries
-            //non-member
+
+            // non-member
             $cci = $mailform->get('cci')->getData();
             $chips = json_decode($cci);
             $nonMembers = array();
@@ -183,20 +185,21 @@ class MailController extends Controller
                     $beneficiaries[] = $fake_beneficiary;
                 }
             }
-            //en non-member
 
-            $nb = 0;
-            $errored = [];
-
+            // from
             $mailerService = $this->get('mailer_service');
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailerService->getAllowedEmails())) {
                 $from = array($from_email => array_search($from_email, $mailerService->getAllowedEmails()));
             } else {
-                //email not listed !
+                // email not listed !
                 $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
             }
+
+            $from_email_in_cc = $mailform->get('from_in_cc')->getData();
+
+            // content & template
             $contentType = 'text/html';
             $content = $mailform->get('message')->getData();
             $parser = new Markdown;
@@ -206,18 +209,23 @@ class MailController extends Controller
             if ($emailTemplate) {
                 $content = str_replace('{{template_content}}', $content, $emailTemplate->getContent());
             }
-
             $template = $this->get('twig')->createTemplate($content);
+
+            // send mail(s)
+            $nb = 0;
+            $errored = [];
             foreach ($beneficiaries as $beneficiary) {
+                $to = [$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()];
+                if ($from_email_in_cc) {
+                    array_push($to, $from);
+                }
+
                 $body = $this->get('twig')->render($template, array('beneficiary' => $beneficiary));
                 try {
                     $message = (new \Swift_Message($mailform->get('subject')->getData()))
                         ->setFrom($from)
-                        ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
-                        ->addPart(
-                            $body,
-                            $contentType
-                        );
+                        ->setTo($to)
+                        ->addPart($body, $contentType);
                     $mailer->send($message);
                     $nb++;
                 } catch (\Swift_RfcComplianceException $exception) {
@@ -242,11 +250,11 @@ class MailController extends Controller
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
             ->add('from', ChoiceType::class, array(
-                'label' => 'Depuis',
+                'label' => 'Expéditeur',
                 'required' => false,
                 'choices' => $mailerService->getAllowedEmails()
             ))
-            ->add('to', HiddenType::class, array('label' => 'Destinataires', 'required' => true))
+            ->add('to', HiddenType::class, array('label' => 'Destinataire(s)', 'required' => true))
             ->add('cci', HiddenType::class, array('label' => 'Non-membres', 'required' => false))
             ->add('template', EntityType::class, array(
                 'class' => 'AppBundle:EmailTemplate',
@@ -255,6 +263,11 @@ class MailController extends Controller
                 'multiple' => false,
                 'required' => false,
                 'label' => 'Modèle'
+            ))
+            ->add('from_in_cc', CheckboxType::class, array(
+                'required' => false,
+                'label' => 'Mettre l\'expéditeur en copie',
+                'attr' => array('class' => 'filled-in')
             ))
             ->add('subject', TextType::class, array('label' => 'Sujet', 'required' => true))
             ->add('message', MarkdownEditorType::class, array('label' => 'Message', 'required' => true, 'attr' => array('class' => 'materialize-textarea')))
