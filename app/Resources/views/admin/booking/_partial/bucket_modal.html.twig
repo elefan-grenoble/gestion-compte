@@ -26,56 +26,45 @@ It use the materialize modal class https://materializecss.com/modals.html
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
-                        <div class="collapsible-body">
-                            <p>
-                                {% if use_fly_and_fixed %}
-                                    Créneau <b>{% if shift.fixe %}fixe{% else %}volant{% endif %}</b>, réservé
-                                {% else %}
-                                    Réservé
-                                {% endif %}
-                                le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show",{'member_number': shift.booker.beneficiary.membership.memberNumber}) }}">{{ shift.booker.beneficiary }}</a>{% else %}{{shift.booker}}{% endif %}.
-                            </p>
-                            {% if is_granted('free',shift) %}
-                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                    {% if shift.wasCarriedOut %}
-                                        <form action="{{ path('invalidate_shift', { 'id' : shift.id }) }}" method="POST" id="invalidate_shift_{{ shift.id }}">
-                                            <button type="submit" class="btn red">
-                                                <i class="material-icons left">highlight_off</i>Invalider la participation
-                                            </button>
-                                        </form>
-                                    {% else %}
-                                        <form action="{{ path('validate_shift', { 'id' : shift.id }) }}" method="POST" id="validate_shift_{{ shift.id }}">
-                                            <button type="submit" class="btn green">
-                                                <i class="material-icons left">check_circle</i>Valider la participation
-                                            </button>
-                                        </form>
-                                    {% endif %}
-                                {% endif %}
-                                <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
-                                    {% if shift.isPast %}
-                                        <button type="submit" class="btn red">
-                                            <i class="material-icons left">delete</i>Supprimer
-                                        </button>
-                                    {% else %}
-                                        <button type="submit" class="btn orange">
-                                            <i class="material-icons left">lock_open</i>Libérer
-                                        </button>
-                                    {% endif %}
+                    </div>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        {% if use_fly_and_fixed %}
+                            Créneau <b>{% if shift.fixe %}fixe{% else %}volant{% endif %}</b>, réservé
+                        {% else %}
+                            Réservé
+                        {% endif %}
+                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show",{'member_number': shift.booker.beneficiary.membership.memberNumber}) }}">{{ shift.booker.beneficiary }}</a>{% else %}{{shift.booker}}{% endif %}.
+                    </p>
+                    {% if is_granted('free',shift) %}
+                        {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                            {% if shift.wasCarriedOut %}
+                                <form action="{{ path('invalidate_shift', { 'id' : shift.id }) }}" method="POST" id="invalidate_shift_{{ shift.id }}">
+                                    <button type="submit" class="btn red">
+                                        <i class="material-icons left">highlight_off</i>Invalider la participation
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="{{ path('validate_shift', { 'id' : shift.id }) }}" method="POST" id="validate_shift_{{ shift.id }}">
+                                    <button type="submit" class="btn green">
+                                        <i class="material-icons left">check_circle</i>Valider la participation
+                                    </button>
                                 </form>
                             {% endif %}
-                            <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
-                                {% if shift.isPast %}
-                                    <button type="submit" class="btn red">
-                                        <i class="material-icons left">delete</i>Supprimer
-                                    </button>
-                                {% else %}
-                                    <button type="submit" class="btn orange">
-                                        <i class="material-icons left">lock_open</i>Libérer
-                                    </button>
-                                {% endif %}
-                            </form>
-                        </div>
-                    </div>
+                        {% endif %}
+                        <form action="{{ path('free_shift', { 'id' : shift.id }) }}" method="POST" id="free_shift_{{ shift.id }}">
+                            {% if shift.isPast %}
+                                <button type="submit" class="btn red">
+                                    <i class="material-icons left">delete</i>Supprimer
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn orange">
+                                    <i class="material-icons left">lock_open</i>Libérer
+                                </button>
+                            {% endif %}
+                        </form>
+                    {% endif %}
                 </div>
             </li>
         {% else %}
