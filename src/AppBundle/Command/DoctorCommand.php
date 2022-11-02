@@ -101,6 +101,7 @@ class DoctorCommand extends ContainerAwareCommand
                         $member->setFrozen(false);
                     if ($member->getWithdrawn() === null)
                         $member->setWithdrawn(false);
+                        $member->setWithdrawnDate(null);
                     $em->persist($member);
                     $counter++;
                 }

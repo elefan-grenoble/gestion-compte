@@ -124,8 +124,10 @@ class HelloassoEventListener
                 $payment->setRegistration($registration);
                 $membership->addRegistration($registration);
 
-                if ($membership->isWithdrawn()){
-                    $membership->setWithdrawn(false); //open
+                // if account closed, re-open
+                if ($membership->isWithdrawn()) {
+                    $membership->setWithdrawn(false);
+                    $membership->setWithdrawnDate(null);
                 }
                 $this->_em->persist($membership);
 

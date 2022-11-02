@@ -144,6 +144,7 @@ class ImportUsersCommand extends CsvCommand
                             $output->writeln("<info>No Membership with number <fg=cyan>$member_number</> found, create one</info>",OutputInterface::VERBOSITY_DEBUG);
                             $membership->setMemberNumber($member_number);
                             $membership->setWithdrawn(false);
+                            $membership->setWithdrawnDate(null);
                             $membership->setFrozen(false);
                             $membership->setFrozenChange(false);
                             $em->persist($membership);

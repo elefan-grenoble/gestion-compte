@@ -483,6 +483,7 @@ class MembershipController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $member->setWithdrawn(true);
+        $member->setWithdrawnDate(new \DateTime('now'));
         $em->persist($member);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte fermé');
@@ -503,6 +504,7 @@ class MembershipController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $member->setWithdrawn(false);
+        $member->setWithdrawnDate(null);
         $em->persist($member);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte reouvert');
@@ -686,6 +688,7 @@ class MembershipController extends Controller
             }
 
             $member->setWithdrawn(false);
+            $member->setWithdrawnDate(null);
             $member->setFrozen(false);
             $member->setFrozenChange(false);
 
