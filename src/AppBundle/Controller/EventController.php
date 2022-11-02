@@ -420,9 +420,13 @@ class EventController extends Controller
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
-                    $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' !');
+                    if ($proxy->getOwner() == $proxy->getOwner()->getMembership()->getMainBeneficiary()) {
+                        $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' !');
+                    } else {
+                        $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' (bénéficiaire de '. $proxy->getOwner()->getMembership()->getMainBeneficiary() .') !');
+                    }
 
-                    if ($proxy->getGiver() && $proxy->getOwner()){
+                    if ($proxy->getGiver() && $proxy->getOwner()) {
                         $this->sendProxyMail($proxy,$mailer);
                     }
 

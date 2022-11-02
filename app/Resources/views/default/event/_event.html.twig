@@ -21,14 +21,14 @@
                         {% if proxy_given.owner is null %}
                             <span>Procuration donnée au premier membre volontaire</span>
                         {% else %}
-                            <span>Procuration donnée à &nbsp;<b>{{ proxy_given.owner }}</b></span>
+                            <span>Procuration donnée à &nbsp;<b>{{ proxy_given.owner.membership.mainBeneficiary }}</b></span>
                         {% endif %}
                     {% endif %}
                     {% for proxy_received_item in proxy_received %}
                         {% if proxy_received_item.giver %}
-                            <div>Procuration portée par <b>{{ proxy_received_item.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.mainBeneficiary }}</b></div>
+                            <div>Procuration portée par <b>{{ proxy_received_item.owner.membership.mainBeneficiary }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.mainBeneficiary }}</b></div>
                         {% else %}
-                            <div><b>{{ proxy_received_item.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></div>
+                            <div><b>{{ proxy_received_item.owner.membership.mainBeneficiary }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></div>
                         {% endif %}
                     {% endfor %}
                     {% if (proxy_given is null) and (proxy_received|length == 0) %}
@@ -84,14 +84,14 @@
                                 {% if proxy_given.owner is null %}
                                     <li>Procuration donnée au premier volontaire</li>
                                 {% else %}
-                                    <li>Procuration donnée à &nbsp;<b>{{ proxy_given.owner }}</b></li>
+                                    <li>Procuration donnée à &nbsp;<b>{{ proxy_given.owner.membership.mainBeneficiary }}</b></li>
                                 {% endif %}
                             {% endif %}
                             {% for proxy_received_item in proxy_received %}
                                 {% if proxy_received_item.giver %}
-                                    <li>Procuration portée par <b>{{ proxy_received_item.owner.user.firstname }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.mainBeneficiary }}</b></li>
+                                    <li>Procuration portée par <b>{{ proxy_received_item.owner.membership.mainBeneficiary }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.mainBeneficiary }}</b></li>
                                 {% else %}
-                                    <li><b>{{ proxy_received_item.owner.user.firstname }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></li>
+                                    <li><b>{{ proxy_received_item.owner.membership.mainBeneficiary }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></li>
                                 {% endif %}
                             {% endfor %}
                         </ul>

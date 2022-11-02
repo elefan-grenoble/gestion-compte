@@ -38,9 +38,7 @@
             <td colspan="2" class="warning" style="background: gray; color: white;">
                 Procuration donnée à <br>
                 {% if event.proxiesByGiver(beneficiary.membership).first.owner %}
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.lastname }}&nbsp;
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.firstname }}&nbsp;
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}
+                    <strong>{{ event.proxiesByGiver(beneficiary.membership).first.owner.lastname }}&nbsp;{{ event.proxiesByGiver(beneficiary.membership).first.owner.firstname }}&nbsp;#{{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}</strong>
                 {% else %}
                     Membre supprimé
                 {% endif %}
