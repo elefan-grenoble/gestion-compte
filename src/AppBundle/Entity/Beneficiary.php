@@ -87,11 +87,6 @@ class Beneficiary
     private $shifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="booker",cascade={"remove"})
-     */
-    private $booked_shifts;
-
-    /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter",cascade={"remove"})
      */
     private $reservedShifts;
@@ -315,7 +310,6 @@ class Beneficiary
         $this->commissions = new ArrayCollection();
         $this->formations = new ArrayCollection();
         $this->shifts = new ArrayCollection();
-        $this->booked_shifts = new ArrayCollection();
     }
 
     /**
@@ -449,40 +443,6 @@ class Beneficiary
     public function getShifts()
     {
         return $this->shifts;
-    }
-
-    /**
-     * Add bookedShift
-     *
-     * @param \AppBundle\Entity\Shift $bookedShift
-     *
-     * @return Beneficiary
-     */
-    public function addBookedShift(\AppBundle\Entity\Shift $bookedShift)
-    {
-        $this->booked_shifts[] = $bookedShift;
-
-        return $this;
-    }
-
-    /**
-     * Remove bookedShift
-     *
-     * @param \AppBundle\Entity\Shift $bookedShift
-     */
-    public function removeBookedShift(\AppBundle\Entity\Shift $bookedShift)
-    {
-        $this->booked_shifts->removeElement($bookedShift);
-    }
-
-    /**
-     * Get bookedShifts
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBookedShifts()
-    {
-        return $this->booked_shifts;
     }
 
     /**

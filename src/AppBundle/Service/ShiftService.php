@@ -101,7 +101,7 @@ class ShiftService
         if ($this->forbidShiftOverlapTime < 0) {
             return true;
         }
-        $shifts = $beneficiary->getBookedShifts()->filter(function ($shift) use ($currentShift) {
+        $shifts = $beneficiary->getShifts()->filter(function ($shift) use ($currentShift) {
             $start = (clone $shift->getStart())->add(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
             $end = (clone $shift->getEnd())->sub(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
             return ($currentShift->getStart() < $end

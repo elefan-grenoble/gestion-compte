@@ -53,36 +53,6 @@
                 </li>
             {% endif %}
         {% endfor %}
-        {% if (member.getFutureRebookedShifts() | length) != 0 %}
-            <li class="active">
-                <div class="collapsible-header">
-                    <i class="material-icons">event_busy</i>Mes créneaux annulés et repris par un autre bénévole
-                </div>
-                <div class="collapsible-body">
-                    <div class="row">
-                        {% for bookedshift in member.getFutureRebookedShifts() %}
-                            <div class="col s12 m6 l4 {% if (member.getFutureRebookedShifts() | length) < 2 %}push-m3{% endif %}">
-                                <div class="card green lighten-5">
-                                    <div class="card-content green-text">
-                                        <span class="card-title">{{ bookedshift.start|date_fr_long }} de {{ bookedshift.start|date('H:i') }} à {{ bookedshift.end|date('H:i') }}</span>
-                                        <i class="material-icons">person</i>{{ bookedshift.booker.firstname }} / <b class="{{ bookedshift.job.color }}-text">{{ bookedshift.job.name }}</b>
-                                        {% if use_fly_and_fixed %}
-                                            <br />
-                                            Type : <b>{% if bookedshift.fixe %}Fixe{% else %}Volant{% endif %}</b>
-                                        {% endif %}
-                                        {% if bookedshift.formation != null %}
-                                            <br />
-                                            Formation : <b>{{ bookedshift.formation }}</b>
-                                        {% endif %}
-                                        <p>Créneau repris par {{ bookedshift.shifter.firstname }} {{ bookedshift.shifter.lastname|first|upper }}.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </li>
-        {% endif %}
         {% if (shift_service.hasCycle(member, -1) or shift_service.hasCycle(member, -2)) %}
             <li>
                 <div class="collapsible-header">

@@ -41,7 +41,7 @@ class PeriodPosition
     private $shifter;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
@@ -168,11 +168,11 @@ class PeriodPosition
     /**
      * Set booker
      *
-     * @param \AppBundle\Entity\Beneficiary $booker
+     * @param \AppBundle\Entity\User $booker
      *
      * @return BookedShift
      */
-    public function setBooker(\AppBundle\Entity\Beneficiary $booker = null)
+    public function setBooker(\AppBundle\Entity\User $booker = null)
     {
         $this->booker = $booker;
 
@@ -182,7 +182,7 @@ class PeriodPosition
     /**
      * Get booker
      *
-     * @return \AppBundle\Entity\Beneficiary
+     * @return \AppBundle\Entity\User
      */
     public function getBooker()
     {

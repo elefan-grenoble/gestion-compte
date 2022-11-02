@@ -424,20 +424,6 @@ class Membership
     }
 
     /**
-     * Get all booked shifts for all beneficiaries
-     */
-    public function getAllBookedShifts()
-    {
-        $shifts = new ArrayCollection();
-        foreach ($this->getBeneficiaries() as $beneficiary) {
-            foreach ($beneficiary->getBookedShifts() as $shift) {
-                $shifts->add($shift);
-            }
-        }
-        return $shifts;
-    }
-
-    /**
      * Get all reserved shifts for all beneficiaries
      */
     public function getReservedShifts()
@@ -528,17 +514,6 @@ class Membership
         }
 
         return $this->_endOfCycle[$cycleOffset];
-    }
-
-    /**
-     * Get all rebooked shifts in the future
-     */
-    public function getFutureRebookedShifts()
-    {
-        return $this->getAllBookedShifts()->filter(function($shift) {
-            return $shift->getStart() > new DateTime('now') &&
-                $shift->getBooker() != $shift->getShifter();
-        });
     }
 
     /**
