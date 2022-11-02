@@ -63,6 +63,7 @@ twig:
     code_generation_enabled: '%code_generation_enabled%'
     local_currency_name: '%local_currency_name%'
     use_fly_and_fixed: '%use_fly_and_fixed%'
+    max_event_proxy_per_member: '%max_event_proxy_per_member%'
     display_gauge: '%display_gauge%'
     profile_display_task_list: '%profile_display_task_list%'
     profile_display_time_log: '%profile_display_time_log%'

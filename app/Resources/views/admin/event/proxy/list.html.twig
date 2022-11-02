@@ -6,11 +6,16 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('event_list') }}"><i class="material-icons">list</i>&nbsp;Liste des événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">event</i>&nbsp;{{ event.title }}<i class="material-icons">chevron_right</i>
 <i class="material-icons">list</i>&nbsp;Procurations
 {% endblock %}
 
 {% block content %}
     <h4>Liste des procurations en cours <small>({{ proxies | length }})</small></h4>
+
+    <p class="red-text">
+        Rappel : chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
+    </p>
 
     {% if event %}
         <h5>{{ event.title }}</h5>
