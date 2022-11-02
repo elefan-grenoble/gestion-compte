@@ -49,6 +49,10 @@
             </div>
         </div>
         {{ form_end(confirm_form) }}
+
+        <a href="{{ path("event_proxy_give", { 'id': event.id }) }}" class="btn waves-effect waves-light">
+            <i class="material-icons left">keyboard_return</i>Retourner à la recherche
+        </a>
     {% endif %}
 
     {% if event.anonymousProxy %}
