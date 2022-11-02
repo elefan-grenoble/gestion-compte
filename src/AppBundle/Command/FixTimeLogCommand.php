@@ -55,7 +55,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
         $log->setMembership($membership);
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
-        $log->setDate($shift->getStart());
+        $log->setCreatedAt($shift->getStart());
         $log->setType(1);
         $log->setDescription("Créneau réalisé");
         $em->persist($log);
