@@ -400,7 +400,7 @@ class EventController extends Controller
                 $member_owner_proxies = $em->getRepository('AppBundle:Proxy')->findBy(
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
-                if (count($member_owner_proxies) == $max_event_proxy_per_member) {
+                if (count($member_owner_proxies) >= $max_event_proxy_per_member) {
                     $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
                     return $this->redirectToRoute('homepage');
                 }
@@ -536,10 +536,11 @@ class EventController extends Controller
      *
      * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove", methods={"GET"})
      */
-    public function removeProxyLiteAction(Event $event,Proxy $proxy,Request $request){
+    public function removeProxyLiteAction(Event $event, Proxy $proxy, Request $request)
+    {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        if ($proxy->getEvent() === $event && $proxy->getOwner()->getUser() == $current_app_user){
+        if (($proxy->getEvent() === $event) && ($proxy->getOwner()->getUser() == $current_app_user)) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($proxy);
             $em->flush();
@@ -553,7 +554,7 @@ class EventController extends Controller
      *
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
      */
-    public function acceptProxyAction(Event $event,Request $request,\Swift_Mailer $mailer)
+    public function acceptProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
     {
         $em = $this->getDoctrine()->getManager();
         $session = new Session();
@@ -600,7 +601,7 @@ class EventController extends Controller
             // check if member doesn't already have the maximum nomber of proxies (%max_event_proxy_per_member%)
             $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
             $myproxy = $em->getRepository('AppBundle:Proxy')->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
-            if (count($myproxy) == $max_event_proxy_per_member) {
+            if (count($myproxy) >= $max_event_proxy_per_member) {
                 $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_member .' procuration.');
                 return $this->redirectToRoute('event_proxy_take', array('id'=>$event->getId()));
             }
