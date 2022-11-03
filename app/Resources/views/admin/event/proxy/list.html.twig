@@ -14,14 +14,14 @@
     <h4>Liste des procurations en cours <small>({{ proxies | length }})</small></h4>
 
     {% if max_event_proxy_per_member > 0 %}
-    <blockquote class="red-text">
-        chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
-    </blockquote>
+        <blockquote class="red-text">
+            chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
+        </blockquote>
     {% endif %}
     {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
-    <blockquote class="red-text">
-        si un membre a <strong>plusieurs</strong> bénéficiaires, c'est le bénéficiaire <strong>principal</strong> qui sera affiché à droite
-    </blockquote>
+        <blockquote class="red-text">
+            si un membre a <strong>plusieurs</strong> bénéficiaires, c'est n'importe lequel des bénéficiaires qui peut porter la procuration
+        </blockquote>
     {% endif %}
 
     {% if event %}
@@ -35,12 +35,12 @@
                     {% if not proxy.giver %}
                         Pour le premier volontaire
                     {% else %}
-                        De &nbsp;<b>{{ proxy.giver.mainBeneficiary }}</b>&nbsp;
+                        De &nbsp;<b>{{ proxy.giver.memberNumberWithBeneficiaryListString }}</b>&nbsp;
                     {% endif %}
                     {% if not proxy.owner %}
                         porté par le premier volontaire
                     {% else %}
-                        porté par &nbsp;<b>{{ proxy.owner.membership.mainBeneficiary }}</b>&nbsp;
+                        porté par &nbsp;<b>{{ proxy.owner.membership.memberNumberWithBeneficiaryListString }}</b>&nbsp;
                     {% endif %}
                     {% if not event and proxy.event %}
                         [{{ proxy.event.title }}]
