@@ -19,7 +19,7 @@ class SearchUserFormHelper {
     public function getSearchForm($formBuilder, $params_string = '', $ambassador = false) {
         $params = array();
         parse_str($params_string, $params);
-        $formBuilder->add('withdrawn', ChoiceType::class, array('label' => 'fermé', 'required' => false, 'choices' => array(
+        $formBuilder->add('withdrawn', ChoiceType::class, array('label' => '∅ fermé', 'required' => false, 'choices' => array(
             'fermé' => 2,
             'ouvert' => 1,
         )));
@@ -29,7 +29,7 @@ class SearchUserFormHelper {
                 'Non activé' => 1,
             )));
         }
-        $formBuilder->add('frozen', ChoiceType::class, array('label' => 'gelé', 'required' => false, 'choices' => array(
+        $formBuilder->add('frozen', ChoiceType::class, array('label' => '❄️ gelé', 'required' => false, 'choices' => array(
             'gelé' => 2,
             'Non gelé' => 1,
         )));
@@ -237,17 +237,8 @@ class SearchUserFormHelper {
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
         if ($form->get('beneficiary_count')->getData() > 0) {
-            var_dump($form->get('beneficiary_count')->getData()-1);
             $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
                 ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
-        }
-
-        if ($form->get('phone')->getData() > 0) {
-            if ($form->get('phone')->getData() == 1) { // non renseigné
-                $qb = $qb->andWhere('b.phone < 100000000');
-            } else {
-                $qb = $qb->andWhere('b.phone > 100000000');
-            }
         }
 
         if ($form->get('registrationdate')->getData()) {
@@ -347,6 +338,14 @@ class SearchUserFormHelper {
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }
+        if ($form->get('phone')->getData() > 0) {
+            if ($form->get('phone')->getData() == 1) { // non renseigné
+                $qb = $qb->andWhere('b.phone < 100000000');
+            } else {
+                $qb = $qb->andWhere('b.phone > 100000000');
+            }
+        }
+
         $join_formations = false;
         if ($form->get('formations')->getData() && count($form->get('formations')->getData())) {
             if (($form->get('or_and_exp_formations')->getData() > 0) && (count($form->get('formations')->getData()) > 1)) { // AND not OR
