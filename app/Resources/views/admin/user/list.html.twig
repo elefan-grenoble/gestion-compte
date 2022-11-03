@@ -24,7 +24,7 @@
                         <h5>Compte</h5>
                         <div class="row">
                             <div class="col s4">
-                                fermé :
+                                ∅ fermé :
                                 {{ form_widget(form.withdrawn) }}
                                 {{ form_label(form.withdrawn) }}
                             </div>
@@ -34,7 +34,7 @@
                                 {{ form_label(form.enabled) }}
                             </div>
                             <div class="col s4">
-                                gelé :
+                                ❄️ gelé :
                                 {{ form_widget(form.frozen) }}
                                 {{ form_label(form.frozen) }}
                             </div>
@@ -217,15 +217,15 @@
             {% if member.mainBeneficiary %}
                 <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td class="hide-on-med-and-down">
-                        {% if not member.withdrawn %}
+                        {% if member.withdrawn %}
+                            <i class="material-icons">block</i>
+                        {% else %}
                             {% if not member.mainBeneficiary.user.isEnabled %}
                                 <i class="material-icons">phonelink_off</i>
                             {% endif %}
                             {% if member.frozen %}
                                 <i class="material-icons">ac_unit</i>
                             {% endif %}
-                        {% else %}
-                                <i class="material-icons">do_not_disturb</i>
                         {% endif %}
                     </td>
                     <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a></td>
