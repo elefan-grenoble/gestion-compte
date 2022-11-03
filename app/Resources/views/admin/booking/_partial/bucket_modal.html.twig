@@ -171,7 +171,7 @@ It use the materialize modal class https://materializecss.com/modals.html
 <a href="{{ path('shift_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
 </a>
-<form method="post" action="{{ path('delete_bucket', {'id': bucket.id}) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');">
+<form method="post" action="{{ path('delete_bucket', {'id': bucket.id}) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');" style="display:inline;">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
     <button type="submit" title="Supprimer tous les créneaux à cette heure et ce poste" class="red btn">
