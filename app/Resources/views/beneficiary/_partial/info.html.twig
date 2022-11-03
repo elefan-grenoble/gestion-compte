@@ -1,15 +1,21 @@
 <div class="card-title">
     <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img" />
     {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
-    {% if beneficiary.isMain %}<span class="teal white-text badge">principal</span>{% endif %}
-    {% if beneficiary.membership.withdrawn %}<span class="red white-text badge">fermé</span>{% endif %}
+    {% if beneficiary.isMain %}
+        <span class="teal white-text badge">principal</span>
+    {% endif %}
+    {% if beneficiary.membership.withdrawn %}
+        <span class="red white-text badge">fermé</span>
+    {% endif %}
     {% if beneficiary.membership.frozenChange %}
-        {% if beneficiary.membership.frozen %}<span class="deep-purple white-text badge">Dégel à la fin du cycle</span>
-        {% else %}<span class="deep-purple white-text badge">Gel à la fin du cycle</span>
+        {% if beneficiary.membership.frozen %}
+            <span class="deep-purple white-text badge">Dégel à la fin du cycle</span>
+        {% else %}
+            <span class="deep-purple white-text badge">Gel à la fin du cycle</span>
         {% endif %}
     {% endif %}
     {% if beneficiary.membership.frozen %}
-        <i class="material-icons">notifications_paused</i>
+        <i class="material-icons">ac_unit</i>
         <span class="deep-purple white-text badge">❄️ gelé</span>
     {% endif %}
 </div>
