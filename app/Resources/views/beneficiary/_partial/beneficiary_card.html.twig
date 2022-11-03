@@ -32,7 +32,7 @@
                 </div>
                 {% if delete_form is defined and not beneficiary.isMain %}
                     <div class="card-btn">
-                        <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le beneficiaire">
+                        <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le bénéficiaire">
                             <i class="material-icons">remove</i>
                         </a>
                     </div>
@@ -45,6 +45,13 @@
                     </div>
                 {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
+                    {% if not beneficiary.isMain %}
+                        <div class="card-btn">
+                            <a href="#detach-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="séparer le bénéficiaire">
+                                <i class="material-icons">call_split</i>
+                            </a>
+                        </div>
+                    {% endif %}
                     <div class="card-btn">
                         <a href="{{ path('homepage', { '_login_as':  beneficiary.user.username }) }}"
                             class="btn btn-floating waves-effect waves-light grey" style="padding-top: 6px"
@@ -65,11 +72,35 @@
         </div>
     </div>
 </div>
+
+{% if detach_form %}
+    {{ form_start(detach_form) }}
+    <div id="detach-beneficiary-{{ beneficiary.id }}" class="modal">
+        <div class="modal-content">
+            <h5><i class="material-icons left small">call_split</i>Séparer le bénéficiaire</h5>
+            <p>
+                Attention, le bénéficiaire devra ré-adhérer.
+            </p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
+                Retour à la raison
+            </a>
+            <button type="submit" class="btn waves-effect waves-light orange">
+                <i class="material-icons left">check</i>Je sais ce que je fais !
+            </button>
+        </div>
+    </div>
+    {{ form_end(detach_form) }}
+{% endif %}
+
 {{ form_start(delete_form) }}
 <div id="remove-beneficiary-{{ beneficiary.id }}" class="modal">
     <div class="modal-content">
         <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le bénéficiaire</h5>
-        <p>Attention, le bénéficiaire n'aura plus accès à son compte et ses informations seront perdus.</p>
+        <p>
+            Attention, le bénéficiaire n'aura plus accès à son compte et ses informations seront perdus.
+        </p>
     </div>
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">

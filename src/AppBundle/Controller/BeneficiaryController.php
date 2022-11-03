@@ -90,6 +90,73 @@ class BeneficiaryController extends Controller
     }
 
     /**
+     * Detaches a beneficiary entity.
+     *
+     * @Route("/{id}/detach", name="beneficiary_detach")
+     * @Method("POST")
+     * @param Request $request
+     * @param Beneficiary $beneficiary
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function detachBeneficiaryAction(Request $request, Beneficiary $beneficiary)
+    {
+        $session = new Session();
+        $member = $beneficiary->getMembership();
+
+        $this->denyAccessUnlessGranted('edit', $member);
+
+        if ($beneficiary->isMain()) {
+            $session->getFlashBag()->add('error', 'Un bénéficiaire principal ne peut pas être détaché');
+            return $this->redirectToShow($member);
+        }
+
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('beneficiary_detach', array('id' => $beneficiary->getId())))
+            ->setMethod('POST')
+            ->getForm();
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+
+            // first we remove the beneficiary from the current member
+            $member->removeBeneficiary($beneficiary);
+            $em->persist($member);
+
+            // check if there is a existing membership with this main beneficiary (artefact ?)
+            $existing_member = $em->getRepository('AppBundle:Membership')->findOneBy(array('mainBeneficiary' => $beneficiary));
+            if ($existing_member) {
+                $new_member = $existing_member;
+                $new_member->setMainBeneficiary($beneficiary);
+            } else {
+                // then we create a new membership
+                $new_member = new Membership();
+                // init member id
+                $m = $em->getRepository('AppBundle:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
+                $mm = 1;
+                if ($m)
+                    $mm = $m->getMemberNumber() + 1;
+                $new_member->setMemberNumber($mm);
+                // set main beneficiary
+                $new_member->setMainBeneficiary($beneficiary);
+            }
+            // init other fields
+            $new_member->setWithdrawn(false);
+            $new_member->setFrozen(false);
+            $new_member->setFrozenChange(false);
+
+            $em->persist($new_member);
+
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le bénéficiaire a été détaché ! Il a maintenant son propre compte.');
+            return $this->redirectToShow($new_member);
+        }
+
+        return $this->redirectToShow($member);
+    }
+
+    /**
      * Deletes a beneficiary entity.
      *
      * @Route("/beneficiary/{id}", name="beneficiary_delete")

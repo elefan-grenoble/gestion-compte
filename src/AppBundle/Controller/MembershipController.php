@@ -124,8 +124,16 @@ class MembershipController extends Controller
         $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
 
+        $detachBeneficiaryForms = array();
         $deleteBeneficiaryForms = array();
         foreach ($member->getBeneficiaries() as $beneficiary) {
+            if (!$beneficiary->isMain()) {
+                $detachBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_detach', array('id' => $beneficiary->getId())))
+                    ->setMethod('POST')->getForm()->createView();
+            } else {
+                $detachBeneficiaryForms[$beneficiary->getId()] = array();
+            }
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
@@ -155,6 +163,7 @@ class MembershipController extends Controller
             'notes_form' => $notes_form,
             'notes_delete_form' => $notes_delete_form,
             'new_notes_form' => $new_notes_form,
+            'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'delete_form' => $deleteForm->createView(),
             'time_log_form' => $timeLogForm->createView(),
@@ -637,7 +646,7 @@ class MembershipController extends Controller
             }
         }
 
-        if (!$a_beneficiary){
+        if (!$a_beneficiary) {
             $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
         }
 
