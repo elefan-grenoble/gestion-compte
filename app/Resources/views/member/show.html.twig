@@ -6,6 +6,7 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 {% if is_granted("ROLE_ADMIN") %}
     <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_index') }}"><i class="material-icons">people</i>&nbsp;Liste des membres</a><i class="material-icons">chevron_right</i>
 {% else %}
     <a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
 {% endif %}
