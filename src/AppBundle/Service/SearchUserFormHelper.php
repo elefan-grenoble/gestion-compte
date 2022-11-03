@@ -30,10 +30,16 @@ class SearchUserFormHelper {
             )));
         }
         $formBuilder->add('frozen', ChoiceType::class, array('label' => 'gelé', 'required' => false, 'choices' => array(
-                'gelé' => 2,
-                'Non gelé' => 1,
+            'gelé' => 2,
+            'Non gelé' => 1,
+        )));
+        if (!$ambassador) {
+            $formBuilder->add('beneficiary_count', ChoiceType::class, array('label' => 'nb de bénéficiaires', 'required' => false, 'choices' => array(
+                // '0' => 1,
+                '1' => 2,
+                '2' => 3,
             )));
-
+        }
         if ($params && isset($params['membernumber']) && $params['membernumber'])
             $formBuilder->add('membernumber', TextType::class, array('label' => '# =', 'required' => false, 'attr' => array('value' => $params['membernumber'])));
         else
@@ -229,6 +235,11 @@ class SearchUserFormHelper {
         if ($form->get('frozen')->getData() > 0) {
             $qb = $qb->andWhere('o.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
+        }
+        if ($form->get('beneficiary_count')->getData() > 0) {
+            var_dump($form->get('beneficiary_count')->getData()-1);
+            $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
+                ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
         }
 
         if ($form->get('phone')->getData() > 0) {
