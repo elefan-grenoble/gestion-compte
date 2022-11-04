@@ -28,25 +28,29 @@
                 {{ form_end(form) }}
             {% endif %}
             {% if beneficiaries %}
-            <div class="collection">
-                {% for beneficiary in beneficiaries %}
-                    <form action="{{ path(return_path, { (routeParam): beneficiary.id } | merge(params)) }}" method="post" class="collection-item">
-                        <a href="#" onclick="$(this).closest('form').submit()" >{{ beneficiary.publicDisplayNameWithMemberNumber }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
-                    </form>
-                {% endfor %}
-            </div>
-            {% elseif not form %}
-                <div class="row center">
-                    <p class=" col s12 light">Oups, aucun résultats pour ce prénom !<br>
-                        <a href="{{ path('find_member_number') }}" class="btn">Essayer un autre ?</a>
-                    </p>
+                <div class="collection">
+                    {% for beneficiary in beneficiaries %}
+                        <form action="{{ path(return_path, { (routeParam): beneficiary.id } | merge(params)) }}" method="POST" class="collection-item">
+                            <a href="#" onclick="$(this).closest('form').submit()" >{{ beneficiary.publicDisplayNameWithMemberNumber }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                        </form>
+                    {% endfor %}
                 </div>
+            {% elseif not form %}
+                <p class=" col s12 light">Oups, aucun résultats pour ce prénom !</p>
+                <br />
+                {% if 'proxy' in return_path %}
+                    <a href="{{ path(return_path, params) }}" class="btn waves-effect waves-light">
+                        <i class="material-icons left">keyboard_return</i>Retourner à la recherche
+                    </a>
+                {% else %}
+                    <a href="{{ path('find_member_number') }}" class="btn">Essayer un autre ?</a>
+                {% endif %}
             {% endif %}
             {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             <div class="row center">
                 <p class=" col s12 light">Déjà un compte ? <a href="{{ path('fos_user_security_login') }}">identifiez-vous</a></p>
             </div>
-            {% endif %}
+        {% endif %}
         </div>
     </div>
 {% endblock %}

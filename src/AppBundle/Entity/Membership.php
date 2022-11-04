@@ -282,10 +282,10 @@ class Membership
     {
         $memberNumberWithBeneficiaryListString = '#' . $this->getMemberNumber();
         foreach ($this->getBeneficiariesWithMainInFirstPosition() as $key => $beneficiary) {
-            $memberNumberWithBeneficiaryListString .= ' '. $beneficiary->getFullName();
             if ($key > 0) {
                 $memberNumberWithBeneficiaryListString .= ' &';
             }
+            $memberNumberWithBeneficiaryListString .= ' '. $beneficiary->getDisplayName();
         }
         return $memberNumberWithBeneficiaryListString;
     }

@@ -160,21 +160,6 @@ class Beneficiary
     }
 
     /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->commissions = new ArrayCollection();
-        $this->formations = new ArrayCollection();
-        $this->shifts = new ArrayCollection();
-    }
-
-    public function __toString()
-    {
-        return $this->getDisplayName();
-    }
-
-    /**
      * Get id
      *
      * @return int
@@ -242,16 +227,6 @@ class Beneficiary
         return strtoupper($this->lastname);
     }
 
-    /**
-     * Get public full name
-     *
-     * @return string
-     */
-    public function getPublicFullName()
-    {
-        return $this->getFirstname() . ' ' . $this->getLastname()[0];
-    }
-
     public function getDisplayName(): string
     {
         return $this->getFirstname() . ' ' . $this->getLastname();
@@ -267,7 +242,7 @@ class Beneficiary
      */
     public function getDisplayNameWithMemberNumber(): string
     {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFullName();
+        return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
     }
 
     public function getDisplayNameWithMemberNumberAndStatusIcon(): string
@@ -286,16 +261,6 @@ class Beneficiary
     public function getPublicDisplayNameWithMemberNumber(): string
     {
         return '#' . $this->getMemberNumber() . ' ' . $this->getPublicDisplayName();
-    }
-
-    /**
-     * Get firstname
-     *
-     * @return string
-     */
-    public function getFirstname()
-    {
-        return ucfirst(strtolower($this->firstname));
     }
 
     /**

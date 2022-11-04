@@ -388,7 +388,7 @@ class EventController extends Controller
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
                 if (count($member_giver_proxies) > 0) {
-                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayName() . ' a déjà donné sa procuration');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayNameWithMemberNumber() . ' a déjà donné sa procuration');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -401,7 +401,7 @@ class EventController extends Controller
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
                 if (count($member_owner_proxies) >= $max_event_proxy_per_member) {
-                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayNameWithMemberNumber() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
                     return $this->redirectToRoute('homepage');
                 }
 
