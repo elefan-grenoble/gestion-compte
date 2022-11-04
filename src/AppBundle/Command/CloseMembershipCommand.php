@@ -46,6 +46,7 @@ class CloseMembershipCommand extends ContainerAwareCommand
         foreach ($members as $member) {
             $member->setWithdrawn(true);
             $member->setWithdrawnDate(new \DateTime('now'));
+            // $member->setWithdrawnBy(); //TODO
             $member->setFrozen(false); //not frozen anymore
             $em->persist($member);
             $count++;

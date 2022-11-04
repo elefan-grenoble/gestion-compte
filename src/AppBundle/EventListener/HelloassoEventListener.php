@@ -127,7 +127,6 @@ class HelloassoEventListener
                 // if account closed, re-open
                 if ($membership->isWithdrawn()) {
                     $membership->setWithdrawn(false);
-                    $membership->setWithdrawnDate(null);
                 }
                 $this->_em->persist($membership);
 
