@@ -16,8 +16,6 @@
             {# Not main benificiary, only one vote per memeber whatever the beneficiries number -----#}
             <td colspan="2" class="warning" style="background: gray; color: white;">
                 Bénéficiaire de <strong>{{ beneficiary.membership.mainBeneficiary.displayName }}</strong>
-                <br />
-                &#9888&nbsp;<strong>NE PAS SIGNER ICI</strong>&nbsp;&#9888
             </td>
 
         {% elseif (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
