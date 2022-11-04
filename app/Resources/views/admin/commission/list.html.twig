@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des commissions</h4>
+    <h4>Liste des commissions ({{ commissions | length }})</h4>
 
     <div class="row">
         {% for commission in commissions %}

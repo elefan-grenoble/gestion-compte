@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des rôles</h4>
+    <h4>Liste des rôles ({{ roles | length }})</h4>
 
     <table class="striped">
         <thead>
@@ -35,10 +35,4 @@
         {% endfor %}
         </tbody>
     </table>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-
-{% block javascripts %}
 {% endblock %}
