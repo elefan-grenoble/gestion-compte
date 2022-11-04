@@ -11,6 +11,29 @@
 {% block content %}
     <h4>Liste des postes de bénévolat ({{ jobs | length }})</h4>
 
+    {# Filter form  --------- #}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">tune</i>Filtres
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(filter_form) }}
+                <div class="row">
+                    <div class="col s6">
+                        {{ form_errors(filter_form.enabled) }}
+                        <label>
+                            {{ form_widget(filter_form.enabled) }}
+                            <span>{{ filter_form.enabled.vars.label }}</span>
+                        </label>
+                    </div>
+                </div>
+                {{ form_widget(filter_form.filter) }}
+            </div>
+        </li>
+    </ul>
+    {{ form_end(filter_form) }}
+
     <table class="responsive-table">
         <thead>
             <tr>
