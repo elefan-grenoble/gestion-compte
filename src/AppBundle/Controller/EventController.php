@@ -388,7 +388,7 @@ class EventController extends Controller
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
                 if (count($member_giver_proxies) > 0) {
-                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' a déjà donné sa procuration');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayName() . ' a déjà donné sa procuration');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -401,7 +401,7 @@ class EventController extends Controller
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
                 if (count($member_owner_proxies) >= $max_event_proxy_per_member) {
-                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -420,14 +420,10 @@ class EventController extends Controller
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
-                    if ($proxy->getOwner() == $proxy->getOwner()->getMembership()->getMainBeneficiary()) {
-                        $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' !');
-                    } else {
-                        $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' (bénéficiaire de '. $proxy->getOwner()->getMembership()->getMainBeneficiary() .') !');
-                    }
+                    $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()) {
-                        $this->sendProxyMail($proxy,$mailer);
+                        $this->sendProxyMail($proxy, $mailer);
                     }
 
                     return $this->redirectToRoute('homepage');
