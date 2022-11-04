@@ -43,7 +43,7 @@ class EventController extends Controller
      * Lists all proxy
      *
      * @Route("/proxies_list", name="proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listProxiesAction()
     {
@@ -65,7 +65,7 @@ class EventController extends Controller
      * Lists all proxy for one event.
      *
      * @Route("/{id}/proxies_list", name="event_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listEventProxiesAction(Event $event, Request $request)
     {
