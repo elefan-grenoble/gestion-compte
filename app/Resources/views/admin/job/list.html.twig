@@ -11,7 +11,7 @@
 {% block content %}
     <h4>Liste des postes de bénévolat ({{ jobs | length }})</h4>
 
-    <table class="responsive-table striped">
+    <table class="responsive-table">
         <thead>
             <tr>
                 <th>Poste</th>
@@ -22,7 +22,6 @@
                 <th>Actions</th>
             </tr>
         </thead>
-
         <tbody>
             {% for job in jobs %}
                 <tr>

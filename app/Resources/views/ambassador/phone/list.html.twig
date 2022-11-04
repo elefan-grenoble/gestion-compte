@@ -1,5 +1,7 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des retardataires - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
@@ -8,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h1>
+    <h4>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h4>
 
     <ul class="collapsible">
         <li>
@@ -109,7 +111,7 @@
         </li>
     </ul>
 
-    <table class="striped">
+    <table class="responsive-table">
         <thead>
         <tr>
             <th data-col="o.member_number">#</th>
@@ -118,7 +120,7 @@
             <th data-col="r.date">Adhésion(s)</th>
             <th data-col="time">Compteur</th>
             <th>Note(s)</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>

@@ -11,7 +11,7 @@
 {% block content %}
     <h4>Liste des formations ({{ formations | length }})</h4>
 
-    <table class="responsive-table striped">
+    <table class="responsive-table">
         <thead>
             <tr>
                 <th>Formation</th>
@@ -20,7 +20,6 @@
                 <th>Actions</th>
             </tr>
         </thead>
-
         <tbody>
             {% for formation in formations %}
                 <tr>
