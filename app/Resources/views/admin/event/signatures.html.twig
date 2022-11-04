@@ -15,7 +15,7 @@
         {% if not beneficiary.isMain %}
             {# Not main benificiary, only one vote per memeber whatever the beneficiries number -----#}
             <td colspan="2" class="warning" style="background: gray; color: white;">
-                Bénéficiaire de <strong>{{ beneficiary.membership.mainBeneficiary.lastname }}&nbsp;{{ beneficiary.membership.mainBeneficiary.firstname }}</strong>
+                Bénéficiaire de <strong>{{ beneficiary.membership.mainBeneficiary.displayName }}</strong>
                 <br />
                 &#9888&nbsp;<strong>NE PAS SIGNER ICI</strong>&nbsp;&#9888
             </td>
@@ -29,15 +29,14 @@
             </td>
 
         {% elseif (event.proxiesByGiver(beneficiary.membership) | length > 0) %}
-            {# This memeber designated a proxy to vote and is not the proxy ------------------------- #}
+            {# This member designated a proxy to vote and is not the proxy ------------------------- #}
+            {# first? only 1 proxy per member #}
             <td colspan="2" class="warning" style="background: gray; color: white;">
                 Procuration donnée à
                 <br />
-                {% if event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary  %}
+                {% if event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary %}
                     <strong>
-                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary.lastname }}
-                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary.firstname }}
-                        #{{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}
+                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumberWithBeneficiaryListString }}
                     </strong>
                 {% else %}
                     Membre supprimé
@@ -58,10 +57,30 @@
      #########################################################################}
     {% macro table_line(beneficiary, event) %}
         <tr>
-            <td {% if beneficiary.lastname | length > 12 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
-            <td {% if beneficiary.firstname | length > 12 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
-            <td>#{{ beneficiary.membership.memberNumber }}</td>
-            <td class="date">{{ beneficiary.membership.lastRegistration.date | date('d-m-Y') }}</td>
+            <td {% if beneficiary.lastname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.lastname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.lastname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td {% if beneficiary.firstname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.firstname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.firstname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td class="center">#{{ beneficiary.membership.memberNumber }}</td>
+            <td class="center date">{{ beneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
             {{ _self.sign_cells(beneficiary, event) }}
         </tr>
 
@@ -70,12 +89,31 @@
             {% for proxy in event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) %}
                 <tr>
                     <td>
-                        <spam class="smaller">&#8618;&nbsp;A une procuration pour</spam>
-                        <br>{{ proxy.giver.mainBeneficiary.lastname }}
+                        <span class="smaller">&#8618;&nbsp;A une procuration pour</span>
+                        <br />
+                        {{ proxy.giver.mainBeneficiary.lastname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.lastname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     </td>
-                    <td>{{ proxy.giver.mainBeneficiary.firstname }}</td>
-                    <td>#{{ proxy.giver.mainBeneficiary.memberNumber }}</td>
-                    <td>{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date('d-m-Y') }}</td>
+                    <td>
+                        {{ proxy.giver.mainBeneficiary.firstname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.firstname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="center">#{{ proxy.giver.mainBeneficiary.memberNumber }}</td>
+                    <td class="center">{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
 
                 {% if (proxy.giver.mainBeneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
                     {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
@@ -102,8 +140,8 @@
             <tr>
                 <th>Nom</th>
                 <th>Prénom</th>
-                <th>#</th>
-                <th>Adhésion</th>
+                <th class="center">#</th>
+                <th class="center">Adhésion</th>
                 <th>Signature</th>
                 <th>Vote</th>
             </tr>
@@ -130,8 +168,9 @@
                 {% set number_of_voters = number_of_voters+1 %}
             {% endif %}
         {% endfor %}
-        <br>Nombre de votants : {{ number_of_voters }}
-        <br>Nombre de procurations : {{ number_of_proxy }}
+        Nombre de votants : {{ number_of_voters }}
+        <br />
+        Nombre de procurations : {{ number_of_proxy }}
     {% endmacro member_count %}
 
 {% endblock %}
@@ -225,10 +264,6 @@
             /*background: white;*/
         }
 
-        .subpage td:nth-child(3) {
-            text-align: center;
-        }
-
         .subpage tr:nth-child(even) {
             background: lightgray !important;
             -webkit-print-color-adjust: exact;
@@ -289,8 +324,9 @@
             <div class="subpage">
                 <div class="title" id="main_title">
                     Liste des votants pour l'événement "{{ event.title() }}"
-                    <span style="white-space: nowrap;">le {{ event.date | date('d-m-Y') }}</span>
-                    généré le <span style="white-space: nowrap;">{{ "now" | date('d-m-Y') }}</span>
+                    <span style="white-space: nowrap;">le {{ event.date | date('d F Y H:i') }}</span>
+                    <br />
+                    <small>généré le <span style="white-space: nowrap;">{{ "now" | date('d F Y H:i') }}</span></small>
                 </div>
                 <div class="center" id="member_count">
                     <p>{{ _self.member_count(beneficiaries, event) }}</p>
