@@ -78,6 +78,14 @@ class TimeLog
     private $shift;
 
     /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -223,18 +231,10 @@ class TimeLog
      *
      * @return TimeLog
      */
-    public function setCreatedAt($created_at)
+    public function setCreatedAt($date)
     {
         $this->createdAt = $date;
         return $this;
-    }
-
-    /**
-     * @ORM\PrePersist
-     */
-    public function setCreatedAtValue()
-    {
-        $this->createdAt = new \DateTime();
     }
 
     /**
