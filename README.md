@@ -2,11 +2,17 @@
 
 Application symfony pour la gestion d'une épicerie ou d'un super marché coopératif.
 
-Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet grenoblois de super marché coopératif.
+Ce code est à l'initiative de [l'éléfan](https://lelefan.org/), projet grenoblois de super marché coopératif. Il est open source, sous licence GPLv3.
 
-![home](doc/images/homepage_25102018.png)
+Cet outil est utilisé par plus d'une dizaine d'autres coopératives en France.
 
-Il est open source sous licence GPLv3.
+## Captures d'écran
+
+_cliquez pour voir l'image en grand_
+
+|Page d'accueil (anonyme)|Page d'accueil membre|Page d'administration|
+|---|---|---|
+|![home_anon](doc/images/20121105_homepage_anon.png)|![home](doc/images/20121105_homepage_raphael.png)|![admin](doc/images/20121105_homepage_admin.png)|
 
 ## Projet
 
