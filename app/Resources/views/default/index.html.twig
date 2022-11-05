@@ -75,10 +75,10 @@
                                 {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
                                     <p>
                                         <i class="material-icons">warning</i>
-                                        Ton adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
+                                        {% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
                                     </p>
                                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                        <i class="material-icons left">card_membership</i>Je ré-adhère en ligne
+                                        <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
                                     </a>
                                 {% elseif not app.user.beneficiary.membership | uptodate %}
                                     <p>
@@ -86,7 +86,7 @@
                                         Il est temps d'adhérer.
                                     </p>
                                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                        <i class="material-icons left">card_membership</i>J'adhère en ligne
+                                        <i class="material-icons left">card_membership</i>Adhèrer en ligne
                                     </a>
                                 {% else %}
                                     <div>
