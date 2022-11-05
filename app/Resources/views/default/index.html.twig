@@ -19,7 +19,7 @@
 
             <div class="row">
                 <div class="col s12">
-                    <h3 class="header">
+                    <h4 class="header">
                         Bonjour
                         {% if app.user.beneficiary %}
                             {{ app.user.beneficiary.firstname }}
@@ -28,7 +28,7 @@
                         {% else %}
                             {{ app.user.username }}
                         {% endif %}
-                    </h3>
+                    </h4>
                 </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <div class="col s12">
