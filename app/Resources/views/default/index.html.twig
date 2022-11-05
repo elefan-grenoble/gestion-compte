@@ -41,7 +41,12 @@
                 {% endif %}
                 {% if app.user.beneficiary %}
                     <div class="col s12">
-                        <p>Bienvenue sur ton espace personnel à {{ project_name }}</p>
+                        <p>
+                            Bienvenue sur ton espace personnel à {{ project_name }}
+                            {% if app.user.beneficiary.membership.beneficiaries | length %}
+                            <br />Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}{{ beneficiary.firstname }}{% endif %}{% endfor %}
+                            {% endif %}
+                        </p>
                         {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
                             <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
                             <br />
