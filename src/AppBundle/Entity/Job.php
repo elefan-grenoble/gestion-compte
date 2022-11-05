@@ -47,6 +47,13 @@ class Job
     private $description;
 
     /**
+     * @var string
+     * 
+     * @ORM\Column(name="url", type="string", length=255, nullable=true)
+     */
+    private $url;
+
+    /**
      * @var int
      * 
      * @ORM\Column(name="min_shifter_alert", type="integer", options={"default" : 2})
@@ -289,6 +296,30 @@ class Job
     {
         $this->description = $description;
         return $this;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     *
+     * @return Job
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     /**
