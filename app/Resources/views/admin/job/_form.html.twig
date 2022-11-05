@@ -35,6 +35,11 @@
     {{ form_widget(form.description) }}
 </div>
 <div class="row">
+    {{ form_label(form.url) }}
+    {{ form_errors(form.url) }}
+    {{ form_widget(form.url) }}
+</div>
+<div class="row">
     {{ form_errors(form.enabled) }}
     <label>
         {{ form_widget(form.enabled) }}
