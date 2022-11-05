@@ -41,15 +41,21 @@
         {% endif %}
         {% if member.timeCount < 0 %}
             <p>
-                <i class="material-icons">warning</i> Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.
+                <i class="material-icons">warning</i>
+                {% if member.beneficiaries | length %}
+                    <span>Vous avez du retard sur votre bénévolat. Pensez à réserver vos créneaux.</span>
+                {% else %}
+                    <span>Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.</span>
+                {% endif %}
             </p>
         {% else %}
             {% set remaining = shift_service.remainingToBook(member) %}
             {% if remaining > 0 %}
                 <p>
-                    <i class="material-icons">warning</i> Pense à réserver tes créneaux.
-                    <br>
-                    Tu as encore {{ remaining | duration_from_minutes }} à effectuer.
+                    <i class="material-icons">warning</i>
+                    <span>{% if member.beneficiaries | length %}Pensez à réserver vos créneaux.{% else %}Pense à réserver tes créneaux.{% endif %}</span>
+                    <br />
+                    <span>{% if member.beneficiaries | length %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
                 </p>
             {% else %}
                 {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
@@ -87,11 +93,11 @@
 
     <a href="{{ path("booking") }}" class="btn teal hide-on-small-only" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         <i class="material-icons left">schedule</i>
-        Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}
+        Réserver un créneau{% if use_fly_and_fixed %} volant{% endif %}
     </a>
     <a href="{{ path("booking") }}" class="btn teal hide-on-med-and-up" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
         Réserver
     </a>
 
-    <p>Mon cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
+    <p>{% if member.beneficiaries | length %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
 {% endif %}
