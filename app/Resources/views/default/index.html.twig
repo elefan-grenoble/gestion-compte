@@ -19,7 +19,7 @@
 
             <div class="row">
                 <div class="col s12">
-                    <h3 class="header">
+                    <h4 class="header">
                         Bonjour
                         {% if app.user.beneficiary %}
                             {{ app.user.beneficiary.firstname }}
@@ -28,7 +28,7 @@
                         {% else %}
                             {{ app.user.username }}
                         {% endif %}
-                    </h3>
+                    </h4>
                 </div>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <div class="col s12">
@@ -41,7 +41,12 @@
                 {% endif %}
                 {% if app.user.beneficiary %}
                     <div class="col s12">
-                        <p>Bienvenue sur ton espace personnel à {{ project_name }}</p>
+                        <p>
+                            Bienvenue sur ton espace personnel à {{ project_name }}
+                            {% if app.user.beneficiary.membership.beneficiaries | length %}
+                            <br />Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}{{ beneficiary.firstname }}{% endif %}{% endfor %}
+                            {% endif %}
+                        </p>
                         {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
                             <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
                             <br />
@@ -70,10 +75,10 @@
                                 {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
                                     <p>
                                         <i class="material-icons">warning</i>
-                                        Ton adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
+                                        {% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
                                     </p>
                                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                        <i class="material-icons left">card_membership</i>Je ré-adhère en ligne
+                                        <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
                                     </a>
                                 {% elseif not app.user.beneficiary.membership | uptodate %}
                                     <p>
@@ -81,7 +86,7 @@
                                         Il est temps d'adhérer.
                                     </p>
                                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                        <i class="material-icons left">card_membership</i>J'adhère en ligne
+                                        <i class="material-icons left">card_membership</i>Adhèrer en ligne
                                     </a>
                                 {% else %}
                                     <div>
