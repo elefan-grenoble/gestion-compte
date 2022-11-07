@@ -19,7 +19,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 
 
 /**
- * Task controller.
+ * Service controller.
  *
  * @Route("services")
  */
@@ -136,7 +136,7 @@ class ServiceController extends Controller
 
 
     /**
-     * edit service.
+     * delete service.
      *
      * @Route("/{id}", name="service_remove")
      * @Method({"DELETE"})

@@ -107,6 +107,14 @@ class Service
     private $clients;
 
     /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
      * @ORM\PrePersist
      */
     public function setUpdatedAtValue()
@@ -219,13 +227,6 @@ class Service
     public function getUrl()
     {
         return $this->url;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**

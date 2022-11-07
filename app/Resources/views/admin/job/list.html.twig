@@ -14,10 +14,10 @@
     <table class="responsive-table striped">
         <thead>
             <tr>
-                <th>id</th>
                 <th>Poste</th>
                 <th>Couleur</th>
                 <th>Description</th>
+                <th>Lien<br />(vers une doc)</th>
                 <th>Nombre de créneaux<br />(semaine type)</th>
                 <th>Actions</th>
             </tr>
@@ -26,12 +26,16 @@
         <tbody>
             {% for job in jobs %}
                 <tr>
-                    <td>{{ job.id }}</td>
                     <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
                     <td class="{{ job.color }} white-text">{{ job.color }}</td>
                     <td class="center-align">
                         {% if job.description is not empty %}
                             <i class="material-icons" title="{{ job.description }}">playlist_add_check</i>
+                        {% endif %}
+                    </td>
+                    <td class="center-align">
+                        {% if job.url is not empty %}
+                            <a href="{{ job.url }}" target="_blank">lien</a>
                         {% endif %}
                     </td>
                     <td>{{ job.periods | length }}</td>
