@@ -23,104 +23,111 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s4">
-                                ∅ fermé :
-                                {{ form_widget(form.withdrawn) }}
-                                {{ form_label(form.withdrawn) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.withdrawn) }}
+                                    {{ form_label(form.withdrawn) }}
+                                </div>
                             </div>
-                            <div class="col s4">
-                                activé :
-                                {{ form_widget(form.enabled) }}
-                                {{ form_label(form.enabled) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.enabled) }}
+                                    {{ form_label(form.enabled) }}
+                                </div>
                             </div>
-                            <div class="col s4">
-                                ❄️ gelé :
-                                {{ form_widget(form.frozen) }}
-                                {{ form_label(form.frozen) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.frozen) }}
+                                    {{ form_label(form.frozen) }}
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.beneficiary_count) }}
+                                    {{ form_label(form.beneficiary_count) }}
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div class="row">
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumber) }}
-                                        {{ form_label(form.membernumber) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberdiff) }}
-                                        {{ form_label(form.membernumberdiff) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumbergt) }}
-                                        {{ form_label(form.membernumbergt) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberlt) }}
-                                        {{ form_label(form.membernumberlt) }}
-                                    </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumber) }}
+                                    {{ form_label(form.membernumber) }}
                                 </div>
                             </div>
-                            <h5>Adhésion(s)</h5>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdate) }}
-                                        {{ form_label(form.registrationdate) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdategt) }}
-                                        {{ form_label(form.registrationdategt) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdatelt) }}
-                                        {{ form_label(form.registrationdatelt) }}
-                                    </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberdiff) }}
+                                    {{ form_label(form.membernumberdiff) }}
                                 </div>
                             </div>
-                            <h5>Dernière Adhésion</h5>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdate) }}
-                                        {{ form_label(form.lastregistrationdate) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdategt) }}
-                                        {{ form_label(form.lastregistrationdategt) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdatelt) }}
-                                        {{ form_label(form.lastregistrationdatelt) }}
-                                    </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumbergt) }}
+                                    {{ form_label(form.membernumbergt) }}
                                 </div>
                             </div>
-                            <h5>Compteur</h5>
-                            <div class="row valign-wrapper">
-                                <div class="input-field col s3">
-                                    {{ form_widget(form.compteurgt) }}
-                                    {{ form_label(form.compteurgt) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberlt) }}
+                                    {{ form_label(form.membernumberlt) }}
                                 </div>
-                                <div class="col s6 center">
-                                    < &nbsp; compteur &nbsp; <
+                            </div>
+                        </div>
+                        <h5>Adhésion(s)</h5>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdate) }}
+                                    {{ form_label(form.registrationdate) }}
                                 </div>
-                                <div class="input-field col s3">
-                                    {{ form_widget(form.compteurlt) }}
-                                    {{ form_label(form.compteurlt) }}
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdategt) }}
+                                    {{ form_label(form.registrationdategt) }}
                                 </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdatelt) }}
+                                    {{ form_label(form.registrationdatelt) }}
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Dernière Adhésion</h5>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdate) }}
+                                    {{ form_label(form.lastregistrationdate) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdategt) }}
+                                    {{ form_label(form.lastregistrationdategt) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdatelt) }}
+                                    {{ form_label(form.lastregistrationdatelt) }}
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                < &nbsp; compteur &nbsp; <
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
                             </div>
                         </div>
                     </div>
@@ -218,19 +225,24 @@
                 <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td class="hide-on-med-and-down">
                         {% if member.withdrawn %}
-                            <i class="material-icons">block</i>
+                            <i class="material-icons" title="Compte fermé">block</i>
                         {% else %}
                             {% if not member.mainBeneficiary.user.isEnabled %}
-                                <i class="material-icons">phonelink_off</i>
+                                <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
                             {% endif %}
                             {% if member.frozen %}
-                                <i class="material-icons">ac_unit</i>
+                                <i class="material-icons" title="Compte gelé">ac_unit</i>
                             {% endif %}
                         {% endif %}
                     </td>
-                    <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a></td>
-                    <td>{{ member.mainBeneficiary.user.username }}</td>
-
+                    <td>
+                        <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a>
+                    </td>
+                    <td>
+                        {% for beneficiary in member.beneficiaries %}
+                            {{ beneficiary.user.username }}<br/>
+                        {% endfor %}
+                    </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
                             {{ beneficiary.firstname }}<br/>

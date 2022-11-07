@@ -174,9 +174,9 @@ class AdminController extends Controller
         $page = 1;
         $order = 'ASC';
         $sort = 'o.member_number';
+        $limit = 25;
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             if ($form->get('page')->getData() > 0) {
                 $page = $form->get('page')->getData();
             }
@@ -186,19 +186,16 @@ class AdminController extends Controller
             if ($form->get('dir')->getData()) {
                 $order = $form->get('dir')->getData();
             }
-
             $formHelper->processSearchFormData($form, $qb);
-
         } else {
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
         }
-
         $formHelper->processSearchQueryData($request->getQueryString(), $qb);
 
-        $limit = 25;
-
         $qb = $qb->orderBy($sort, $order);
+
+        // Export CSV
         if ($action == "csv") {
             $members = $qb->getQuery()->getResult();
             $return = '';
@@ -219,6 +216,7 @@ class AdminController extends Controller
                 'Content-Type' => 'application/force-download; charset=UTF-8',
                 'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
             ));
+        // Envoyer un mail
         } else if ($action === "mail") {
             return $this->redirectToRoute('mail_edit', [
                 'request' => $request

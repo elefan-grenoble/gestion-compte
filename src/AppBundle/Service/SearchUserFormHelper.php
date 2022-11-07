@@ -19,7 +19,7 @@ class SearchUserFormHelper {
     public function getSearchForm($formBuilder, $params_string = '', $ambassador = false) {
         $params = array();
         parse_str($params_string, $params);
-        $formBuilder->add('withdrawn', ChoiceType::class, array('label' => 'fermé', 'required' => false, 'choices' => array(
+        $formBuilder->add('withdrawn', ChoiceType::class, array('label' => '∅ fermé', 'required' => false, 'choices' => array(
             'fermé' => 2,
             'ouvert' => 1,
         )));
@@ -29,11 +29,17 @@ class SearchUserFormHelper {
                 'Non activé' => 1,
             )));
         }
-        $formBuilder->add('frozen', ChoiceType::class, array('label' => 'gelé', 'required' => false, 'choices' => array(
-                'gelé' => 2,
-                'Non gelé' => 1,
+        $formBuilder->add('frozen', ChoiceType::class, array('label' => '❄️ gelé', 'required' => false, 'choices' => array(
+            'gelé' => 2,
+            'Non gelé' => 1,
+        )));
+        if (!$ambassador) {
+            $formBuilder->add('beneficiary_count', ChoiceType::class, array('label' => 'nb de bénéficiaires', 'required' => false, 'choices' => array(
+                // '0' => 1,
+                '1' => 2,
+                '2' => 3,
             )));
-
+        }
         if ($params && isset($params['membernumber']) && $params['membernumber'])
             $formBuilder->add('membernumber', TextType::class, array('label' => '# =', 'required' => false, 'attr' => array('value' => $params['membernumber'])));
         else
@@ -131,9 +137,9 @@ class SearchUserFormHelper {
     public function initSearchQuery($doctrineManager) {
         /** @var QueryBuilder $qb */
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
-            ->leftJoin("o.registrations", "r")->addSelect("r")
-            ->leftJoin("b.user", "u")->addSelect("u");
+        $qb = $qb->leftJoin("o.beneficiaries", "b")
+            ->leftJoin("b.user", "u")
+            ->leftJoin("o.registrations", "r")->addSelect("r");
         $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
         return $qb;
     }
@@ -230,13 +236,9 @@ class SearchUserFormHelper {
             $qb = $qb->andWhere('o.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
-
-        if ($form->get('phone')->getData() > 0) {
-            if ($form->get('phone')->getData() == 1) { // non renseigné
-                $qb = $qb->andWhere('b.phone < 100000000');
-            } else {
-                $qb = $qb->andWhere('b.phone > 100000000');
-            }
+        if ($form->get('beneficiary_count')->getData() > 0) {
+            $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
+                ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
         }
 
         if ($form->get('registrationdate')->getData()) {
@@ -336,6 +338,14 @@ class SearchUserFormHelper {
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }
+        if ($form->get('phone')->getData() > 0) {
+            if ($form->get('phone')->getData() == 1) { // non renseigné
+                $qb = $qb->andWhere('b.phone < 100000000');
+            } else {
+                $qb = $qb->andWhere('b.phone > 100000000');
+            }
+        }
+
         $join_formations = false;
         if ($form->get('formations')->getData() && count($form->get('formations')->getData())) {
             if (($form->get('or_and_exp_formations')->getData() > 0) && (count($form->get('formations')->getData()) > 1)) { // AND not OR
