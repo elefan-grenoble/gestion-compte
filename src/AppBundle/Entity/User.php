@@ -335,6 +335,18 @@ class User extends BaseUser
     }
 
     /**
+     * @return string
+     */
+    public function getBeneficiaryStringWithLink()
+    {
+        if ($this->getBeneficiary()) {
+            return '<a href="{{ path("member_show", { \'member_number\': '. $this->getBeneficiary()->getMembership()->getMemberNumber() .' }) }}">'. $this->getBeneficiary() .'</a>';
+        } else {
+            return $this;
+        }
+    }
+
+    /**
      * @return mixed
      */
     public function getProcessUpdates()

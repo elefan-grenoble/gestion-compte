@@ -35,11 +35,24 @@ class Membership
     protected $member_number;
 
     /**
-     * @var bool
+     * @var \DateTime
      *
      * @ORM\Column(name="withdrawn", type="boolean", nullable=false, options={"default" : 0})
      */
     private $withdrawn;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="withdrawn_date", type="date", nullable=true)
+     */
+    private $withdrawnDate;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="withdrawn_by_id", referencedColumnName="id")
+     */
+    private $withdrawnBy;
 
     /**
      * @var bool
@@ -111,6 +124,11 @@ class Membership
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
         $this->timeLogs = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return '#'.$this->getMemberNumber();
     }
 
     public function getTmpToken($key = ''){
@@ -216,11 +234,6 @@ class Membership
         return $this->beneficiaries;
     }
 
-    public function __toString()
-    {
-        return '#'.$this->getMemberNumber();
-    }
-
     /**
      * Set mainBeneficiary
      *
@@ -264,6 +277,10 @@ class Membership
     public function setWithdrawn($withdrawn)
     {
         $this->withdrawn = $withdrawn;
+        if ($this->withdrawn == false) {
+            $this->withdrawnDate = null;
+            $this->withdrawnBy = null;
+        }
         return $this;
     }
 
@@ -285,6 +302,52 @@ class Membership
     public function getWithdrawn()
     {
         return $this->withdrawn;
+    }
+
+    /**
+     * Set withdrawnDate
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Membership
+     */
+    public function setWithdrawnDate($date)
+    {
+        $this->withdrawnDate = $date;
+        return $this;
+    }
+
+    /**
+     * Get withdrawnDate
+     *
+     * @return \DateTime
+     */
+    public function getWithdrawnDate()
+    {
+        return $this->withdrawnDate;
+    }
+
+    /**
+     * Set withdrawnBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setWithdrawnBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->withdrawnBy = $user;
+        return $this;
+    }
+
+    /**
+     * Get withdrawnBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getWithdrawnBy()
+    {
+        return $this->withdrawnBy;
     }
 
     public function getCommissions()

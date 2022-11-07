@@ -104,14 +104,14 @@ class TimeLog
      *
      * @return TimeLog
      */
-    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
-        $this->createdBy = $createdBy;
+        $this->createdBy = $user;
         return $this;
     }
 
     /**
-     * Get booker
+     * Get createdBy
      *
      * @return \AppBundle\Entity\User
      */

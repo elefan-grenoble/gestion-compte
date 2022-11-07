@@ -480,9 +480,12 @@ class MembershipController extends Controller
     public function closeAction(Membership $member)
     {
         $this->denyAccessUnlessGranted('close', $member);
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $member->setWithdrawn(true);
+        $member->setWithdrawnDate(new \DateTime('now'));
+        $member->setWithdrawnBy($current_user);
         $em->persist($member);
         $em->flush();
         $session->getFlashBag()->add('success', 'Compte fermé');

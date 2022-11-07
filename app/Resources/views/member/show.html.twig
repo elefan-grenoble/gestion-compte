@@ -301,6 +301,14 @@
                             </div>
                         </div>
                     {% else %}
+                        {% if member.withdrawnDate %}
+                            <p>
+                                Compte fermé le <i>{{ member.withdrawnDate | date('d F Y H:i') }}</i>
+                                {% if member.withdrawnBy %}
+                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show",{ 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
+                                {% endif %}
+                            </p>
+                        {% endif %}
                         <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
                             <i class="material-icons left">check</i>Ré-ouvrir le compte
                         </a>
