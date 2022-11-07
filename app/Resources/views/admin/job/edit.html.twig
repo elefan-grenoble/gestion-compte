@@ -12,7 +12,7 @@
 {% block content %}
     <h4>Editer le poste de bénévolat</h4>
 
-    {% include "/admin/job/_form.html.twig" with { form: form } %}
+    {% include "admin/job/_form.html.twig" with { form: form } %}
 
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         {{ form_start(delete_form) }}
