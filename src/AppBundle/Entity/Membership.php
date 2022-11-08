@@ -15,9 +15,10 @@ use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * Commission
- *
- * @ORM\Table(name="membership")
+ * 
  * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipRepository")
+ * @ORM\Table(name="membership")
+ * @UniqueEntity(fields={"member_number"}, message="Ce numéro de membre existe déjà")
  */
 class Membership
 {
