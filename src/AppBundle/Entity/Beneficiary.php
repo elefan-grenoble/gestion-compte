@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Beneficiary
  *
  * @ORM\Table(name="beneficiary")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BeneficiaryRepository")
  */
 class Beneficiary
@@ -131,6 +132,36 @@ class Beneficiary
     private $_counters = [];
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->commissions = new ArrayCollection();
+        $this->formations = new ArrayCollection();
+        $this->shifts = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getDisplayName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -204,11 +235,6 @@ class Beneficiary
     public function getPublicDisplayName()
     {
         return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
-    }
-
-    public function __toString()
-    {
-        return $this->getDisplayName();
     }
 
     /**
@@ -300,16 +326,6 @@ class Beneficiary
     public function isMain()
     {
         return $this === $this->getMembership()->getMainBeneficiary();
-    }
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->commissions = new ArrayCollection();
-        $this->formations = new ArrayCollection();
-        $this->shifts = new ArrayCollection();
     }
 
     /**
@@ -741,6 +757,16 @@ class Beneficiary
      */
     public function setFlying(?bool $flying): void {
         $this->flying = $flying;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 
     public function getTimeCount($cycle = 0)
