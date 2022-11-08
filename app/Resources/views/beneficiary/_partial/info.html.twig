@@ -21,21 +21,23 @@
 
 <div class="row">
     <div class="col s12 truncate">
-        <i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}
+        <i class="material-icons tiny">phone</i>
+        <span>{{ beneficiary.phone }}</span>
     </div>
     {% if phone_only is not defined %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}
+            <i class="material-icons tiny">mail</i>
+            <span>{{ beneficiary.email }}</span>
         </div>
         {% if beneficiary.address %}
             <div class="col s12 truncate">
                 <i class="material-icons tiny">location_on</i>
-                &nbsp;{{ beneficiary.address.street1 }}
+                {{ beneficiary.address.street1 }}
                 {% if beneficiary.address.street2 %}
-                    &nbsp;{{ beneficiary.address.street2 }}
+                    {{ beneficiary.address.street2 }}
                 {% endif %}
-                &nbsp;{{ "%05d"|format(beneficiary.address.zipCode) }}
-                &nbsp;{{ beneficiary.address.city }}
+                {{ "%05d"|format(beneficiary.address.zipCode) }}
+                {{ beneficiary.address.city }}
             </div>
         {% endif %}
     {% endif %}
@@ -52,7 +54,7 @@
     </div>
     {% if use_fly_and_fixed %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">accessibility</i>&nbsp;
+            <i class="material-icons tiny">accessibility</i>
             {% if beneficiary.flying %}
                 <div class="chip green-text">Equipe volante</div>
             {% else %}
@@ -62,7 +64,7 @@
     {% endif %}
     {% if beneficiary.formations | length %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">assignment_ind</i>&nbsp;
+            <i class="material-icons tiny">assignment_ind</i>
             {% for formation in beneficiary.formations %}
                 <div class="chip red-text">{{ formation.name }}</div>
             {% endfor %}
@@ -70,7 +72,7 @@
     {% endif %}
     {% if beneficiary.commissions | length %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">group</i>&nbsp;
+            <i class="material-icons tiny">group</i>
             {% for commission in beneficiary.commissions %}
                 <div class="chip blue-text">{{ commission.name }}</div>
             {% endfor %}
@@ -78,7 +80,7 @@
     {% endif %}
     {% if beneficiary.user and beneficiary.user.roles | length %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">settings</i>&nbsp;
+            <i class="material-icons tiny">settings</i>
             {% for role in beneficiary.user.roles %}
                 <div class="chip purple-text">{{ role }}</div>
             {% endfor %}
@@ -86,8 +88,8 @@
     {% endif %}
     {% if beneficiary.membership.lastRegistration %}
         <div class="col s12 truncate">
-            <i class="material-icons tiny">perm_contact_calendar</i>&nbsp;
-            Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}
+            <i class="material-icons tiny">perm_contact_calendar</i>
+            <span>Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}</span>
         </div>
     {% endif %}
 </div>
