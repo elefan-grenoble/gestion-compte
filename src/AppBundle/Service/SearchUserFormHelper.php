@@ -353,7 +353,7 @@ class SearchUserFormHelper {
                 $ids_groups = array();
                 foreach ($formations as $formation) {
                     $tmp_qb = clone $qb;
-                    $tmp_qb = $tmp_qb->leftjoin("b.formations", "ro")->addSelect("ro")
+                    $tmp_qb = $tmp_qb->leftjoin("b.formations", "ro")
                         ->andWhere('ro.id IN (:rid)')
                         ->setParameter('rid', $formation );
                     $ids_groups[] = $tmp_qb->select('DISTINCT o.id')->getQuery()->getArrayResult();
@@ -370,7 +370,7 @@ class SearchUserFormHelper {
                 $qb = $qb->andWhere('o.id IN (:all_formations)')
                     ->setParameter('all_formations', $ids);
             } else {
-                $qb = $qb->leftjoin("b.formations", "ro")->addSelect("ro")
+                $qb = $qb->leftjoin("b.formations", "ro")
                     ->andWhere('ro.id IN (:rids)')
                     ->setParameter('rids', $form->get('formations')->getData());
                 $join_formations = true;
@@ -378,7 +378,7 @@ class SearchUserFormHelper {
         }
         $join_commissions = false;
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())) {
-            $qb = $qb->leftjoin("b.commissions", "c")->addSelect("c")
+            $qb = $qb->leftjoin("b.commissions", "c")
                 ->andWhere('c.id IN (:cids)')
                 ->setParameter('cids', $form->get('commissions')->getData() );
             $join_commissions = true;
@@ -386,7 +386,7 @@ class SearchUserFormHelper {
         if ($form->get('not_formations')->getData() && count($form->get('not_formations')->getData())) {
             $nrqb = clone $qb;
             if (!$join_formations) {
-                $nrqb = $nrqb->leftjoin("b.formations", "ro")->addSelect("ro")
+                $nrqb = $nrqb->leftjoin("b.formations", "ro")
                     ->andWhere('ro.id IN (:rids)');
             }
             $nrqb->setParameter('rids', $form->get('not_formations')->getData() );
@@ -401,7 +401,7 @@ class SearchUserFormHelper {
         if ($form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())) {
             $ncqb = clone $qb;
             if (!$join_commissions) {
-                $ncqb = $ncqb->leftjoin("b.commissions", "c")->addSelect("c")
+                $ncqb = $ncqb->leftjoin("b.commissions", "c")
                     ->andWhere('c.id IN (:cids)');
             }
             $ncqb->setParameter('cids', $form->get('not_commissions')->getData() );
