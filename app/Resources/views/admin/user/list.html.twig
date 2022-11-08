@@ -222,17 +222,16 @@
         <tbody>
         {% for member in members %}
             {% if member.mainBeneficiary %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
+                <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
                     <td class="hide-on-med-and-down">
                         {% if member.withdrawn %}
                             <i class="material-icons" title="Compte fermé">block</i>
-                        {% else %}
-                            {% if not member.mainBeneficiary.user.isEnabled %}
-                                <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
-                            {% endif %}
-                            {% if member.frozen %}
-                                <i class="material-icons" title="Compte gelé">ac_unit</i>
-                            {% endif %}
+                        {% endif %}
+                        {% if member.frozen %}
+                            <i class="material-icons" title="Compte gelé">ac_unit</i>
+                        {% endif %}
+                        {% if not member.mainBeneficiary.user.isEnabled %}
+                            <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
                         {% endif %}
                     </td>
                     <td>
