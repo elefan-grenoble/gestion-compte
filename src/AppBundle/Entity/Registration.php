@@ -43,7 +43,7 @@ class Registration
      * @ORM\Column(name="created_at", type="datetime")
      * @Assert\DateTime()
      */
-    private $created_at;
+    private $createdAt;
 
     /**
      * @var string
@@ -85,7 +85,7 @@ class Registration
      */
     public function setCreatedAtValue()
     {
-        $this->created_at = new \DateTime();
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -218,9 +218,9 @@ class Registration
      *
      * @return Registration
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->created_at = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }
@@ -232,31 +232,7 @@ class Registration
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Registration
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updated_at = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
+        return $this->createdAt;
     }
 
     /**
