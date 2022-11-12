@@ -226,19 +226,23 @@ class UserController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->getCurrentAppUser();
+
         // cannot remove a nonexistant role
         if (!$user->hasRole($role)) {
             $session->getFlashBag()->add('warning', $user . ' ne possède pas le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         // only ROLE_SUPER_ADMIN can remove ROLE_ADMIN to users
-        if ($role == 'ROLE_ADMIN' && !$user->hasRole('ROLE_SUPER_ADMIN')) {
+        if ($role == 'ROLE_ADMIN' && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
             $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour retirer le rôle ' . $role);
             return $this->redirectToShow($user);
         }
+
         $user->removeRole($role);
         $em->persist($user);
         $em->flush();
+
         $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré à ' . $user);
         return $this->redirectToShow($user);
     }
@@ -257,19 +261,23 @@ class UserController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->getCurrentAppUser();
+
         // cannot add an existing role
         if ($user->hasRole($role)) {
             $session->getFlashBag()->add('warning', $user . ' possède déjà le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         // only ROLE_SUPER_ADMIN can add ROLE_ADMIN to users
-        if ($role == 'ROLE_ADMIN' && !$user->hasRole('ROLE_SUPER_ADMIN')) {
+        if ($role == 'ROLE_ADMIN' && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
             $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour ajouter le rôle ' . $role);
             return $this->redirectToShow($user);
         }
+
         $user->addRole($role);
         $em->persist($user);
         $em->flush();
+
         $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté à ' . $user);
         return $this->redirectToShow($user);
     }
