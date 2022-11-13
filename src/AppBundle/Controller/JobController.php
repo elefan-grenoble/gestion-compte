@@ -142,11 +142,7 @@ class JobController extends Controller
     }
 
     /**
-<<<<<<< HEAD
      * Delete job.
-=======
-     * delete job.
->>>>>>> 2cba1d6 (Add simple filter form on job list)
      *
      * @Route("/{id}", name="job_delete")
      * @Method({"DELETE"})
