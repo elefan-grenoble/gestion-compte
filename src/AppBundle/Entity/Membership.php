@@ -14,10 +14,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\OrderBy;
 
 /**
- * Commission
- * 
- * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipRepository")
+ * Membership
+ *
  * @ORM\Table(name="membership")
+ * @ORM\HasLifecycleCallbacks()
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipRepository")
  * @UniqueEntity(fields={"member_number"}, message="Ce numéro de membre existe déjà")
  */
 class Membership
@@ -118,6 +119,13 @@ class Membership
     private $timeLogs;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
      * Membership constructor.
      */
     public function __construct()
@@ -132,7 +140,16 @@ class Membership
         return '#'.$this->getMemberNumber();
     }
 
-    public function getTmpToken($key = ''){
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
+    public function getTmpToken($key = '')
+    {
         return md5($this->getId().$this->getMemberNumber().$key.date('d'));
     }
 
@@ -704,6 +721,16 @@ class Membership
     public function getTimeLogs()
     {
         return $this->timeLogs;
+    }
+
+    /**
+     * Get created_at
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->created_at;
     }
 
     public function getTimeCount($before = null)
