@@ -1,14 +1,15 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des retardataires - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">list</i>&nbsp;Liste des retardataires
 {% endblock %}
 
 {% block content %}
-    <h1>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h1>
+    <h4>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h4>
 
     <ul class="collapsible">
         <li>
@@ -22,14 +23,16 @@
                         <div>
                             <div class="row">
                                 <div class="col s6">
-                                    ouvert/fermé :
-                                    {{ form_widget(form.withdrawn) }}
-                                    {{ form_label(form.withdrawn) }}
+                                    <div class="input-field">
+                                        {{ form_widget(form.withdrawn) }}
+                                        {{ form_label(form.withdrawn) }}
+                                    </div>
                                 </div>
                                 <div class="col s6">
-                                    ❄️ gelé :
-                                    {{ form_widget(form.frozen) }}
-                                    {{ form_label(form.frozen) }}
+                                    <div class="input-field">
+                                        {{ form_widget(form.frozen) }}
+                                        {{ form_label(form.frozen) }}
+                                    </div>
                                 </div>
                             </div>
                             <div class="row">
@@ -109,38 +112,38 @@
         </li>
     </ul>
 
-    <table class="striped">
+    <table class="responsive-table">
         <thead>
         <tr>
             <th data-col="o.member_number">#</th>
             <th data-col="b.firstname">Prénom</th>
             <th data-col="b.lastname">Nom</th>
-            <th data-col="r.date">Adhésion(s)</th>
+            <th data-col="r.date">Dernière adhésion</th>
             <th data-col="time">Compteur</th>
             <th>Note(s)</th>
-            <th></th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
         {% for member in members %}
             <tr class="{% if member.withdrawn %}withdrawn{% endif %}">
-                <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a></td>
+                <td>
+                    <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a>
+                </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.firstname }}{% if not loop.last %}<hr/>{% endif %}
+                        {{ beneficiary.firstname }}
                     {% endfor %}
                 </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.lastname }}{% if not loop.last %}<hr/>{% endif %}
+                        {{ beneficiary.lastname }}
                     {% endfor %}
                 </td>
                 <td>
-                    <strong>
-                        {{ member.lastregistration.date | date('d/m/Y') }}
-                    </strong>
+                    <strong>{{ member.lastregistration.date | date('d/m/Y') }}</strong>
                     {% if member.lastregistration %}
-                        <br>
+                        <br />
                         {% set difference = member.lastregistration.date.diff(date('now')) %}
                         {% set m = difference.m %}
                         {% set y = difference.y %}
@@ -155,15 +158,16 @@
                 <td>
                     <blockquote class="truncate">
                         {% for note in member.notes %}
-                            <i>{{ note.createdAt | date('d/m/y H:i') }}
-                            : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}
-                            <br>
+                            <i>{{ note.createdAt | date('d/m/y H:i') }} :</i>
+                            <span title="{{ note.text }}">{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}</span>
+                            <br />
                         {% endfor %}
                     </blockquote>
                 </td>
-                <td><i class="material-icons">phone</i><a
-                            href="{{ path('ambassador_phone_show', { 'member_number': member.memberNumber }) }}"
-                            class="">Appeler</a></td>
+                <td>
+                    <i class="material-icons">phone</i>
+                    <a href="{{ path('ambassador_phone_show', { 'member_number': member.memberNumber }) }}">Appeler</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -178,12 +182,12 @@
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                            href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}">
+                    <a href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a>
+                </li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}"
-                   data-page="{{ page+1 }}">
+                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}" data-page="{{ page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </li>
