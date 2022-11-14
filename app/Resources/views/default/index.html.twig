@@ -13,11 +13,11 @@
 
 {% block content %}
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    <div class="center">
+    <div id="home-announcements" class="center">
         {{ dynamicContent | markdown | raw }}
     </div>
 
-    <div class="row center">
+    <div id="home-welcome" class="row center">
         <div class="col s12">
             <h4 class="header">
                 Bonjour
@@ -56,8 +56,8 @@
         {% endif %}
     </div>
 
-    <div class="row center">
-        {% if app.user.beneficiary %}
+    {% if app.user.beneficiary %}
+        <div id="home-actions" class="row center">
             {% if app.user.beneficiary.membership | uptodate %}
                 <div class="col s12 l6">
                     <div class="homebox">
@@ -145,11 +145,15 @@
                     </div>
                 </div>
             </div>
-        {% endif %}
-        {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
+        </div>
+    {% endif %}
+    {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
+        <div id="home-shifts" class="row">
             <div class="col s12">
                 {{ render(controller("AppBundle:Booking:homepageShifts")) }}{# use include instead?#}
             </div>
+        </div>
+        <div class="row center">
             <div class="col offset-xl3 xl6 m8 offset-m2 s12">
                 <div class="homebox">
                     <h5><span class="white"><i class="material-icons">build</i>&nbsp;Action</span></h5>
@@ -166,8 +170,8 @@
                     {% endif %}
                 </div>
             </div>
-        {% endif %}
-    </div>
+        </div>
+    {% endif %}
 {% else %}
     <br>
     <br>
