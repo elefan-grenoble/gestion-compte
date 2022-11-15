@@ -19,10 +19,11 @@
 }
 .shifter {
   font-size: 16px;
-  width: 16px;
+  width: 10px;
   vertical-align: top;
 }
 .shifter-name {
+  padding-left: 6px;
   line-height: 1.8;
 }
 .shift-with-role {

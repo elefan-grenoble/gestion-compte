@@ -1,3 +1,7 @@
+{% if display_names is not defined or display_names == true %}
+    {% set display_names = display_name_shifters %}
+{% endif %}
+
 </div> <!-- end div.section -->
 </div> <!-- end div.container -->
 <div style="padding: 5px;">
@@ -44,9 +48,9 @@
                                     {% endfor %}
                                     {# / compute lines #}
                                     {% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
-                                        {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l, cycle: current_cycle  } %}
+                                        {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l, cycle: current_cycle, display_names: display_names } %}
                                     {% else %}
-                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l  } %}
+                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l, display_names: display_names  } %}
                                     {% endif %}
                                 {% endfor %}
                             </div>

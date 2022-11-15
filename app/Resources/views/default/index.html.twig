@@ -188,7 +188,7 @@
                 </p>
             </div>
         </div>
-        {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+        {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay, display_names: false } %}
     {% endif %}
     </div>
 {% endblock %}
