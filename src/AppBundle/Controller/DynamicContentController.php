@@ -62,8 +62,6 @@ class DynamicContentController extends Controller
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)
     {
-        $this->denyAccessUnlessGranted('edit', $dynamicContent);
-
         $form = $this->createForm('AppBundle\Form\DynamicContentType', $dynamicContent);
         $form->handleRequest($request);
 
@@ -75,9 +73,9 @@ class DynamicContentController extends Controller
             }
             $em->persist($dynamicContent);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Contenu dynamique édité');
             return $this->redirectToRoute('dynamic_content_list');
-
         }
 
         return $this->render('admin/content/edit.html.twig', array(
