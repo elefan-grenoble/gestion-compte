@@ -14,7 +14,11 @@
 }
 .shifter {
   font-size: 16px;
-  width: 10px;
+  width: 16px;
+  vertical-align: top;
+}
+.shifter-name {
+  line-height: 1.8;
 }
 .shift-with-role {
   color: #ff1744;
@@ -29,7 +33,7 @@
 .admin-shift-warning {
   position: absolute;
   bottom: 0;
-  right: 0;
+  left: 0;
   opacity: 0.6;
   text-align: right;
   font-size: small;

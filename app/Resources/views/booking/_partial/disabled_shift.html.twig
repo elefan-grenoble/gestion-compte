@@ -25,6 +25,10 @@
                         {% else %}
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}account_circle{% else %}person_outline{% endif %}</i>
                         {% endif %}
+                        {% if display_name_shifters and (shift.shifter or shift.lastShifter) %}
+                            {% set shifter = shift.shifter ? shift.shifter : shifter.lastShifter %}
+                            <span class="shifter-name">{{ shifter.firstName }} {{ shifter.lastName|first }}</span>
+                        {% endif %}
                     </span>
                 {% endfor %}
             </div>
