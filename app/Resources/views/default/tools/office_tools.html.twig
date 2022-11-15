@@ -1,5 +1,7 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Adhésion et ré-adhésion - {{ site_name }}{% endblock %}
+
 {% block stylesheets %}
 <link rel="stylesheet" href="{{ asset('bundles/app/css/post-it.css') }}" />
 <link href="https://fonts.googleapis.com/css?family=Coming+Soon" rel="stylesheet">
@@ -12,6 +14,8 @@
 {% endblock %}
 
 {% block content %}
+<h4>Adhésion et ré-adhésion</h4>
+
 <div class="row">
     <a href="{{ path('member_new') }}" class="waves-effect waves-light green btn {% if not is_granted("ROLE_SUPER_ADMIN") %}title='Utiliser l\'autre bouton' disabled{% endif %}"><i class="material-icons left">person_add</i>Nouvelle adhésion</a>
     <a href="{{ path('user_quick_new') }}" class="waves-effect waves-light green btn"><i class="material-icons left">person_add</i>Nouvelle adhésion réunion info</a>

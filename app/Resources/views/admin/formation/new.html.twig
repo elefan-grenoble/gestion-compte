@@ -12,14 +12,5 @@
 {% block content %}
     <h4>Nouvelle formation</h4>
 
-    {{ form_start(form) }}
-    <div class="row">
-        <div class="col s6">
-            {{ form_row(form.name) }}
-        </div>
-    </div>
-    <div>
-        <button type="submit" class="btn waves-effect waves-light">Créer</button>
-    </div>
-    {{ form_end(form) }}
+    {% include "admin/formation/_form.html.twig" with { form: form } %}
 {% endblock %}

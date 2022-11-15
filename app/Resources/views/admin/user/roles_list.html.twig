@@ -1,5 +1,7 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des rôles - {{ site_name }}{% endblock %}
+
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
@@ -7,9 +9,9 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des rôles</h4>
+    <h4>Liste des rôles ({{ roles | length }})</h4>
 
-    <table class="striped">
+    <table class="responsive-table">
         <thead>
             <tr>
                 <th data-col="o.icon">Icône</th>
@@ -35,10 +37,4 @@
         {% endfor %}
         </tbody>
     </table>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-
-{% block javascripts %}
 {% endblock %}

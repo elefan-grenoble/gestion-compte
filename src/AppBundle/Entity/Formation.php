@@ -25,6 +25,16 @@ class Formation extends Group
      */
     protected $id;
 
+    // private $name;  // from Group
+    // private $roles;  // from Group
+
+    /**
+     * @var string
+     * 
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    private $description;
+
     /**
      * Many Formations have Many Beneficiaries.
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="formations")
@@ -71,6 +81,28 @@ class Formation extends Group
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Get description
+     * 
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return $this->description ? $this->description : '';
+    }
+
+    /**
+     * Set description
+     * 
+     * @param string $description
+     * @return Formation
+     */
+    public function setDescription(string $description): Formation
+    {
+        $this->description = $description;
+        return $this;
     }
 
     /**
@@ -126,5 +158,4 @@ class Formation extends Group
     {
         return $this->beneficiaries;
     }
-
 }

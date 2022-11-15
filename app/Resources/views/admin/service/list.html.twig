@@ -9,21 +9,20 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des services</h4>
+    <h4>Liste des services ({{ services | length }})</h4>
 
-    <table class="responsive-table striped">
+    <table class="responsive-table">
         <thead>
-        <tr>
-            <th>logo</th>
-            <th>icon</th>
-            <th>Service</th>
-            <th>Description</th>
-            <th>Url</th>
-            <th>Publique</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>logo</th>
+                <th>icon</th>
+                <th>Service</th>
+                <th>Description</th>
+                <th>Url</th>
+                <th>Publique</th>
+                <th>Actions</th>
+            </tr>
         </thead>
-
         <tbody>
         {% for service in services %}
             <tr>
