@@ -189,7 +189,7 @@
             <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
         </p>
     </div>
-    {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
+    {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay, display_names: false } %}
 {% endif %}
 {% endblock %}
 

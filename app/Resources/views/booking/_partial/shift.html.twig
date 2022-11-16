@@ -55,6 +55,10 @@
                         {% else %}
                             <i class="material-icons shifter">account_circle</i>
                         {% endif %}
+                        {% if display_names and (shift.shifter or shift.lastShifter) %}
+                            {% set shifter = shift.shifter ? shift.shifter : shifter.lastShifter %}
+                            <span class="shifter-name">{{ shifter.firstname|lower|capitalize }}&nbsp;{{ shifter.lastname|first|upper }}</span>
+                        {% endif %}
                     </span>
                 {% endfor %}
                 </div>
