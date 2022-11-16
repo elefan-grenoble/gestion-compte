@@ -191,7 +191,7 @@ class UserController extends Controller
      * Recall new unconfirmed user.
      *
      * @Route("/quick_new/{id}/recall", name="user_quick_new_recall")
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_USER_VIEWER')")
      * @Method({"GET"})
      */
     public function quickNewRecallAction(Request $request,AnonymousBeneficiary $anonymousBeneficiary)
