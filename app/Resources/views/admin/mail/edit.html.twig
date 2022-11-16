@@ -22,6 +22,15 @@
             <div class="non-members chips ">
             </div>
         </div>
+        <div class="col s12">
+            <label>
+                {{ form_widget(form.from_in_cc) }}
+                <span>{{ form.from_in_cc.vars.label }}</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="input-field col s12">
             {{ form_widget(form.subject) }}
             {{ form_label(form.subject) }}
