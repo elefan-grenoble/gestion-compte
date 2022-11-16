@@ -383,12 +383,12 @@ class UserController extends Controller
      * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
-    public function preUsersDeleteAction(AnonymousBeneficiary $beneficiary, SessionInterface $session)
+    public function preUsersDeleteAction(AnonymousBeneficiary $anonymousBeneficiary, SessionInterface $session)
     {
-        $this->getDoctrine()->getManager()->remove($beneficiary);
+        $this->getDoctrine()->getManager()->remove($anonymousBeneficiary);
         $this->getDoctrine()->getManager()->flush();
 
-        $session->getFlashBag()->add('success', "L'adhésion a bien été supprimée");
+        $session->getFlashBag()->add('success', "La pré-adhésion a bien été supprimée");
 
         return $this->redirectToRoute('pre_user_index');
     }
