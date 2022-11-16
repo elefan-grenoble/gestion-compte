@@ -371,7 +371,7 @@ class UserController extends Controller
         /** @var AnonymousBeneficiary[] $anonymousBeneficiaries */
         $anonymousBeneficiaries = $this->getDoctrine()->getRepository(AnonymousBeneficiary::class)->findBy(
             [],
-            ['created_at' => 'DESC']
+            ['createdAt' => 'DESC']
         );
         return $this->render('admin/pre_user/list.html.twig', array(
             'anonymousBeneficiaries' => $anonymousBeneficiaries,

@@ -71,7 +71,7 @@ class HelloassoController extends Controller
             $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
         $payments = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:HelloassoPayment')
-            ->findBy(array(), array('created_at' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
+            ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
         $delete_forms = array();
         foreach ($payments as $payment) {
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
