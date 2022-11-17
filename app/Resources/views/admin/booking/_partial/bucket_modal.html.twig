@@ -21,7 +21,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                             {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                 <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                             {% endif %}
-                            #{{ shift.shifter.membership.memberNumber }}&nbsp;{{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname }}
+                            {{ shift.shifter.displayNameWithMemberNumber }}
                             {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
                             {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}

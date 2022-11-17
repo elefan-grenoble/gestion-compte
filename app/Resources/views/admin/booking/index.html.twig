@@ -108,17 +108,17 @@
             .trigger('change');
             $('.modal').modal({
                 onCloseEnd: function() {
-                    $( ".modal-content" ).html('');
+                    $('.modal-content').html('');
                 },
                 onOpenStart: function(modal, trigger) {
                     var url = $(trigger).attr('data-source');
-                    $.get( url, function( data ) {
-                        $( ".modal-content" ).html(data);
+                    $.get(url, function( data ) {
+                        $('.modal-content').html(data);
                         $('.collapsible').collapsible();
                         $('input.autocomplete').autocomplete({
                             data: {
                                 {% for beneficiary in beneficiaries %}
-                                    "{{ beneficiary.autocompleteLabel }}": null,
+                                    "{{ beneficiary.displayNameWithMemberNumber }}": null,
                                 {% endfor %}
                             },
                             limit: 10,

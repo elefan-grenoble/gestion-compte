@@ -64,7 +64,7 @@
                             data: [
                                 {% for beneficiary in to %}
                                 {
-                                tag: "{{ beneficiary.autocompleteLabel }}",
+                                tag: "{{ beneficiary.displayNameWithMemberNumber }}",
                             },{% endfor %} ],
                             autocompleteOptions: {
                                 data: dataUsers,
