@@ -84,8 +84,8 @@
             Référents :
             {% for beneficiary in commission.owners %}
                 <div class="chip black-text {% if not commission.beneficiaries.contains(beneficiary) %}red{% endif %}">
-                    <img src="{{ gravatar(beneficiary.email) }}" alt="{{ beneficiary.displayname }}">
-                    {{ beneficiary.firstname }} {{ beneficiary.lastname }}
+                    <img src="{{ gravatar(beneficiary.email) }}" alt="{{ beneficiary.displayNameWithMemberNumber }}">
+                    {{ beneficiary.displayName }}
                 </div>
             {% endfor %}
         {% endif %}

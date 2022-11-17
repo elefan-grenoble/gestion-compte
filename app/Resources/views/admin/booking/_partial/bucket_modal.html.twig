@@ -74,7 +74,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                         <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
                             <b>
                                 <span style="font-style: italic">
-                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayName }}
+                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayNameWithMemberNumber }}
                                     {% else %}libre
                                     {% endif %}
                                 </span>
