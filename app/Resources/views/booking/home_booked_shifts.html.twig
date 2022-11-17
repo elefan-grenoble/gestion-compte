@@ -25,7 +25,7 @@
         {% if (member.reservedShifts | length) > 0 %}
             <li class="active">
                 <div class="collapsible-header">
-                    <i class="material-icons">event_note</i>{% if member.beneficiaries | length %}Vos{% else %}Mes{% endif %} créneaux à accepter
+                    <i class="material-icons">event_note</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux à accepter
                 </div>
                 <div class="collapsible-body">
                     {% for shift in member.reservedShifts %}
@@ -39,7 +39,7 @@
             {% if shiftsOfCycle | length > 0 %}
                 <li class="active">
                     <div class="collapsible-header">
-                        <i class="material-icons">date_range</i>{% if member.beneficiaries | length %}Vos{% else %}Mes{% endif %} créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})
+                        <i class="material-icons">date_range</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})
                     </div>
                     <div class="collapsible-body">
                         <div class="row">
@@ -56,7 +56,7 @@
         {% if (shift_service.hasCycle(member, -1) or shift_service.hasCycle(member, -2)) %}
             <li>
                 <div class="collapsible-header">
-                    <i class="material-icons">event_available</i>{% if member.beneficiaries | length %}Vos{% else %}Mes{% endif %} créneaux passés
+                    <i class="material-icons">event_available</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux passés
                 </div>
                 <div class="collapsible-body">
                     {# Shift history #}
