@@ -23,6 +23,7 @@ final class Version20221117154213 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE dynamic_content ADD created_at DATETIME NOT NULL');
+        $this->addSql('ALTER TABLE dynamic_content ADD updated_at DATETIME NOT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -31,5 +32,6 @@ final class Version20221117154213 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE dynamic_content DROP created_at');
+        $this->addSql('ALTER TABLE dynamic_content DROP updated_at');
     }
 }

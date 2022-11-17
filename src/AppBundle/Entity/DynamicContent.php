@@ -68,6 +68,13 @@ class DynamicContent
     private $createdAt;
 
     /**
+     * @ORM\Column(name="updated_at", type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -85,6 +92,15 @@ class DynamicContent
     public function setCreatedAtValue()
     {
         $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     /**
@@ -204,5 +220,15 @@ class DynamicContent
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
     }
 }
