@@ -522,6 +522,14 @@ class Membership
                 $shifts->add($shift);
             }
         }
+        // merge shifts of multiple beneficiaries
+        if ($this->getBeneficiaries()->count() > 1) {
+            $iterator = $shifts->getIterator();
+            $iterator->uasort(function ($a, $b) {
+                return $a->getStart() < $b->getStart();  // DESC (default $beneficiary->shifts order)
+            });
+            $shifts = new ArrayCollection(iterator_to_array($iterator));
+        }
         if ($excludeDismissed) {
             return $shifts->filter(function($shift) {
                 return !$shift->getIsDismissed();
