@@ -61,6 +61,18 @@ class DynamicContent
     protected $content;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -210,6 +222,52 @@ class DynamicContent
     public function setDescription(string $description): void
     {
         $this->description = $description;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->createdBy = $user;
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+        return $this;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
     }
 
     /**
