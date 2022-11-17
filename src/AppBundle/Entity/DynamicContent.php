@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Dynamic Content (CMS)
  *
  * @ORM\Table(name="dynamic_content")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DynamicContentRepository")
  */
 class DynamicContent
@@ -60,10 +61,30 @@ class DynamicContent
     protected $content;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
+    }
+
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -175,9 +196,13 @@ class DynamicContent
         $this->description = $description;
     }
 
-    public function __toString()
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
     {
-        return $this->getName();
+        return $this->createdAt;
     }
-
 }
