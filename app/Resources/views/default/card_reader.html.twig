@@ -17,6 +17,8 @@
             <h5>Créneaux à venir</h5>
 
             {% for bucket in buckets %}
+                {% set nbShifts = (bucket.shifts() | length) %}
+                {% set shiftercount = 0 %}
 
                 <div class="card sticky-action">
                     <div class="card-content {{ bucket.job.color }} lighten-4">
@@ -28,25 +30,35 @@
                             {% for shift in bucket.shifts %}
                                 <li style="height: 30px">
                                     <div>
+                                        {% if use_card_reader_to_validate_shifts %}
+                                            <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">
+                                                &#9673;
+                                            </span>&nbsp;
+                                        {% endif %}
                                         {% if shift.shifter %}
-                                            {% if use_card_reader_to_validate_shifts %}
-                                                <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">
-                                                    &#9673;
-                                                </span>&nbsp;
-                                            {% endif %}
+                                            {% set shiftercount = shiftercount + 1 %}
                                             <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
-                                            {% if shift.formation %}
-                                                <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
-                                            {% endif %}
-                                            {% if shift.shifter.shifts | length == 1 %}
-                                                <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
-                                            {% endif %}
                                         {% else %}
-                                            <span style="margin-right: 5px; font-size: 16px">&#10071&#10071 Personne n'est inscrit sur ce créneau &#10071&#10071</span>
+                                            <strong><i>libre</i></strong>
+                                        {% endif %}
+                                        {% if shift.formation %}
+                                            <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
+                                        {% endif %}
+                                        {% if shift.shifter and shift.shifter.shifts | length == 1 %}
+                                            <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
                                         {% endif %}
                                     </div>
                                 </li>
                             {% endfor %}
+                            {% if (shiftercount == 0) %}
+                                <li style="height: 30px">
+                                    <span class="red-text" style="margin-right: 5px; font-size: 16px">
+                                        <i class="material-icons tiny">warning</i>
+                                        Personne n'est inscrit sur ce créneau
+                                        <i class="material-icons tiny">warning</i>
+                                    </span>
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
