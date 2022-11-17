@@ -75,9 +75,16 @@
                 </td>
 
                 <td>
-                    {% if is_granted("ROLE_USER_MANAGER") %}
-                        <a href="{{ path('user_quick_new_recall', { 'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
-                        <br> <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
+                    {% if is_granted("ROLE_USER_VIEWER") %}
+                        <a href="{{ path('pre_user_recall', { 'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2">
+                            <i class="material-icons left">redo</i>Relancer
+                        </a>
+                    {% endif %}
+                    {% if is_granted("ROLE_ADMIN") %}
+                        <br />
+                        <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red">
+                            <i class="material-icons left">delete</i>Supprimer
+                        </a>
                     {% endif %}
                 </td>
             </tr>

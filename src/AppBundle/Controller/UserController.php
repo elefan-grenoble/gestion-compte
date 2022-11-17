@@ -188,31 +188,6 @@ class UserController extends Controller
     }
 
     /**
-     * Recall new unconfirmed user.
-     *
-     * @Route("/quick_new/{id}/recall", name="user_quick_new_recall")
-     * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"GET"})
-     */
-    public function quickNewRecallAction(Request $request,AnonymousBeneficiary $anonymousBeneficiary)
-    {
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
-
-        $anonymousBeneficiary->setRecallDate(new \DateTime());
-        $em = $this->getDoctrine()->getManager();
-        $em->persist($anonymousBeneficiary);
-        $em->flush();
-
-        $session = new Session();
-        $session->getFlashBag()->add('success', 'La relance a été envoyée !');
-
-        $referer = $request->headers->get('referer');
-
-        return new RedirectResponse($referer);
-    }
-
-    /**
      * remove role of user
      *
      * @Route("/{id}/removeRole/{role}", name="user_remove_role")
@@ -362,6 +337,8 @@ class UserController extends Controller
     }
 
     /**
+     * List all unconfirmed users.
+     *
      * @Route("/pre_users", name="pre_user_index")
      * @Method({"GET"})
      * @Security("has_role('ROLE_USER_VIEWER')")
@@ -373,22 +350,50 @@ class UserController extends Controller
             [],
             ['createdAt' => 'DESC']
         );
+
         return $this->render('admin/pre_user/list.html.twig', array(
             'anonymousBeneficiaries' => $anonymousBeneficiaries,
         ));
     }
 
     /**
+     * Recall unconfirmed user.
+     *
+     * @Route("/pre_users/{id}/recall", name="pre_user_recall")
+     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Method({"GET"})
+     */
+    public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary)
+    {
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
+
+        $anonymousBeneficiary->setRecallDate(new \DateTime());
+        $em = $this->getDoctrine()->getManager();
+        $em->persist($anonymousBeneficiary);
+        $em->flush();
+
+        $session = new Session();
+        $session->getFlashBag()->add('success', 'La relance a été envoyée !');
+
+        $referer = $request->headers->get('referer');
+
+        return new RedirectResponse($referer);
+    }
+
+    /**
+     * Delete unconfirmed user.
+     * 
      * @Route("/pre_users/{id}/delete", name="pre_user_delete")
      * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method({"GET"})
      */
-    public function preUsersDeleteAction(AnonymousBeneficiary $beneficiary, SessionInterface $session)
+    public function preUsersDeleteAction(AnonymousBeneficiary $anonymousBeneficiary, SessionInterface $session)
     {
-        $this->getDoctrine()->getManager()->remove($beneficiary);
+        $this->getDoctrine()->getManager()->remove($anonymousBeneficiary);
         $this->getDoctrine()->getManager()->flush();
 
-        $session->getFlashBag()->add('success', "L'adhésion a bien été supprimée");
+        $session->getFlashBag()->add('success', "La pré-adhésion a bien été supprimée");
 
         return $this->redirectToRoute('pre_user_index');
     }
