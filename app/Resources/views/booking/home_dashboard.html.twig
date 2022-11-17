@@ -42,7 +42,7 @@
         {% if member.timeCount < 0 %}
             <p>
                 <i class="material-icons">warning</i>
-                {% if member.beneficiaries | length %}
+                {% if member.beneficiaries | length > 1 %}
                     <span>Vous avez du retard sur votre bénévolat. Pensez à réserver vos créneaux.</span>
                 {% else %}
                     <span>Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.</span>
@@ -53,14 +53,14 @@
             {% if remaining > 0 %}
                 <p>
                     <i class="material-icons">warning</i>
-                    <span>{% if member.beneficiaries | length %}Pensez à réserver vos créneaux.{% else %}Pense à réserver tes créneaux.{% endif %}</span>
+                    <span>{% if member.beneficiaries | length > 1 %}Pensez à réserver vos créneaux.{% else %}Pense à réserver tes créneaux.{% endif %}</span>
                     <br />
-                    <span>{% if member.beneficiaries | length %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
+                    <span>{% if member.beneficiaries | length > 1 %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
                 </p>
             {% else %}
                 {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
                 <p>
-                    Bravo ! {% if member.beneficiaries | length %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
+                    Bravo ! {% if member.beneficiaries | length > 1 %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.
                 </p>
                 {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0 and not allow_extra_shifts %}
@@ -74,7 +74,7 @@
                     </p>
                 {% elseif (allow_extra_shifts) %}
                     <p>
-                        {% if member.beneficiaries | length %}
+                        {% if member.beneficiaries | length > 1 %}
                             Vous pouvez
                         {% else %}
                             Tu peux
@@ -84,7 +84,7 @@
                 {% else %}
                     <p>
                         <i class="material-icons">stars</i> Bravo !
-                        Tous {% if member.beneficiaries | length %}vos{% else %}tes{% endif %} créneaux ont été planifiés sur le cycle actuel !
+                        Tous {% if member.beneficiaries | length > 1 %}vos{% else %}tes{% endif %} créneaux ont été planifiés sur le cycle actuel !
                     </p>
                 {% endif %}
             {% endif %}
@@ -99,5 +99,5 @@
         Réserver
     </a>
 
-    <p>{% if member.beneficiaries | length %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
+    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
 {% endif %}

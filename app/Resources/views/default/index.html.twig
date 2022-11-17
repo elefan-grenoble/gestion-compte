@@ -43,8 +43,8 @@
             <div class="col s12">
                 <p>
                     Bienvenue sur ton espace personnel à {{ project_name }}
-                    {% if app.user.beneficiary.membership.beneficiaries | length %}
-                    <br />Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}{{ beneficiary.firstname }}{% endif %}{% endfor %}
+                    {% if app.user.beneficiary.membership.beneficiaries | length > 1 %}
+                    <br />Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
                     {% endif %}
                 </p>
                 {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
@@ -61,7 +61,7 @@
             {% if app.user.beneficiary.membership | uptodate %}
                 <div class="col s12 l6">
                     <div class="homebox">
-                        <h5><span class="white">Mon Bénévolat</span></h5>
+                        <h5><span class="white">{% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
                         {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
                     </div>
                 </div>
