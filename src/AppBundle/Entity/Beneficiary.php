@@ -150,7 +150,7 @@ class Beneficiary
 
     public function __toString()
     {
-        return $this->getDisplayName();
+        return $this->getDisplayNameWithMemberNumber();
     }
 
     /**
@@ -219,22 +219,32 @@ class Beneficiary
         return $this;
     }
 
-    public function getDisplayName()
+    public function getDisplayName(): string
     {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        return $this->getFirstname() . ' ' . $this->getLastname();
     }
 
-    public function getDisplayNameWithStatusIcon(): string
+    public function getDisplayNameWithMemberNumber(): string
     {
-        $label = '#' . $this->getMembership()->getMemberNumber();
+        return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
+    }
+
+    public function getDisplayNameWithMemberNumberAndStatusIcon(): string
+    {
+        $label = '#' . $this->getMemberNumber();
         $label .= $this->getStatusIcon(true);
-        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        $label .=  ' ' . $this->getDisplayName();
         return $label;
     }
 
-    public function getPublicDisplayName()
+    public function getPublicDisplayName(): string
     {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
+        return $this->getFirstname() . ' ' . $this->getLastname()[0];
+    }
+
+    public function getPublicDisplayNameWithMemberNumber(): string
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getPublicDisplayName();
     }
 
     /**
@@ -617,7 +627,7 @@ class Beneficiary
 
     public function getAutocompleteLabelFull(): string
     {
-        $label = '#' . $this->getMembership()->getMemberNumber();
+        $label = '#' . $this->getMemberNumber();
 
         if($this->getMembership()->getWithdrawn()){
             $label .= " [&#x26A0;]";
