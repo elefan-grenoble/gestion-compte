@@ -20,8 +20,22 @@
                 {% set nbShifts = (bucket.shifts() | length) %}
                 {% set shiftercount = 0 %}
 
+                {# calculate the number of shifters on this shift #}
+                {% for shift in bucket.shifts %}
+                    {% if shift.shifter %}
+                        {% set shiftercount = shiftercount + 1 %}
+                    {% endif %}
+                {% endfor %}
+
                 <div class="card sticky-action">
                     <div class="card-content {{ bucket.job.color }} lighten-4">
+                        {% if (shiftercount == 0) %}
+                            <div class="red-text" style="height: 30px">
+                                <i class="material-icons tiny">warning</i>
+                                Personne n'est inscrit sur ce créneau
+                                <i class="material-icons tiny">warning</i>
+                            </div>
+                        {% endif %}
                         <div class="card-title activator">
                             <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> /
                             <b>{{ bucket.start | date('H:i') }} à {{ bucket.end | date('H:i') }}</b>
@@ -36,7 +50,6 @@
                                             </span>&nbsp;
                                         {% endif %}
                                         {% if shift.shifter %}
-                                            {% set shiftercount = shiftercount + 1 %}
                                             <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
                                         {% else %}
                                             <strong><i>libre</i></strong>
@@ -50,15 +63,6 @@
                                     </div>
                                 </li>
                             {% endfor %}
-                            {% if (shiftercount == 0) %}
-                                <li style="height: 30px">
-                                    <span class="red-text" style="margin-right: 5px; font-size: 16px">
-                                        <i class="material-icons tiny">warning</i>
-                                        Personne n'est inscrit sur ce créneau
-                                        <i class="material-icons tiny">warning</i>
-                                    </span>
-                                </li>
-                            {% endif %}
                         </ul>
                     </div>
                 </div>
