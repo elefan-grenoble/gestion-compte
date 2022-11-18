@@ -137,6 +137,7 @@ class Event
 
     /**
      * @ORM\PrePersist
+     * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
     {
@@ -424,7 +425,7 @@ class Event
     }
 
     /**
-     * Set img.
+     * Set img
      *
      * @param string|null $img
      *
@@ -438,7 +439,7 @@ class Event
     }
 
     /**
-     * Get img.
+     * Get img
      *
      * @return string|null
      */
@@ -448,7 +449,7 @@ class Event
     }
 
     /**
-     * Set imgSize.
+     * Set imgSize
      *
      * @param int|null $imgSize
      *
@@ -462,7 +463,7 @@ class Event
     }
 
     /**
-     * Get imgSize.
+     * Get imgSize
      *
      * @return int|null
      */
@@ -482,7 +483,7 @@ class Event
     }
 
     /**
-     * Get updatedAt.
+     * Get updatedAt
      *
      * @return \DateTime
      */

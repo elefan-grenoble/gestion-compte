@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Dynamic Content (CMS)
  *
  * @ORM\Table(name="dynamic_content")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\DynamicContentRepository")
  */
 class DynamicContent
@@ -60,10 +61,58 @@ class DynamicContent
     protected $content;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(name="updated_at", type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
+    }
+
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     /**
@@ -175,9 +224,69 @@ class DynamicContent
         $this->description = $description;
     }
 
-    public function __toString()
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
-        return $this->getName();
+        $this->createdBy = $user;
+        return $this;
     }
 
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+        return $this;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
 }

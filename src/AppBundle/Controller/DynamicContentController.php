@@ -71,10 +71,12 @@ class DynamicContentController extends Controller
             if ($dynamicContent->getContent() == null) {
                 $dynamicContent->setContent('');
             }
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $dynamicContent->setUpdatedBy($current_user);
             $em->persist($dynamicContent);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Contenu dynamique édité');
+            $session->getFlashBag()->add('success', 'Contenu dynamique édité !');
             return $this->redirectToRoute('dynamic_content_list');
         }
 
