@@ -20,12 +20,9 @@
     {{ form_end(form) }}
 
     {% if is_granted("ROLE_ADMIN") %}
-    {{ form_start(delete_form) }}
-    {{ form_widget(delete_form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-    </div>
-    {{ form_end(delete_form) }}
+        <a href="#remove-period" class="modal-trigger btn waves-effect waves-light red" title="supprimer le créneau type">
+            Supprimer
+        </a>
     {% endif %}
 
     <h5>Postes disponibles</h5>
@@ -130,6 +127,23 @@
         </div>
     </div>
     {{ form_end(position_form) }}
+
+    {{ form_start(delete_form) }}
+    <div id="remove-period" class="modal">
+        <div class="modal-content">
+            <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
+            <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
+                Retour à la raison
+            </a>
+            <button type="submit" class="btn waves-effect waves-light orange">
+                <i class="material-icons left">check</i>Je sais ce que je fais !
+            </button>
+        </div>
+    </div>
+    {{ form_end(delete_form) }}
 {% endblock %}
 
 {% block javascripts %}
