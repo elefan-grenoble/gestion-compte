@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <div class="collapsible-body">
-                                Créneau fixe réservé le <i>{{ position.bookedTime | date_fr_with_time }}</i> par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show",{ 'member_number': position.booker.beneficiary.membership.memberNumber }) }}">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
+                                Créneau fixe réservé pour <a href="{{ path("member_show",{ 'member_number': position.shifter.membership.memberNumber }) }}">{{ position.shifter }}</a> le <i>{{ position.bookedTime | date_fr_with_time }}</i> par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show",{ 'member_number': position.booker.beneficiary.membership.memberNumber }) }}">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
                                 <form action="{{ path('free_position_from_period', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">
                                         <i class="material-icons left">lock_open</i>Libérer
@@ -58,7 +58,7 @@
                         <li id="position{{ position.id }}">
                             <div class="collapsible-header">
                                 <div class="row" style="margin-bottom: 0; width: 100%;">
-                                    <div class="col s11">
+                                    <div class="col s12">
                                         <b>
                                             <span style="font-style: italic">libre</span>
                                         </b>
@@ -67,12 +67,6 @@
                                         {% else %}
                                             &nbsp;(sans formation particulière)
                                         {% endif %}
-                                    </div>
-                                    <div class="col s1 right-align">
-                                        {{ form_start(positions_delete_form[position.id]) }}
-                                        {{ form_widget(positions_delete_form[position.id]) }}
-                                        <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
-                                        {{ form_end(positions_delete_form[position.id]) }}
                                     </div>
                                 </div>
                             </div>
@@ -85,6 +79,12 @@
                                         <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0 />
                                         <button type="button" class="btn add" onclick="postPosition({{ period.id }}, {{ position.id }})">Ajouter</button>
                                     </div>
+                                </div>
+                                <div class="row">
+                                    {{ form_start(positions_delete_form[position.id]) }}
+                                    {{ form_widget(positions_delete_form[position.id]) }}
+                                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
+                                    {{ form_end(positions_delete_form[position.id]) }}
                                 </div>
                             </div>
                         </li>
