@@ -215,7 +215,7 @@ class PeriodController extends Controller
         $positionsDeleteForm = array();
         foreach($period->getPositions() as $position){
             $positionsDeleteForm[$position->getId()] = $this->createFormBuilder()
-                ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position_id' => $position->getId())))
+                ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))
                 ->setMethod('DELETE')
                 ->getForm()->createView();
         }
@@ -280,7 +280,7 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/{position_id}", name="remove_position_from_period")
+     * @Route("/{id}/position/{position}", name="remove_position_from_period")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"DELETE"})
      */
@@ -289,7 +289,7 @@ class PeriodController extends Controller
         $session = new Session();
 
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position_id' => $position->getId())))
+            ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('DELETE')
             ->getForm();
         $form->handleRequest($request);
@@ -308,14 +308,13 @@ class PeriodController extends Controller
     /**
      * Book a period.
      *
-     * @Route("/book/{id}", name="book_position_from_period")
+     * @Route("/{id}/position/{position}/book", name="book_position_from_period")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
      */
-    public function bookPositionToPeriodAction(Request $request, PeriodPosition $position): Response
+    public function bookPositionToPeriodAction(Request $request, Period $period, PeriodPosition $position): Response
     {
         $session = new Session();
-        $period = $position->getPeriod();
 
         $form = $this->createBookForm($position);
         $form->handleRequest($request);
@@ -354,11 +353,11 @@ class PeriodController extends Controller
     /**
      * free a position.
      *
-     * @Route("/{id}/free", name="free_position_from_period")
+     * @Route("/{id}/position/{position}/free", name="free_position_from_period")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("POST")
      */
-    public function freePositionToPeriodAction(Request $request, PeriodPosition $position)
+    public function freePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
 
