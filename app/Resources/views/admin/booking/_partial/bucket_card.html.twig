@@ -25,7 +25,7 @@
                                 {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                 {% endif %}
-                                {{ shift.shifter.firstname|lower|capitalize }}&nbsp;{{ shift.shifter.lastname|first|upper }}
+                                {{ shift.shifter.publicDisplayName }}
                                 {% if shift.formation %}</b>{% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>

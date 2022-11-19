@@ -12,7 +12,6 @@
     </nav>
 
     <div class="row">
-
         <div class="col s6">
             <h5>Créneaux à venir</h5>
 
@@ -50,7 +49,18 @@
                                             </span>&nbsp;
                                         {% endif %}
                                         {% if shift.shifter %}
-                                            <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayName }}</span>
+                                            {% if use_card_reader_to_validate_shifts %}
+                                                <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">
+                                                    &#9673;
+                                                </span>
+                                            {% endif %}
+                                            <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayNameWithMemberNumber }}</span>
+                                            {% if shift.formation %}
+                                                <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
+                                            {% endif %}
+                                            {% if shift.shifter.shifts | length == 1 %}
+                                                <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
+                                            {% endif %}
                                         {% else %}
                                             <strong><i>libre</i></strong>
                                         {% endif %}
@@ -70,7 +80,6 @@
         </div>
 
         <div class="col s6">{{ dynamicContent | markdown | raw }}</div>
-
     </div>
 {% endblock %}
 
@@ -85,8 +94,8 @@
     </script>
     <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
     <script type="text/javascript">
-        setTimeout(function(){
+        setTimeout(function() {
             location.reload();
-        },60000);
+        }, 60 * 1000);  // page reload every 60 seconds
     </script>
 {% endblock %}

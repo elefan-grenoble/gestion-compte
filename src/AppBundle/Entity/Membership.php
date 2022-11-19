@@ -137,7 +137,7 @@ class Membership
 
     public function __toString()
     {
-        return '#'.$this->getMemberNumber();
+        return $this->getDisplayMemberNumber();
     }
 
     /**
@@ -663,8 +663,9 @@ class Membership
         return $this->given_proxies;
     }
 
-    public function getAutocompleteLabel(){
-        return '#'.$this->getMemberNumber();
+    public function getDisplayMemberNumber()
+    {
+        return '#' . $this->getMemberNumber();
     }
 
     /**

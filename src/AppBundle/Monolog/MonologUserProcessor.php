@@ -23,7 +23,7 @@ class MonologUserProcessor
             $text = $user->getId();
             $beneficiary = $user->getBeneficiary();
             if ($beneficiary) {
-                $text .= ' (' . $beneficiary->getDisplayName() . ')';
+                $text .= ' (' . $beneficiary->getDisplayNameWithMemberNumber() . ')';
             }
             $record['extra']['user'] = $text;
         } else if ($user) {

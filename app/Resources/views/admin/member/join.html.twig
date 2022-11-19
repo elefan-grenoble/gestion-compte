@@ -40,7 +40,7 @@
                 data: {
                     {% for member in members %}
                         {% if member.mainBeneficiary %}
-                            "#{{ member.memberNumber }} {{ member.mainBeneficiary.firstname }} {{ member.mainBeneficiary.lastname }}": null,
+                            "{{ member.mainBeneficiary.displayNameWithMemberNumber }}": null,
                         {% endif %}
                     {% endfor %}
                 },

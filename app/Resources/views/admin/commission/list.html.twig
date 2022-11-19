@@ -24,7 +24,7 @@
                         <a href="mailto:{{ commission.email | email_encode | raw }}"><i class="material-icons left">email</i></a>
                         {% for owner in commission.owners %}
                             <a class="chip black-text" href="{{ path("member_show",{member_number:owner.user.beneficiary.membership.memberNumber}) }}" style="font-size: 9px;">
-                                <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayNameWithMemberNumber }}">
                                 {{ owner.firstname }}
                             </a>
                         {% endfor %}

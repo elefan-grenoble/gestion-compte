@@ -24,7 +24,7 @@
                 {% else %}
                     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent <b>{{ beneficiary.publicDisplayNameWithMemberNumber }}</b> est déjà actif.
                             <br>
                             Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
@@ -39,7 +39,7 @@
                                 </div>
                             </form>
                         {% else %}
-                            C'est <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            C'est <b>{{ beneficiary.publicDisplayName }}</b> !
                             {% if not member.lastRegistration %}
                                 <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour ce compte. <br/>Il ne peux donc pas être activé.</div>
                                 <div class="center-align">
@@ -75,7 +75,7 @@
                         {% endif %}
                     {% else %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent <b>{{ beneficiary.publicDisplayNameWithMemberNumber }}</b> est déjà actif.
                             <br>
                             Il est lié à l'adresse courriel {{ user.anonymousEmail }}
                             <br>
@@ -95,7 +95,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            Bonjour <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            Bonjour <b>{{ beneficiary.publicDisplayName }}</b> !
                             {% if not member.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peut pas être activé.</div>
                             {% else %}

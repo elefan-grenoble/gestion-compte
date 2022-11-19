@@ -37,7 +37,7 @@
         $("#contactform{{ shift.id }} input[name='form[to]']").val(JSON.stringify(ids));
     }
     function toto{{ shift.id }}() {
-        var allMembers = [{% for shift in coShifts %}"#{{shift.shifter.id}} {{ shift.shifter.firstname|lower|capitalize }} {{ shift.shifter.lastname|first|upper }}",{% endfor %}];
+        var allMembers = [{% for shift in coShifts %}"{{ shift.shifter.publicDisplayNameWithMemberNumber }}",{% endfor %}];
         $('#to{{ shift.id }}').chips({
             autocompleteOptions: {
                 data: allMembers.reduce(function(map, obj) {

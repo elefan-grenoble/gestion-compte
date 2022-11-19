@@ -34,7 +34,7 @@
             <div class="collection">
                 {% for beneficiary in beneficiaries %}
                     <form action="{{ path(return_path, { (routeParam): beneficiary.id } | merge(params)) }}" method="post" class="collection-item">
-                        <a href="#" onclick="$(this).closest('form').submit()" >#{{ beneficiary.memberNumber }} {{ beneficiary.firstname }} {{ beneficiary.lastname | first | upper }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
+                        <a href="#" onclick="$(this).closest('form').submit()" >{{ beneficiary.publicDisplayNameWithMemberNumber }}{% if beneficiary.membership.lastRegistration %} - {{ beneficiary.membership.lastRegistration.date | date('d F Y') }}{% endif %}</a>
                     </form>
                 {% endfor %}
             </div>

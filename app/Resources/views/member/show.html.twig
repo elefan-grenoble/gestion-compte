@@ -1,6 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}{{ member.autocompleteLabel }} - {{ site_name }}{% endblock %}
+{% block title %}{{ member.displayMemberNumber }} - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
@@ -10,7 +10,7 @@
 {% else %}
     <a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
 {% endif %}
-<i class="material-icons">person</i>&nbsp;{{ member.autocompleteLabel }}
+<i class="material-icons">person</i>&nbsp;{{ member.displayMemberNumber }}
 {% endblock %}
 
 {% block content %}

@@ -48,8 +48,8 @@
                                 <td>
                                     {% for owner in task.owners %}
                                         <span class="chip truncate">
-                                            <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
-                                            {{ owner.firstname }}&nbsp;{{ owner.lastname }}
+                                            <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayNameWithMemberNumber }}">
+                                            {{ owner.displayName }}
                                         </span>
                                     {% endfor %}
                                 </td>
