@@ -8,6 +8,8 @@ use Symfony\Component\EventDispatcher\Event;
 class MembershipEvent extends Event
 {
     const CREATED = 'membership.created';
+    const BENEFICIARY_ADDED = 'membership.beneficiary_added';
+    const BENEFICIARY_REMOVED = 'membership.beneficiary_removed';
 
     private $membership;
 

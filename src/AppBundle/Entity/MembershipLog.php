@@ -132,6 +132,30 @@ class MembershipLog
     }
 
     /**
+     * Set membership
+     *
+     * @param Membership|null $membership
+     *
+     * @return MembershipLog
+     */
+    public function setMembership(?Membership $membership)
+    {
+        $this->membership = $membership;
+
+        return $this;
+    }
+
+    /**
+     * Get membership
+     *
+     * @return Membership|null
+     */
+    public function getMembership() : ?Membership
+    {
+        return $this->membership;
+    }
+
+    /**
      * Set createdBy
      *
      * @param \AppBundle\Entity\User $createBy

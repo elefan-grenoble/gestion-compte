@@ -879,6 +879,7 @@ class MembershipController extends Controller
                     } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
                         $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
                     } else {
+                        // update destination membership
                         foreach ($fromMember->getBeneficiaries() as $beneficiary) {
                             $destMember->addBeneficiary($beneficiary); //in
                             $fromMember->removeBeneficiary($beneficiary); //out
@@ -887,9 +888,14 @@ class MembershipController extends Controller
                         }
                         $em->persist($destMember);
                         $em->flush();
+
+                        // delete from membership
                         $fromMember->setMainBeneficiary(null);
                         $em->remove($fromMember);
                         $em->flush();
+
+                        $dispatcher = $this->get('event_dispatcher');
+                        $dispatcher->dispatch(MembershipEvent::BENEFICIARY_ADDED, new MembershipEvent($destMember));
 
                         $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
 

@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Form\BeneficiaryType;
+use AppBundle\Event\MembershipEvent;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -119,10 +120,13 @@ class BeneficiaryController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $dispatcher = $this->get('event_dispatcher');
 
             // first we remove the beneficiary from the current member
             $member->removeBeneficiary($beneficiary);
             $em->persist($member);
+
+            $dispatcher->dispatch(MembershipEvent::BENEFICIARY_REMOVED, new MembershipEvent($member));
 
             // check if there is a existing membership with this main beneficiary (artefact ?)
             $existing_member = $em->getRepository('AppBundle:Membership')->findOneBy(array('mainBeneficiary' => $beneficiary));
@@ -147,8 +151,9 @@ class BeneficiaryController extends Controller
             $new_member->setFrozenChange(false);
 
             $em->persist($new_member);
-
             $em->flush();
+
+            $dispatcher->dispatch(MembershipEvent::CREATED, new MembershipEvent($new_member));
 
             $session->getFlashBag()->add('success', 'Le bénéficiaire a été détaché ! Il a maintenant son propre compte.');
             return $this->redirectToShow($new_member);
