@@ -319,7 +319,7 @@ class PeriodController extends Controller
         $str = $content->beneficiary;
 
         $em = $this->getDoctrine()->getManager();
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneFromAutoComplete($str);
 
         if (!$beneficiary) {
             $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
