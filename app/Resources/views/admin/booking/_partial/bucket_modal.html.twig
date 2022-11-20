@@ -35,7 +35,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                         {% else %}
                             Réservé
                         {% endif %}
-                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show",{'member_number': shift.booker.beneficiary.membership.memberNumber}) }}">{{ shift.booker.beneficiary }}</a>{% else %}{{shift.booker}}{% endif %}.
+                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show",{'member_number': shift.booker.beneficiary.membership.memberNumber}) }}">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
                     </p>
                     {% if is_granted('free',shift) %}
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
@@ -101,8 +101,8 @@ It use the materialize modal class https://materializecss.com/modals.html
                         <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
                         <div class="row">
                             <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                                <label for="appbundle_shift_booker{{ shift.id}}">Bénéficiaire</label>
-                                <input id="appbundle_shift_booker{{ shift.id }}" name="form[booker]" type="text" class="autocomplete" />
+                                <label for="appbundle_shift_shifter{{ shift.id }}">Bénéficiaire</label>
+                                <input id="appbundle_shift_shifter{{ shift.id }}" name="form[shifter]" type="text" class="autocomplete" />
                             </div>
                             {% if use_fly_and_fixed %}
                                 <div class="col s2">

@@ -732,7 +732,7 @@ class BookingController extends Controller
         $session = new Session();
 
         $form = $this->createFormBuilder()
-            ->add('booker', TextType::class)
+            ->add('shifter', TextType::class)
             ->add('fixe', RadioType::class)
             ->getForm();
 
@@ -745,9 +745,11 @@ class BookingController extends Controller
             }
 
             $fixe = $form->get("fixe")->getData();
-            $str = $form->get("booker")->getData();
+            $str = $form->get("shifter")->getData();
             $em = $this->getDoctrine()->getManager();
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
+            // $membership = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($str);
+            // $beneficiary = $membership->getBeneficiaries()->findOneFromAutoComplete($str);
+            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneFromAutoComplete($str);
 
             if (!$beneficiary) {
                 $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
