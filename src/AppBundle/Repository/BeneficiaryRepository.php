@@ -10,6 +10,12 @@ namespace AppBundle\Repository;
  */
 class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * findOneFromAutoComplete
+     *
+     * We consider that the $str will have the following format:
+     * "<Membership.member_number> <Beneficiary.firstname> <Beneficiary.lastname>"
+     */
     public function findOneFromAutoComplete($str)
     {
         $reId = '/^#([0-9]+).*/';
