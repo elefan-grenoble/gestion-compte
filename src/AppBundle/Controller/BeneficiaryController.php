@@ -28,7 +28,8 @@ class BeneficiaryController extends Controller
 {
     private $_current_app_user;
 
-    public function getCurrentAppUser(){
+    public function getCurrentAppUser()
+    {
         if (!$this->_current_app_user){
             $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         }
@@ -186,7 +187,8 @@ class BeneficiaryController extends Controller
         return $this->redirectToShow($member);
     }
 
-    private function getErrorMessages(Form $form) {
+    private function getErrorMessages(Form $form)
+    {
         $errors = array();
 
         foreach ($form->getErrors() as $key => $error) {
@@ -268,25 +270,15 @@ class BeneficiaryController extends Controller
         return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
     }
 
-    private function redirectToShow(Membership $member)
-    {
-        $user = $member->getMainBeneficiary()->getUser(); // FIXME
-        $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
-    }
-
     /**
      * @Route("/list", name="beneficiary_list")
      * @Method({"POST"})
+     * @Security("has_role('ROLE_USER')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\Response
-     * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request){
-
+    public function listAction(Request $request)
+    {
         $granted = false;
         if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             $granted = true;
@@ -323,5 +315,15 @@ class BeneficiaryController extends Controller
             return new JsonResponse($returnArray);
         }
         return new Response("Ajax only",400);
+    }
+
+    private function redirectToShow(Membership $member)
+    {
+        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+        $session = new Session();
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
+        else
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 }
