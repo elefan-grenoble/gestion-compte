@@ -16,7 +16,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * Membership
  *
- * @ORM\Table(name="membership")
+ * @ORM\Table(name="membership", uniqueConstraints={@ORM\UniqueConstraint(columns={"member_number"})})
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipRepository")
  * @UniqueEntity(fields={"member_number"}, message="Ce numéro de membre existe déjà")
