@@ -11,8 +11,14 @@
 {% block content %}
     <h4>Joindre deux comptes</h4>
 
-    <p class="red-text"><i class="material-icons">warning</i>Attention, le compte choisi en première position va être <b>détruit</b> et les bénéficiaires ajoutés au compte choisi en deuxième
-        <br>
+    <p>Nombre maximum de bénéficiaires par compte : {{ maximum_nb_of_beneficiaries_in_membership }}</p>
+
+    <p class="red-text">
+        <i class="material-icons">warning</i>
+        Attention, le compte choisi à gauche va être <b>détruit</b>.
+        <br />
+        Il sera rajouté en tant que bénéficiaire du compte choisi à droite.
+        <br />
         <b>Cette opération ne peut pas être annulée.</b>
     </p>
 
