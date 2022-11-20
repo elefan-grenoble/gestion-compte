@@ -14,7 +14,7 @@ use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
-use AppBundle\Event\MemberCreatedEvent;
+use AppBundle\Event\MembershipEvent;
 use AppBundle\EventListener\SetFirstPasswordListener;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
@@ -721,7 +721,7 @@ class MembershipController extends Controller
             }
             $em->flush();
 
-            $dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
+            $dispatcher->dispatch(MembershipEvent::CREATED, new MembershipEvent($member));
 
             $securityContext = $this->container->get('security.authorization_checker');
             if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {

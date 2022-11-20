@@ -7,7 +7,7 @@ use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\CodeNewEvent;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Event\MemberCreatedEvent;
+use AppBundle\Event\MembershipEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
@@ -132,12 +132,12 @@ class EmailingEventListener
     }
 
     /**
-     * @param MemberCreatedEvent $event
+     * @param MembershipEvent $event
      * @throws \Exception
      */
-    public function onMemberCreated(MemberCreatedEvent $event)
+    public function onMembershipCreated(MembershipEvent $event)
     {
-        $this->logger->info("Emailing Listener: onMemberCreated");
+        $this->logger->info("Emailing Listener: onMembershipCreated");
 
         //
     }

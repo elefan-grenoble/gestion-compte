@@ -5,9 +5,9 @@ namespace AppBundle\Event;
 use AppBundle\Entity\Membership;
 use Symfony\Component\EventDispatcher\Event;
 
-class MemberCreatedEvent extends Event
+class MembershipEvent extends Event
 {
-    const NAME = 'member.created';
+    const CREATED = 'membership.created';
 
     private $membership;
 
