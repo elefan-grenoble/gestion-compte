@@ -113,10 +113,16 @@ class Membership
     private $_endOfCycle;
 
     /**
-     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership", cascade={"persist", "remove"})
      * @OrderBy({"createdAt" = "DESC"})
      */
     private $timeLogs;
+
+    /**
+     * @ORM\OneToMany(targetEntity="MembershipLog", mappedBy="membership", cascade={"persist", "remove"})
+     * @OrderBy({"createdAt" = "DESC"})
+     */
+    private $logs;
 
     /**
      * @var \DateTime

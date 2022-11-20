@@ -209,6 +209,8 @@ class TimeLog
     }
 
     /**
+     * Get membership
+     *
      * @param mixed $membership
      */
     public function setMembership($membership)
@@ -217,11 +219,23 @@ class TimeLog
     }
 
     /**
+     * Get type
+     *
      * @return int
      */
     public function getType(): int
     {
         return $this->type;
+    }
+
+    /**
+     * Set type
+     *
+     * @param int $type
+     */
+    public function setType(int $type): void
+    {
+        $this->type = $type;
     }
 
     /**
@@ -236,15 +250,6 @@ class TimeLog
         $this->createdAt = $date;
         return $this;
     }
-
-    /**
-     * @param int $type
-     */
-    public function setType(int $type): void
-    {
-        $this->type = $type;
-    }
-
 
     /**
      * @return string
