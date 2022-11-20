@@ -857,46 +857,43 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
+        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
-            $re = '/#([0-9]+).*/';
-            $str = $form->get('from_text')->getData() . "\n" . $form->get('dest_text')->getData();
-            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-            if (count($matches) >= 2) {
-                $fromMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[0][1]));
-                if (!$fromMember) {
-                    $session->getFlashBag()->add('error', 'Impossible de trouver le compte à lier.');
+            $fromMemberStr = $form->get('from_text')->getData();
+            $fromMember = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($fromMemberStr);
+            if (!$fromMember) {
+                $session->getFlashBag()->add('error', 'Impossible de trouver le compte à lier.');
+            } else {
+                $destMemberStr = $form->get('dest_text')->getData();
+                $destMember = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($destMemberStr);
+                if (!$destMember) {
+                    $session->getFlashBag()->add('error', 'Impossible de trouver le compte de destination.');
                 } else {
-                    $destMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[1][1]));
-                    if (!$destMember) {
-                        $session->getFlashBag()->add('error', 'Impossible de trouver le compte de destination.');
+                    if ($fromMember == $destMember) {
+                        $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
+                    } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                        $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
+                    }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                        $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
+                    } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                        $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
                     } else {
-                        if ($fromMember == $destMember) {
-                            $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
-                        } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                            $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
-                        }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                            $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
-                        } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                            $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
-                        } else {
-                            foreach ($fromMember->getBeneficiaries() as $beneficiary) {
-                                $destMember->addBeneficiary($beneficiary); //in
-                                $fromMember->removeBeneficiary($beneficiary); //out
-                                $beneficiary->setMembership($destMember);
-                                $em->persist($beneficiary);
-                            }
-                            $em->persist($destMember);
-                            $em->flush();
-                            $fromMember->setMainBeneficiary(null);
-                            $em->remove($fromMember);
-                            $em->flush();
-
-                            $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
-
-                            return $this->redirectToShow($destMember);
+                        foreach ($fromMember->getBeneficiaries() as $beneficiary) {
+                            $destMember->addBeneficiary($beneficiary); //in
+                            $fromMember->removeBeneficiary($beneficiary); //out
+                            $beneficiary->setMembership($destMember);
+                            $em->persist($beneficiary);
                         }
+                        $em->persist($destMember);
+                        $em->flush();
+                        $fromMember->setMainBeneficiary(null);
+                        $em->remove($fromMember);
+                        $em->flush();
+
+                        $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
+
+                        return $this->redirectToShow($destMember);
                     }
                 }
             }
@@ -921,8 +918,8 @@ class MembershipController extends Controller
         $note_form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
-
         $session = $request->getSession();
+
         if ($note_form->isSubmitted()) {
             if ($note_form->isValid()) {
                 $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));

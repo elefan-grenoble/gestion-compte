@@ -20,6 +20,7 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
         }
         return null;
     }
+
     /**
      * findAllActive
      *
