@@ -13,6 +13,17 @@ use Doctrine\ORM\Query\Expr\Join;
 class MembershipRepository extends \Doctrine\ORM\EntityRepository
 {
 
+    public function findOneFromAutoComplete($str)
+    {
+        $re = '/^#([0-9]+).*/';
+        preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
+        if (count($matches) == 1) {
+            $membershipNumber = $matches[0][1];
+            return $this->findOneBy(array("member_number" => $membershipNumber));
+        }
+        return null;
+    }
+
     public function findWithNewCycleStarting($date = null)
     {
         if (!($date)) {

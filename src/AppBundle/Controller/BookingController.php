@@ -739,7 +739,6 @@ class BookingController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             if ($shift->getShifter() && !$shift->getIsDismissed()) {
                 $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
                 return new Response($this->generateUrl("booking_admin"), 205);
