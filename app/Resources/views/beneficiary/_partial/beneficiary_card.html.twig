@@ -38,7 +38,7 @@
                     </div>
                 {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
-                    {% if not beneficiary.isMain %}
+                    {% if not beneficiary.isMain and detach_form is defined %}
                         <div class="card-btn">
                             <a href="#detach-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="séparer le bénéficiaire">
                                 <i class="material-icons">call_split</i>
@@ -60,7 +60,7 @@
                             </a>
                         </div>
                     {% endif %}
-                    {% if delete_form is defined and not beneficiary.isMain %}
+                    {% if not beneficiary.isMain and delete_form is defined %}
                         <div class="card-btn">
                             <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le bénéficiaire">
                                 <i class="material-icons">remove</i>
