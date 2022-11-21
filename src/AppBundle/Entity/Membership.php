@@ -253,6 +253,25 @@ class Membership
     }
 
     /**
+     * Get beneficiaries (with main in first position)
+     * Why? because beneficiaries are ordered by id ASC
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBeneficiariesWithMainInFirstPosition()
+    {
+        $beneficiaries[] = $this->getMainBeneficiary();
+        if ($this->getBeneficiaries()->count() > 1) {
+            foreach ($this->getBeneficiaries() as $beneficiary) {
+                if ($beneficiary !== $this->getMainBeneficiary()) {
+                    $beneficiaries[] = $beneficiary;
+                }
+            }
+        }
+        return $beneficiaries;
+    }
+
+    /**
      * Set mainBeneficiary
      *
      * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
