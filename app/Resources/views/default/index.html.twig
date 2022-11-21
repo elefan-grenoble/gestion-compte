@@ -44,7 +44,8 @@
                 <p>
                     Bienvenue sur ton espace personnel à {{ project_name }}
                     {% if app.user.beneficiary.membership.beneficiaries | length > 1 %}
-                    <br />Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
+                        <br />
+                        Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
                     {% endif %}
                 </p>
                 {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
