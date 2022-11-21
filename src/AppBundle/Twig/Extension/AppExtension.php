@@ -117,30 +117,45 @@ class AppExtension extends AbstractExtension
         return 'my_app_extension';
     }
 
+    /**
+     * exemple output: "mercredi 29 juin"
+     */
     public function date_fr_long(\DateTime $date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $date->getTimestamp());
     }
 
+    /**
+     * exemple output: "06/29/22 11:30"
+     */
     public function date_time(\DateTime $date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%D %H:%M", $date->getTimestamp());
     }
 
+    /**
+     * exemple output: "mercredi 29 juin 2022"
+     */
     public function date_fr_full(\DateTime $date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
+    /**
+     * exemple output: "mercredi 29 juin 2022 à 11:31"
+     */
     public function date_fr_with_time(\DateTime $date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
     }
 
+    /**
+     * exemple output: "2022-06-29T11:32:18+02:00"
+     */
     public function date_w3c(\DateTime $date)
     {
         return $date->format( \DateTimeInterface::W3C);
