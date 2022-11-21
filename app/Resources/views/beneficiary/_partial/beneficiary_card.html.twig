@@ -30,7 +30,7 @@
                         <button type="submit" class="btn btn-floating waves-effect waves-light" title="éditer"><i class="material-icons">mode_edit</i></button>
                     </form>
                 </div>
-                {% if not beneficiary.isMain %}
+                {% if not beneficiary.isMain %}{# implies that maximum_nb_of_beneficiaries_in_membership > 1 #}
                     <div class="card-btn">
                         <a href="{{ path('beneficiary_set_main', { 'id': beneficiary.id }) }}" class="modal-trigger btn btn-floating waves-effect waves-light purple" title="mettre en bénéficiaire principal">
                             <i class="material-icons">flag</i>
