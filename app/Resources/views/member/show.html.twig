@@ -252,7 +252,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_freeze',{ 'id' : member.id }) }}">
+                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_freeze', { 'id' : member.id }) }}">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </a>
                                 </div>
@@ -271,7 +271,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_unfreeze',{ 'id' : member.id }) }}">
+                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_unfreeze', { 'id' : member.id }) }}">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </a>
                                 </div>
@@ -292,6 +292,7 @@
                         <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte
                         </a>
+                        {{ form_start(close_form) }}
                         <div id="close-member" class="modal">
                             <div class="modal-content">
                                 <h5>
@@ -307,17 +308,18 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange" href="{{ path('member_close',{ 'id' : member.id }) }}">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </a>
+                                </button>
                             </div>
                         </div>
+                        {{ form_end(close_form) }}
                     {% else %}
                         {% if member.withdrawnDate %}
                             <p>
                                 Compte fermé le <i>{{ member.withdrawnDate | date('d F Y H:i') }}</i>
                                 {% if member.withdrawnBy %}
-                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show",{ 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
+                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
                                 {% endif %}
                             </p>
                         {% endif %}
