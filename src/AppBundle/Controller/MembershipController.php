@@ -168,6 +168,7 @@ class MembershipController extends Controller
             'delete_form' => $deleteForm->createView(),
             'time_log_form' => $timeLogForm->createView(),
             'period_positions' => $period_positions,
+            'in_progress_and_upcoming_shifts' => $member->getInProgressAndUpcomingShifts(),
         ));
     }
 

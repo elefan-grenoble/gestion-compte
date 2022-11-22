@@ -292,6 +292,12 @@
                                     <i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre
                                 </h5>
                                 <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
+                                <ul>
+                                    {% if use_fly_and_fixed %}
+                                        <li>Ce membre a {{ period_positions | length }} créneau fixe.</li>
+                                    {% endif %}
+                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneaux à venir.</li>
+                                </ul>
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
