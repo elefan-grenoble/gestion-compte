@@ -326,6 +326,7 @@
                         <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
                             <i class="material-icons left">check</i>Ré-ouvrir le compte
                         </a>
+                        {{ form_start(open_form) }}
                         <div id="reopen-member" class="modal">
                             <div class="modal-content">
                                 <h5>
@@ -335,11 +336,12 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange" href="{{ path('member_open',{ 'id' : member.id }) }}">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </a>
+                                </button>
                             </div>
                         </div>
+                        {{ form_end(open_form) }}
                     {% endif %}
                 </div>
             </li>

@@ -87,6 +87,7 @@ class MembershipController extends Controller
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
 
         $closeForm = $this->createCloseForm($member);
+        $openForm = $this->createOpenForm($member);
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
@@ -167,6 +168,7 @@ class MembershipController extends Controller
             'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'close_form' => $closeForm->createView(),
+            'open_form' => $openForm->createView(),
             'delete_form' => $deleteForm->createView(),
             'time_log_form' => $timeLogForm->createView(),
             'period_positions' => $period_positions,
@@ -480,6 +482,7 @@ class MembershipController extends Controller
      *
      * @Route("/{id}/close", name="member_close")
      * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -511,19 +514,30 @@ class MembershipController extends Controller
      * Open member
      *
      * @Route("/{id}/open", name="member_open")
-     * @Method({"GET"})
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function openAction(Membership $member)
+    public function openAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('open', $member);
+
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setWithdrawn(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte reouvert');
+
+        $form = $this->createOpenForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $member->setWithdrawn(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte reouvert');
+        }
+
         return $this->redirectToShow($member);
     }
 
@@ -1015,6 +1029,20 @@ class MembershipController extends Controller
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('member_close', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to open a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createOpenForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_open', array('id' => $member->getId())))
             ->setMethod('POST')
             ->getForm();
     }
