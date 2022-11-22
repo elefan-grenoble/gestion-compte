@@ -71,7 +71,7 @@ class MembershipController extends Controller
     /**
      * Finds and displays a membership entity.
      *
-     * @Route("/show/{member_number}", name="member_show")
+     * @Route("/{member_number}", name="member_show")
      * @Method("GET")
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -504,7 +504,7 @@ class MembershipController extends Controller
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte fermé');
+            $session->getFlashBag()->add('success', 'Compte fermé !');
         }
 
         return $this->redirectToShow($member);
@@ -535,7 +535,7 @@ class MembershipController extends Controller
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte reouvert');
+            $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
         }
 
         return $this->redirectToShow($member);
