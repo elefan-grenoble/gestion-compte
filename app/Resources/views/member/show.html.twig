@@ -235,11 +235,11 @@
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
-                            <a href="#freeze" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                            <a href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
                             </a>
                             {{ form_start(freeze_form) }}
-                            <div id="freeze" class="modal">
+                            <div id="freeze-member-confirmation-modal" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
@@ -250,7 +250,7 @@
                                         {% if use_fly_and_fixed %}
                                             <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
                                         {% endif %}
-                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
+                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
                                     </ul>
                                 </div>
                                 <div class="modal-footer">
@@ -262,11 +262,11 @@
                             </div>
                             {{ form_end(freeze_form) }}
                         {% else %}
-                            <a href="#unfreeze" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                            <a href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3">
                                 <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
                             </a>
                             {{ form_start(unfreeze_form) }}
-                            <div id="unfreeze" class="modal">
+                            <div id="unfreeze-member-confirmation-modal" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">play_arrow</i>Dégel immédiat du compte
@@ -295,11 +295,11 @@
                 </div>
                 <div class="collapsible-body white">
                     {% if not member.withdrawn %}
-                        <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
+                        <a href="#close-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte
                         </a>
                         {{ form_start(close_form) }}
-                        <div id="close-member" class="modal">
+                        <div id="close-member-confirmation-modal" class="modal">
                             <div class="modal-content">
                                 <h5>
                                     <i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre
@@ -309,7 +309,7 @@
                                     {% if use_fly_and_fixed %}
                                         <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
                                     {% endif %}
-                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
+                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
                                 </ul>
                             </div>
                             <div class="modal-footer">
@@ -329,11 +329,11 @@
                                 {% endif %}
                             </p>
                         {% endif %}
-                        <a href="#open-member" class="modal-trigger waves-effect waves-light btn teal">
+                        <a href="#open-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn teal">
                             <i class="material-icons left">check</i>Ré-ouvrir le compte
                         </a>
                         {{ form_start(open_form) }}
-                        <div id="open-member" class="modal">
+                        <div id="open-member-confirmation-modal" class="modal">
                             <div class="modal-content">
                                 <h5>
                                     <i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre
