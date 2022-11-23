@@ -97,7 +97,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                     </div>
                 </div>
                 <div class="collapsible-body">
-                    <form method="post" action="{{ path('admin_shift_book',{'id': shift.id}) }}">
+                    <form method="post" action="{{ path('shift_book_admin', { 'id': shift.id }) }}">
                         <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
                         <div class="row">
                             <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
