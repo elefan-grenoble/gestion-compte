@@ -233,11 +233,11 @@
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
-                            <a href="#pause" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                            <a href="#freeze" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
                             </a>
                             {{ form_start(freeze_form) }}
-                            <div id="pause" class="modal">
+                            <div id="freeze" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
@@ -260,10 +260,11 @@
                             </div>
                             {{ form_end(freeze_form) }}
                         {% else %}
-                            <a href="#unpause" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                            <a href="#unfreeze" class="waves-effect waves-light btn modal-trigger purple lighten-3">
                                 <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
                             </a>
-                            <div id="unpause" class="modal">
+                            {{ form_start(unfreeze_form) }}
+                            <div id="unfreeze" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">play_arrow</i>Dégel immédiat du compte
@@ -273,11 +274,12 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_unfreeze', { 'id' : member.id }) }}">
+                                    <button type="submit" class="btn waves-effect waves-light orange">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
+                            {{ form_end(unfreeze_form) }}
                         {% endif %}
                     {% endif %}
                 </div>
