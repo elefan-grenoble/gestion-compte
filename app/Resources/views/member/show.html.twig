@@ -22,7 +22,7 @@
     </h4>
 
     <div class="row">
-        {% for beneficiary in member.beneficiaries %}
+        {% for beneficiary in member.beneficiariesWithMainInFirstPosition %}
             {% include "beneficiary/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, detach_form: detach_beneficiary_forms[beneficiary.id], delete_form: delete_beneficiary_forms[beneficiary.id] } %}
         {% endfor %}
     </div>
