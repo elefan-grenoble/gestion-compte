@@ -40,7 +40,7 @@
         </div>
     {% endif %}
 
-    {% if is_granted("beneficiary_add", member) and member.beneficiaries|length < 2 %}{#todo put this value in conf#}
+    {% if is_granted("beneficiary_add", member) and member.beneficiaries | length < maximum_nb_of_beneficiaries_in_membership %}
         <ul class="collapsible">
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
