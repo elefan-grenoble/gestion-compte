@@ -196,14 +196,19 @@ class DefaultController extends Controller
     {
         $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findRemainingToday();
-        $buckets = $this->get('shift_service')->generateShiftBuckets($shifts);
-        // $buckets = $this->get('shift_service')->removeEmptyShift($buckets);
+
+        // in progress shifts
+        $shifts_in_progress = $em->getRepository('AppBundle:Shift')->findInProgress();
+        $buckets_in_progress = $this->get('shift_service')->generateShiftBuckets($shifts_in_progress);
+        // upcoming shifts
+        $shifts_upcoming = $em->getRepository('AppBundle:Shift')->findUpcomingToday();
+        $buckets_upcoming = $this->get('shift_service')->generateShiftBuckets($shifts_upcoming);
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 
-        return $this->render('default/card_reader.html.twig', [
-            "buckets" => $buckets,
+        return $this->render('default/card_reader/index.html.twig', [
+            "buckets_in_progress" => $buckets_in_progress,
+            "buckets_upcoming" => $buckets_upcoming,
             "dynamicContent" => $dynamicContent
         ]);
     }

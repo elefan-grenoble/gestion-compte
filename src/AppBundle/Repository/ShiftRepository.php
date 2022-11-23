@@ -246,22 +246,25 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findInProgress(\DateTime $date)
+    public function findInProgress()
     {
+        $now = new \DateTime('now');
+
         $qb = $this->createQueryBuilder('s');
 
         $qb
             ->where('s.shifter is not null')
             ->andWhere('s.isDismissed = 0')
             ->andwhere(':date between s.start and s.end')
-            ->setParameter('date', $date);
+            ->setParameter('date', $now)
+            ->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()
             ->getResult();
     }
 
-    public function findRemainingToday()
+    public function findUpcomingToday()
     {
         $now = new \DateTime('now');
         $end_of_day = new \DateTime('now');
@@ -271,7 +274,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
 
         $qb
             ->where('s.isDismissed = 0')
-            ->andwhere('(s.start > :now AND s.end < :end_of_day) OR (s.start < :now AND s.end > :now)')
+            ->andwhere('s.start > :now AND s.end < :end_of_day')
             ->setParameter('now', $now)
             ->setParameter('end_of_day', $end_of_day)
             ->orderBy('s.start', 'ASC');

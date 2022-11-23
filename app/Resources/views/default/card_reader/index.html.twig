@@ -1,0 +1,50 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block beforecontainer %}
+    <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+        <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
+        <div class="nav-wrapper" style="margin-right: 20px; font-size: 16px; font-weight: 600">
+            <ul class="right">
+                <li>{{ date('now') | date_fr_long }}&nbsp;{{ "now" | date('H:i') }}</li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="row">
+        <div class="col s6">
+            {% if buckets_in_progress | length > 1 %}
+                <h5>Créneaux en cours</h5>
+
+                {% for bucket in buckets_in_progress %}
+                    {% include "default/card_reader/_partial/bucket_card.html.twig" with { bucket: bucket } %}
+                {% endfor %}
+                <br />
+            {% endif %}
+
+            <h5>Créneaux à venir</h5>
+
+            {% for bucket in buckets_upcoming %}
+                {% include "default/card_reader/_partial/bucket_card.html.twig" with { bucket: bucket } %}
+            {% endfor %}
+        </div>
+
+        <div class="col s6">{{ dynamicContent | markdown | raw }}</div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery(function () {
+            $(".collapsible .modal-trigger").on('click', function (e) {
+                e.preventDefault();
+            });
+        })
+        var barcode_submit_url = "{{ path('check') }}";
+    </script>
+    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+    <script type="text/javascript">
+        setTimeout(function() {
+            location.reload();
+        }, 60 * 1000);  // page reload every 60 seconds
+    </script>
+{% endblock %}
