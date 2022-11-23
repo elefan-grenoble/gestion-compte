@@ -245,9 +245,9 @@
                                     <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
                                     <ul>
                                         {% if use_fly_and_fixed %}
-                                            <li>Ce membre a {{ period_positions | length }} créneau fixe.</li>
+                                            <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
                                         {% endif %}
-                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneaux à venir.</li>
+                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
                                     </ul>
                                 </div>
                                 <div class="modal-footer">
@@ -300,9 +300,9 @@
                                 <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
                                 <ul>
                                     {% if use_fly_and_fixed %}
-                                        <li>Ce membre a {{ period_positions | length }} créneau fixe.</li>
+                                        <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
                                     {% endif %}
-                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneaux à venir.</li>
+                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
                                 </ul>
                             </div>
                             <div class="modal-footer">
