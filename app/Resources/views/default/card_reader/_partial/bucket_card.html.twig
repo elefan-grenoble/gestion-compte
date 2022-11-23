@@ -32,12 +32,6 @@
                         {% endif %}
                         {% if shift.shifter %}
                             <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayNameWithMemberNumber }}</span>
-                            {% if shift.formation %}
-                                <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
-                            {% endif %}
-                            {% if shift.shifter.shifts | length == 1 %}
-                                <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
-                            {% endif %}
                         {% else %}
                             <strong><i>libre</i></strong>
                         {% endif %}
