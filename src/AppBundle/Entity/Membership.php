@@ -486,6 +486,8 @@ class Membership
 
     /**
      * Get all shifts for all beneficiaries
+     * @param bool $excludeDismissed
+     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
      */
     public function getAllShifts($excludeDismissed = false)
     {
@@ -505,6 +507,19 @@ class Membership
     }
 
     /**
+     * Get all in progress & upcoming shifts for all beneficiaries
+     * @param bool $excludeDismissed
+     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
+     */
+    public function getInProgressAndUpcomingShifts($excludeDismissed = false)
+    {
+        $now = new DateTime('now');
+        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($now) {
+            return $shift->getStart() > $now;
+        });
+    }
+
+    /**
      * Get all reserved shifts for all beneficiaries
      */
     public function getReservedShifts()
@@ -517,7 +532,6 @@ class Membership
         }
         return $shifts;
     }
-
 
     /**
      * Get shifts of a specific cycle

@@ -241,8 +241,14 @@
                                     <h5>
                                         <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
                                     </h5>
-                                    <p>Attention, le gel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin</p>
+                                    <p>Attention, le gel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin.</p>
                                     <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
+                                    <ul>
+                                        {% if use_fly_and_fixed %}
+                                            <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                                        {% endif %}
+                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
+                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
@@ -292,6 +298,12 @@
                                     <i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre
                                 </h5>
                                 <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
+                                <ul>
+                                    {% if use_fly_and_fixed %}
+                                        <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                                    {% endif %}
+                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} à venir.</li>
+                                </ul>
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
