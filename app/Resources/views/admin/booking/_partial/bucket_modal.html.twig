@@ -98,23 +98,23 @@ It use the materialize modal class https://materializecss.com/modals.html
                 </div>
                 <div class="collapsible-body">
                     {{ form_start(shift_book_forms[shift.id]) }}
-                        <div class="row">
-                            <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                                {{ form_label(shift_book_forms[shift.id].shifter) }}
-                                {{ form_widget(shift_book_forms[shift.id].shifter) }}
-                            </div>
-                            {% if use_fly_and_fixed %}
-                                <div class="col s2">
-                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
-                                </div>
-                            {% endif %}
-                            <div class="col s3">
-                                {% if not use_fly_and_fixed %}
-                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
-                                {% endif %}
-                                <button class="btn add">Ajouter</button>
-                            </div>
+                    <div class="row">
+                        <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                            {{ form_label(shift_book_forms[shift.id].shifter) }}
+                            {{ form_widget(shift_book_forms[shift.id].shifter) }}
                         </div>
+                        {% if use_fly_and_fixed %}
+                            <div class="col s2">
+                                {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                            </div>
+                        {% endif %}
+                        <div class="col s3">
+                            {% if not use_fly_and_fixed %}
+                                {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                            {% endif %}
+                            <button class="btn add">Ajouter</button>
+                        </div>
+                    </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
                 </div>
             </li>
