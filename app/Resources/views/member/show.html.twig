@@ -209,27 +209,29 @@
                 </div>
                 <div class="collapsible-body white">
                     {% if is_granted("freeze_change", member) %}
+                        {{ form_start(freeze_change_form) }}
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">cancel</i>Annuler la demande de gel du compte
-                                </a>
+                                </button>
                             {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
+                                <button type="submit" class="btn waves-effect waves-light deep-purple">
                                     <i class="material-icons left">paused</i>Geler le compte à la fin du cycle
-                                </a>
+                                </button>
                             {% endif %}
                         {% else %}
                             {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte
-                                </a>
+                                </button>
                             {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
+                                <button type="submit" class="btn waves-effect waves-light deep-purple lighten-2">
                                     <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle
-                                </a>
+                                </button>
                             {% endif %}
                         {% endif %}
+                        {{ form_end(freeze_change_form) }}
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}

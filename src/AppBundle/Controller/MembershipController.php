@@ -88,6 +88,7 @@ class MembershipController extends Controller
 
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
+        $freezeChangeForm = $this->createFreezeChangeForm($member);
         $closeForm = $this->createCloseForm($member);
         $openForm = $this->createOpenForm($member);
         $deleteForm = $this->createDeleteForm($member);
@@ -171,6 +172,7 @@ class MembershipController extends Controller
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'freeze_form' => $freezeForm->createView(),
             'unfreeze_form' => $unfreezeForm->createView(),
+            'freeze_change_form' => $freezeChangeForm->createView(),
             'close_form' => $closeForm->createView(),
             'open_form' => $openForm->createView(),
             'delete_form' => $deleteForm->createView(),
@@ -527,14 +529,13 @@ class MembershipController extends Controller
     {
         $this->denyAccessUnlessGranted('open', $member);
 
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
-        $session = new Session();
-
         $form = $this->createOpenForm($member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
             $em = $this->getDoctrine()->getManager();
+
             $member->setWithdrawn(false);
             $em->persist($member);
             $em->flush();
@@ -558,14 +559,13 @@ class MembershipController extends Controller
     {
         $this->denyAccessUnlessGranted('freeze', $member);
 
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
-        $session = new Session();
-
         $form = $this->createFreezeForm($member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
             $em = $this->getDoctrine()->getManager();
+
             $member->setFrozen(true);
             $member->setFrozenChange(false);
             $em->persist($member);
@@ -590,14 +590,13 @@ class MembershipController extends Controller
     {
         $this->denyAccessUnlessGranted('freeze', $member);
 
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
-        $session = new Session();
-
         $form = $this->createUnfreezeForm($member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
             $em = $this->getDoctrine()->getManager();
+
             $member->setFrozen(false);
             $member->setFrozenChange(false);
             $em->persist($member);
@@ -613,23 +612,33 @@ class MembershipController extends Controller
      * Ask freeze status change for user
      *
      * @Route("/{id}/freeze_change", name="member_freeze_change")
-     * @Method({"GET"})
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeChangeAction(Membership $member)
+    public function freezeChangeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze_change', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozenChange(!$member->getFrozenChange());
-        $em->persist($member);
-        $em->flush();
-        if ($member->getFrozenChange()) {
-            $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
-        } else {
-            $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
+
+        $form = $this->createFreezeChangeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozenChange(!$member->getFrozenChange());
+            $em->persist($member);
+            $em->flush();
+
+            if ($member->getFrozenChange()) {
+                $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+            }
         }
+
         if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
             return $this->redirectToRoute("fos_user_profile_show");
         } else {
@@ -640,7 +649,7 @@ class MembershipController extends Controller
     /**
      * Delete member
      *
-     * @Route("/delete/{id}", name="member_delete")
+     * @Route("/{id}", name="member_delete")
      * @Method("DELETE")
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
@@ -649,16 +658,17 @@ class MembershipController extends Controller
      */
     public function deleteAction(Request $request, Membership $member)
     {
+        $session = new Session();
+
         $form = $this->createDeleteForm($member);
         $form->handleRequest($request);
 
-        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Le membre a bien été supprimé");
+            $session->getFlashBag()->add('success', "Le membre a bien été supprimé !");
         }
 
         return $this->redirectToRoute('user_index');
@@ -1069,6 +1079,20 @@ class MembershipController extends Controller
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('member_unfreeze', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to edit member frozen_change
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFreezeChangeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_freeze_change', array('id' => $member->getId())))
             ->setMethod('POST')
             ->getForm();
     }
