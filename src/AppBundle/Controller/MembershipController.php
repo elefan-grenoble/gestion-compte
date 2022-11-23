@@ -71,7 +71,7 @@ class MembershipController extends Controller
     /**
      * Finds and displays a membership entity.
      *
-     * @Route("/show/{member_number}", name="member_show")
+     * @Route("/{member_number}", name="member_show")
      * @Method("GET")
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -86,6 +86,11 @@ class MembershipController extends Controller
 
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
 
+        $freezeForm = $this->createFreezeForm($member);
+        $unfreezeForm = $this->createUnfreezeForm($member);
+        $freezeChangeForm = $this->createFreezeChangeForm($member);
+        $closeForm = $this->createCloseForm($member);
+        $openForm = $this->createOpenForm($member);
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
@@ -165,6 +170,11 @@ class MembershipController extends Controller
             'new_notes_form' => $new_notes_form,
             'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'freeze_form' => $freezeForm->createView(),
+            'unfreeze_form' => $unfreezeForm->createView(),
+            'freeze_change_form' => $freezeChangeForm->createView(),
+            'close_form' => $closeForm->createView(),
+            'open_form' => $openForm->createView(),
             'delete_form' => $deleteForm->createView(),
             'time_log_form' => $timeLogForm->createView(),
             'period_positions' => $period_positions,
@@ -328,12 +338,6 @@ class MembershipController extends Controller
 
     }
 
-    private function createNewBeneficiaryForm(Membership $member)
-    {
-        $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
-        return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
-    }
-
     /**
      * Displays a form to edit an existing member entity.
      *
@@ -482,109 +486,159 @@ class MembershipController extends Controller
     /**
      * Close member
      *
-     * @Route("/{id}/close/", name="member_close")
-     * @Method({"GET"})
+     * @Route("/{id}/close", name="member_close")
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function closeAction(Membership $member)
+    public function closeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('close', $member);
+
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setWithdrawn(true);
-        $member->setWithdrawnDate(new \DateTime('now'));
-        $member->setWithdrawnBy($current_user);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte fermé');
+
+        $form = $this->createCloseForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $member->setWithdrawn(true);
+            $member->setWithdrawnDate(new \DateTime('now'));
+            $member->setWithdrawnBy($current_user);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte fermé !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
      * Open member
      *
-     * @Route("/{id}/open/", name="member_open")
-     * @Method({"GET"})
+     * @Route("/{id}/open", name="member_open")
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function openAction(Membership $member)
+    public function openAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('open', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setWithdrawn(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte reouvert');
+
+        $form = $this->createOpenForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setWithdrawn(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
-     * freeze user
+     * freeze member
      *
-     * @Route("/{id}/freeze/", name="member_freeze")
-     * @Method({"GET"})
+     * @Route("/{id}/freeze", name="member_freeze")
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeAction(Membership $member)
+    public function freezeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozen(true);
-        $member->setFrozenChange(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte gelé');
+
+        $form = $this->createFreezeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozen(true);
+            $member->setFrozenChange(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte gelé !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
      * Unfreeze member
      *
-     * @Route("/{id}/unfreeze/", name="member_unfreeze")
-     * @Method({"GET"})
+     * @Route("/{id}/unfreeze", name="member_unfreeze")
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function unfreezeAction(Membership $member)
+    public function unfreezeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozen(false);
-        $member->setFrozenChange(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte dégelé');
+
+        $form = $this->createUnfreezeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozen(false);
+            $member->setFrozenChange(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte dégelé !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
      * Ask freeze status change for user
      *
-     * @Route("/{id}/freeze_change/}", name="member_freeze_change")
-     * @Method({"GET"})
+     * @Route("/{id}/freeze_change", name="member_freeze_change")
+     * @Method({"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeChangeAction(Membership $member)
+    public function freezeChangeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze_change', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozenChange(!$member->getFrozenChange());
-        $em->persist($member);
-        $em->flush();
-        if ($member->getFrozenChange()) {
-            $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
-        } else {
-            $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
+
+        $form = $this->createFreezeChangeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozenChange(!$member->getFrozenChange());
+            $em->persist($member);
+            $em->flush();
+
+            if ($member->getFrozenChange()) {
+                $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+            }
         }
+
         if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
             return $this->redirectToRoute("fos_user_profile_show");
         } else {
@@ -593,9 +647,9 @@ class MembershipController extends Controller
     }
 
     /**
-     * Deletes a member entity.
+     * Delete member
      *
-     * @Route("/delete/{id}", name="member_delete")
+     * @Route("/{id}", name="member_delete")
      * @Method("DELETE")
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
@@ -604,16 +658,17 @@ class MembershipController extends Controller
      */
     public function deleteAction(Request $request, Membership $member)
     {
+        $session = new Session();
+
         $form = $this->createDeleteForm($member);
         $form->handleRequest($request);
 
-        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Le membre a bien été supprimé");
+            $session->getFlashBag()->add('success', "Le membre a bien été supprimé !");
         }
 
         return $this->redirectToRoute('user_index');
@@ -962,35 +1017,6 @@ class MembershipController extends Controller
     }
 
     /**
-     * Creates a form to delete a member entity.
-     *
-     * @param Membership $member
-     * @return \Symfony\Component\Form\FormInterface
-     */
-    private function createDeleteForm(Membership $member)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('member_delete', array('id' => $member->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-    }
-
-    /**
-     * Creates a form to delete a note entity.
-     *
-     * @param Note $note the note entity
-     *
-     * @return \Symfony\Component\Form\FormInterface The form
-     */
-    private function createNoteDeleteForm(Note $note)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-    }
-
-    /**
      * Export all emails of members (including beneficiary)
      *
      * @Route("/emails_csv", name="admin_emails_csv")
@@ -1021,6 +1047,111 @@ class MembershipController extends Controller
             'Content-Type' => 'application/force-download; charset=UTF-8',
             'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
         ));
+    }
+
+    private function createNewBeneficiaryForm(Membership $member)
+    {
+        $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
+        return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
+    }
+
+    /**
+     * Creates a form to freeze a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFreezeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_freeze', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to unfreeze a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createUnfreezeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_unfreeze', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to edit member frozen_change
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFreezeChangeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_freeze_change', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to close a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createCloseForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_close', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to open a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createOpenForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_open', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to delete a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createDeleteForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_delete', array('id' => $member->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to delete a note entity.
+     *
+     * @param Note $note the note entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createNoteDeleteForm(Note $note)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     private function redirectToShow(Membership $member)

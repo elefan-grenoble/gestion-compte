@@ -209,39 +209,42 @@
                 </div>
                 <div class="collapsible-body white">
                     {% if is_granted("freeze_change", member) %}
+                        {{ form_start(freeze_change_form) }}
                         {% if not member.frozen %}
                             {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">cancel</i>Annuler la demande de gel du compte
-                                </a>
+                                </button>
                             {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
+                                <button type="submit" class="btn waves-effect waves-light deep-purple">
                                     <i class="material-icons left">paused</i>Geler le compte à la fin du cycle
-                                </a>
+                                </button>
                             {% endif %}
                         {% else %}
                             {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte
-                                </a>
+                                </button>
                             {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn waves-purple purple lighten-2">
+                                <button type="submit" class="btn waves-effect waves-light deep-purple lighten-2">
                                     <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle
-                                </a>
+                                </button>
                             {% endif %}
                         {% endif %}
+                        {{ form_end(freeze_change_form) }}
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
-                            <a href="#pause" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                            <a href="#freeze" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
                             </a>
-                            <div id="pause" class="modal">
+                            {{ form_start(freeze_form) }}
+                            <div id="freeze" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
                                     </h5>
-                                    <p>Attention, le gel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin.</p>
+                                    <p>Attention, le gel immédiat sera effectif dès aujourd'hui, interdisant l'accès au magasin.</p>
                                     <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
                                     <ul>
                                         {% if use_fly_and_fixed %}
@@ -252,16 +255,18 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_freeze',{ 'id' : member.id }) }}">
+                                    <button type="submit" class="btn waves-effect waves-light orange">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
+                            {{ form_end(freeze_form) }}
                         {% else %}
-                            <a href="#unpause" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                            <a href="#unfreeze" class="waves-effect waves-light btn modal-trigger purple lighten-3">
                                 <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
                             </a>
-                            <div id="unpause" class="modal">
+                            {{ form_start(unfreeze_form) }}
+                            <div id="unfreeze" class="modal">
                                 <div class="modal-content">
                                     <h5>
                                         <i class="material-icons left small">play_arrow</i>Dégel immédiat du compte
@@ -271,11 +276,12 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange" href="{{ path('member_unfreeze',{ 'id' : member.id }) }}">
+                                    <button type="submit" class="btn waves-effect waves-light orange">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
+                            {{ form_end(unfreeze_form) }}
                         {% endif %}
                     {% endif %}
                 </div>
@@ -292,6 +298,7 @@
                         <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
                             <i class="material-icons left">close</i>Fermer le compte
                         </a>
+                        {{ form_start(close_form) }}
                         <div id="close-member" class="modal">
                             <div class="modal-content">
                                 <h5>
@@ -307,24 +314,26 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange" href="{{ path('member_close',{ 'id' : member.id }) }}">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </a>
+                                </button>
                             </div>
                         </div>
+                        {{ form_end(close_form) }}
                     {% else %}
                         {% if member.withdrawnDate %}
                             <p>
                                 Compte fermé le <i>{{ member.withdrawnDate | date('d F Y H:i') }}</i>
                                 {% if member.withdrawnBy %}
-                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show",{ 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
+                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
                                 {% endif %}
                             </p>
                         {% endif %}
-                        <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
+                        <a href="#open-member" class="modal-trigger waves-effect waves-light btn teal">
                             <i class="material-icons left">check</i>Ré-ouvrir le compte
                         </a>
-                        <div id="reopen-member" class="modal">
+                        {{ form_start(open_form) }}
+                        <div id="open-member" class="modal">
                             <div class="modal-content">
                                 <h5>
                                     <i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre
@@ -333,11 +342,12 @@
                             </div>
                             <div class="modal-footer">
                                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange" href="{{ path('member_open',{ 'id' : member.id }) }}">
+                                <button type="submit" class="btn waves-effect waves-light orange">
                                     <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </a>
+                                </button>
                             </div>
                         </div>
+                        {{ form_end(open_form) }}
                     {% endif %}
                 </div>
             </li>
