@@ -212,7 +212,7 @@ class PeriodController extends Controller
             ->getForm();
 
         $positionsDeleteForm = array();
-        foreach($period->getPositions() as $position){
+        foreach($period->getPositions() as $position) {
             $positionsDeleteForm[$position->getId()] = $this->createFormBuilder()
                 ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))
                 ->setMethod('DELETE')

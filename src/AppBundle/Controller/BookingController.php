@@ -399,19 +399,29 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
 
-        $shift_add_form = $this->createForm(
+        $shiftAddForm = $this->createForm(
             ShiftType::class,
             $bucket,
             array(
                 'action' => $this->generateUrl('shift_new'),
                 'only_add_formation' => true,
-            )
-        )
-            ->createView();
+            ));
+
+        $shiftsDeleteForm = array();
+        foreach($shifts as $shift) {
+            $shiftsDeleteForm[$shift->getId()] = $this->createFormBuilder()
+                ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+                ->setMethod('DELETE')
+                ->getForm()->createView();
+        }
+
+        $bucketDeleteForm = $this->createDeleteBucketForm($bucket);
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'shift_add_form' => $shift_add_form
+            'shift_add_form' => $shiftAddForm->createView(),
+            'shifts_delete_form' => $shiftsDeleteForm,
+            'bucket_delete_form' => $bucketDeleteForm->createView(),
         ]);
 
     }
@@ -534,7 +544,7 @@ class BookingController extends Controller
                 $count++;
             }
             $em->flush();
-            $session->getFlashBag()->add('success', $count . " shifts removed");
+            $session->getFlashBag()->add('success', $count . " créneaux ont été supprimés !");
         }
         return $this->redirectToRoute('booking_admin');
     }
