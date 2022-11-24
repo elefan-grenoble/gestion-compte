@@ -455,7 +455,7 @@ class ShiftController extends Controller
     }
 
     /**
-     * remove a shift.
+     * delete a shift.
      *
      * @Route("/{id}", name="shift_delete")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
