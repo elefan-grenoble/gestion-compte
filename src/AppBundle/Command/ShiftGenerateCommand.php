@@ -132,11 +132,12 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 ->setBody(
                     $this->getContainer()->get('twig')->render(
                         'emails/shift_reserved.html.twig',
-                        array('shift' => $shift,
-                        'oldshift' => $formerShifts[$i],
-                        'days' => $d,
-                        'accept_url' => $router->generate('accept_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                        'reject_url' => $router->generate('reject_reserved_shift',array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        array(
+                            'shift' => $shift,
+                            'oldshift' => $formerShifts[$i],
+                            'days' => $d,
+                            'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                            'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
                         )
                     ),
                     'text/html'
