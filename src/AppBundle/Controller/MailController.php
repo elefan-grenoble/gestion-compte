@@ -157,12 +157,7 @@ class MailController extends Controller
             //beneficiaries
             $to = $mailform->get('to')->getData();
             $to = json_decode($to);
-            var_dump($to);
-            $beneficiaries = [];
-            foreach ($to as $beneficiary) {
-                $beneficiaries[] = $em->getRepository('AppBundle:Beneficiary')->findOneFromAutoComplete($beneficiary);
-            }
-            var_dump($beneficiaries);
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($to);
             //non-member
             $cci = $mailform->get('cci')->getData();
             $chips = json_decode($cci);

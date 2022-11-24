@@ -13,27 +13,35 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
     /**
      * findOneFromAutoComplete
      *
-     * We consider that the $str will have the following format:
-     * "<Membership.member_number> <Beneficiary.firstname> <Beneficiary.lastname>"
+     * We consider that the $beneficiary has the following format:
+     * "#<Membership.member_number> <Beneficiary.firstname> <Beneficiary.lastname>"
      */
-    public function findOneFromAutoComplete($str)
+    public function findOneFromAutoComplete($beneficiary)
     {
-        $reId = '/^#([0-9]+).*/';
-        $reFirstname = '/(?<=\s)(.*?)(?=\s)/';
-        preg_match_all($reId, $str, $matchesId, PREG_SET_ORDER, 0);
-        preg_match_all($reFirstname, $str, $matchesFirstname, PREG_SET_ORDER, 0);
-        if ((count($matchesId) == 1) && (count($matchesFirstname) == 1)) {
-            $qb = $this->createQueryBuilder('b');
+        $qb = $this->createQueryBuilder('b');
 
-            $qb->leftJoin('b.membership', 'm')
-                ->where('m.member_number = :membernumber')
-                ->andWhere('b.firstname = :firstname')
-                ->setParameter('membernumber', $matchesId[0][1])
-                ->setParameter('firstname', $matchesFirstname[0][1]);
+        $qb->leftJoin('b.membership', 'm')
+            ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) = :fullname')
+            ->setParameter('fullname', $beneficiary);
 
-            return $qb->getQuery()->getSingleResult();
-        }
-        return null;
+        return $qb->getQuery()->getSingleResult();
+    }
+
+    /**
+     * findFromAutoComplete
+     *
+     * We consider that each string of $beneficiaries has the following format:
+     * "#<Membership.member_number> <Beneficiary.firstname> <Beneficiary.lastname>"
+     */
+    public function findFromAutoComplete($beneficiaries)
+    {
+        $qb = $this->createQueryBuilder('b');
+
+        $qb->leftJoin('b.membership', 'm')
+            ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) IN (:fullname)')
+            ->setParameter('fullname', $beneficiaries);
+
+        return $qb->getQuery()->getResult();
     }
 
     /**
