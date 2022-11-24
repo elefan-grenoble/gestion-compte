@@ -365,8 +365,84 @@ class ShiftController extends Controller
                 $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
             } else {
-                $session->getFlashBag()->add('warning', "shift not found");
+                $session->getFlashBag()->add('warning', "Créneau pas trouvé");
             }
+        }
+
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Accept a reserved shift
+     *
+     * @Route("/{id}/accept", name="shift_accept_reserved")
+     * @Method("GET")
+     */
+    public function acceptReservedShift(Request $request, Shift $shift)
+    {
+        $session = new Session();
+
+        if (!$shift->getId() || !$this->isGranted('accept', $shift)) {
+            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
+            return $this->redirectToRoute("homepage");
+        }
+
+        if ($shift->getId()) {
+            if ($shift->getLastShifter()) {
+                $current_user = $this->get('security.token_storage')->getToken()->getUser();
+                $shift->setBooker($current_user);
+                $beneficiary = $shift->getLastShifter();
+                $shift->setShifter($beneficiary);
+                $shift->setBookedTime(new DateTime('now'));
+                $shift->setLastShifter(null);
+                $shift->setFixe(false);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+
+                $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
+            } else {
+                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
+        } else {
+            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+        }
+
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Reject a reserved shift
+     *
+     * @Route("/{id}/reject", name="shift_reject_reserved")
+     * @Method("GET")
+     */
+    public function rejectReservedShift(Request $request, Shift $shift)
+    {
+        $session = new Session();
+
+        if (!$this->isGranted('reject', $shift)) {
+            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
+            return $this->redirectToRoute("homepage");
+        }
+
+        if ($shift->getId()) {
+            if ($shift->getLastShifter()) {
+                $shift->setLastShifter(null);
+                $shift->setFixe(false);
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+                $session->getFlashBag()->add('success', "Créneau libéré");
+                $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
+            } else {
+                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+            }
+        } else {
+            $session->getFlashBag()->add('error', "Créneau pas trouvé");
         }
 
         return $this->redirectToRoute('homepage');
