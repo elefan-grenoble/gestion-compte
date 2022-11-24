@@ -390,7 +390,7 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/show_bucket/{id}", name="shift_show")
+     * @Route("/bucket/{id}/show", name="bucket_show")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET"})
      */
@@ -417,7 +417,7 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/edit_bucket/{id}", name="shift_edit")
+     * @Route("/bucket/{id}/edit", name="bucket_edit")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method({"GET", "POST"})
      */
@@ -509,7 +509,7 @@ class BookingController extends Controller
     /**
      * delete all shifts in bucket.
      *
-     * @Route("/delete_bucket/{id}", name="delete_bucket")
+     * @Route("/bucket/{id}", name="bucket_delete")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @Method("DELETE")
      */
@@ -549,7 +549,7 @@ class BookingController extends Controller
     private function createDeleteBucketForm(Shift $bucket)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket', array('id' => $bucket->getId())))
+            ->setAction($this->generateUrl('bucket_delete', array('id' => $bucket->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }
