@@ -60,7 +60,7 @@ class BookingController extends Controller
      */
     public function homepageShiftsAction(): Response
     {
-        $undismissShiftForm = $this->createFormBuilder()
+        $shiftUndismissForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('shift_undismiss'))
             ->setMethod('POST')
             ->add('shift_id', HiddenType::class)
@@ -72,7 +72,7 @@ class BookingController extends Controller
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
 
         return $this->render('booking/home_booked_shifts.html.twig', array(
-            'undismiss_shift_form' => $undismissShiftForm->createView(),
+            'shift_undismiss_form' => $shiftUndismissForm->createView(),
             'period_positions' => $period_positions,
         ));
     }
@@ -472,6 +472,58 @@ class BookingController extends Controller
     }
 
     /**
+     * lock a bucket
+     *
+     * @Route("/bucket/{id}/lock", name="bucket_lock")
+     * @Method("GET")
+     */
+    public function lockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $session = new Session();
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(true);
+            }
+            $em->flush();
+        }
+
+        $session->getFlashBag()->add('success', "La créneau a été vérouillé");
+        return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
+     * unlock a bucket
+     *
+     * @Route("/bucket/{id}/unlock", name="bucket_unlock")
+     * @Method("GET")
+     */
+    public function unlockShiftAction(Request $request, Shift $shift)
+    {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+
+        $session = new Session();
+
+        $em = $this->getDoctrine()->getManager();
+
+        if ($shift) {
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            foreach ($bucket->getShifts() as $s) {
+                $s->setLocked(false);
+            }
+            $em->flush();
+        }
+
+        $session->getFlashBag()->add('success', "La créneau a été dévérouillé");
+        return $this->redirectToRoute('booking_admin');
+    }
+
+    /**
      * delete all shifts in bucket.
      *
      * @Route("/delete_bucket/{id}", name="delete_bucket")
@@ -517,52 +569,6 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('delete_bucket', array('id' => $bucket->getId())))
             ->setMethod('DELETE')
             ->getForm();
-    }
-
-    /**
-     * lock a shift.
-     *
-     * @Route("/lock_shift/{id}", name="lock_shift")
-     * @Method("GET")
-     */
-    public function lockShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(true);
-            }
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('booking_admin');
-    }
-
-    /**
-     * unlock a shift.
-     *
-     * @Route("/unlock_shift/{id}", name="unlock_shift")
-     * @Method("GET")
-     */
-    public function unlockShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(false);
-            }
-            $em->flush();
-        }
-
-        return $this->redirectToRoute('booking_admin');
     }
 
     /**

@@ -338,7 +338,7 @@ class ShiftController extends Controller
      * @Route("/undismiss", name="shift_undismiss")
      * @Method("POST")
      */
-    public function undismissShift(Request $request)
+    public function undismissShiftAction(Request $request)
     {
         $session = new Session();
 
@@ -378,7 +378,7 @@ class ShiftController extends Controller
      * @Route("/{id}/accept", name="shift_accept_reserved")
      * @Method("GET")
      */
-    public function acceptReservedShift(Request $request, Shift $shift)
+    public function acceptReservedShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
 
@@ -420,7 +420,7 @@ class ShiftController extends Controller
      * @Route("/{id}/reject", name="shift_reject_reserved")
      * @Method("GET")
      */
-    public function rejectReservedShift(Request $request, Shift $shift)
+    public function rejectReservedShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
 
@@ -449,7 +449,7 @@ class ShiftController extends Controller
     }
 
     /**
-     * remove a shift.
+     * delete a shift.
      *
      * @Route("/{id}", name="shift_delete")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
