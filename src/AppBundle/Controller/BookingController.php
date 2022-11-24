@@ -7,7 +7,6 @@ use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Repository\JobRepository;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
@@ -63,7 +62,7 @@ class BookingController extends Controller
     public function homepageShiftsAction(): Response
     {
         $undismissShiftForm = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
+            ->setAction($this->generateUrl('shift_undismiss'))
             ->setMethod('POST')
             ->add('shift_id', HiddenType::class)
             ->getForm();
@@ -519,80 +518,6 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('delete_bucket', array('id' => $bucket->getId())))
             ->setMethod('DELETE')
             ->getForm();
-    }
-
-    /**
-     * Dismiss a booked shift.
-     *
-     * @Route("/shift/{id}/dismiss", name="shift_dismiss")
-     * @Method("POST")
-     */
-    public function dismissShiftAction(Request $request, Shift $shift)
-    {
-        if (!$this->isGranted('dismiss', $shift)) {
-            $session = new Session();
-            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
-            return $this->redirectToRoute("booking");
-        }
-
-        $beneficiary = $shift->getShifter();
-        $em = $this->getDoctrine()->getManager();
-        if($shift->isFixe()) {
-            $session = new Session();
-            $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
-            return $this->redirectToRoute("booking");
-        } else {
-            $shift->setShifter(null);
-            $shift->setBooker(null);
-            $shift->setFixe(false);
-        }
-        $em->persist($shift);
-        $em->flush();
-
-        $reason = $request->get("reason");
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
-
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Undismiss a shift
-     *
-     * @Route("/undismiss_shift/", name="undismiss_shift")
-     * @Method("POST")
-     */
-    public function undismissShift(Request $request)
-    {
-
-        $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shift->setIsDismissed(false);
-                $shift->setDismissedTime(null);
-                $shift->setDismissedReason(null);
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-
-            } else {
-                $session->getFlashBag()->add('warning', "shift not found");
-            }
-        }
-        return $this->redirectToRoute('homepage');
     }
 
     /**
