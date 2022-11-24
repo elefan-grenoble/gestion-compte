@@ -8,11 +8,7 @@ use AppBundle\Entity\Shift;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
-use AppBundle\Event\ShiftFreedEvent;
-use AppBundle\Event\ShiftValidatedEvent;
-use AppBundle\Event\ShiftInvalidatedEvent;
 use AppBundle\Repository\JobRepository;
-use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\ShiftBucket;
@@ -678,99 +674,6 @@ class BookingController extends Controller
     }
 
     /**
-     * free a shift.
-     *
-     * @Route("/free_shift/{id}", name="free_shift")
-     * @Method("POST")
-     */
-    public function freeShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
-
-        $session = new Session();
-
-        $membership = $shift->getShifter()->getMembership();
-
-        $em = $this->getDoctrine()->getManager();
-        $shift->free();
-        $shift->invalidateShiftParticipation();
-        $em->persist($shift);
-        $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
-
-        $session->getFlashBag()->add('success', "Le shift a bien été libéré");
-
-        $referer = $request->headers->get('referer');
-
-        return new RedirectResponse($referer);
-
-    }
-
-    /**
-     * validate a shift.
-     *
-     * @Route("/validate_shift/{id}", name="validate_shift")
-     * @Method("POST")
-     */
-    public function validateShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
-        $session = new Session();
-
-        if ($shift->getWasCarriedOut() == 0) {
-            $membership = $shift->getShifter()->getMembership();
-
-            $em = $this->getDoctrine()->getManager();
-            $shift->validateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
-
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été validée");
-        } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été validée");
-        }
-
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-    }
-
-    /**
-     * invalidate a shift.
-     *
-     * @Route("/invalidate_shift/{id}", name="invalidate_shift")
-     * @Method("POST")
-     */
-    public function invalidateShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
-        $session = new Session();
-
-        if ($shift->getWasCarriedOut() == 1) {
-            $membership = $shift->getShifter()->getMembership();
-
-            $em = $this->getDoctrine()->getManager();
-            $shift->invalidateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
-
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été invalidée");
-        } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été invalidée");
-        }
-
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-    }
-
-    /**
      * lock a shift.
      *
      * @Route("/lock_shift/{id}", name="lock_shift")
@@ -794,7 +697,7 @@ class BookingController extends Controller
     }
 
     /**
-     * free a shift.
+     * unlock a shift.
      *
      * @Route("/unlock_shift/{id}", name="unlock_shift")
      * @Method("GET")
@@ -814,22 +717,6 @@ class BookingController extends Controller
         }
 
         return $this->redirectToRoute('booking_admin');
-    }
-
-    /**
-     * Creates a form to delete a shift entity.
-     *
-     * @param Shift $shift The shift entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm(Shift $shift)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-            ->setMethod('DELETE')
-            ->getForm()
-        ;
     }
 
     /**
