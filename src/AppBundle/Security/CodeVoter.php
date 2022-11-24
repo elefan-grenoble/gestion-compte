@@ -119,21 +119,23 @@ class CodeVoter extends Voter
         }
 
         if ($user->getBeneficiary()) {
-            if ($this->container->get("shift_service")->isBeginner($user->getBeneficiary())) // not for beginner
+            if ($this->container->get("shift_service")->isBeginner($user->getBeneficiary())) { // not for beginner
                 return false;
-            $shifts = $user->getBeneficiary()->getMembership()->getShiftsOfCycle(0);
-            $y = new \DateTime('Yesterday');
-            $y->setTime(23, 59, 59);
-            $some_time_ago = new \DateTime();
-            $in_some_time = new \DateTime();
-            $some_time_ago->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
-            $in_some_time->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
-            foreach ($shifts as $shift) {
-                if (($shift->getStart() < $in_some_time) && // dans une heure il sera commencé
-                    $shift->getStart() > $y && // le début est aujourd'hui (après hier 23h59:59)
-                    ($shift->getEnd() > $some_time_ago)) { // il y a deux heure il n'était pas fini
-                    return true;
-                }
+            }
+
+            $start_after = new \DateTime('Yesterday');
+            $start_after->setTime(23, 59, 59);
+            $start_before = new \DateTime();
+            $start_before->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
+            $end_before = new \DateTime();
+            $end_before->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
+
+            if (!$this->container->get("shift_service")->isBeneficiaryHasShifts($user->getBeneficiary(),
+                $start_before,
+                $start_after,
+                $end_before)
+            ) {
+                return false;
             }
         }
 

@@ -143,7 +143,8 @@ class TimeLogEventListener
 
         $dispatcher = $this->container->get('event_dispatcher');
         if (!$member->getFrozen()) {
-            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date));
+            $currentCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsOfCycle($member);
+            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date, $currentCycleShifts));
         }
     }
 

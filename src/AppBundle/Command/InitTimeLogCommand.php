@@ -37,9 +37,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
 
-                $lastCycleShifts = $member->getShiftsOfCycle(-1, true)->toArray();
-                $currentCycleShifts = $member->getShiftsOfCycle(0, true)->toArray();
-                $shifts = array_merge($lastCycleShifts, $currentCycleShifts);
+                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsOfCycle($member, -1, 0, true);
                 foreach ($shifts as $shift) {
                     $this->createShiftLog($em, $shift, $member);
                     $countShiftLogs++;

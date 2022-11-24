@@ -66,14 +66,17 @@ class BookingController extends Controller
             ->add('shift_id', HiddenType::class)
             ->getForm();
 
-        $beneficiaries = $this->getUser()->getBeneficiary()->getMembership()->getBeneficiaries();
+        $membership = $this->getUser()->getBeneficiary()->getMembership();
+        $beneficiaries = $membership->getBeneficiaries();
 
         $em = $this->getDoctrine()->getManager();
+        $shiftsByCycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($membership, -2, 1);
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
 
         return $this->render('booking/home_booked_shifts.html.twig', array(
             'shift_undismiss_form' => $shiftUndismissForm->createView(),
             'period_positions' => $period_positions,
+            'shiftsByCycle' => $shiftsByCycle,
         ));
     }
 

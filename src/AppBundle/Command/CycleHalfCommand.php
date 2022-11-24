@@ -43,7 +43,8 @@ class CycleHalfCommand extends ContainerAwareCommand
         $members_with_half_cycle = $em->getRepository('AppBundle:Membership')->findWithHalfCyclePast($date);
         $count = 0;
         foreach ($members_with_half_cycle as $member) {
-            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date));
+            $currentCycleShifts = $em->getRepository('AppBundle:Shift')->findShiftsOfCycle($member);
+            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date, $currentCycleShifts));
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
             $count++;

@@ -497,47 +497,6 @@ class Membership
         return false;
     }
 
-    /**
-     * Get total shift duration for current cycle
-     */
-    public function getCycleShiftsDuration($cycleOffset = 0, $excludeDismissed = false)
-    {
-        $duration = 0;
-        foreach ($this->getShiftsOfCycle($cycleOffset, $excludeDismissed) as $shift) {
-            $duration += $shift->getDuration();
-        }
-        return $duration;
-    }
-
-    /**
-     * Get all shifts for all beneficiaries
-     * @param bool $excludeDismissed
-     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
-     */
-    public function getAllShifts($excludeDismissed = false)
-    {
-        $shifts = new ArrayCollection();
-        foreach ($this->getBeneficiaries() as $beneficiary) {
-            foreach ($beneficiary->getShifts() as $shift) {
-                $shifts->add($shift);
-            }
-        }
-        // merge shifts of multiple beneficiaries
-        if ($this->getBeneficiaries()->count() > 1) {
-            $iterator = $shifts->getIterator();
-            $iterator->uasort(function ($a, $b) {
-                return $a->getStart() < $b->getStart();  // DESC (default $beneficiary->shifts order)
-            });
-            $shifts = new ArrayCollection(iterator_to_array($iterator));
-        }
-        if ($excludeDismissed) {
-            return $shifts->filter(function($shift) {
-                return !$shift->getIsDismissed();
-            });
-        } else {
-            return $shifts;
-        }
-    }
 
     /**
      * Get all in progress & upcoming shifts for all beneficiaries
@@ -566,19 +525,6 @@ class Membership
         return $shifts;
     }
 
-    /**
-     * Get shifts of a specific cycle
-     * @param $cycleOffset int to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
-     * @param bool $excludeDismissed
-     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
-     */
-    public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false)
-    {
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleOffset) {
-            return $shift->getStart() > $this->startOfCycle($cycleOffset) &&
-                $shift->getEnd() < $this->endOfCycle($cycleOffset);
-        });
-    }
 
     /**
      * Get start date of current cycle
