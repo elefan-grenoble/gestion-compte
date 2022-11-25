@@ -9,9 +9,8 @@
                 <div class="errors">
                     {{ form_errors(form.to) }}
                 </div>
-                {{ form_widget(form.to) }}
                 {{ form_label(form.to) }}
-                <div id="to{{ shift.id }}"></div>
+                {{ form_widget(form.to) }}
             </div>
             <div class="col s12">
                 <div class="errors">
@@ -30,26 +29,3 @@
            onclick="javascript:$('#contactform{{ shift.id }}').submit();return false;"><i class="material-icons right">send</i>Envoyer</a>
     </div>
 </div>
-<script>
-    function updateForm{{ shift.id}}() {
-        var chipsData = M.Chips.getInstance($('#to{{ shift.id }}')).chipsData;
-        var ids = chipsData.map((member) => (member['tag'].split(' ')[0].substring(1)));
-        $("#contactform{{ shift.id }} input[name='form[to]']").val(JSON.stringify(ids));
-    }
-    function toto{{ shift.id }}() {
-        var allMembers = [{% for shift in coShifts %}"{{ shift.shifter.publicDisplayNameWithMemberNumber }}",{% endfor %}];
-        $('#to{{ shift.id }}').chips({
-            autocompleteOptions: {
-                data: allMembers.reduce(function(map, obj) {
-                    map[obj] = null;
-                    return map;
-                }, {}),
-            },
-            data: allMembers.map((member) => ({tag: member})),
-            onChipAdd: updateForm{{ shift.id}},
-            onChipDelete: updateForm{{ shift.id}}
-        });
-        updateForm{{ shift.id}}();
-    }
-    setTimeout(toto{{ shift.id }},500);
-</script>

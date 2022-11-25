@@ -61,7 +61,11 @@
                     return {tag: this.value};
                 }),
                 autocompleteOptions: {
+                    {% if is_granted("ROLE_USER_MANAGER") %}
                     data: {{ beneficiary_service.autocompleteBeneficiaries | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                    {% else %}
+                    data: [],
+                    {% endif %}
                     limit: 6,
                 },
                 onChipAdd: updateInput{{ id }}Forms,
