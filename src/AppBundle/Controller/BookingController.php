@@ -745,7 +745,7 @@ class BookingController extends Controller
             }
 
             // $fixe = $form->get("fixe")->getData();  // Symfony 3.4 : always returns true, even if "0" is passed from the form data
-            $fixe = $request->request->get("form")["fixe"];  // TODO Symfony 4.1 : re-use the previous line
+            $fixe = $request->request->get("form")["fixe"] ?? false;  // TODO Symfony 4.1 : re-use the previous line
             $str = $form->get("shifter")->getData();
             $em = $this->getDoctrine()->getManager();
             // $membership = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($str);
