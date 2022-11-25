@@ -41,13 +41,13 @@ It use the materialize modal class https://materializecss.com/modals.html
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                             {% if shift.wasCarriedOut %}
                                 <form action="{{ path('shift_invalidate', { 'id': shift.id }) }}" method="POST" id="shift_invalidate_{{ shift.id }}">
-                                    <button type="submit" class="btn red">
+                                    <button type="submit" class="btn orange" title="Invalider la participation">
                                         <i class="material-icons left">highlight_off</i>Invalider la participation
                                     </button>
                                 </form>
                             {% else %}
                                 <form action="{{ path('shift_validate', { 'id': shift.id }) }}" method="POST" id="shift_validate_{{ shift.id }}">
-                                    <button type="submit" class="btn green">
+                                    <button type="submit" class="btn green" title="Valider la participation">
                                         <i class="material-icons left">check_circle</i>Valider la participation
                                     </button>
                                 </form>
@@ -55,11 +55,11 @@ It use the materialize modal class https://materializecss.com/modals.html
                         {% endif %}
                         <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST" id="shift_free_{{ shift.id }}">
                             {% if shift.isPast %}
-                                <button type="submit" class="btn red">
-                                    <i class="material-icons left">delete</i>Supprimer
+                                <button type="submit" class="btn orange" title="Supprimer la participation">
+                                    <i class="material-icons left">delete</i>Supprimer la participation
                                 </button>
                             {% else %}
-                                <button type="submit" class="btn orange">
+                                <button type="submit" class="btn orange" title="Libérer">
                                     <i class="material-icons left">lock_open</i>Libérer
                                 </button>
                             {% endif %}
@@ -137,7 +137,9 @@ It use the materialize modal class https://materializecss.com/modals.html
         {{ form_widget(shift_add_form.formation) }}
     </div>
     <div class="col s3">
-        <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+        <button type="submit" class="btn waves-effect waves-light teal">
+            <i class="material-icons left">add</i>Ajouter
+        </button>
     </div>
 </div>
 {{ form_row(shift_add_form._token) }}
