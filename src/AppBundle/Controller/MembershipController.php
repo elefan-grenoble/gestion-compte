@@ -16,6 +16,7 @@ use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\EventListener\SetFirstPasswordListener;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
@@ -907,8 +908,8 @@ class MembershipController extends Controller
     public function joinAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre', 'attr' => array('class' => 'autocomplete')))
-            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent', 'attr' => array('class' => 'autocomplete')))
+            ->add('from_text', AutocompleteBeneficiaryType::class, array('label' => 'Adhérent a joindre'))
+            ->add('dest_text', AutocompleteBeneficiaryType::class, array('label' => 'au compte de l\'adhérent'))
             ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);
@@ -917,47 +918,35 @@ class MembershipController extends Controller
         $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $fromMemberStr = $form->get('from_text')->getData();
-            $fromMember = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($fromMemberStr);
-            if (!$fromMember) {
-                $session->getFlashBag()->add('error', 'Impossible de trouver le compte à lier.');
+            $fromMember = $form->get('from_text')->getData()->getMembership();
+            $destMember = $form->get('dest_text')->getData()->getMembership();
+            if ($fromMember == $destMember) {
+                $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
+            } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
+            }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
+            } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
             } else {
-                $destMemberStr = $form->get('dest_text')->getData();
-                $destMember = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($destMemberStr);
-                if (!$destMember) {
-                    $session->getFlashBag()->add('error', 'Impossible de trouver le compte de destination.');
-                } else {
-                    if ($fromMember == $destMember) {
-                        $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
-                    } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                        $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
-                    }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                        $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
-                    } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                        $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
-                    } else {
-                        foreach ($fromMember->getBeneficiaries() as $beneficiary) {
-                            $destMember->addBeneficiary($beneficiary); //in
-                            $fromMember->removeBeneficiary($beneficiary); //out
-                            $beneficiary->setMembership($destMember);
-                            $em->persist($beneficiary);
-                        }
-                        $em->persist($destMember);
-                        $em->flush();
-                        $fromMember->setMainBeneficiary(null);
-                        $em->remove($fromMember);
-                        $em->flush();
-
-                        $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
-
-                        return $this->redirectToShow($destMember);
-                    }
+                foreach ($fromMember->getBeneficiaries() as $beneficiary) {
+                    $destMember->addBeneficiary($beneficiary); //in
+                    $fromMember->removeBeneficiary($beneficiary); //out
+                    $beneficiary->setMembership($destMember);
+                    $em->persist($beneficiary);
                 }
+                $em->persist($destMember);
+                $em->flush();
+                $fromMember->setMainBeneficiary(null);
+                $em->remove($fromMember);
+                $em->flush();
+
+                $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
+
+                return $this->redirectToShow($destMember);
             }
         }
-
-        $members = $em->getRepository('AppBundle:Membership')->findAll(); //todo exclude closed
-        return $this->render('admin/member/join.html.twig', array('form' => $form->createView(), 'members' => $members));
+        return $this->render('admin/member/join.html.twig', array('form' => $form->createView()));
     }
 
     /**
