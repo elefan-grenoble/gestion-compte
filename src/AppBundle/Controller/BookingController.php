@@ -263,7 +263,6 @@ class BookingController extends Controller
 
         try {
             if ($filterForm->isSubmitted() && $filterForm->isValid()) {
-
                 $job = $filterForm->get("job")->getData();
                 $filling = $filterForm->get("filling")->getData();
 
@@ -307,19 +306,17 @@ class BookingController extends Controller
     }
 
     /**
-     * build the bucket (regrouping all the shift at the same time
-     * with the same job)
+     * build the bucket (regrouping all the shift at the same time with the same job)
+     * // TODO Maybe it should be in the BucketRepository...
      * @param array $shifts
      * @param string|null $filling
      * @return array
      */
     private function bucketFactory(array $shifts, string $filling = null): array
     {
-        // TODO Maybe it should be but in the BucketRepository...
-
         $bucketsByDay = array();
-        foreach ($shifts as $shift) {
 
+        foreach ($shifts as $shift) {
             $day = $shift->getStart()->format("d m Y");
             $jobId = $shift->getJob()->getId();
 
@@ -344,14 +341,13 @@ class BookingController extends Controller
                     foreach ($bucketByInterval as $interval => $bucket) {
                         $nbShifts = count($bucket->getShifts());
                         $bookableShifts = count($shiftService->getBookableShifts($bucket));
-                        if  (($filling == 'empty' and  $bookableShifts != $nbShifts  )
-                          or ($filling == 'full' and $bookableShifts !=  0)
-                            or ( $filling == 'partial' and ($bookableShifts == $nbShifts  or $bookableShifts ==  0))) {
-
+                        if  (($filling == 'empty' and $bookableShifts != $nbShifts)
+                        or ($filling == 'full' and $bookableShifts != 0)
+                        or ( $filling == 'partial' and ($bookableShifts == $nbShifts or $bookableShifts == 0))) {
                             unset($bucketsByDay[$day][$jobId][$interval]);
-                            if (count($bucketsByDay[$day][$jobId])==0){
+                            if (count($bucketsByDay[$day][$jobId]) == 0) {
                                 unset($bucketsByDay[$day][$jobId]);
-                                if (count($bucketsByDay[$day])==0){
+                                if (count($bucketsByDay[$day]) == 0) {
                                     unset($bucketsByDay[$day]);
                                 }
                             }
@@ -373,7 +369,6 @@ class BookingController extends Controller
      */
     public function adminAction(Request $request): Response
     {
-
         $filter = $this->adminFilterFormFactory($request);
 
         // calendar creation
@@ -393,7 +388,6 @@ class BookingController extends Controller
             'jobs' => $jobs,
             'beneficiaries' => $beneficiaries,
         ]);
-
     }
 
     /**

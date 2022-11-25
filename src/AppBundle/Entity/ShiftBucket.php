@@ -71,10 +71,15 @@ class ShiftBucket
                     return 1;
                 }
             } else {
-                if (!$b->getFormation())
+                if (!$b->getFormation()) {
                     return -1;
-                else
-                    return $a->getFormation()->getId() < $b->getFormation()->getId();
+                } else {
+                    if ($a->getFormation()->getId() != $b->getFormation()->getId()) {
+                        return $a->getFormation()->getId() < $b->getFormation()->getId();
+                    } else {
+                        return $a->getBookedTime() < $b->getBookedTime();
+                    }
+                }
             }
         }
         if ($a->getLastShifter() && $a->getLastShifter()->getId() == $beneficiary->getId()) {
