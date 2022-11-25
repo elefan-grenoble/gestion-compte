@@ -622,7 +622,7 @@ class Beneficiary
 
     public function getAutocompleteLabel(): string
     {
-        return '#' . $this->getId() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     public function getAutocompleteLabelFull(): string

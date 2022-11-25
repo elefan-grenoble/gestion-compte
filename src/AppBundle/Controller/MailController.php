@@ -27,7 +27,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class MailController extends Controller
 {
-
     /**
      * Get beneficiaries autocomplete labels
      *
@@ -158,8 +157,7 @@ class MailController extends Controller
             //beneficiaries
             $to = $mailform->get('to')->getData();
             $to = json_decode($to);
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id' => $to));
-            //end beneficiaries
+            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($to);
             //non-member
             $cci = $mailform->get('cci')->getData();
             $chips = json_decode($cci);

@@ -46,9 +46,7 @@
             function() {
                 function updateBeneficiaries() {
                     var chipsData = M.Chips.getInstance($('.beneficiaries')).chipsData;
-                    console.log(chipsData);
-                    var ids = chipsData.map((member) => (member['tag'].split(' ')[0].substring(1)));
-                    console.log(ids);
+                    var ids = chipsData.map((member) => member['tag']); // .split(' ')[0].substring(1)));
                     $("input[name='form[to]']").val(JSON.stringify(ids));
                 };
                 $.ajax({

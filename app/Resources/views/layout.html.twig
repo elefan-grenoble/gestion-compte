@@ -195,21 +195,6 @@
             </div>
         </footer>
 
-        {% if is_granted('ROLE_ADMIN') %}
-            <nav id="quick_search_nav" class="white">
-                <div class="nav-wrapper">
-                    <form id="quick_search_form" action="" method="post">
-                        <div class="input-field">
-                            <input id="quick_search" type="search" autocomplete="off">
-                            <label class="label-icon" for="search"><i class="material-icons left">search</i></label>
-                            <i class="material-icons" id="quick_search_close">close</i>
-                            <ul class="autocomplete-content dropdown-content" style="display: none"></ul>
-                        </div>
-                    </form>
-                </div>
-            </nav>
-        {% endif %}
-
         <script src="{{ asset('bundles/app/js/jquery-3.6.min.js') }}"></script>
         <script src="{{ asset('bundles/app/materialize/js/materialize-1.1.0.min.js') }}"></script>
         <script src="{{ asset('bundles/app/simplemde/simplemde.min.js') }}"></script>
@@ -220,12 +205,6 @@
         <script src="{{ asset('bundles/app/js/app.js') }}?060820191303"></script>
         <script src="{{ asset('bundles/app/js/js.cookie.js') }}"></script>
         <script src="{{ asset('bundles/app/js/datepicker.js') }}"></script>
-        {% if is_granted('ROLE_ADMIN') %}
-            <script>
-                var search_url = "{{ path('search') }}";
-            </script>
-            <script src="{{ asset('bundles/app/js/quicksearch.js') }}"></script>
-        {% endif %}
         {% block javascripts %}{% endblock %}
     </body>
 </html>
