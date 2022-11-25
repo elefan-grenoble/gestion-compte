@@ -187,10 +187,23 @@
         </main>
 
         <footer class="page-footer" style="background-color: {{ main_color }}">
+            <div class="container"></div>
             <div class="footer-copyright">
                 <div class="container">
                     © {{ 'now'|date('Y') }} Copyright {{ project_name }}
-                    <a class="grey-text text-lighten-4 right" href="{{ project_url }}">{{ project_url_display }}</a>
+                    {% if project_social_facebook_url %}
+                        <a class="grey-text text-lighten-4 right" href="{{ project_social_facebook_url }}">
+                            &nbsp;|&nbsp;{{ project_social_facebook_url_display }}
+                        </a>
+                    {% endif %}
+                    {% if project_social_linkedin_url %}
+                        <a class="grey-text text-lighten-4 right" href="{{ project_social_linkedin_url }}">
+                            &nbsp;|&nbsp;{{ project_social_linkedin_url_display }}
+                        </a>
+                    {% endif %}
+                    <a class="grey-text text-lighten-4 right" href="{{ project_url }}">
+                        {{ project_url_display }}
+                    </a>
                 </div>
             </div>
         </footer>

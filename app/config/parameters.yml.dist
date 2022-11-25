@@ -77,6 +77,12 @@ parameters:
     #ip of the spot, comma separated if many
     place_local_ip_address: '127.0.0.1,192.168.0.x'
 
+    # Social
+    project_social_facebook_url:
+    project_social_facebook_url_display: 'Groupe FB'
+    project_social_linkedin_url:
+    project_social_linkedin_url_display: 'Page LinkedIn'
+
     wiki_keys_url: ~
 
     # Registration
