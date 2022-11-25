@@ -55,7 +55,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                         {% endif %}
                         <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST" id="shift_free_{{ shift.id }}">
                             {% if shift.isPast %}
-                                <button type="submit" class="btn orange" title="Supprimer la participation">
+                                <button type="submit" class="btn red" title="Supprimer la participation">
                                     <i class="material-icons left">delete</i>Supprimer la participation
                                 </button>
                             {% else %}
@@ -71,7 +71,7 @@ It use the materialize modal class https://materializecss.com/modals.html
             <li>
                 <div class="collapsible-header" style="display: block;">
                     <div class="row" style="margin-bottom: 0px;">
-                        <div class="col {% if not shift.lastShifter %}s11{% else %}s12{% endif %}">
+                        <div class="col s12">
                             <b>
                                 <span style="font-style: italic">
                                     {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayNameWithMemberNumber }}
@@ -85,15 +85,6 @@ It use the materialize modal class https://materializecss.com/modals.html
                                 </b>&nbsp;(sans formation particulière)
                             {% endif %}
                         </div>
-                        {% if not shift.lastShifter %}
-                            <div class="col s1">
-                                <form name="form" method="post" action="{{ path('shift_delete', {'id': shift.id}) }}" onsubmit="return confirm('Etes-vous sûr de supprimer ce poste ?!');">
-                                    <input type="hidden" name="_method" value="DELETE">
-                                    <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
-                                    <a href="#" onclick="$(this).closest('form').submit(); event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
-                                </form>
-                            </div>
-                        {% endif %}
                     </div>
                 </div>
                 <div class="collapsible-body">
@@ -116,6 +107,16 @@ It use the materialize modal class https://materializecss.com/modals.html
                         </div>
                     </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
+                    {# TODO: use symfony form + confirmation-modal #}
+                    {% if not shift.lastShifter %}
+                        <form name="form" method="post" action="{{ path('shift_delete', { 'id': shift.id }) }}" onsubmit="return confirm('Etes-vous sûr de supprimer ce poste ?!');">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
+                            <a href="#" onclick="$(this).closest('form').submit(); event.stopPropagation();" title="Supprimer le poste" class="btn red">
+                                <i class="material-icons left">delete</i>Supprimer
+                            </a>
+                        </form>
+                    {% endif %}
                 </div>
             </li>
         {% endif %}
@@ -162,7 +163,7 @@ It use the materialize modal class https://materializecss.com/modals.html
 <form method="post" action="{{ path('bucket_delete', { 'id': bucket.id }) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');" style="display:inline;">
     <input type="hidden" name="_method" value="DELETE">
     <input type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
-    <button type="submit" title="Supprimer tous les créneaux à cette heure et ce poste" class="red btn">
+    <button type="submit" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
         <i class="material-icons left">delete</i>Supprimer
     </button>
 </form>
