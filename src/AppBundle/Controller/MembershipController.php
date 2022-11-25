@@ -70,8 +70,9 @@ class MembershipController extends Controller
 
     /**
      * Finds and displays a membership entity.
+     * Why the '/show' in the route? Because routing conflict if not
      *
-     * @Route("/{member_number}", name="member_show")
+     * @Route("/{member_number}/show", name="member_show")
      * @Method("GET")
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
