@@ -11,35 +11,15 @@
 
 {% block autocomplete_beneficiary_widget %}
     {% spaceless %}
-        {% set attr = attr|merge({class: (attr.class|default('') ~ 'email_membership_autocomplete')|trim}) %}
-        {{ form_label(form) }}
-        <input type="text" autocomplete="off" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+        <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     {% endspaceless %}
     <script>
         defer(function(){
-            //
-            $('#{{ id }}').on('keydown',function () {
-                if ($(this).val().length > 2){
-                    jQuery.ajax({
-                        type: 'POST',
-                        url: "{{ path('beneficiary_list') }}",
-                        data: {'string':$(this).val()},
-                        success: function (response) {
-                            var accounts = response;
-                            var data = {};
-                            for (var i = 0; i < accounts.length; i++) {
-                                data[accounts[i].name] = accounts[i].icon;
-                            }
-                            $('#{{ id }}').autocomplete({
-                                data: data,
-                                limit: 6, // The max amount of results that can be shown at once. Default: Infinity.
-                            }).trigger('keyup');
-                        }
-                    });
-                }
-            }).dblclick(function () {
-                $(this).val('');
-            })
+            // Init autocomplete
+            $('#{{ id }}').autocomplete({
+                data: {{ beneficiary_service.autocompleteBeneficiaries | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                limit: 6,
+            });
         });
     </script>
 {% endblock %}

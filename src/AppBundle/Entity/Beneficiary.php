@@ -625,22 +625,6 @@ class Beneficiary
         return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
-    public function getAutocompleteLabelFull(): string
-    {
-        $label = '#' . $this->getMemberNumber();
-
-        if($this->getMembership()->getWithdrawn()){
-            $label .= " [&#x26A0;]";
-        }elseif ($this->getMembership()->isFrozen()){
-            $label .= " [&#x2744;]";
-        }
-
-        $label .=  ' ' . $this->getFirstname() . ' ' . $this->getLastname();
-        $label .=   ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
-        return $label;
-
-    }
-
     /**
      * Add reservedShift
      *

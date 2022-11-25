@@ -311,13 +311,6 @@ class User extends BaseUser
         return $this->annotations;
     }
 
-    public function getAutocompleteLabel(){
-        if ($this->getBeneficiary())
-            return '#'.$this->getId().' '.$this->getFirstname().' '.$this->getLastname();
-        else
-            return '#'.$this->getId().' '.$this->getUsername();
-    }
-
     /**
      * @return Beneficiary
      */

@@ -270,53 +270,6 @@ class BeneficiaryController extends Controller
         return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
     }
 
-    /**
-     * @Route("/list", name="beneficiary_list")
-     * @Method({"POST"})
-     * @Security("has_role('ROLE_USER')")
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function listAction(Request $request)
-    {
-        $granted = false;
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
-            $granted = true;
-        if ($this->getUser()->getBeneficiary() && count($this->getUser()->getBeneficiary()->getOwnedCommissions()))
-            $granted = true;
-        if ($granted && $request->isXmlHttpRequest()){
-            $em = $this->getDoctrine()->getManager();
-            $userRepo = $em->getRepository(Beneficiary::class);
-
-            $string = $request->get('string');
-
-            $rsm = new ResultSetMappingBuilder($em);
-            $rsm->addRootEntityFromClassMetadata('AppBundle:Beneficiary', 'b');
-
-            $query = $em->createNativeQuery('SELECT b.* FROM beneficiary AS b LEFT JOIN fos_user as u ON u.id = b.user_id WHERE LOWER(CONCAT_WS(u.username,u.email,b.lastname,b.firstname)) LIKE :key', $rsm);
-
-            $beneficiaries = $query->setParameter('key', '%' . $string . '%')
-                ->getResult();
-
-            $returnArray = array();
-            foreach ($beneficiaries as $beneficiary){
-                $dead = false;
-                if ($beneficiary->getMembership()->isWithdrawn()){
-                    $dead = true;
-                }
-                if (!$this->get('membership_service')->isUptodate($beneficiary->getMembership())){
-                    $dead = true;
-                }
-                if (!$beneficiary->getMembership()){
-                    $dead = true;
-                }
-                $returnArray[] = array('name' => $beneficiary->getAutocompleteLabelFull() ,'icon' => (!$dead) ? $request->getUriForPath('/bundles/app/img/cancel.svg') : '');
-            }
-            return new JsonResponse($returnArray);
-        }
-        return new Response("Ajax only",400);
-    }
-
     private function redirectToShow(Membership $member)
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME

@@ -106,14 +106,13 @@
             <div class="col s12">
                 <h4>Ajout à une adhésion existante</h4>
             </div>
-            <div class="col s12">
+            <div class="input-field col s12">
                 <div class="errors">
                     {{ form_errors(form.join_to) }}
                 </div>
-                <div class="input-field">
-                    <i class="material-icons prefix">person_add</i>
-                    {{ form_widget(form.join_to) }}
-                </div>
+                <i class="material-icons prefix">person_add</i>
+                {{ form_widget(form.join_to) }}
+                {{ form_label(form.join_to) }}
             </div>
         </div>
     </div>

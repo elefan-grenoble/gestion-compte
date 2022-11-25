@@ -35,7 +35,7 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
             return '';
         }
 
-        return $beneficiary->getAutocompleteLabelFull();
+        return $beneficiary->getAutocompleteLabel();
     }
 
     /**
@@ -48,42 +48,18 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
     public function reverseTransform($autocomplete)
     {
         if (!$autocomplete) {
-            return;
+            return null;
         }
 
-        $userRepo = $this->entityManager->getRepository(User::class);
-        $beneficiaryRepo = $this->entityManager->getRepository(Beneficiary::class);
+        $beneficiary = $this->entityManager
+                            ->getRepository(Beneficiary::class)
+                            ->findOneFromAutoComplete($autocomplete);
 
-        $re = '/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+).*\(([0-9]+)\)/';
-        preg_match($re, $autocomplete, $matches, PREG_OFFSET_CAPTURE, 0);
-
-        if (count($matches)<=1){
+        if (null === $beneficiary){
             throw new TransformationFailedException(sprintf(
                 'Aucun utilisateur trouvé avec ces données "%s".',
                 $autocomplete
             ));
-        }
-
-        $user = $userRepo->findOneBy(array('email'=>$matches[1][0]));
-        $beneficiary = $beneficiaryRepo->find($matches[2][0]);
-
-        if (null === $user) {
-            throw new TransformationFailedException(sprintf(
-                'Aucun utilisateur trouvé avec cet email "%s" !',
-                $matches[1][0]
-            ));
-        }
-
-        if (null === $beneficiary) {
-            throw new TransformationFailedException(sprintf(
-                'Aucun beneficiaire trouvé avec cet id "%s" !',
-                $matches[2][0]
-            ));
-        }
-
-        if ($user != $beneficiary->getUser()) {
-            throw new TransformationFailedException('L\'email et l\'identifiant ne correspondent pas'
-            );
         }
 
         return $beneficiary;

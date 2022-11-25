@@ -24,7 +24,7 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
             ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) = :fullname')
             ->setParameter('fullname', $beneficiary);
 
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**
