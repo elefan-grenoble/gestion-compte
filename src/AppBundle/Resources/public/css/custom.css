@@ -348,12 +348,6 @@ strong {
   width: 300px;
   margin-left: -170px;
 }
-#quick_search_nav {
-  display: none;
-  position: fixed;
-  top: 0;
-  z-index: 1000;
-}
 .CodeMirror,
 .CodeMirror-scroll {
   min-height: 100px;
