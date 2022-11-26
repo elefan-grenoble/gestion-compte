@@ -100,7 +100,7 @@ class SendMassMailCommand extends ContainerAwareCommand
                 $to[] = $beneficiary->getEmail();
         }
         if (!$exclude_non_member){
-            $non_members = $em->getRepository("AppBundle:User")->findNonMember();
+            $non_members = $em->getRepository("AppBundle:User")->findActiveNonMembers();
             foreach ($non_members as $user){
                 $to[] = $user->getEmail();
             }

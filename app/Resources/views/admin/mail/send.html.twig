@@ -48,28 +48,18 @@
                     var emails = chipsData.map((member) => (member['tag']));
                     $("input[name='form[cci]']").val(JSON.stringify(emails));
                 };
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ path('mail_get_non_members') }}',
-                    success: function(response) {
-                        var dataUsers = response.reduce(function(map, obj) {
-                            map[obj] = null;
-                            return map;
-                        }, {});
-                        $('.non-members').chips({
-                            placeholder: 'Non-membre',
-                            data: [],
-                            autocompleteOptions: {
-                                data: dataUsers,
-                                limit: Infinity,
-                                minLength: 1
-                            },
-                            onChipAdd: updateNonMembers,
-                            onChipDelete: updateNonMembers
-                        });
-                        updateNonMembers();
-                    }
+                $('.non-members').chips({
+                    placeholder: 'Non-membre',
+                    data: [],
+                    autocompleteOptions: {
+                        data: {{ non_members | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                        limit: Infinity,
+                        minLength: 1
+                    },
+                    onChipAdd: updateNonMembers,
+                    onChipDelete: updateNonMembers
                 });
+                updateNonMembers();
             }
         );
     </script>
