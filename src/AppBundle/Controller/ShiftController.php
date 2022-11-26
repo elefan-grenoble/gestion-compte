@@ -10,6 +10,8 @@ use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
 use AppBundle\Event\ShiftDismissedEvent;
+use AppBundle\Form\AutocompleteBeneficiaryType;
+use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
@@ -30,6 +32,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
  */
 class ShiftController extends Controller
 {
+    /**
+     * @var boolean
+     */
+    private $useFlyAndFixed;
+
+    public function __construct(bool $useFlyAndFixed)
+    {
+        $this->useFlyAndFixed = $useFlyAndFixed;
+    }
 
     /**
      * @Route("/new", name="shift_new")
@@ -304,8 +315,9 @@ class ShiftController extends Controller
      */
     public function dismissShiftAction(Request $request, Shift $shift)
     {
+        $session = new Session();
+
         if (!$this->isGranted('dismiss', $shift)) {
-            $session = new Session();
             $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
             return $this->redirectToRoute("booking");
         }
@@ -313,7 +325,6 @@ class ShiftController extends Controller
         $beneficiary = $shift->getShifter();
         $em = $this->getDoctrine()->getManager();
         if($shift->isFixe()) {
-            $session = new Session();
             $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
             return $this->redirectToRoute("booking");
         } else {
@@ -328,7 +339,7 @@ class ShiftController extends Controller
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
 
-        $session->getFlashBag()->add('success', "La créneau a été annulé");
+        $session->getFlashBag()->add('success', "Le créneau a été annulé");
         return $this->redirectToRoute('homepage');
     }
 

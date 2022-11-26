@@ -2,18 +2,18 @@
 
 namespace AppBundle\Controller;
 
+use DateTime;
+use Exception;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
-use AppBundle\Event\ShiftDeletedEvent;
-use AppBundle\Repository\JobRepository;
-use AppBundle\Security\ShiftVoter;
-use DateTime;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
-use Exception;
+use AppBundle\Repository\JobRepository;
+use AppBundle\Security\ShiftVoter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -31,7 +31,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- * User controller.
+ * Booking controller.
  *
  * @Route("booking")
  */
@@ -477,7 +477,7 @@ class BookingController extends Controller
      * @Route("/bucket/{id}/lock", name="bucket_lock")
      * @Method("GET")
      */
-    public function lockShiftAction(Request $request, Shift $shift)
+    public function lockBucketAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
@@ -493,7 +493,7 @@ class BookingController extends Controller
             $em->flush();
         }
 
-        $session->getFlashBag()->add('success', "La créneau a été vérouillé");
+        $session->getFlashBag()->add('success', "Le créneau a été vérouillé");
         return $this->redirectToRoute('booking_admin');
     }
 
@@ -503,7 +503,7 @@ class BookingController extends Controller
      * @Route("/bucket/{id}/unlock", name="bucket_unlock")
      * @Method("GET")
      */
-    public function unlockShiftAction(Request $request, Shift $shift)
+    public function unlockBucketAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
@@ -519,7 +519,7 @@ class BookingController extends Controller
             $em->flush();
         }
 
-        $session->getFlashBag()->add('success', "La créneau a été dévérouillé");
+        $session->getFlashBag()->add('success', "Le créneau a été dévérouillé");
         return $this->redirectToRoute('booking_admin');
     }
 
@@ -573,6 +573,7 @@ class BookingController extends Controller
 
     /**
      * Creates a form to book a shift entity.
+     * // TODO: how to avoid having same createBookForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *

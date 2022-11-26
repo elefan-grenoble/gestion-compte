@@ -40,6 +40,9 @@ services:
     AppBundle\Controller\BookingController:
         arguments:
             - "%use_fly_and_fixed%"
+    AppBundle\Controller\ShiftController:
+        arguments:
+            - "%use_fly_and_fixed%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
