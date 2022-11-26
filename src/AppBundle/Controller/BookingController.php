@@ -421,16 +421,13 @@ class BookingController extends Controller
             array(
                 'action' => $this->generateUrl('shift_new'),
                 'only_add_formation' => true,
-            )
-        )
-            ->createView();
+            ));
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'shift_add_form' => $shiftAddForm,
+            'shift_add_form' => $shiftAddForm->createView(),
             'shift_book_forms' => $shiftBookForms
         ]);
-
     }
 
     /**
@@ -551,7 +548,7 @@ class BookingController extends Controller
                 $count++;
             }
             $em->flush();
-            $session->getFlashBag()->add('success', $count . " shifts removed");
+            $session->getFlashBag()->add('success', $count . " créneaux ont été supprimés !");
         }
         return $this->redirectToRoute('booking_admin');
     }

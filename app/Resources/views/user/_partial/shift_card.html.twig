@@ -9,7 +9,7 @@
         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
             {% if shift.wasCarriedOut %}
                 <form action="{{ path('shift_invalidate', { 'id': shift.id }) }}" method="POST" id="invalidate_shift_{{ shift.id }}">
-                    <button type="submit" class="btn red" title="Invalider la participation">
+                    <button type="submit" class="btn orange" title="Invalider la participation">
                         <i class="material-icons left">highlight_off</i>Invalider la participation
                     </button>
                 </form>
@@ -24,8 +24,8 @@
         {% if is_granted('free',shift) %}
             <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST">
                 {% if shift.isPast %}
-                    <button type="submit" class="btn red" title="Supprimer">
-                        <i class="material-icons left">delete</i>Supprimer
+                    <button type="submit" class="btn red" title="Supprimer la participation">
+                        <i class="material-icons left">delete</i>Supprimer la participation
                     </button>
                 {% else %}
                     <button type="submit" class="btn orange" title="Libérer">
