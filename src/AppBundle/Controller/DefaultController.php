@@ -14,6 +14,7 @@ use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Event\SwipeCardEvent;
 use AppBundle\Event\ShiftValidatedEvent;
+use AppBundle\Form\AutocompleteBeneficiaryCollectionType;
 use AppBundle\Service\MembershipService;
 use AppBundle\Twig\Extension\AppExtension;
 use Psr\Log\LoggerInterface;
@@ -351,9 +352,14 @@ class DefaultController extends Controller
     public function shiftContactFormAction(Shift $shift, Request $request, \Swift_Mailer $mailer)
     {
 
+        $em = $this->getDoctrine()->getManager();
+        $coShifters = $em->getRepository('AppBundle:Beneficiary')->findCoShifters($shift);
         $formBuilder = $this->createFormBuilder();
         $formBuilder->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()));
-        $formBuilder->add('to', HiddenType::class, array('label' => 'A'));
+        $formBuilder->add('to', AutocompleteBeneficiaryCollectionType::class, [
+            'label' => 'A',
+            'data' => $coShifters,
+        ]);
         $formBuilder->add('message', TextareaType::class, [
             'attr' => ['class' => 'materialize-textarea'],
             'label' => 'Message',
@@ -364,11 +370,8 @@ class DefaultController extends Controller
         $form = $formBuilder->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
-            $to = $form->get('to')->getData();
-            $to = json_decode($to);
+            $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
-            $em = $this->getDoctrine()->getManager();
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findBy(array('id' => $to));
             $from = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id' => $from));
             $emails = array();
             $firstnames = array();
@@ -403,21 +406,11 @@ class DefaultController extends Controller
 
             $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
             return $this->redirectToRoute('homepage');
-        } else {
-            $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $shift->getStart(), 'end' => $shift->getEnd(), 'job' => $shift->getJob()));
-            $coShifts = array();
-            foreach ($shifts as $s) {
-                if ($s->getBooker() != null && $s->getId() != $shift->getId()) {
-                    $coShifts[] = $s;
-                }
-            }
-            return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
-                'shift' => $shift,
-                'coShifts' => $coShifts,
-                'form' => $form->createView()
-            ));
         }
+        return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
+            'shift' => $shift,
+            'form' => $form->createView()
+        ));
     }
 
     /**

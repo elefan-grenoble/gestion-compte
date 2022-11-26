@@ -25,11 +25,17 @@
     {{ form_start(form) }}
         <div class="row">
             <div class="input-field col m6 s12">
+                <div class="errors">
+                    {{ form_errors(form.from_text) }}
+                </div>
                 <i class="material-icons prefix">person</i>
                 {{ form_widget(form.from_text) }}
                 {{ form_label(form.from_text) }}
             </div>
             <div class="input-field col m6 s12">
+                <div class="errors">
+                    {{ form_errors(form.dest_text) }}
+                </div>
                 <i class="material-icons prefix">person</i>
                 {{ form_widget(form.dest_text) }}
                 {{ form_label(form.dest_text) }}
@@ -37,25 +43,4 @@
         </div>
         {{ form_widget(form.join) }}
     {{ form_end(form) }}
-{% endblock %}
-
-{% block javascripts %}
-    <script>
-        $(document).ready(function() {
-            $('input.autocomplete').autocomplete({
-                data: {
-                    {% for member in members %}
-                        {% if member.mainBeneficiary %}
-                            "{{ member.mainBeneficiary.displayNameWithMemberNumber }}": null,
-                        {% endif %}
-                    {% endfor %}
-                },
-                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
-                onAutocomplete: function(val) {
-                    // Callback function when value is autcompleted.
-                },
-                minLength: 1, // The minimum length of the input for the autocomplete to start. Default: 1.
-            });
-        })
-    </script>
 {% endblock %}

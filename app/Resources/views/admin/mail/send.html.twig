@@ -1,0 +1,67 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+{{ form_start(form) }}
+
+    <div class="row">
+        <div class="input-field col s12 m6">
+            {{ form_widget(form.from) }}
+            {{ form_label(form.from) }}
+        </div>
+        <div class="input-field col s12 m6">
+            {{ form_widget(form.template) }}
+            {{ form_label(form.template) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.to) }}
+            {{ form_widget(form.to) }}
+        </div>
+        <div class="col s12">
+            <label>Non-membre(s) en copie</label>
+            <div class="non-members chips">
+            </div>
+        </div>
+        <div class="input-field col s12">
+            {{ form_widget(form.subject) }}
+            {{ form_label(form.subject) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.message) }}
+            {{ form_widget(form.message) }}
+        </div>
+        <div class="tips right small">
+            prénom : <input value="{{ '{{' }} beneficiary.firstname {{ '}}' }}"/>
+        </div>
+    </div>
+
+    <button class="btn waves-effect waves-light" type="submit"><i class="material-icons left">send</i>Envoyer</button>
+    {{ form_widget(form) }}
+{{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        jQuery(
+            function() {
+                function updateNonMembers() {
+                    var chipsData = M.Chips.getInstance($('.non-members')).chipsData;
+                    var emails = chipsData.map((member) => (member['tag']));
+                    $("input[name='form[cci]']").val(JSON.stringify(emails));
+                };
+                $('.non-members').chips({
+                    placeholder: 'Non-membre',
+                    data: [],
+                    autocompleteOptions: {
+                        data: {{ non_members | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                        limit: Infinity,
+                        minLength: 1
+                    },
+                    onChipAdd: updateNonMembers,
+                    onChipDelete: updateNonMembers
+                });
+                updateNonMembers();
+            }
+        );
+    </script>
+
+{% endblock %}

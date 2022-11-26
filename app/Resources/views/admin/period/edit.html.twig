@@ -80,15 +80,18 @@
                                 </div>
                             </div>
                             <div class="collapsible-body">
+                                {{ form_start(pp_book_forms[position.id]) }}
                                 <div class="row">
-                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                                        <input id ="benef{{ position.id }}" type="text" class="autocomplete" name="beneficiary" placeholder="Beneficiaire" />
+                                    <div class="col s7 input-field">
+                                        {{ form_label(pp_book_forms[position.id].shifter) }}
+                                        {{ form_errors(pp_book_forms[position.id].shifter) }}
+                                        {{ form_widget(pp_book_forms[position.id].shifter) }}
                                     </div>
                                     <div class="col s3">
-                                        <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0 />
-                                        <button type="button" class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
+                                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter</button>
                                     </div>
                                 </div>
+                                {{ form_end(pp_book_forms[position.id]) }}
                             </div>
                         </li>
                     {% endif %}
@@ -130,56 +133,4 @@
         </div>
     </div>
     {{ form_end(position_form) }}
-{% endblock %}
-
-{% block javascripts %}
-    <script>
-        $(document).ready(function ($) {
-            $('input.autocomplete').autocomplete({
-                data: {
-                    {% for beneficiary in beneficiaries %}
-                        "{{ beneficiary.displayNameWithMemberNumber }}": null,
-                    {% endfor %}
-                },
-                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
-                onAutocomplete: function(val) {
-                    // Callback function when value is autcompleted.
-                    $('button.add').removeAttr('disabled');
-                },
-                minLength: 2, // The minimum length of the input for the autocomplete to start. Default: 1.
-            });
-            $('input.empty-shift').keydown(function () {
-                $('button.add:not(:disabled)').attr('disabled','disabled');
-            });
-        })
-
-        function postPosition(positionId) {
-            let selectedBenef = document.getElementById('benef'+positionId);
-
-            if (selectedBenef != null) {
-                let url = "{{ path('book_position_from_period',{'id': 'tmpId'}) }}";
-                url = url.replace("tmpId", positionId);
-
-                let body = {
-                    "beneficiary": selectedBenef.value
-                };
-
-                // If using old IE version
-                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-
-                xhttp.open("POST", url, true);
-                xhttp.onreadystatechange = function () {
-                    if (xhttp.readyState > 3) {
-                        if (200 <= xhttp.status && xhttp.status < 300) {
-                            window.location.replace(xhttp.responseText);
-                        } else {
-                            alert("une erreur est survenue");
-                        }
-                    }
-                };
-                xhttp.send(JSON.stringify(body));
-                return xhttp;
-            }
-        }
-    </script>
 {% endblock %}

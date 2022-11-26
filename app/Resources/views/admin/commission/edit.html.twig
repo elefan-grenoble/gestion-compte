@@ -132,13 +132,20 @@
                             var data = $form.serialize();
                             $.ajax($form.attr('action'),{
                                 data: data,
-                                method: 'post'
-                            }).success(function (d) {
-                                //console.log(d);
-                                if (d.success){
-                                    Materialize.toast(d.message,2500,'green');
-                                }else{
-                                    Materialize.toast(d.message,2500,'red');
+                                method: 'post',
+                                success: function (d) {
+                                    M.toast({
+                                        html: d.message,
+                                        displayLength: 2500,
+                                        classes: 'green'
+                                    });
+                                },
+                                error: function (d) {
+                                    M.toast({
+                                        html: d.message,
+                                        displayLength: 2500,
+                                        classes: 'red'
+                                    });
                                 }
                             });
                         }
@@ -149,15 +156,23 @@
                         var data = $form.serialize();
                         $.ajax($form.attr('action'),{
                             data: data,
-                            method: 'post'
-                        }).success(function (d) {
-                            if (d.success){
-                                Materialize.toast(d.message,2500,'green');
+                            method: 'post',
+                            success: function (d) {
+                                M.toast({
+                                    html: d.message,
+                                    displayLength: 2500,
+                                    classes: 'green'
+                                });
                                 $('#users .chips').append(d.html);
-                            }else{
-                                Materialize.toast(d.message,2500,'red');
+                                $('#form_beneficiary').val('');
+                            },
+                            error: function (d) {
+                                M.toast({
+                                    html: d.message,
+                                    displayLength: 2500,
+                                    classes: 'red'
+                                });
                             }
-                            $('#form_beneficiary').val('');
                         });
                     });
                 });

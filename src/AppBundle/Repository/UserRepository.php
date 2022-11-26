@@ -27,13 +27,14 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findNonMember()
+    public function findActiveNonMembers()
     {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('u')
             ->from($this->_entityName, 'u')
             ->leftJoin('u.beneficiary', 'b')
-            ->where('b.id is NULL');
+            ->where('b.id is NULL')
+            ->andWhere("u.enabled = 1");
 
         return $qb->getQuery()->getResult();
     }

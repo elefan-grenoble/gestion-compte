@@ -24,7 +24,7 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
             ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) = :fullname')
             ->setParameter('fullname', $beneficiary);
 
-        return $qb->getQuery()->getSingleResult();
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**
@@ -61,5 +61,25 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
             ->where('membership.withdrawn = 0');
 
         return $qb->getQuery()->getResult();
+    }
+
+    public function findCoShifters($shift)
+    {
+        $qb = $this->createQueryBuilder('b')
+                   ->leftJoin('b.shifts', 's')
+                    ->where('s.start = :start')
+                    ->andWhere('s.end = :end')
+                    ->andWhere('s.job = :job')
+                    ->andWhere('s.id != :id')
+                    ->andWhere('s.shifter IS NOT NULL')
+                    ->setParameter('start', $shift->getStart())
+                    ->setParameter('end', $shift->getEnd())
+                    ->setParameter('job', $shift->getJob())
+                    ->setParameter('id', $shift->getId());
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+
     }
 }

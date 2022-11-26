@@ -7,6 +7,7 @@ use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
 use AppBundle\Repository\JobRepository;
@@ -226,6 +227,12 @@ class PeriodController extends Controller
                 'add_position_to_period',
                 array('id' => $period->getId())))) ;
 
+        $pp_book_forms = [];
+        foreach ($period->getPositions() as $position) {
+            if (!$position->getShifter()) {
+                $pp_book_forms[$position->getId()] = $this->createBookForm($position)->createView();
+            }
+        }
 
         return $this->render('admin/period/edit.html.twig', array(
             "form" => $form->createView(),
@@ -233,7 +240,8 @@ class PeriodController extends Controller
             "beneficiaries" => $beneficiaries,
             "position_form" => $positionForm->createView(),
             "delete_form" => $deleteForm->createView(),
-            "positions_delete_form" => $positionsDeleteForm
+            "positions_delete_form" => $positionsDeleteForm,
+            "pp_book_forms" => $pp_book_forms
         ));
     }
 
@@ -310,41 +318,38 @@ class PeriodController extends Controller
         $session = new Session();
         $period = $position->getPeriod();
 
-        if ($position->getShifter()) {
-            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+        $form = $this->createBookForm($position);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            if ($position->getShifter()) {
+                $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
+                return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+            }
+
+            $beneficiary = $form->get("shifter")->getData();
+            if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
+                $session
+                    ->getFlashBag()
+                    ->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
+                return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
+            }
+
+            if (!$position->getBooker()) {
+                $current_user = $this->get('security.token_storage')->getToken()->getUser();
+                $position->setBooker($current_user);
+                $position->setBookedTime(new \DateTime('now'));
+            }
+
+            $em = $this->getDoctrine()->getManager();
+            $position->setShifter($beneficiary);
+            $em->persist($position);
+            $em->flush();
+
+            $session->getFlashBag()->add("success", "Créneau fixe réservé avec succès pour " . $position->getShifter());
         }
-
-        $content = json_decode($request->getContent());
-        $str = $content->beneficiary;
-
-        $em = $this->getDoctrine()->getManager();
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneFromAutoComplete($str);
-
-        if (!$beneficiary) {
-            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
-            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
-        }
-
-        if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
-            $session
-                ->getFlashBag()
-                ->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
-            return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
-        }
-
-        if (!$position->getBooker()) {
-            $current_user = $this->get('security.token_storage')->getToken()->getUser();
-            $position->setBooker($current_user);
-            $position->setBookedTime(new \DateTime('now'));
-        }
-        $position->setShifter($beneficiary);
-        $em->persist($position);
-        $em->flush();
-
-        $session->getFlashBag()->add("success", "Créneau fixe réservé avec succès pour " . $position->getShifter());
-        return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 200);
-
+        return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
     }
 
     /**
@@ -490,5 +495,19 @@ class PeriodController extends Controller
             "form" => $form->createView()
         ));
     }
-    
+
+    /**
+     * Creates a form to book a period position entity.
+     *
+     * @param PeriodPosition $pp The period position entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createBookForm(PeriodPosition $pp)
+    {
+        return $this->get('form.factory')->createNamedBuilder('pp_book_forms_' . $pp->getId())
+            ->setAction($this->generateUrl('book_position_from_period', array('id' => $pp->getId())))
+            ->add('shifter', AutocompleteBeneficiaryType::class, array('label'=>'Numéro d\'adhérent ou nom du membre', 'required'=>true))
+            ->getForm();
+    }
 }

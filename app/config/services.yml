@@ -37,6 +37,9 @@ services:
     AppBundle\Controller\AmbassadorController:
         arguments:
             - "%time_after_which_members_are_late_with_shifts%"
+    AppBundle\Controller\BookingController:
+        arguments:
+            - "%use_fly_and_fixed%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
@@ -166,6 +169,12 @@ services:
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
+
+    beneficiary_service:
+            class:  AppBundle\Service\BeneficiaryService
+            public: true
+            arguments:
+                - "@doctrine.orm.entity_manager"
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor
