@@ -156,7 +156,6 @@ class ShiftController extends Controller
         $session = new Session();
 
         $form = $this->createBookForm($shift);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -168,13 +167,13 @@ class ShiftController extends Controller
             $fixe = $form->get("fixe")->getData();
             $beneficiary = $form->get("shifter")->getData();
 
-            if (!$beneficiary) {
-                $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
+            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
                 return $this->redirectToRoute('booking_admin');
             }
 
-            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
+            if ($beneficiary->getMembership()->isExemptedFromShifts($shift->getStart())) {
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole est exempté de créneau sur cette période");
                 return $this->redirectToRoute('booking_admin');
             }
 
@@ -208,7 +207,6 @@ class ShiftController extends Controller
             $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
             return $this->redirectToRoute('booking_admin');
         }
-
         $session->getFlashBag()->add('error', "Une erreur est survenue...");
         return $this->redirectToRoute('booking_admin');
     }

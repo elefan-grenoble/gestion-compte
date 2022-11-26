@@ -242,7 +242,7 @@ class MembershipShiftExemption
      * @param \DateTime $date
      * @return \DateTime
      */
-    public function isValid($date)
+    public function isValid(\Datetime $date)
     {
         return ($date >= $this->start) && ($date <= $this->end);
     }

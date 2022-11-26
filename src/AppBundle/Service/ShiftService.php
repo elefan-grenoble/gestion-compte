@@ -206,6 +206,9 @@ class ShiftService
         }
 
         $member = $beneficiary->getMembership();
+        if ($member->isExemptedFromShifts($shift->getStart()))
+            return false;
+
         if ($member->isWithdrawn())
             return false;
 

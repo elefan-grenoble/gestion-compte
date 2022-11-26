@@ -97,7 +97,8 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         $current_shift->setFormation($position->getFormation());
                         $current_shift->setPosition($position);
                         // si c'est un créneau fixe
-                        if ($use_fly_and_fixed && $position->getShifter() != null) {
+                        if ($use_fly_and_fixed && $position->getShifter() != null &&
+                            !$position->getShifter()->getMembership()->isExemptedFromShifts($current_shift->getStart())) {
                             $current_shift->setFixe(True);
                             $current_shift->setShifter($position->getShifter());
                             $current_shift->setBookedTime(new \DateTime('now'));
