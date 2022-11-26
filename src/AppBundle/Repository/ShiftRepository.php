@@ -31,7 +31,11 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('start', $shift->getStart())
             ->setParameter('end', $shift->getEnd())
             ->setParameter('job', $shift->getJob())
-            ->orderBy('s.shifter', 'DESC');
+            ->addSelect('CASE WHEN s.formation IS NOT NULL THEN 1 ELSE 0 END as HIDDEN formation_is_not_null')
+            ->addSelect('CASE WHEN s.shifter IS NOT NULL THEN 1 ELSE 0 END as HIDDEN shifter_is_not_null')
+            ->addOrderBy('formation_is_not_null', 'DESC')
+            ->addOrderBy('shifter_is_not_null', 'DESC')
+            ->addOrderBy('s.bookedTime', 'DESC');  // ordering similar to ShiftBucket.compareShifts()
 
         return $qb
             ->getQuery()
