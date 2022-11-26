@@ -733,7 +733,7 @@ class BookingController extends Controller
 
         $form = $this->createFormBuilder()
             ->add('shifter', TextType::class)
-            ->add('fixe', RadioType::class)
+            ->add('fixe', RadioType::class, array('required' => false))  // TODO Symfony 4.1 : 'false_values' => ['false', '0']
             ->getForm();
 
         $form->handleRequest($request);
@@ -744,7 +744,8 @@ class BookingController extends Controller
                 return new Response($this->generateUrl("booking_admin"), 205);
             }
 
-            $fixe = $form->get("fixe")->getData();
+            // $fixe = $form->get("fixe")->getData();  // Symfony 3.4 : always returns true, even if "0" is passed from the form data
+            $fixe = $request->request->get("form")["fixe"] ?? false;  // TODO Symfony 4.1 : re-use the previous line
             $str = $form->get("shifter")->getData();
             $em = $this->getDoctrine()->getManager();
             // $membership = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($str);
