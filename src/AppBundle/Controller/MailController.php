@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
+use AppBundle\Form\AutocompleteBeneficiaryCollectionType;
 use AppBundle\Form\MarkdownEditorType;
 use AppBundle\Service\SearchUserFormHelper;
 use Michelf\Markdown;
@@ -27,23 +28,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class MailController extends Controller
 {
-    /**
-     * Get beneficiaries autocomplete labels
-     *
-     * @Route("/beneficiaries", name="mail_get_beneficiaries")
-     * @Method({"GET"})
-     */
-    public function allBeneficiariesAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
-        $r = array();
-        foreach ($beneficiaries as $beneficiary) {
-            $r[] = $beneficiary->getAutocompleteLabel();
-        }
-        return $this->json($r);
-    }
-
     /**
      * Get non members autocomplete labels
      *
@@ -69,10 +53,9 @@ class MailController extends Controller
      */
     public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary)
     {
-        $mailform = $this->getMailForm();
-        return $this->render('admin/mail/edit.html.twig', array(
+        $mailform = $this->getMailForm(array($beneficiary));
+        return $this->render('admin/mail/send.html.twig', array(
             'form' => $mailform->createView(),
-            'to' => array($beneficiary),
         ));
     }
 
@@ -82,19 +65,18 @@ class MailController extends Controller
      */
     public function mailBucketShift(Request $request, Shift $shift)
     {
-        $mailform = $this->getMailForm();
         if ($shift) {
             $em = $this->getDoctrine()->getManager();
             $shifts = $em->getRepository(Shift::class)->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
-            $beneficiary = array();
+            $beneficiaries = array();
             foreach ($shifts as $shift) {
                 if ($shift->getShifter()) {
-                    $beneficiary[] = $shift->getShifter();
+                    $beneficiaries[] = $shift->getShifter();
                 }
             }
-            return $this->render('admin/mail/edit.html.twig', array(
+            $mailform = $this->getMailForm($beneficiaries);
+            return $this->render('admin/mail/send.html.twig', array(
                 'form' => $mailform->createView(),
-                'to' => $beneficiary
             ));
         }
     }
@@ -127,15 +109,9 @@ class MailController extends Controller
             $non_members_emails[] = $user;
         }
 
-        $params = array();
-        foreach ($request->request as $k => $param) {
-            $params[$k] = $param;
-        }
-
-        $mailform = $this->getMailForm();
-        return $this->render('admin/mail/edit.html.twig', array(
+        $mailform = $this->getMailForm($to);
+        return $this->render('admin/mail/send.html.twig', array(
             'form' => $mailform->createView(),
-            'to' => $to,
             'non_member' => $non_members_users
         ));
     }
@@ -155,9 +131,7 @@ class MailController extends Controller
         if ($mailform->isSubmitted() && $mailform->isValid()) {
             $em = $this->getDoctrine()->getManager();
             //beneficiaries
-            $to = $mailform->get('to')->getData();
-            $to = json_decode($to);
-            $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($to);
+            $beneficiaries = $mailform->get('to')->getData();
             //non-member
             $cci = $mailform->get('cci')->getData();
             $chips = json_decode($cci);
@@ -234,7 +208,7 @@ class MailController extends Controller
         return $this->redirectToRoute('mail_edit');
     }
 
-    private function getMailForm() {
+    private function getMailForm($to = []) {
         $mailerService = $this->get('mailer_service');
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
@@ -244,7 +218,10 @@ class MailController extends Controller
                 'required' => false,
                 'choices' => $mailerService->getAllowedEmails()
             ))
-            ->add('to', HiddenType::class, array('label' => 'Destinataires', 'required' => true))
+            ->add('to', AutocompleteBeneficiaryCollectionType::class, [
+                'data' => $to,
+                'label' => "Destinataire(s)",
+            ])
             ->add('cci', HiddenType::class, array('label' => 'Non-membres', 'required' => false))
             ->add('template', EntityType::class, array(
                 'class' => 'AppBundle:EmailTemplate',

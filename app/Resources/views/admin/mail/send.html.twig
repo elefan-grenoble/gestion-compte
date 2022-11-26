@@ -13,13 +13,12 @@
             {{ form_label(form.template) }}
         </div>
         <div class="col s12">
-            <label>Destinataire(s)</label>
-            <div class="beneficiaries chips ">
-            </div>
+            {{ form_label(form.to) }}
+            {{ form_widget(form.to) }}
         </div>
         <div class="col s12">
             <label>Non-membre(s) en copie</label>
-            <div class="non-members chips ">
+            <div class="non-members chips">
             </div>
         </div>
         <div class="input-field col s12">
@@ -44,37 +43,6 @@
     <script>
         jQuery(
             function() {
-                function updateBeneficiaries() {
-                    var chipsData = M.Chips.getInstance($('.beneficiaries')).chipsData;
-                    var ids = chipsData.map((member) => member['tag']); // .split(' ')[0].substring(1)));
-                    $("input[name='form[to]']").val(JSON.stringify(ids));
-                };
-                $.ajax({
-                    type: 'GET',
-                    url: '{{ path('mail_get_beneficiaries') }}',
-                    success: function(response) {
-                        var dataUsers = response.reduce(function(map, obj) {
-                            map[obj] = null;
-                            return map;
-                        }, {});
-                        $('.beneficiaries').chips({
-                            placeholder: 'Beneficiaire',
-                            data: [
-                                {% for beneficiary in to %}
-                                {
-                                tag: "{{ beneficiary.displayNameWithMemberNumber }}",
-                            },{% endfor %} ],
-                            autocompleteOptions: {
-                                data: dataUsers,
-                                limit: Infinity,
-                                minLength: 1
-                            },
-                            onChipAdd: updateBeneficiaries,
-                            onChipDelete: updateBeneficiaries
-                        });
-                        updateBeneficiaries();
-                    }
-                });
                 function updateNonMembers() {
                     var chipsData = M.Chips.getInstance($('.non-members')).chipsData;
                     var emails = chipsData.map((member) => (member['tag']));
