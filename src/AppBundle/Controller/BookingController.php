@@ -17,6 +17,7 @@ use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Form\AutocompleteBeneficiaryType;
+use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
 use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -42,6 +43,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class BookingController extends Controller
 {
+    /**
+     * @var boolean
+     */
+    private $useFlyAndFixed;
+
+    public function __construct(bool $useFlyAndFixed)
+    {
+        $this->useFlyAndFixed = $useFlyAndFixed;
+    }
+
     /**
      * @return Response
      */
@@ -955,7 +966,20 @@ class BookingController extends Controller
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
             ->setAction($this->generateUrl('admin_shift_book', array('id' => $shift->getId())))
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label'=>'Numéro d\'adhérent ou nom du membre', 'required'=>true));
-            ->add('fixe', RadioType::class);
+
+        if ($this->useFlyAndFixed) {
+            $form = $form->add('fixe', RadioChoiceType::class, [
+                'choices'  => [
+                    'Volant' => 0,
+                    'Fixe' => 1,
+                ],
+                'data' => 0
+            ]);
+        } else {
+            $form = $form->add('fixe', HiddenType::class, [
+                'data' => 0
+            ]);
+        }
 
         return $form->getForm();
     }

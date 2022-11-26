@@ -75,6 +75,24 @@
     </script>
 {% endblock %}
 
+{% block radio_choice_widget %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% for child in form %}
+                <div>
+                    <label for="{{ child.vars.id }}" class="required" style="color: #5f5a5a; font-weight: 600;">
+                        {{ form_widget(child) }}
+                        <span>{{ child.vars.label }}</span>
+                    </label>
+                </div>
+            {% endfor %}
+            {% for child in form %}
+                {{ form_widget(child) }}
+            {% endfor %}
+        </div>
+    {% endspaceless %}
+{% endblock %}
+
 {% block simplemde_editor_row %}
     <div class="markdow-editor">
         <div class="errors">

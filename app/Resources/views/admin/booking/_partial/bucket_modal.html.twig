@@ -105,28 +105,15 @@ It use the materialize modal class https://materializecss.com/modals.html
                             </div>
                             {% if use_fly_and_fixed %}
                                 <div class="col s2">
-                                    <div>
-                                        <label style="color: #5f5a5a; font-weight: 600;">
-                                            <input type="radio" name="form[fixe]" value="0" checked>
-                                            <span>volant</span>
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <label style="color: #5f5a5a; font-weight: 600;">
-                                            <input type="radio" name="form[fixe]" value="1">
-                                            <span>fixe</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <button class="btn add" disabled="disabled">Ajouter</button>
-                                </div>
-                            {% else %}
-                                <div class="col s3">
-                                    <input type="hidden" id="appbundle_shift_fixe" name="appbundle_shift[fixe]" value="0" checked>
-                                    <button class="btn add">Ajouter</button>
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
                                 </div>
                             {% endif %}
+                            <div class="col s3">
+                                {% if not use_fly_and_fixed %}
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                                {% endif %}
+                                <button class="btn add">Ajouter</button>
+                            </div>
                         </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
                 </div>
