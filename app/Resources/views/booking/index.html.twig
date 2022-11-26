@@ -190,9 +190,9 @@
 
             if (selectedFormation !== null && selectedTypeService !== null) {
 
-                // let url = "/booking/shift/" + checkedValue +"/book";
+                // let url = "/shift/" + checkedValue + "/book";
 
-                let url = "{{ path('shift_book',{'id': 'tmpId'}) }}";
+                let url = "{{ path('shift_book', { 'id': 'tmpId' }) }}";
                 url = url.replace("tmpId", selectedFormation.value);
 
                 let body = {

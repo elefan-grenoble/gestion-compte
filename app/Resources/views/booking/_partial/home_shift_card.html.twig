@@ -24,12 +24,12 @@
                 <div class="modal-footer">
                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
                     <a href="#" class="modal-action modal-close waves-effect waves-green btn teal"
-                       onclick="$('#form_shift_id').val({{ shift.id }});$('#undismiss_shift').submit();">Oui, je reprends<span class="hide-on-med-and-down"> mon créneau</span></a>
+                       onclick="$('#form_shift_id').val({{ shift.id }});$('#shift_undismiss').submit();">Oui, je reprends<span class="hide-on-med-and-down"> mon créneau</span></a>
                 </div>
             </div>
-            {{ form_start(undismiss_shift_form,{ 'attr' : { 'id' : 'undismiss_shift' } }) }}
-            {{ form_widget(undismiss_shift_form) }}
-            {{ form_end(undismiss_shift_form) }}
+            {{ form_start(shift_undismiss_form, { 'attr': { 'id': 'shift_undismiss' } }) }}
+            {{ form_widget(shift_undismiss_form) }}
+            {{ form_end(shift_undismiss_form) }}
         {% else %}
             {% if not shift.fixe or shift.isUpcoming %}
                 <div class="card-action">
@@ -41,7 +41,7 @@
                     {% endif %}
                 </div>
                 <div id="dismiss{{ shift.id }}" class="modal black-text">
-                    <form action="{{ path('shift_dismiss',{'id':shift.id}) }}" method="post">
+                    <form action="{{ path('shift_dismiss', { 'id': shift.id }) }}" method="POST">
                         <div class="modal-content">
                             <h5>Je ne peux pas faire mon créneau</h5>
                             <div class="input-field">
@@ -50,8 +50,8 @@
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text ">Retour à la raison</a>
-                            <button class="modal-action modal-close waves-effect waves-green btn red ">Oui, je me désiste !</button>
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Retour à la raison</a>
+                            <button class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
                         </div>
                     </form>
                 </div>

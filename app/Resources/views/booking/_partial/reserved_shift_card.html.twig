@@ -12,7 +12,7 @@
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-            <a href="{{ path("accept_reserved_shift",{ id : shift.id }) }}"
+            <a href="{{ path("shift_accept_reserved", { 'id': shift.id }) }}"
                class="modal-action modal-close waves-effect waves-green btn teal">Oui, je reprends mon créneau</a>
         </div>
     </div>
@@ -22,7 +22,7 @@
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-            <a href="{{ path("reject_reserved_shift",{ id : shift.id }) }}"
+            <a href="{{ path("shift_reject_reserved", { 'id': shift.id }) }}"
                class="modal-action modal-close waves-effect waves-green btn teal">Oui, Je ne reprends pas ce créneau</a>
         </div>
     </div>
