@@ -16,6 +16,7 @@ use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use DateTime;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\ShiftType;
 use Exception;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -407,6 +408,10 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
 
+        $shift_book_forms = [];
+        foreach ($shifts as $shift) {
+            $shift_book_forms[$shift->getId()] = $this->createBookForm($shift)->createView();
+        }
         $shift_add_form = $this->createForm(
             ShiftType::class,
             $bucket,
@@ -419,7 +424,8 @@ class BookingController extends Controller
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'shift_add_form' => $shift_add_form
+            'shift_add_form' => $shift_add_form,
+            'shift_book_forms' => $shift_book_forms
         ]);
 
     }
@@ -731,31 +737,17 @@ class BookingController extends Controller
     {
         $session = new Session();
 
-        $form = $this->createFormBuilder()
-            ->add('shifter', TextType::class)
-            ->add('fixe', RadioType::class, array('required' => false))  // TODO Symfony 4.1 : 'false_values' => ['false', '0']
-            ->getForm();
-
+        $form = $this->createBookForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($shift->getShifter() && !$shift->getIsDismissed()) {
                 $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-                return new Response($this->generateUrl("booking_admin"), 205);
-            }
-
-            // $fixe = $form->get("fixe")->getData();  // Symfony 3.4 : always returns true, even if "0" is passed from the form data
-            $fixe = $request->request->get("form")["fixe"] ?? false;  // TODO Symfony 4.1 : re-use the previous line
-            $str = $form->get("shifter")->getData();
-            $em = $this->getDoctrine()->getManager();
-            // $membership = $em->getRepository('AppBundle:Membership')->findOneFromAutoComplete($str);
-            // $beneficiary = $membership->getBeneficiaries()->findOneFromAutoComplete($str);
-            $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findOneFromAutoComplete($str);
-
-            if (!$beneficiary) {
-                $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
                 return $this->redirectToRoute('booking_admin');
             }
+
+            $fixe = $form->get("fixe")->getData();
+            $beneficiary = $form->get("shifter")->getData();
 
             if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
@@ -774,6 +766,7 @@ class BookingController extends Controller
             $shift->setLastShifter(null);
             $shift->setFixe($fixe);
 
+            $em = $this->getDoctrine()->getManager();
             $em->persist($shift);
 
             $member = $beneficiary->getMembership();
@@ -949,4 +942,22 @@ class BookingController extends Controller
             ->getForm()
         ;
     }
+
+    /**
+     * Creates a form to book a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createBookForm(Shift $shift)
+    {
+        $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('admin_shift_book', array('id' => $shift->getId())))
+            ->add('shifter', AutocompleteBeneficiaryType::class, array('label'=>'Numéro d\'adhérent ou nom du membre', 'required'=>true));
+            ->add('fixe', RadioType::class);
+
+        return $form->getForm();
+    }
+
 }

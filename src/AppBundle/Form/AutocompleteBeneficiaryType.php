@@ -23,7 +23,8 @@ class AutocompleteBeneficiaryType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'block_prefix' => 'autocomplete_beneficiary'
+            'block_prefix' => 'autocomplete_beneficiary',
+            'attr' => ['class' => 'autocomplete'],
         ]);
     }
 

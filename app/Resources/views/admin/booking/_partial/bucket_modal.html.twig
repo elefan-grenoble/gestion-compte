@@ -97,12 +97,11 @@ It use the materialize modal class https://materializecss.com/modals.html
                     </div>
                 </div>
                 <div class="collapsible-body">
-                    <form method="post" action="{{ path('admin_shift_book',{'id': shift.id}) }}">
-                        <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
+                    {{ form_start(shift_book_forms[shift.id]) }}
                         <div class="row">
                             <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                                <label for="appbundle_shift_shifter{{ shift.id }}">Bénéficiaire</label>
-                                <input id="appbundle_shift_shifter{{ shift.id }}" name="form[shifter]" type="text" class="autocomplete" />
+                                {{ form_label(shift_book_forms[shift.id].shifter) }}
+                                {{ form_widget(shift_book_forms[shift.id].shifter) }}
                             </div>
                             {% if use_fly_and_fixed %}
                                 <div class="col s2">
@@ -129,7 +128,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                                 </div>
                             {% endif %}
                         </div>
-                    </form>
+                    {{ form_end(shift_book_forms[shift.id]) }}
                 </div>
             </li>
         {% endif %}
