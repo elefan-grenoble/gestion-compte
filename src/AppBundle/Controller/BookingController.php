@@ -447,12 +447,13 @@ class BookingController extends Controller
                 'end' => $bucket->getEnd()
             ]);
             foreach ($shifts as $s) {
-                $s->setStart($bucket->getStart());
-                $s->setEnd($bucket->getEnd());
-                $s->setJob($bucket->getJob());
+                $s->setStart($form->get('start')->getData());
+                $s->setEnd($form->get('end')->getData());
+                $s->setJob($form->get('job')->getData());
                 $em->persist($s);
             }
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le créneau a bien été édité !');
             return $this->redirectToRoute('booking_admin');
         }
