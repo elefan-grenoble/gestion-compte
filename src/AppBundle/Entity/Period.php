@@ -184,7 +184,7 @@ class Period
     /**
      * Add periodPosition
      *
-     * @param \AppBundle\Entity\PeriodPosition $periodPosition
+     * @param \AppBundle\Entity\PeriodPosition $position
      *
      * @return Period
      */

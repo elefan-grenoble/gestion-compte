@@ -20,9 +20,25 @@
     {{ form_end(form) }}
 
     {% if is_granted("ROLE_ADMIN") %}
-        <a href="#remove-period" class="modal-trigger btn waves-effect waves-light red" title="supprimer le créneau type">
+        <a href="#remove-period-confirmation-modal" class="modal-trigger btn waves-effect waves-light red" title="supprimer le créneau type">
             Supprimer
         </a>
+        {{ form_start(delete_form) }}
+        <div id="remove-period-confirmation-modal" class="modal">
+            <div class="modal-content">
+                <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
+                <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
+                    Retour à la raison
+                </a>
+                <button type="submit" class="btn waves-effect waves-light orange">
+                    <i class="material-icons left">check</i>Je sais ce que je fais !
+                </button>
+            </div>
+        </div>
+        {{ form_end(delete_form) }}
     {% endif %}
 
     <h5>Postes disponibles</h5>
@@ -46,7 +62,7 @@
                                 </div>
                             </div>
                             <div class="collapsible-body">
-                                Créneau fixe réservé pour <a href="{{ path("member_show",{ 'member_number': position.shifter.membership.memberNumber }) }}">{{ position.shifter }}</a> le <i>{{ position.bookedTime | date_fr_with_time }}</i> par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show",{ 'member_number': position.booker.beneficiary.membership.memberNumber }) }}">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
+                                Créneau fixe réservé pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}">{{ position.shifter }}</a> le <i>{{ position.bookedTime | date_fr_with_time }}</i> par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
                                 <form action="{{ path('free_position_from_period', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">
                                         <i class="material-icons left">lock_open</i>Libérer
@@ -71,23 +87,23 @@
                                 </div>
                             </div>
                             <div class="collapsible-body">
-                                {{ form_start(pp_book_forms[position.id]) }}
+                                {{ form_start(positions_book_forms[position.id]) }}
                                 <div class="row">
                                     <div class="col s7 input-field">
-                                        {{ form_label(pp_book_forms[position.id].shifter) }}
-                                        {{ form_errors(pp_book_forms[position.id].shifter) }}
-                                        {{ form_widget(pp_book_forms[position.id].shifter) }}
+                                        {{ form_label(positions_book_forms[position.id].shifter) }}
+                                        {{ form_errors(positions_book_forms[position.id].shifter) }}
+                                        {{ form_widget(positions_book_forms[position.id].shifter) }}
                                     </div>
                                     <div class="col s3">
                                         <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter</button>
                                     </div>
                                 </div>
-                                {{ form_end(pp_book_forms[position.id]) }}
+                                {{ form_end(positions_book_forms[position.id]) }}
                                 <div class="row">
-                                    {{ form_start(positions_delete_form[position.id]) }}
-                                    {{ form_widget(positions_delete_form[position.id]) }}
+                                    {{ form_start(positions_delete_forms[position.id]) }}
+                                    {{ form_widget(positions_delete_forms[position.id]) }}
                                     <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
-                                    {{ form_end(positions_delete_form[position.id]) }}
+                                    {{ form_end(positions_delete_forms[position.id]) }}
                                 </div>
                             </div>
                         </li>
@@ -97,14 +113,14 @@
         {% endfor %}
     {% else %}
         {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{week}}</h6>
+            <h6>Semaine {{ week }}</h6>
             <ul>
             {% for position in positions %}
                 <li>
-                    {{ form_start(positions_delete_form[position.id]) }}
-                    {{ form_widget(positions_delete_form[position.id]) }}
+                    {{ form_start(positions_delete_forms[position.id]) }}
+                    {{ form_widget(positions_delete_forms[position.id]) }}
                     {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
-                    {{ form_end(positions_delete_form[position.id]) }}
+                    {{ form_end(positions_delete_forms[position.id]) }}
                 </li>
             {% endfor %}
             </ul>
@@ -130,21 +146,4 @@
         </div>
     </div>
     {{ form_end(position_form) }}
-
-    {{ form_start(delete_form) }}
-    <div id="remove-period" class="modal">
-        <div class="modal-content">
-            <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
-            <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
-        </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
-                Retour à la raison
-            </a>
-            <button type="submit" class="btn waves-effect waves-light orange">
-                <i class="material-icons left">check</i>Je sais ce que je fais !
-            </button>
-        </div>
-    </div>
-    {{ form_end(delete_form) }}
 {% endblock %}
