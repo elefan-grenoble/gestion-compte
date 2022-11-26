@@ -30,7 +30,7 @@ class BeneficiaryService
 
         $returnArray = array();
         foreach ($beneficiaries as $beneficiary){
-            $returnArray[$beneficiary->getAutocompleteLabel()] = '';
+            $returnArray[$beneficiary->getDisplayNameWithMemberNumber()] = '';
         }
         return $returnArray;
     }

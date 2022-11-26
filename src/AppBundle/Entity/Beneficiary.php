@@ -224,9 +224,17 @@ class Beneficiary
         return $this->getFirstname() . ' ' . $this->getLastname();
     }
 
+    /**
+     * /!\ DO NOT MODIFY /!\
+     *
+     * Such a method is also used for autocomplete. If you want to
+     * change it, you HAVE to adapt the methods used in data
+     * transformer: BeneficiaryToStringTransformer. Otherwise,
+     * autocomplete will be broken.
+     */
     public function getDisplayNameWithMemberNumber(): string
     {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
+        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     public function getDisplayNameWithMemberNumberAndStatusIcon(): string
@@ -618,11 +626,6 @@ class Beneficiary
         // 	for dispensed beneficiary &#127989;
         return $res;
 
-    }
-
-    public function getAutocompleteLabel(): string
-    {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     /**

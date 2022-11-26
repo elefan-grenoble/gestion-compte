@@ -35,7 +35,7 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
             return '';
         }
 
-        return $beneficiary->getAutocompleteLabel();
+        return $beneficiary->getDisplayNameWithMemberNumber();
     }
 
     /**
