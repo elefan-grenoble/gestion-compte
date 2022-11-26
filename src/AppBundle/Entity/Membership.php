@@ -126,6 +126,12 @@ class Membership
     private $createdAt;
 
     /**
+     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership",cascade={"persist", "remove"})
+     * @OrderBy({"createdAt" = "DESC"})
+     */
+    private $membershipShiftExemptions;
+
+    /**
      * Membership constructor.
      */
     public function __construct()
@@ -782,4 +788,28 @@ class Membership
             $logs = $this->getTimeLogs();
         return array_reduce($logs->toArray(), $sum, 0);
     }
+
+    /**
+     * Get membershipShiftExemptions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMembershipShiftExemptions()
+    {
+        return $this->membershipShiftExemptions;
+    }
+
+    /**
+     * Return if the membership is exempted from doing shifts
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function isExemptedFromShifts($date)
+    {
+        return array_reduce($this->membershipShiftExemptions, function($carry, MembershipShiftExemption $item) {
+            $carry = $carry || $item->isValid($date);
+        }, false);
+    }
+
 }
