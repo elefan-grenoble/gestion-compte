@@ -110,12 +110,13 @@ class ClientController extends Controller
 
             return $this->redirectToRoute('admin_clients');
 
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
-            }
+        // } elseif ($form->isSubmitted()){
+        //     foreach ($this->getErrorMessages($form) as $key => $errors){
+        //         foreach ($errors as $error)
+        //             $session->getFlashBag()->add('error', $key." : ".$error);
+        //     }
         }
+
         $delete_form = $this->createFormBuilder()
             ->setAction($this->generateUrl('client_remove', array('id' => $client->getId())))
             ->setMethod('DELETE')

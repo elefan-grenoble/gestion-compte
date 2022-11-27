@@ -512,50 +512,6 @@ class Beneficiary
     }
 
     /**
-     * Add givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     *
-     * @return Beneficiary
-     */
-    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxys[] = $givenProxy;
-
-        return $this;
-    }
-
-    /**
-     * Remove givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     */
-    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxys->removeElement($givenProxy);
-    }
-
-    /**
-     * Get givenProxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getGivenProxys()
-    {
-        return $this->given_proxys;
-    }
-
-    /**
-     * Get givenProxies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getGivenProxies()
-    {
-        return $this->given_proxies;
-    }
-
-    /**
      * Add receivedProxy
      *
      * @param \AppBundle\Entity\Proxy $receivedProxy

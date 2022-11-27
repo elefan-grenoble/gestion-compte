@@ -59,6 +59,20 @@ class PeriodPosition
      */
     private $bookedTime;
 
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+    }
+
+    public function __toString()
+    {
+        if ($this->getFormation())
+            return $this->getFormation()->getName();
+        else
+            return "Membre";
+    }
 
     /**
      * Get id
@@ -225,20 +239,4 @@ class PeriodPosition
         $this->setShifter(null);
         return $this;
     }
-
-    public function __toString()
-    {
-        if ($this->getFormation())
-            return $this->getFormation()->getName();
-        else
-            return "Membre";
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->periods = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
 }
