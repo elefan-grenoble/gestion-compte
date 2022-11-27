@@ -21,6 +21,7 @@ jobs:
         uses: shivammathur/setup-php@verbose
         with:
           php-version: ${{ matrix.php-versions }}
+          tools: composer:2.2.17
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
 
       # Composer
@@ -37,35 +38,9 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
-
-      # # https://github.com/sensiolabs/security-checker
-      # - name: Security check installed dependencies
-      #   uses: symfonycorp/security-checker-action@v2
-
-      # # https://github.com/chekalsky/phpcs-action (community)
-      # - name: Check PSR12 code style (PHP_CodeSniffer)
-      #   uses: chekalsky/phpcs-action@v1.2.0
-      #   with:
-      #     enable_warnings: true
-      #     installed_paths: '${{ github.workspace }}/vendor/squizlabs/php_codesniffer'
-      #     phpcs_bin_path: './vendor/bin/phpcs src --ignore="Migrations/"'
-
-      # https://github.com/phpmd/phpmd
-      # - name: Analyses PHP Code (PHP Mess Detector)
-      #  run: vendor/bin/phpmd src,tests text .phpmd-ruleset.xml
-
-      # # https://github.com/phpstan/phpstan
-      # - name: Analyse PHP Code (PHPStan)
-      #   run: vendor/bin/phpstan analyse src
-
-      # # Symfony
-      # - name: Check the Symfony console
-      #   run: |
-      #     php bin/console -V
-      #     php bin/console about
+        run: composer install --no-progress --prefer-dist --optimize-autoloader
 
       # Tests
       - name: Run unit and functional tests
         run: |
-          php bin/phpunit --stop-on-failure
+          php ./vendor/bin/phpunit
