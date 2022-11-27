@@ -9,6 +9,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\Session;
+use \Datetime;
 
 /**
  * MembershipShiftExemption controller.
@@ -56,6 +58,7 @@ class MembershipShiftExemptionController extends Controller
      */
     public function newAction(Request $request)
     {
+        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $membershipShiftExemption = new MembershipShiftExemption();
         $form = $this->createForm('AppBundle\Form\MembershipShiftExemptionType', $membershipShiftExemption);
@@ -64,18 +67,23 @@ class MembershipShiftExemptionController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $membership = $form->get("beneficiary")->getData()->getMembership();
             $membershipShiftExemption->setMembership($membership);
+
+            if ($this->isMembershipHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+                $session->getFlashBag()->add("error", "Désolé, les bénéficiaires ont déjà des créneaux planifiés sur la plage d'exemption.");
+                return $this->redirectToRoute('admin_membershipshiftexemption_new');
+            }
+
             $current_user = $this->get('security.token_storage')->getToken()->getUser();
             $membershipShiftExemption->setCreatedBy($current_user);
             $em->persist($membershipShiftExemption);
             $em->flush();
 
+            $session->getFlashBag()->add('success', 'L\'exemption de créneau a bien été crée !');
             return $this->redirectToRoute('admin_membershipshiftexemption_index');
         }
-        $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
 
         return $this->render('admin/membershipshiftexemption/new.html.twig', array(
             'membershipShiftExemption' => $membershipShiftExemption,
-            'beneficiaries' => $beneficiaries,
             'form' => $form->createView(),
         ));
     }
@@ -89,12 +97,19 @@ class MembershipShiftExemptionController extends Controller
      */
     public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
+        $session = new Session();
         $deleteForm = $this->createDeleteForm($membershipShiftExemption);
-        $editForm = $this->createForm('AppBundle\Form\MembershipShiftExemptionType', $membershipShiftExemption, ['edit' => true]);
+        $editForm = $this->createForm('AppBundle\Form\MembershipShiftExemptionType', $membershipShiftExemption);
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+
+            if ($this->isMembershipHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+                $session->getFlashBag()->add("error", "Désolé, les bénéficiaires ont déjà des créneaux planifiés sur la plage d'exemption.");
+            } else {
+                $session->getFlashBag()->add('success', 'L\'exemption de créneau a bien été éditée !');
+                $this->getDoctrine()->getManager()->flush();
+            }
 
             return $this->redirectToRoute('admin_membershipshiftexemption_edit', array('id' => $membershipShiftExemption->getId()));
         }
@@ -110,18 +125,29 @@ class MembershipShiftExemptionController extends Controller
      * Deletes a membershipShiftExemption entity.
      *
      * @Route("/{id}", name="admin_membershipshiftexemption_delete")
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_USER_MANAGER')")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
+        $session = new Session();
         $form = $this->createDeleteForm($membershipShiftExemption);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
+            $current_user = $this->get('security.token_storage')->getToken()->getUser();
+            $today = new Datetime('now');
+            $today->setTime(0, 0, 0);
+            if (($membershipShiftExemption->getStart() < $today) && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
+                $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour supprimer une exemption déjà commencée');
+                return $this->redirectToRoute('admin_membershipshiftexemption_edit', array('id' => $membershipShiftExemption->getId()));
+            }
+
             $em = $this->getDoctrine()->getManager();
             $em->remove($membershipShiftExemption);
             $em->flush();
+            $session->getFlashBag()->add('success', 'L\'exemption de créneau a bien été supprimée !');
         }
 
         return $this->redirectToRoute('admin_membershipshiftexemption_index');
@@ -141,5 +167,13 @@ class MembershipShiftExemptionController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function isMembershipHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
+    {
+        return $membershipShiftExemption->getMembership()->getInProgressAndUpcomingShifts(true)
+                          ->exists(function($key, $value) use ($membershipShiftExemption) {
+                              return $membershipShiftExemption->isValid($value->getStart());
+                          });
     }
 }
