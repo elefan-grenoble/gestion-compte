@@ -449,4 +449,21 @@ class ShiftService
         return $buckets;
     }
 
+
+    /**
+     * Check if the beneficiary has shifts that match parameters
+     * @param Beneficiary $beneficiary
+     * @param Datetime $start_before
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     * @return bool
+     */
+    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_before, \Datetime $start_after, \Datetime $end_before)
+    {
+        return count($this->em->getRepository('AppBundle:Shift')->findShifts($beneficiary,
+                $start_before,
+                $start_after,
+                $end_before)) > 0;
+    }
+
 }

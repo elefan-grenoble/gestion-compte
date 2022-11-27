@@ -11,11 +11,13 @@ class MemberCycleStartEvent extends Event
 
     private $membership;
     private $date;
+    private $currentCycleShifts;
 
-    public function __construct(Membership $user, \DateTime $date)
+    public function __construct(Membership $user, \DateTime $date, $currentCycleShifts)
     {
         $this->membership = $user;
         $this->date = $date;
+        $this->currentCycleShifts = $currentCycleShifts;
     }
 
     /**
@@ -32,6 +34,14 @@ class MemberCycleStartEvent extends Event
     public function getDate()
     {
         return $this->date;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCurrentCycleShifts()
+    {
+        return $this->currentCycleShifts;
     }
 
 }

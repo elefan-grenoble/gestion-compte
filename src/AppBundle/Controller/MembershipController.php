@@ -160,6 +160,7 @@ class MembershipController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
+        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, -1, 1);
 
         return $this->render('member/show.html.twig', array(
             'member' => $member,
@@ -181,6 +182,7 @@ class MembershipController extends Controller
             'time_log_form' => $timeLogForm->createView(),
             'period_positions' => $period_positions,
             'in_progress_and_upcoming_shifts' => $member->getInProgressAndUpcomingShifts(),
+            'shifts_by_cycle' => $shifts_by_cycle,
         ));
     }
 

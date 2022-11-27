@@ -298,12 +298,18 @@ class EmailingEventListener
 
         $membership = $event->getMembership();
         $date = $event->getDate();
+        $currentCycleShifts = $event->getCurrentCycleShifts();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
+        // Compute cycleShiftsDuration
+        $cycleShiftsDuration = 0;
+        foreach ($currentCycleShifts as $shift) {
+            $cycleShiftsDuration += $shift->getDuration();
+        }
         // member wont be frozen for this cycle && not a fresh new member && member still have to book
-        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) {
+        if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) {
             foreach ($membership->getBeneficiaries() as $beneficiary){
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
                     ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
@@ -331,11 +337,17 @@ class EmailingEventListener
 
         $membership = $event->getMembership();
         $date = $event->getDate();
+        $currentCycleShifts = $event->getCurrentCycleShifts();
 
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        if ($membership->getFirstShiftDate() < $date && $membership->getCycleShiftsDuration() < $this->due_duration_by_cycle) { //only if member still have to book
+        // Compute cycleShiftsDuration
+        $cycleShiftsDuration = 0;
+        foreach ($currentCycleShifts as $shift) {
+            $cycleShiftsDuration += $shift->getDuration();
+        }
+        if ($membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($membership->getMainBeneficiary()->getEmail())

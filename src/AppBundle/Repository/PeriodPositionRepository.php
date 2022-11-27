@@ -20,7 +20,10 @@ class PeriodPositionRepository extends \Doctrine\ORM\EntityRepository
     {
         $qb = $this->createQueryBuilder('pp');
         $qb->where('pp.shifter = :shifter')
-            ->setParameter('shifter', $beneficiary);
+            ->setParameter('shifter', $beneficiary)
+            ->leftJoin('pp.period', 'p')
+            ->addOrderBy('p.dayOfWeek', 'ASC')
+            ->addOrderBy('p.start', 'ASC');
 
         return $qb->getQuery()->getResult();
     }
@@ -36,7 +39,10 @@ class PeriodPositionRepository extends \Doctrine\ORM\EntityRepository
         $qb->where('pp.shifter IN (:shiftersId)')
             ->setParameter('shiftersId', array_map(function(Beneficiary $beneficiary) {
                 return $beneficiary->getId();
-            }, $beneficiaries->toArray()));
+            }, $beneficiaries->toArray()))
+            ->leftJoin('pp.period', 'p')
+            ->addOrderBy('p.dayOfWeek', 'ASC')
+            ->addOrderBy('p.start', 'ASC');
 
         return $qb->getQuery()->getResult();
     }
