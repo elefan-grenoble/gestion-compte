@@ -73,13 +73,14 @@ class DefaultController extends Controller
                     return $this->redirectToRoute('homepage');
                 }
 
-                $dayAfterEndOfCycle = clone $membership->endOfCycle();
+                $cycle_end = $this->get('membership_service')->getEndOfCycle($membership);
+                $dayAfterEndOfCycle = clone $cycle_end;
                 $dayAfterEndOfCycle->modify('+1 day');
                 if ($membership->getFrozenChange() && !$membership->getFrozen()) {
                     $now = new \DateTime('now');
                     $session->getFlashBag()->add('warning',
                         'Comme demandé, ton compte sera gelé dans ' .
-                        date_diff($now, $membership->endOfCycle())->format('%a jours') .
+                        date_diff($now, $cycle_end)->format('%a jours') .
                         ', le <strong>' . AppExtension::date_fr_long($dayAfterEndOfCycle) . '</strong>' .
                         " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"" .
                         $this->get('router')->generate('fos_user_profile_show')
@@ -89,7 +90,7 @@ class DefaultController extends Controller
                     $now = new \DateTime('now');
                     $session->getFlashBag()->add('notice',
                         'Comme demandé, ton compte sera dégelé dans ' .
-                        date_diff($now, $membership->endOfCycle())->format('%a jours') .
+                        date_diff($now, $cycle_end)->format('%a jours') .
                         ', le <strong>' . AppExtension::date_fr_long($dayAfterEndOfCycle) . '</strong>' .
                         " Pour annuler, visite <a style=\"text-decoration:underline;color:white;\" href=\"" .
                         $this->get('router')->generate('fos_user_profile_show')
@@ -235,7 +236,9 @@ class DefaultController extends Controller
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
         } else {
             $beneficiary = $card->getBeneficiary();
-            $counter = $beneficiary->getMembership()->getTimeCount($beneficiary->getMembership()->endOfCycle(0));
+            $membership = $beneficiary->getMembership();
+            $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
+            $counter = $membership->getTimeCount($cycle_end);
             if ($this->swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
                 if ($this->swipeCardLoggingAnonymous) {

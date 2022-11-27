@@ -129,8 +129,6 @@ class Beneficiary
      */
     private $received_proxies;
 
-    private $_counters = [];
-
     /**
      * @var \DateTime
      *
@@ -764,22 +762,6 @@ class Beneficiary
     public function getCreatedAt()
     {
         return $this->createdAt;
-    }
-
-    public function getTimeCount($cycle = 0)
-    {
-        if (!isset($this->_counters[$cycle])) {
-            $this->_counters[$cycle] = 0;
-            $member = $this->getMembership();
-            //todo add a custom query for this
-            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member, $cycle) {
-                return ($shift->getStart() > $member->startOfCycle($cycle) && $shift->getEnd() < $member->endOfCycle($cycle));
-            });
-            foreach ($beneficiary_shift_for_current_cycle as $s) {
-                $this->_counters[$cycle] += $s->getDuration();
-            }
-        }
-        return $this->_counters[$cycle];
     }
 
 }

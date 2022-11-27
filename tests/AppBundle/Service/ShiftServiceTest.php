@@ -7,10 +7,13 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use AppBundle\Repository\ShiftRepository;
+use AppBundle\Service\BeneficiaryService;
+use AppBundle\Service\MembershipService;
 use AppBundle\Service\ShiftService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
+use \Datetime;
 
 class ShiftServiceTest extends TestCase
 {
@@ -27,7 +30,9 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->shiftService = new ShiftService($this->em, 180, 90, false, false, '3 days', 30);
+        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
+        $this->shiftService = new ShiftService($this->em, 180, 90, false, false, '3 days', 30, $beneficiaryService, $membershipService);
     }
 
     public function testShiftTimeByCycle()
@@ -82,13 +87,17 @@ class ShiftServiceTest extends TestCase
         $shift = $this
             ->getMockBuilder(Shift::class)
             ->getMock();
+        $shift->method('getStart')
+             ->willReturn(new Datetime());
         $shift->expects($this->any())
             ->method('getIsPast')
             ->will($this->returnValue(false));
+        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
-            ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30])
+            ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30, $beneficiaryService, $membershipService])
             ->getMock();
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
@@ -128,10 +137,12 @@ class ShiftServiceTest extends TestCase
         $beneficiary = new Beneficiary();
         $beneficiary->setFlying(false);
 
+        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
-            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false, '3 days', 30])
+            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false, '3 days', 30, $beneficiaryService, $membershipService])
             ->getMock()
         ;
 

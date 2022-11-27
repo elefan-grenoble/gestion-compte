@@ -92,6 +92,7 @@ parameters:
     due_duration_by_cycle: 180
     min_shift_duration: 90
     cycle_duration: '28 days'
+    cycle_type: 'abcd'
     maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
     allow_extra_shifts: true

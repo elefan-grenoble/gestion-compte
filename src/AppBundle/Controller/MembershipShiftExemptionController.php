@@ -171,9 +171,10 @@ class MembershipShiftExemptionController extends Controller
 
     private function isMembershipHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
     {
-        return $membershipShiftExemption->getMembership()->getInProgressAndUpcomingShifts(true)
-                          ->exists(function($key, $value) use ($membershipShiftExemption) {
-                              return $membershipShiftExemption->isValid($value->getStart());
-                          });
+        $em = $this->getDoctrine()->getManager();
+        $shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
+        return $shifts->exists(function($key, $value) use ($membershipShiftExemption) {
+            return $membershipShiftExemption->isValid($value->getStart());
+        });
     }
 }

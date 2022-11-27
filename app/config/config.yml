@@ -54,6 +54,7 @@ twig:
     support_email: '%transactional_mailer_user%'
     images_tmp_dir: '%images_tmp_dir%'
     beneficiary_service: "@beneficiary_service"
+    membership_service: "@membership_service"
     shift_service: "@shift_service"
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
     allow_extra_shifts: '%allow_extra_shifts%'

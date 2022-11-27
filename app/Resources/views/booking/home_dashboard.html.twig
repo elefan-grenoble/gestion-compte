@@ -3,6 +3,7 @@
     {% set member = beneficiary.membership %}
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% set due_duration_hour = due_duration_by_cycle / 60 %}
+    {% set end_current_cycle = membership_service.endOfCycle(member) %}
     {% if not member.frozen %}
         {% if display_gauge %}
             <div class="gauge_container">
@@ -58,7 +59,7 @@
                     <span>{% if member.beneficiaries | length > 1 %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
                 </p>
             {% else %}
-                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) %}
+                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(end_current_cycle)) %}
                 <p>
                     Bravo ! {% if member.beneficiaries | length > 1 %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.
@@ -70,7 +71,7 @@
                         {% else %}
                             {{ (beneficiariesWhoCanBook | first).firstname }} peut
                         {% endif %} encore
-                        effectuer {{ (shift_service.shiftTimeByCycle(member) - member.timeCount(member.endOfCycle)) | duration_from_minutes }}.
+                        effectuer {{ duration_to_book | duration_from_minutes }}.
                     </p>
                 {% elseif (allow_extra_shifts) %}
                     <p>
@@ -99,5 +100,5 @@
         Réserver
     </a>
 
-    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ member.endOfCycle | date_fr_long }}</p>
+    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ end_current_cycle | date_fr_long }}</p>
 {% endif %}

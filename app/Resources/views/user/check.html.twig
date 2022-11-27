@@ -85,7 +85,7 @@
                     <br>
                     {% image '@AppBundle/Resources/public/img/emoticons/021-sad.svg' %}<img class="emoticon" src="{{ asset_url }}" alt=":(" />{% endimage %}</p>
                 {% if beneficiary.membership.frozenChange %}
-                    <p class="center-align">Le degel est programmé, il sera effectif le {{ beneficiary.user.endOfCycle(0) | date_fr_long }}</p>
+                    <p class="center-align">Le degel est programmé, il sera effectif le {{ membership_service.endOfCycle(beneficiary.membership) | date_fr_long }}</p>
                 {% else %}
                     <p class="center-align">Rendez vous sur {% if more_than_one %}votre{% else %}ton{% endif %} espace membre pour programmer le degel !</p>
                 {% endif %}

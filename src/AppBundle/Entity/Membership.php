@@ -108,10 +108,6 @@ class Membership
      */
     private $firstShiftDate;
 
-    // array of date
-    private $_startOfCycle;
-    private $_endOfCycle;
-
     /**
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
      * @OrderBy({"createdAt" = "DESC"})
@@ -497,20 +493,6 @@ class Membership
         return false;
     }
 
-
-    /**
-     * Get all in progress & upcoming shifts for all beneficiaries
-     * @param bool $excludeDismissed
-     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
-     */
-    public function getInProgressAndUpcomingShifts($excludeDismissed = false)
-    {
-        $now = new DateTime('now');
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($now) {
-            return $shift->getStart() > $now;
-        });
-    }
-
     /**
      * Get all reserved shifts for all beneficiaries
      */
@@ -523,71 +505,6 @@ class Membership
             }
         }
         return $shifts;
-    }
-
-
-    /**
-     * Get start date of current cycle
-     * IMPORTANT : time are reset, only date are kept
-     * @param int $cycleIndex
-     * @return DateTime|null
-     */
-    public function startOfCycle($cycleOffset = 0)
-    {
-        if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[$cycleOffset])) {
-            if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[0])){
-                if (!isset($this->_startOfCycle)) {
-                    $this->_startOfCycle = array();
-                }
-                $firstDate = $this->getFirstShiftDate();
-                $modFirst = null;
-                $now = new DateTime('now');
-                $now->setTime(0, 0, 0);
-                if ($firstDate) {
-                    $diff = $firstDate->diff($now);
-                    $currentCycleCount = intval($diff->format('%a') / 28);
-                }else{
-                    $firstDate = new DateTime('now');
-                    $currentCycleCount = 0;
-                }
-                $this->_startOfCycle[0] = clone($firstDate);
-                if ($firstDate < $now) {
-                    $this->_startOfCycle[0]->modify("+" . (28 * $currentCycleCount) . " days");
-                }
-            }
-            if ($cycleOffset != 0 ){
-                $this->_startOfCycle[$cycleOffset] = clone($this->_startOfCycle[0]);
-                $this->_startOfCycle[$cycleOffset]->modify((($cycleOffset>0)?"+":"").(28*$cycleOffset)." days");
-            }
-        }
-
-        return $this->_startOfCycle[$cycleOffset];
-    }
-
-    /**
-     * Get end date of current cycle
-     * @param int $cycleIndex
-     * @return DateTime|null
-     */
-    public function endOfCycle($cycleOffset = 0)
-    {
-        if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[$cycleOffset])) {
-            if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[0])) {
-                if (!isset($this->_endOfCycle)) {
-                    $this->_endOfCycle = array();
-                }
-                $this->_endOfCycle[0] = clone($this->startOfCycle());
-                $this->_endOfCycle[0]->modify("+27 days");
-                $this->_endOfCycle[0]->setTime(23, 59, 59);
-            }
-
-            if ($cycleOffset != 0 ){
-                $this->_endOfCycle[$cycleOffset] = clone($this->_endOfCycle[0]);
-                $this->_endOfCycle[$cycleOffset]->modify("+".(28*$cycleOffset)."days");
-            }
-        }
-
-        return $this->_endOfCycle[$cycleOffset];
     }
 
     /**

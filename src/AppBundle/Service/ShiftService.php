@@ -21,7 +21,8 @@ class ShiftService
     private $allowExtraShifts;
     private $forbidShiftOverlapTime;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime)
+    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts,
+        $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime, $beneficiaryService, $membershipService)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
@@ -30,6 +31,8 @@ class ShiftService
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
         $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
+        $this->beneficiaryService = $beneficiaryService;
+        $this->membershipService = $membershipService;
     }
 
     /**
@@ -39,7 +42,8 @@ class ShiftService
      */
     public function remainingToBook(Membership $member)
     {
-        return $this->due_duration_by_cycle - $member->getTimeCount($member->endOfCycle());
+        $cycle_end = $this->membershipService->getEndOfCycle($member);
+        return $this->due_duration_by_cycle - $member->getTimeCount($cycle_end);
     }
 
     /**
@@ -126,19 +130,18 @@ class ShiftService
         }
 
         $member = $beneficiary->getMembership();
-        $beneficiary_counter = $beneficiary->getTimeCount($cycle);
+        $beneficiary_counter = $this->beneficiaryService->getTimeCount($beneficiary, $cycle);
+        $cycle_end = $this->membershipService->getEndOfCycle($membership, $cycle);
+        $membership_counter = $member->getTimeCount($cycle_end);
 
         //check if beneficiary booked time is ok
         //if timecount < due_duration_by_cycle : some shift to catchup, can book more than what's due
-        if ($member->getTimeCount($member->endOfCycle($cycle)) >= $this->due_duration_by_cycle && $beneficiary_counter >= $this->due_duration_by_cycle) { //Beneficiary is already ok
+        if ($membership_counter >= $this->due_duration_by_cycle && $beneficiary_counter >= $this->due_duration_by_cycle) { //Beneficiary is already ok
             return false;
         }
 
-        // Time count before the end of cycle
-        $timeCounter = $member->getTimeCount($member->endOfCycle($cycle));
-
         // Check if there is some time to catchup for the membership
-        if ($duration + $timeCounter <= ($cycle + 1) * $this->due_duration_by_cycle) {
+        if ($duration + $membership_counter <= ($cycle + 1) * $this->due_duration_by_cycle) {
             return true;
         }
 
@@ -225,18 +228,28 @@ class ShiftService
             return false;
         }
 
-        $current_cycle = $this->getShiftCycleIndex($shift, $member);
-
         if ($member->getFrozen()) {
+            $cycle_end = $this->membershipService->getEndOfCycle($member);
             //current cycle : cannot book when frozen
-            if (!$current_cycle)
+            if ($shift->getStart() <= $cycle_end)
                 return false;
             //next cycle : cannot book if frozen
-            if ($current_cycle > 0 && !$member->getFrozenChange())
+            if ($shift->getStart() > $cycle_end && !$member->getFrozenChange())
                 return false;
         }
 
-        return $this->canBookDuration($beneficiary, $shift->getDuration(), $current_cycle) or $this->canBookExtraShift($beneficiary, $shift);
+        // TODO refactor code to remove shift_cycle
+        // canBookDuration method should not use TimeLog but request shifts
+        $shift_cycle = 0;
+        for ($cycle = 0; $cycle < 3; $cycle++) {
+            $current_cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
+            if ($shift->getStart() <= $current_cycle_end) {
+                $shift_cycle = $cycle;
+                break;
+            }
+        }
+
+        return $this->canBookDuration($beneficiary, $shift->getDuration(), $shift_cycle) or $this->canBookExtraShift($beneficiary, $shift);
     }
 
     /**
@@ -276,20 +289,6 @@ class ShiftService
     {
         $shifts = $this->em->getRepository('AppBundle:Shift')->findAlreadyBookedShiftsOfBucket($shift);
         return count($shifts) === 0;
-    }
-
-    public function getShiftCycleIndex(Shift $shift, Membership $membership)
-    {
-        $current_cycle = 0;
-        for ($cycle = 1; $cycle < 3; $cycle++) {
-            if ($shift->getStart() > $membership->endOfCycle($cycle - 1)) {
-                if ($shift->getStart() < $membership->endOfCycle($cycle)) {
-                    $current_cycle = $cycle;
-                    break;
-                }
-            }
-        }
-        return $current_cycle;
     }
 
     public function getBookableShifts(ShiftBucket $bucket, Beneficiary $beneficiary = null)
@@ -411,7 +410,7 @@ class ShiftService
             return false;
         }
         $registrationDate = $firstRegistration->getDate();
-        $startOfCycle = $membership->startOfCycle($cycle);
+        $startOfCycle = $this->membershipService->getStartOfCycle($membership, $cycle);
 
         return $registrationDate < $startOfCycle;
     }
@@ -458,14 +457,16 @@ class ShiftService
      * @param Beneficiary $beneficiary
      * @param Datetime $start_before
      * @param Datetime $start_after
+     * @param bool $excludeDismissed
      * @param Datetime $end_before
      * @return bool
      */
-    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_before, \Datetime $start_after, \Datetime $end_before)
+    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_before, \Datetime $start_after, $excludeDismissed, \Datetime $end_before)
     {
-        return count($this->em->getRepository('AppBundle:Shift')->findShifts($beneficiary,
+        return count($this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary,
                 $start_before,
                 $start_after,
+                $excludeDismissed,
                 $end_before)) > 0;
     }
 
