@@ -34,5 +34,4 @@ class BeneficiaryService
         }
         return $returnArray;
     }
-
 }

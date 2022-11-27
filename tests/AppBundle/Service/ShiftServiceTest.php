@@ -89,8 +89,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
             ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30])
-            ->getMock()
-        ;
+            ->getMock();
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
             ->willReturn($emptyShift);
@@ -100,7 +99,6 @@ class ShiftServiceTest extends TestCase
         $shiftService->expects($this->any())
             ->method('isBeginner')
             ->willReturn($beginner);
-
 
         return $shiftService->isShiftBookable($shift, $beneficiary);
     }
@@ -173,6 +171,7 @@ class ShiftServiceTest extends TestCase
     public function doTestHasPreviousValidShifts($shiftDate, $dismissed = false)
     {
         $shifts = new ArrayCollection();
+
         if ($shiftDate)
         {
             $shift = new Shift();
@@ -180,7 +179,6 @@ class ShiftServiceTest extends TestCase
             $shift->setStart($shiftDate);
             $shifts->add($shift);
         }
-
 
         $beneficiary = $this->getMockBuilder(Beneficiary::class)->getMock();
         $beneficiary->expects($this->any())
@@ -191,8 +189,7 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->setMethodsExcept(['hasPreviousValidShifts'])
             ->disableOriginalConstructor()
-            ->getMock()
-        ;
+            ->getMock();
 
         return $shiftService->hasPreviousValidShifts($beneficiary);
     }
