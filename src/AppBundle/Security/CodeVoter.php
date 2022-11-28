@@ -130,14 +130,11 @@ class CodeVoter extends Voter
             $end_before = new \DateTime();
             $end_before->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
 
-            if (!$this->container->get("shift_service")->isBeneficiaryHasShifts($user->getBeneficiary(),
+            return $this->container->get("shift_service")->isBeneficiaryHasShifts($user->getBeneficiary(),
                 $start_after,
                 $end_before,
                 true,
-                $start_before)
-            ) {
-                return false;
-            }
+                $start_before);
         }
 
         return false;

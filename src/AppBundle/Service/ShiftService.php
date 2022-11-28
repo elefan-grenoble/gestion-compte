@@ -461,13 +461,13 @@ class ShiftService
      * @param Datetime $end_before
      * @return bool
      */
-    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_before, \Datetime $start_after, $excludeDismissed, \Datetime $end_before)
+    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $end_before, $excludeDismissed, \Datetime $start_before)
     {
-        return count($this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary,
-                $start_before,
+        return !$this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary,
                 $start_after,
+                $end_before,
                 $excludeDismissed,
-                $end_before)) > 0;
+                $start_before)->isEmpty();
     }
 
 }
