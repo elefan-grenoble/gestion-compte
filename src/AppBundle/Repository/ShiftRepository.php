@@ -3,8 +3,11 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
+use Doctrine\Common\Collections\ArrayCollection;
+use \Datetime;
 
 /**
  * ShiftRepository
@@ -304,63 +307,103 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /**
-     * Get shifts of specific cycles for a given membership
-     * @param $fromCycleOffset int to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
-     * @param $toCycleOffset int to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
+     * Get shifts for a given membership grouped in cycles
+     * @param Membership $membership
+     * @param Datetime $start_after
+     * @param Datetime $end_before
      * @param bool $excludeDismissed
      */
-    public function findShiftsOfCycles($membership, $fromCycleOffset = 0, $toCycleOffset = 0, $excludeDismissed = false)
+    public function findShiftsByCycles($membership, $start_after, $end_before, $excludeDismissed = false)
+    {
+        $shifts = $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before, $excludeDismissed);
+        $now = new DateTime('now');
+        $now->setTime(0, 0, 0);
+        // Compute the cycle number corresponding to the $start_after date
+        // 0 for current cycle, 1 for next, -1 for previous...
+        $startCycleNumber = intval($now->diff($start_after)->format('%r%a') / 28);
+        if ($start_after > $now) {
+            $startCycleNumber = $startCycleNumber + 1;
+        }
+        // Compute the cycle number corresponding to the $end_before date
+        $endCycleNumber = $startCycleNumber + intval($start_after->diff($end_before)->format('%a') / 28);
+        // Create empty arrays
+        $shiftsByCycles = [];
+        foreach(range($startCycleNumber, $endCycleNumber) as $cycle) {
+            $shiftsByCycles[$cycle] = [];
+        }
+        // Compute for each shift its cycle and assign it to the corresponding array
+        foreach($shifts as $shift) {
+            // Compute the number of elapsed cycles until today
+            $diff = $start_after->diff($shift->getStart())->format('%a');
+            $cycle = $startCycleNumber + intval($diff / 28);
+            $shiftsByCycles[$cycle][] = $shift;
+        }
+        return $shiftsByCycles;
+    }
+
+    /**
+     * Get in progress and upcoming shifts for a given membership
+     * @param Membership $membership
+     */
+    public function findInProgressAndUpcomingShiftsForMembership($membership)
+    {
+        $now = new \Datetime('now');
+        return $this->findShifts($membership->getBeneficiaries(), $now, null, true);
+    }
+
+    /**
+     * Get shifts for a given membership at a given time
+     * @param Membership
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     * @param bool $excludeDismissed
+     * @param Datetime $start_before
+     */
+    public function findShiftsForMembership(Membership $membership, $start_after, $end_before, $excludeDismissed = false)
+    {
+        return $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before, $excludeDismissed);
+    }
+
+    /**
+     * Get shifts for a given beneficiary at a given time
+     * @param Beneficiary $beneficiary
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     * @param bool $excludeDismissed
+     * @param Datetime $start_before
+     */
+    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $excludeDismissed = false, $start_before = null)
+    {
+        return $this->findShifts([$beneficiary], $start_after, $end_before, $excludeDismissed, $start_before);
+    }
+
+    private function findShifts($beneficiaries, $start_after, $end_before, $excludeDismissed = false, $start_before = null)
     {
         $qb = $this->createQueryBuilder('s')
                     ->where('s.shifter IN (:beneficiaries)')
-                    ->andwhere('s.start > :startOfCycle')
-                    ->andwhere('s.end < :endOfCycle')
-                    ->setParameter('beneficiaries', $membership->getBeneficiaries())
-                    ->setParameter('startOfCycle', $membership->startOfCycle($fromCycleOffset))
-                    ->setParameter('endOfCycle', $membership->endOfCycle($toCycleOffset));
+                    ->andwhere('s.start > :start_after')
+                    ->setParameter('beneficiaries', $beneficiaries)
+                    ->setParameter('start_after', $start_after);
+
+        if ($end_before != null) {
+            $qb = $qb->andwhere('s.end < :end_before')
+                     ->setParameter('end_before', $end_before);
+        }
+
+        if ($start_before != null) {
+            $qb = $qb->andwhere('s.start < :start_before')
+                     ->setParameter('start_before', $start_before);
+        }
         if ($excludeDismissed) {
             $qb = $qb->andWhere('s.isDismissed = :excludeDismissed')
                      ->setParameter('excludeDismissed', !$excludeDismissed);
         }
         $qb = $qb->orderBy("s.start", "ASC");
 
-        return $qb
+        $result = $qb
             ->getQuery()
             ->getResult();
-    }
 
-    public function findShiftsByCycles($membership, $fromCycleOffset = 0, $toCycleOffset = 0, $excludeDismissed = false)
-    {
-        $shifts = $this->findShiftsOfCycles($membership, $fromCycleOffset, $toCycleOffset, $excludeDismissed);
-        $shiftsByCycles = [];
-        $cycles = range($fromCycleOffset, $toCycleOffset);
-        foreach($cycles as $cycle) {
-            $shiftsByCycles[$cycle] = [];
-        }
-        foreach($shifts as $shift) {
-            foreach($cycles as $cycle) {
-                if ($shift->getEnd() < $membership->endOfCycle($cycle)) {
-                    array_push($shiftsByCycles[$cycle], $shift);
-                    break;
-                }
-            }
-        }
-        return $shiftsByCycles;
-    }
-
-    public function findShifts($beneficiary, $start_before, $start_after, $end_before)
-    {
-        $qb = $this->createQueryBuilder('s')
-                    ->where('s.shifter = :beneficiary')
-                    ->andwhere('s.start < :start_before')
-                    ->andwhere('s.start > :start_after')
-                    ->andwhere('s.end < :end_before')
-                    ->setParameter('beneficiary', $beneficiary)
-                    ->setParameter('start_before', $start_before)
-                    ->setParameter('start_after', $start_after)
-                    ->setParameter('end_before', $end_before);
-        return $qb
-            ->getQuery()
-            ->getResult();
+        return new ArrayCollection($result);
     }
 }

@@ -16,9 +16,10 @@ class BeneficiaryService
 
     protected $em;
 
-    public function __construct($em)
+    public function __construct($em, $membershipService)
     {
         $this->em = $em;
+        $this->membershipService = $membershipService;
     }
 
     /**
@@ -33,5 +34,20 @@ class BeneficiaryService
             $returnArray[$beneficiary->getDisplayNameWithMemberNumber()] = '';
         }
         return $returnArray;
+    }
+
+    public function getTimeCount(Beneficiary $beneficiary, $cycle = 0)
+    {
+        $member = $beneficiary->getMembership();
+        $cycle_start = $this->membershipService->getStartOfCycle($member, $cycle);
+        $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
+
+        $shifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end, true);
+
+        $counter = 0;
+        foreach ($shifts as $shift) {
+            $counter += $shift->getDuration();
+        }
+        return $counter;
     }
 }

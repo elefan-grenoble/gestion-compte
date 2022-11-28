@@ -172,12 +172,15 @@ services:
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
+                - '@beneficiary_service'
+                - '@membership_service'
 
     beneficiary_service:
             class:  AppBundle\Service\BeneficiaryService
             public: true
             arguments:
                 - "@doctrine.orm.entity_manager"
+                - '@membership_service'
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor
@@ -220,6 +223,7 @@ services:
                 - "@doctrine.orm.entity_manager"
                 - "%registration_duration%"
                 - "%registration_every_civil_year%"
+                - "%cycle_type%"
 
     event_service:
             class: AppBundle\Service\EventService

@@ -1,8 +1,9 @@
+{% set end_current_cycle = membership_service.endOfCycle(member) %}
 {% if not member.frozen %}
     {% if member.frozenChange %}
         <br />
         Comme demandé, mon compte sera gelé à la fin de mon cycle courant. soit le
-        <strong>{{ member.endOfCycle | date_modify('+1 day') |date_fr_long }}</strong>
+        <strong>{{ end_current_cycle | date_modify('+1 day') |date_fr_long }}</strong>
         <br />
         <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
             <i class="material-icons left">cancel</i>Annuler le gel de mon compte
@@ -24,7 +25,7 @@
                     Pendant le gel, tu n'as plus accès au magasin, mais tu n'es pas engagé par le bénévolat.
                     <br />
                     Le gel sera effectif dès le début de ton prochain cycle, soit le
-                    <strong>{{ member.endOfCycle | date_modify("+1 day") | date_fr_long }}</strong> et
+                    <strong>{{ end_current_cycle | date_modify("+1 day") | date_fr_long }}</strong> et
                     reste actif pour <strong>au minimum un cycle complet</strong>.
                     <br />
                     Tu peux demander le dégel à tout moment.
@@ -40,7 +41,7 @@
     {% endif %}
 {% else %}
     {% if member.frozenChange %}
-        Mon compte sera degelé à la fin de mon cycle courrant qui termine le {{ member.endOfCycle |date_fr_long }}<br>
+        Mon compte sera degelé à la fin de mon cycle courrant qui termine le {{ end_current_cycle |date_fr_long }}<br>
         <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
             <i class="material-icons left">cancel</i>Annuler la demande de degel de mon compte
         </a>

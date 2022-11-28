@@ -10,18 +10,22 @@ use AppBundle\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
+use \Datetime;
 
 class MembershipService
 {
 
     protected $em;
     protected $registration_duration;
+    protected $registration_every_civil_year;
+    protected $cycle_type;
 
-    public function __construct($em, $registration_duration, $registration_every_civil_year)
+    public function __construct($em, $registration_duration, $registration_every_civil_year, $cycle_type)
     {
         $this->em = $em;
         $this->registration_duration = $registration_duration;
         $this->registration_every_civil_year = $registration_every_civil_year;
+        $this->cycle_type = $cycle_type;
     }
 
     /**
@@ -93,4 +97,62 @@ class MembershipService
     {
         return ($this->getRemainder($membership)->format("%R%a") >= 0);
     }
+
+    /**
+     * Get start date of current cycle
+     * @param Membership $membership
+     * @param int $cycleOffset
+     * @return DateTime|null
+     */
+    public function getStartOfCycle(Membership $membership, $cycleOffset = 0)
+    {
+        if ($this->cycle_type == "abcd") {
+            $date = new DateTime('now');
+            // 0 (for Monday) through 6 (for Sunday)
+            $day = $date->format("N") - 1;
+            // 0 (for week A) through 3 (for week D)
+            $week = ($date->format("W") - 1) % 4;
+            // Set date to last monday
+            $date->modify('-' . $day . ' days');
+            // Set date to monday of week A
+            $date->modify('-'. (7 * $week) . ' days');
+        } else {
+            $firstDate = $this->getFirstShiftDate();
+            if ($firstDate) {
+                $now = new DateTime('now');
+                $date = clone($firstDate);
+                if ($firstDate < $now) {
+                    // Compute the number of elapsed cycles until today
+                    $diff = $firstDate->diff($now)->format("%a");
+                    $currentCycleCount = intval($diff / 28);
+                    $date->modify("+" . (28 * $currentCycleCount) . " days");
+                }
+            }else{
+                $date = new DateTime('now');
+            }
+        }
+        // Set time to 0h:0m:0s
+        $date->setTime(0, 0, 0);
+        if ($cycleOffset != 0 ){
+            // Set date cycleOffset
+            // TODO should use cycle_duration instead of hardcoded 28
+            $date->modify((($cycleOffset>0) ? "+" : "") . (28 * $cycleOffset) . ' days');
+        }
+        return $date;
+    }
+
+    /**
+     * Get end date of current cycle
+     * @param Membership $membership
+     * @param int $cycleIndex
+     * @return DateTime|null
+     */
+    public function getEndOfCycle(Membership $membership, $cycleOffset = 0)
+    {
+        $date = clone($this->getStartOfCycle($membership, $cycleOffset));
+        $date->modify("+27 days");
+        $date->setTime(23, 59, 59);
+        return $date;
+    }
+
 }

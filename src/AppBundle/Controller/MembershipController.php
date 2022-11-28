@@ -160,8 +160,11 @@ class MembershipController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
-        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, -1, 1);
+        $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1);
+        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
+        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
 
+        $in_progress_and_upcoming_shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($member);
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
@@ -181,7 +184,7 @@ class MembershipController extends Controller
             'delete_form' => $deleteForm->createView(),
             'time_log_form' => $timeLogForm->createView(),
             'period_positions' => $period_positions,
-            'in_progress_and_upcoming_shifts' => $member->getInProgressAndUpcomingShifts(),
+            'in_progress_and_upcoming_shifts' => $in_progress_and_upcoming_shifts,
             'shifts_by_cycle' => $shifts_by_cycle,
         ));
     }

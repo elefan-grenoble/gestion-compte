@@ -25,7 +25,7 @@
             {% elseif cycle == 1 %}
                 Prochain cycle
             {% endif %}
-            (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})
+            (du {{ membership_service.startOfCycle(member,cycle) | date_fr_long }} au {{ membership_service.endOfCycle(member,cycle) | date_fr_long }})
         </h6>
         {% if shifts | length == 0 %}
             Pas de créneau

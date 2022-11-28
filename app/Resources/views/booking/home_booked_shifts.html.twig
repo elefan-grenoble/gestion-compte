@@ -38,7 +38,7 @@
             {% if (cycle in [0, 1]) and (shiftsOfCycle | length > 0) %}
                 <li class="active">
                     <div class="collapsible-header">
-                        <i class="material-icons">date_range</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ member.startOfCycle(cycle) | date_fr_long }} au {{ member.endOfCycle(cycle) | date_fr_long }})
+                        <i class="material-icons">date_range</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ membership_service.startOfCycle(member,cycle) | date_fr_long }} au {{ membership_service.endOfCycle(member,cycle) | date_fr_long }})
                     </div>
                     <div class="collapsible-body">
                         <div class="row">
@@ -64,7 +64,7 @@
                             {% if shift_service.hasCycle(member, cycle) %}
                                 <div class="col s12 m6 l4">
                                     {% set previousShifts = shiftsByCycle[cycle] %}
-                                    <h6>Cycle précédent (du {{ member.startOfCycle(cycle) | date('d/m/y') }} au {{ member.endOfCycle(cycle) | date('d/m/y') }})</h6>
+                                    <h6>Cycle précédent (du {{ membership_service.startOfCycle(member,cycle) | date('d/m/y') }} au {{ membership_service.endOfCycle(member,cycle) | date('d/m/y') }})</h6>
                                     {% if previousShifts|length == 0 %}
                                         Pas de créneau
                                     {% endif %}

@@ -37,7 +37,9 @@ class InitTimeLogCommand extends ContainerAwareCommand
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
 
-                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsOfCycle($member, -1, 0, true);
+                $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1);
+                $current_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 0);
+                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end, true);
                 foreach ($shifts as $shift) {
                     $this->createShiftLog($em, $shift, $member);
                     $countShiftLogs++;
@@ -78,7 +80,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
      */
     private function createCurrentCycleBeginningLog(EntityManager $em, Membership $membership)
     {
-        $date = $membership->startOfCycle(0);
+        $date = $this->get('membership_service')->getStartOfCycle($membership, 0);
         $log = new TimeLog();
         $log->setMembership($membership);
         $log->setTime(-180);

@@ -59,7 +59,7 @@
                 {% endfor %}
             </div>
         </li>
-        {% if beneficiary and (( beneficiary.membership.endOfCycle(current_cycle) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') )) %}
+        {% if beneficiary and (( membership_service.endOfCycle(beneficiary.membership, current_cycle) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') )) %}
                 {% set current_cycle = current_cycle + 1 %}
             </ul>
             <ul class="collapsible" accordion="false">
