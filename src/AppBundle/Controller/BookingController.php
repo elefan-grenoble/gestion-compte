@@ -478,7 +478,6 @@ class BookingController extends Controller
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
         $session = new Session();
-
         $em = $this->getDoctrine()->getManager();
 
         if ($shift) {

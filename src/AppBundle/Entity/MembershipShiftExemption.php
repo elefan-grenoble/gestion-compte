@@ -3,6 +3,8 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * MembershipShiftExemption
@@ -10,6 +12,12 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="membership_shift_exemption")
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipShiftExemptionRepository")
+ * @UniqueEntity(
+ *     fields={"membership", "start"},
+ * )
+ * @UniqueEntity(
+ *     fields={"membership", "end"},
+ * )
  */
 class MembershipShiftExemption
 {
@@ -43,6 +51,7 @@ class MembershipShiftExemption
 
     /**
      * @var string
+     * @Assert\NotBlank
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=false)
      */
@@ -55,16 +64,17 @@ class MembershipShiftExemption
     private $membership;
 
     /**
-     * @var \DateTime
+     * @Assert\Date
      *
      * @ORM\Column(name="start", type="date")
      */
     private $start;
 
     /**
-     * @var \DateTime
+     * @Assert\Date
      *
      * @ORM\Column(name="end", type="date")
+     * @Assert\GreaterThan(propertyPath="start")
      */
     private $end;
 
@@ -237,12 +247,20 @@ class MembershipShiftExemption
     }
 
     /**
+     * @Assert\IsTrue(message="La date de début doit être avant celle de fin")
+     */
+    public function isStartBeforeEnd()
+    {
+        return $this->start < $this->end;
+    }
+
+    /**
      * Return if the membershipShiftExemption is valid for a given date
      *
      * @param \DateTime $date
      * @return \DateTime
      */
-    public function isValid($date)
+    public function isValid(\Datetime $date)
     {
         return ($date >= $this->start) && ($date <= $this->end);
     }

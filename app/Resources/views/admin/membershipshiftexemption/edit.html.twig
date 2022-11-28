@@ -13,6 +13,7 @@
     <h4>Editer une exemption de bénévolat</h4>
 
     {{ form_start(edit_form) }}
+    {{ form_errors(edit_form) }}
     <div class="row">
         <div class="col s6">
             <label for="beneficiaries">Bénéficiaires</label>
@@ -43,7 +44,7 @@
     <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     {{ form_end(edit_form) }}
 
-    {% if is_granted("ROLE_SUPER_ADMIN") %}
+    {% if (membershipShiftExemption.start|date('Y-m-d') > "now"|date('Y-m-d')) or is_granted("ROLE_SUPER_ADMIN") %}
         {{ form_start(delete_form) }}
         <button type="submit" class="btn waves-effect waves-light red"><i class="material-icons left">delete</i>Supprimer</button>
         {{ form_end(delete_form) }}

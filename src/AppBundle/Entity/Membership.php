@@ -759,11 +759,11 @@ class Membership
      * @param \DateTime $date
      * @return boolean
      */
-    public function isExemptedFromShifts($date)
+    public function isExemptedFromShifts(\Datetime $date)
     {
-        return array_reduce($this->membershipShiftExemptions, function($carry, MembershipShiftExemption $item) {
-            $carry = $carry || $item->isValid($date);
-        }, false);
+        return $this->membershipShiftExemptions->exists(function($key, $value) use ($date) {
+            return $value->isValid($date);
+        });
     }
 
 }

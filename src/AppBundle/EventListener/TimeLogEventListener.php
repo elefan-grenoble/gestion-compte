@@ -131,6 +131,8 @@ class TimeLogEventListener
             $this->createRegistrationExpiredLog($member);
         } else if ($member->getFrozen()) {
             $this->createFrozenLog($member);
+        } else if ($member->isExemptedFromShifts($date)) {
+            $this->createExemptedLog($member);
         } else {
             $this->createCycleBeginningLog($member, $date);
         }
@@ -220,6 +222,21 @@ class TimeLogEventListener
         $log->setMembership($membership);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_FROZEN);
+        $this->em->persist($log);
+        $this->em->flush();
+    }
+
+    /**
+     * @param Membership $membership
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createExemptedLog(Membership $membership)
+    {
+        $log = new TimeLog();
+        $log->setMembership($membership);
+        $log->setTime(0);
+        $log->setType(TimeLog::TYPE_CYCLE_END_EXEMPTED);
         $this->em->persist($log);
         $this->em->flush();
     }
