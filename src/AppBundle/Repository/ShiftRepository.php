@@ -372,12 +372,12 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @param bool $excludeDismissed
      * @param Datetime $start_before
      */
-    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $excludeDismissed = false, $start_before = null)
+    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $excludeDismissed = false, $start_before = null, $end_after = null)
     {
-        return $this->findShifts([$beneficiary], $start_after, $end_before, $excludeDismissed, $start_before);
+        return $this->findShifts([$beneficiary], $start_after, $end_before, $excludeDismissed, $start_before, $end_after);
     }
 
-    private function findShifts($beneficiaries, $start_after, $end_before, $excludeDismissed = false, $start_before = null)
+    private function findShifts($beneficiaries, $start_after, $end_before, $excludeDismissed = false, $start_before = null, $end_after = null)
     {
         $qb = $this->createQueryBuilder('s')
                     ->where('s.shifter IN (:beneficiaries)')
@@ -386,14 +386,18 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                     ->setParameter('start_after', $start_after);
 
         if ($end_before != null) {
-            if ($start_before != null) {
-                $qb = $qb->andwhere('((s.end < :end_before) or (s.start < :start_before))')
-                         ->setParameter('end_before', $end_before)
-                         ->setParameter('start_before', $start_before);
-            } else {
-                $qb = $qb->andwhere('s.end < :end_before')
-                         ->setParameter('end_before', $end_before);
-            }
+            $qb = $qb->andwhere('s.end < :end_before')
+                     ->setParameter('end_before', $end_before);
+        }
+
+        if ($start_before != null) {
+            $qb = $qb->andwhere('s.start < :start_before')
+                     ->setParameter('start_before', $start_before);
+        }
+
+        if ($end_after != null) {
+            $qb = $qb->andwhere('s.end > :end_after')
+                     ->setParameter('end_after', $end_after);
         }
 
         if ($excludeDismissed) {

@@ -125,16 +125,17 @@ class CodeVoter extends Voter
 
             $start_after = new \DateTime('Yesterday');
             $start_after->setTime(23, 59, 59);
+            $end_after = new \DateTime();
+            $end_after->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
             $start_before = new \DateTime();
-            $start_before->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
-            $end_before = new \DateTime();
-            $end_before->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
+            $start_before->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
 
             return $this->container->get("shift_service")->isBeneficiaryHasShifts($user->getBeneficiary(),
                 $start_after,
-                $end_before,
-                true,
-                $start_before);
+                $start_before,
+                $end_after,
+                true
+            );
         }
 
         return false;
