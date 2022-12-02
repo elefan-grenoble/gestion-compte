@@ -131,7 +131,7 @@ class ShiftService
 
         $member = $beneficiary->getMembership();
         $beneficiary_counter = $this->beneficiaryService->getTimeCount($beneficiary, $cycle);
-        $cycle_end = $this->membershipService->getEndOfCycle($membership, $cycle);
+        $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
         $membership_counter = $member->getTimeCount($cycle_end);
 
         //check if beneficiary booked time is ok
@@ -398,19 +398,19 @@ class ShiftService
 
     /**
      * Check if the given cycle is after the registration of this member
-     * @param Membership $membership
+     * @param Membership $member
      * @param $cycle
      * @return bool
      */
-    public function hasCycle(Membership $membership, $cycle)
+    public function hasCycle(Membership $member, $cycle)
     {
         /** @var Registration $firstRegistration */
-        $firstRegistration = $membership->getRegistrations()->first();
+        $firstRegistration = $member->getRegistrations()->first();
         if (!$firstRegistration) {
             return false;
         }
         $registrationDate = $firstRegistration->getDate();
-        $startOfCycle = $this->membershipService->getStartOfCycle($membership, $cycle);
+        $startOfCycle = $this->membershipService->getStartOfCycle($member, $cycle);
 
         return $registrationDate < $startOfCycle;
     }
@@ -451,7 +451,6 @@ class ShiftService
         return $buckets;
     }
 
-
     /**
      * Check if the beneficiary has shifts that match parameters
      * @param Beneficiary $beneficiary
@@ -470,5 +469,4 @@ class ShiftService
                 $start_before,
                 $end_after)->isEmpty();
     }
-
 }

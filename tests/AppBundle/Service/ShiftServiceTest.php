@@ -23,6 +23,17 @@ class ShiftServiceTest extends TestCase
     protected $shiftService;
 
     private $em;
+    // Membership parameters
+    private $registration_duration = '1 year';
+    private $registration_every_civil_year = true;
+    private $cycle_type = 'abcd';
+    // Shift parameters
+    private $due_duration_by_cycle = 180;
+    private $min_shift_duration = 90;
+    private $new_users_start_as_beginner = false;
+    private $allow_extra_shifts = false;
+    private $max_time_in_advance_to_book_extra_shifts = '3 days';
+    private $forbid_shift_overlap_time = 30;
 
     public function setUp()
     {
@@ -30,9 +41,9 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $membershipService = new MembershipService($this->em, $this->registration_duration, $this->registration_every_civil_year, $this->cycle_type);
         $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
-        $this->shiftService = new ShiftService($this->em, 180, 90, false, false, '3 days', 30, $beneficiaryService, $membershipService);
+        $this->shiftService = new ShiftService($this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService);
     }
 
     public function testShiftTimeByCycle()
@@ -92,12 +103,12 @@ class ShiftServiceTest extends TestCase
         $shift->expects($this->any())
             ->method('getIsPast')
             ->will($this->returnValue(false));
-        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $membershipService = new MembershipService($this->em, $this->registration_duration, $this->registration_every_civil_year, $this->cycle_type);
         $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
-            ->setConstructorArgs([$this->em, 180, 90, false, false, '3 days', 30, $beneficiaryService, $membershipService])
+            ->setConstructorArgs([$this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService])
             ->getMock();
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
@@ -137,12 +148,12 @@ class ShiftServiceTest extends TestCase
         $beneficiary = new Beneficiary();
         $beneficiary->setFlying(false);
 
-        $membershipService = new MembershipService($this->em, '1 year', true, 'abcd');
+        $membershipService = new MembershipService($this->em, $this->registration_duration, $this->registration_every_civil_year, $this->cycle_type);
         $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
-            ->setConstructorArgs([$this->em, 180, 90, $newUserStartAsBeginner, false, '3 days', 30, $beneficiaryService, $membershipService])
+            ->setConstructorArgs([$this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $newUserStartAsBeginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService])
             ->getMock()
         ;
 
