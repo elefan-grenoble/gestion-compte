@@ -103,7 +103,6 @@ class MembershipShiftExemptionController extends Controller
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-
             if ($this->isMembershipHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
                 $session->getFlashBag()->add("error", "Désolé, les bénéficiaires ont déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
@@ -111,7 +110,7 @@ class MembershipShiftExemptionController extends Controller
                 $this->getDoctrine()->getManager()->flush();
             }
 
-            return $this->redirectToRoute('admin_membershipshiftexemption_edit', array('id' => $membershipShiftExemption->getId()));
+            return $this->redirectToRoute('admin_membershipshiftexemption_index');
         }
 
         return $this->render('admin/membershipshiftexemption/edit.html.twig', array(
