@@ -35,7 +35,7 @@ class MembershipService
      * @return \DateInterval|false
      * @throws \Exception
      */
-    public function getRemainder(Membership $membership,\DateTime $date = null)
+    public function getRemainder(Membership $membership, \DateTime $date = null)
     {
         if (!$date){
             $date = new \DateTime('now');

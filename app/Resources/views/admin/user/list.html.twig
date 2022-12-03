@@ -233,6 +233,9 @@
                         {% if not member.mainBeneficiary.user.isEnabled %}
                             <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
                         {% endif %}
+                        {% if member.isExemptedFromShifts() %}
+                            <i class="material-icons" title="Compte exempté">beach_access</i>
+                        {% endif %}
                     </td>
                     <td>
                         <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a>

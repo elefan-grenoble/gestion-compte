@@ -676,8 +676,11 @@ class Membership
      * @param \DateTime $date
      * @return boolean
      */
-    public function isExemptedFromShifts(\Datetime $date)
+    public function isExemptedFromShifts(\DateTime $date = null)
     {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
         return $this->membershipShiftExemptions->exists(function($key, $value) use ($date) {
             return $value->isValid($date);
         });
