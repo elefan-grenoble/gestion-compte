@@ -9,12 +9,11 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des exemptions de bénévolat</h4>
+    <h4>Liste des exemptions de bénévolat ({{ shiftExemptions | length }})</h4>
 
-    <table class="responsive-table striped">
+    <table class="responsive-table">
         <thead>
             <tr>
-                <th>id</th>
                 <th>Exemption</th>
                 <th>Actions</th>
             </tr>
@@ -23,7 +22,6 @@
         <tbody>
         {% for shiftExemption in shiftExemptions %}
             <tr>
-                <td>{{ shiftExemption.id }}</td>
                 <td>{{ shiftExemption.name }}</td>
                 <td>
                     <a href="{{ path('admin_shiftexemption_edit', { 'id': shiftExemption.id }) }}"><i class="material-icons">edit</i>editer</a>
