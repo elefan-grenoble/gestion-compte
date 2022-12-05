@@ -40,8 +40,9 @@ class CycleStartCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
         $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $cycle_type = $this->getContainer()->getParameter('cycle_type');
 
-        $members_with_cycle_starting_today = $em->getRepository('AppBundle:Membership')->findWithNewCycleStarting($date);
+        $members_with_cycle_starting_today = $em->getRepository('AppBundle:Membership')->findWithNewCycleStarting($date, $cycle_type);
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
             $dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
