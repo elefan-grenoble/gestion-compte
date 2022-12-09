@@ -114,9 +114,8 @@
                     var url = $(trigger).attr('data-source');
                     $.get(url, function( data ) {
                         $('#modal-bucket-content').html(data);
-                        $('.collapsible').collapsible();
-                        $('select').formSelect();
-                        eval($('#modal-bucket-content script').html());
+                        $('#modal-bucket-content .collapsible').collapsible();
+                        $('#modal-bucket-content select').formSelect();
                     });
                 }
             });

@@ -16,6 +16,7 @@ use AppBundle\Form\ShiftType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -251,11 +252,7 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
 
-        $session = new Session();
-
         if ($shift->getWasCarriedOut() == 0) {
-            $membership = $shift->getShifter()->getMembership();
-
             $em = $this->getDoctrine()->getManager();
             $shift->validateShiftParticipation();
             $em->persist($shift);
@@ -264,13 +261,21 @@ class ShiftController extends Controller
             $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
 
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été validée");
+            $success = true;
+            $message = "La participation au créneau a bien été validée";
         } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été validée");
+            $success = false;
+            $message = "La participation au créneau a déjà été validée";
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $referer = $request->headers->get('referer');
+            return new RedirectResponse($referer);
+        }
     }
 
     /**
@@ -283,8 +288,6 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
 
-        $session = new Session();
-
         if ($shift->getWasCarriedOut() == 1) {
             $membership = $shift->getShifter()->getMembership();
 
@@ -296,13 +299,21 @@ class ShiftController extends Controller
             $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
 
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été invalidée");
+            $success = true;
+            $message = "La participation au créneau a bien été invalidée";
         } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été invalidée");
+            $success = false;
+            $message = "La participation au créneau a déjà été invalidée";
         }
 
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $referer = $request->headers->get('referer');
+            return new RedirectResponse($referer);
+        }
     }
 
     /**

@@ -17,7 +17,7 @@ It use the materialize modal class https://materializecss.com/modals.html
             <li>
                 <div class="collapsible-header" style="display: block;">
                     <div class="row" style="margin-bottom: 0px">
-                        <div class="col s12">
+                        <div id="modal-shift-{{ shift.id }}" class="col s12">
                             {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                 <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                             {% endif %}
@@ -39,19 +39,12 @@ It use the materialize modal class https://materializecss.com/modals.html
                     </p>
                     {% if is_granted('free',shift) %}
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                            {% if shift.wasCarriedOut %}
-                                <form action="{{ path('shift_invalidate', { 'id': shift.id }) }}" method="POST" id="shift_invalidate_{{ shift.id }}">
-                                    <button type="submit" class="btn orange" title="Invalider la participation">
-                                        <i class="material-icons left">highlight_off</i>Invalider la participation
-                                    </button>
-                                </form>
-                            {% else %}
-                                <form action="{{ path('shift_validate', { 'id': shift.id }) }}" method="POST" id="shift_validate_{{ shift.id }}">
-                                    <button type="submit" class="btn green" title="Valider la participation">
-                                        <i class="material-icons left">check_circle</i>Valider la participation
-                                    </button>
-                                </form>
-                            {% endif %}
+                            <button class="btn orange" title="Invalider la participation" id="shift_invalidate_{{ shift.id }}" data-shiftid="{{ shift.id }}" {% if not shift.wasCarriedOut %}style="display: none;"{% endif %}>
+                                <i class="material-icons left">highlight_off</i>Invalider la participation
+                            </button>
+                            <button class="btn green" title="Valider la participation" id="shift_validate_{{ shift.id }}" data-shiftid="{{ shift.id }}" {% if shift.wasCarriedOut %}style="display: none;"{% endif %}>
+                                <i class="material-icons left">check_circle</i>Valider la participation
+                            </button>
                         {% endif %}
                         <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST" id="shift_free_{{ shift.id }}">
                             {% if shift.isPast %}
@@ -167,3 +160,43 @@ It use the materialize modal class https://materializecss.com/modals.html
         <i class="material-icons left">delete</i>Supprimer
     </button>
 </form>
+<script>
+    $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
+        var shiftid = $(this).data('shiftid');
+        if ($(this).attr('id').includes("invalidate")) {
+            var url = "{{ path('shift_invalidate', { 'id': 'xxxxxx' }) }}".replace('xxxxxx', shiftid);
+            var show = 'button[id="shift_validate_'+shiftid+'"]';
+            var textcolor = "red-text";
+        } else {
+            var url = "{{ path('shift_validate', { 'id': 'xxxxxx' }) }}".replace('xxxxxx', shiftid);
+            var show = 'button[id="shift_invalidate_'+shiftid+'"]';
+            var textcolor = "green-text";
+        }
+        var self = this;
+        $.ajax({
+            url: url,
+            data: {},
+            method: 'POST',
+            success: function (data) {
+                M.toast({
+                    text: data.message,
+                    displayLength: 2500,
+                    classes: 'green'
+                });
+                $(self).hide();
+                $(show).show();
+                $("#modal-shift-"+shiftid).find('span').attr("class",textcolor);
+                $("#main-shift-"+shiftid).find('span').attr("class",textcolor);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                var data = jqXHR.responseJSON;
+                M.toast({
+                    text: data.message,
+                    displayLength: 2500,
+                    classes: 'red'
+                });
+            }
+        });
+        e.stopPropagation();
+    });
+</script>
