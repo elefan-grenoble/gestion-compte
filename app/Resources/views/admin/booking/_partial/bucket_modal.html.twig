@@ -4,7 +4,7 @@ It use the materialize modal class https://materializecss.com/modals.html
 #}
 {% set nbBookableShifts = shifts | filter ( shift => shift.isDismissed or not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
-{% set bucket = (shifts | first) %}
+{% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
 {% if bucket.locked %}
     <i class="material-icons left large">lock</i>
 {% endif %}
@@ -160,10 +160,40 @@ It use the materialize modal class https://materializecss.com/modals.html
 <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
 </a>
-<form method="post" action="{{ path('bucket_delete', { 'id': bucket.id }) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');" style="display:inline;">
-    <input type="hidden" name="_method" value="DELETE">
-    <input type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
-    <button type="submit" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
-        <i class="material-icons left">delete</i>Supprimer
-    </button>
-</form>
+<button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste" data-bucketid="{{ bucket.id }}">
+    <i class="material-icons left">delete</i>Supprimer
+</button>
+<script>
+    $('button[id^="bucket_delete"]').on('click', function (e) {
+        var result = confirm('Supprimer les créneaux et les réservations ?!');
+        if (result) {
+            var bucketid = $(this).data('bucketid');
+            $.ajax({
+                url: "{{ path('bucket_delete', { 'id': 'xxxxxx' }) }}".replace('xxxxxx', bucketid),
+                data: {
+                    "_method": "DELETE",
+                    "form[_token]": "{{ csrf_token('form') }}"
+                },
+                method: 'DELETE',
+                success: function (data) {
+                    M.toast({
+                        text: data.message,
+                        displayLength: 2500,
+                        classes: 'green'
+                    });
+                    M.Modal.getInstance($('#modal-bucket')).close();
+                    $("#main-bucket-"+bucketid).remove();
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    var data = jqXHR.responseJSON;
+                    M.toast({
+                        text: data.message,
+                        displayLength: 2500,
+                        classes: 'red'
+                    });
+                }
+            });
+        }
+        e.stopPropagation();
+    });
+</script>

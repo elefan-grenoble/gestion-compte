@@ -24,6 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -548,9 +549,19 @@ class BookingController extends Controller
                 $count++;
             }
             $em->flush();
-            $session->getFlashBag()->add('success', $count . " créneaux ont été supprimés !");
+            $success = true;
+            $message = $count . " créneaux ont été supprimés !";
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de supprimer le créneau";
         }
-        return $this->redirectToRoute('booking_admin');
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
     }
 
     /**
