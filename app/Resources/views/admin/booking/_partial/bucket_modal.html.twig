@@ -4,7 +4,7 @@ It use the materialize modal class https://materializecss.com/modals.html
 #}
 {% set nbBookableShifts = shifts | filter ( shift => shift.isDismissed or not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
-{% set bucket = (shifts | first) %}
+{% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
 {% if bucket.locked %}
     <i class="material-icons left large">lock</i>
 {% endif %}
@@ -153,13 +153,11 @@ It use the materialize modal class https://materializecss.com/modals.html
 <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
 </a>
-<form method="post" action="{{ path('bucket_delete', { 'id': bucket.id }) }}" onsubmit="return confirm('Supprimer les créneaux et les réservations ?!');" style="display:inline;">
-    <input type="hidden" name="_method" value="DELETE">
-    <input type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
-    <button type="submit" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
-        <i class="material-icons left">delete</i>Supprimer
-    </button>
-</form>
+{{ form_start(bucket_delete_form) }}
+<button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
+    <i class="material-icons left">delete</i>Supprimer
+</button>
+{{ form_end(bucket_delete_form) }}
 <script>
     function error (jqXHR, exception) {
         var msg = '';
@@ -194,14 +192,20 @@ It use the materialize modal class https://materializecss.com/modals.html
                 method: 'POST',
                 success: function (data) {
                     M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
-                    $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
-                    M.Modal.getInstance($('#modal-bucket')).close();
+                    if (this.data.includes("bucket_delete_form")) {
+                        $('#main-bucket-{{ bucket.id }}').remove();
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    } else {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    }
                 },
                 error: error
             });
         }
         event.preventDefault();
     }
+    $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Supprimer les créneaux et les réservations ?!"}, makeAjaxCall);
     $('form[name="bucket_add_form"]').on('submit', {}, makeAjaxCall);
     $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
         var shiftid = $(this).data('shiftid');

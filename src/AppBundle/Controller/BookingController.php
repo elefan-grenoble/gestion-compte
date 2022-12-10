@@ -24,6 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -423,11 +424,13 @@ class BookingController extends Controller
                 'action' => $this->generateUrl('shift_new'),
                 'only_add_formation' => true,
             ));
+        $bucketDeleteform = $this->createDeleteBucketForm($bucket);
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
             'bucket_add_form' => $bucketAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
+            'bucket_delete_form' => $bucketDeleteform->createView(),
         ]);
     }
 
@@ -549,9 +552,19 @@ class BookingController extends Controller
                 $count++;
             }
             $em->flush();
-            $session->getFlashBag()->add('success', $count . " créneaux ont été supprimés !");
+            $success = true;
+            $message = $count . " créneaux ont été supprimés !";
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);
         }
-        return $this->redirectToRoute('booking_admin');
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
     }
 
     /**
@@ -563,7 +576,7 @@ class BookingController extends Controller
      */
     private function createDeleteBucketForm(Shift $bucket)
     {
-        return $this->createFormBuilder()
+        return $this->get('form.factory')->createNamedBuilder('bucket_delete_form')
             ->setAction($this->generateUrl('bucket_delete', array('id' => $bucket->getId())))
             ->setMethod('DELETE')
             ->getForm();
