@@ -306,6 +306,18 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function getYears()
+    {
+        $qb = $this->createQueryBuilder('s')
+                   ->select('YEAR(s.start) as year')
+                   ->distinct()
+                   ->getQuery();
+
+        $result = $qb
+            ->getScalarResult();
+        return array_column($result, "year");
+    }
+
     /**
      * Get shifts for a given membership grouped in cycles
      * @param Membership $membership

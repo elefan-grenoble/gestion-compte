@@ -181,7 +181,7 @@ class BookingController extends Controller
      *      "filling"=>str|null,
      *      )
      */
-    private function adminFilterFormFactory(Request $request): array
+    private function adminFilterFormFactory($em, Request $request): array
     {
         // filter creation ----------------------
         $defaultFrom = new DateTime();
@@ -192,6 +192,8 @@ class BookingController extends Controller
 
         $defaultWeek = (new DateTime())->format('W');
         $defaultYear = (new DateTime())->format('Y');
+
+        $years = $em->getRepository(Shift::class)->getYears();
 
         $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
@@ -216,15 +218,12 @@ class BookingController extends Controller
                 'data' => $defaultTo->format('Y-m-d'),
                 'attr' => array('class' => 'datepicker'),
             ])
-            ->add('year', IntegerType::class, [
+            ->add('year', ChoiceType::class, [
                 'required' => false,
+                'choices' => array_combine($years, $years),
                 'label' => 'Année',
-                'scale' => 0,
-                'data' => $defaultYear,
-                'attr' => [
-                    'min' => 2000,
-                    'max' => (int)$defaultYear + 10,
-                ],
+                'data' =>  $defaultYear,
+                'placeholder' => false,
             ])
             ->add('week', IntegerType::class, [
                 'required' => false,
@@ -380,11 +379,9 @@ class BookingController extends Controller
      */
     public function adminAction(Request $request): Response
     {
-        $filter = $this->adminFilterFormFactory($request);
-
-        // calendar creation
-        /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManager();
+        $filter = $this->adminFilterFormFactory($em, $request);
+
         $jobs = $em->getRepository(Job::class)->findByEnabled(true);
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
         $shifts = $em
