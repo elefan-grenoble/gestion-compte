@@ -187,9 +187,6 @@ class BookingController extends Controller
         $defaultFrom = new DateTime();
         $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
 
-        $defaultTo = new DateTime();
-        $defaultTo->setTimestamp(strtotime('next sunday', strtotime('tomorrow')));
-
         $defaultWeek = (new DateTime())->format('W');
         $defaultYear = (new DateTime())->format('Y');
 
@@ -215,7 +212,6 @@ class BookingController extends Controller
             ->add('to', TextType::class, [
                 'label' => 'Jusqu\'à',
                 'required' => false,
-                'data' => $defaultTo->format('Y-m-d'),
                 'attr' => array('class' => 'datepicker'),
             ])
             ->add('year', ChoiceType::class, [
@@ -267,7 +263,7 @@ class BookingController extends Controller
 
         $filterForm->handleRequest($request);
         $from = $defaultFrom;
-        $to = $defaultTo;
+        $to = null;
         $job = null;
         $filling=null;
 
@@ -291,12 +287,10 @@ class BookingController extends Controller
                     $week = $filterForm->get("week")->getData();
                     $year = $filterForm->get("year")->getData();
 
-                    $dateTime = new DateTime();
-                    $dateTime->setISODate($year, $week, 1);
-                    $from = clone $dateTime;
-                    $dateTime->modify('+6 days');
-                    $to = $dateTime;
-
+                    $from = new DateTime();
+                    $from->setISODate($year, $week, 1);
+                    $to = clone $dateTime;
+                    $to->modify('+6 days');
                 }
             }
         } catch (Exception $ex) {
