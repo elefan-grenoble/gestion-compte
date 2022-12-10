@@ -415,7 +415,8 @@ class BookingController extends Controller
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createBookForm($shift)->createView();
         }
-        $shiftAddForm = $this->createForm(
+        $bucketAddForm = $this->get('form.factory')->createNamed(
+            'bucket_add_form',
             ShiftType::class,
             $bucket,
             array(
@@ -425,8 +426,8 @@ class BookingController extends Controller
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'shift_add_form' => $shiftAddForm->createView(),
-            'shift_book_forms' => $shiftBookForms
+            'bucket_add_form' => $bucketAddForm->createView(),
+            'shift_book_forms' => $shiftBookForms,
         ]);
     }
 

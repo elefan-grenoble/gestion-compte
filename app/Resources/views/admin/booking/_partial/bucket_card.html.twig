@@ -29,7 +29,6 @@
                                 {% if shift.formation %}</b>{% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>
-                            {% set shiftercount = shiftercount + 1 %}
                         {% else %}
                             <li id="main-shift-{{shift.id}}">
                                 <b>
@@ -42,8 +41,8 @@
                         {% endif %}
                     {% elseif shiftercount == 4 %}
                         <li>( ... )</li>
-                        {% set shiftercount = shiftercount + 1 %}
                     {% endif %}
+                    {% set shiftercount = shiftercount + 1 %}
                 {% endfor %}
             </ul>
             {% if bucket.first.locked %}

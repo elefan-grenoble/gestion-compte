@@ -115,20 +115,20 @@ It use the materialize modal class https://materializecss.com/modals.html
         {% endif %}
     {% endfor %}
 </ul>
-{{ form_start(shift_add_form) }}
-<input type="hidden" id="{{ shift_add_form.start.date.vars.id }}" name="{{ shift_add_form.start.date.vars.full_name }}" value="{{ shift_add_form.start.date.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.start.time.vars.id }}" name="{{ shift_add_form.start.time.vars.full_name }}" value="{{ shift_add_form.start.time.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.end.date.vars.id }}" name="{{ shift_add_form.end.date.vars.full_name }}" value="{{ shift_add_form.end.date.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.end.time.vars.id }}" name="{{ shift_add_form.end.time.vars.full_name }}" value="{{ shift_add_form.end.time.vars.value }}">
-{{ form_widget(shift_add_form.job) }}
+{{ form_start(bucket_add_form) }}
+<input type="hidden" id="{{ bucket_add_form.start.date.vars.id }}" name="{{ bucket_add_form.start.date.vars.full_name }}" value="{{ bucket_add_form.start.date.vars.value }}">
+<input type="hidden" id="{{ bucket_add_form.start.time.vars.id }}" name="{{ bucket_add_form.start.time.vars.full_name }}" value="{{ bucket_add_form.start.time.vars.value }}">
+<input type="hidden" id="{{ bucket_add_form.end.date.vars.id }}" name="{{ bucket_add_form.end.date.vars.full_name }}" value="{{ bucket_add_form.end.date.vars.value }}">
+<input type="hidden" id="{{ bucket_add_form.end.time.vars.id }}" name="{{ bucket_add_form.end.time.vars.full_name }}" value="{{ bucket_add_form.end.time.vars.value }}">
+{{ form_widget(bucket_add_form.job) }}
 <div class="row valign-wrapper">
     <div class="col s3">
-        {{ form_label(shift_add_form.number) }}
-        {{ form_widget(shift_add_form.number) }}
+        {{ form_label(bucket_add_form.number) }}
+        {{ form_widget(bucket_add_form.number) }}
     </div>
     <div class="col s6">
-        {{ form_label(shift_add_form.formation) }}
-        {{ form_widget(shift_add_form.formation) }}
+        {{ form_label(bucket_add_form.formation) }}
+        {{ form_widget(bucket_add_form.formation) }}
     </div>
     <div class="col s3">
         <button type="submit" class="btn waves-effect waves-light teal">
@@ -136,8 +136,8 @@ It use the materialize modal class https://materializecss.com/modals.html
         </button>
     </div>
 </div>
-{{ form_row(shift_add_form._token) }}
-{{ form_end(shift_add_form,  {'render_rest': false}) }}
+{{ form_row(bucket_add_form._token) }}
+{{ form_end(bucket_add_form,  {'render_rest': false}) }}
 <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
     <i class="material-icons left">mail</i>Envoyer un email aux membres
 </a>
@@ -181,6 +181,28 @@ It use the materialize modal class https://materializecss.com/modals.html
         }
         M.toast({ text: msg, displayLength: 5000, classes: 'red' });
     }
+    function makeAjaxCall(event) {
+        if (event.data.confirmation) {
+            var result = confirm(event.data.confirmation);
+        } else {
+            var result = true;
+        }
+        if (result) {
+            $.ajax({
+                url: $(event.currentTarget).attr('action'),
+                data: $(event.currentTarget).serialize(),
+                method: 'POST',
+                success: function (data) {
+                    M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
+                    $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                    M.Modal.getInstance($('#modal-bucket')).close();
+                },
+                error: error
+            });
+        }
+        event.preventDefault();
+    }
+    $('form[name="bucket_add_form"]').on('submit', {}, makeAjaxCall);
     $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
         var shiftid = $(this).data('shiftid');
         var validate = !$(this).attr('id').includes("invalidate");
