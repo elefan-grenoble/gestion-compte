@@ -98,15 +98,12 @@ It use the materialize modal class https://materializecss.com/modals.html
                         </div>
                     </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
-                    {# TODO: use symfony form + confirmation-modal #}
                     {% if not shift.lastShifter %}
-                        <form name="form" method="post" action="{{ path('shift_delete', { 'id': shift.id }) }}" onsubmit="return confirm('Etes-vous sûr de supprimer ce poste ?!');">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <input id="form__token" type="hidden" name="form[_token]" value="{{ csrf_token('form') }}">
-                            <a href="#" onclick="$(this).closest('form').submit(); event.stopPropagation();" title="Supprimer le poste" class="btn red">
-                                <i class="material-icons left">delete</i>Supprimer
-                            </a>
-                        </form>
+                        {{ form_start(shift_delete_forms[shift.id]) }}
+                        <button type="submit" title="Supprimer le poste" class="btn red">
+                            <i class="material-icons left">delete</i>Supprimer
+                        </button>
+                        {{ form_end(shift_delete_forms[shift.id]) }}
                     {% endif %}
                 </div>
             </li>
@@ -210,6 +207,7 @@ It use the materialize modal class https://materializecss.com/modals.html
         event.preventDefault();
     }
     $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Supprimer les créneaux et les réservations ?!"}, makeAjaxCall);
+    $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de supprimer ce poste ?!"}, makeAjaxCall);
     $('form[name="bucket_add_form"], form[name="bucket_lock_unlock_form"]').on('submit', {}, makeAjaxCall);
     $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
         var shiftid = $(this).data('shiftid');

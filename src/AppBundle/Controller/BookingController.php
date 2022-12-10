@@ -413,8 +413,10 @@ class BookingController extends Controller
         $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
 
         $shiftBookForms = [];
+        $shiftDeleteForms = [];
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createBookForm($shift)->createView();
+            $shiftDeleteForms[$shift->getId()] = $this->createDeleteForm($shift)->createView();
         }
         $bucketAddForm = $this->get('form.factory')->createNamed(
             'bucket_add_form',
@@ -431,6 +433,7 @@ class BookingController extends Controller
             'shifts' => $shifts,
             'bucket_add_form' => $bucketAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
+            'shift_delete_forms' => $shiftDeleteForms,
             'bucket_delete_form' => $bucketDeleteform->createView(),
             'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
         ]);
@@ -634,5 +637,21 @@ class BookingController extends Controller
         }
 
         return $form->getForm();
+    }
+
+    /**
+     * Creates a form to delete a shift entity.
+     * // TODO: how to avoid having same createDeleteForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+                                         ->setMethod('DELETE')
+                                         ->getForm();
     }
 }

@@ -517,8 +517,6 @@ class ShiftController extends Controller
      */
     public function removeShiftAction(Request $request, Shift $shift)
     {
-        $session = new Session();
-
         $form = $this->createDeleteForm($shift);
         $form->handleRequest($request);
 
@@ -526,10 +524,32 @@ class ShiftController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($shift);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le créneau a bien été supprimé !');
+
+            $success = true;
+            $message = 'Le créneau a bien été supprimé !';
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);
         }
 
-        return $this->redirectToRoute('booking_admin');
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
+            }
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
     }
 
     /**
@@ -571,9 +591,9 @@ class ShiftController extends Controller
      */
     private function createDeleteForm(Shift $shift)
     {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
+        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+                                         ->setMethod('DELETE')
+                                         ->getForm();
     }
 }
