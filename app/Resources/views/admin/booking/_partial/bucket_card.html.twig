@@ -47,7 +47,7 @@
                 {% endfor %}
             </ul>
             {% if bucket.first.locked %}
-                <span class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
+                <span id="main-lock-label" class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
             {% elseif (shiftercount == 0) %}
                 <span class="red-text red lighten-5 truncate admin-shift-warning"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
             {% elseif (shiftercount < (bucket.shifts() | length)/2) %}

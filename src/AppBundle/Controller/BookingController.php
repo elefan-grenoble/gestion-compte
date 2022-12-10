@@ -425,12 +425,14 @@ class BookingController extends Controller
                 'only_add_formation' => true,
             ));
         $bucketDeleteform = $this->createDeleteBucketForm($bucket);
+        $bucketLockUnlockForm = $this->createLockUnlockBucketForm($bucket);
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
             'bucket_add_form' => $bucketAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
             'bucket_delete_form' => $bucketDeleteform->createView(),
+            'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
         ]);
     }
 
@@ -476,52 +478,55 @@ class BookingController extends Controller
     /**
      * lock a bucket
      *
-     * @Route("/bucket/{id}/lock", name="bucket_lock")
-     * @Method("GET")
+     * @Route("/bucket/{id}/lock", name="bucket_lock_unlock")
+     * @Method("POST")
      */
-    public function lockBucketAction(Request $request, Shift $shift)
+    public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
+        $form = $this->createLockUnlockBucketForm($shift);
+        $form->handleRequest($request);
 
-        if ($shift) {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $lock = $form->get('lock')->getData() == 1;
             $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(true);
+            $current = $bucket->getFirst()->isLocked() == 1;
+            if ($lock == $current) {
+                $success = false;
+                $message = "Le créneau a déjà été " . ($lock ? "verrouillé" : "déverrouillé");
+            } else {
+                foreach ($bucket->getShifts() as $s) {
+                    $s->setLocked($lock);
+                }
+                $em->flush();
+                $message = "Le créneau a été " . ($lock ? "verrouillé" : "déverrouillé");
+                $success = true;
             }
-            $em->flush();
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de verrouiller/déverouiller le créneau. " . (string) $form->getErrors(true, false);
         }
 
-        $session->getFlashBag()->add('success', "Le créneau a été vérouillé");
-        return $this->redirectToRoute('booking_admin');
-    }
-
-    /**
-     * unlock a bucket
-     *
-     * @Route("/bucket/{id}/unlock", name="bucket_unlock")
-     * @Method("GET")
-     */
-    public function unlockBucketAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
-
-        $session = new Session();
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(false);
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
             }
-            $em->flush();
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
         }
-
-        $session->getFlashBag()->add('success', "Le créneau a été dévérouillé");
-        return $this->redirectToRoute('booking_admin');
     }
 
     /**
@@ -565,6 +570,24 @@ class BookingController extends Controller
             $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
+    }
+
+    /**
+     * Creates a form to lock/unlock a bucket entity.
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createLockUnlockBucketForm(Shift $bucket)
+    {
+        return $this->get('form.factory')->createNamedBuilder('bucket_lock_unlock_form')
+            ->setAction($this->generateUrl('bucket_lock_unlock', array('id' => $bucket->getId())))
+            ->add('lock', HiddenType::class, [
+                'data'  => ($bucket->isLocked() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
