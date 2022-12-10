@@ -16,6 +16,7 @@ use AppBundle\Form\ShiftType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -50,41 +51,54 @@ class ShiftController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
-        $shift = new Shift();
 
         $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
-
         if (!$job) {
             $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
+        $shift = new Shift();
         $form = $this->createForm(ShiftType::class, $shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $data = $request->request->all();
 
-            if (count($data) === 1){
-                $number = array_values($data)[0]["number"];
-
-                while (1 < $number ){
-                    $s = clone($shift);
-                    $em->persist($s);
-                    $number --;
-                }
+            $number = $form->get('number')->getData();
+            while (1 < $number ){
+                $s = clone($shift);
+                $em->persist($s);
+                $number --;
             }
 
             $em->persist($shift);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le créneau a bien été créé !');
-            return $this->redirectToRoute('booking_admin');
+            $success = true;
+            $message = 'Le créneau a bien été créé !';
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de créer le créneau";
         }
 
-        return $this->render('admin/shift/new.html.twig', array(
-            "form" => $form->createView()
-        ));
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $bucket = $em->getRepository('AppBundle:Shift')->findBucket($shift);
+                $shifts = array_map(fn($shift) => $shift->getId(), $bucket);
+                return new JsonResponse(array('message'=>$message, 'shifts'=>$shifts), 201);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
+            }
+        } else {
+            if ($success) {
+                $session->getFlashBag()->add('success', $message);
+                return $this->redirectToRoute('booking_admin');
+            } else {
+                return $this->render('admin/shift/new.html.twig', array(
+                    "form" => $form->createView()
+                ));
+            }
+        }
     }
 
     /**

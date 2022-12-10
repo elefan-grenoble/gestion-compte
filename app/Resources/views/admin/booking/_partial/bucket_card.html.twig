@@ -20,7 +20,7 @@
                 {% for shift in bucket.sortedShifts() %}
                     {% if (shiftercount < 4) %}
                         {% if (shift.shifter) %}{# is booked #}
-                            <li class="{% if shift.isDismissed() %}red-text{% endif %}">
+                            <li id="main-shift-{{shift.id}}" class="{% if shift.isDismissed() %}red-text{% endif %}">
                                 {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
@@ -29,9 +29,8 @@
                                 {% if shift.formation %}</b>{% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>
-                            {% set shiftercount = shiftercount + 1 %}
                         {% else %}
-                            <li>
+                            <li id="main-shift-{{shift.id}}">
                                 <b>
                                     {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                         <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
@@ -42,8 +41,8 @@
                         {% endif %}
                     {% elseif shiftercount == 4 %}
                         <li>( ... )</li>
-                        {% set shiftercount = shiftercount + 1 %}
                     {% endif %}
+                    {% set shiftercount = shiftercount + 1 %}
                 {% endfor %}
             </ul>
             {% if bucket.first.locked %}

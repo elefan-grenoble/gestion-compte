@@ -122,12 +122,6 @@ It use the materialize modal class https://materializecss.com/modals.html
         {% endif %}
     {% endfor %}
 </ul>
-{{ form_start(shift_add_form) }}
-<input type="hidden" id="{{ shift_add_form.start.date.vars.id }}" name="{{ shift_add_form.start.date.vars.full_name }}" value="{{ shift_add_form.start.date.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.start.time.vars.id }}" name="{{ shift_add_form.start.time.vars.full_name }}" value="{{ shift_add_form.start.time.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.end.date.vars.id }}" name="{{ shift_add_form.end.date.vars.full_name }}" value="{{ shift_add_form.end.date.vars.value }}">
-<input type="hidden" id="{{ shift_add_form.end.time.vars.id }}" name="{{ shift_add_form.end.time.vars.full_name }}" value="{{ shift_add_form.end.time.vars.value }}">
-{{ form_widget(shift_add_form.job) }}
 <div class="row valign-wrapper">
     <div class="col s3">
         {{ form_label(shift_add_form.number) }}
@@ -138,13 +132,11 @@ It use the materialize modal class https://materializecss.com/modals.html
         {{ form_widget(shift_add_form.formation) }}
     </div>
     <div class="col s3">
-        <button type="submit" class="btn waves-effect waves-light teal">
+        <button id="bucket_add" class="btn waves-effect waves-light teal" data-bucketid="{{ bucket.id }}">
             <i class="material-icons left">add</i>Ajouter
         </button>
     </div>
 </div>
-{{ form_row(shift_add_form._token) }}
-{{ form_end(shift_add_form,  {'render_rest': false}) }}
 <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
     <i class="material-icons left">mail</i>Envoyer un email aux membres
 </a>
@@ -167,3 +159,48 @@ It use the materialize modal class https://materializecss.com/modals.html
         <i class="material-icons left">delete</i>Supprimer
     </button>
 </form>
+<script>
+    $('button[id^="bucket_add"]').on('click', function (e) {
+        var bucketid = $(this).data('bucketid');
+        $.ajax({
+            url: "{{ shift_add_form.vars.action }}",
+            data: {
+                "{{ shift_add_form._token.vars.full_name }}": "{{ shift_add_form._token.vars.value }}",
+                "{{ shift_add_form.start.date.vars.full_name }}": "{{ shift_add_form.start.date.vars.value }}",
+                "{{ shift_add_form.start.time.vars.full_name }}": "{{ shift_add_form.start.time.vars.value }}",
+                "{{ shift_add_form.end.date.vars.full_name }}": "{{ shift_add_form.end.date.vars.value }}",
+                "{{ shift_add_form.end.time.vars.full_name }}": "{{ shift_add_form.end.time.vars.value }}",
+                "{{ shift_add_form.job.vars.full_name }}": "{{ shift_add_form.job.vars.value }}",
+                "{{ shift_add_form.number.vars.full_name }}": $("#{{ shift_add_form.number.vars.id }}").val(),
+                "{{ shift_add_form.formation.vars.full_name }}": $("#{{ shift_add_form.formation.vars.id }}").val()
+            },
+            method: 'POST',
+            success: function (data) {
+                M.toast({
+                    text: data.message,
+                    displayLength: 2500,
+                    classes: 'green'
+                });
+                var bucketEl = $("#main-bucket-"+bucketid).find('ul');
+                var newShifts = data.shifts.filter(sId => $('#main-shift-'+sId).length == 0);
+                for (const shift of newShifts) {
+                    if (bucketEl.children().length < 4) {
+                        bucketEl.append("<li id=\"main-shift-" + shift + "\"><b><i>libre</i></b></li>");
+                    } else if (bucketEl.children().length == 4) {
+                        bucketEl.append("<li>( ... )</li>");
+                    }
+                }
+                M.Modal.getInstance($('#modal-bucket')).close();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                var data = jqXHR.responseJSON;
+                M.toast({
+                    text: data.message,
+                    displayLength: 2500,
+                    classes: 'red'
+                });
+            }
+        });
+        e.stopPropagation();
+    });
+</script>
