@@ -116,6 +116,20 @@ class ShiftBucket
         return $ids;
     }
 
+    public function getId(){
+        return min($this->getShiftIds());
+    }
+
+    public function getShiftWithMinId(){
+        $min = $this->shifts->first();
+        foreach ($this->getShifts() as $shift){
+            if ($min->getId() > $shift->getId()) {
+                $min = $shift;
+            }
+        }
+        return $min;
+    }
+
     public function getShifterCount()
     {
         $bookedShifts = $this->getShifts()->filter(function (Shift $shift) {

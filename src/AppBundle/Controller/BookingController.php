@@ -24,6 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -412,21 +413,35 @@ class BookingController extends Controller
         $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
 
         $shiftBookForms = [];
+        $shiftDeleteForms = [];
+        $shiftFreeForms = [];
+        $shiftValidateInvalidateForms = [];
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createBookForm($shift)->createView();
+            $shiftDeleteForms[$shift->getId()] = $this->createDeleteForm($shift)->createView();
+            $shiftFreeForms[$shift->getId()] = $this->createFreeForm($shift)->createView();
+            $shiftValidateInvalidateForms[$shift->getId()] = $this->createValidateInvalidateShiftForm($shift)->createView();
         }
-        $shiftAddForm = $this->createForm(
+        $bucketAddForm = $this->get('form.factory')->createNamed(
+            'bucket_add_form',
             ShiftType::class,
             $bucket,
             array(
                 'action' => $this->generateUrl('shift_new'),
                 'only_add_formation' => true,
             ));
+        $bucketDeleteform = $this->createDeleteBucketForm($bucket);
+        $bucketLockUnlockForm = $this->createLockUnlockBucketForm($bucket);
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'shift_add_form' => $shiftAddForm->createView(),
-            'shift_book_forms' => $shiftBookForms
+            'bucket_add_form' => $bucketAddForm->createView(),
+            'shift_book_forms' => $shiftBookForms,
+            'shift_delete_forms' => $shiftDeleteForms,
+            'shift_free_forms' => $shiftFreeForms,
+            'shift_validate_invalidate_forms' => $shiftValidateInvalidateForms,
+            'bucket_delete_form' => $bucketDeleteform->createView(),
+            'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
         ]);
     }
 
@@ -472,52 +487,57 @@ class BookingController extends Controller
     /**
      * lock a bucket
      *
-     * @Route("/bucket/{id}/lock", name="bucket_lock")
-     * @Method("GET")
+     * @Route("/bucket/{id}/lock", name="bucket_lock_unlock")
+     * @Method("POST")
      */
-    public function lockBucketAction(Request $request, Shift $shift)
+    public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
+        $form = $this->createLockUnlockBucketForm($shift);
+        $form->handleRequest($request);
 
-        if ($shift) {
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $lock = $form->get('lock')->getData() == 1;
             $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(true);
+            $current = $bucket->getFirst()->isLocked() == 1;
+            if ($lock == $current) {
+                $success = false;
+                $message = "Le créneau a déjà été " . ($lock ? "verrouillé" : "déverrouillé");
+            } else {
+                foreach ($bucket->getShifts() as $s) {
+                    $s->setLocked($lock);
+                }
+                $em->flush();
+                $message = "Le créneau a été " . ($lock ? "verrouillé" : "déverrouillé");
+                $success = true;
             }
-            $em->flush();
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de verrouiller/déverouiller le créneau. " . (string) $form->getErrors(true, false);
         }
 
-        $session->getFlashBag()->add('success', "Le créneau a été vérouillé");
-        return $this->redirectToRoute('booking_admin');
-    }
-
-    /**
-     * unlock a bucket
-     *
-     * @Route("/bucket/{id}/unlock", name="bucket_unlock")
-     * @Method("GET")
-     */
-    public function unlockBucketAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
-
-        $session = new Session();
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(false);
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
+                    'bucket' => $bucket->getShiftWithMinId()
+                ])->getContent();
+                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
             }
-            $em->flush();
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
         }
-
-        $session->getFlashBag()->add('success', "Le créneau a été dévérouillé");
-        return $this->redirectToRoute('booking_admin');
     }
 
     /**
@@ -548,9 +568,37 @@ class BookingController extends Controller
                 $count++;
             }
             $em->flush();
-            $session->getFlashBag()->add('success', $count . " créneaux ont été supprimés !");
+            $success = true;
+            $message = $count . " créneaux ont été supprimés !";
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);
         }
-        return $this->redirectToRoute('booking_admin');
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
+    }
+
+    /**
+     * Creates a form to lock/unlock a bucket entity.
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createLockUnlockBucketForm(Shift $bucket)
+    {
+        return $this->get('form.factory')->createNamedBuilder('bucket_lock_unlock_form')
+            ->setAction($this->generateUrl('bucket_lock_unlock', array('id' => $bucket->getId())))
+            ->add('lock', HiddenType::class, [
+                'data'  => ($bucket->isLocked() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
@@ -562,7 +610,7 @@ class BookingController extends Controller
      */
     private function createDeleteBucketForm(Shift $bucket)
     {
-        return $this->createFormBuilder()
+        return $this->get('form.factory')->createNamedBuilder('bucket_delete_form')
             ->setAction($this->generateUrl('bucket_delete', array('id' => $bucket->getId())))
             ->setMethod('DELETE')
             ->getForm();
@@ -597,5 +645,56 @@ class BookingController extends Controller
         }
 
         return $form->getForm();
+    }
+
+    /**
+     * Creates a form to delete a shift entity.
+     * // TODO: how to avoid having same createDeleteForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+                                         ->setMethod('DELETE')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity.
+     * // TODO: how to avoid having same createFreeForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createFreeForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to validate / invalidate a shift entity.
+     * // TODO: how to avoid having same createValidateInvalidateShiftForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createValidateInvalidateShiftForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+                                         ->add('validate', HiddenType::class, [
+                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
+                                         ])
+                                         ->setMethod('POST')
+                                         ->getForm();
     }
 }

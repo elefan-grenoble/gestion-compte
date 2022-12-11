@@ -1,9 +1,9 @@
 {% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
 {% set nbShifts = (bucket.shifts() | length) %}
 
-<div data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
+<div id="main-bucket-{{ bucket.id }}" data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
     style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left: {{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
-    <a href="#modal-bucket" data-source="{{ path('bucket_show', { 'id': bucket.first.id }) }}" class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.first.job.name }}">
+    <a href="#modal-bucket" data-source="{{ path('bucket_show', { 'id': bucket.id }) }}" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}">
         <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
             <div style="height:2px; width: 100%; position: absolute;">
                 {% if nbBookableShifts < nbShifts %}
@@ -20,7 +20,7 @@
                 {% for shift in bucket.sortedShifts() %}
                     {% if (shiftercount < 4) %}
                         {% if (shift.shifter) %}{# is booked #}
-                            <li class="{% if shift.isDismissed() %}red-text{% endif %}">
+                            <li id="main-shift-{{shift.id}}" class="{% if shift.isDismissed() %}red-text{% endif %}">
                                 {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
@@ -29,12 +29,11 @@
                                 {% if shift.formation %}</b>{% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">(q)</b>{% endif %}
                             </li>
-                            {% set shiftercount = shiftercount + 1 %}
                         {% else %}
-                            <li>
+                            <li id="main-shift-{{shift.id}}">
                                 <b>
                                     {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                        <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                                        <span class="red-text">&#9673;</span>&nbsp;
                                     {% endif %}
                                     <i>libre</i>
                                 </b>
@@ -42,12 +41,12 @@
                         {% endif %}
                     {% elseif shiftercount == 4 %}
                         <li>( ... )</li>
-                        {% set shiftercount = shiftercount + 1 %}
                     {% endif %}
+                    {% set shiftercount = shiftercount + 1 %}
                 {% endfor %}
             </ul>
             {% if bucket.first.locked %}
-                <span class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
+                <span id="main-lock-label" class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
             {% elseif (shiftercount == 0) %}
                 <span class="red-text red lighten-5 truncate admin-shift-warning"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
             {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
