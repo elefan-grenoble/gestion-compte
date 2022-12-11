@@ -94,7 +94,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                             {% if not use_fly_and_fixed %}
                                 {{ form_widget(shift_book_forms[shift.id].fixe) }}
                             {% endif %}
-                            <button class="btn add">Ajouter</button>
+                            <button type="submit" class="btn add">Ajouter</button>
                         </div>
                     </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
@@ -208,7 +208,7 @@ It use the materialize modal class https://materializecss.com/modals.html
     }
     $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Supprimer les créneaux et les réservations ?!"}, makeAjaxCall);
     $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de supprimer ce poste ?!"}, makeAjaxCall);
-    $('form[name="bucket_add_form"], form[name="bucket_lock_unlock_form"]').on('submit', {}, makeAjaxCall);
+    $('form[name="bucket_add_form"], form[name="bucket_lock_unlock_form"], form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
     $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
         var shiftid = $(this).data('shiftid');
         var validate = !$(this).attr('id').includes("invalidate");

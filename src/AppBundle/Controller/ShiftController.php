@@ -172,62 +172,73 @@ class ShiftController extends Controller
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
-        $session = new Session();
-
         $form = $this->createBookForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($shift->getShifter() && !$shift->getIsDismissed()) {
-                $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-                return $this->redirectToRoute('booking_admin');
-            }
-
             $fixe = $form->get("fixe")->getData();
             $beneficiary = $form->get("shifter")->getData();
 
-            if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
-                return $this->redirectToRoute('booking_admin');
-            }
-
-            if ($beneficiary->getMembership()->isExemptedFromShifts($shift->getStart())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole est exempté de créneau sur cette période");
-                return $this->redirectToRoute('booking_admin');
-            }
-
-            if (!$shift->getBooker()) {
+            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+                $message = "Désolé, ce créneau est déjà réservé";
+                $success = false;
+            } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+                $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")";
+                $success = false;
+            } elseif ($beneficiary->getMembership()->isExemptedFromShifts($shift->getStart())) {
+                $message = "Désolé, ce bénévole est exempté de créneau sur cette période";
+                $success = false;
+            } else {
                 $current_user = $this->get('security.token_storage')->getToken()->getUser();
                 $shift->setBooker($current_user);
                 $shift->setBookedTime(new DateTime('now'));
+                $shift->setShifter($beneficiary);
+                $shift->setIsDismissed(false);
+                $shift->setDismissedReason(null);
+                $shift->setDismissedTime(null);
+                $shift->setLastShifter(null);
+                $shift->setFixe($fixe);
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+
+                $member = $beneficiary->getMembership();
+                if ($member->getFirstShiftDate() == null) {
+                    $firstDate = clone($shift->getStart());
+                    $firstDate->setTime(0, 0, 0);
+                    $member->setFirstShiftDate($firstDate);
+                    $em->persist($member);
+                }
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+
+                $message = "Créneau réservé avec succès pour " . $shift->getShifter();
+                $success = true;
             }
-            $shift->setShifter($beneficiary);
-            $shift->setIsDismissed(false);
-            $shift->setDismissedReason(null);
-            $shift->setDismissedTime(null);
-            $shift->setLastShifter(null);
-            $shift->setFixe($fixe);
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($shift);
-
-            $member = $beneficiary->getMembership();
-            if ($member->getFirstShiftDate() == null) {
-                $firstDate = clone($shift->getStart());
-                $firstDate->setTime(0, 0, 0);
-                $member->setFirstShiftDate($firstDate);
-                $em->persist($member);
+        } else {
+            $message = "Une erreur s'est produite... Impossible de réserver le créneau. " . (string) $form->getErrors(true, false);
+            $success = false;
+        }
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
             }
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
-
-            $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
-        $session->getFlashBag()->add('error', "Une erreur est survenue...");
-        return $this->redirectToRoute('booking_admin');
     }
 
     /**
