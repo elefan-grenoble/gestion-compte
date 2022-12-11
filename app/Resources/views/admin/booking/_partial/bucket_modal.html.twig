@@ -5,7 +5,9 @@ It use the materialize modal class https://materializecss.com/modals.html
 {% set nbBookableShifts = shifts | filter ( shift => shift.isDismissed or not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
 {% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
-<i id="modal-lock-icon" class="material-icons left large" {% if not bucket.locked %}style="display: none;"{% endif %}>lock</i>
+{% if bucket.locked %}
+    <i class="material-icons left large">lock</i>
+{% endif %}
 <h4>Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span></h4>
 <h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
 <span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ (((nbShifts-nbBookableShifts) / nbShifts)*100) | round }}%)</span>
@@ -141,12 +143,15 @@ It use the materialize modal class https://materializecss.com/modals.html
     <i class="material-icons left">mail</i>Envoyer un email
 </a>
 {{ form_start(bucket_lock_unlock_form, {'attr': { 'style':  'display:inline;'}}) }}
-<button id="bucket_unlock" class="btn orange" {% if not bucket.locked %}style="display: none;"{% endif %}>
-    <i class="material-icons left">lock_open</i>Déverrouiller
-</button>
-<button id="bucket_lock" class="btn orange" {% if bucket.locked %}style="display: none;"{% endif %}>
-    <i class="material-icons left">lock</i>Verrouiller
-</button>
+{% if bucket.locked %}
+    <button type="submit" class="btn orange">
+        <i class="material-icons left">lock_open</i>Déverrouiller
+    </button>
+{% else %}
+    <button type="submit" class="btn orange">
+        <i class="material-icons left">lock</i>Verrouiller
+    </button>
+{% endif %}
 {{ form_end(bucket_lock_unlock_form) }}
 <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
@@ -170,14 +175,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                 method: 'POST',
                 success: function (data) {
                     M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
-                    if (this.data.includes("bucket_lock_unlock_form")) {
-                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
-                        var lock = $('#{{bucket_lock_unlock_form.lock.vars.id }}').val() == 1;
-                        $('button[id="bucket_'+ (lock ? '' : 'un') +'lock"]').hide();
-                        $('button[id="bucket_'+ (lock ? 'un' : '') +'lock"]').show();
-                        lock ? $("#modal-lock-icon").show() : $("#modal-lock-icon").hide();
-                        $('#{{bucket_lock_unlock_form.lock.vars.id }}').val(lock ? 0 : 1);
-                    } else if (this.data.includes("bucket_delete_form")) {
+                    if (this.data.includes("bucket_delete_form")) {
                         $('#main-bucket-{{ bucket.id }}').remove();
                         M.Modal.getInstance($('#modal-bucket')).close();
                     } else if (this.data.includes("shift_validate_invalidate_form")) {
