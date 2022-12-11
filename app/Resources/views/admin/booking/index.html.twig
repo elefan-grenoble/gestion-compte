@@ -94,6 +94,26 @@
 
 {% block javascripts %}
     <script>
+        function ajaxError (jqXHR, exception) {
+            var msg = '';
+            if (jqXHR.status === 0) {
+                msg = 'Perte de connexion à internet. Vérifier votre connexion.';
+            } else if (jqXHR.status == 404) {
+                msg = 'Oups, le créneau n\'existe plus. Quelqu\'un d\'autre l\'a supprimé entre temps ?';
+            } else if (jqXHR.status == 500) {
+                msg = 'Erreur interne, il faut mettre les informatiens sur le coup !';
+            } else if (exception === 'parsererror') {
+                msg = 'Réponse du serveur incompréhensible (JSON parse failed).';
+            } else if (exception === 'timeout') {
+                msg = 'Le serveur n\'a pas répondu dans les temps...';
+            } else if (exception === 'abort') {
+                msg = 'Ajax request aborted.';
+            } else {
+                var data = jqXHR.responseJSON;
+                msg = data.message;
+            }
+            M.toast({ text: msg, displayLength: 5000, classes: 'red' });
+        }
         $(document).ready(function ($) {
             // for the filter form ------------------
             $('#SelectionTypeDropBox').on('change', function () {
@@ -116,7 +136,7 @@
                         $('#modal-bucket-content').html(data);
                         $('#modal-bucket-content .collapsible').collapsible();
                         $('#modal-bucket-content select').formSelect();
-                    });
+                    }).fail(ajaxError);
                 }
             });
         });
