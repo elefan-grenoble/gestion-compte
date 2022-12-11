@@ -22,7 +22,7 @@
             {% endif %}
         {% endif %}
         {% if is_granted('free',shift) %}
-            <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST">
+            {{ form_start(shift_free_forms[shift.id]) }}
                 {% if shift.isPast %}
                     <button type="submit" class="btn red" title="Supprimer la participation">
                         <i class="material-icons left">delete</i>Supprimer la participation
@@ -32,7 +32,7 @@
                         <i class="material-icons left">lock_open</i>Libérer
                     </button>
                 {% endif %}
-            </form>
+            {{ form_end(shift_free_forms[shift.id]) }}
         {% endif %}
     </div>
 </div>

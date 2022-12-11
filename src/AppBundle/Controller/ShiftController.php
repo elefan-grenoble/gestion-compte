@@ -251,24 +251,51 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
-        $session = new Session();
+        $form = $this->createFreeForm($shift);
+        $form->handleRequest($request);
 
-        $membership = $shift->getShifter()->getMembership();
+        if ($form->isSubmitted() && $form->isValid()) {
+            if (!$shift->getShifter()) {
+                $success = false;
+                $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
+            } else {
+                $membership = $shift->getShifter()->getMembership();
+                $em = $this->getDoctrine()->getManager();
+                $shift->free();
+                $shift->invalidateShiftParticipation();
+                $em->persist($shift);
+                $em->flush();
 
-        $em = $this->getDoctrine()->getManager();
-        $shift->free();
-        $shift->invalidateShiftParticipation();
-        $em->persist($shift);
-        $em->flush();
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
 
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
+                $success = true;
+                $message = "Le créneau a bien été libéré";
+            }
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de libérer le créneau. " . (string) $form->getErrors(true, false);
+        }
 
-        $session->getFlashBag()->add('success', "Le créneau a bien été libéré");
-
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
+            }
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $referer = $request->headers->get('referer');
+            return new RedirectResponse($referer);
+        }
     }
 
     /**
@@ -605,6 +632,21 @@ class ShiftController extends Controller
         return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
                                          ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
                                          ->setMethod('DELETE')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createFreeForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
                                          ->getForm();
     }
 }

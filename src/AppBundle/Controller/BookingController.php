@@ -414,9 +414,11 @@ class BookingController extends Controller
 
         $shiftBookForms = [];
         $shiftDeleteForms = [];
+        $shiftFreeForms = [];
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createBookForm($shift)->createView();
             $shiftDeleteForms[$shift->getId()] = $this->createDeleteForm($shift)->createView();
+            $shiftFreeForms[$shift->getId()] = $this->createFreeForm($shift)->createView();
         }
         $bucketAddForm = $this->get('form.factory')->createNamed(
             'bucket_add_form',
@@ -434,6 +436,7 @@ class BookingController extends Controller
             'bucket_add_form' => $bucketAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
             'shift_delete_forms' => $shiftDeleteForms,
+            'shift_free_forms' => $shiftFreeForms,
             'bucket_delete_form' => $bucketDeleteform->createView(),
             'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
         ]);
@@ -652,6 +655,22 @@ class BookingController extends Controller
         return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
                                          ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
                                          ->setMethod('DELETE')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity.
+     * // TODO: how to avoid having same createDeleteForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createFreeForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
                                          ->getForm();
     }
 }

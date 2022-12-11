@@ -44,7 +44,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                                 <i class="material-icons left">check_circle</i>Valider la participation
                             </button>
                         {% endif %}
-                        <form action="{{ path('shift_free', { 'id': shift.id }) }}" method="POST" id="shift_free_{{ shift.id }}">
+                        {{ form_start(shift_free_forms[shift.id]) }}
                             {% if shift.isPast %}
                                 <button type="submit" class="btn red" title="Supprimer la participation">
                                     <i class="material-icons left">delete</i>Supprimer la participation
@@ -54,7 +54,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                                     <i class="material-icons left">lock_open</i>Libérer
                                 </button>
                             {% endif %}
-                        </form>
+                        {{ form_end(shift_free_forms[shift.id]) }}
                     {% endif %}
                 </div>
             </li>
@@ -208,6 +208,7 @@ It use the materialize modal class https://materializecss.com/modals.html
     }
     $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Supprimer les créneaux et les réservations ?!"}, makeAjaxCall);
     $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de supprimer ce poste ?!"}, makeAjaxCall);
+    $('form[name^="shift_free_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir libérer ce poste ?!"}, makeAjaxCall);
     $('form[name="bucket_add_form"], form[name="bucket_lock_unlock_form"], form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
     $('button[id^="shift_validate"], button[id^="shift_invalidate"]').on('click', function (e) {
         var shiftid = $(this).data('shiftid');

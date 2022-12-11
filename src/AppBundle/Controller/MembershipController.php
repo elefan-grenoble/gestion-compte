@@ -163,6 +163,12 @@ class MembershipController extends Controller
         $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1);
         $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
         $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
+        $shiftFreeForms = [];
+        foreach ($shifts_by_cycle as $shifts) {
+            foreach ($shifts as $shift) {
+                $shiftFreeForms[$shift->getId()] = $this->createFreeForm($shift)->createView();
+            }
+        }
 
         $in_progress_and_upcoming_shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($member);
         return $this->render('member/show.html.twig', array(
@@ -186,6 +192,7 @@ class MembershipController extends Controller
             'period_positions' => $period_positions,
             'in_progress_and_upcoming_shifts' => $in_progress_and_upcoming_shifts,
             'shifts_by_cycle' => $shifts_by_cycle,
+            'shift_free_forms' => $shiftFreeForms,
         ));
     }
 
@@ -1160,5 +1167,20 @@ class MembershipController extends Controller
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+    }
+
+    /**
+     * Creates a form to free a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createFreeForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
+                                         ->getForm();
     }
 }
