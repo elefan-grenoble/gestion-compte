@@ -44,7 +44,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                                 <i class="material-icons left">check_circle</i>Valider la participation
                             </button>
                         {% endif %}
-                        {{ form_start(shift_free_forms[shift.id]) }}
+                        {{ form_start(shift_free_forms[shift.id], {'attr': { 'style':  'display:inline;'}}) }}
                             {% if shift.isPast %}
                                 <button type="submit" class="btn red" title="Supprimer la participation">
                                     <i class="material-icons left">delete</i>Supprimer la participation
@@ -79,22 +79,24 @@ It use the materialize modal class https://materializecss.com/modals.html
                     </div>
                 </div>
                 <div class="collapsible-body">
-                    {{ form_start(shift_book_forms[shift.id]) }}
+                    {{ form_start(shift_book_forms[shift.id], {'attr': { 'style':  'display:inline;'}}) }}
                     <div class="row">
                         <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
                             {{ form_label(shift_book_forms[shift.id].shifter) }}
                             {{ form_widget(shift_book_forms[shift.id].shifter) }}
                         </div>
                         {% if use_fly_and_fixed %}
-                            <div class="col s2">
+                            <div class="col s2 input-field">
                                 {{ form_widget(shift_book_forms[shift.id].fixe) }}
                             </div>
                         {% endif %}
-                        <div class="col s3">
+                        <div class="col s3 input-field">
                             {% if not use_fly_and_fixed %}
                                 {{ form_widget(shift_book_forms[shift.id].fixe) }}
                             {% endif %}
-                            <button type="submit" class="btn add">Ajouter</button>
+                            <button type="submit" class="btn">
+                                <i class="material-icons left">add</i>Ajouter
+                            </button>
                         </div>
                     </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
@@ -110,7 +112,7 @@ It use the materialize modal class https://materializecss.com/modals.html
         {% endif %}
     {% endfor %}
 </ul>
-{{ form_start(bucket_add_form) }}
+{{ form_start(bucket_add_form, {'attr': { 'style':  'display:inline;'}}) }}
 <input type="hidden" id="{{ bucket_add_form.start.date.vars.id }}" name="{{ bucket_add_form.start.date.vars.full_name }}" value="{{ bucket_add_form.start.date.vars.value }}">
 <input type="hidden" id="{{ bucket_add_form.start.time.vars.id }}" name="{{ bucket_add_form.start.time.vars.full_name }}" value="{{ bucket_add_form.start.time.vars.value }}">
 <input type="hidden" id="{{ bucket_add_form.end.date.vars.id }}" name="{{ bucket_add_form.end.date.vars.full_name }}" value="{{ bucket_add_form.end.date.vars.value }}">
@@ -134,9 +136,9 @@ It use the materialize modal class https://materializecss.com/modals.html
 {{ form_row(bucket_add_form._token) }}
 {{ form_end(bucket_add_form,  {'render_rest': false}) }}
 <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
-    <i class="material-icons left">mail</i>Envoyer un email aux membres
+    <i class="material-icons left">mail</i>Envoyer un email
 </a>
-{{ form_start(bucket_lock_unlock_form) }}
+{{ form_start(bucket_lock_unlock_form, {'attr': { 'style':  'display:inline;'}}) }}
 <button id="bucket_unlock" class="btn orange" {% if not bucket.locked %}style="display: none;"{% endif %}>
     <i class="material-icons left">lock_open</i>Déverrouiller
 </button>
@@ -147,7 +149,7 @@ It use the materialize modal class https://materializecss.com/modals.html
 <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
 </a>
-{{ form_start(bucket_delete_form) }}
+{{ form_start(bucket_delete_form, {'attr': { 'style':  'display:inline;'}}) }}
 <button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
     <i class="material-icons left">delete</i>Supprimer
 </button>
