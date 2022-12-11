@@ -187,6 +187,15 @@ It use the materialize modal class https://materializecss.com/modals.html
                         $(event.currentTarget).find('button[name="shift_' + (validate ? 'in' : '') + 'validate"]').show();
                         $(event.currentTarget).find('input:hidden[name*="[validate]"]').val(validate ? 0 : 1);
                         $(event.currentTarget).parent().siblings(':first-child').find('span').attr("class", (validate? 'green-text' : 'red-text'));
+                    } else if (data.modal) {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        if (this.data.includes("shift_delete_forms_") && (this.url.substring(this.url.lastIndexOf('/') + 1) == {{ bucket.id }})) {
+                            // Change id as bucket id has been removed
+                            $('#main-bucket-{{ bucket.id }}').attr("id",$(data.card).attr('id'));
+                        }
+                        $('#modal-bucket-content').html(data.modal);
+                        $('#modal-bucket-content .collapsible').collapsible();
+                        $('#modal-bucket-content select').formSelect();
                     } else {
                         $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
                         M.Modal.getInstance($('#modal-bucket')).close();
