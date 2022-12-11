@@ -201,7 +201,7 @@ It use the materialize modal class https://materializecss.com/modals.html
         event.preventDefault();
     }
     $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ces créneaux et leurs réservations ?!"}, makeAjaxCall);
-    $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de supprimer ce poste ?!"}, makeAjaxCall);
+    $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ce poste ?!"}, makeAjaxCall);
     $('form[name^="shift_free_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir libérer ce poste ?!"}, makeAjaxCall);
     $('form[name="bucket_add_form"]').on('submit', {}, makeAjaxCall);
     $('form[name="bucket_lock_unlock_form"]').on('submit', {}, makeAjaxCall);
