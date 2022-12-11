@@ -40,12 +40,15 @@ It use the materialize modal class https://materializecss.com/modals.html
                     {% if is_granted('free',shift) %}
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                             {{ form_start(shift_validate_invalidate_forms[shift.id], {'attr': { 'style':  'display:inline;'}}) }}
-                            <button type="submit" name="shift_invalidate" class="btn orange" title="Invalider la participation" {% if not shift.wasCarriedOut %}style="display: none;"{% endif %}>
-                                <i class="material-icons left">highlight_off</i>Invalider la participation
-                            </button>
-                            <button type="submit" name="shift_validate" class="btn green" title="Valider la participation" {% if shift.wasCarriedOut %}style="display: none;"{% endif %}>
-                                <i class="material-icons left">check_circle</i>Valider la participation
-                            </button>
+                                {% if shift.wasCarriedOut %}
+                                    <button type="submit" class="btn orange" title="Invalider la participation">
+                                        <i class="material-icons left">highlight_off</i>Invalider la participation
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn green" title="Valider la participation">
+                                        <i class="material-icons left">check_circle</i>Valider la participation
+                                    </button>
+                                {% endif %}
                             {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
                         {% endif %}
                         {{ form_start(shift_free_forms[shift.id], {'attr': { 'style':  'display:inline;'}}) }}
@@ -178,13 +181,6 @@ It use the materialize modal class https://materializecss.com/modals.html
                     if (this.data.includes("bucket_delete_form")) {
                         $('#main-bucket-{{ bucket.id }}').remove();
                         M.Modal.getInstance($('#modal-bucket')).close();
-                    } else if (this.data.includes("shift_validate_invalidate_form")) {
-                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
-                        var validate = $(event.currentTarget).find('input:hidden[name*="[validate]"]').val() == 1;
-                        $(event.currentTarget).find('button[name="shift_' + (validate ? '' : 'in') + 'validate"]').hide();
-                        $(event.currentTarget).find('button[name="shift_' + (validate ? 'in' : '') + 'validate"]').show();
-                        $(event.currentTarget).find('input:hidden[name*="[validate]"]').val(validate ? 0 : 1);
-                        $(event.currentTarget).parent().siblings(':first-child').find('span').attr("class", (validate? 'green-text' : 'red-text'));
                     } else if (data.modal) {
                         $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
                         if (this.data.includes("shift_delete_forms_") && (this.url.substring(this.url.lastIndexOf('/') + 1) == {{ bucket.id }})) {

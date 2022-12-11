@@ -361,7 +361,10 @@ class ShiftController extends Controller
                     'end' => 22,
                     'line' => 0,
                 ));
-                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+                $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
+                    'bucket' => $bucket->getShiftWithMinId()
+                ])->getContent();
+                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
             } else {
                 return new JsonResponse(array('message'=>$message), 400);
             }
