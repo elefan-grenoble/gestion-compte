@@ -299,7 +299,7 @@ class ShiftController extends Controller
     }
 
     /**
-     * validate a shift.
+     * validate / invalidate a shift.
      *
      * @Route("/{id}/validate", name="shift_validate")
      * @Method("POST")
@@ -308,69 +308,39 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
 
-        if ($shift->getWasCarriedOut() == 0) {
+        $form = $this->createValidateInvalidateShiftForm($shift);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $shift->validateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
-
-            $success = true;
-            $message = "La participation au créneau a bien été validée";
-        } else {
-            $success = false;
-            $message = "La participation au créneau a déjà été validée";
-        }
-
-        if ($request->isXmlHttpRequest()) {
-            if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
-                    'bucket' => $bucket,
-                    'start' => 6,
-                    'end' => 22,
-                    'line' => 0,
-                ));
-                return new JsonResponse(array('message'=>$message, 'card' => $card), 200);
+            $validate = $form->get('validate')->getData() == 1;
+            $current = $shift->getWasCarriedOut() == 1;
+            if ($validate == $current) {
+                $success = false;
+                $message = "La participation au créneau a déjà été " . ($validate ? "validée" : "invalidée");
             } else {
-                return new JsonResponse(array('message'=>$message), 400);
+                if ($validate) {
+                    $shift->validateShiftParticipation();
+                } else {
+                    $shift->invalidateShiftParticipation();
+                }
+                $em->persist($shift);
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                if ($validate) {
+                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                } else {
+                    $membership = $shift->getShifter()->getMembership();
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
+                }
+
+                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée");
+                $success = true;
             }
         } else {
-            $session = new Session();
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            $referer = $request->headers->get('referer');
-            return new RedirectResponse($referer);
-        }
-    }
-
-    /**
-     * invalidate a shift.
-     *
-     * @Route("/{id}/invalidate", name="shift_invalidate")
-     * @Method("POST")
-     */
-    public function invalidateShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
-
-        if ($shift->getWasCarriedOut() == 1) {
-            $membership = $shift->getShifter()->getMembership();
-
-            $em = $this->getDoctrine()->getManager();
-            $shift->invalidateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
-
-            $success = true;
-            $message = "La participation au créneau a bien été invalidée";
-        } else {
             $success = false;
-            $message = "La participation au créneau a déjà été invalidée";
+            $message = "Une erreur s'est produite... Impossible de valider/invalider le créneau. " . (string) $form->getErrors(true, false);
         }
 
         if ($request->isXmlHttpRequest()) {
@@ -646,6 +616,24 @@ class ShiftController extends Controller
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
                                          ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to validate / invalidate a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createValidateInvalidateShiftForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+                                         ->add('validate', HiddenType::class, [
+                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
+                                         ])
                                          ->setMethod('POST')
                                          ->getForm();
     }

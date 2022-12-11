@@ -415,10 +415,12 @@ class BookingController extends Controller
         $shiftBookForms = [];
         $shiftDeleteForms = [];
         $shiftFreeForms = [];
+        $shiftValidateInvalidateForms = [];
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createBookForm($shift)->createView();
             $shiftDeleteForms[$shift->getId()] = $this->createDeleteForm($shift)->createView();
             $shiftFreeForms[$shift->getId()] = $this->createFreeForm($shift)->createView();
+            $shiftValidateInvalidateForms[$shift->getId()] = $this->createValidateInvalidateShiftForm($shift)->createView();
         }
         $bucketAddForm = $this->get('form.factory')->createNamed(
             'bucket_add_form',
@@ -437,6 +439,7 @@ class BookingController extends Controller
             'shift_book_forms' => $shiftBookForms,
             'shift_delete_forms' => $shiftDeleteForms,
             'shift_free_forms' => $shiftFreeForms,
+            'shift_validate_invalidate_forms' => $shiftValidateInvalidateForms,
             'bucket_delete_form' => $bucketDeleteform->createView(),
             'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
         ]);
@@ -491,7 +494,6 @@ class BookingController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
-        $session = new Session();
         $form = $this->createLockUnlockBucketForm($shift);
         $form->handleRequest($request);
 
@@ -660,7 +662,7 @@ class BookingController extends Controller
 
     /**
      * Creates a form to free a shift entity.
-     * // TODO: how to avoid having same createDeleteForm in ShiftController ?
+     * // TODO: how to avoid having same createFreeForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
@@ -670,6 +672,25 @@ class BookingController extends Controller
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
                                          ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+                                         ->setMethod('POST')
+                                         ->getForm();
+    }
+
+    /**
+     * Creates a form to validate / invalidate a shift entity.
+     * // TODO: how to avoid having same createValidateInvalidateShiftForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createValidateInvalidateShiftForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+                                         ->add('validate', HiddenType::class, [
+                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
+                                         ])
                                          ->setMethod('POST')
                                          ->getForm();
     }
