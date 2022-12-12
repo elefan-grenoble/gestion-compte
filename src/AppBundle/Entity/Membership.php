@@ -671,13 +671,31 @@ class Membership
     }
 
     /**
+     * Get valid membership shiftExemptions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getValidMembershipShiftExemptions(\DateTime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $this->membershipShiftExemptions->filter(function($membershipShiftExemption) use ($date) {
+            return $membershipShiftExemption->isValid($date);
+        });
+    }
+
+    /**
      * Return if the membership is exempted from doing shifts
      *
      * @param \DateTime $date
      * @return boolean
      */
-    public function isExemptedFromShifts(\Datetime $date)
+    public function isExemptedFromShifts(\DateTime $date = null)
     {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
         return $this->membershipShiftExemptions->exists(function($key, $value) use ($date) {
             return $value->isValid($date);
         });

@@ -1,5 +1,17 @@
 {% set firstShiftDate = member.firstShiftDate %}
 
+{% if member.isExemptedFromShifts() %}
+    <div class="row">
+        {% set firstValidMembershipShiftExemption = member.getValidMembershipShiftExemptions().first %}
+        <div class="card-panel teal white-text">
+            <i class="material-icons small left">beach_access</i>
+            <strong>Compte exempté de créneau !</strong>
+            <br />
+            ({{ firstValidMembershipShiftExemption.shiftExemption }}) jusqu'au {{ firstValidMembershipShiftExemption.end | date_fr_full }}
+        </div>
+    </div>
+{% endif %}
+
 {% if use_fly_and_fixed %}
     <div class="row">
         <h6>Créneau fixe</h6>

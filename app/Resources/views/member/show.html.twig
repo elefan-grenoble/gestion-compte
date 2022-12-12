@@ -17,8 +17,12 @@
     <h4>
         {% if member.withdrawn %}<del>{% endif %}
         Membre #{{ member.memberNumber }}{% if member.withdrawn %}</del>{% endif %}
-        {% if member.frozen %}<i class="material-icons">ac_unit</i>{% endif %}
-        {% if member.withdrawn %}<i class="material-icons">block</i>{% endif %}
+        {% if not member.mainBeneficiary.user.isEnabled %}
+            <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
+        {% endif %}
+        {% if member.isExemptedFromShifts() %}<i class="material-icons" title="Compte exempté">beach_access</i>{% endif %}
+        {% if member.frozen %}<i class="material-icons" title="Compte gelé">ac_unit</i>{% endif %}
+        {% if member.withdrawn %}<i class="material-icons" title="Compte fermé">block</i>{% endif %}
     </h4>
 
     <div class="row">
