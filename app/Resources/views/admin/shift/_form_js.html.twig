@@ -7,12 +7,8 @@
         $('#appbundle_shift_start_date.datepicker').datepicker({
             format: 'yyyy-mm-dd'
         });
-        $("form[name='appbundle_shift']").submit(function(event) {
-            $("input[id='appbundle_shift_end_date']").val($("input[id='appbundle_shift_start_date']").val());
-        });
-        // bucket_add_form
-        $("form[name='bucket_add_form']").submit(function(event) {
-            $("input[id='bucket_add_form_end_date']").val($("input[id='bucket_add_form_start_date']").val());
+        $("form[name='{{form.vars.name}}']").submit(function(event) {
+            $("input[id='{{form.end.date.vars.id}}']").val($("input[id='{{form.start.date.vars.id}}']").val());
         });
     });
 </script>
