@@ -182,17 +182,16 @@ class BookingController extends Controller
      *      "filling"=>str|null,
      *      )
      */
-    private function adminFilterFormFactory(Request $request): array
+    private function adminFilterFormFactory($em, Request $request): array
     {
         // filter creation ----------------------
         $defaultFrom = new DateTime();
         $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
 
-        $defaultTo = new DateTime();
-        $defaultTo->setTimestamp(strtotime('next sunday', strtotime('tomorrow')));
-
         $defaultWeek = (new DateTime())->format('W');
         $defaultYear = (new DateTime())->format('Y');
+
+        $years = $em->getRepository(Shift::class)->getYears();
 
         $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
@@ -214,18 +213,14 @@ class BookingController extends Controller
             ->add('to', TextType::class, [
                 'label' => 'Jusqu\'à',
                 'required' => false,
-                'data' => $defaultTo->format('Y-m-d'),
                 'attr' => array('class' => 'datepicker'),
             ])
-            ->add('year', IntegerType::class, [
+            ->add('year', ChoiceType::class, [
                 'required' => false,
+                'choices' => array_combine($years, $years),
                 'label' => 'Année',
-                'scale' => 0,
-                'data' => $defaultYear,
-                'attr' => [
-                    'min' => 2000,
-                    'max' => (int)$defaultYear + 10,
-                ],
+                'data' =>  $defaultYear,
+                'placeholder' => false,
             ])
             ->add('week', IntegerType::class, [
                 'required' => false,
@@ -269,7 +264,7 @@ class BookingController extends Controller
 
         $filterForm->handleRequest($request);
         $from = $defaultFrom;
-        $to = $defaultTo;
+        $to = null;
         $job = null;
         $filling=null;
 
@@ -293,12 +288,10 @@ class BookingController extends Controller
                     $week = $filterForm->get("week")->getData();
                     $year = $filterForm->get("year")->getData();
 
-                    $dateTime = new DateTime();
-                    $dateTime->setISODate($year, $week, 1);
-                    $from = clone $dateTime;
-                    $dateTime->modify('+6 days');
-                    $to = $dateTime;
-
+                    $from = new DateTime();
+                    $from->setISODate($year, $week, 1);
+                    $to = clone $dateTime;
+                    $to->modify('+6 days');
                 }
             }
         } catch (Exception $ex) {
@@ -381,11 +374,9 @@ class BookingController extends Controller
      */
     public function adminAction(Request $request): Response
     {
-        $filter = $this->adminFilterFormFactory($request);
-
-        // calendar creation
-        /** @var EntityManager $em */
         $em = $this->getDoctrine()->getManager();
+        $filter = $this->adminFilterFormFactory($em, $request);
+
         $jobs = $em->getRepository(Job::class)->findByEnabled(true);
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
         $shifts = $em
