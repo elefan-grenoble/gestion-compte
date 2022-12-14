@@ -1,5 +1,9 @@
 <script>
     $(document).ready(function() {
+        // shift start & end fields have a datetime format
+        // - date should be equal ('yyyy-mm-dd') format
+        // - date picker is hidden
+        // - only time picker is displayed
         $('#appbundle_shift_start_date.datepicker').datepicker({
             format: 'yyyy-mm-dd'
         });
