@@ -290,7 +290,7 @@ class BookingController extends Controller
 
                     $from = new DateTime();
                     $from->setISODate($year, $week, 1);
-                    $to = clone $dateTime;
+                    $to = clone $from;
                     $to->modify('+6 days');
                 }
             }
