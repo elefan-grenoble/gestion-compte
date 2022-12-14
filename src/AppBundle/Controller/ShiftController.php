@@ -54,24 +54,23 @@ class ShiftController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
+
         if (!$job) {
             $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
         $shift = new Shift();
-        $form = $this->get('form.factory')->createNamed('bucket_add_form',ShiftType::class, $shift);
+        $form = $this->get('form.factory')->createNamed('bucket_add_form', ShiftType::class, $shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $number = $form->get('number')->getData();
-            while (1 < $number ){
+            while (1 < $number) {
                 $s = clone($shift);
                 $em->persist($s);
                 $number --;
             }
-
             $em->persist($shift);
             $em->flush();
             $success = true;
@@ -102,6 +101,9 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add('success', $message);
                 return $this->redirectToRoute('booking_admin');
             } else {
+                if ($form->isSubmitted()) {
+                    $session->getFlashBag()->add('error', $message);
+                }
                 return $this->render('admin/shift/new.html.twig', array(
                     "form" => $form->createView()
                 ));
