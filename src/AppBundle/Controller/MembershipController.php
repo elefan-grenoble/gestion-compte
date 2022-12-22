@@ -1056,6 +1056,21 @@ class MembershipController extends Controller
         ));
     }
 
+    /**
+     * @return Response
+     */
+    public function homepageFreezeAction(): Response
+    {
+        $member = $this->getUser()->getBeneficiary()->getMembership();
+
+        $freezeChangeForm = $this->createFreezeChangeForm($member);
+
+        return $this->render('member/_partial/frozen.html.twig', array(
+            'member' => $member,
+            'freeze_change_form' => $freezeChangeForm->createView(),
+        ));
+    }
+
     private function createNewBeneficiaryForm(Membership $member)
     {
         $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));

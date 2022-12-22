@@ -387,14 +387,13 @@ class ShiftController extends Controller
     public function dismissShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         if (!$this->isGranted('dismiss', $shift)) {
             $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
             return $this->redirectToRoute("booking");
         }
 
-        $beneficiary = $shift->getShifter();
-        $em = $this->getDoctrine()->getManager();
         if($shift->isFixe()) {
             $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
             return $this->redirectToRoute("booking");
@@ -406,6 +405,7 @@ class ShiftController extends Controller
         $em->persist($shift);
         $em->flush();
 
+        $beneficiary = $shift->getShifter();
         $reason = $request->get("reason");
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
