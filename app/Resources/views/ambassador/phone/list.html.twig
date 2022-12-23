@@ -114,15 +114,15 @@
 
     <table class="responsive-table">
         <thead>
-        <tr>
-            <th data-col="o.member_number">#</th>
-            <th data-col="b.firstname">Prénom</th>
-            <th data-col="b.lastname">Nom</th>
-            <th data-col="r.date">Dernière adhésion</th>
-            <th data-col="time">Compteur</th>
-            <th>Note(s)</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th data-col="o.member_number">#</th>
+                <th data-col="b.firstname">Prénom</th>
+                <th data-col="b.lastname">Nom</th>
+                <th data-col="r.date">Dernière adhésion</th>
+                <th data-col="time">Compteur</th>
+                <th>Note(s)</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
         {% for member in members %}
@@ -193,17 +193,15 @@
             </li>
         </ul>
     {% endif %}
-
 {% endblock %}
 
 {% block stylesheets %}
     <style>
-        td strong {
-            /*font-weight: 600;*/
-        }
-
         th.active {
-            color: #51CAE9;
+            color: {{ main_color }};
+        }
+        th[data-col] {
+            cursor: pointer;
         }
     </style>
 {% endblock %}

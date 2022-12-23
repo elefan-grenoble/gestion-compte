@@ -209,12 +209,12 @@
         <thead>
             <tr>
                 <th class="hide-on-med-and-down">Etat</th>
-                <th data-col="o.member_number" style="cursor:pointer;">#</th>
-                <th data-col="u.username" style="cursor:pointer;">username</th>
-                <th data-col="b.firstname" style="cursor:pointer;">prénom</th>
-                <th data-col="b.lastname" style="cursor:pointer;">nom</th>
-                <th data-col="b.email" style="cursor:pointer;">email</th>
-                <th data-col="r.date" class="hide-on-small-and-down" style="cursor:pointer;">Adhésion(s)</th>
+                <th data-col="o.member_number">#</th>
+                <th data-col="u.username">username</th>
+                <th data-col="b.firstname">prénom</th>
+                <th data-col="b.lastname">nom</th>
+                <th data-col="b.email">email</th>
+                <th data-col="r.date" class="hide-on-small-and-down">Adhésion(s)</th>
                 <th class="hide-on-med-and-down">Formation(s)</th>
                 <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
@@ -359,6 +359,9 @@
     <style>
         th.active {
             color: {{ main_color }};
+        }
+        th[data-col] {
+            cursor: pointer;
         }
         tr.withdrawn {
             background: rgba(255, 50, 0, 0.2);
