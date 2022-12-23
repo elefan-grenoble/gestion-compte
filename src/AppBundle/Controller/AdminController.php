@@ -70,7 +70,7 @@ class AdminController extends Controller
     /**
      * Lists all user entities.
      *
-     * @param Request $request , SearchUserFormHelper $formHelper
+     * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/users", name="user_index")
      * @Method({"GET","POST"})
@@ -85,9 +85,11 @@ class AdminController extends Controller
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
 
+        # default data
+        $defaultWithdrawn = 1;  # open accounts
         $page = 1;
-        $order = 'ASC';
         $sort = 'o.member_number';
+        $order = 'ASC';
         $limit = 25;
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -100,11 +102,12 @@ class AdminController extends Controller
             if ($form->get('dir')->getData()) {
                 $order = $form->get('dir')->getData();
             }
-            $formHelper->processSearchFormData($form, $qb);
         } else {
+            $form->get('withdrawn')->setData($defaultWithdrawn);
             $form->get('sort')->setData($sort);
             $form->get('dir')->setData($order);
         }
+        $formHelper->processSearchFormData($form, $qb);
         $formHelper->processSearchQueryData($request->getQueryString(), $qb);
 
         $qb = $qb->orderBy($sort, $order);
