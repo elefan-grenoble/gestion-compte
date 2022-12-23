@@ -105,7 +105,7 @@ class BookingController extends Controller
                 return $this->redirectToRoute('homepage');
             }
             if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
-                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ ! Dégel pour réserver 😉');
+                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
                 return $this->redirectToRoute('homepage');
             }
         }

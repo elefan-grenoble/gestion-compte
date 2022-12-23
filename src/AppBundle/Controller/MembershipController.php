@@ -651,10 +651,18 @@ class MembershipController extends Controller
             $em->persist($member);
             $em->flush();
 
-            if ($member->getFrozenChange()) {
-                $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+            if ($member->isFrozen()) {
+                if ($member->getFrozenChange()) {
+                    $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+                } else {
+                    $session->getFlashBag()->add('success', 'La demande de dégel a été annulée !');
+                }
             } else {
-                $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+                if ($member->getFrozenChange()) {
+                    $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+                } else {
+                    $session->getFlashBag()->add('success', 'La demande de gel a été annulée !');
+                }
             }
         }
 

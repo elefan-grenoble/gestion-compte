@@ -19,18 +19,6 @@
     <body>
         {% include "_partial/header.html.twig" %}
         <main>
-            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                {% if frozen %}
-                    <div class="wrapper blue lighten-5">
-                        <strong class="deep-purple-text"><i class="material-icons">pause</i>Adhésion en pause</strong>.
-                        {% if not app.user.beneficiary.membership.frozenChange %}
-                            Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}" class="">ton profil <i class="material-icons tiny">settings</i></a>
-                        {% else %}
-                            Dégel programmé.
-                        {% endif %}
-                    </div>
-                {% endif %}
-            {% endif %}
             {% set _breadcrumbs = block('breadcrumbs') %}
             {% if _breadcrumbs is not empty %}
                 <div class="wrapper breadcrumbs blue-grey lighten-5">
@@ -38,6 +26,23 @@
                         {% block breadcrumbs %}{% endblock breadcrumbs %}
                     </div>
                 </div>
+            {% endif %}
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                {% if frozen %}
+                    <div class="row">
+                        <div class="col s12">
+                            <div class="card-panel" style="background-color: rgba(0, 138, 255, 0.1);margin-bottom:0;">
+                                <strong class="orange"><i class="material-icons left">ac_unit</i>Adhésion en pause</strong>
+                                <br />
+                                {% if not app.user.beneficiary.membership.frozenChange %}
+                                    Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}">ton profil <i class="material-icons tiny">settings</i></a>
+                                {% else %}
+                                    Dégel programmé.
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
             {% endif %}
             {% if app.request.hasPreviousSession %}
                 {% for type, messages in app.session.flashBag.all %}
