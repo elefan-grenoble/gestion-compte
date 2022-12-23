@@ -415,11 +415,11 @@
         }
         {% elseif member.frozen %}
         body {
-            background-color: rgba(0, 138, 255, 0.1);
+            background-color: {{ member_frozen_background_color }};
         }
         {% elseif member.isExemptedFromShifts() %}
         body {
-            background-color: rgb(0, 150, 136, 0.1);
+            background-color: {{ member_exempted_background_color }};
         }
         {% endif %}
     </style>
