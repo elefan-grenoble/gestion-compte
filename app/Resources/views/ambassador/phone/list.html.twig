@@ -20,40 +20,52 @@
                 <div class="row">
                     <div class="col s12 m4">
                         <h5>Compte</h5>
-                        <div>
-                            <div class="row">
-                                <div class="col s6">
-                                    <div class="input-field">
-                                        {{ form_widget(form.withdrawn) }}
-                                        {{ form_label(form.withdrawn) }}
-                                    </div>
-                                </div>
-                                <div class="col s6">
-                                    <div class="input-field">
-                                        {{ form_widget(form.frozen) }}
-                                        {{ form_label(form.frozen) }}
-                                    </div>
+                        <div class="row">
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.withdrawn) }}
+                                    {{ form_label(form.withdrawn) }}
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumber) }}
-                                        {{ form_label(form.membernumber) }}
-                                    </div>
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.frozen) }}
+                                    {{ form_label(form.frozen) }}
                                 </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumbergt) }}
-                                        {{ form_label(form.membernumbergt) }}
-                                    </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumber) }}
+                                    {{ form_label(form.membernumber) }}
                                 </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberlt) }}
-                                        {{ form_label(form.membernumberlt) }}
-                                    </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumbergt) }}
+                                    {{ form_label(form.membernumbergt) }}
                                 </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberlt) }}
+                                    {{ form_label(form.membernumberlt) }}
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                <span><</span>&nbsp;&nbsp;compteur&nbsp;&nbsp;<span><</span>
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
                             </div>
                         </div>
                     </div>
@@ -88,22 +100,9 @@
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
                         </div>
-                    </div>
-                    <div class="col s12 m4">
-                        <h5>Compteur</h5>
-                        <div class="row valign-wrapper">
-                            <div class="input-field col s3">
-                                {{ form_widget(form.compteurgt) }}
-                                {{ form_label(form.compteurgt) }}
-                            </div>
-                            <div class="col s6 center">
-                                <  &nbsp; compteur &nbsp; <
-                            </div>
-                            <div class="input-field col s3">
-                                {{ form_widget(form.compteurlt) }}
-                                {{ form_label(form.compteurlt) }}
-                            </div>
-                        </div>
+                        <br />
+                        <h5>Actions</h5>
+                        {{ form_widget(form.submit) }}
                     </div>
                 </div>
 
@@ -115,6 +114,7 @@
     <table class="responsive-table">
         <thead>
             <tr>
+                <th class="hide-on-med-and-down">Etat</th>
                 <th data-col="o.member_number">#</th>
                 <th data-col="b.firstname">Prénom</th>
                 <th data-col="b.lastname">Nom</th>
@@ -126,7 +126,21 @@
         </thead>
         <tbody>
         {% for member in members %}
-            <tr class="{% if member.withdrawn %}withdrawn{% endif %}">
+            <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isExemptedFromShifts() %}exempted{% endif %}">
+                <td class="hide-on-med-and-down">
+                    {% if member.withdrawn %}
+                        <i class="material-icons" title="Compte fermé">block</i>
+                    {% endif %}
+                    {% if member.frozen %}
+                        <i class="material-icons" title="Compte gelé">ac_unit</i>
+                    {% endif %}
+                    {% if member.isExemptedFromShifts() %}
+                        <i class="material-icons" title="Compte exempté">beach_access</i>
+                    {% endif %}
+                    {% if not member.mainBeneficiary.user.isEnabled %}
+                        <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a>
                 </td>
@@ -202,6 +216,15 @@
         }
         th[data-col] {
             cursor: pointer;
+        }
+        tr.withdrawn {
+            background: rgba(255, 50, 0, 0.2);
+        }
+        tr.frozen {
+            background-color: rgba(0, 138, 255, 0.1);
+        }
+        tr.exempted {
+            background-color: rgb(0, 150, 136, 0.1);
         }
     </style>
 {% endblock %}
