@@ -12,14 +12,7 @@
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}?060820191303">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
         <script src="{{ asset('bundles/app/js/vanilla_top.js') }}"></script>
-        <style>
-            .homebox {
-                border-color: {{ main_color }};
-            }
-            .main-color-text {
-                color: {{ main_color }};
-            }
-        </style>
+        {% include "_partial/style_config.html.twig" %}
     </head>
     <body>
         <header>

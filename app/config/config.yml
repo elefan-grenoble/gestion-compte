@@ -66,6 +66,11 @@ twig:
     display_gauge: '%display_gauge%'
     profile_display_task_list: '%profile_display_task_list%'
     profile_display_time_log: '%profile_display_time_log%'
+    # member
+    member_withdrawn_background_color: '%member_withdrawn_background_color%'
+    member_frozen_background_color: '%member_frozen_background_color%'
+    member_exempted_background_color: '%member_exempted_background_color%'
+    # swipe card
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
     display_freeze_account_false_message: '%display_freeze_account_false_message%'

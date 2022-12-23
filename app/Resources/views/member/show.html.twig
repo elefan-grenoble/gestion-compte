@@ -411,7 +411,7 @@
 
         {% if member.withdrawn %}
         body {
-            background: rgba(255, 50, 0, 0.2);
+            background-color: {{ member_withdrawn_background_color }};
         }
         {% elseif member.frozen %}
         body {
