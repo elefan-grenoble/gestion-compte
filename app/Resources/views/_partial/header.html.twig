@@ -1,0 +1,120 @@
+{% set frozen = app.user and app.user.beneficiary and app.user.beneficiary.membership.frozen %}
+
+<header>
+    {% if is_granted('ROLE_PREVIOUS_ADMIN') %}
+        <div class="navbar-fixed">
+            <nav class="impersonate">
+                <div class="brand-logo">{% image '@AppBundle/Resources/public/img/emoticons/072-ninja.svg' %}<img height="30px" class="emoticon" src="{{ asset_url }}" alt="ninja mode" />{% endimage %}</div>
+                <div class="nav-wrapper">
+                    <ul class="right">
+                        <li>
+                            {% if app.user.beneficiary %}
+                                <a href="{{ path('member_show', {'member_number': app.user.beneficiary.membership.memberNumber,'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                            {% else %}
+                                <a href="{{ path('homepage', {'_login_as': '_exit'}) }}"><i class="material-icons small right">arrow_back</i>Quitter le login as {{ app.user.username }}</a>
+                            {% endif %}
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    {% endif %}
+    <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+        <div class="nav-wrapper container">
+            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">{{ site_name }}</a>
+            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
+            <ul id="nav-desktop" class="right hide-on-med-and-down">
+                {% if is_granted("ROLE_ADMIN_PANEL") %}
+                    <li class="highlight">
+                        <a href="{{ path("admin") }}" title="Administration">
+                            <i class="material-icons left">build</i>
+                            <span class="show-on-xl-only">Administration</span>
+                        </a>
+                    </li>
+                {% endif %}
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    {{ render(controller("AppBundle:Service:navlist")) }}
+                    {% if app.user.beneficiary %}
+                        <li>
+                            <a href="{{ path('fos_user_profile_show') }}" title="{{ app.user.firstname }}">
+                                <i class="material-icons small left">settings</i>
+                                <span class="show-on-xl-only">{{ app.user.firstname }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    <li>
+                        <a href="{{ path('fos_user_security_logout') }}">
+                            <i class="material-icons small right">exit_to_app</i>
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ path('fos_user_security_login') }}">
+                            {{ 'layout.login'|trans({}, 'FOSUserBundle') }}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+
+            <a href="#" data-target="nav-mobile" class="sidenav-trigger show-on-medium-and-down">
+                <i class="material-icons">menu</i>
+            </a>
+            <ul id="nav-mobile" class="sidenav show-on-medium-and-down">
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <li>
+                        <div class="user-view center-align">
+                            <div class="background">
+                                {% if frozen %}
+                                    {% image '@AppBundle/Resources/public/img/frozen.png' %}
+                                        <img class="responsive-img" src="{{ asset_url }}" alt="" />
+                                    {% endimage %}
+                                {% else %}
+                                    {% image '@AppBundle/Resources/public/img/dumbo-in-the-air.jpg' %}
+                                        <img class="responsive-img" src="{{ asset_url }}" alt="" style="position: absolute;bottom: -46px;left: 0;" />
+                                    {% endimage %}
+                                {% endif %}
+                            </div>
+                            <a href="#user">
+                                <img class="circle" src="{{ gravatar(app.user.email) }}">
+                            </a>
+                            <a href="#name">
+                                <span class="{% if not frozen %}white-text{% else %}black-text{% endif %} name">{{ app.user }}</span>
+                            </a>
+                        </div>
+                    </li>
+                    <li>
+                        <a href="{{ path('homepage') }}">
+                            <i class="material-icons small">home</i>Accueil
+                        </a>
+                    </li>
+                    {% if app.user.beneficiary %}
+                        <li>
+                            <a href="{{ path('fos_user_profile_show') }}">
+                                <i class="material-icons">settings</i>Mon profil ({{ app.user.username }})
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% if is_granted("ROLE_ADMIN_PANEL") %}
+                        <li class="indigo lighten-5">
+                            <a href="{{ path("admin") }}" class="">
+                                <i class="material-icons left indigo-text darken-4">build</i>Administration
+                            </a>
+                        </li>
+                    {% endif %}
+                    {{ render(controller("AppBundle:Service:navlist")) }}
+                    <li>
+                        <a href="{{ path('fos_user_security_logout') }}">
+                            <i class="material-icons small">exit_to_app</i>{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ path('fos_user_security_login') }}">
+                            <span class="glyphicon glyphicon-log-in"></span> {{ 'layout.login'|trans({}, 'FOSUserBundle') }}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+</header>

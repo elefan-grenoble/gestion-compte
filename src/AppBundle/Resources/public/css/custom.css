@@ -114,17 +114,11 @@ body {
 main {
   flex: 1 0 auto;
 }
-.main-navigation {
-  background-color: #51CAE9;
-}
 .impersonate {
   background: black;
 }
 .impersonate .brand-logo {
   margin-left: 10px;
-}
-footer.page-footer {
-  background-color: #51CAE9;
 }
 #logo-container {
   font-family: 'black_jackregular';
@@ -144,12 +138,7 @@ footer.page-footer {
 .btn,
 .btn-large {
   color: #fff;
-  background-color: #51CAE9;
   margin-bottom: 5px;
-}
-.btn:hover,
-.btn-large:hover {
-  background-color: #189bbc;
 }
 .breadcrumbs {
   font-size: 12px;

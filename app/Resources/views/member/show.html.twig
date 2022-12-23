@@ -411,15 +411,15 @@
 
         {% if member.withdrawn %}
         body {
-            background: rgba(255, 50, 0, 0.2);
+            background-color: {{ member_withdrawn_background_color }};
         }
         {% elseif member.frozen %}
         body {
-            background-color: rgba(0, 138, 255, 0.1);
+            background-color: {{ member_frozen_background_color }};
         }
         {% elseif member.isExemptedFromShifts() %}
         body {
-            background-color: rgb(0, 150, 136, 0.1);
+            background-color: {{ member_exempted_background_color }};
         }
         {% endif %}
     </style>
