@@ -95,6 +95,7 @@
                                     <i class="material-icons left">settings</i>Gérer mon compte
                                 </a>
                                 {% if display_freeze_account %}
+                                    <br />
                                     {# why render instead of include? because of forms init #}
                                     {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
                                 {% endif %}
