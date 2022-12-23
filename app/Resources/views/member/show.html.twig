@@ -417,6 +417,10 @@
         body {
             background-color: rgba(0, 138, 255, 0.1);
         }
+        {% elseif member.isExemptedFromShifts() %}
+        body {
+            background-color: rgb(0, 150, 136, 0.1);
+        }
         {% endif %}
     </style>
 {% endblock %}

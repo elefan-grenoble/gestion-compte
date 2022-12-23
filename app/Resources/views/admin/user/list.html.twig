@@ -214,7 +214,7 @@
                 <th data-col="b.firstname">prénom</th>
                 <th data-col="b.lastname">nom</th>
                 <th data-col="b.email">email</th>
-                <th class="hide-on-small-and-down" data-col="r.date">Adhésion(s)</th>
+                <th data-col="r.date" class="hide-on-small-and-down">Adhésion(s)</th>
                 <th class="hide-on-med-and-down">Formation(s)</th>
                 <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
@@ -222,7 +222,7 @@
         <tbody>
         {% for member in members %}
             {% if member.mainBeneficiary %}
-                <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
+                <tr data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isExemptedFromShifts() %}exempted{% endif %}">
                     <td class="hide-on-med-and-down">
                         {% if member.withdrawn %}
                             <i class="material-icons" title="Compte fermé">block</i>
@@ -293,8 +293,8 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
-                    <td colspan="9">{{ member.mainBeneficiary.user }}</td>
+                <tr data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}">
+                    <td colspan="9">{{ member }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -357,26 +357,30 @@
 
 {% block stylesheets %}
     <style>
-        td strong{
-            /*font-weight: 600;*/
+        th.active {
+            color: {{ main_color }};
         }
-        th.active{
-            color: #51CAE9;
+        th[data-col] {
+            cursor: pointer;
         }
-        tr.withdrawn{
+        tr.withdrawn {
             background: rgba(255, 50, 0, 0.2);
         }
-        tr.frozen{
+        tr.frozen {
             background-color: rgba(0, 138, 255, 0.1);
             background-image: url({% image '@AppBundle/Resources/public/img/snowflakes.svg' %}{{ asset_url }}{% endimage %});
             background-position: top right;
             background-repeat: no-repeat;
             background-size: contain;
         }
-        tr.frozen td{
+        tr.frozen td {
             background-color: rgba(255, 255, 255, 0.5);
         }
-        tbody tr{
+        tr.exempted {
+            /* teal */
+            background-color: rgb(0, 150, 136, 0.1);
+        }
+        tbody tr {
             cursor: pointer;
         }
     </style>
