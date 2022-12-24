@@ -25,7 +25,8 @@ class TimeLogEventListener
     protected $due_duration_by_cycle;
     protected $cycle_duration;
     protected $registration_duration;
-    protected $maxTimeAtEndOfShift ;
+    protected $use_card_reader_to_validate_shifts;
+    protected $maxTimeAtEndOfShift;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -257,5 +258,4 @@ class TimeLogEventListener
         $this->em->persist($log);
         $this->em->flush();
     }
-
 }
