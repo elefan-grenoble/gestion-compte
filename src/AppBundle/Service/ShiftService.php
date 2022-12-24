@@ -7,6 +7,9 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Service\MembershipService;
+use AppBundle\Service\BeneficiaryService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
@@ -19,10 +22,13 @@ class ShiftService
     protected $min_shift_duration;
     private $newUserStartAsBeginner;
     private $allowExtraShifts;
+    private $maxTimeInAdvanceToBookExtraShifts;
     private $forbidShiftOverlapTime;
+    private $beneficiaryService;
+    private $membershipService;
 
-    public function __construct($em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts,
-        $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime, $beneficiaryService, $membershipService)
+    public function __construct(EntityManagerInterface $em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts,
+        $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime, BeneficiaryService $beneficiaryService, MembershipService $membershipService)
     {
         $this->em = $em;
         $this->due_duration_by_cycle = $due_duration_by_cycle;

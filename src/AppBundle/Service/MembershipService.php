@@ -7,6 +7,7 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
@@ -19,7 +20,7 @@ class MembershipService
     protected $registration_every_civil_year;
     protected $cycle_type;
 
-    public function __construct($em, $registration_duration, $registration_every_civil_year, $cycle_type)
+    public function __construct(EntityManagerInterface $em, $registration_duration, $registration_every_civil_year, $cycle_type)
     {
         $this->em = $em;
         $this->registration_duration = $registration_duration;
