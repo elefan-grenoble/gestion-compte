@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/CycleStartCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Event\MemberCycleEndEvent;

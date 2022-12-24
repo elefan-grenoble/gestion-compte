@@ -25,18 +25,17 @@ class FixTimeLogCommand extends ContainerAwareCommand
         $countShiftLogs = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $members = $em->getRepository('AppBundle:Membership')->findAll();
+
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
-
-                $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1);
-                $current_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 0);
+                $previous_cycle_start = $this->getContainer()->get('membership_service')->getStartOfCycle($member, -1);
+                $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
                 $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end, true);
-                foreach ($shifts as $shift) {
 
+                foreach ($shifts as $shift) {
                     $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {
                         return ($log->getShift() && $log->getShift()->getId() == $shift->getId());
                     });
-
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
                         $this->createShiftLog($em, $shift, $member);

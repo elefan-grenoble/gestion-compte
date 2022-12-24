@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/ShiftGenerateCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Beneficiary;
