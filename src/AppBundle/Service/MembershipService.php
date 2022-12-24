@@ -14,7 +14,6 @@ use \Datetime;
 
 class MembershipService
 {
-
     protected $em;
     protected $registration_duration;
     protected $registration_every_civil_year;
@@ -117,7 +116,7 @@ class MembershipService
             // Set date to monday of week A
             $date->modify('-'. (7 * $week) . ' days');
         } else {
-            $firstDate = $this->getFirstShiftDate();
+            $firstDate = $membership->getFirstShiftDate();
             if ($firstDate) {
                 $now = new DateTime('now');
                 $date = clone($firstDate);
@@ -127,7 +126,7 @@ class MembershipService
                     $currentCycleCount = intval($diff / 28);
                     $date->modify("+" . (28 * $currentCycleCount) . " days");
                 }
-            }else{
+            } else {
                 $date = new DateTime('now');
             }
         }
@@ -154,5 +153,4 @@ class MembershipService
         $date->setTime(23, 59, 59);
         return $date;
     }
-
 }
