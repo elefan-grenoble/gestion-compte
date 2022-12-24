@@ -39,21 +39,12 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
         $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');
 
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")
-            ->leftJoin("b.user", "u")
-            ->leftJoin("o.registrations", "r")->addSelect("r");
-        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
-        $qb = $qb->andWhere('o.withdrawn = 0');
-        $qb = $qb->andWhere('o.frozen = 0');
-        $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-            ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
-        $alerts = $qb->getQuery()->getResult();
-        return $alerts;
+        $formHelper = $this->getContainer()->get('search_user_form_helper');
+        return $em
+          ->getRepository("AppBundle:Membership")
+          ->findLateShifters($formHelper, $time_after_which_members_are_late_with_shifts)
+          ->getQuery()
+          ->getResult();
     }
 
     private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, $alerts, $template) {

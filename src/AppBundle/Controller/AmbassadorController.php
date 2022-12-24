@@ -126,11 +126,7 @@ class AmbassadorController extends Controller
 
         $action = $form->get('action')->getData();
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+        $em = $this->getDoctrine()->getManager();
 
         $page = $request->get('page');
         if (!intval($page))
@@ -140,30 +136,27 @@ class AmbassadorController extends Controller
 
         $session = new Session();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('page')->getData() > 0) {
-                $page = $form->get('page')->getData();
-            }
-            if ($form->get('sort')->getData()) {
-                $sort = $form->get('sort')->getData();
-            }
-            if ($form->get('dir')->getData()) {
-                $order = $form->get('dir')->getData();
-            }
-            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "shifttimelog");
-        }else{
-            if (!$form->isSubmitted()) {
-                $form->get('sort')->setData($sort);
-                $form->get('dir')->setData($order);
-                $form->get('compteurlt')->setData($this->timeAfterWhichMembersAreLateWithShifts);
-                $form->get('withdrawn')->setData(1);
-                $form->get('frozen')->setData(1);
-            }
-            $qb = $qb->andWhere('o.withdrawn = 0');
-            $qb = $qb->andWhere('o.frozen = 0');
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-                ->setParameter('compteurlt', $this->timeAfterWhichMembersAreLateWithShifts);
+        if (!$form->isSubmitted()) {
+            $form->get('sort')->setData($sort);
+            $form->get('dir')->setData($order);
+            $form->get('compteurlt')->setData($this->timeAfterWhichMembersAreLateWithShifts);
+            $form->get('withdrawn')->setData(1);
+            $form->get('frozen')->setData(1);
         }
+
+        if ($form->get('page')->getData() > 0) {
+            $page = $form->get('page')->getData();
+        }
+        if ($form->get('sort')->getData()) {
+            $sort = $form->get('sort')->getData();
+        }
+        if ($form->get('dir')->getData()) {
+            $order = $form->get('dir')->getData();
+        }
+
+        $qb = $em
+          ->getRepository("AppBundle:Membership")
+          ->findLateShifters($formHelper, null, $form, $session); 
 
         $limit = 25;
         $qb2 = clone $qb;
