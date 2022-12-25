@@ -114,6 +114,7 @@
             }
             M.toast({ text: msg, displayLength: 5000, classes: 'red' });
         }
+
         $(document).ready(function ($) {
             // for the filter form ------------------
             $('#SelectionTypeDropBox').on('change', function () {
@@ -126,16 +127,19 @@
                 }
             })
             .trigger('change');
+
+            // for the bucket modals ------------------
             $('#modal-bucket').modal({
                 onCloseEnd: function() {
                     $('#modal-bucket-content').html('');
                 },
                 onOpenStart: function(modal, trigger) {
+                    console.log("onOpenStart");
                     var url = $(trigger).attr('data-source');
                     $.get(url, function( data ) {
                         $('#modal-bucket-content').html(data);
                         $('#modal-bucket-content .collapsible').collapsible();
-                        $('#modal-bucket-content select').formSelect();
+                        $('#modal-bucket-content select').formSelect({ dropdownOptions: { container: document.body } });
                     }).fail(ajaxError);
                 }
             });
