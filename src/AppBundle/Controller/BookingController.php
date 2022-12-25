@@ -281,9 +281,9 @@ class BookingController extends Controller
                 } else {
                     $week = $filterForm->get("week")->getData();
                     $year = $filterForm->get("year")->getData();
-
                     $from = new DateTime();
                     $from->setISODate($year, $week, 1);
+                    $from->setTime(0,0);
                     $to = clone $from;
                     $to->modify('+6 days');
                 }
