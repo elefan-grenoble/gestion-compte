@@ -28,8 +28,14 @@ _cliquez pour voir l'image en grand_
 
 ## Developpement
 
-* Stack technique : PHP 7.4 ; Symfony 3.4 ; jQuery 3.6 ; Materialize 1.1.0 ; MySQL/MariaDB
-* [Guide du développeur](doc/dev.md)
+* Stack technique :
+  * PHP 7.4
+  * Symfony 3.4
+  * jQuery 3.6
+  * Materialize 1.2.1
+  * MySQL/MariaDB
+
+[Guide du développeur](doc/dev.md)
 
 ## Liste des fonctionnalités
 
