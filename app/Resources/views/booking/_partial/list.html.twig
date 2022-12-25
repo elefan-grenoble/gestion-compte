@@ -9,13 +9,17 @@
     {% if beneficiary is not defined %}
         {% set beneficiary = null %}
     {% endif %}
-    {% set weekCycle = ["A", "B", "C", "D"] %}
     {% set previousWeekIndex = -1 %}
+    {% set weekCycle = ["A", "B", "C", "D"] %}
+
     {% for bucketsByjob in bucketsByDay %}
         {% set weekIndex = (((bucketsByjob|first|first).start | date('W') - 1) % 4) %}
         {% if previousWeekIndex != weekIndex %}
             {% if previousWeekIndex != -1 %}</ul>{% endif %}
-            <h5 style="margin-left: 3px;">Semaine {{weekCycle[((bucketsByjob|first|first).start | date('W') - 1) % 4]}}</h5>
+            <h5>
+                Semaine {{ weekCycle[((bucketsByjob|first|first).start | date('W') - 1) % 4] }}
+                <small title="Numéro de semaine">(#{{ (bucketsByjob|first|first).start | date('W') }})</small>
+            </h5>
             {% set previousWeekIndex = weekIndex %}
             <ul class="collapsible collapsible-expandable">
         {% endif %}

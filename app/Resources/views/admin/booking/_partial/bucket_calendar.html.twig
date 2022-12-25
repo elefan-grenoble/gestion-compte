@@ -9,7 +9,10 @@
 
         {# New week --------- #}
         {% if not date and previousWeekIndex != weekIndex %}
-            <h5>Semaine {{ weekCycle[((buckets|first).start | date('W') - 1) % 4] }}</h5>
+            <h5>
+                Semaine {{ weekCycle[((buckets|first).start | date('W') - 1) % 4] }}
+                <small title="Numéro de semaine">(#{{ (buckets|first).start | date('W') }})</small>
+            </h5>
             {% set previousWeekIndex = weekIndex %}
         {% endif %}
 
