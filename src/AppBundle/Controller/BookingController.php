@@ -83,7 +83,6 @@ class BookingController extends Controller
         ));
     }
 
-
     /**
      * @Route("/", name="booking")
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
@@ -178,19 +177,18 @@ class BookingController extends Controller
      *      "form":FormBuilderInterface
      *      "from" => DateTime,
      *      "to" => DateTime,
-     *      "job"=> Job|null,
-     *      "filling"=>str|null,
+     *      "job" => Job|null,
+     *      "filling" => str|null,
      *      )
      */
     private function adminFilterFormFactory($em, Request $request): array
     {
-        // filter creation ----------------------
+        // default values
         $defaultFrom = new DateTime();
         $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
-
+        $defaultTo = null;
         $defaultWeek = (new DateTime())->format('W');
         $defaultYear = (new DateTime())->format('Y');
-
         $years = $em->getRepository(Shift::class)->getYears();
 
         $filterForm = $this->createFormBuilder()
@@ -200,29 +198,29 @@ class BookingController extends Controller
                 'required' => true,
                 'data' => "Date",
                 'choices' => array(
-                    'Date' => true,
-                    'Semaine' => false,
+                    'Date' => "date",
+                    'Semaine' => "week",
                 ),
             ))
-            ->add('from', TextType::class, [
+            ->add('from', TextType::class, array(
                 'label' => 'A partir de',
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
                 'attr' => array('class' => 'datepicker'),
-            ])
-            ->add('to', TextType::class, [
+            ))
+            ->add('to', TextType::class, array(
                 'label' => 'Jusqu\'à',
                 'required' => false,
                 'attr' => array('class' => 'datepicker'),
-            ])
-            ->add('year', ChoiceType::class, [
+            ))
+            ->add('year', ChoiceType::class, array(
                 'required' => false,
                 'choices' => array_combine($years, $years),
                 'label' => 'Année',
                 'data' =>  $defaultYear,
                 'placeholder' => false,
-            ])
-            ->add('week', IntegerType::class, [
+            ))
+            ->add('week', IntegerType::class, array(
                 'required' => false,
                 'label' => 'Numéro de semaine',
                 'scale' => 0,
@@ -231,7 +229,7 @@ class BookingController extends Controller
                     'min' => 1,
                     'max' => 52,
                 ],
-            ])
+            ))
             ->add('job', EntityType::class, array(
                 'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
@@ -247,49 +245,45 @@ class BookingController extends Controller
                 }
             ))
             ->add('filling', ChoiceType::class, array(
-                    'label' => 'Remplissage',
-                    'required' => false,
-                    'choices' => array(
-                        'Complet' => 'full',
-                        'Partiel' => 'partial',
-                        'Vide' => 'empty',
-                    ),
+                'label' => 'Remplissage',
+                'required' => false,
+                'choices' => array(
+                    'Complet' => 'full',
+                    'Partiel' => 'partial',
+                    'Vide' => 'empty',
+                ),
             ))
-            ->add(
-                'filter',
-                SubmitType::class,
-                array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer'))
-            )
+            ->add('filter', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
             ->getForm();
 
         $filterForm->handleRequest($request);
         $from = $defaultFrom;
-        $to = null;
+        $to = $defaultTo;
         $job = null;
-        $filling=null;
+        $filling = null;
 
         try {
             if ($filterForm->isSubmitted() && $filterForm->isValid()) {
                 $job = $filterForm->get("job")->getData();
                 $filling = $filterForm->get("filling")->getData();
 
-                if ($filterForm->get("type")->getData()) {
-                    // selection mode based on dates
-
+                // selection mode based on dates
+                if ($filterForm->get("type")->getData() == "date") {
                     $from = new DateTime($filterForm->get('from')->getData());
                     $to = $filterForm->get('to')->getData();
                     if ($to) {
                         $to = new DateTime($to);
                     }
-
+                // selection mode based on week number
                 } else {
-                    // selection mode based on week number
-
                     $week = $filterForm->get("week")->getData();
                     $year = $filterForm->get("year")->getData();
-
                     $from = new DateTime();
                     $from->setISODate($year, $week, 1);
+                    $from->setTime(0,0);
                     $to = clone $from;
                     $to->modify('+6 days');
                 }
@@ -300,13 +294,12 @@ class BookingController extends Controller
             $job = null;
         }
 
-
         return array(
             "form" => $filterForm,
             "from" => $from,
             "to" => $to,
-            "job"=> $job,
-            "filling"=>$filling,
+            "job" => $job,
+            "filling" => $filling,
         );
     }
 
