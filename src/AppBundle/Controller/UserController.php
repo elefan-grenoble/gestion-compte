@@ -262,6 +262,7 @@ class UserController extends Controller
      *
      * @Route("/self_register", name="user_self_register")
      * @Method({"GET"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function selfRegistrationAction()
     {
