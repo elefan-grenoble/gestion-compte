@@ -258,7 +258,7 @@ class TimeLog
             case self::TYPE_SHIFT:
                 if ($this->shift) {
                     setlocale(LC_TIME, 'fr_FR.UTF8');
-                    return strftime("Créneau de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                    return "Créneau " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
                 } else {
                     return "Créneau (non renseigné)";
                 }
