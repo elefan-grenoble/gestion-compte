@@ -1,4 +1,4 @@
-{% if member.mainBeneficiary.user.recordedRegistrations | length %}
+{% if member.mainBeneficiary and member.mainBeneficiary.user.recordedRegistrations | length %}
 <h6>Recorded registrations</h6>
 <ul class="collapsible">
     {% for registration in member.mainBeneficiary.user.recordedRegistrations %}

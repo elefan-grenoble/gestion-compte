@@ -80,13 +80,12 @@ class MembershipController extends Controller
      */
     public function showAction(Membership $member)
     {
-        $session = new Session();
         if ($member->getMemberNumber() <= 0) {
             return $this->redirectToRoute("homepage");
         }
         $this->denyAccessUnlessGranted('view', $member);
 
-        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+        $session = new Session();
 
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
@@ -122,11 +121,11 @@ class MembershipController extends Controller
             $newReg->setDate(new DateTime('now'));
         }
         $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber()));
-        else
+        } else {
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
-
+        }
 
         $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
@@ -141,17 +140,19 @@ class MembershipController extends Controller
             } else {
                 $detachBeneficiaryForms[$beneficiary->getId()] = array();
             }
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
                     ->setMethod('DELETE')->getForm()->createView();
-            else
+            } else {
+                $user = $member->getMainBeneficiary()->getUser(); // FIXME
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array(
                         'id' => $beneficiary->getId(),
                         'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
                     )))
                     ->setMethod('DELETE')->getForm()->createView();
+            }
         }
 
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
@@ -173,6 +174,7 @@ class MembershipController extends Controller
         }
 
         $in_progress_and_upcoming_shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($member);
+
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
