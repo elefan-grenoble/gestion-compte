@@ -95,7 +95,9 @@
                                     <i class="material-icons left">settings</i>Gérer mon compte
                                 </a>
                                 {% if display_freeze_account %}
-                                    {% include "member/_partial/frozen.html.twig" with { member: app.user.beneficiary.membership } %}
+                                    <br />
+                                    {# why render instead of include? because of forms init #}
+                                    {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
                                 {% endif %}
                             </div>
                         {% endif %}
@@ -169,7 +171,8 @@
     {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
         <div id="home-shifts" class="row">
             <div class="col s12">
-                {{ render(controller("AppBundle:Booking:homepageShifts")) }}{# use include instead? #}
+                {# why render instead of include? because of forms init #}
+                {{ render(controller("AppBundle:Booking:homepageShifts")) }}
             </div>
         </div>
     {% endif %}

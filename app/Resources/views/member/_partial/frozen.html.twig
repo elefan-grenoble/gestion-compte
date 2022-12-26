@@ -1,20 +1,21 @@
 {% set end_current_cycle = membership_service.endOfCycle(member) %}
 {% if not member.frozen %}
     {% if member.frozenChange %}
+        Comme demandé, mon compte sera gelé à la fin de mon cycle courant.
         <br />
-        Comme demandé, mon compte sera gelé à la fin de mon cycle courant. soit le
-        <strong>{{ end_current_cycle | date_modify('+1 day') |date_fr_long }}</strong>
+        Soit le <strong>{{ end_current_cycle | date_modify('+1 day') | date_fr_long }}</strong>.
         <br />
-        <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
+        {{ form_start(freeze_change_form) }}
+        <button type="submit" class="waves-effect waves-light btn orange">
             <i class="material-icons left">cancel</i>Annuler le gel de mon compte
-        </a>
+        </button>
+        {{ form_end(freeze_change_form) }}
     {% else %}
-        <a class="waves-effect waves-light btn modal-trigger blue" href="#freeze">
+        <a class="waves-effect waves-light btn modal-trigger blue" href="#freeze-confirmation-modal">
             <i class="material-icons left">ac_unit</i>Geler mon compte
         </a>
-
-        <!-- Modal Structure -->
-        <div class="modal" id="freeze">
+        {{ form_start(freeze_change_form) }}
+        <div class="modal" id="freeze-confirmation-modal">
             <div class="modal-content">
                 <h5>
                     <i class="material-icons small">ac_unit</i>&nbsp;Gel de compte
@@ -33,22 +34,31 @@
             </div>
             <div class="modal-footer">
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-                <a class="waves-effect waves-light btn green" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
+                <button type="submit" class="waves-effect waves-light btn green">
                     <i class="material-icons left">check</i>Ok, je gèle mon compte
-                </a>
+                </button>
             </div>
         </div>
+        {{ form_end(freeze_change_form) }}
     {% endif %}
 {% else %}
     {% if member.frozenChange %}
-        Mon compte sera degelé à la fin de mon cycle courrant qui termine le {{ end_current_cycle |date_fr_long }}<br>
-        <a class="btn-large waves-effect waves-light btn orange" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
+        Mon compte sera dégelé à la fin de mon cycle courant.
+        <br />
+        <strong>Soit le {{ end_current_cycle | date_fr_long }}</strong>.
+        <br />
+        {{ form_start(freeze_change_form) }}
+        <button type="submit" class="waves-effect waves-light btn orange">
             <i class="material-icons left">cancel</i>Annuler la demande de degel de mon compte
-        </a>
+        </button>
+        {{ form_end(freeze_change_form) }}
     {% else %}
         Mon compte est gelé
-        <a class="btn-large waves-effect waves-light btn green" href="{{ path('member_freeze_change',{ 'id' : member.id }) }}">
+        <br />
+        {{ form_start(freeze_change_form) }}
+        <button type="submit" class="waves-effect waves-light btn green">
             <i class="material-icons left">play_circle_filled</i>Demander le dégèle de mon compte
-        </a>
+        </button>
+        {{ form_end(freeze_change_form) }}
     {% endif %}
 {% endif %}

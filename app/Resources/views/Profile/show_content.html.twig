@@ -36,7 +36,8 @@
             </div>
             <div class="collapsible-body">
                 {% if display_freeze_account %}
-                    {% include "member/_partial/frozen.html.twig" with { member: member } %}
+                    {# why render instead of include? because of forms init #}
+                    {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
                 {% else %}
                     <p class="red-text">
                         {{ display_freeze_account_false_message }}
