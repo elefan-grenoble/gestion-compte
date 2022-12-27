@@ -35,17 +35,6 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
         }
     }
 
-    private function computeAlerts() {
-        $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');
-
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $formHelper = $this->getContainer()->get('search_user_form_helper');
-        return $em
-          ->getRepository("AppBundle:Membership")
-          ->findLateShifters($formHelper, $time_after_which_members_are_late_with_shifts)
-          ->getQuery()
-          ->getResult();
-    }
 
     private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, $alerts, $template) {
         $mailer = $this->getContainer()->get('mailer');
