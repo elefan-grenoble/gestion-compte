@@ -2,7 +2,6 @@
 namespace AppBundle\Twig\Extension;
 
 use AppBundle\Entity\AbstractRegistration;
-use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
@@ -24,7 +23,6 @@ use Twig\TwigFunction;
 
 class MembershipExtension extends AbstractExtension
 {
-
     private $container;
     /** @var MembershipService $membershipService */
     private $membershipService;
@@ -37,10 +35,10 @@ class MembershipExtension extends AbstractExtension
     public function getFilters()
     {
         return array(
-            new TwigFilter('can_register',array($this->membershipService,'canRegister')),
-            new TwigFilter('remainder',array($this->membershipService,'getRemainder')),
-            new TwigFilter('uptodate',array($this->membershipService,'isUptodate')),
-            new TwigFilter('expire',array($this->membershipService,'getExpire'))
+            new TwigFilter('can_register', array($this->membershipService, 'canRegister')),
+            new TwigFilter('remainder', array($this->membershipService, 'getRemainder')),
+            new TwigFilter('uptodate', array($this->membershipService, 'isUptodate')),
+            new TwigFilter('expire', array($this->membershipService, 'getExpire'))
         );
     }
 }
