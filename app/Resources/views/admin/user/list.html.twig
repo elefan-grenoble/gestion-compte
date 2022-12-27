@@ -304,37 +304,37 @@
         </li>
         {% if nb_of_pages < 10 %}
             {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
         {% else %}
             {% if page <= 3 %}
                 {% for i in range(1,page+1) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
                 <li>...</li>
                 {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
             {% else %}
                 {% if nb_of_pages - page <= 3 %}
                     {% for i in range(1,2) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
                     {% for i in range(page-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% else %}
                     {% for i in range(1,2) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
                     {% for i in range(page-1,page+1) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
                     {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% endif %}
             {% endif %}
@@ -387,12 +387,9 @@
             });
             $('.pagination li:not(.disabled) a').click(function(e){
                 e.preventDefault();
-                $('#form_page').val($(this).attr('data-page'));
+                $('#form_page').val($(this).data('page'));
                 $('form[name=form]').submit();
             });
-            // $('select').on('change', function() {
-            //     $('form[name=form]').submit();
-            // });
             $('th[data-col]').click(function(e){
                 e.preventDefault();
                 if ($('#form_sort').val() === $(this).attr('data-col')){
