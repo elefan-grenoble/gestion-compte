@@ -25,7 +25,12 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
     {
         $email_template = $input->getOption('emailTemplate');
 
-        $alerts = $this->computeAlerts();
+        $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');
+
+        $em = $this->getContainer()->get('doctrine')->getManager();
+        $alerts = $em
+          ->getRepository("AppBundle:Membership")
+          ->findLateShifters($time_after_which_members_are_late_with_shifts);
         $nbAlerts = count($alerts);
         if ($nbAlerts > 0) {
             $output->writeln('<fg=cyan;>Found ' . $nbAlerts . ' alerts to send</>');
