@@ -96,29 +96,17 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findLateShifters($formHelper, $time_after_which_members_are_late_with_shifts = null, $form = null, $session = null)
+    public function findLateShifters($time_after_which_members_are_late_with_shifts = null)
     {
-        $qb = $formHelper->initSearchQuery($this->_em);
-
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
-
-        if ($form === null) {
-            $qb = $qb->andWhere('o.withdrawn = 0');
-            $qb = $qb->andWhere('o.frozen = 0');
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)');
-        } else {
-            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "shifttimelog");
-        }
-
-        if ($time_after_which_members_are_late_with_shifts !== null) {
-            // avoid any surprise if $form overrides it: the explicit function argument wins
-            $qb = $qb->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
-        }
-
-        return $qb;
-    }
+        $qb = $this->createQueryBuilder('m')
+           ->leftJoin("m.beneficiaries", "b")->addSelect("b")                                                                     
+            ->andWhere('m.member_number > 0') //do not include admin user                                                                       
+            ->andWhere('m.withdrawn = 0')
+            ->andWhere('m.frozen = 0')
+            ->andWhere('m IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+            ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
+        return $qb                                                                                                      
+              ->getQuery()                                                                                                
+              ->getResult(); 
 
 }
