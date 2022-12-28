@@ -28,9 +28,8 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
         $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');
 
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $alerts = $em
-          ->getRepository("AppBundle:Membership")
-          ->findLateShifters($time_after_which_members_are_late_with_shifts);
+        $alerts = $em->getRepository("AppBundle:Membership")
+                     ->findLateShifters($time_after_which_members_are_late_with_shifts);
         $nbAlerts = count($alerts);
         if ($nbAlerts > 0) {
             $output->writeln('<fg=cyan;>Found ' . $nbAlerts . ' alerts to send</>');
@@ -46,13 +45,12 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
         $recipients = $input->getOption('emails') ? explode(',', $input->getOption('emails')) : null;
         if ($recipients) {
             setlocale(LC_TIME, 'fr_FR.UTF8');
-            $subject = '[ALERTE RETARDS] Membres en retard de shifts';
-
+            $subject = '[ALERTE RETARDS] Membres en retard de créneaux';
             $shiftEmail = $this->getContainer()->getParameter('emails.shift');
 
             $em = $this->getContainer()->get('doctrine')->getManager();
             $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode($template);
-            $template = null;
+
             if ($dynamicContent) {
                 $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent->getContent());
             } else {
@@ -67,7 +65,7 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
                         $template,
                         array('membership_late_alerts' => $alerts)
                     ),
-                    'text/html'
+                    'text/plain'
                 );
             $mailer->send($email);
             $output->writeln('<fg=cyan;>Email(s) sent</>');
