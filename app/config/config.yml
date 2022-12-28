@@ -134,6 +134,10 @@ doctrine_migrations:
   column_length: 191
   organize_migrations: false # Version >=1.2 Possible values are: "BY_YEAR", "BY_YEAR_AND_MONTH", false
 
+sensio_framework_extra:
+  router:
+    annotations: false
+
 # Swiftmailer Configuration
 swiftmailer:
   transport: '%mailer_transport%'
