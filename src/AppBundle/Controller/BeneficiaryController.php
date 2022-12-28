@@ -5,18 +5,16 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
 use AppBundle\Form\BeneficiaryType;
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 
 /**
@@ -28,7 +26,11 @@ class BeneficiaryController extends Controller
 {
     private $_current_app_user;
 
-    public function getCurrentAppUser()
+    /**
+     * Returns a user current representation.
+     * @return UserInterface
+     */
+    public function getCurrentAppUser(): UserInterface
     {
         if (!$this->_current_app_user){
             $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -39,11 +41,10 @@ class BeneficiaryController extends Controller
     /**
      * Displays a form to edit an existing user entity.
      *
-     * @Route("/{id}/edit", name="beneficiary_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="beneficiary_edit", methods={"GET", "POST"})
      * @param Request $request
      * @param Beneficiary $beneficiary
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @return RedirectResponse|Response
      */
     public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
@@ -72,12 +73,11 @@ class BeneficiaryController extends Controller
     /**
      * Set as main beneficiary
      *
-     * @Route("/beneficiary/{id}", name="beneficiary_set_main")
-     * @Method("GET")
+     * @Route("/beneficiary/{id}/set_main", name="beneficiary_set_main", methods={"GET"})
      * @param Beneficiary $beneficiary
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
-    public function setAsMainBeneficiaryAction(Beneficiary $beneficiary)
+    public function setAsMainBeneficiaryAction(Beneficiary $beneficiary): RedirectResponse
     {
         $session = new Session();
         $member = $beneficiary->getMembership();
@@ -93,13 +93,12 @@ class BeneficiaryController extends Controller
     /**
      * Detaches a beneficiary entity.
      *
-     * @Route("/{id}/detach", name="beneficiary_detach")
-     * @Method("POST")
+     * @Route("/{id}/detach", name="beneficiary_detach", methods={"GET", "POST"})
      * @param Request $request
      * @param Beneficiary $beneficiary
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
-    public function detachBeneficiaryAction(Request $request, Beneficiary $beneficiary)
+    public function detachBeneficiaryAction(Request $request, Beneficiary $beneficiary): RedirectResponse
     {
         $session = new Session();
         $member = $beneficiary->getMembership();
@@ -160,13 +159,12 @@ class BeneficiaryController extends Controller
     /**
      * Deletes a beneficiary entity.
      *
-     * @Route("/beneficiary/{id}", name="beneficiary_delete")
-     * @Method("DELETE")
+     * @Route("/beneficiary/{id}", name="beneficiary_delete", methods={"GET", "POST"})
      * @param Request $request
      * @param Beneficiary $beneficiary
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     * @return RedirectResponse
      */
-    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary)
+    public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary): RedirectResponse
     {
         $member = $beneficiary->getMembership();
 
@@ -187,7 +185,8 @@ class BeneficiaryController extends Controller
         return $this->redirectToShow($member);
     }
 
-    private function getErrorMessages(Form $form)
+    // TODO: check if this function is ever used ?!
+    private function getErrorMessages(Form $form): array
     {
         $errors = array();
 
@@ -212,9 +211,9 @@ class BeneficiaryController extends Controller
     /**
      * @Route("/find_member_number", name="find_member_number")
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function findMemberNumberAction(Request $request)
+    public function findMemberNumberAction(Request $request): Response
     {
         $securityContext = $this->container->get('security.authorization_checker');
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -259,18 +258,17 @@ class BeneficiaryController extends Controller
     }
 
     /**
-     * @Route("/{id}/confirm", name="confirm")
-     * @Method({"POST"})
+     * @Route("/{id}/confirm", name="confirm", methods={"POST"})
      * @param Beneficiary $beneficiary
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
-    public function confirmAction(Beneficiary $beneficiary, Request $request)
+    public function confirmAction(Beneficiary $beneficiary, Request $request): Response
     {
         return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
     }
 
-    private function redirectToShow(Membership $member)
+    private function redirectToShow(Membership $member):RedirectResponse
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();

@@ -10,8 +10,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -28,8 +27,7 @@ class EventController extends Controller
     /**
      * Lists all events.
      *
-     * @Route("/", name="event_list")
-     * @Method("GET")
+     * @Route("/", name="event_list", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request) {
@@ -43,8 +41,7 @@ class EventController extends Controller
     /**
      * Lists all proxy
      *
-     * @Route("/proxies_list", name="proxies_list")
-     * @Method("GET")
+     * @Route("/proxies_list", name="proxies_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function listProxiesAction(){
@@ -64,8 +61,7 @@ class EventController extends Controller
     /**
      * Lists all proxy for one event.
      *
-     * @Route("/{id}/proxies_list", name="event_proxies_list")
-     * @Method("GET")
+     * @Route("/{id}/proxies_list", name="event_proxies_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function listEventProxiesAction(Event $event,Request $request){
@@ -85,8 +81,7 @@ class EventController extends Controller
     /**
      * Event new
      *
-     * @Route("/new", name="event_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="event_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -112,8 +107,7 @@ class EventController extends Controller
     /**
      * Event edit
      *
-     * @Route("/{id}/edit", name="event_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="event_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request,Event $event)
@@ -146,8 +140,7 @@ class EventController extends Controller
     /**
      * Event delete
      *
-     * @Route("/{id}", name="event_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="event_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function removeAction(Request $request,Event $event)
@@ -168,8 +161,7 @@ class EventController extends Controller
     /**
      * Proxy delete
      *
-     * @Route("/proxy/{id}", name="proxy_delete")
-     * @Method({"DELETE"})
+     * @Route("/proxy/{id}", name="proxy_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeProxyAction(Request $request,Proxy $proxy)
@@ -190,8 +182,7 @@ class EventController extends Controller
     /**
      * Proxy edit
      *
-     * @Route("/proxy/{id}", name="proxy_edit")
-     * @Method({"GET","POST"})
+     * @Route("/proxy/{id}", name="proxy_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function editProxyAction(Request $request,Proxy $proxy,\Swift_Mailer $mailer)
@@ -294,8 +285,7 @@ class EventController extends Controller
     /**
      * Proxy new
      *
-     * @Route("/{id}/proxy/give", name="event_proxy_give")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
      */
     public function giveProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
         $session = new Session();
@@ -451,8 +441,7 @@ class EventController extends Controller
      * is defined, the member with an expired registration.
      *
      * Goes with the Twig template views/beneficiary/find_member_number.html.twig
-     * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary")
-     * @Method({"POST"})
+     * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary", methods={"POST"})
      */
     public function findBeneficiaryAction(Event $event,Request $request){
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -523,8 +512,7 @@ class EventController extends Controller
     /**
      * Proxy take
      *
-     * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove")
-     * @Method({"GET"})
+     * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove", methods={"GET"})
      */
     public function removeProxyLiteAction(Event $event,Proxy $proxy,Request $request){
         $session = new Session();
@@ -541,8 +529,7 @@ class EventController extends Controller
     /**
      * Proxy take
      *
-     * @Route("/{id}/proxy/take", name="event_proxy_take")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
      */
     public function acceptProxyAction(Event $event,Request $request,\Swift_Mailer $mailer){
 
@@ -650,8 +637,7 @@ class EventController extends Controller
      *
      * Goes with the twig template views/admin/event/signatures.html.twig
      *
-     * @Route("/{id}/signatures/", name="event_signatures")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/signatures/", name="event_signatures", methods={"GET","POST"})
      */
     public function signaturesListAction(Request $request,Event $event): Response
     {

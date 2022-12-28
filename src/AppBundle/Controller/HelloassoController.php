@@ -35,8 +35,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -53,22 +52,24 @@ class HelloassoController extends Controller
     /**
      * Helloasso payments list
      *
-     * @Route("/payments", name="helloasso_payments")
-     * @Method("GET")
+     * @Route("/payments", name="helloasso_payments", methods={"GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoPaymentsAction(Request $request)
     {
-        if (!($page = $request->get('page')))
+        if (!($page = $request->get('page'))) {
             $page = 1;
+        }
         $limit = 50;
         $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\HelloassoPayment', 'n')
             ->select('count(n.id)')
             ->getQuery()
             ->getSingleScalarResult();
+
         $nb_of_pages = intval($max / $limit);
-        if ($max > 0)
+        if ($max > 0) {
             $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+        }
         $payments = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:HelloassoPayment')
             ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
@@ -79,6 +80,7 @@ class HelloassoController extends Controller
 
         //todo: save this somewhere ?
         $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
+
         $campaigns = array();
         foreach ($campaigns_json->resources as $c) {
             $campaigns[intval($c->id)] = $c;
@@ -96,8 +98,7 @@ class HelloassoController extends Controller
     /**
      * Helloasso browser
      *
-     * @Route("/browser", name="helloasso_browser")
-     * @Method("GET")
+     * @Route("/browser", name="helloasso_browser", methods={"GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoBrowserAction(Request $request)
@@ -136,8 +137,7 @@ class HelloassoController extends Controller
     /**
      * Helloasso manual paiement add
      *
-     * @Route("/manualPaimentAdd/", name="helloasso_manual_paiement_add")
-     * @Method("POST")
+     * @Route("/manualPaimentAdd/", name="helloasso_manual_paiement_add", methods={"POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoManualPaimentAddAction(Request $request)
@@ -190,8 +190,7 @@ class HelloassoController extends Controller
     /**
      * remove payment
      *
-     * @Route("/payments/{id}", name="helloasso_payment_remove")
-     * @Method({"DELETE"})
+     * @Route("/payments/{id}", name="helloasso_payment_remove", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removePaymentAction(Request $request, HelloassoPayment $payment)
@@ -227,8 +226,7 @@ class HelloassoController extends Controller
     /**
      * resolve orphan payment
      *
-     * @Route("/payment/{id}/resolve_orphan/{code}", name="helloasso_resolve_orphan")
-     * @Method({"GET"})
+     * @Route("/payment/{id}/resolve_orphan/{code}", name="helloasso_resolve_orphan", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function resolveOrphan(HelloassoPayment $payment,$code){
@@ -252,8 +250,7 @@ class HelloassoController extends Controller
     /**
      * confirm resolve orphan payment
      *
-     * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan")
-     * @Method({"GET"})
+     * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function confirmOrphan(HelloassoPayment $payment,$code){
@@ -276,8 +273,7 @@ class HelloassoController extends Controller
     /**
      * exit app and redirect to resolve
      *
-     * @Route("/payment/{id}/orphan_exit_and_back/{code}", name="helloasso_orphan_exit_and_back")
-     * @Method({"GET"})
+     * @Route("/payment/{id}/orphan_exit_and_back/{code}", name="helloasso_orphan_exit_and_back", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function orphanExitAndConfirm(Request $request,HelloassoPayment $payment,$code){

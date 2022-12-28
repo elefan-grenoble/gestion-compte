@@ -40,8 +40,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -73,8 +72,7 @@ class MembershipController extends Controller
      * Finds and displays a membership entity.
      * Why the '/show' in the route? Because routing conflict if not
      *
-     * @Route("/{member_number}/show", name="member_show")
-     * @Method("GET")
+     * @Route("/{member_number}/show", name="member_show", methods={"GET"})
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
@@ -211,8 +209,7 @@ class MembershipController extends Controller
     /**
      * Add a new registration.
      *
-     * @Route("/newRegistration/{member_number}/", name="member_new_registration")
-     * @Method({"GET", "POST"})
+     * @Route("/newRegistration/{member_number}/", name="member_new_registration", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -296,8 +293,7 @@ class MembershipController extends Controller
     /**
      * Add a beneficiary from admin to a member
      *
-     * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary")
-     * @Method({"GET", "POST"})
+     * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -360,8 +356,7 @@ class MembershipController extends Controller
     /**
      * Displays a form to edit an existing member entity.
      *
-     * @Route("/edit", name="member_edit_firewall")
-     * @Method({"GET", "POST"})
+     * @Route("/edit", name="member_edit_firewall", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
@@ -419,8 +414,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * @Route("/{id}/set_email", name="set_email")
-     * @Method({"POST"})
+     * @Route("/{id}/set_email", name="set_email", methods={"POST"})
      * @param Beneficiary $beneficiary
      * @param Request $request
      * @return Response
@@ -505,8 +499,7 @@ class MembershipController extends Controller
     /**
      * Close member
      *
-     * @Route("/{id}/close", name="member_close")
-     * @Method({"POST"})
+     * @Route("/{id}/close", name="member_close", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -538,8 +531,7 @@ class MembershipController extends Controller
     /**
      * Open member
      *
-     * @Route("/{id}/open", name="member_open")
-     * @Method({"POST"})
+     * @Route("/{id}/open", name="member_open", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -568,8 +560,7 @@ class MembershipController extends Controller
     /**
      * freeze member
      *
-     * @Route("/{id}/freeze", name="member_freeze")
-     * @Method({"POST"})
+     * @Route("/{id}/freeze", name="member_freeze", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -599,8 +590,7 @@ class MembershipController extends Controller
     /**
      * Unfreeze member
      *
-     * @Route("/{id}/unfreeze", name="member_unfreeze")
-     * @Method({"POST"})
+     * @Route("/{id}/unfreeze", name="member_unfreeze", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -630,8 +620,7 @@ class MembershipController extends Controller
     /**
      * Ask freeze status change for user
      *
-     * @Route("/{id}/freeze_change", name="member_freeze_change")
-     * @Method({"POST"})
+     * @Route("/{id}/freeze_change", name="member_freeze_change", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -676,8 +665,7 @@ class MembershipController extends Controller
     /**
      * Delete member
      *
-     * @Route("/{id}", name="member_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="member_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param Membership $member
@@ -704,8 +692,7 @@ class MembershipController extends Controller
     /**
      * Creates a new membership entity
      *
-     * @Route("/new", name="member_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="member_new", methods={"GET","POST"})
      */
     public function newAction(Request $request)
     {
@@ -830,8 +817,7 @@ class MembershipController extends Controller
     /**
      * Add a new beneficiary from an anonymous one to an existing membership.
      *
-     * @Route("/add_beneficiary", name="member_add_beneficiary")
-     * @Method({"GET", "POST"})
+     * @Route("/add_beneficiary", name="member_add_beneficiary", methods={"GET","POST"})
      * @param Request $request
      * @return Response
      * @throws
@@ -926,8 +912,7 @@ class MembershipController extends Controller
     /**
      * Join two members
      *
-     * @Route("/join", name="member_join")
-     * @Method({"GET","POST"})
+     * @Route("/join", name="member_join", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function joinAction(Request $request)
@@ -977,8 +962,7 @@ class MembershipController extends Controller
     /**
      * Office tools: membership creation & management
      *
-     * @Route("/office_tools", name="user_office_tools")
-     * @Method({"GET","POST"})
+     * @Route("/office_tools", name="user_office_tools", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function officeToolsAction(Request $request)
@@ -1034,8 +1018,7 @@ class MembershipController extends Controller
     /**
      * Export all emails of members (including beneficiary)
      *
-     * @Route("/emails_csv", name="admin_emails_csv")
-     * @Method({"GET"})
+     * @Route("/emails_csv", name="admin_emails_csv", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function exportEmails(Request $request)

@@ -7,8 +7,7 @@ use AppBundle\Form\EmailTemplateType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -31,8 +30,7 @@ class EmailTemplateController extends Controller
     /**
      * Lists all email templates.
      *
-     * @Route("/", name="email_template_list")
-     * @Method("GET")
+     * @Route("/", name="email_template_list", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
@@ -49,8 +47,7 @@ class EmailTemplateController extends Controller
     /**
      * Create an email template
      *
-     * @Route("/new", name="email_template_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="email_template_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
@@ -76,8 +73,7 @@ class EmailTemplateController extends Controller
     /**
      * Edit an email template
      *
-     * @Route("/{id}/edit", name="email_template_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="email_template_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, EmailTemplate $emailTemplate)

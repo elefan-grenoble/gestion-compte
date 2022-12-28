@@ -13,8 +13,7 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -37,8 +36,7 @@ class AmbassadorController extends Controller
     /**
      * Lists all users with a registration date older than one year.
      *
-     * @Route("/membership", name="ambassador_membership_list")
-     * @Method({"GET","POST"})
+     * @Route("/membership", name="ambassador_membership_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
@@ -113,8 +111,7 @@ class AmbassadorController extends Controller
     /**
      * Lists all users with shift time logs older than 9 hours.
      *
-     * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
-     * @Method({"GET", "POST"})
+     * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
@@ -189,8 +186,7 @@ class AmbassadorController extends Controller
     /**
      * display a member phones.
      *
-     * @Route("/phone/{member_number}", name="ambassador_phone_show")
-     * @Method("GET")
+     * @Route("/phone/{member_number}", name="ambassador_phone_show", methods={"GET"})
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -216,8 +212,7 @@ class AmbassadorController extends Controller
 
     /**
      *
-     * @Route("/note/{member_number}", name="ambassador_new_note")
-     * @Method("POST")
+     * @Route("/note/{member_number}", name="ambassador_new_note", methods={"POST"})
      * @param Membership $member
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse

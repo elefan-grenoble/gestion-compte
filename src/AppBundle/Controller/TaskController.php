@@ -6,8 +6,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Task;
 use AppBundle\Form\TaskType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -25,8 +24,7 @@ class TaskController extends Controller
     /**
      * Lists all tasks.
      *
-     * @Route("/", name="tasks_list")
-     * @Method("GET")
+     * @Route("/", name="tasks_list", methods={"GET"})
      */
     public function listAction(Request $request)
     {
@@ -43,8 +41,7 @@ class TaskController extends Controller
     /**
      * add new task.
      *
-     * @Route("/new", name="task_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="task_new", methods={"GET","POST"})
      */
     public function newAction(Request $request)
     {
@@ -89,8 +86,7 @@ class TaskController extends Controller
     /**
      * add new task.
      *
-     * @Route("/edit/{id}", name="task_edit")
-     * @Method({"GET","POST"})
+     * @Route("/edit/{id}", name="task_edit", methods={"GET","POST"})
      */
     public function editAction(Request $request,Task $task)
     {
@@ -140,8 +136,7 @@ class TaskController extends Controller
     /**
      * task delete
      *
-     * @Route("/{id}", name="task_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="task_delete", methods={"DELETE"})
      */
     public function removeAction(Request $request,Task $task)
     {

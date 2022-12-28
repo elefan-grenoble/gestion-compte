@@ -6,8 +6,7 @@ use AppBundle\Entity\DynamicContent;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -30,8 +29,7 @@ class DynamicContentController extends Controller
     /**
      * Lists all dynamic contents.
      *
-     * @Route("/", name="dynamic_content_list")
-     * @Method("GET")
+     * @Route("/", name="dynamic_content_list", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
@@ -56,8 +54,7 @@ class DynamicContentController extends Controller
     /**
      * Edit a dynamic content
      *
-     * @Route("/{id}/edit", name="dynamic_content_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="dynamic_content_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)

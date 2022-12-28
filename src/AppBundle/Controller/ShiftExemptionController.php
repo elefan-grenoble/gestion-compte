@@ -4,8 +4,8 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\ShiftExemption;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 
@@ -19,9 +19,8 @@ class ShiftExemptionController extends Controller
     /**
      * Lists all shiftExemption entities.
      *
-     * @Route("/", name="admin_shiftexemption_index")
+     * @Route("/", name="admin_shiftexemption_index", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method("GET")
      */
     public function indexAction()
     {
@@ -37,9 +36,8 @@ class ShiftExemptionController extends Controller
     /**
      * Creates a new shiftExemption entity.
      *
-     * @Route("/new", name="admin_shiftexemption_new")
+     * @Route("/new", name="admin_shiftexemption_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -66,9 +64,8 @@ class ShiftExemptionController extends Controller
     /**
      * Displays a form to edit an existing shiftExemption entity.
      *
-     * @Route("/{id}/edit", name="admin_shiftexemption_edit")
+     * @Route("/{id}/edit", name="admin_shiftexemption_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, ShiftExemption $shiftExemption)
     {
@@ -94,9 +91,8 @@ class ShiftExemptionController extends Controller
     /**
      * Deletes a shiftExemption entity.
      *
-     * @Route("/{id}", name="admin_shiftexemption_delete")
+     * @Route("/{id}", name="admin_shiftexemption_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
-     * @Method("DELETE")
      */
     public function deleteAction(Request $request, ShiftExemption $shiftExemption)
     {

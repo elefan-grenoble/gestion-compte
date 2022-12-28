@@ -13,7 +13,7 @@ use AppBundle\Form\PeriodType;
 use AppBundle\Repository\JobRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -23,7 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -139,9 +139,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/new", name="period_new")
+     * @Route("/new", name="period_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -178,9 +177,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/edit", name="period_edit")
+     * @Route("/{id}/edit", name="period_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, Period $period)
     {
@@ -243,9 +241,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/add", name="add_position_to_period")
+     * @Route("/{id}/position/add", name="add_position_to_period", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"POST"})
      */
     public function addPositionToPeriodAction(Request $request, Period $period)
     {
@@ -277,9 +274,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/{position}", name="remove_position_from_period")
+     * @Route("/{id}/position/{position}", name="remove_position_from_period", methods={"DELETE"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"DELETE"})
      */
     public function removePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position)
     {
@@ -302,9 +298,8 @@ class PeriodController extends Controller
     /**
      * Book a period.
      *
-     * @Route("/{id}/position/{position}/book", name="book_position_from_period")
+     * @Route("/{id}/position/{position}/book", name="book_position_from_period", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("POST")
      */
     public function bookPositionToPeriodAction(Request $request, Period $period, PeriodPosition $position): Response
     {
@@ -347,9 +342,8 @@ class PeriodController extends Controller
     /**
      * free a position.
      *
-     * @Route("/{id}/position/{position}/free", name="free_position_from_period")
+     * @Route("/{id}/position/{position}/free", name="free_position_from_period", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("POST")
      */
     public function freePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position)
     {
@@ -367,9 +361,8 @@ class PeriodController extends Controller
     /**
      * Deletes a period entity.
      *
-     * @Route("/{id}", name="period_delete")
+     * @Route("/{id}", name="period_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method("DELETE")
      */
     public function deleteAction(Request $request, Period $period)
     {
@@ -393,9 +386,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/copyPeriod/", name="period_copy")
+     * @Route("/copyPeriod/", name="period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"GET","POST"})
      */
     public function periodCopyAction(Request $request){
         $days = array(
@@ -446,9 +438,8 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/generateShifts/", name="shifts_generation")
+     * @Route("/generateShifts/", name="shifts_generation", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"GET","POST"})
      */
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
         $form = $this->createFormBuilder()

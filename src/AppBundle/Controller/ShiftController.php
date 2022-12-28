@@ -24,9 +24,9 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+
 
 /**
  * @Route("shift")
@@ -44,9 +44,8 @@ class ShiftController extends Controller
     }
 
     /**
-     * @Route("/new", name="shift_new")
+     * @Route("/new", name="shift_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -114,8 +113,7 @@ class ShiftController extends Controller
     /**
      * Book a shift.
      *
-     * @Route("/{id}/book", name="shift_book")
-     * @Method("POST")
+     * @Route("/{id}/book", name="shift_book", methods={"POST"})
      */
     public function bookShiftAction(Request $request, Shift $shift): Response
     {
@@ -171,9 +169,8 @@ class ShiftController extends Controller
     /**
      * Book a shift admin.
      *
-     * @Route("/{id}/book_admin", name="shift_book_admin")
+     * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("POST")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
@@ -252,8 +249,7 @@ class ShiftController extends Controller
     /**
      * free a shift.
      *
-     * @Route("/{id}/free", name="shift_free")
-     * @Method("POST")
+     * @Route("/{id}/free", name="shift_free", methods={"POST"})
      */
     public function freeShiftAction(Request $request, Shift $shift)
     {
@@ -312,8 +308,7 @@ class ShiftController extends Controller
     /**
      * validate / invalidate a shift.
      *
-     * @Route("/{id}/validate", name="shift_validate")
-     * @Method("POST")
+     * @Route("/{id}/validate", name="shift_validate", methods={"POST"})
      */
     public function validateShiftAction(Request $request, Shift $shift)
     {
@@ -381,8 +376,7 @@ class ShiftController extends Controller
     /**
      * Dismiss a booked shift
      *
-     * @Route("/{id}/dismiss", name="shift_dismiss")
-     * @Method("POST")
+     * @Route("/{id}/dismiss", name="shift_dismiss", methods={"POST"})
      */
     public function dismissShiftAction(Request $request, Shift $shift)
     {
@@ -417,8 +411,7 @@ class ShiftController extends Controller
     /**
      * Undismiss a shift
      *
-     * @Route("/undismiss", name="shift_undismiss")
-     * @Method("POST")
+     * @Route("/undismiss", name="shift_undismiss", methods={"POST"})
      */
     public function undismissShiftAction(Request $request)
     {
@@ -457,8 +450,7 @@ class ShiftController extends Controller
     /**
      * Accept a reserved shift
      *
-     * @Route("/{id}/accept", name="shift_accept_reserved")
-     * @Method("GET")
+     * @Route("/{id}/accept", name="shift_accept_reserved", methods={"GET"})
      */
     public function acceptReservedShiftAction(Request $request, Shift $shift)
     {
@@ -499,8 +491,7 @@ class ShiftController extends Controller
     /**
      * Reject a reserved shift
      *
-     * @Route("/{id}/reject", name="shift_reject_reserved")
-     * @Method("GET")
+     * @Route("/{id}/reject", name="shift_reject_reserved", methods={"GET"})
      */
     public function rejectReservedShiftAction(Request $request, Shift $shift)
     {
@@ -533,9 +524,8 @@ class ShiftController extends Controller
     /**
      * delete a shift.
      *
-     * @Route("/{id}", name="shift_delete")
+     * @Route("/{id}", name="shift_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("DELETE")
      */
     public function removeShiftAction(Request $request, Shift $shift)
     {

@@ -8,8 +8,7 @@ use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
 use AppBundle\Form\ClientType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -27,8 +26,7 @@ class ClientController extends Controller
     /**
      * Lists all clients.
      *
-     * @Route("/", name="admin_clients")
-     * @Method("GET")
+     * @Route("/", name="admin_clients", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function listAction()
@@ -40,8 +38,7 @@ class ClientController extends Controller
     /**
      * Add new Client //todo put this auto in service création
      *
-     * @Route("/client_new", name="client_new")
-     * @Method({"GET","POST"})
+     * @Route("/client_new", name="client_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request){
@@ -83,8 +80,7 @@ class ClientController extends Controller
     /**
      * edit client.
      *
-     * @Route("/edit/{id}", name="client_edit")
-     * @Method({"GET","POST"})
+     * @Route("/edit/{id}", name="client_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request,Client $client){
@@ -135,8 +131,7 @@ class ClientController extends Controller
     /**
      * remove client.
      *
-     * @Route("/remove/{id}", name="client_remove")
-     * @Method({"DELETE"})
+     * @Route("/remove/{id}", name="client_remove", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Client $client)

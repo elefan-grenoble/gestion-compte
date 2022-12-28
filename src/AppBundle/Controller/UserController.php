@@ -28,8 +28,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -56,8 +55,7 @@ class UserController extends Controller
     /**
      * install admin
      *
-     * @Route("/install_admin", name="user_install_admin")
-     * @Method({"GET","POST"})
+     * @Route("/install_admin", name="user_install_admin", methods={"GET","POST"})
      */
     public function installAdminAction(Request $request)
     {
@@ -107,8 +105,7 @@ class UserController extends Controller
     /**
      * change_password
      *
-     * @Route("/change_password", name="user_change_password")
-     * @Method({"GET", "POST"})
+     * @Route("/change_password", name="user_change_password", methods={"GET","POST"})
      * @param Request $request
      * @return Response
      */
@@ -153,8 +150,7 @@ class UserController extends Controller
     /**
      * Creates a new user entity
      *
-     * @Route("/quick_new", name="user_quick_new")
-     * @Method({"GET", "POST"})
+     * @Route("/quick_new", name="user_quick_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function quickNewAction(Request $request, \Swift_Mailer $mailer)
@@ -190,8 +186,7 @@ class UserController extends Controller
     /**
      * remove role of user
      *
-     * @Route("/{id}/removeRole/{role}", name="user_remove_role")
-     * @Method({"GET"})
+     * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param User $user
      * @param $role
@@ -225,8 +220,7 @@ class UserController extends Controller
     /**
      * add role of user
      *
-     * @Route("/{id}/addRole/{role}", name="user_add_role")
-     * @Method({"GET"})
+     * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      * @param User $user
      * @param $role
@@ -260,8 +254,7 @@ class UserController extends Controller
     /**
      * self_register
      *
-     * @Route("/self_register", name="user_self_register")
-     * @Method({"GET"})
+     * @Route("/self_register", name="user_self_register", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function selfRegistrationAction()
@@ -278,8 +271,7 @@ class UserController extends Controller
     /**
      * remove client from user
      *
-     * @Route("/{username}/remove_client/{client_id}", name="user_client_remove")
-     * @Method({"GET", "POST"})
+     * @Route("/{username}/remove_client/{client_id}", name="user_client_remove", methods={"GET","POST"})
      */
     public function removeClientUserAction(User $user, $client_id)
     {
@@ -313,8 +305,7 @@ class UserController extends Controller
     /**
      * Deletes a user entity
      *
-     * @Route("/delete/{id}", name="user_delete")
-     * @Method("DELETE")
+     * @Route("/delete/{id}", name="user_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param User $user
@@ -340,8 +331,7 @@ class UserController extends Controller
     /**
      * List all unconfirmed users
      *
-     * @Route("/pre_users", name="pre_user_index")
-     * @Method({"GET"})
+     * @Route("/pre_users", name="pre_user_index", methods={"GET"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function preUsersAction()
@@ -360,8 +350,7 @@ class UserController extends Controller
     /**
      * Recall unconfirmed user
      *
-     * @Route("/pre_users/{id}/recall", name="pre_user_recall")
-     * @Method({"GET"})
+     * @Route("/pre_users/{id}/recall", name="pre_user_recall", methods={"GET"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary)
@@ -385,8 +374,7 @@ class UserController extends Controller
     /**
      * Delete unconfirmed user
      * 
-     * @Route("/pre_users/{id}/delete", name="pre_user_delete")
-     * @Method({"GET"})
+     * @Route("/pre_users/{id}/delete", name="pre_user_delete", methods={"GET"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      */
     public function preUsersDeleteAction(AnonymousBeneficiary $anonymousBeneficiary, SessionInterface $session)

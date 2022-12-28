@@ -39,8 +39,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -57,8 +56,7 @@ class AdminController extends Controller
     /**
      * Admin panel
      *
-     * @Route("/", name="admin")
-     * @Method("GET")
+     * @Route("/", name="admin", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN_PANEL')")
      */
     public function indexAction()
@@ -71,8 +69,7 @@ class AdminController extends Controller
      *
      * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
-     * @Route("/users", name="user_index")
-     * @Method({"GET","POST"})
+     * @Route("/users", name="user_index", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
@@ -160,8 +157,7 @@ class AdminController extends Controller
      * @param Request $request , SearchUserFormHelper $formHelper
      * @param SearchUserFormHelper $formHelper
      * @return Response
-     * @Route("/admin_users", name="admins_list")
-     * @Method({"GET","POST"})
+     * @Route("/admin_users", name="admins_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function adminUsersAction(Request $request, SearchUserFormHelper $formHelper)
@@ -188,8 +184,7 @@ class AdminController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @Route("/roles", name="roles_list")
-     * @Method({"GET"})
+     * @Route("/roles", name="roles_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function rolesListAction(Request $request)
@@ -220,8 +215,7 @@ class AdminController extends Controller
     /**
      * Widget generator
      *
-     * @Route("/widget", name="widget_generator")
-     * @Method({"GET","POST"})
+     * @Route("/widget", name="widget_generator", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function widgetBuilderAction(Request $request){
@@ -255,8 +249,7 @@ class AdminController extends Controller
     /**
      * Import from CSV
      *
-     * @Route("/importcsv", name="user_import_csv")
-     * @Method({"GET","POST"})
+     * @Route("/importcsv", name="user_import_csv", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function csvImportAction(Request $request, KernelInterface $kernel)
