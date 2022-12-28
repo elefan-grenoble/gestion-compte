@@ -96,5 +96,18 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    public function findLateShifters($time_after_which_members_are_late_with_shifts = null)
+    {
+        $qb = $this->createQueryBuilder('m')
+           ->leftJoin("m.beneficiaries", "b")->addSelect("b")
+            ->andWhere('m.member_number > 0') //do not include admin user
+            ->andWhere('m.withdrawn = 0')
+            ->andWhere('m.frozen = 0')
+            ->andWhere('m IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+            ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
+        return $qb
+              ->getQuery()
+              ->getResult();
+    }
 
 }

@@ -181,6 +181,9 @@ services:
             arguments:
                 - "@doctrine.orm.entity_manager"
                 - '@membership_service'
+    search_user_form_helper:
+            class: AppBundle\Service\SearchUserFormHelper
+            public: true
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor
