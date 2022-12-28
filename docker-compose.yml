@@ -34,7 +34,7 @@ services:
 
   mailcatcher:
     container_name: mailcatcher
-    image: lelefan/mailcatcher:0.8.1
+    image: lelefan/mailcatcher:0.8.2
     ports:
       - "1080:1080"
       - "1025:1025"
