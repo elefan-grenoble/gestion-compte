@@ -82,10 +82,15 @@ class ApiController extends Controller
         if (!$response['user']){
             return new JsonResponse($response);
         }
+        $groups = array_map(
+            function($group) { return $group->getName(); },
+            $response['user']->getGroups()
+        );
         return new JsonResponse(array(
             'email' => $response['user']->getEmail(),
             'displayName' => $response['user']->getFirstName() . ' ' . $response['user']->getLastName(),
-            'identifier' => $response['user']->getUserName()
+            'identifier' => $response['user']->getUserName(),
+            'groups' => $groups
         ));
     }
 

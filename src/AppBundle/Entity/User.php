@@ -65,7 +65,7 @@ class User extends BaseUser
     public function getGroups()
     {
         if ($this->getBeneficiary()){
-            return $this->getBeneficiary()->getFormations();
+            return $this->getBeneficiary()->getFormations()->toArray();
         }else{
             return new ArrayCollection();
         }
