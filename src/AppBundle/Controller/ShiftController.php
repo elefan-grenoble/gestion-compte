@@ -398,6 +398,8 @@ class ShiftController extends Controller
             $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
             return $this->redirectToRoute("booking");
         } else {
+            // Store beneficiary entity before removing it
+            $beneficiary = $shift->getShifter();
             $shift->setShifter(null);
             $shift->setBooker(null);
             $shift->setFixe(false);
@@ -405,7 +407,6 @@ class ShiftController extends Controller
         $em->persist($shift);
         $em->flush();
 
-        $beneficiary = $shift->getShifter();
         $reason = $request->get("reason");
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
