@@ -641,7 +641,7 @@ class Membership
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function getTimeCount($before = null)
