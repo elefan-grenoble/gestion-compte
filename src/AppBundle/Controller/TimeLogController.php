@@ -9,8 +9,7 @@ use AppBundle\Form\TimeLogType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -24,8 +23,7 @@ class TimeLogController extends Controller
     /**
      * Delete time log
      *
-     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete")
-     * @Method({"GET"})
+     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Membership $member
      * @param $timelog_id
@@ -50,8 +48,7 @@ class TimeLogController extends Controller
     /**
      * Create a new log
      *
-     * @Route("/{id}/new", name="time_log_new")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/new", name="time_log_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @param Membership $member
      */

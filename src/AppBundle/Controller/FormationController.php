@@ -6,8 +6,7 @@ use AppBundle\Entity\Formation;
 use AppBundle\Form\FormationType;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -23,8 +22,7 @@ class FormationController extends Controller
     /**
      * Formations list
      *
-     * @Route("/", name="admin_formations")
-     * @Method("GET")
+     * @Route("/", name="admin_formations", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
@@ -36,8 +34,7 @@ class FormationController extends Controller
     /**
      * Formation new
      *
-     * @Route("/new", name="formation_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="formation_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -68,8 +65,7 @@ class FormationController extends Controller
     /**
      * Formation edit
      *
-     * @Route("/{id}/edit", name="formation_edit")
-     * @Method({"GET", "POST"})
+     * @Route("/{id}/edit", name="formation_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Formation $formation)
@@ -99,8 +95,7 @@ class FormationController extends Controller
     /**
      * Formation delete
      *
-     * @Route("/{id}", name="formation_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="formation_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request, Formation $formation)

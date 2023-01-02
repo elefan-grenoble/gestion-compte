@@ -27,8 +27,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -84,12 +83,11 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/", name="booking")
+     * @Route("/", name="booking", methods={"GET","POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @Method({"GET","POST"})
      * @param Request $request
      * @return RedirectResponse|Response
-     * @throws \Exception
+     * @throws Exception
      */
     public function indexAction(Request $request)
     {
@@ -306,6 +304,7 @@ class BookingController extends Controller
     /**
      * build the bucket (regrouping all the shift at the same time with the same job)
      * // TODO Maybe it should be in the BucketRepository...
+     *
      * @param array $shifts
      * @param string|null $filling
      * @return array
@@ -361,9 +360,9 @@ class BookingController extends Controller
 
     /**
      * main administration page for booking shift
-     * @Route("/admin", name="booking_admin")
+     *
+     * @Route("/admin", name="booking_admin", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET","POST"})
      */
     public function adminAction(Request $request): Response
     {
@@ -387,9 +386,8 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/bucket/{id}/show", name="bucket_show")
+     * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET"})
      */
     public function showBucketAction(Request $request, Shift $bucket)
     {
@@ -430,9 +428,11 @@ class BookingController extends Controller
     }
 
     /**
+     * When the user click on the 'edit' button on the bucket popup.
+     *
+     * @Route("/bucket/{id}/edit", name="bucket_edit", methods={"GET", "POST"})
      * @Route("/bucket/{id}/edit", name="bucket_edit")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function editBucketAction(Request $request,Shift $shift)
     {
@@ -469,10 +469,10 @@ class BookingController extends Controller
     }
 
     /**
-     * lock a bucket
+     * lock a bucket, used when the user click on the 'verouiller' button
+     * on the bucket popup.
      *
-     * @Route("/bucket/{id}/lock", name="bucket_lock_unlock")
-     * @Method("POST")
+     * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
      */
     public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
@@ -525,11 +525,11 @@ class BookingController extends Controller
     }
 
     /**
-     * delete all shifts in bucket.
+     * delete all shifts in bucket, used when the user click on the 'supprimer'
+     * button on the bucket popup.
      *
-     * @Route("/bucket/{id}", name="bucket_delete")
+     * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("DELETE")
      */
     public function deleteBucketAction(Request $request, Shift $bucket)
     {

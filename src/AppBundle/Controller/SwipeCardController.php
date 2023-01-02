@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -37,8 +36,7 @@ class SwipeCardController extends Controller
      * @param String $code
      * @param Request $request
      * @return Response
-     * @Route("/in/{code}", name="swipe_in")
-     * @Method({"GET"})
+     * @Route("/in/{code}", name="swipe_in", methods={"GET"})
      */
     public function swipeInAction(Request $request, $code){
         $session = new Session();
@@ -70,10 +68,9 @@ class SwipeCardController extends Controller
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return Response
-     * @Route("/active/", name="active_swipe")
-     * @Route("/active/{id}", name="active_swipe_for_beneficiary")
+     * @Route("/active/", name="active_swipe", methods={"GET","POST"})
+     * @Route("/active/{id}", name="active_swipe_for_beneficiary", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
-     * @Method({"POST"})
      */
     public function activeSwipeCardAction(Request $request,Beneficiary $beneficiary = null)
     {
@@ -136,9 +133,8 @@ class SwipeCardController extends Controller
      * @param Beneficiary $beneficiary
      * @return Response
      * @Route("/enable/", name="enable_swipe")
-     * @Route("/enable/{id}", name="enable_swipe_for_beneficiary")
+     * @Route("/enable/{id}", name="enable_swipe_for_beneficiary", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
-     * @Method({"POST"})
      */
     public function enableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
         $session = new Session();
@@ -187,9 +183,8 @@ class SwipeCardController extends Controller
      * @param Beneficiary $beneficiary
      * @return Response
      * @Route("/disable/", name="disable_swipe")
-     * @Route("/disable/{id}", name="disable_swipe_for_beneficiary")
+     * @Route("/disable/{id}", name="disable_swipe_for_beneficiary", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
-     * @Method({"POST"})
      */
     public function disableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
         $session = new Session();
@@ -229,9 +224,8 @@ class SwipeCardController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @Route("/delete/", name="delete_swipe")
+     * @Route("/delete/", name="delete_swipe", methods={"POST"})
      * @Security("has_role('ROLE_ADMIN')")
-     * @Method({"POST"})
      */
     public function deleteAction(Request $request){
         $session = new Session();
@@ -263,9 +257,8 @@ class SwipeCardController extends Controller
      *
      * @param SwipeCard $card
      * @return Response A Response instance
-     * @Route("/{id}/show", name="swipe_show")
+     * @Route("/{id}/show", name="swipe_show", methods={"GET"})
      * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method({"GET"})
      */
     public function showAction(SwipeCard $card){
         return $this->render('user/swipe_card.html.twig', [
@@ -291,8 +284,7 @@ class SwipeCardController extends Controller
      *
      * @param String $code
      * @return Response A Response instance
-     * @Route("/{code}/qr.png", name="swipe_qr")
-     * @Method({"GET"})
+     * @Route("/{code}/qr.png", name="swipe_qr", methods={"GET"})
      */
     public function qrAction(Request $request, $code){
         $code = urldecode($code);
@@ -320,8 +312,7 @@ class SwipeCardController extends Controller
      *
      * @param String $code
      * @return Response A Response instance
-     * @Route("/{code}/br.png", name="swipe_br")
-     * @Method({"GET"})
+     * @Route("/{code}/br.png", name="swipe_br", methods={"GET"})
      */
     public function brAction(Request $request, $code){
         $code = urldecode($code);

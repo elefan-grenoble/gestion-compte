@@ -35,8 +35,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -53,8 +52,7 @@ class RegistrationsController extends Controller
     /**
      * Registrations list
      *
-     * @Route("/", name="registrations")
-     * @Method({"POST","GET"})
+     * @Route("/", name="registrations", methods={"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
@@ -192,8 +190,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     /**
      * edit registration
      *
-     * @Route("/{id}/edit", name="registration_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="registration_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function editRegistrationAction(Request $request, Registration $registration)
@@ -220,8 +217,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     /**
      * remove registration
      *
-     * @Route("/{id}/remove", name="registration_remove")
-     * @Method({"DELETE"})
+     * @Route("/{id}/remove", name="registration_remove", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeRegistrationAction(Request $request, Registration $registration)

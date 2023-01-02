@@ -9,7 +9,6 @@ use AppBundle\Form\AutocompleteBeneficiaryCollectionType;
 use AppBundle\Form\MarkdownEditorType;
 use AppBundle\Service\SearchUserFormHelper;
 use Michelf\Markdown;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -32,8 +31,7 @@ class MailController extends Controller
     /**
      * Edit a message
      *
-     * @Route("/to/{id}", name="mail_edit_one_beneficiary")
-     * @Method({"GET","POST"})
+     * @Route("/to/{id}", name="mail_edit_one_beneficiary", methods={"GET","POST"})
      */
     public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary)
     {
@@ -46,8 +44,7 @@ class MailController extends Controller
     }
 
     /**
-     * @Route("/to_bucket/{id}", name="mail_bucketshift")
-     * @Method({"GET","POST"})
+     * @Route("/to_bucket/{id}", name="mail_bucketshift", methods={"GET","POST"})
      */
     public function mailBucketShift(Request $request, Shift $shift)
     {
@@ -72,8 +69,7 @@ class MailController extends Controller
     /**
      * Edit a message
      *
-     * @Route("/", name="mail_edit")
-     * @Method({"GET","POST"})
+     * @Route("/", name="mail_edit", methods={"GET","POST"})
      */
     public function editAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -104,8 +100,7 @@ class MailController extends Controller
     /**
      * Send a message
      *
-     * @Route("/send", name="mail_send")
-     * @Method({"POST"})
+     * @Route("/send", name="mail_send", methods={"POST"})
      */
     public function sendAction(Request $request, \Swift_Mailer $mailer)
     {

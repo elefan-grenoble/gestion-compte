@@ -5,8 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Job;
 use AppBundle\Form\JobType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -57,8 +56,7 @@ class JobController extends Controller
     /**
      * Lists all jobs.
      *
-     * @Route("/", name="job_list")
-     * @Method({"GET","POST"})
+     * @Route("/", name="job_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
@@ -82,8 +80,7 @@ class JobController extends Controller
     /**
      * add new job.
      *
-     * @Route("/new", name="job_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="job_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -114,8 +111,7 @@ class JobController extends Controller
     /**
      * Edit job.
      *
-     * @Route("/edit/{id}", name="job_edit")
-     * @Method({"GET","POST"})
+     * @Route("/edit/{id}", name="job_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Job $job)
@@ -144,8 +140,7 @@ class JobController extends Controller
     /**
      * Delete job.
      *
-     * @Route("/{id}", name="job_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="job_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Job $job)

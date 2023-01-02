@@ -11,13 +11,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Validator\Constraints\Date;
 
 /**
- * Process update controller.
+ * Process update controller. Correspond to the pages
+ * "Gérer les nouveautés" -> Liste des procédures / nouveautés
  *
  * @Route("process/updates")
  */
@@ -27,8 +27,7 @@ class ProcessUpdateController extends Controller
     /**
      * Lists all process updates.
      *
-     * @Route("/", name="process_update_list")
-     * @Method("GET")
+     * @Route("/", name="process_update_list", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function listAction(Request $request)
@@ -64,8 +63,7 @@ class ProcessUpdateController extends Controller
     }
 
     /**
-     * @Route("/count_unread", name="process_update_count_unread")
-     * @Method("POST")
+     * @Route("/count_unread", name="process_update_count_unread", methods={"POST"})
      * @param Request $request
      * @return Response | JsonResponse
      * @throws
@@ -87,8 +85,7 @@ class ProcessUpdateController extends Controller
     /**
      * Create a process update
      *
-     * @Route("/new", name="process_update_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="process_update_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
@@ -119,8 +116,7 @@ class ProcessUpdateController extends Controller
     /**
      * Edit a process update
      *
-     * @Route("/{id}/edit", name="process_update_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="process_update_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, ProcessUpdate $processUpdate)
@@ -163,8 +159,7 @@ class ProcessUpdateController extends Controller
     /**
      * Delete a process update.
      *
-     * @Route("/{id}", name="process_update_delete")
-     * @Method("DELETE")
+     * @Route("/{id}", name="process_update_delete", methods={"DELETE"})
      */
     public function deleteAction(Request $request, ProcessUpdate $processUpdate)
     {

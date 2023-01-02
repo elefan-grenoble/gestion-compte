@@ -7,8 +7,7 @@ use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
 use AppBundle\Form\ServiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
@@ -28,8 +27,7 @@ class ServiceController extends Controller
     /**
      * Lists all services.
      *
-     * @Route("/", name="admin_services")
-     * @Method("GET")
+     * @Route("/", name="admin_services", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function listAction(Request $request)
@@ -45,8 +43,7 @@ class ServiceController extends Controller
     /**
      * Lists all services.
      *
-     * @Route("/navlist", name="nav_list_services")
-     * @Method("GET")
+     * @Route("/navlist", name="nav_list_services", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function navlistAction()
@@ -61,8 +58,7 @@ class ServiceController extends Controller
     /**
      * add new services.
      *
-     * @Route("/new", name="service_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="service_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
@@ -99,8 +95,7 @@ class ServiceController extends Controller
     /**
      * edit service.
      *
-     * @Route("/edit/{id}", name="service_edit")
-     * @Method({"GET","POST"})
+     * @Route("/edit/{id}", name="service_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request,Service $service)
@@ -138,8 +133,7 @@ class ServiceController extends Controller
     /**
      * delete service.
      *
-     * @Route("/{id}", name="service_remove")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="service_remove", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeAction(Request $request,Service $service)

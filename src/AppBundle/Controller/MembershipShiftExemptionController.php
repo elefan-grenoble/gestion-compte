@@ -5,8 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\MembershipShiftExemption;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -22,9 +21,8 @@ class MembershipShiftExemptionController extends Controller
     /**
      * Lists all membershipShiftExemption entities.
      *
-     * @Route("/", name="admin_membershipshiftexemption_index")
+     * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET"})
      * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method("GET")
      */
     public function indexAction(Request $request)
     {
@@ -52,9 +50,8 @@ class MembershipShiftExemptionController extends Controller
     /**
      * Creates a new membershipShiftExemption entity.
      *
-     * @Route("/new", name="admin_membershipshiftexemption_new")
+     * @Route("/new", name="admin_membershipshiftexemption_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function newAction(Request $request)
     {
@@ -91,9 +88,8 @@ class MembershipShiftExemptionController extends Controller
     /**
      * Displays a form to edit an existing membershipShiftExemption entity.
      *
-     * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit")
+     * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
@@ -123,9 +119,8 @@ class MembershipShiftExemptionController extends Controller
     /**
      * Deletes a membershipShiftExemption entity.
      *
-     * @Route("/{id}", name="admin_membershipshiftexemption_delete")
+     * @Route("/{id}", name="admin_membershipshiftexemption_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_USER_MANAGER')")
-     * @Method("DELETE")
      */
     public function deleteAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
