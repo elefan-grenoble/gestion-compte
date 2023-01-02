@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 /**
  * Shift
@@ -11,8 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ShiftRepository")
  */
-class Shift
+class Shift implements JsonSerializable
 {
+
     /**
      * @var int
      *
@@ -652,4 +654,17 @@ class Shift
     {
         return $this->createdAt;
     }
+
+    public function jsonSerialize()
+    {
+        return array(
+            "start" => $this->getStart(),
+            "end" => $this->getEnd(),
+            "formation" => $this->getFormation() ? $this->getFormation()->getName() : null,
+            "job" => $this->getJob() ? $this->getJob()->getName() : null,
+            "fixe" => $this->isFixe(),
+            "wasCarriedOut" => $this->getWasCarriedOut()
+        );
+    }
+
 }

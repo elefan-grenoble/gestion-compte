@@ -16,6 +16,16 @@ services:
         bind:
             $localCurrency: '%local_currency_name%'
 
+    json_serializable_normalizer:
+        class: Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer
+        tags: [serializer.normalizer]
+
+    datetime_normalizer:
+      class: Symfony\Component\Serializer\Normalizer\DateTimeNormalizer
+      arguments:
+          $format: "d/m/Y H:i:s"
+
+
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     AppBundle\:
@@ -151,6 +161,12 @@ services:
             tags:
                 - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
 
+    audit_subscriber:
+            class: AppBundle\EventSubscriber\AuditSubscriber
+            public: true
+            tags:
+                - { name: doctrine.event_subscriber }
+
     validator_anonymous_beneficiary_unique_email:
             class: AppBundle\Validator\Constraints\UniqueEmailValidator
             arguments:
@@ -161,6 +177,12 @@ services:
         arguments:
               $container: "@service_container"
               $maximum_nb_of_beneficiaries_in_membership: "%maximum_nb_of_beneficiaries_in_membership%"
+
+    audit_service:
+            class:  AppBundle\Service\AuditLogger
+            public: true
+            arguments:
+                $tokenStorage: '@security.token_storage'
 
     shift_service:
             class:  AppBundle\Service\ShiftService

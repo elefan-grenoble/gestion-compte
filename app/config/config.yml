@@ -12,6 +12,9 @@ parameters:
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
 
 framework:
+  serializer:
+    enable_annotations: true
+    circular_reference_handler: 'AppBundle\Serializer\CircularReferenceHandler'
   translator: { fallbacks: ['%locale%'] }
   secret: '%secret%'
   router:

@@ -114,9 +114,12 @@
             {% endif %}
 
             {% if is_granted("ROLE_ADMIN") %}
-                <h6><i class="material-icons">verified_user</i>&nbsp;Rôles utilisateurs</h6>
-                <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn deep-purple">
-                    <i class="material-icons left">list</i>Liste des roles
+                <h6><i class="material-icons">verified_user</i>&nbsp;Gestion</h6>
+                <a href="{{ path("roles_list") }}" class="waves-effect waves-light btn light-blue">
+                    <i class="material-icons left">list</i>Rôles utilisateurs
+                </a>
+                <a href="{{ path("admin_auditlog_index") }}" class="waves-effect waves-light btn light-blue">
+                    <i class="material-icons left">library_books</i>Logs
                 </a>
             {% endif %}
 
