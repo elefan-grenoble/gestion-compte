@@ -31,15 +31,16 @@ class EventService
         return $qb->getQuery()->getOneOrNullResult();
     }
 
-    public function getReceivedProxyOfBeneficiaryForAnEvent(Event $event, Beneficiary $beneficiary)
+    public function getReceivedProxiesOfBeneficiaryForAnEvent(Event $event, Beneficiary $beneficiary)
     {
         $qb = $this->em->getRepository('AppBundle:Proxy')->createQueryBuilder('p');
 
         $qb->where('p.event = :event')
-            ->andWhere( 'p.owner = :beneficiary')
+            ->andWhere('p.owner IN (:beneficiaries)')
             ->setParameter('event', $event)
-            ->setParameter('beneficiary', $beneficiary);
+            ->setParameter('beneficiaries', $beneficiary->getMembership()->getBeneficiaries());
 
-        return $qb->getQuery()->getOneOrNullResult();
+        // getResult instead of getOneOrNullResult? member can have multiple proxies (%max_event_proxy_per_member%)
+        return $qb->getQuery()->getResult();
     }
 }

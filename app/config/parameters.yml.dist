@@ -106,6 +106,9 @@ parameters:
     use_card_reader_to_validate_shifts: false
     max_time_at_end_of_shift: 0
 
+    # Events
+    max_event_proxy_per_member: 1
+
     # Profile configuration
     profile_display_task_list: true
     profile_display_time_log: true
