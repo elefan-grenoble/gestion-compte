@@ -37,6 +37,7 @@ services:
     AppBundle\Controller\AmbassadorController:
         arguments:
             - "%time_after_which_members_are_late_with_shifts%"
+            - "%registration_every_civil_year%"
     AppBundle\Controller\BookingController:
         arguments:
             - "%use_fly_and_fixed%"

@@ -8,126 +8,273 @@ use Doctrine\ORM\QueryBuilder;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilder;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 
 class SearchUserFormHelper {
 
-    public function getSearchForm($formBuilder, $params_string = '', $ambassador = false) {
-        $params = array();
-        parse_str($params_string, $params);
-        $formBuilder->add('withdrawn', ChoiceType::class, array('label' => '∅ fermé', 'required' => false, 'choices' => array(
-            'fermé' => 2,
-            'ouvert' => 1,
-        )));
-        if (!$ambassador) {
-            $formBuilder->add('enabled', ChoiceType::class, array('label' => 'activé', 'required' => false, 'choices' => array(
-                'activé' => 2,
-                'Non activé' => 1,
-            )));
+    public function getSearchForm($formBuilder, $type = null) {
+        $formBuilder->add('withdrawn', ChoiceType::class, [
+            'data' => 1,
+            'label' => '∅ fermé',
+            'required' => false,
+            'choices' => [
+                'fermé' => 2,
+                'ouvert' => 1,
+            ]
+        ]);
+        if (!$type) {
+            $formBuilder->add('enabled', ChoiceType::class, [
+                'label' => 'activé',
+                'required' => false,
+                'choices' => [
+                    'activé' => 2,
+                    'Non activé' => 1,
+                ]
+            ]);
         }
-        $formBuilder->add('frozen', ChoiceType::class, array('label' => '❄️ gelé', 'required' => false, 'choices' => array(
-            'gelé' => 2,
-            'Non gelé' => 1,
-        )));
-        if (!$ambassador) {
-            $formBuilder->add('beneficiary_count', ChoiceType::class, array('label' => 'nb de bénéficiaires', 'required' => false, 'choices' => array(
-                // '0' => 1,
-                '1' => 2,
-                '2' => 3,
-            )));
+        $formBuilder->add('frozen', ChoiceType::class, [
+            'label' => '❄️ gelé',
+            'required' => false,
+            'choices' => [
+                'gelé' => 2,
+                'Non gelé' => 1,
+            ]
+        ]);
+        if (!$type) {
+            $formBuilder->add('beneficiary_count', ChoiceType::class, [
+                'label' => 'nb de bénéficiaires',
+                'required' => false,
+                'choices' => [
+                    '1' => 2,
+                    '2' => 3,
+                ]
+            ]);
         }
-        if ($params && isset($params['membernumber']) && $params['membernumber'])
-            $formBuilder->add('membernumber', TextType::class, array('label' => '# =', 'required' => false, 'attr' => array('value' => $params['membernumber'])));
-        else
-            $formBuilder->add('membernumber', TextType::class, array('label' => '# =', 'required' => false));
-
-        $formBuilder->add('membernumbergt', IntegerType::class, array('label' => '# >', 'required' => false))
-            ->add('membernumberlt', IntegerType::class, array('label' => '# <', 'required' => false));
-        if (!$ambassador) {
-            $formBuilder->add('membernumberdiff', TextType::class, array('label' => '# <>', 'required' => false))
-            ->add('registrationdate', TextType::class, array('label' => 'le', 'required' => false, 'attr' => array('class' => 'datepicker')))
-            ->add('registrationdategt', TextType::class, array('label' => 'après le', 'required' => false, 'attr' => array('class' => 'datepicker')))
-            ->add('registrationdatelt', TextType::class, array('label' => 'avant le', 'required' => false, 'attr' => array('class' => 'datepicker')))
-            ->add('lastregistrationdate', TextType::class, array('label' => 'le', 'required' => false, 'attr' => array('class' => 'datepicker')));
+        $formBuilder->add('membernumber', TextType::class, [
+            'label' => '# =',
+            'required' => false,
+        ])
+        ->add('membernumbergt', IntegerType::class, [
+            'label' => '# >',
+            'required' => false
+        ])
+        ->add('membernumberlt', IntegerType::class, [
+            'label' => '# <',
+            'required' => false
+        ]);
+        if (!$type) {
+            $formBuilder->add('membernumberdiff', TextType::class, [
+                'label' => '# <>',
+                'required' => false
+            ])
+            ->add('registrationdate', TextType::class, [
+                'label' => 'le',
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ])
+            ->add('registrationdategt', TextType::class, [
+                'label' => 'après le',
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ])
+            ->add('registrationdatelt', TextType::class, [
+                'label' => 'avant le',
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ])
+            ->add('lastregistrationdate', DateType::class, [
+                'widget' => 'single_text',
+                'html5' => false,
+                'label' => 'le',
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ]);
         }
-        $formBuilder->add('lastregistrationdategt', TextType::class, array('label' => 'après le', 'required' => false, 'attr' => array('class' => 'datepicker')))
-            ->add('lastregistrationdatelt', TextType::class, array('label' => 'avant le', 'required' => false, 'attr' => array('class' => 'datepicker')));
-        if (!$ambassador) {
-            $formBuilder->add('username', TextType::class, array('label' => 'username', 'required' => false));
+        $formBuilder->add('lastregistrationdategt', DateType::class, [
+            'widget' => 'single_text',
+            'html5' => false,
+            'label' => 'après le',
+            'required' => false,
+            'attr' => [
+                'class' => 'datepicker'
+            ]
+        ])
+        ->add('lastregistrationdatelt', DateType::class, [
+            'widget' => 'single_text',
+            'html5' => false,
+            'label' => 'avant le',
+            'required' => false,
+            'attr' => [
+                'class' => 'datepicker'
+            ]
+        ]);
+        if (!$type) {
+            $formBuilder->add('username', TextType::class, [
+                'label' => 'username',
+                'required' => false
+            ]);
         }
-        $formBuilder->add('compteurlt', NumberType::class, array('label' => 'max', 'required' => false))
-            ->add('compteurgt', NumberType::class, array('label' => 'min', 'required' => false))
-            ->add('firstname', TextType::class, array('label' => 'prénom', 'required' => false))
-            ->add('lastname', TextType::class, array('label' => 'nom', 'required' => false))
-            ->add('email', TextType::class, array('label' => 'email', 'required' => false));
-        if (!$ambassador) {
-            $formBuilder->add('phone', ChoiceType::class, array(
+        $formBuilder->add('compteurlt', NumberType::class, [
+            'label' => 'max',
+            'required' => false
+        ])
+        ->add('compteurgt', NumberType::class, [
+            'label' => 'min',
+            'required' => false
+        ])
+        ->add('firstname', TextType::class, [
+            'label' => 'prénom',
+            'required' => false
+        ])
+        ->add('lastname', TextType::class, [
+            'label' => 'nom',
+            'required' => false
+        ])
+        ->add('email', TextType::class, [
+            'label' => 'email',
+            'required' => false
+        ]);
+        if (!$type) {
+            $formBuilder->add('phone', ChoiceType::class, [
                 'label' => 'Téléphone renseigné ?',
                 'required' => false,
-                'choices' => array(
+                'choices' => [
                     'Renseigné' => 2,
                     'Non renseigné' => 1,
-                )
-            ))
-            ->add('formations', EntityType::class, array(
+                ]
+            ])
+            ->add('formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
-                'choice_label'     => 'name',
-                'multiple'     => true,
+                'choice_label' => 'name',
+                'multiple' => true,
                 'required' => false,
                 'label'=>'Avec le(s) formations(s)'
-            ))
-            ->add('or_and_exp_formations', ChoiceType::class, array(
+            ])
+            ->add('or_and_exp_formations', ChoiceType::class, [
                 'label' => 'Toutes ?',
                 'required' => true,
-                'choices' => array(
+                'choices' => [
                     '' => 0,
                     'Toutes ces formations' => 1,
-                )
-            ))
-            ->add('commissions', EntityType::class, array(
+                ]
+            ])
+            ->add('commissions', EntityType::class, [
                 'class' => 'AppBundle:Commission',
-                'choice_label'     => 'name',
-                'multiple'     => true,
+                'choice_label' => 'name',
+                'multiple' => true,
                 'required' => false,
                 'label'=>'Dans la/les commissions(s)'
-            ))
-            ->add('not_formations', EntityType::class, array(
+            ])
+            ->add('not_formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
-                'choice_label'     => 'name',
-                'multiple'     => true,
+                'choice_label' => 'name',
+                'multiple' => true,
                 'required' => false,
                 'label'=>'Sans le(s) formations(s)'
-            ))
-            ->add('not_commissions', EntityType::class, array(
+            ])
+            ->add('not_commissions', EntityType::class, [
                 'class' => 'AppBundle:Commission',
-                'choice_label'     => 'name',
-                'multiple'     => true,
+                'choice_label' => 'name',
+                'multiple' => true,
                 'required' => false,
                 'label'=>'Hors de la/les commissions(s)'
-            ))
-            ->add('flying', ChoiceType::class, array(
+            ])
+            ->add('flying', ChoiceType::class, [
                 'choices' => [
                     'Oui' => 2,
                     'Non' => 1,
                 ],
                 'required' => false,
                 'label'=>'Equipe volante'
-            ));
+            ]);
         }
-        $formBuilder->add('action', HiddenType::class,array())
-            ->add('page', HiddenType::class,array())
-            ->add('dir', HiddenType::class,array())
-            ->add('sort', HiddenType::class,array())
-            ->add('submit', SubmitType::class, array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'show')));
-        if (!$ambassador) {
-            $formBuilder->add('csv', SubmitType::class, array('label' => 'Export CSV', 'attr' => array('class' => 'btn', 'value' => 'csv')))
-            ->add('mail', SubmitType::class, array('label' => 'Envoyer un mail', 'attr' => array('class' => 'btn', 'value' => 'mail')));
+        $formBuilder->add('action', HiddenType::class, [
+        ])
+        ->add('page', HiddenType::class, [
+            'data' => '1'
+        ])
+        ->add('dir', HiddenType::class, [
+        ])
+        ->add('sort', HiddenType::class, [
+        ])
+        ->add('submit', SubmitType::class, [
+            'label' => 'Filtrer',
+            'attr' => [
+                'class' => 'btn',
+                'value' => 'show'
+            ]
+        ]);
+        if (!$type) {
+            $formBuilder->add('csv', SubmitType::class, [
+                'label' => 'Export CSV',
+                'attr' => [
+                    'class' => 'btn',
+                    'value' => 'csv'
+                ]
+            ])
+            ->add('mail', SubmitType::class, [
+                'label' => 'Envoyer un mail',
+                'attr' => [
+                    'class' => 'btn',
+                    'value' => 'mail'
+            ]]);
         }
         return $formBuilder->getForm();
+    }
+
+    public function createMemberFilterForm($formBuilder, $defaults) {
+        $form = $this->getSearchForm($formBuilder);
+        foreach ($defaults as $k => $v) {
+            $form->get($k)->setData($v);
+        }
+        return $form;
+    }
+
+    public function createShiftTimeLogFilterForm($formBuilder, $defaults) {
+        $form = $this->getSearchForm($formBuilder, "shifttimelog");
+        // set compteurlt default
+        $options = $form->get('compteurlt')->getConfig()->getOptions();
+        $options['required'] = true;
+        $options['constraints'] = [
+            new NotBlank(),
+            new LessThanOrEqual($defaults['compteurlt'])
+        ];
+        $form->add('compteurlt', NumberType::class, $options);
+        foreach ($defaults as $k => $v) {
+            $form->get($k)->setData($v);
+        }
+        return $form;
+    }
+
+    public function createMembershipFilterForm($formBuilder, $defaults) {
+        $form = $this->getSearchForm($formBuilder, "membership");
+        // set lastregistrationdatelt default
+        $options = $form->get('lastregistrationdatelt')->getConfig()->getOptions();
+        $options['required'] = true;
+        $options['constraints'] = [
+            new NotBlank(),
+                new LessThanOrEqual($defaults['lastregistrationdatelt'])
+        ];
+        $form->add('lastregistrationdatelt', DateType::class, $options);
+        foreach ($defaults as $k => $v) {
+            $form->get($k)->setData($v);
+        }
+        return $form;
     }
 
     /**
@@ -149,61 +296,32 @@ class SearchUserFormHelper {
      * @param QueryBuilder $qb
      * @return QueryBuilder
      */
-    public function processSearchFormAmbassadorData($form, &$qb, $session, $type) {
-        $lastYear = new \DateTime('last year');
+    public function processSearchFormAmbassadorData($form, &$qb) {
         if ($form->get('withdrawn')->getData() > 0) {
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                      ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
-        } else {
-            $qb = $qb->andWhere('o.withdrawn = 0');
         }
         if ($form->get('frozen')->getData() > 0) {
             $qb = $qb->andWhere('o.frozen = :frozen')
                      ->setParameter('frozen', $form->get('frozen')->getData()-1);
-        } elseif ($type == "shifttimelog") {
-            $qb = $qb->andWhere('o.frozen = 0');
         }
-        if ($form->get('compteurlt')->getData()) {
+        if (!is_null($form->get('compteurlt')->getData())) {
             $compteurlt = $form->get('compteurlt')->getData();
-            if ($type == "shifttimelog" && $compteurlt > 0) {
-                $session->getFlashBag()->add('warning', 'Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs créneaux');
-                $compteurlt = 0;
-            }
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $compteurlt);
-        } elseif ($type == "shifttimelog") {
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < 0)');
         }
-        if ($form->get('compteurgt')->getData()) {
+        if (!is_null($form->get('compteurgt')->getData())) {
             $compteurgt = $form->get('compteurgt')->getData();
-            if ($type == "shifttimelog" && $compteurgt >= 0) {
-                $session->getFlashBag()->add('warning', 'Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs créneaux');
-                $compteurgt = 0;
-            }
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $compteurgt);
         }
         if ($form->get('lastregistrationdategt')->getData()) {
             $date = $form->get('lastregistrationdategt')->getData();
-            $datetime = \DateTime::createFromFormat('Y-m-d', $date);
-            if ($type == "membership" && $datetime > $lastYear) {
-                $session->getFlashBag()->add('warning', 'Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
-                $date = $lastYear->format('Y-m-d') ;
-            }
             $qb = $qb->andWhere('r.date > :lastregistrationdategt')
                      ->setParameter('lastregistrationdategt', $date);
         }
         if ($form->get('lastregistrationdatelt')->getData()) {
             $date = $form->get('lastregistrationdatelt')->getData();
-            $datetime = \DateTime::createFromFormat('Y-m-d', $date);
-            if ($type == "membership" && $datetime > $lastYear) {
-                $session->getFlashBag()->add('warning', 'Oups, cet outil n\'est pas conçu pour rechercher des membres à jour sur leurs adhésions');
-                $date = $lastYear->format('Y-m-d') ;
-            }
-            $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                     ->setParameter('lastregistrationdatelt', $date);
-        } elseif ($type == "membership") {
-            $date = $lastYear->format('Y-m-d') ;
             $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                      ->setParameter('lastregistrationdatelt', $date);
         }
@@ -214,6 +332,28 @@ class SearchUserFormHelper {
         if ($form->get('membernumbergt')->getData()) {
             $qb = $qb->andWhere('o.member_number > :membernumbergt')
                      ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
+        }
+        if ($form->get('membernumberlt')->getData()) {
+            $qb = $qb->andWhere('o.member_number < :membernumberlt')
+                ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
+        }
+        if ($form->get('firstname')->getData()) {
+            $qb = $qb->andWhere('b.firstname LIKE :firstname')
+                ->setParameter('firstname', '%'.$form->get('firstname')->getData().'%');
+        }
+        if ($form->get('lastname')->getData()) {
+            $qb = $qb->andWhere('b.lastname LIKE :lastname')
+                ->setParameter('lastname', '%'.$form->get('lastname')->getData().'%');
+        }
+        if ($form->get('email')->getData()) {
+            $list  = explode(', ', $form->get('email')->getData());
+            if (count($list)>1) {
+                $qb = $qb->andWhere('u.email IN (:emails)')
+                    ->setParameter('emails', $list);
+            } else {
+                $qb = $qb->andWhere('u.email LIKE :email')
+                    ->setParameter('email', '%'.$form->get('email')->getData().'%');
+            }
         }
         return $qb;
     }
@@ -253,11 +393,11 @@ class SearchUserFormHelper {
             $qb = $qb->andWhere('r.date < :registrationdatelt')
                 ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
         }
-        if ($form->get('compteurlt')->getData()) {
+        if (!is_null($form->get('compteurlt')->getData())) {
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $form->get('compteurlt')->getData());
         }
-        if ($form->get('compteurgt')->getData()) {
+        if (!is_null($form->get('compteurgt')->getData())) {
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $form->get('compteurgt')->getData());
         }
@@ -266,7 +406,7 @@ class SearchUserFormHelper {
                 ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->andWhere('lr.id IS NULL')
                 ->andWhere('r.date LIKE :lastregistrationdate')
-                ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData().'%');
+                ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData()->format('Y-m-d').'%');
         }
         if ($form->get('lastregistrationdategt')->getData()) {
             $qb = $qb
@@ -419,19 +559,4 @@ class SearchUserFormHelper {
         return $qb;
     }
 
-    public function processSearchQueryData($params_string,&$qb) {
-        $params = array();
-        parse_str($params_string, $params);
-        if ($params && $params['membernumber']) {
-            $list  = explode(', ', $params['membernumber']);
-            if (count($list)>1) {
-                $qb = $qb->andWhere('o.member_number IN (:membernumber)')
-                    ->setParameter('membernumber', $list);
-            } else {
-                $qb = $qb->andWhere('o.member_number = :membernumber')
-                    ->setParameter('membernumber', $params['membernumber']);
-            }
-        }
-        return $qb;
-    }
 }

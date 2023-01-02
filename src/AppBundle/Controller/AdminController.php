@@ -27,6 +27,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -77,38 +78,30 @@ class AdminController extends Controller
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
-        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString());
+        $defaults = [
+            'sort' => 'o.member_number',
+            'dir' => 'ASC',
+            'withdrawn' => 1,
+        ];
+        $form = $formHelper->createMemberFilterForm($this->createFormBuilder(), $defaults);
         $form->handleRequest($request);
 
         $action = $form->get('action')->getData();
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
 
-        # default data
-        $defaultWithdrawn = 1;  # open accounts
-        $page = 1;
-        $sort = 'o.member_number';
-        $order = 'ASC';
-        $limit = 25;
-
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('page')->getData() > 0) {
-                $page = $form->get('page')->getData();
-            }
-            if ($form->get('sort')->getData()) {
-                $sort = $form->get('sort')->getData();
-            }
-            if ($form->get('dir')->getData()) {
-                $order = $form->get('dir')->getData();
-            }
+            $formHelper->processSearchFormData($form, $qb);
+            $sort = $form->get('sort')->getData();
+            $order = $form->get('dir')->getData();
+            $currentPage = $form->get('page')->getData();
         } else {
-            $form->get('withdrawn')->setData($defaultWithdrawn);
-            $form->get('sort')->setData($sort);
-            $form->get('dir')->setData($order);
+            $sort = $defaults['sort'];
+            $order = $defaults['dir'];
+            $currentPage = 1;
+            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                    ->setParameter('withdrawn', $defaults['withdrawn']-1);
         }
-        $formHelper->processSearchFormData($form, $qb);
-        $formHelper->processSearchQueryData($request->getQueryString(), $qb);
-
         $qb = $qb->orderBy($sort, $order);
 
         // Export CSV
@@ -138,19 +131,24 @@ class AdminController extends Controller
                 'request' => $request
             ], 307);
         } else {
-            $qb = $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
-            $members = new Paginator($qb->getQuery());
-            $max = sizeof($members);
-            $nb_of_pages = intval($max / $limit);
-            $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+            $limitPerPage = 25;
+            $paginator = new Paginator($qb);
+            $totalItems = count($paginator);
+            $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
+            $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+
+            $paginator
+                ->getQuery()
+                ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+                ->setMaxResults($limitPerPage); // set the limit
         }
 
         return $this->render('admin/user/list.html.twig', array(
-            'members' => $members,
+            'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $max,
-            'page' => $page,
-            'nb_of_pages' => $nb_of_pages
+            'nb_of_result' => $totalItems,
+            'page' => $currentPage,
+            'nb_of_pages' => $pagesCount
         ));
     }
 

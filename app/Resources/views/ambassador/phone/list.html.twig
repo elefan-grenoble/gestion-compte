@@ -21,37 +21,30 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s6">
-                                <div class="input-field">
-                                    {{ form_widget(form.withdrawn) }}
-                                    {{ form_label(form.withdrawn) }}
-                                </div>
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.withdrawn) }}
+                                {{ form_label(form.withdrawn) }}
+                                {{ form_errors(form.withdrawn) }}
                             </div>
-                            <div class="col s6">
-                                <div class="input-field">
-                                    {{ form_widget(form.frozen) }}
-                                    {{ form_label(form.frozen) }}
-                                </div>
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.frozen) }}
+                                {{ form_label(form.frozen) }}
+                                {{ form_errors(form.frozen) }}
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col s4">
-                                <div class="input-field">
-                                    {{ form_widget(form.membernumber) }}
-                                    {{ form_label(form.membernumber) }}
-                                </div>
+                            <div class="col s4 input-field">
+                                {{ form_widget(form.membernumber) }}
+                                {{ form_label(form.membernumber) }}
+                                {{ form_errors(form.membernumber) }}
                             </div>
-                            <div class="col s4">
-                                <div class="input-field">
-                                    {{ form_widget(form.membernumbergt) }}
-                                    {{ form_label(form.membernumbergt) }}
-                                </div>
+                            <div class="col s4 input-field">
+                                {{ form_widget(form.membernumbergt) }}
+                                {{ form_label(form.membernumbergt) }}
+                                {{ form_errors(form.membernumbergt) }}
                             </div>
-                            <div class="col s4">
-                                <div class="input-field">
-                                    {{ form_widget(form.membernumberlt) }}
-                                    {{ form_label(form.membernumberlt) }}
-                                </div>
+                            <div class="col s4 input-field">
+                                {{ form_widget(form.membernumberlt) }}
+                                {{ form_label(form.membernumberlt) }}
+                                {{ form_errors(form.membernumberlt) }}
                             </div>
                         </div>
                         <h5>Compteur</h5>
@@ -59,6 +52,7 @@
                             <div class="input-field col s3">
                                 {{ form_widget(form.compteurgt) }}
                                 {{ form_label(form.compteurgt) }}
+                                {{ form_errors(form.compteurgt) }}
                             </div>
                             <div class="col s6 center">
                                 <span><</span>&nbsp;&nbsp;compteur&nbsp;&nbsp;<span><</span>
@@ -66,23 +60,22 @@
                             <div class="input-field col s3">
                                 {{ form_widget(form.compteurlt) }}
                                 {{ form_label(form.compteurlt) }}
+                                {{ form_errors(form.compteurlt) }}
                             </div>
                         </div>
                     </div>
                     <div class="col s12 m4">
                         <h5>Dernière Adhésion</h5>
                         <div class="row">
-                            <div class="col s6">
-                                <div class="input-field">
-                                    {{ form_widget(form.lastregistrationdatelt) }}
-                                    {{ form_label(form.lastregistrationdatelt) }}
-                                </div>
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.lastregistrationdatelt) }}
+                                {{ form_label(form.lastregistrationdatelt) }}
+                                {{ form_errors(form.lastregistrationdatelt) }}
                             </div>
-                            <div class="col s6">
-                                <div class="input-field">
-                                    {{ form_widget(form.lastregistrationdategt) }}
-                                    {{ form_label(form.lastregistrationdategt) }}
-                                </div>
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.lastregistrationdategt) }}
+                                {{ form_label(form.lastregistrationdategt) }}
+                                {{ form_errors(form.lastregistrationdategt) }}
                             </div>
                         </div>
                     </div>
@@ -91,14 +84,17 @@
                         <div class="input-field">
                             {{ form_widget(form.firstname) }}
                             {{ form_label(form.firstname) }}
+                            {{ form_errors(form.firstname) }}
                         </div>
                         <div class="input-field">
                             {{ form_widget(form.lastname) }}
                             {{ form_label(form.lastname) }}
+                            {{ form_errors(form.lastname) }}
                         </div>
                         <div class="input-field">
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
+                            {{ form_errors(form.email) }}
                         </div>
                         <br />
                         <h5>Actions</h5>
@@ -190,18 +186,17 @@
     {% if nb_of_pages > 1 %}
         <ul class="pagination">
             <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path(path,{'page':page-1}) }}{% endif %}"
-                   data-page="{{ page-1 }}">
+                <a href="#" data-page="{{ page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
             {% for i in range(1,nb_of_pages) %}
                 <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}">
-                    <a href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a>
+                    <a href="#" data-page="{{ i }}">{{ i }}</a>
                 </li>
             {% endfor %}
             <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}" data-page="{{ page+1 }}">
+                <a href="#" data-page="{{ page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </li>
@@ -223,19 +218,11 @@
 {% block javascripts %}
     <script>
         jQuery(function () {
-            $('[type=submit]').click(function (e) {
-                e.preventDefault();
-                $('#form_action').val($(this).val());
-                $('form[name=form]').submit();
-            });
             $('.pagination li:not(.disabled) a').click(function (e) {
                 e.preventDefault();
-                $('#form_page').val($(this).attr('data-page'));
+                $('#form_page').val($(this).data('page'));
                 $('form[name=form]').submit();
             });
-            // $('select').on('change', function() {
-            //     $('form[name=form]').submit();
-            // });
             $('th[data-col]').click(function (e) {
                 e.preventDefault();
                 if ($('#form_sort').val() === $(this).attr('data-col')) {
