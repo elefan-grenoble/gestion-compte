@@ -1,100 +1,132 @@
 {#########################################################################
- # Twig template for  /Controller/EventController.php/signaturesListAction()
+ # Twig template for /Controller/EventController.php/signaturesListAction()
  #
  # @param beneficiaries: beneficiary entity for this line
  # @param event: The event entity object signature sheet
  #########################################################################}
 
-
 {% block macro %}
     {#########################################################################
-     # Compute and output the 2 last cells of a table_line depending of the
-     # beneficiary status.
+     # Compute and output the 2 last cells of a table_line depending on the beneficiary status.
      # @param beneficiary: beneficiary entity for this line
      # @param event: The event entity object signature sheet
      #########################################################################}
     {% macro sign_cells(beneficiary, event) %}
-
-        {% if not beneficiary.isMain%}
+        {% if not beneficiary.isMain %}
             {# Not main benificiary, only one vote per memeber whatever the beneficiries number -----#}
             <td colspan="2" class="warning" style="background: gray; color: white;">
-                Bénéficiaire de <b>{{ beneficiary.membership.mainBeneficiary.lastname }}
-                    &nbsp;{{ beneficiary.membership.mainBeneficiary.firstname }}</b>
-                <br>
-                &#9888&nbsp;<b>NE PAS SIGNER ICI</b>&nbsp;&#9888
+                Bénéficiaire de <strong>{{ beneficiary.membership.mainBeneficiary.displayName }}</strong>
             </td>
 
-        {% elseif (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration)
-            <= time_after_which_members_are_late_with_shifts * 60) %}
+        {% elseif (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
             {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
             <td colspan="2" class="wrong" style="background: gray; color: white;">
-                Compteur de créneaux
-                à {{ beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
-                <br>&#9888&nbsp;<b>VOTE IMPOSSIBLE</b>&nbsp;&#9888
+                Compteur de créneaux à {{ beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
+                <br />
+                &#9888&nbsp;<strong>VOTE IMPOSSIBLE</strong>&nbsp;&#9888
             </td>
 
         {% elseif (event.proxiesByGiver(beneficiary.membership) | length > 0) %}
-            {# This memeber designated a proxy to vote and is not the proxy ------------------------- #}
+            {# This member designated a proxy to vote and is not the proxy ------------------------- #}
+            {# first? only 1 proxy per member #}
             <td colspan="2" class="warning" style="background: gray; color: white;">
-                Procuration donnée à <br>
-                {% if event.proxiesByGiver(beneficiary.membership).first.owner %}
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.lastname }}&nbsp;
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.firstname }}&nbsp;
-                    {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}
+                Procuration donnée à
+                <br />
+                {% if event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary %}
+                    <strong>
+                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumberWithBeneficiaryListString }}
+                    </strong>
                 {% else %}
                     Membre supprimé
                 {% endif %}
             </td>
 
         {% else %}
-            {# This beneficiry can vote ------------------------------------------------------------ #}
+            {# This beneficiary can vote ------------------------------------------------------------ #}
             <td></td>
             <td></td>
         {% endif %}
-
     {% endmacro sign_cells %}
 
     {#########################################################################
-     # Compute and output a line for a benyficiary
+     # Compute and output a line for each beneficiary
      # @param beneficiary: beneficiary entity for this line
      # @param event: The event entity object signature sheet
      #########################################################################}
     {% macro table_line(beneficiary, event) %}
         <tr>
-            <td {% if beneficiary.lastname | length > 12 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
-            <td {% if beneficiary.firstname | length > 12 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
-            <td>#{{ beneficiary.membership.memberNumber }}</td>
-            <td class="date">{{ beneficiary.membership.lastRegistration.date | date('d-m-Y') }}</td>
+            <td {% if beneficiary.lastname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.lastname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.lastname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td {% if beneficiary.firstname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.firstname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.firstname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td class="center">#{{ beneficiary.membership.memberNumber }}</td>
+            <td class="center date">{{ beneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
             {{ _self.sign_cells(beneficiary, event) }}
         </tr>
 
         {# this beneficiary designated a proxy so generation of a additional line for this proxy to sign #}
-        {% if (((event.proxiesByOwner(beneficiary) | length) > 0)
-            and (event.proxiesByOwner(beneficiary).first.giver)) %}
-            {% set proxied_bneficiary = event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary %}
-            <tr>
-                <td>
-                    <spam class="smaller">&#8618;&nbsp;A une procuration pour</spam>
-                    <br>{{ proxied_bneficiary.lastname }}
-                </td>
-                <td>{{ proxied_bneficiary.firstname }}</td>
-                <td>#{{ proxied_bneficiary.memberNumber }}</td>
-                <td>{{ proxied_bneficiary.membership.lastRegistration.date | date('d-m-Y') }}</td>
+        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
+            {% for proxy in event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) %}
+                <tr>
+                    <td>
+                        <span class="smaller">&#8618;&nbsp;A une procuration pour</span>
+                        <br />
+                        {{ proxy.giver.mainBeneficiary.lastname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.lastname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ proxy.giver.mainBeneficiary.firstname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.firstname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="center">#{{ proxy.giver.mainBeneficiary.memberNumber }}</td>
+                    <td class="center">{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
 
-            {% if (proxied_bneficiary.membership.getTimeCount(event.maxDateOfLastRegistration)
-                        <= time_after_which_members_are_late_with_shifts * 60) %}
-                {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
-                {# Todo: Maybe it should be put in the sign_cells macro #}
-                <td colspan="2" class="wrong" style="background: gray; color: white;">
-                    Compteur de créneaux de #{{ proxied_bneficiary.memberNumber }}
-                    à {{ proxied_bneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
-                    <br>&#9888&nbsp;<b>VOTE IMPOSSIBLE</b>&nbsp;&#9888
-                </td>
-            {% else %}
-                <td></td>
-                <td></td>
-            {% endif %}
-            </tr>
+                {% if (proxy.giver.mainBeneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
+                    {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
+                    {# Todo: Maybe it should be put in the sign_cells macro #}
+                    <td colspan="2" class="wrong" style="background: gray; color: white;">
+                        Compteur de créneaux de #{{ proxy.giver.mainBeneficiary.memberNumber }} à {{ proxy.giver.mainBeneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
+                        <br />
+                        &#9888&nbsp;<strong>VOTE IMPOSSIBLE</strong>&nbsp;&#9888
+                    </td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+                </tr>
+            {% endfor %}
         {% endif %}
     {% endmacro table_line %}
 
@@ -106,13 +138,12 @@
             <tr>
                 <th>Nom</th>
                 <th>Prénom</th>
-                <th>#</th>
-                <th>Adhésion</th>
+                <th class="center">#</th>
+                <th class="center">Adhésion</th>
                 <th>Signature</th>
                 <th>Vote</th>
             </tr>
         </thead>
-
     {% endmacro table_header %}
 
     {#########################################################################
@@ -121,25 +152,23 @@
      # @param event: The event entity object signature sheet
      #########################################################################}
     {% macro member_count(beneficiaries, event) %}
-        {% set  number_of_voters = 0 %}
-        {% set  number_of_proxy = 0 %}
+        {% set number_of_voters = 0 %}
+        {% set number_of_proxy = 0 %}
 
         {% for beneficiary in beneficiaries %}
-            {% set  time_count_ok =  not (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration)
-                <= time_after_which_members_are_late_with_shifts * 60) %}
+            {% set time_count_ok = not (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
 
-            {% if ((event.proxiesByGiver(beneficiary.membership) | length > 0) and beneficiary.isMain)  %}
-                {% set  number_of_proxy = number_of_proxy + 1 %}
+            {% if (event.proxiesByGiver(beneficiary.membership) | length > 0) and beneficiary.isMain %}
+                {% set number_of_proxy = number_of_proxy + 1 %}
             {% endif %}
 
             {% if beneficiary.isMain and time_count_ok %}
-                {% set  number_of_voters = number_of_voters+1 %}
+                {% set number_of_voters = number_of_voters+1 %}
             {% endif %}
-
         {% endfor %}
-        <br>Nombre de votants : {{ number_of_voters }}
-        <br>Nombre de procurations : {{ number_of_proxy }}
-
+        Nombre de votants : {{ number_of_voters }}
+        <br />
+        Nombre de procurations : {{ number_of_proxy }}
     {% endmacro member_count %}
 
 {% endblock %}
@@ -233,10 +262,6 @@
             /*background: white;*/
         }
 
-        .subpage td:nth-child(3) {
-            text-align: center;
-        }
-
         .subpage tr:nth-child(even) {
             background: lightgray !important;
             -webkit-print-color-adjust: exact;
@@ -297,11 +322,12 @@
             <div class="subpage">
                 <div class="title" id="main_title">
                     Liste des votants pour l'événement "{{ event.title() }}"
-                    <span style="white-space: nowrap;">le {{ event.date | date('d-m-Y') }}</span>
-                    généré le <span style="white-space: nowrap;">{{ "now" | date('d-m-Y') }}</span>
+                    <span style="white-space: nowrap;">le {{ event.date | date('d F Y H:i') }}</span>
+                    <br />
+                    <small>généré le <span style="white-space: nowrap;">{{ "now" | date('d F Y H:i') }}</span></small>
                 </div>
                 <div class="center" id="member_count">
-                    <p>{{ _self.member_count(beneficiaries, event)  }}</p>
+                    <p>{{ _self.member_count(beneficiaries, event) }}</p>
                 </div>
                 <table>
                     {# keep track of the number of line generated to make page break #}
@@ -324,8 +350,7 @@
                         {# generate a benificiary line -------------------- #}
                         {{ _self.table_line(beneficiary, event) }}
                         {# if proxy, a line is added, so index++ ----------- #}
-                        {% if ((event.proxiesByOwner(beneficiary) | length) > 0)
-                            and (event.proxiesByOwner(beneficiary).first.giver) %}
+                        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
                             {% set index = index + 1 %}
                         {% endif %}
                         {% set index = index + 1 %}

@@ -180,6 +180,30 @@ class Beneficiary
     }
 
     /**
+     * Get firstname
+     *
+     * @return string
+     */
+    public function getFirstname()
+    {
+        return ucfirst(strtolower($this->firstname));
+    }
+
+    /**
+     * Set firstname
+     *
+     * @param string $firstname
+     *
+     * @return Beneficiary
+     */
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    /**
      * Set lastname
      *
      * @param string $lastname
@@ -203,20 +227,6 @@ class Beneficiary
         return strtoupper($this->lastname);
     }
 
-    /**
-     * Set firstname
-     *
-     * @param string $firstname
-     *
-     * @return Beneficiary
-     */
-    public function setFirstname($firstname)
-    {
-        $this->firstname = $firstname;
-
-        return $this;
-    }
-
     public function getDisplayName(): string
     {
         return $this->getFirstname() . ' ' . $this->getLastname();
@@ -232,7 +242,7 @@ class Beneficiary
      */
     public function getDisplayNameWithMemberNumber(): string
     {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
+        return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
     }
 
     public function getDisplayNameWithMemberNumberAndStatusIcon(): string
@@ -251,16 +261,6 @@ class Beneficiary
     public function getPublicDisplayNameWithMemberNumber(): string
     {
         return '#' . $this->getMemberNumber() . ' ' . $this->getPublicDisplayName();
-    }
-
-    /**
-     * Get firstname
-     *
-     * @return string
-     */
-    public function getFirstname()
-    {
-        return ucfirst(strtolower($this->firstname));
     }
 
     /**

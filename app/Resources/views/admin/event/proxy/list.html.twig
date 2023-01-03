@@ -6,50 +6,85 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('event_list') }}"><i class="material-icons">list</i>&nbsp;Liste des événements</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">event</i>&nbsp;{{ event.title }}<i class="material-icons">chevron_right</i>
+{% if event %}
+    <i class="material-icons">event</i>&nbsp;{{ event.title }}<i class="material-icons">chevron_right</i>
+{% endif %}
 <i class="material-icons">list</i>&nbsp;Procurations
 {% endblock %}
 
 {% block content %}
     <h4>Liste des procurations en cours <small>({{ proxies | length }})</small></h4>
 
-    <p class="red-text">
-        Rappel : chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
-    </p>
-
-    {% if event %}
-        <h5>{{ event.title }}</h5>
+    {% if max_event_proxy_per_member > 0 %}
+        <blockquote class="red-text">
+            chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
+        </blockquote>
+    {% endif %}
+    {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+        <blockquote class="red-text">
+            si un membre a <strong>plusieurs</strong> bénéficiaires, c'est n'importe lequel des bénéficiaires qui peut porter la procuration
+        </blockquote>
     {% endif %}
 
-    <ul class="collapsible popout">
-        {% for proxy in proxies %}
-            <li>
-                <div class="collapsible-header">
-                    {% if not proxy.giver %}
-                        Pour le premier volontaire
-                    {% else %}
-                        De &nbsp;<b>{{ proxy.giver.mainBeneficiary }}</b>&nbsp;
-                    {% endif %}
-                    {% if not proxy.owner %}
-                        porté par le premier volontaire
-                    {% else %}
-                        porté par &nbsp;<b>{{ proxy.owner }}</b>&nbsp;
-                    {% endif %}
-                    {% if  not event and proxy.event  %}[{{ proxy.event.title }}]{% endif %}
-                </div>
-                {% if is_granted("ROLE_SUPER_ADMIN") %}
-                    <div class="collapsible-body">
-                        <a href="{{ path("proxy_edit",{'id':proxy.id}) }}" class="btn waves-effect waves-light">Editer</a>
+    {% if event %}
+        <h5>{{ event.title }} <small>{{ event.date | date('d F Y H:i') }}</small></h5>
+    {% endif %}
 
-                        {{ form_start(delete_forms[proxy.id]) }}
-                        {{ form_widget(delete_forms[proxy.id]) }}
-                        <div>
-                            <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-                        </div>
-                        {{ form_end(delete_forms[proxy.id]) }}
-                    </div>
+    <table class="responsive-table striped">
+        <thead>
+            <tr>
+                {% if not event %}
+                    <th>Evénement</th>
                 {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+                <th>De</th>
+                <th>Porté par</th>
+                <th>Date</th>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <th>Actions</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for proxy in proxies %}
+                <tr>
+                    {% if not event %}
+                        <td>
+                            {% if proxy.event %}
+                                {{ proxy.event.title }}
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    <td>
+                        {% if not proxy.giver %}
+                            Pour le premier volontaire
+                        {% else %}
+                            {{ proxy.giver.memberNumberWithBeneficiaryListString }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not proxy.owner %}
+                            porté par le premier volontaire
+                        {% else %}
+                            {{ proxy.owner.membership.memberNumberWithBeneficiaryListString }}
+                        {% endif %}
+                    </td>
+                    <td title="{{ proxy.createdAt | date('d F Y H:i') }}">
+                        {{ proxy.createdAt | date('d F Y') }}
+                    </td>
+                    {% if is_granted("ROLE_SUPER_ADMIN") %}
+                        <td>
+                            <a href="{{ path("proxy_edit",{'id':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
+                            {{ form_start(delete_forms[proxy.id]) }}
+                            {{ form_widget(delete_forms[proxy.id]) }}
+                            <div>
+                                <button type="submit" class="btn btn-small waves-effect waves-light red">Supprimer</button>
+                            </div>
+                            {{ form_end(delete_forms[proxy.id]) }}
+                        </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 {% endblock %}

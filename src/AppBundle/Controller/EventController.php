@@ -43,7 +43,7 @@ class EventController extends Controller
      * Lists all proxy
      *
      * @Route("/proxies_list", name="proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listProxiesAction()
     {
@@ -65,7 +65,7 @@ class EventController extends Controller
      * Lists all proxy for one event.
      *
      * @Route("/{id}/proxies_list", name="event_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listEventProxiesAction(Event $event, Request $request)
     {
@@ -388,7 +388,7 @@ class EventController extends Controller
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
                 if (count($member_giver_proxies) > 0) {
-                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' a déjà donné sa procuration');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayNameWithMemberNumber() . ' a déjà donné sa procuration');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -401,7 +401,7 @@ class EventController extends Controller
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
                 if (count($member_owner_proxies) >= $max_event_proxy_per_member) {
-                    $session->getFlashBag()->add('error', $beneficiary->getUser()->getFirstName() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
+                    $session->getFlashBag()->add('error', $beneficiary->getPublicDisplayNameWithMemberNumber() . ' accepte déjà de prendre le nombre maximal de procurations ('. $max_event_proxy_per_member .')');
                     return $this->redirectToRoute('homepage');
                 }
 
@@ -420,10 +420,10 @@ class EventController extends Controller
                     $em->persist($proxy);
                     $em->flush();
                     $session = new Session();
-                    $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner() .' !');
+                    $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
-                    if ($proxy->getGiver() && $proxy->getOwner()){
-                        $this->sendProxyMail($proxy,$mailer);
+                    if ($proxy->getGiver() && $proxy->getOwner()) {
+                        $this->sendProxyMail($proxy, $mailer);
                     }
 
                     return $this->redirectToRoute('homepage');

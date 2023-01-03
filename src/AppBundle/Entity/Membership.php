@@ -274,6 +274,23 @@ class Membership
     }
 
     /**
+     * Get member_number & list of beneficiaries
+     *
+     * @return string
+     */
+    public function getMemberNumberWithBeneficiaryListString()
+    {
+        $memberNumberWithBeneficiaryListString = '#' . $this->getMemberNumber();
+        foreach ($this->getBeneficiariesWithMainInFirstPosition() as $key => $beneficiary) {
+            if ($key > 0) {
+                $memberNumberWithBeneficiaryListString .= ' &';
+            }
+            $memberNumberWithBeneficiaryListString .= ' '. $beneficiary->getDisplayName();
+        }
+        return $memberNumberWithBeneficiaryListString;
+    }
+
+    /**
      * Set mainBeneficiary
      *
      * @param \AppBundle\Entity\Beneficiary $mainBeneficiary
