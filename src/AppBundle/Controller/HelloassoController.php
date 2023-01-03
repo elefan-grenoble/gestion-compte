@@ -108,7 +108,11 @@ class HelloassoController extends Controller
 
         if (!($campaignId = $request->get('campaign'))) {
             $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
-            $campaigns = $campaigns_json->resources;
+            if ($campaigns_json && !array_key_exists('code', $campaigns_json)) {
+                $campaigns = $campaigns_json->resources;
+            } else {
+                $campaigns = null;
+            }
             return $this->render(
                 'admin/helloasso/browser.html.twig',
                 array('campaigns' => $campaigns));
