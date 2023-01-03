@@ -283,30 +283,6 @@ class Event
     }
 
     /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Address $address
-     *
-     * @return Event
-     */
-    public function setAddress(\AppBundle\Entity\Address $address = null)
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Address
-     */
-    public function getAddress()
-    {
-        return $this->address;
-    }
-
-    /**
      * Get proxies
      *
      * @return \Doctrine\Common\Collections\Collection
@@ -413,22 +389,6 @@ class Event
             return $this->date;
         }
         return $this->max_date_of_last_registration;
-    }
-
-    /**
-     * Get minDateOfLastRegistration
-     *
-     * @return \DateTime
-     */
-    public function getMinDateOfLastRegistration()
-    {
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!is_null($registrationDuration)) {
-            $minDateOfLastRegistration = clone $this->getMaxDateOfLastRegistration();
-            $minDateOfLastRegistration->modify('-'.$registrationDuration);
-            return $minDateOfLastRegistration;
-        }
-        return null;
     }
 
     /**
