@@ -19,15 +19,18 @@
         <div class="container">
             <br><br>
             <h3 class="header center orange-text">{% if re %}Ré-a{% else %}A{% endif %}dhérer !</h3>
-            <p> Pour {% if re %}ré-{% endif %}adhérer en ligne, nous allons te rediriger vers <a href="{{ helloasso_registration_campaign_url }}" target="_blank">helloasso.com</a> <br>
-            Ce site met a disposition des associations comme la notre, gratuitement, des outils de paiement en ligne. <br>
-                Pour se financer, il propose aux usagers ( toi ) de faire un don. <br>
-                Note que ce don est <b>facultatif</b> et qu'il <b>ne revient pas à {{ project_name }}</b>. <br>
-                Pour que l'opération soit enregistrée automatiquement ici, merci d'utiliser ton adresse <b>{{ app.user.email }}</b>.
+            <p> Pour {% if re %}ré-{% endif %}adhérer en ligne, nous allons te rediriger vers <a href="{{ helloasso_registration_campaign_url }}" target="_blank">helloasso.com</a> <br><br>
+            Pour que l'opération soit enregistrée automatiquement ici, il faut <b>ABSOLUMENT</b> que tu utilises ton adresse mail enregistrée à {{ project_name }} : <b>{{ app.user.email }}</b><br>
             </p>
             <div class="center-align">
                 <a href="{{ helloasso_registration_campaign_url }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>OK, j{% if re %}e ré-{% else %}'{% endif %}adhére sur helloasso.com </a>
             </div>
+            <p>
+            Note que ce site met a disposition des associations comme la notre, gratuitement, des outils de paiement en ligne. Pour se financer, il propose aux usagers ( toi ) de faire un don. Ce don est <b>facultatif</b> et il <b>ne revient pas à {{ project_name }}</b>. Tu es libre de modifier le montant à la dernière étape ("Récapitulatif") en cliquant sur le bouton "Modifier" à la section "Votre contribution au fonctionnement de HelloAsso".
+            </p>
+            <p>
+            Si tu as la moindre question, contacte-nous en amont !
+            </p>
         </div>
     </div>
 {% endblock %}
