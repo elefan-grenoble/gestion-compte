@@ -95,7 +95,6 @@ class ClientController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $urls = $form->get('urls')->getData();
             $client->setRedirectUris(explode(',',$urls));
             $service = $form->get('service')->getData();
@@ -107,14 +106,12 @@ class ClientController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le client a bien été édité !');
-
             return $this->redirectToRoute('admin_clients');
 
-        // } elseif ($form->isSubmitted()){
-        //     foreach ($this->getErrorMessages($form) as $key => $errors){
-        //         foreach ($errors as $error)
-        //             $session->getFlashBag()->add('error', $key." : ".$error);
-        //     }
+        } elseif ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $key => $error) {
+                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+            }
         }
 
         $delete_form = $this->createFormBuilder()
