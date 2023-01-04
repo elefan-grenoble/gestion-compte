@@ -40,6 +40,11 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+      # PHPStan finds bugs in your code without writing tests
+      # https://github.com/phpstan/phpstan
+      - name: Run PHPStan code scan
+        run: vendor/bin/phpstan analyse src
+
       # Tests
       - name: Run unit and functional tests
         run: |

@@ -246,7 +246,7 @@ class Event
      */
     public function addProxy(\AppBundle\Entity\Proxy $proxy)
     {
-        $this->proxys[] = $proxy;
+        $this->proxies[] = $proxy;
 
         return $this;
     }
@@ -258,7 +258,7 @@ class Event
      */
     public function removeProxy(\AppBundle\Entity\Proxy $proxy)
     {
-        $this->proxys->removeElement($proxy);
+        $this->proxies->removeElement($proxy);
     }
 
     public function getProxiesByOwner(Beneficiary $beneficiary)
@@ -280,30 +280,6 @@ class Event
         return $this->proxies->filter(function (Proxy $proxy) use ($membership) {
             return ($proxy->getGiver() === $membership);
         });
-    }
-
-    /**
-     * Set address
-     *
-     * @param \AppBundle\Entity\Address $address
-     *
-     * @return Event
-     */
-    public function setAddress(\AppBundle\Entity\Address $address = null)
-    {
-        $this->address = $address;
-
-        return $this;
-    }
-
-    /**
-     * Get address
-     *
-     * @return \AppBundle\Entity\Address
-     */
-    public function getAddress()
-    {
-        return $this->address;
     }
 
     /**
@@ -413,22 +389,6 @@ class Event
             return $this->date;
         }
         return $this->max_date_of_last_registration;
-    }
-
-    /**
-     * Get minDateOfLastRegistration
-     *
-     * @return \DateTime
-     */
-    public function getMinDateOfLastRegistration()
-    {
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!is_null($registrationDuration)) {
-            $minDateOfLastRegistration = clone $this->getMaxDateOfLastRegistration();
-            $minDateOfLastRegistration->modify('-'.$registrationDuration);
-            return $minDateOfLastRegistration;
-        }
-        return null;
     }
 
     /**

@@ -13,6 +13,7 @@ class ToggleableHandler extends AbstractHandler
      * @var bool
      */
     private $enabled;
+
     /**
      * @var AbstractHandler
      */
@@ -36,7 +37,8 @@ class ToggleableHandler extends AbstractHandler
     public function handle(array $record)
     {
         if ($this->enabled) {
-            $this->nestedHandler->handle($record);
+            return $this->nestedHandler->handle($record);
         }
+        return false;
     }
 }

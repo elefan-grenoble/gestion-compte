@@ -95,6 +95,11 @@ class Service
     private $logoSize;
 
     /**
+     * @ORM\OneToMany(targetEntity="Client", mappedBy="service",cascade={"persist", "remove"})
+     */
+    private $clients;
+
+    /**
      * @ORM\Column(type="datetime")
      *
      * @var \DateTime
@@ -102,16 +107,10 @@ class Service
     private $updatedAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="Client", mappedBy="service",cascade={"persist", "remove"})
-     */
-    private $clients;
-
-    /**
      * Constructor
      */
     public function __construct()
     {
-        $this->users = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -227,40 +226,6 @@ class Service
     public function getUrl()
     {
         return $this->url;
-    }
-
-    /**
-     * Add user
-     *
-     * @param \AppBundle\Entity\User $user
-     *
-     * @return Service
-     */
-    public function addUser(\AppBundle\Entity\User $user)
-    {
-        $this->users[] = $user;
-
-        return $this;
-    }
-
-    /**
-     * Remove user
-     *
-     * @param \AppBundle\Entity\User $user
-     */
-    public function removeUser(\AppBundle\Entity\User $user)
-    {
-        $this->users->removeElement($user);
-    }
-
-    /**
-     * Get users
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getUsers()
-    {
-        return $this->users;
     }
 
     /**

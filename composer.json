@@ -41,10 +41,10 @@
         "vich/uploader-bundle": "^1.11"
     },
     "require-dev": {
+        "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^7.5",
         "sensio/generator-bundle": "^3.1",
         "symfony/phpunit-bridge": "^4.4"
-
     },
     "scripts": {
         "symfony-scripts": [

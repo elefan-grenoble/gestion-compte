@@ -9,6 +9,7 @@ class SwipeCardEvent extends Event
 {
     const SWIPE_CARD_SCANNED = 'swipe_card.scanned';
 
+    private $swipeCard;
     /**
      * @var integer
      */

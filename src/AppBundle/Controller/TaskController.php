@@ -60,7 +60,6 @@ class TaskController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $date = $form->get('due_date')->getData();
             $new_date = new \DateTime($date);
             $task->setDueDate($new_date);
@@ -69,11 +68,10 @@ class TaskController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle tache a bien été créée !');
-
             return $this->redirectToRoute('task_edit',array('id'=>$task->getId()));
 
-        } elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
+        } elseif ($form->isSubmitted()) {
+            foreach ($this->getErrorMessages($form) as $key => $errors) {
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);
             }
@@ -102,7 +100,6 @@ class TaskController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $date = $form->get('due_date')->getData();
             $new_date = new \DateTime($date);
             $task->setDueDate($new_date);
@@ -115,10 +112,9 @@ class TaskController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La tache a bien été éditée !');
-
             return $this->redirectToRoute('tasks_list');
 
-        } elseif ($form->isSubmitted()){
+        } elseif ($form->isSubmitted()) {
             foreach ($this->getErrorMessages($form) as $key => $errors){
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);
@@ -144,12 +140,14 @@ class TaskController extends Controller
         $session = new Session();
         $form = $this->getDeleteForm($task);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
         }
+
         return $this->redirectToRoute('tasks_list');
     }
 

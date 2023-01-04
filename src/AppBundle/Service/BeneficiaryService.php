@@ -7,16 +7,18 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Service\MembershipService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
 
 class BeneficiaryService
 {
-
     protected $em;
+    private $membershipService;
 
-    public function __construct($em, $membershipService)
+    public function __construct(EntityManagerInterface $em, MembershipService $membershipService)
     {
         $this->em = $em;
         $this->membershipService = $membershipService;

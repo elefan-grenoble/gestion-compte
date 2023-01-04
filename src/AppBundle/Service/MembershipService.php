@@ -7,6 +7,7 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
@@ -14,13 +15,12 @@ use \Datetime;
 
 class MembershipService
 {
-
     protected $em;
     protected $registration_duration;
     protected $registration_every_civil_year;
     protected $cycle_type;
 
-    public function __construct($em, $registration_duration, $registration_every_civil_year, $cycle_type)
+    public function __construct(EntityManagerInterface $em, $registration_duration, $registration_every_civil_year, $cycle_type)
     {
         $this->em = $em;
         $this->registration_duration = $registration_duration;
@@ -117,7 +117,7 @@ class MembershipService
             // Set date to monday of week A
             $date->modify('-'. (7 * $week) . ' days');
         } else {
-            $firstDate = $this->getFirstShiftDate();
+            $firstDate = $membership->getFirstShiftDate();
             if ($firstDate) {
                 $now = new DateTime('now');
                 $date = clone($firstDate);
@@ -127,7 +127,7 @@ class MembershipService
                     $currentCycleCount = intval($diff / 28);
                     $date->modify("+" . (28 * $currentCycleCount) . " days");
                 }
-            }else{
+            } else {
                 $date = new DateTime('now');
             }
         }
@@ -154,5 +154,4 @@ class MembershipService
         $date->setTime(23, 59, 59);
         return $date;
     }
-
 }

@@ -757,7 +757,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $dispatcher = $this->get('event_dispatcher');
 
             if (!$a_beneficiary) {
@@ -802,7 +801,8 @@ class MembershipController extends Controller
             }
 
             return $this->redirectToShow($member);
-        } else if ($form->isSubmitted()) {
+
+        } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
                 $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
@@ -880,7 +880,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $beneficiary = $form->get('beneficiary')->getData();
             $beneficiary->setMembership($member);
 
@@ -897,7 +896,7 @@ class MembershipController extends Controller
             $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
             return $this->redirectToRoute('fos_user_registration_check_email');
 
-        } else if ($form->isSubmitted()) {
+        } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
                 $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
