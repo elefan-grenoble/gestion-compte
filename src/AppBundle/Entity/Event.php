@@ -392,22 +392,6 @@ class Event
     }
 
     /**
-     * Get minDateOfLastRegistration
-     *
-     * @return \DateTime
-     */
-    public function getMinDateOfLastRegistration()
-    {
-        $registrationDuration = $this->getParameter('registration_duration');
-        if (!is_null($registrationDuration)) {
-            $minDateOfLastRegistration = clone $this->getMaxDateOfLastRegistration();
-            $minDateOfLastRegistration->modify('-'.$registrationDuration);
-            return $minDateOfLastRegistration;
-        }
-        return null;
-    }
-
-    /**
      * Set img
      *
      * @param string|null $img
