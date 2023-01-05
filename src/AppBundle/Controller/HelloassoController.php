@@ -2,47 +2,20 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Command\ImportUsersCommand;
-use AppBundle\Entity\AbstractRegistration;
-use AppBundle\Entity\Address;
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Commission;
 use AppBundle\Entity\HelloassoPayment;
-use AppBundle\Entity\Registration;
-use AppBundle\Entity\Formation;
-use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\RegistrationType;
-use AppBundle\Service\SearchUserFormHelper;
-use Doctrine\ORM\Query\ResultSetMappingBuilder;
-use Doctrine\ORM\QueryBuilder;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use OAuth2\OAuth2;
-use Ornicar\GravatarBundle\GravatarApi;
-use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use DateTime;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Registrations controller.
+ * Helloasso controller.
  *
  * @Route("helloasso")
  */
@@ -82,8 +55,16 @@ class HelloassoController extends Controller
         $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
 
         $campaigns = array();
-        foreach ($campaigns_json->resources as $c) {
-            $campaigns[intval($c->id)] = $c;
+        if ($campaigns_json && array_key_exists('resources', $campaigns_json)) {
+            foreach ($campaigns_json->resources as $c) {
+                $campaigns[intval($c->id)] = $c;
+            }
+        } else {
+            $campaign_ids = array_unique(array_map(fn($payment) => $payment->getCampaignId(), $payments));
+            foreach ($campaign_ids as $id) {
+                $campaigns[intval($id)] = ["url" => null, "name" => null];
+            }
+
         }
 
         return $this->render(
@@ -108,7 +89,11 @@ class HelloassoController extends Controller
 
         if (!($campaignId = $request->get('campaign'))) {
             $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
-            $campaigns = $campaigns_json->resources;
+            if ($campaigns_json && array_key_exists('resources', $campaigns_json)) {
+                $campaigns = $campaigns_json->resources;
+            } else {
+                $campaigns = null;
+            }
             return $this->render(
                 'admin/helloasso/browser.html.twig',
                 array('campaigns' => $campaigns));
@@ -212,6 +197,43 @@ class HelloassoController extends Controller
     }
 
     /**
+     * edit payment
+     *
+     * @Route("/payment/{id}/edit", name="helloasso_payment_edit", methods={"GET","POST"})
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function editPaymentAction(Request $request, HelloassoPayment $payment)
+    {
+        $session = new Session();
+
+        $form = $this->createPaymentEditForm($payment);
+        $form->handleRequest($request);
+
+        if ($payment->getRegistration()) {
+            $session->getFlashBag()->add('error', 'Désolé, cette adhésion est déjà associée à un membre valide');
+            return $this->redirectToRoute('helloasso_payments');
+        }
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $beneficiary = $form->get("subscriber")->getData();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(
+                HelloassoEvent::ORPHAN_SOLVE,
+                new HelloassoEvent($payment, $beneficiary->getUser())
+            );
+
+            $session->getFlashBag()->add('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
+            return $this->redirectToRoute('helloasso_payments');
+        }
+
+        return $this->render('admin/helloasso/payment_modal.html.twig', [
+            'payment' => $payment,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    /**
      * @param HelloassoPayment $payment
      * @return \Symfony\Component\Form\FormInterface
      */
@@ -221,6 +243,21 @@ class HelloassoController extends Controller
             ->setAction($this->generateUrl('helloasso_payment_remove', array('id' => $payment->getId())))
             ->setMethod('DELETE')
             ->getForm();
+    }
+
+    /**
+     * Creates a form to edit a payment entity.
+     *
+     * @param HelloassoPayment $payment The payment entity
+     *
+     * @return \Symfony\Component\Form\Form
+     */
+    private function createPaymentEditForm(HelloassoPayment $payment)
+    {
+        return $this->createFormBuilder()
+                    ->setAction($this->generateUrl('helloasso_payment_edit', array('id' => $payment->getId())))
+                    ->add('subscriber', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
+                    ->getForm();
     }
 
     /**

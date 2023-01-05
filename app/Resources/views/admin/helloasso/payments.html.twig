@@ -11,65 +11,110 @@
 {% block content %}
     <h4>Liste des paiements Helloasso</h4>
 
-    {% if is_granted("ROLE_FINANCE_MANAGER") %}
-        <table>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>#</th>
-                    <th>payment_id</th>
-                    <th>payment_date</th>
-                    <th>received date</th>
-                    <th>amount</th>
-                    <th>campagne</th>
-                    <th>payer_first_name</th>
-                    <th>payer_last_name</th>
-                    <th>membre</th>
-                    <th>action</th>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Ref. Helloasso</th>
+                <th>Date du paiement</th>
+                <th>Montant</th>
+                <th>Prénom</th>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Associé à</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payments %}
+                <tr class="{% if payment.registration and payment.registration.membership  %}teal{% else %}red{% endif %} lighten-5">
+                    <td>{{ payment.id }}</td>
+                    <td><span class="{% if campaigns[payment.campaignId].url != helloasso_registration_campaign_url  %}red-text{% else %}green-text{% endif %}">{{ campaigns[payment.campaignId].name }}</span><br>({{ payment.paymentId }})</td>
+                    <td title="reçu le {{ payment.createdAt | date_fr_with_time }}">{{ payment.date | date("d/m/Y")}}</td>
+                    <td>{{ payment.amount }}€</td>
+                    <td>{{ payment.payerFirstName }}</td>
+                    <td>{{ payment.payerLastName }}</td>
+                    <td>{{ payment.email }}</td>
+                    <td>
+                        {% if payment.registration and payment.registration.membership %}
+                            {{ payment.registration.membership.beneficiaries | map(b => "<a href=\'#{path('member_show',{'member_number': b.membership.memberNumber})}\'>#{b}</a>") | join('<br/>') | raw }}</td>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not payment.registration %}
+                            <a class="btn-floating waves-effect waves-light modal-trigger" href="#modal-bucket" title="Edit" data-source="{{ path("helloasso_payment_edit", {'id':payment.id}) }}">
+                                <i class="material-icons">edit</i>
+                            </a>
+                            {{ form_start(delete_forms[payment.id]) }}
+                            {{ form_widget(delete_forms[payment.id]) }}
+                            <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer">
+                                <i class="material-icons">delete</i>
+                            </button>
+                            {{ form_end(delete_forms[payment.id]) }}
+                        {% endif %}</td>
                 </tr>
-            </thead>
-            <tbody>
-                {% for payment in payments %}
-                    <tr class="{% if payment.registration and payment.registration.membership  %}teal{% else %}red{% endif %} lighten-5">
-                        <td><i class="material-icons">{% if payment.registration and payment.registration.membership  %}person_pin{% else %}help{% endif %}</i></td>
-                        <td>{{ payment.id }}</td>
-                        <td>{{ payment.paymentId }}</td>
-                        <td>{{ payment.date | date('Y-m-d H:i:s') }}</td>
-                        <td>{{ payment.createdAt | date('Y-m-d H:i:s') }}</td>
-                        <td>{{ payment.amount }}€</td>
-                        <td><span class="{% if campaigns[payment.campaignId].url != helloasso_registration_campaign_url  %}red-text{% else %}green-text{% endif %}">{{ campaigns[payment.campaignId].name }}</span></td>
-                        <td>{{ payment.payerFirstName }}</td>
-                        <td>{{ payment.payerLastName }}</td>
-                        <td>{% if payment.registration and payment.registration.membership %}<a href="{{ path('member_show', { 'member_number': payment.registration.membership.memberNumber }) }}">{{ payment.registration.membership }}</a>{% endif %}</td>
-                        <td>{% if not payment.registration %}
-                                {{ form_start(delete_forms[payment.id]) }}
-                                {{ form_widget(delete_forms[payment.id]) }}
-                                <div>
-                                    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-                                </div>
-                                {{ form_end(delete_forms[payment.id]) }}
-                            {% endif %}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <ul class="pagination">
-            <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_payments",{'page':page-1}) }}{% endif %}">
-                    <i class="material-icons">chevron_left</i>
-                </a>
-            </li>
-            {% for i in range(1,nb_of_pages) %}
-            <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_payments",{'page':i}) }}">{{ i }}</a></li>
             {% endfor %}
-            <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_payments",{'page':page+1}) }}{% endif %}">
-                    <i class="material-icons">chevron_right</i>
-                </a>
-            </li>
-        </ul>
+        </tbody>
+    </table>
 
-        <a href="{{ path("helloasso_browser") }}" class="btn">Parcourir les paiments Helloasso (API)</a>
-    {% endif %}
+    <ul class="pagination">
+        <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_payments",{'page':page-1}) }}{% endif %}">
+                <i class="material-icons">chevron_left</i>
+            </a>
+        </li>
+        {% for i in range(1,nb_of_pages) %}
+        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_payments",{'page':i}) }}">{{ i }}</a></li>
+        {% endfor %}
+        <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_payments",{'page':page+1}) }}{% endif %}">
+                <i class="material-icons">chevron_right</i>
+            </a>
+        </li>
+    </ul>
+
+    <div id="modal-bucket" class="modal">
+        <div id="modal-bucket-content" class="modal-content">
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function ajaxError (jqXHR, exception) {
+            var msg = '';
+            if (jqXHR.status === 0) {
+                msg = 'Perte de connexion à internet. Vérifier votre connexion.';
+            } else if (jqXHR.status == 404) {
+                msg = 'Oups, le paiement n\'existe plus. Quelqu\'un d\'autre l\'a supprimé entre temps ?';
+            } else if (jqXHR.status == 500) {
+                msg = 'Erreur interne, il faut mettre les informatiens sur le coup !';
+            } else if (exception === 'parsererror') {
+                msg = 'Réponse du serveur incompréhensible (JSON parse failed).';
+            } else if (exception === 'timeout') {
+                msg = 'Le serveur n\'a pas répondu dans les temps...';
+            } else if (exception === 'abort') {
+                msg = 'Ajax request aborted.';
+            } else {
+                var data = jqXHR.responseJSON;
+                msg = data.message;
+            }
+            M.toast({ text: msg, displayLength: 5000, classes: 'red' });
+        }
+
+        $(document).ready(function ($) {
+            $('#modal-bucket').modal({
+                onCloseEnd: function() {
+                    $('#modal-bucket-content').html('');
+                },
+                onOpenStart: function(modal, trigger) {
+                    var url = $(trigger).attr('data-source');
+                    $.get(url, function( data ) {
+                        $('#modal-bucket-content').html(data);
+                        $('#modal-bucket-content select').formSelect({ dropdownOptions: { container: document.body } });
+                    }).fail(ajaxError);
+                }
+            });
+        });
+    </script>
 {% endblock %}
