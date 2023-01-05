@@ -60,7 +60,7 @@ class HelloassoController extends Controller
                 $campaigns[intval($c->id)] = $c;
             }
         } else {
-            $campaign_ids = array_unique(array_map(fn($payment) => $payment->getCampaignId(), $payments));
+            $campaign_ids = array_unique(array_map(function($payment) { return $payment->getCampaignId(); }, $payments));
             foreach ($campaign_ids as $id) {
                 $campaigns[intval($id)] = ["url" => null, "name" => null];
             }
