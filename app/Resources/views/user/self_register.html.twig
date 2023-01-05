@@ -20,7 +20,7 @@
             <br><br>
             <h3 class="header center orange-text">{% if re %}Ré-a{% else %}A{% endif %}dhérer !</h3>
             <p> Pour {% if re %}ré-{% endif %}adhérer en ligne, nous allons te rediriger vers <a href="{{ helloasso_registration_campaign_url }}" target="_blank">helloasso.com</a> <br><br>
-            Pour que l'opération soit enregistrée automatiquement ici, il faut <b>ABSOLUMENT</b> que tu utilises ton adresse mail enregistrée à {{ project_name }} : <b>{{ app.user.email }}</b><br>
+            Pour que l'opération soit enregistrée automatiquement ici, il faut <b>ABSOLUMENT</b> que tu utilises ton adresse email enregistrée à {{ project_name }} : <b>{{ app.user.email }}</b><br>
             </p>
             <div class="center-align">
                 <a href="{{ helloasso_registration_campaign_url }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>OK, j{% if re %}e ré-{% else %}'{% endif %}adhére sur helloasso.com </a>
