@@ -31,45 +31,26 @@ class MembershipService
     /**
      * get remainder
      * @param Membership $membership
-     * @param \DateTime $date
      * @return \DateInterval|false
      * @throws \Exception
      */
-    public function getRemainder(Membership $membership, \DateTime $date = null)
+    public function getRemainder(Membership $membership)
     {
-        if (!$date){
-            $date = new \DateTime('now');
-        }
-        if (!$membership->getLastRegistration()){
-            $expire = new \DateTime('-1 day');
-        } else {
-            $expire = $this->getExpire($membership);
-        }
-        return date_diff($date,$expire);
+        return date_diff(new \DateTime('now'), $this->getExpire($membership));
     }
 
     /**
      * Check if registration is possible
      *
      * @param Membership $membership
-     * @param \DateTime $date
      * @return boolean
-     * @throws \Exception
      */
-    public function canRegister(Membership $membership,\DateTime $date = null)
+    public function canRegister(Membership $membership)
     {
-        $remainder = $this->getRemainder($membership,$date);
-        if ( ! $remainder->invert ){ //still some days
-            $min_delay_to_anticipate =  \DateInterval::createFromDateString('28 days');
-            $now = new \DateTimeImmutable();
-            $away = $now->add($min_delay_to_anticipate);
-            $now = new \DateTimeImmutable();
-            $expire = $now->add($remainder);
-            return ($expire < $away);
-        }
-        else {
-            return true;
-        }
+        $expire = $this->getExpire($membership);
+        $date = new \DateTime('+28 days');
+        $date->setTime(0,0);
+        return ($expire < $date);
     }
 
     /**
@@ -78,13 +59,23 @@ class MembershipService
      */
     public function getExpire($membership): ?\DateTime
     {
-        $expire = clone $membership->getLastRegistration()->getDate();
         if ($this->registration_every_civil_year) {
+            if ($membership->getLastRegistration()){
+                $expire = $membership->getLastRegistration()->getDate();
+            } else {
+                $expire = new \DateTime('-1 year');
+            }
             $expire = new \DateTime('last day of December '.$expire->format('Y'));
         } else {
-            $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
-            $expire->modify('-1 day');
+            if ($membership->getLastRegistration()){
+                $expire = clone $membership->getLastRegistration()->getDate();
+                $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+                $expire->modify('-1 day');
+            } else {
+                $expire = new \DateTime('-1 day');
+            }
         }
+        $expire->setTime(23, 59, 59);
         return $expire;
     }
 
@@ -95,7 +86,10 @@ class MembershipService
      */
     public function isUptodate(Membership $membership)
     {
-        return ($this->getRemainder($membership)->format("%R%a") >= 0);
+        $expire = $this->getExpire($membership);
+        $today = new \DateTime('now');
+        $today->setTime(0,0);
+        return ($expire > $today);
     }
 
     /**

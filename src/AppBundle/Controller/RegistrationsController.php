@@ -196,18 +196,13 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     public function editRegistrationAction(Request $request, Registration $registration)
     {
         $session = new Session();
-        if ($registration->getId() && ($request->attributes->get('id') == $registration->getId())){
-            $edit_form = $this->createForm(RegistrationType::class, $registration);
-            $edit_form->handleRequest($request);
-            if ($edit_form->isSubmitted() && $edit_form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($registration);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
-                return $this->redirectToRoute("registrations");
-            }
-        }else{
-            $session->getFlashBag()->add('error', 'l\'entrée #'.$request->attributes->get('id').' n\'a pas été trouvée');
+        $edit_form = $this->createForm(RegistrationType::class, $registration);
+        $edit_form->handleRequest($request);
+        if ($edit_form->isSubmitted() && $edit_form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($registration);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
             return $this->redirectToRoute("registrations");
         }
 
