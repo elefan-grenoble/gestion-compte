@@ -13,6 +13,7 @@ use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -381,27 +382,43 @@ class ShiftController extends Controller
     public function dismissShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
 
         if (!$this->isGranted('dismiss', $shift)) {
             $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
             return $this->redirectToRoute("booking");
         }
 
-        if($shift->isFixe()) {
-            $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
-            return $this->redirectToRoute("booking");
-        } else {
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_dismiss', ['id' => $shift->getId()]))
+            ->setMethod('POST')
+            ->add('reason', TextareaType::class)
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if($shift->isFixe()) {
+                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
+                return $this->redirectToRoute("homepage");
+            }
+            if (!$shift->getShifter()) {
+                $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
+                return $this->redirectToRoute("homepage");
+            }
             // Store beneficiary entity before removing it
             $beneficiary = $shift->getShifter();
             $shift->setShifter(null);
             $shift->setBooker(null);
             $shift->setFixe(false);
-        }
-        $em->persist($shift);
-        $em->flush();
+            $reason = $form->get("reason")->getData();
 
-        $reason = $request->get("reason");
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
+
         $dispatcher = $this->get('event_dispatcher');
         $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
 

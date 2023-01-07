@@ -41,19 +41,20 @@
                     {% endif %}
                 </div>
                 <div id="dismiss{{ shift.id }}" class="modal black-text">
-                    <form action="{{ path('shift_dismiss', { 'id': shift.id }) }}" method="POST">
+                    {{ form_start(shift_dismiss_forms[shift.id]) }}
                         <div class="modal-content">
                             <h5>Je ne peux pas faire mon créneau</h5>
                             <div class="input-field">
-                                <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
-                                <label for="reason">Justification éventuelle</label>
+                                {{ form_label(shift_dismiss_forms[shift.id].reason) }}
+                                {{ form_errors(shift_dismiss_forms[shift.id].reason) }}
+                                {{ form_widget(shift_dismiss_forms[shift.id].reason) }}
                             </div>
                         </div>
                         <div class="modal-footer">
                             <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Retour à la raison</a>
-                            <button class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
+                            <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
                         </div>
-                    </form>
+                    {{ form_end(shift_dismiss_forms[shift.id]) }}
                 </div>
             {% endif %}
         {% endif %}
