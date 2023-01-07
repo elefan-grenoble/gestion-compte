@@ -407,6 +407,7 @@ class ShiftController extends Controller
             $shift->setBooker(null);
             $shift->setFixe(false);
             $reason = $form->get("reason")->getData();
+            $shift->setReason($reason);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($shift);

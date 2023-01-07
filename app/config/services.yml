@@ -176,6 +176,18 @@ services:
                 - '@beneficiary_service'
                 - '@membership_service'
 
+    shift_subscriber:
+            class: AppBundle\EventSubscriber\ShiftSubscriber
+            public: true
+            tags:
+                - { name: doctrine.event_subscriber }
+
+    shift_free_service:
+            class:  AppBundle\Service\ShiftFreeLogger
+            public: true
+            arguments:
+                $tokenStorage: '@security.token_storage'
+
     beneficiary_service:
             class:  AppBundle\Service\BeneficiaryService
             public: true
