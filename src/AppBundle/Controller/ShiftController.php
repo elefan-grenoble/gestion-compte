@@ -144,8 +144,6 @@ class ShiftController extends Controller
         }
         $shift->setShifter($beneficiary);
         $shift->setIsDismissed(false);
-        $shift->setDismissedReason(null);
-        $shift->setDismissedTime(null);
         $shift->setLastShifter(null);
         $shift->setFixe($isFixe);
         $em->persist($shift);
@@ -197,8 +195,6 @@ class ShiftController extends Controller
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setShifter($beneficiary);
                 $shift->setIsDismissed(false);
-                $shift->setDismissedReason(null);
-                $shift->setDismissedTime(null);
                 $shift->setLastShifter(null);
                 $shift->setFixe($fixe);
 
@@ -449,8 +445,6 @@ class ShiftController extends Controller
             $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
             if ($shift) {
                 $shift->setIsDismissed(false);
-                $shift->setDismissedTime(null);
-                $shift->setDismissedReason(null);
 
                 $em->persist($shift);
                 $em->flush();

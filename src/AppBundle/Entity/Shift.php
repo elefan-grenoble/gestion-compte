@@ -51,18 +51,9 @@ class Shift
     private $isDismissed;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="dismissed_time", type="datetime", nullable=true)
-     */
-    private $dismissedTime;
-
-    /**
      * @var string
-     *
-     * @ORM\Column(name="dismissed_reason", type="string", length=255, nullable=true)
      */
-    private $dismissedReason;
+    private $reason;
 
     /**
      * @var bool
@@ -114,6 +105,11 @@ class Shift
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift")
      */
     private $timeLogs;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ShiftFreeLog", mappedBy="shift")
+     */
+    private $shiftFreeLogs;
 
     /**
      * @var bool
@@ -263,51 +259,27 @@ class Shift
     }
 
     /**
-     * Set dismissedTime
+     * Set reason
      *
-     * @param \DateTime $dismissedTime
+     * @param string $reason
      *
      * @return BookedShift
      */
-    public function setDismissedTime($dismissedTime)
+    public function setreason($reason)
     {
-        $this->dismissedTime = $dismissedTime;
+        $this->reason = $reason;
 
         return $this;
     }
 
     /**
-     * Get dismissedTime
-     *
-     * @return \DateTime
-     */
-    public function getDismissedTime()
-    {
-        return $this->dismissedTime;
-    }
-
-    /**
-     * Set dismissedReason
-     *
-     * @param string $dismissedReason
-     *
-     * @return BookedShift
-     */
-    public function setDismissedReason($dismissedReason)
-    {
-        $this->dismissedReason = $dismissedReason;
-
-        return $this;
-    }
-
-    /**
-     * Get dismissedReason
+     * Get reason
      *
      * @return string
      */
-    public function getDismissedReason()
+    public function getreason()
     {
-        return $this->dismissedReason;
+        return $this->reason;
     }
 
     /**
@@ -473,9 +445,7 @@ class Shift
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
-        $this->setDismissedReason('');
         $this->setIsDismissed(false);
-        $this->setDismissedTime(null);
         $this->setShifter(null);
         $this->setFixe(false);
         return $this;
