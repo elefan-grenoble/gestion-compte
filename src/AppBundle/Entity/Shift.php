@@ -44,13 +44,6 @@ class Shift
     private $bookedTime;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_dismissed", type="boolean", options={"default" : 0})
-     */
-    private $isDismissed;
-
-    /**
      * @var string
      */
     private $reason;
@@ -134,7 +127,6 @@ class Shift
 
     public function __construct()
     {
-        $this->isDismissed = false;
         $this->wasCarriedOut = false;
     }
 
@@ -232,30 +224,6 @@ class Shift
     public function getBookedTime()
     {
         return $this->bookedTime;
-    }
-
-    /**
-     * Set isDismissed
-     *
-     * @param boolean $isDismissed
-     *
-     * @return BookedShift
-     */
-    public function setIsDismissed($isDismissed)
-    {
-        $this->isDismissed = $isDismissed;
-
-        return $this;
-    }
-
-    /**
-     * Get isDismissed
-     *
-     * @return bool
-     */
-    public function getIsDismissed()
-    {
-        return $this->isDismissed;
     }
 
     /**
@@ -445,7 +413,6 @@ class Shift
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
-        $this->setIsDismissed(false);
         $this->setShifter(null);
         $this->setFixe(false);
         return $this;

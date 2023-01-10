@@ -61,12 +61,6 @@ class BookingController extends Controller
      */
     public function homepageShiftsAction(): Response
     {
-        $shiftUndismissForm = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_undismiss'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
         $membership = $this->getUser()->getBeneficiary()->getMembership();
         $beneficiaries = $membership->getBeneficiaries();
 
@@ -89,7 +83,6 @@ class BookingController extends Controller
         }
 
         return $this->render('booking/home_booked_shifts.html.twig', array(
-            'shift_undismiss_form' => $shiftUndismissForm->createView(),
             'shift_dismiss_forms' => $shiftDismissForms,
             'period_positions' => $period_positions,
             'shiftsByCycle' => $shifts_by_cycle,
@@ -151,12 +144,6 @@ class BookingController extends Controller
 
             $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
-            $dismissedShifts = array();
-            foreach ($shifts as $shift) {
-                if ($shift->getIsDismissed()) {
-                    $dismissedShifts[] = $shift;
-                }
-            }
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -165,7 +152,6 @@ class BookingController extends Controller
 
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
-                'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository(Job::class)->findByEnabled(true)

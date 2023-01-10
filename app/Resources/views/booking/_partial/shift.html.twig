@@ -38,9 +38,7 @@
             <div class="shift-block">
                 <div class="hide-on-med-and-down">
                 {% for shift in bucket.sortedShifts %}
-                    {% if shift.isDismissed %}
-                        {% set class = "red-text" %}
-                    {% elseif (shift.shifter) %}
+                    {% if (shift.shifter) %}
                         {% set class = "green-text" %}
                     {% elseif (shift.lastShifter) %}
                         {% set class = "green-text text-lighten-4" %}
@@ -62,9 +60,6 @@
                     </span>
                 {% endfor %}
                 </div>
-                {% if firstBookableShift and firstBookableShift.isDismissed %}
-                    <span style="position:absolute; top:0;right:50%;opacity:0.5;" class="blue-text"><i class="material-icons">star</i></span>
-                {% endif %}
             </div>
         </div>
     </a>

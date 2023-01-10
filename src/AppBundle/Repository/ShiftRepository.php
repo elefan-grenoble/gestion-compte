@@ -127,7 +127,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->join('s.shifter', "ben")
             ->where('ben.user = :user')
             ->setParameter('user', $user)
-            ->andWhere('s.isDismissed = 0')
             ->orderBy('s.start', 'ASC')
             ->setMaxResults(1);
 
@@ -151,7 +150,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->join('s.shifter', "ben")
             ->where('ben.id = :id')
             ->setParameter('id', $beneficiary->getId())
-            ->andWhere('s.isDismissed = 0')
             ->andWhere('s.end < :today')
             ->setParameter('today',$now)
             ->orderBy('s.start', 'DESC')
@@ -243,7 +241,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->andwhere('s.start = :start')
             ->andwhere('s.end = :end')
             ->andWhere('s.shifter is not null')
-            ->andWhere('s.isDismissed = false')
             ->setParameter('job', $shift->getJob())
             ->setParameter('start', $shift->getStart())
             ->setParameter('end', $shift->getEnd());
@@ -261,7 +258,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
 
         $qb
             ->where('s.shifter is not null')
-            ->andWhere('s.isDismissed = 0')
             ->andwhere(':date between s.start and s.end')
             ->setParameter('date', $now)
             ->orderBy('s.start', 'ASC');
@@ -280,7 +276,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->where('s.isDismissed = 0')
             ->andwhere('s.start > :now AND s.end < :end_of_day')
             ->setParameter('now', $now)
             ->setParameter('end_of_day', $end_of_day)
@@ -323,11 +318,10 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @param Membership $membership
      * @param Datetime $start_after
      * @param Datetime $end_before
-     * @param bool $excludeDismissed
      */
-    public function findShiftsByCycles($membership, $start_after, $end_before, $excludeDismissed = false)
+    public function findShiftsByCycles($membership, $start_after, $end_before)
     {
-        $shifts = $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before, $excludeDismissed);
+        $shifts = $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before);
         $now = new DateTime('now');
         $now->setTime(0, 0, 0);
         // Compute the cycle number corresponding to the $start_after date
@@ -360,7 +354,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     public function findInProgressAndUpcomingShiftsForMembership($membership)
     {
         $now = new \Datetime('now');
-        return $this->findShifts($membership->getBeneficiaries(), $now, null, true);
+        return $this->findShifts($membership->getBeneficiaries(), $now, null);
     }
 
     /**
@@ -368,12 +362,10 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @param Membership
      * @param Datetime $start_after
      * @param Datetime $end_before
-     * @param bool $excludeDismissed
-     * @param Datetime $start_before
      */
-    public function findShiftsForMembership(Membership $membership, $start_after, $end_before, $excludeDismissed = false)
+    public function findShiftsForMembership(Membership $membership, $start_after, $end_before)
     {
-        return $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before, $excludeDismissed);
+        return $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before);
     }
 
     /**
@@ -381,15 +373,15 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @param Beneficiary $beneficiary
      * @param Datetime $start_after
      * @param Datetime $end_before
-     * @param bool $excludeDismissed
      * @param Datetime $start_before
+     * @param Datetime $end_after
      */
-    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $excludeDismissed = false, $start_before = null, $end_after = null)
+    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $start_before = null, $end_after = null)
     {
-        return $this->findShifts([$beneficiary], $start_after, $end_before, $excludeDismissed, $start_before, $end_after);
+        return $this->findShifts([$beneficiary], $start_after, $end_before, $start_before, $end_after);
     }
 
-    private function findShifts($beneficiaries, $start_after, $end_before, $excludeDismissed = false, $start_before = null, $end_after = null)
+    private function findShifts($beneficiaries, $start_after, $end_before, $start_before = null, $end_after = null)
     {
         $qb = $this->createQueryBuilder('s')
                     ->where('s.shifter IN (:beneficiaries)')
@@ -412,10 +404,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                      ->setParameter('end_after', $end_after);
         }
 
-        if ($excludeDismissed) {
-            $qb = $qb->andWhere('s.isDismissed = :excludeDismissed')
-                     ->setParameter('excludeDismissed', !$excludeDismissed);
-        }
         $qb = $qb->orderBy("s.start", "ASC");
 
         $result = $qb

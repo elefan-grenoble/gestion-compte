@@ -115,7 +115,6 @@ services:
                 $container: "@service_container"
             tags:
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
-                - { name: kernel.event_listener, event: shift.dismissed, method: onShiftDismissed }
                 - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
                 - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
                 - { name: kernel.event_listener, event: shift.validated, method: onShiftValidated }
@@ -134,7 +133,6 @@ services:
                 - { name: kernel.event_listener, event: code.new, method: onCodeNew }
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
                 - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
-                - { name: kernel.event_listener, event: shift.dismissed, method: onShiftDismissed }
                 - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
                 - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
                 - { name: kernel.event_listener, event: member.created, method: onMemberCreated }

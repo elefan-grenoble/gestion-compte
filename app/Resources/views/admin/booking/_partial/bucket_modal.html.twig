@@ -2,7 +2,7 @@
 Template for the modal popup used to change the user register for a shift bucket in  /booking/admin
 It use the materialize modal class https://materializecss.com/modals.html
 #}
-{% set nbBookableShifts = shifts | filter ( shift => shift.isDismissed or not shift.shifter) | length %}
+{% set nbBookableShifts = shifts | filter ( shift => not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
 {% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
 {% if bucket.locked %}
@@ -24,7 +24,6 @@ It use the materialize modal class https://materializecss.com/modals.html
                             {{ shift.shifter.displayNameWithMemberNumber }}
                             {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
-                            {% if shift.isDismissed() %}<div class="red-text" style="padding-left: 5px">(en attente de reprise)</div>{% endif %}
                         </div>
                     </div>
                 </div>

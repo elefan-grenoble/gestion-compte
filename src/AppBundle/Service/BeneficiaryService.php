@@ -44,7 +44,7 @@ class BeneficiaryService
         $cycle_start = $this->membershipService->getStartOfCycle($member, $cycle);
         $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
 
-        $shifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end, true);
+        $shifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end);
 
         $counter = 0;
         foreach ($shifts as $shift) {

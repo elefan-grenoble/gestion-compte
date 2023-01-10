@@ -9,7 +9,6 @@ use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
@@ -102,16 +101,6 @@ class TimeLogEventListener
     }
 
     /**
-     * @param ShiftDismissedEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     */
-    public function onShiftDismissed(ShiftDismissedEvent $event)
-    {
-        $this->logger->info("Time Log Listener: onShiftDismissed");
-        $this->deleteShiftLogs($event->getShift(), $event->getBeneficiary()->getMembership());
-    }
-
-    /**
      * @param MemberCycleEndEvent $event
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -148,7 +137,7 @@ class TimeLogEventListener
         if (!$member->getFrozen()) {
             $current_cycle_start = $this->container->get('membership_service')->getStartOfCycle($member, 0);
             $current_cycle_end = $this->container->get('membership_service')->getEndOfCycle($member, 0);
-            $currentCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end, true);
+            $currentCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
             $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date, $currentCycleShifts));
         }
     }

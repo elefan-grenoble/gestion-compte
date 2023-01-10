@@ -15,7 +15,6 @@ class ShiftVoter extends Voter
 {
     const BOOK = 'book';
     const FREE = 'free';
-    const DISMISS = 'dismiss';
     const REJECT = 'reject';
     const ACCEPT = 'accept';
     const LOCK = 'lock';
@@ -38,7 +37,7 @@ class ShiftVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::BOOK, self::DISMISS, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE))) {
+        if (!in_array($attribute, array(self::BOOK, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE))) {
             return false;
         }
 
@@ -83,11 +82,6 @@ class ShiftVoter extends Voter
                     return true;
                 }
                 return false;
-            case self::DISMISS:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
-                    return true;
-                }
-                return $this->canDismiss($shift, $user);
             case self::REJECT:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
@@ -106,23 +100,6 @@ class ShiftVoter extends Voter
         }
 
         throw new \LogicException('This code should not be reached!');
-    }
-
-    private function canDismiss(Shift $shift, User $user)
-    {
-        if ($shift->getIsDismissed()) {
-            return false;
-        }
-        if (!$shift->getShifter()) {
-            return false;
-        }
-        if ($shift->getIsPast()) {
-            return false;
-        }
-        if ($user->getBeneficiary() === $shift->getShifter()) {
-            return true;
-        }
-        return false;
     }
 
     private function canReject(Shift $shift, User $user = null)

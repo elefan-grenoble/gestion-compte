@@ -9,7 +9,6 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
@@ -143,7 +142,6 @@ class ShiftController extends Controller
             $shift->setBookedTime(new DateTime('now'));
         }
         $shift->setShifter($beneficiary);
-        $shift->setIsDismissed(false);
         $shift->setLastShifter(null);
         $shift->setFixe($isFixe);
         $em->persist($shift);
@@ -180,7 +178,7 @@ class ShiftController extends Controller
             $fixe = $form->get("fixe")->getData();
             $beneficiary = $form->get("shifter")->getData();
 
-            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+            if ($shift->getShifter()) {
                 $message = "Désolé, ce créneau est déjà réservé";
                 $success = false;
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
@@ -194,7 +192,6 @@ class ShiftController extends Controller
                 $shift->setBooker($current_user);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setShifter($beneficiary);
-                $shift->setIsDismissed(false);
                 $shift->setLastShifter(null);
                 $shift->setFixe($fixe);
 
@@ -416,47 +413,8 @@ class ShiftController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
 
         $session->getFlashBag()->add('success', "Le créneau a été annulé");
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Undismiss a shift
-     *
-     * @Route("/undismiss", name="shift_undismiss", methods={"POST"})
-     */
-    public function undismissShiftAction(Request $request)
-    {
-        $session = new Session();
-
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_undismiss'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shift->setIsDismissed(false);
-
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-            } else {
-                $session->getFlashBag()->add('warning', "Créneau pas trouvé");
-            }
-        }
-
         return $this->redirectToRoute('homepage');
     }
 

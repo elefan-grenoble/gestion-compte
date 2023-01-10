@@ -38,9 +38,6 @@
                     </div>
                 </div>
             {% endif %}
-            {% if firstBookable.isDismissed %}
-                <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
-            {% endif %}
         {% endif %}
 
         {% if beneficiary.membership.beneficiaries | length < 1 %}
@@ -51,7 +48,7 @@
                     <p>Places déjà occupées : </p>
                     {% for shift in bucket.sortedShifts() %}
                         <div>
-                            {% if shift.shifter and not shift.isDismissed() %}
+                            {% if shift.shifter %}
                                 <i style="color: #5f5a5a; font-weight: 400;">
                                     {{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname|first|upper }}.
                                     {% if shift.formation %}
