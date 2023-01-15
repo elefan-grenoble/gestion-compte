@@ -8,11 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
  * Code
  *
  * @ORM\Table(name="code")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\CodeRepository")
  */
 class Code
 {
-
     /**
      * @var int
      *
@@ -30,13 +30,6 @@ class Code
     private $value;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
      * @var bool
      *
      * @ORM\Column(name="closed", type="boolean", nullable=false, options={"default" : 0})
@@ -49,6 +42,27 @@ class Code
      */
     private $registrar;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
+    }
 
     /**
      * Get id
@@ -106,16 +120,6 @@ class Code
     public function getCreatedAt()
     {
         return $this->createdAt;
-    }
-
-
-
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
     }
 
     /**

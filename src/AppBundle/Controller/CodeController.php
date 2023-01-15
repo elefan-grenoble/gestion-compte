@@ -97,9 +97,7 @@ class CodeController extends Controller
             $value = $codeform->get('code')->getData();
             $code = new Code();
             $code->setValue($value);
-
             $code->setClosed(false);
-            $code->setCreatedAt(new \DateTime('now'));
             $code->setRegistrar($this->getUser());
 
             $em->persist($code);
@@ -178,9 +176,7 @@ class CodeController extends Controller
         $value = rand(0,9999); // code aléatoire à 4 chiffres
         $code = new Code();
         $code->setValue($value);
-
         $code->setClosed(false);
-        $code->setCreatedAt(new \DateTime('now'));
         $code->setRegistrar($current_app_user);
 
         $em->persist($code);
