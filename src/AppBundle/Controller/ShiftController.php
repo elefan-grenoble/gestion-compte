@@ -258,17 +258,26 @@ class ShiftController extends Controller
                 $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
             } else {
                 $membership = $shift->getShifter()->getMembership();
-                $em = $this->getDoctrine()->getManager();
+                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+
+                // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+                if ($wasCarriedOut) {
+                    $shift->invalidateShiftParticipation();
+                }
                 $shift->free();
-                $shift->invalidateShiftParticipation();
+
+                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
                 $dispatcher = $this->get('event_dispatcher');
+                if ($wasCarriedOut) {
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
+                }
                 $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
 
                 $success = true;
-                $message = "Le créneau a bien été libéré";
+                $message = "Le créneau a bien été libéré !";
             }
         } else {
             $success = false;
@@ -335,7 +344,7 @@ class ShiftController extends Controller
                     $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
                 }
 
-                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée");
+                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
                 $success = true;
             }
         } else {

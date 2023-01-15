@@ -271,7 +271,8 @@ class Shift
      */
     public function validateShiftParticipation()
     {
-        $this->wasCarriedOut = 1;
+        $this->setWasCarriedOut(true);
+
         return $this;
     }
 
@@ -282,7 +283,8 @@ class Shift
      */
     public function invalidateShiftParticipation()
     {
-        $this->wasCarriedOut = 0;
+        $this->setWasCarriedOut(false);
+
         return $this;
     }
 
