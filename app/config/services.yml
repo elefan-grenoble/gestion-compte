@@ -84,14 +84,14 @@ services:
 
     # listeners
     oauth_event_listener:
-            class:  AppBundle\EventListener\OAuthEventListener
+            class: AppBundle\EventListener\OAuthEventListener
             arguments:
                 $entityManager: "@doctrine.orm.entity_manager"
             tags:
                 - { name: kernel.event_listener, event: fos_oauth_server.pre_authorization_process, method: onPreAuthorizationProcess }
                 - { name: kernel.event_listener, event: fos_oauth_server.post_authorization_process, method: onPostAuthorizationProcess }
     helloasso_event_listener:
-            class:  AppBundle\EventListener\HelloassoEventListener
+            class: AppBundle\EventListener\HelloassoEventListener
             arguments:
                 $mailer: "@mailer"
                 $entityManager: "@doctrine.orm.entity_manager"
@@ -101,7 +101,7 @@ services:
                 - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
                 - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }
     commission_leave_or_join_listener:
-            class:  AppBundle\EventListener\CommissionEventListener
+            class: AppBundle\EventListener\CommissionEventListener
             arguments:
                 $entityManager: "@doctrine.orm.entity_manager"
                 $logger: "@logger"
@@ -110,7 +110,7 @@ services:
                 - { name: kernel.event_listener, event: commission.join, method: onJoin }
                 - { name: kernel.event_listener, event: commission.leave, method: onLeave }
     time_log_event_listener:
-            class:  AppBundle\EventListener\TimeLogEventListener
+            class: AppBundle\EventListener\TimeLogEventListener
             arguments:
                 $entityManager: "@doctrine.orm.entity_manager"
                 $logger: "@logger"
@@ -123,7 +123,7 @@ services:
                 - { name: kernel.event_listener, event: shift.invalidated, method: onShiftInvalidated }
                 - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
     emailing_event_listener:
-            class:  AppBundle\EventListener\EmailingEventListener
+            class: AppBundle\EventListener\EmailingEventListener
             arguments:
                 $mailer: "@mailer"
                 $logger: "@logger"
@@ -174,24 +174,28 @@ services:
             public: true
             arguments:
                 - "@doctrine.orm.entity_manager"
+                - '@beneficiary_service'
+                - '@membership_service'
                 - "%due_duration_by_cycle%"
                 - "%min_shift_duration%"
                 - "%new_users_start_as_beginner%"
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
-                - '@beneficiary_service'
-                - '@membership_service'
     shift_free_service:
-            class:  AppBundle\Service\ShiftFreeLogger
+            class: AppBundle\Service\ShiftFreeLogger
             public: true
             arguments:
                 $tokenStorage: '@security.token_storage'
+
     time_log_service:
         class: AppBundle\Service\TimeLogService
         public: true
         arguments:
             - "@doctrine.orm.entity_manager"
+            - '@membership_service'
+            - "%due_duration_by_cycle%"
+
     beneficiary_service:
             class: AppBundle\Service\BeneficiaryService
             public: true

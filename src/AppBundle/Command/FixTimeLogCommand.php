@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/FixTimeLogCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Membership;
@@ -38,7 +38,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
                     });
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $log = $this->container->get('time_log_service')->initShiftLog($shift);
+                        $log = $this->getContainer()->get('time_log_service')->initShiftLog($shift);
                         $log->setDescription("Créneau réalisé");
                         $em->persist($log);
                         $countShiftLogs++;
@@ -50,5 +50,4 @@ class FixTimeLogCommand extends ContainerAwareCommand
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
     }
-
 }
