@@ -34,14 +34,15 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $members = $em->getRepository('AppBundle:Membership')->findAll();
         $beginningOfLastCycle = new \DateTime('28 days ago');
         $beginningOfLastCycle->setTime(0, 0, 0);
+
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
-
                 $previous_cycle_start = $this->getContainer()->get('membership_service')->getStartOfCycle($member, -1);
                 $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
                 $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
                 foreach ($shifts as $shift) {
-                    $this->createShiftLog($em, $shift, $member);
+                    $log = $this->container->get('time_log_service')->initShiftLog($shift);
+                    $em->persist($log);
                     $countShiftLogs++;
                 }
 
@@ -51,26 +52,10 @@ class InitTimeLogCommand extends ContainerAwareCommand
                 }
             }
         }
+
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
         $output->writeln($countCycleBeginning . ' logs de début de cycle créés');
-    }
-
-    /**
-     * @param EntityManager $em
-     * @param Shift $shift
-     * @param Membership $membership
-     * @throws \Doctrine\ORM\ORMException
-     */
-    private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
-    {
-        $log = new TimeLog();
-        $log->setMembership($membership);
-        $log->setTime($shift->getDuration());
-        $log->setShift($shift);
-        $log->setCreatedAt($shift->getStart());
-        $log->setType(TimeLog::TYPE_SHIFT);
-        $em->persist($log);
     }
 
     /**

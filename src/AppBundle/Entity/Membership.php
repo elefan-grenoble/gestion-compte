@@ -109,7 +109,7 @@ class Membership
     private $firstShiftDate;
 
     /**
-     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership", cascade={"persist", "remove"})
      * @OrderBy({"createdAt" = "DESC"})
      */
     private $timeLogs;
@@ -122,7 +122,7 @@ class Membership
     private $createdAt;
 
     /**
-     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership", cascade={"persist", "remove"})
      * @OrderBy({"createdAt" = "DESC"})
      */
     private $membershipShiftExemptions;

@@ -591,10 +591,11 @@ class ShiftController extends Controller
      */
     private function createDeleteForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-                                         ->setMethod('DELETE')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setMethod('DELETE');
+
+        return $form->getForm();
     }
 
     /**
@@ -606,10 +607,11 @@ class ShiftController extends Controller
      */
     private function createFreeForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
-                                         ->setMethod('POST')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->setMethod('POST');
+
+        return $form->getForm();
     }
 
     /**
@@ -621,12 +623,13 @@ class ShiftController extends Controller
      */
     private function createValidateInvalidateShiftForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
-                                         ->add('validate', HiddenType::class, [
-                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
-                                         ])
-                                         ->setMethod('POST')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+            ->add('validate', HiddenType::class, [
+                'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
+            ])
+            ->setMethod('POST');
+
+        return $form->getForm();
     }
 }

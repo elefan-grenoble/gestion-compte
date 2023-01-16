@@ -16,7 +16,6 @@ use Symfony\Component\DependencyInjection\Container;
 
 class ShiftService
 {
-
     protected $em;
     protected $due_duration_by_cycle;
     protected $min_shift_duration;
