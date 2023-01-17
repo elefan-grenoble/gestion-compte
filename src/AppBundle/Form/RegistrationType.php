@@ -14,6 +14,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class RegistrationType extends AbstractType
 {
@@ -43,15 +44,10 @@ class RegistrationType extends AbstractType
             $registration = $event->getData();
 
             $form->add('date', DateType::class,array(
-                'label' => [
-                    'dat' => 'Jour',
-                    'year' => 'Année',
-                    'month' => 'Mois',
-                ],'placeholder' => [
-                    'year' => 'Année',
-                    'month' => 'Mois',
-                ],
-                'years' => range(2016, date('Y')),'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))),
+                'label' => 'Date',
+                'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))),
+                'html5' => false,
+                'widget' => 'single_text',
                 'attr' => [
                     'class' => 'datepicker'
                 ]
@@ -60,50 +56,35 @@ class RegistrationType extends AbstractType
             if (!is_object($user)||!$user->hasRole('ROLE_SUPER_ADMIN')){
                 if ($registration){
                     if (!$registration->getAmount()){
-                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
+                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),
+                            'constraints' => [ new GreaterThan(0) ]));
                     }else{
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('disabled'=>'true')));
                     }
-                    if (!$registration->getRegistrar()){
-                        $form->add('registrar',EntityType::class,array(
-                            'label' => 'Enregistré par',
-                            'class' => 'AppBundle:User',
-                            'query_builder' => function (EntityRepository $er) {
-                                return $er->createQueryBuilder('u,b')
-                                    ->leftJoin('u.beneficiary', 'b')
-                                    ->orderBy('u.username', 'ASC');
-                            },
-                            'choice_label' => 'username',
-                        ));
-                    }else{
-                        $form->add('registrar',EntityType::class,array(
-                            'label' => 'Enregistré par',
-                            'class' => 'AppBundle:User',
-                            'query_builder' => function (EntityRepository $er) use ($registration) {
-                                return $er->createQueryBuilder('u')
-                                    ->where(':uid = u.id')
-                                    ->setParameter('uid', $registration->getRegistrar()->getId())
-                                    ->orderBy('u.username', 'ASC');
-                            },
-                            'choice_label' => 'username',
-                            'attr'=>array('disabled' => true)
-                        ));
-                    }
-                    if (!$registration->getMode()) {
-                        $form->add('mode', ChoiceType::class, array('choices' => array(
+                    $form->add('registrar', EntityType::class, array(
+                        'label' => 'Enregistré par',
+                        'class' => 'AppBundle:User',
+                        'query_builder' => function (EntityRepository $er) {
+                            return $er->createQueryBuilder('u')
+                                ->orderBy('u.username', 'ASC');
+                        },
+                        'choice_label' => 'username',
+                        'attr' => array(
+                            'disabled' => !is_null($registration->getRegistrar())
+                        )
+                    ));
+                    $form->add('mode', ChoiceType::class, array(
+                        'choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
                             $this->localCurrency => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
-                        ), 'label' => 'Mode de réglement')); //todo, make it dynamic
-                    }else{
-                        $form->add('mode', ChoiceType::class, array('choices' => array(
-                            'Espèce' => Registration::TYPE_CASH,
-                            'Chèque' => Registration::TYPE_CHECK,
-                             $this->localCurrency => Registration::TYPE_LOCAL,
-                            'HelloAsso' => Registration::TYPE_HELLOASSO,
-                        ), 'label' => 'Mode de réglement','attr'=>array('disabled' => true))); //todo, make it dynamic
-                    }
+                        ),
+                        'label' => 'Mode de réglement',
+                        'attr' => array(
+                            'disabled' => !is_null($registration->getMode())
+                        )
+                    )); //todo, make it dynamic
                 }
             }else{
                 $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
@@ -112,12 +93,9 @@ class RegistrationType extends AbstractType
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
-                            ->select('u,b')
-                            ->leftJoin('u.beneficiary', 'b')
                             ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',
-                    'data' => $registration->getRegistrar()
                 ));
                 $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,

@@ -114,7 +114,9 @@ class MembershipController extends Controller
         $newReg = new Registration();
         $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get('membership_service')->getExpire($member));
+            $expire = $this->get('membership_service')->getExpire($member);
+            $expire->modify('+1 day');
+            $newReg->setDate($expire);
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
@@ -221,7 +223,9 @@ class MembershipController extends Controller
         $newReg = new Registration();
         $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get('membership_service')->getExpire($member));
+            $expire = $this->get('membership_service')->getExpire($member);
+            $expire->modify('+1 day');
+            $newReg->setDate($expire);
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
@@ -243,7 +247,7 @@ class MembershipController extends Controller
             $newReg->setRegistrar($this->getCurrentAppUser());
 
             $date = $registrationForm->get('date')->getData();
-            if (!$this->get('membership_service')->canRegister($member,$date)) {
+            if ($this->get('membership_service')->getExpire($member) >= $date) {
                 $session->getFlashBag()->add('warning', 'l\'adhésion précédente est encore valable à cette date !');
                 return $this->redirectToShow($member);
             }
@@ -256,12 +260,6 @@ class MembershipController extends Controller
 
             $session->getFlashBag()->add('success', 'Enregistrement effectuée');
             return $this->redirectToShow($member);
-        }
-
-        $registrationForms = array();
-        foreach ($member->getRegistrations() as $registration) {
-            $form = $this->createForm(RegistrationType::class, $registration);
-            $registrationForms[$registration->getId()] = $form->createView();
         }
 
         $id = $request->request->get("registration_id");
