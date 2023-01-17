@@ -2,7 +2,6 @@
 
 namespace AppBundle\Controller;
 
-
 use AppBundle\Entity\Code;
 use AppBundle\Event\CodeNewEvent;
 use AppBundle\Security\CodeVoter;
@@ -95,18 +94,15 @@ class CodeController extends Controller
         $codeform->handleRequest($request);
 
         if ($codeform->isSubmitted() && $codeform->isValid()) {
-
             $value = $codeform->get('code')->getData();
             $code = new Code();
             $code->setValue($value);
-
             $code->setClosed(false);
-            $code->setCreatedAt(new \DateTime('now'));
             $code->setRegistrar($this->getUser());
 
             $em->persist($code);
 
-            if ($codeform->get('close_old_codes')->getData()){
+            if ($codeform->get('close_old_codes')->getData()) {
                 //close old codes
                 $open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0));
                 foreach ($open_codes as $open_code) {
@@ -127,13 +123,14 @@ class CodeController extends Controller
             'form' => $codeform->createView()
         ));
     }
+
     /**
-     * add new code.
+     * generate new code.
      *
      * @Route("/generate", name="code_generate", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function generateAction(Request $request){
+    public function generateAction(Request $request) {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -160,29 +157,26 @@ class CodeController extends Controller
                     'code' => $my_open_codes[0],
                     'old_codes' => $old_codes,
                 ));
-            }else{
+            } else {
                 return $this->render('default/code/generate.html.twig', array(
                     'display' =>  true,
                     'code' => $my_open_codes[0],
                     'old_codes' => $my_open_codes,
                 ));
             }
-
         }
 
-        //no code open for this user
+        // no code open for this user
 
-        if ($request->get('generate') === null){ //first visit
+        if ($request->get('generate') === null){ // first visit
             $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
             return $this->render('default/code/generate.html.twig');
         }
 
-        $value = rand(0,9999);//code aléatoire à 4 chiffres
+        $value = rand(0,9999); // code aléatoire à 4 chiffres
         $code = new Code();
         $code->setValue($value);
-
         $code->setClosed(false);
-        $code->setCreatedAt(new \DateTime('now'));
         $code->setRegistrar($current_app_user);
 
         $em->persist($code);
@@ -200,15 +194,15 @@ class CodeController extends Controller
             'code' => $code,
             'old_codes' => $old_codes,
         ));
-
     }
 
     /**
+     * toggle code 
      *
-     * @Route("/toggle/{id}", name="code_toggle",methods={"GET","POST"})
+     * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function toggleAction(Request $request,Code $code){
+    public function toggleAction(Request $request, Code $code) {
         $session = new Session();
 
         if ($code->getClosed())
@@ -288,7 +282,7 @@ class CodeController extends Controller
 
 
     /**
-     * code delete
+     * delete code
      *
      * @Route("/{id}", name="code_delete", methods={"DELETE"})
      */
@@ -311,7 +305,7 @@ class CodeController extends Controller
      * @param Code $code
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Code $code){
+    protected function getDeleteForm(Code $code) {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('code_delete', array('id' => $code->getId())))
             ->setMethod('DELETE')
