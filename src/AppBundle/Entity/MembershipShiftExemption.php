@@ -255,13 +255,16 @@ class MembershipShiftExemption
     }
 
     /**
-     * Return if the membershipShiftExemption is valid for a given date
+     * Return if the membershipShiftExemption is current (ongoing) for a given date
      *
      * @param \DateTime $date
      * @return \DateTime
      */
-    public function isValid(\Datetime $date)
+    public function isCurrent(\Datetime $date = null)
     {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
         return ($date >= $this->start) && ($date <= $this->end);
     }
 }

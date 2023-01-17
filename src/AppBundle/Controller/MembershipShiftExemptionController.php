@@ -168,7 +168,7 @@ class MembershipShiftExemptionController extends Controller
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
         return $shifts->exists(function($key, $value) use ($membershipShiftExemption) {
-            return $membershipShiftExemption->isValid($value->getStart());
+            return $membershipShiftExemption->isCurrent($value->getStart());
         });
     }
 }

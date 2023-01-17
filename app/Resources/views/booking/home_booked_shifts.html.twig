@@ -2,13 +2,13 @@
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
 
-    {% if member.isExemptedFromShifts() %}
-        {% set firstValidMembershipShiftExemption = member.getValidMembershipShiftExemptions().first %}
+    {% if member.isCurrentlyExemptedFromShifts() %}
+        {% set firstCurrentMembershipShiftExemption = member.getCurrentMembershipShiftExemptions().first %}
         <div class="card-panel teal white-text">
             <i class="material-icons small left">beach_access</i>
             <strong>{% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
             <br />
-            ({{ firstValidMembershipShiftExemption.shiftExemption }}) jusqu'au {{ firstValidMembershipShiftExemption.end | date_fr_full }}
+            ({{ firstCurrentMembershipShiftExemption.shiftExemption }}) jusqu'au {{ firstCurrentMembershipShiftExemption.end | date_fr_full }}
         </div>
     {% endif %}
 

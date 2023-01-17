@@ -184,7 +184,7 @@ class ShiftController extends Controller
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")";
                 $success = false;
-            } elseif ($beneficiary->getMembership()->isExemptedFromShifts($shift->getStart())) {
+            } elseif ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts($shift->getStart())) {
                 $message = "Désolé, ce bénévole est exempté de créneau sur cette période";
                 $success = false;
             } else {

@@ -122,7 +122,7 @@
         </thead>
         <tbody>
         {% for member in members %}
-            <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isExemptedFromShifts() %}exempted{% endif %}">
+            <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
                 <td class="hide-on-med-and-down">
                     {% if member.withdrawn %}
                         <i class="material-icons" title="Compte fermé">block</i>
@@ -130,7 +130,7 @@
                     {% if member.frozen %}
                         <i class="material-icons" title="Compte gelé">ac_unit</i>
                     {% endif %}
-                    {% if member.isExemptedFromShifts() %}
+                    {% if member.isCurrentlyExemptedFromShifts() %}
                         <i class="material-icons" title="Compte exempté">beach_access</i>
                     {% endif %}
                     {% if not member.mainBeneficiary.user.isEnabled %}

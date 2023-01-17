@@ -271,8 +271,8 @@ class TimeLog
             case self::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS:
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_CYCLE_END_EXEMPTED:
-                return "Début de cycle (compte exempté de créneau - exemption n°" . join(",", $this->membership->getMembershipShiftExemptions()->filter(function($element) {
-                    return $element->isValid($this->createdAt);
+                return "Début de cycle (compte exempté de créneau - exemption n°" . join(",", $this->membership->getMembershipShiftExemptions()->filter(function($membershipShiftExemption) {
+                    return $membershipShiftExemption->isCurrent($this->createdAt);
                 })->map(function($element) {
                     return $element->getId();
                 })->toArray()) . ")";
