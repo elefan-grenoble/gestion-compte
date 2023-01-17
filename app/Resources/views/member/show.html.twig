@@ -20,7 +20,7 @@
         {% if member.mainBeneficiary and not member.mainBeneficiary.user.isEnabled %}
             <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
         {% endif %}
-        {% if member.isExemptedFromShifts() %}<i class="material-icons" title="Compte exempté">beach_access</i>{% endif %}
+        {% if member.isCurrentlyExemptedFromShifts() %}<i class="material-icons" title="Compte exempté">beach_access</i>{% endif %}
         {% if member.frozen %}<i class="material-icons" title="Compte gelé">ac_unit</i>{% endif %}
         {% if member.withdrawn %}<i class="material-icons" title="Compte fermé">block</i>{% endif %}
     </h4>
@@ -421,7 +421,7 @@
         body {
             background-color: {{ member_frozen_background_color }};
         }
-        {% elseif member.isExemptedFromShifts() %}
+        {% elseif member.isCurrentlyExemptedFromShifts() %}
         body {
             background-color: {{ member_exempted_background_color }};
         }

@@ -692,13 +692,13 @@ class Membership
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getValidMembershipShiftExemptions(\DateTime $date = null)
+    public function getCurrentMembershipShiftExemptions(\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
         return $this->membershipShiftExemptions->filter(function($membershipShiftExemption) use ($date) {
-            return $membershipShiftExemption->isValid($date);
+            return $membershipShiftExemption->isCurrent($date);
         });
     }
 
@@ -708,13 +708,13 @@ class Membership
      * @param \DateTime $date
      * @return boolean
      */
-    public function isExemptedFromShifts(\DateTime $date = null)
+    public function isCurrentlyExemptedFromShifts(\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
-        return $this->membershipShiftExemptions->exists(function($key, $value) use ($date) {
-            return $value->isValid($date);
+        return $this->membershipShiftExemptions->exists(function($key, $membershipShiftExemption) use ($date) {
+            return $membershipShiftExemption->isCurrent($date);
         });
     }
 

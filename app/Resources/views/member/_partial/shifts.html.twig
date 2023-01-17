@@ -1,13 +1,15 @@
 {% set firstShiftDate = member.firstShiftDate %}
 
-{% if member.isExemptedFromShifts() %}
+{% if member.isCurrentlyExemptedFromShifts() %}
     <div class="row">
-        {% set firstValidMembershipShiftExemption = member.getValidMembershipShiftExemptions().first %}
         <div class="card-panel teal white-text">
-            <i class="material-icons small left">beach_access</i>
+            <i class="material-icons left">beach_access</i>
             <strong>Compte exempté de créneau !</strong>
-            <br />
-            ({{ firstValidMembershipShiftExemption.shiftExemption }}) jusqu'au {{ firstValidMembershipShiftExemption.end | date_fr_full }}
+            <ul class="list-unstyled">
+                {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
+                    <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 {% endif %}

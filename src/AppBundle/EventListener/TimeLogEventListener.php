@@ -121,7 +121,7 @@ class TimeLogEventListener
             $this->createRegistrationExpiredLog($member);
         } else if ($member->getFrozen()) {
             $this->createFrozenLog($member);
-        } else if ($member->isExemptedFromShifts($date)) {
+        } else if ($member->isCurrentlyExemptedFromShifts($date)) {
             $this->createExemptedLog($member);
         } else {
             $this->createCycleBeginningLog($member, $date);
