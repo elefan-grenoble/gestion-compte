@@ -109,7 +109,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                     {{ form_end(shift_book_forms[shift.id]) }}
                     {% if not shift.lastShifter %}
                         {{ form_start(shift_delete_forms[shift.id]) }}
-                        <button type="submit" title="Supprimer le poste" class="btn red">
+                        <button type="submit" title="Supprimer le poste" class="btn red" {% if nbShifts == 1 %}disabled{% endif %}>
                             <i class="material-icons left">delete</i>Supprimer
                         </button>
                         {{ form_end(shift_delete_forms[shift.id]) }}
