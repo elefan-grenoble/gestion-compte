@@ -14,6 +14,7 @@
     <table class="responsive-table">
         <thead>
             <tr>
+                <th>Etat</th>
                 <th>Membre</th>
                 <th>Raison</th>
                 <th>Description</th>
@@ -27,7 +28,18 @@
 
         <tbody>
         {% for membershipShiftExemption in membershipShiftExemptions %}
-            <tr>
+            <tr class="{% if membershipShiftExemption.isPast() %}grey lighten-2{% elseif membershipShiftExemption.isCurrent() %}exempted{% endif %}">
+                <td>
+                    {% if membershipShiftExemption.isPast() %}
+                        <i class="material-icons" title="Passé">close</i>
+                    {% endif %}
+                    {% if membershipShiftExemption.isCurrent() %}
+                        <i class="material-icons" title="En cours">beach_access</i>
+                    {% endif %}
+                    {% if membershipShiftExemption.isUpcoming() %}
+                        <i class="material-icons" title="À venir">schedule</i>
+                    {% endif %}
+                </td>
                 <td>{{ membershipShiftExemption.membership.beneficiaries | map(b => "<a href=\'#{path('member_show',{'member_number': b.membership.memberNumber})}\'>#{b}</a>") | join('<br/>') | raw }}</td>
                 <td>{{ membershipShiftExemption.shiftExemption }}</td>
                 <td>{{ membershipShiftExemption.description }}</td>
