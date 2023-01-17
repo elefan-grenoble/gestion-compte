@@ -255,16 +255,44 @@ class MembershipShiftExemption
     }
 
     /**
+     * Return if the membershipShiftExemption is past for a given date
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function isPast(\Datetime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $date > $this->end;
+    }
+
+    /**
+     * Return if the membershipShiftExemption is upcoming for a given date
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function isUpcoming(\Datetime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $date < $this->start;
+    }
+
+    /**
      * Return if the membershipShiftExemption is current (ongoing) for a given date
      *
      * @param \DateTime $date
-     * @return \DateTime
+     * @return boolean
      */
     public function isCurrent(\Datetime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
-        return ($date >= $this->start) && ($date <= $this->end);
+        return !$this->isPast($date) && !$this->isUpcoming($date);
     }
 }
