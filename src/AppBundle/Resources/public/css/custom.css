@@ -478,3 +478,8 @@ strong {
 .hover-toggle-text-icon a:hover span {
   display: none;
 }
+ul.list-unstyled {
+  list-style: none;
+	margin-left: 0;
+	padding-left: 0;
+}
