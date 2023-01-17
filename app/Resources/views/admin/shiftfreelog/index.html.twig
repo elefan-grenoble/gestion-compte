@@ -1,0 +1,76 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Historique des annulations de créneaux - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Historique des annulations de créneaux
+{% endblock %}
+
+{% block content %}
+    <h4>Historique des annulations de créneaux</h4>
+
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Auteur</th>
+                <th>Créneau</th>
+                <th>Bénéficiaire</th>
+                {% if is_granted("ROLE_ADMIN") %}
+                <th>Route</th>
+                {% endif %}
+                <th>Raison</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for shiftFreeLog in shiftFreeLogs %}
+            <tr>
+                <td>
+                    {{ shiftFreeLog.createdAt|date('d/m/Y H:i:s') }}
+                </td>
+                <td>
+                    {% if shiftFreeLog.createdBy and shiftFreeLog.createdBy.beneficiary %}
+                        <a href="{{ path("member_show",{'member_number': shiftFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
+                            {{ shiftFreeLog.createdBy.beneficiary }}
+                        </a>
+                    {% else %}
+                        {{ shiftFreeLog.createdBy }}
+                    {% endif %}
+                </td>
+                <td>
+                    {{ shiftFreeLog.shift.job }} - {{ shiftFreeLog.shift.start | date('d/m/Y \\d\\e H:i')}} à {{ shiftFreeLog.shift.end | date('H:i')}}
+                </td>
+                <td>
+                    <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">
+                        {{ shiftFreeLog.beneficiary }}
+                    </a>
+                </td>
+                {% if is_granted("ROLE_ADMIN") %}
+                <td>{{ shiftFreeLog.requestRoute }}</td>
+                {% endif %}
+                <td>{{ shiftFreeLog.reason }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul class="pagination">
+        <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_shiftfreelog_index",{'page':current_page-1}) }}{% endif %}">
+                <i class="material-icons">chevron_left</i>
+            </a>
+        </li>
+        {% for i in range(1,pages_count) %}
+        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("admin_shiftfreelog_index",{'page':i}) }}">{{ i }}</a></li>
+        {% endfor %}
+        <li class="{% if(current_page==pages_count) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==pages_count) %}#!{% else %}{{ path("admin_shiftfreelog_index",{'page':current_page+1}) }}{% endif %}">
+                <i class="material-icons">chevron_right</i>
+            </a>
+        </li>
+    </ul>
+
+{% endblock %}

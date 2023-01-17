@@ -1,4 +1,4 @@
-<div class="card center mini-shift {% if (shift.isDismissed) %}orange darken-4 white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+<div class="card center mini-shift {% if (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
     </div>

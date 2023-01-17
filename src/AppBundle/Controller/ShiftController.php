@@ -9,10 +9,10 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -142,9 +142,6 @@ class ShiftController extends Controller
             $shift->setBookedTime(new DateTime('now'));
         }
         $shift->setShifter($beneficiary);
-        $shift->setIsDismissed(false);
-        $shift->setDismissedReason(null);
-        $shift->setDismissedTime(null);
         $shift->setLastShifter(null);
         $shift->setFixe($isFixe);
         $em->persist($shift);
@@ -181,7 +178,7 @@ class ShiftController extends Controller
             $fixe = $form->get("fixe")->getData();
             $beneficiary = $form->get("shifter")->getData();
 
-            if ($shift->getShifter() && !$shift->getIsDismissed()) {
+            if ($shift->getShifter()) {
                 $message = "Désolé, ce créneau est déjà réservé";
                 $success = false;
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
@@ -195,9 +192,6 @@ class ShiftController extends Controller
                 $shift->setBooker($current_user);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setShifter($beneficiary);
-                $shift->setIsDismissed(false);
-                $shift->setDismissedReason(null);
-                $shift->setDismissedTime(null);
                 $shift->setLastShifter(null);
                 $shift->setFixe($fixe);
 
@@ -381,70 +375,46 @@ class ShiftController extends Controller
     public function dismissShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $em = $this->getDoctrine()->getManager();
 
         if (!$this->isGranted('dismiss', $shift)) {
             $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
             return $this->redirectToRoute("booking");
         }
 
-        if($shift->isFixe()) {
-            $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
-            return $this->redirectToRoute("booking");
-        } else {
-            // Store beneficiary entity before removing it
-            $beneficiary = $shift->getShifter();
-            $shift->setShifter(null);
-            $shift->setBooker(null);
-            $shift->setFixe(false);
-        }
-        $em->persist($shift);
-        $em->flush();
-
-        $reason = $request->get("reason");
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
-
-        $session->getFlashBag()->add('success', "Le créneau a été annulé");
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Undismiss a shift
-     *
-     * @Route("/undismiss", name="shift_undismiss", methods={"POST"})
-     */
-    public function undismissShiftAction(Request $request)
-    {
-        $session = new Session();
-
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_undismiss'))
+            ->setAction($this->generateUrl('shift_dismiss', ['id' => $shift->getId()]))
             ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
+            ->add('reason', TextareaType::class)
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shift->setIsDismissed(false);
-                $shift->setDismissedTime(null);
-                $shift->setDismissedReason(null);
-
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-            } else {
-                $session->getFlashBag()->add('warning', "Créneau pas trouvé");
+            if($shift->isFixe()) {
+                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
+                return $this->redirectToRoute("homepage");
             }
+            if (!$shift->getShifter()) {
+                $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
+                return $this->redirectToRoute("homepage");
+            }
+            // Store beneficiary entity before removing it
+            $beneficiary = $shift->getShifter();
+            $shift->setShifter(null);
+            $shift->setBooker(null);
+            $shift->setFixe(false);
+            $reason = $form->get("reason")->getData();
+            $shift->setReason($reason);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+        } else {
+            return $this->redirectToRoute('homepage');
         }
 
+
+        $session->getFlashBag()->add('success', "Le créneau a été annulé");
         return $this->redirectToRoute('homepage');
     }
 

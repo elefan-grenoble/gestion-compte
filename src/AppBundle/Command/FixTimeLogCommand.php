@@ -30,7 +30,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
             if ($member->getFirstShiftDate()) {
                 $previous_cycle_start = $this->getContainer()->get('membership_service')->getStartOfCycle($member, -1);
                 $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
-                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end, true);
+                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
 
                 foreach ($shifts as $shift) {
                     $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {

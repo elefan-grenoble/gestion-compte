@@ -88,19 +88,7 @@ class ShiftBucket
         if ($b->getLastShifter() && $b->getLastShifter()->getId() == $beneficiary->getId()) {
             return 1;
         }
-        if ($a->getIsDismissed()) {
-            if ($b->getIsDismissed()) {
-                if ($a->getDismissedTime() == $b->getDismissedTime()) {
-                    return 0;
-                } else {
-                    return $a->getDismissedTime() < $b->getDismissedTime() ? -1 : 1;
-                }
-            } else {
-                return -1;
-            }
-        } else {
-            return $b->getIsDismissed() ? 1 : 0;
-        }
+        return 0;
     }
 
     public function getShifts()

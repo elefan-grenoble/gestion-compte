@@ -198,10 +198,6 @@ class ShiftService
         if ($shift->getIsPast() || $shift->isLocked()) {
             return false;
         }
-        // Do not book already booked
-        if ($shift->getShifter() && !$shift->getIsDismissed()) {
-            return false;
-        }
         // Do not book pre-booked shift
         if ($shift->getLastShifter() && $beneficiary->getId() != $shift->getLastShifter()->getId()) {
             return false;
@@ -280,7 +276,7 @@ class ShiftService
     public function hasPreviousValidShifts(Beneficiary $beneficiary)
     {
         $shifts = $beneficiary->getShifts()->filter(function (Shift $shift) {
-            return $shift->getStart() < new \DateTime('now') && !$shift->getIsDismissed();
+            return $shift->getStart() < new \DateTime('now');
         });
 
         return $shifts->count() > 0;
@@ -301,7 +297,7 @@ class ShiftService
     {
         if (!$beneficiary) {
             $bookableShifts = $bucket->getShifts()->filter(function (Shift $shift) {
-                return ($shift->getIsDismissed() || !$shift->getShifter()); //dismissed or free
+                return !$shift->getShifter(); // free
             });
         } else {
             if ($bucket->canBookInterval($beneficiary)) {
@@ -462,16 +458,14 @@ class ShiftService
      * @param Beneficiary $beneficiary
      * @param Datetime $start_before
      * @param Datetime $start_after
-     * @param bool $excludeDismissed
      * @param Datetime $end_before
      * @return bool
      */
-    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $start_before, \Datetime $end_after, $excludeDismissed)
+    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $start_before, \Datetime $end_after)
     {
         return !$this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary,
                 $start_after,
                 null,
-                $excludeDismissed,
                 $start_before,
                 $end_after)->isEmpty();
     }

@@ -44,25 +44,9 @@ class Shift
     private $bookedTime;
 
     /**
-     * @var bool
-     *
-     * @ORM\Column(name="is_dismissed", type="boolean", options={"default" : 0})
-     */
-    private $isDismissed;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="dismissed_time", type="datetime", nullable=true)
-     */
-    private $dismissedTime;
-
-    /**
      * @var string
-     *
-     * @ORM\Column(name="dismissed_reason", type="string", length=255, nullable=true)
      */
-    private $dismissedReason;
+    private $reason;
 
     /**
      * @var bool
@@ -116,6 +100,11 @@ class Shift
     private $timeLogs;
 
     /**
+     * @ORM\OneToMany(targetEntity="ShiftFreeLog", mappedBy="shift")
+     */
+    private $shiftFreeLogs;
+
+    /**
      * @var bool
      *
      * @ORM\Column(name="locked", type="boolean", options={"default" : 0}, nullable=false)
@@ -138,7 +127,6 @@ class Shift
 
     public function __construct()
     {
-        $this->isDismissed = false;
         $this->wasCarriedOut = false;
     }
 
@@ -239,75 +227,27 @@ class Shift
     }
 
     /**
-     * Set isDismissed
+     * Set reason
      *
-     * @param boolean $isDismissed
+     * @param string $reason
      *
      * @return BookedShift
      */
-    public function setIsDismissed($isDismissed)
+    public function setreason($reason)
     {
-        $this->isDismissed = $isDismissed;
+        $this->reason = $reason;
 
         return $this;
     }
 
     /**
-     * Get isDismissed
-     *
-     * @return bool
-     */
-    public function getIsDismissed()
-    {
-        return $this->isDismissed;
-    }
-
-    /**
-     * Set dismissedTime
-     *
-     * @param \DateTime $dismissedTime
-     *
-     * @return BookedShift
-     */
-    public function setDismissedTime($dismissedTime)
-    {
-        $this->dismissedTime = $dismissedTime;
-
-        return $this;
-    }
-
-    /**
-     * Get dismissedTime
-     *
-     * @return \DateTime
-     */
-    public function getDismissedTime()
-    {
-        return $this->dismissedTime;
-    }
-
-    /**
-     * Set dismissedReason
-     *
-     * @param string $dismissedReason
-     *
-     * @return BookedShift
-     */
-    public function setDismissedReason($dismissedReason)
-    {
-        $this->dismissedReason = $dismissedReason;
-
-        return $this;
-    }
-
-    /**
-     * Get dismissedReason
+     * Get reason
      *
      * @return string
      */
-    public function getDismissedReason()
+    public function getreason()
     {
-        return $this->dismissedReason;
+        return $this->reason;
     }
 
     /**
@@ -473,9 +413,6 @@ class Shift
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
-        $this->setDismissedReason('');
-        $this->setIsDismissed(false);
-        $this->setDismissedTime(null);
         $this->setShifter(null);
         $this->setFixe(false);
         return $this;

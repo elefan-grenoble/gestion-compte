@@ -90,26 +90,6 @@
                 </li>
             </ul>
         </div>
-        {% if dismissedShifts | length %}
-            <div class="row">
-                <ul class="collapsible collapsible-expandable" id="dismissed">
-                    <li class="active">
-                        <div class="collapsible-header">
-                            <i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !
-                        </div>
-                        <div class="collapsible-body row">
-                            {% for shift in dismissedShifts %}
-                                {% if shift_service.isShiftBookable(shift, beneficiary) %}
-                                <div class="col s6 m3">
-                                    {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
-                                </div>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        {% endif %}
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
 
@@ -149,10 +129,6 @@
                 data.booking.legend_closed = $(this).hasClass("active");
                 Cookies.set("frontend",data);
             });
-            //todo put it server side
-            if ($('#dismissed .collapsible-header div').length < 1){
-                $('#dismissed').hide();
-            }
 
             //affichage de la description du job dans la modal
             $('.legend_job').click(function () {

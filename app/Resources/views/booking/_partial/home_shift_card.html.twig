@@ -1,4 +1,4 @@
-<div class="card center sticky-action {% if (shift.isDismissed) %}orange darken-4 white-text{% elseif (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+<div class="card center sticky-action {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
     </div>
@@ -13,49 +13,31 @@
             {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
         {% endif %}
     {% else %}
-        {% if shift.isDismissed %}
+        {% if not shift.fixe or shift.isUpcoming %}
             <div class="card-action">
-                <a href="#undismiss{{ shift.id }}" class="modal-trigger btn-flat green truncate white-text">reprendre<span class="hide-on-med-and-down"> mon créneau</span></a>
+                {% if not shift.fixe %}
+                    <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
+                {% endif %}
+                {% if shift.isUpcoming %}
+                    <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
+                {% endif %}
             </div>
-            <div id="undismiss{{ shift.id }}" class="modal black-text">
-                <div class="modal-content">
-                    <h5>Confirmation</h5>
-                </div>
-                <div class="modal-footer">
-                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-                    <a href="#" class="modal-action modal-close waves-effect waves-green btn teal"
-                       onclick="$('#form_shift_id').val({{ shift.id }});$('#shift_undismiss').submit();">Oui, je reprends<span class="hide-on-med-and-down"> mon créneau</span></a>
-                </div>
+            <div id="dismiss{{ shift.id }}" class="modal black-text">
+                {{ form_start(shift_dismiss_forms[shift.id]) }}
+                    <div class="modal-content">
+                        <h5>Je ne peux pas faire mon créneau</h5>
+                        <div class="input-field">
+                            {{ form_label(shift_dismiss_forms[shift.id].reason) }}
+                            {{ form_errors(shift_dismiss_forms[shift.id].reason) }}
+                            {{ form_widget(shift_dismiss_forms[shift.id].reason) }}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Retour à la raison</a>
+                        <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
+                    </div>
+                {{ form_end(shift_dismiss_forms[shift.id]) }}
             </div>
-            {{ form_start(shift_undismiss_form, { 'attr': { 'id': 'shift_undismiss' } }) }}
-            {{ form_widget(shift_undismiss_form) }}
-            {{ form_end(shift_undismiss_form) }}
-        {% else %}
-            {% if not shift.fixe or shift.isUpcoming %}
-                <div class="card-action">
-                    {% if not shift.fixe %}
-                        <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
-                    {% endif %}
-                    {% if shift.isUpcoming %}
-                        <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
-                    {% endif %}
-                </div>
-                <div id="dismiss{{ shift.id }}" class="modal black-text">
-                    <form action="{{ path('shift_dismiss', { 'id': shift.id }) }}" method="POST">
-                        <div class="modal-content">
-                            <h5>Je ne peux pas faire mon créneau</h5>
-                            <div class="input-field">
-                                <textarea id="reason" name="reason" class="materialize-textarea"></textarea>
-                                <label for="reason">Justification éventuelle</label>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Retour à la raison</a>
-                            <button class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
-                        </div>
-                    </form>
-                </div>
-            {% endif %}
         {% endif %}
     {% endif %}
 </div>

@@ -19,6 +19,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -60,12 +61,6 @@ class BookingController extends Controller
      */
     public function homepageShiftsAction(): Response
     {
-        $shiftUndismissForm = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_undismiss'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
-
         $membership = $this->getUser()->getBeneficiary()->getMembership();
         $beneficiaries = $membership->getBeneficiaries();
 
@@ -75,8 +70,20 @@ class BookingController extends Controller
         $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($membership, $preceding_previous_cycle_start, $next_cycle_end);
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
 
+        $shiftDismissForms = [];
+        foreach ($shifts_by_cycle as $key => $shifts) {
+            foreach ($shifts as $shift) {
+                $shiftDismissForms[$shift->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('shift_dismiss', ['id' => $shift->getId()]))
+                    ->setMethod('POST')
+                    ->add('reason', TextareaType::class, ['label' => 'Justification éventuelle', 'attr' => [ 'class' => 'materialize-textarea']])
+                    ->getForm()
+                    ->createView();
+            }
+        }
+
         return $this->render('booking/home_booked_shifts.html.twig', array(
-            'shift_undismiss_form' => $shiftUndismissForm->createView(),
+            'shift_dismiss_forms' => $shiftDismissForms,
             'period_positions' => $period_positions,
             'shiftsByCycle' => $shifts_by_cycle,
         ));
@@ -137,12 +144,6 @@ class BookingController extends Controller
 
             $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
-            $dismissedShifts = array();
-            foreach ($shifts as $shift) {
-                if ($shift->getIsDismissed()) {
-                    $dismissedShifts[] = $shift;
-                }
-            }
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -151,7 +152,6 @@ class BookingController extends Controller
 
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
-                'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository(Job::class)->findByEnabled(true)
