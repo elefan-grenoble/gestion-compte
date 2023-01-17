@@ -13,7 +13,9 @@
     <h4>Exemption d'un nouveau membre de bénévolat</h4>
 
     {{ form_start(form) }}
-    {{ form_errors(form) }}
+    <div class="errors">
+        {{ form_errors(form) }}
+    </div>
     <div class="row">
         <div class="col s6 input-field">
             {{ form_label(form.beneficiary) }}
@@ -46,7 +48,6 @@
     {{ form_end(form) }}
 {% endblock %}
 
-
 {% block javascripts %}
-    {% include "/admin/membershipshiftexemption/_form_js.html.twig" %}
+{% include "/admin/membershipshiftexemption/_form_js.html.twig" %}
 {% endblock %}
