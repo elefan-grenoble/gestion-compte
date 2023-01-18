@@ -32,7 +32,7 @@
 {% for cycle, shifts in shifts_by_cycle %}
     <div class="row">
         <h6>
-            {% if cycle == -1 %}
+            {% if cycle <= -1 %}
                 Cycle précédent
             {% elseif cycle == 0 %}
                 Cycle en cours
