@@ -161,7 +161,7 @@ class MembershipController extends Controller
 
         $em = $this->getDoctrine()->getManager();
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
-        $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -3);
+        $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
         $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
         $shifts_by_cycle = array_reverse($shifts_by_cycle, true);  // from latest to oldest
