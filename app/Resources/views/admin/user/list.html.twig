@@ -23,25 +23,33 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s3">
+                            <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.withdrawn) }}
                                     {{ form_label(form.withdrawn) }}
                                 </div>
                             </div>
-                            <div class="col s3">
+                            <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.enabled) }}
                                     {{ form_label(form.enabled) }}
                                 </div>
                             </div>
-                            <div class="col s3">
+                            <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.frozen) }}
                                     {{ form_label(form.frozen) }}
                                 </div>
                             </div>
-                            <div class="col s3">
+                        </div>
+                        <div class="row">
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.exempted) }}
+                                    {{ form_label(form.exempted) }}
+                                </div>
+                            </div>
+                            <div class="col s6">
                                 <div class="input-field">
                                     {{ form_widget(form.beneficiary_count) }}
                                     {{ form_label(form.beneficiary_count) }}
