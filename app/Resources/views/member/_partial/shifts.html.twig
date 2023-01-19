@@ -24,7 +24,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <p>Pas de créneau fixe</p>
+            Pas de créneau fixe
         {% endif %}
     </div>
 {% endif %}
@@ -32,7 +32,7 @@
 {% for cycle, shifts in shifts_by_cycle %}
     <div class="row">
         <h6>
-            {% if cycle == -1 %}
+            {% if cycle <= -1 %}
                 Cycle précédent
             {% elseif cycle == 0 %}
                 Cycle en cours
@@ -41,14 +41,15 @@
             {% endif %}
             (du {{ membership_service.startOfCycle(member,cycle) | date_fr_long }} au {{ membership_service.endOfCycle(member,cycle) | date_fr_long }})
         </h6>
-        {% if shifts | length == 0 %}
+        {% if shifts | length > 0 %}
+            {% for shift in shifts %}
+                <div class="col s12 m6 l4">
+                    {% include "user/_partial/shift_card.html.twig" with { shift: shift } %}
+                </div>
+            {% endfor %}
+        {% else %}
             Pas de créneau
         {% endif %}
-        {% for shift in shifts %}
-            <div class="col s12 m6 l4">
-                {% include "user/_partial/shift_card.html.twig" with { shift: shift } %}
-            </div>
-        {% endfor %}
     </div>
 {% endfor %}
 

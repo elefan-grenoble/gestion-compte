@@ -399,25 +399,6 @@ class ShiftService
     }
 
     /**
-     * Check if the given cycle is after the registration of this member
-     * @param Membership $member
-     * @param $cycle
-     * @return bool
-     */
-    public function hasCycle(Membership $member, $cycle)
-    {
-        /** @var Registration $firstRegistration */
-        $firstRegistration = $member->getRegistrations()->first();
-        if (!$firstRegistration) {
-            return false;
-        }
-        $registrationDate = $firstRegistration->getDate();
-        $startOfCycle = $this->membershipService->getStartOfCycle($member, $cycle);
-
-        return $registrationDate < $startOfCycle;
-    }
-
-    /**
      * Create a ShiftBucket from a single Shift
      * @param Shift $shift
      * @return ShiftBucket

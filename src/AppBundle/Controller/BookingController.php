@@ -65,7 +65,7 @@ class BookingController extends Controller
         $beneficiaries = $membership->getBeneficiaries();
 
         $em = $this->getDoctrine()->getManager();
-        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($membership, -2);
+        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($membership, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 1);
         $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($membership, $preceding_previous_cycle_start, $next_cycle_end);
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);

@@ -30,7 +30,7 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p>Pas de créneau fixe</p>
+                        Pas de créneau fixe
                     {% endif %}
                 </div>
             </li>
@@ -48,50 +48,51 @@
             </li>
         {% endif %}
         {% for cycle, shiftsOfCycle in shiftsByCycle %}
-            {% if (cycle in [0, 1]) and (shiftsOfCycle | length > 0) %}
+            {% if (cycle in [0, 1]) %}
                 <li class="active">
                     <div class="collapsible-header">
                         <i class="material-icons">date_range</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux pour le cycle {% if cycle == 0 %}courant{% else %}suivant{% endif %} (du {{ membership_service.startOfCycle(member,cycle) | date_fr_long }} au {{ membership_service.endOfCycle(member,cycle) | date_fr_long }})
                     </div>
                     <div class="collapsible-body">
-                        <div class="row">
-                            {% for shift in shiftsOfCycle %}
-                                <div class="col s12 m6 l4 {% if shiftsOfCycle | length == 1 %}push-m3{% endif %}">
-                                    {% include "booking/_partial/home_shift_card.html.twig" with { shift: shift } %}
-                                </div>
-                            {% endfor %}
-                        </div>
+                        {% if shiftsOfCycle | length > 0 %}
+                            <div class="row">
+                                {% for shift in shiftsOfCycle %}
+                                    <div class="col s12 m6 l4 {% if shiftsOfCycle | length == 1 %}push-m3{% endif %}">
+                                        {% include "booking/_partial/home_shift_card.html.twig" with { shift: shift } %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            Pas de créneau
+                        {% endif %}
                     </div>
                 </li>
             {% endif %}
         {% endfor %}
-        {% if (shift_service.hasCycle(member, -1) or shift_service.hasCycle(member, -2)) %}
-            <li>
-                <div class="collapsible-header">
-                    <i class="material-icons">event_available</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux passés
-                </div>
-                <div class="collapsible-body">
-                    {# Shift history #}
-                    <div class="row">
-                        {% for cycle in -1..-2 %}
-                            {% if shift_service.hasCycle(member, cycle) %}
-                                <div class="col s12 m6 l4">
-                                    {% set previousShifts = shiftsByCycle[cycle] %}
-                                    <h6>Cycle précédent (du {{ membership_service.startOfCycle(member,cycle) | date('d/m/y') }} au {{ membership_service.endOfCycle(member,cycle) | date('d/m/y') }})</h6>
-                                    {% if previousShifts|length == 0 %}
-                                        Pas de créneau
-                                    {% endif %}
-                                    {% for shift in previousShifts %}
-                                        <div class="col s12 m12">
-                                            {% include "user/_partial/mini_shift_card.html.twig" with { shift: shift } %}
-                                        </div>
-                                    {% endfor %}
-                                </div>
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">event_available</i>{% if member.beneficiaries | length > 1 %}Vos{% else %}Mes{% endif %} créneaux passés
+            </div>
+            <div class="collapsible-body">
+                {# Shift history #}
+                <div class="row">
+                    {% for cycle in -1..(-1 * max_nb_of_past_cycles_to_display) %}
+                        <div class="col s12 m6 l4">
+                            {% set previousShifts = shiftsByCycle[cycle] %}
+                            <h6>Cycle précédent (du {{ membership_service.startOfCycle(member,cycle) | date('d/m/y') }} au {{ membership_service.endOfCycle(member,cycle) | date('d/m/y') }})</h6>
+                            {% if previousShifts | length > 0 %}
+                                {% for shift in previousShifts %}
+                                    <div class="col s12 m12">
+                                        {% include "user/_partial/mini_shift_card.html.twig" with { shift: shift } %}
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                Pas de créneau
                             {% endif %}
-                        {% endfor %}
-                    </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            </li>
-        {% endif %}
+            </div>
+        </li>
     </ul>
 {% endif %}

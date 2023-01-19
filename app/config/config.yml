@@ -65,6 +65,7 @@ twig:
     use_fly_and_fixed: '%use_fly_and_fixed%'
     max_event_proxy_per_member: '%max_event_proxy_per_member%'
     display_gauge: '%display_gauge%'
+    max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
     profile_display_task_list: '%profile_display_task_list%'
     profile_display_time_log: '%profile_display_time_log%'
     # member
