@@ -391,7 +391,7 @@ class SearchUserFormHelper {
                 $qb = $qb->andWhere('e.start <= :date AND e.end >= :date')
                          ->setParameter('date', $now);
             } else if ($form->get('exempted')->getData() == 1) {
-                $qb = $qb->andWhere('e.start > :date OR e.end < :date OR e.start IS NULL ')
+                $qb = $qb->andWhere('e.start IS NULL OR e.start > :date OR e.end < :date')
                          ->setParameter('date', $now);
             }
         }
