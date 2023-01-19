@@ -109,7 +109,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                     {{ form_end(shift_book_forms[shift.id]) }}
                     {% if not shift.lastShifter %}
                         {{ form_start(shift_delete_forms[shift.id]) }}
-                        <button type="submit" title="Supprimer le poste" class="btn red" {% if nbShifts == 1 %}disabled{% endif %}>
+                        <button type="submit" title="Supprimer le poste" class="btn red">
                             <i class="material-icons left">delete</i>Supprimer
                         </button>
                         {{ form_end(shift_delete_forms[shift.id]) }}
@@ -178,7 +178,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                 method: 'POST',
                 success: function (data) {
                     M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
-                    if (this.data.includes("bucket_delete_form")) {
+                    if (this.data.includes("bucket_delete_form") || data.card === null) {
                         $('#main-bucket-{{ bucket.id }}').remove();
                         M.Modal.getInstance($('#modal-bucket')).close();
                     } else if (data.modal) {

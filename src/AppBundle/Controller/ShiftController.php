@@ -548,15 +548,20 @@ class ShiftController extends Controller
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
-                    'bucket' => $bucket,
-                    'start' => 6,
-                    'end' => 22,
-                    'line' => 0,
-                ));
-                $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
-                ])->getContent();
+                if (count($bucket->getShifts()) > 0) {
+                    $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                        'bucket' => $bucket,
+                        'start' => 6,
+                        'end' => 22,
+                        'line' => 0,
+                    ));
+                    $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
+                        'bucket' => $bucket->getShiftWithMinId()
+                    ])->getContent();
+                } else {
+                    $card = null;
+                    $modal = null;
+                }
                 return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
             } else {
                 return new JsonResponse(array('message'=>$message), 400);
