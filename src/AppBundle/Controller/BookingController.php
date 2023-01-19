@@ -553,7 +553,7 @@ class BookingController extends Controller
             }
             $em->flush();
             $success = true;
-            $message = $count . " créneaux ont été supprimés !";
+            $message = $count . (($count > 1) ? " créneaux ont été supprimés" : " créneau a été supprimé") . " !";
         } else {
             $success = false;
             $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);

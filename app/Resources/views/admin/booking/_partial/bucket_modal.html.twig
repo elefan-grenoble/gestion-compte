@@ -177,7 +177,7 @@ It use the materialize modal class https://materializecss.com/modals.html
                 method: 'POST',
                 success: function (data) {
                     M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
-                    if (this.data.includes("bucket_delete_form")) {
+                    if (this.data.includes("bucket_delete_form") || data.card === null) {
                         $('#main-bucket-{{ bucket.id }}').remove();
                         M.Modal.getInstance($('#modal-bucket')).close();
                     } else if (data.modal) {
