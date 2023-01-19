@@ -47,11 +47,19 @@ class SearchUserFormHelper {
                 'Non gelé' => 1,
             ]
         ]);
+        $formBuilder->add('exempted', ChoiceType::class, [
+            'label' => 'exempté',
+            'required' => false,
+            'choices' => [
+                'exempté' => 2,
+                'Non exempté' => 1,
+            ]
+        ]);
         if (!$type) {
             $formBuilder->add('beneficiary_count', ChoiceType::class, [
                 'label' => 'nb de bénéficiaires',
                 'required' => false,
-                'choices' => [
+                'choices' => [  // TODO: make dynamic depending on maximum_nb_of_beneficiaries_in_membership
                     '1' => 2,
                     '2' => 3,
                 ]
@@ -282,12 +290,13 @@ class SearchUserFormHelper {
      * @return QueryBuilder
      */
     public function initSearchQuery($doctrineManager) {
-        /** @var QueryBuilder $qb */
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
         $qb = $qb->leftJoin("o.beneficiaries", "b")
             ->leftJoin("b.user", "u")
-            ->leftJoin("o.registrations", "r")->addSelect("r");
-        $qb = $qb->andWhere('o.member_number > 0'); //do not include admin user
+            ->leftJoin("o.registrations", "r")->addSelect("r")
+            ->leftJoin("o.membershipShiftExemptions", "e");
+        // do not include admin user
+        $qb = $qb->andWhere('o.member_number > 0');
         return $qb;
     }
 
@@ -364,6 +373,7 @@ class SearchUserFormHelper {
      * @return QueryBuilder
      */
     public function processSearchFormData($form,&$qb) {
+        $now = new \DateTime('now');
         if ($form->get('withdrawn')->getData() > 0) {
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
@@ -375,6 +385,15 @@ class SearchUserFormHelper {
         if ($form->get('frozen')->getData() > 0) {
             $qb = $qb->andWhere('o.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
+        }
+        if ($form->get('exempted')->getData() > 0) {
+            if ($form->get('exempted')->getData() == 2) {
+                $qb = $qb->andWhere('e.start <= :date AND e.end >= :date')
+                         ->setParameter('date', $now);
+            } else if ($form->get('exempted')->getData() == 1) {
+                $qb = $qb->andWhere('e.start IS NULL OR e.start > :date OR e.end < :date')
+                         ->setParameter('date', $now);
+            }
         }
         if ($form->get('beneficiary_count')->getData() > 0) {
             $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
