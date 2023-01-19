@@ -51,8 +51,8 @@ class SearchUserFormHelper {
             'label' => 'exempté',
             'required' => false,
             'choices' => [
-                'exempté' => "exempted",
-                // 'Non exempté' => "not_exempted",
+                'exempté' => 2,
+                'Non exempté' => 1,
             ]
         ]);
         if (!$type) {
@@ -386,9 +386,14 @@ class SearchUserFormHelper {
             $qb = $qb->andWhere('o.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
-        if ($form->get('exempted')->getData() == "exempted") {
-            $qb = $qb->andWhere('e.start <= :date AND e.end >= :date')
-                ->setParameter('date', $now);
+        if ($form->get('exempted')->getData() > 0) {
+            if ($form->get('exempted')->getData() == 2) {
+                $qb = $qb->andWhere('e.start <= :date AND e.end >= :date')
+                         ->setParameter('date', $now);
+            } else if ($form->get('exempted')->getData() == 1) {
+                $qb = $qb->andWhere('e.start > :date OR e.end < :date OR e.start IS NULL ')
+                         ->setParameter('date', $now);
+            }
         }
         if ($form->get('beneficiary_count')->getData() > 0) {
             $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
