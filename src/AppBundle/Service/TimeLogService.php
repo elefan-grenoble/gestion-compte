@@ -25,14 +25,19 @@ class TimeLogService
      * @param Shift $shift
      * @return TimeLog
      */
-    public function initShiftLog(Shift $shift)
+    public function initShiftLog(Shift $shift, \DateTime $date = null, $description = null)
     {
         $log = new TimeLog();
         $log->setMembership($shift->getShifter()->getMembership());
         $log->setTime($shift->getDuration());
         $log->setShift($shift);
         $log->setType(TimeLog::TYPE_SHIFT);
-        $log->setCreatedAt($shift->getStart());
+        if ($description) {
+            $log->setDescription($description);
+        }
+        if ($date) {
+            $log->setCreatedAt($date);
+        }
         return $log;
     }
 
@@ -44,7 +49,6 @@ class TimeLogService
      */
     public function initCycleBeginningLog(Membership $member, \DateTime $date = null)
     {
-        $date = $this->membershipService->getStartOfCycle($member, 0);
         $log = new TimeLog();
         $log->setMembership($member);
         $log->setTime(-1 * $this->due_duration_by_cycle);

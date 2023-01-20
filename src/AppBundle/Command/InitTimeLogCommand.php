@@ -41,7 +41,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
                 $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
                 $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
                 foreach ($shifts as $shift) {
-                    $log = $this->getContainer()->get('time_log_service')->initShiftLog($shift);
+                    $log = $this->getContainer()->get('time_log_service')->initShiftLog($shift, $shift->getStart());
                     $em->persist($log);
                     $countShiftLogs++;
                 }

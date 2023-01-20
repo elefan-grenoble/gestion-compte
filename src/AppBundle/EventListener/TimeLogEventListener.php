@@ -149,7 +149,7 @@ class TimeLogEventListener
      */
     private function createShiftLog(Shift $shift)
     {
-        $log = $this->container->get('time_log_service')->initShiftLog($shift);
+        $log = $this->container->get('time_log_service')->initShiftLog($shift, $shift->getStart());
         $this->em->persist($log);
         $this->em->flush();
     }
