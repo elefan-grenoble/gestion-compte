@@ -258,17 +258,26 @@ class ShiftController extends Controller
                 $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
             } else {
                 $membership = $shift->getShifter()->getMembership();
-                $em = $this->getDoctrine()->getManager();
+                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+
+                // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+                if ($wasCarriedOut) {
+                    $shift->invalidateShiftParticipation();
+                }
                 $shift->free();
-                $shift->invalidateShiftParticipation();
+
+                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
                 $dispatcher = $this->get('event_dispatcher');
+                if ($wasCarriedOut) {
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
+                }
                 $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
 
                 $success = true;
-                $message = "Le créneau a bien été libéré";
+                $message = "Le créneau a bien été libéré !";
             }
         } else {
             $success = false;
@@ -335,7 +344,7 @@ class ShiftController extends Controller
                     $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
                 }
 
-                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée");
+                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
                 $success = true;
             }
         } else {
@@ -582,10 +591,11 @@ class ShiftController extends Controller
      */
     private function createDeleteForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-                                         ->setMethod('DELETE')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setMethod('DELETE');
+
+        return $form->getForm();
     }
 
     /**
@@ -597,10 +607,11 @@ class ShiftController extends Controller
      */
     private function createFreeForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
-                                         ->setMethod('POST')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->setMethod('POST');
+
+        return $form->getForm();
     }
 
     /**
@@ -612,12 +623,13 @@ class ShiftController extends Controller
      */
     private function createValidateInvalidateShiftForm(Shift $shift)
     {
-        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
-                                         ->add('validate', HiddenType::class, [
-                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
-                                         ])
-                                         ->setMethod('POST')
-                                         ->getForm();
+        $form = $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+            ->add('validate', HiddenType::class, [
+                'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
+            ])
+            ->setMethod('POST');
+
+        return $form->getForm();
     }
 }

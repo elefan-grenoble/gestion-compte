@@ -16,29 +16,28 @@ use Symfony\Component\DependencyInjection\Container;
 
 class ShiftService
 {
-
-    protected $em;
-    protected $due_duration_by_cycle;
-    protected $min_shift_duration;
+    private $em;
+    private $beneficiaryService;
+    private $membershipService;
+    private $due_duration_by_cycle;
+    private $min_shift_duration;
     private $newUserStartAsBeginner;
     private $allowExtraShifts;
     private $maxTimeInAdvanceToBookExtraShifts;
     private $forbidShiftOverlapTime;
-    private $beneficiaryService;
-    private $membershipService;
 
-    public function __construct(EntityManagerInterface $em, $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts,
-        $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime, BeneficiaryService $beneficiaryService, MembershipService $membershipService)
+    public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
+        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime)
     {
         $this->em = $em;
+        $this->beneficiaryService = $beneficiaryService;
+        $this->membershipService = $membershipService;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
         $this->min_shift_duration = $min_shift_duration;
         $this->newUserStartAsBeginner = $newUserStartAsBeginner;
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
         $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
-        $this->beneficiaryService = $beneficiaryService;
-        $this->membershipService = $membershipService;
     }
 
     /**

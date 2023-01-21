@@ -11,12 +11,12 @@ use Psr\Log\LoggerInterface;
 
 class ShiftSubscriber implements EventSubscriber
 {
-
+    protected $logger;
     private ShiftFreeLogger $shiftFreeLogger;
 
-    public function __construct(ShiftFreeLogger $shiftFreeLogger, LoggerInterface $logger) {
-        $this->shiftFreeLogger = $shiftFreeLogger;
+    public function __construct(LoggerInterface $logger, ShiftFreeLogger $shiftFreeLogger) {
         $this->logger = $logger;
+        $this->shiftFreeLogger = $shiftFreeLogger;
     }
 
     public function getSubscribedEvents(): array

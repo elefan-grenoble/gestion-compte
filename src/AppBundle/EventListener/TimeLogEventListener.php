@@ -149,12 +149,7 @@ class TimeLogEventListener
      */
     private function createShiftLog(Shift $shift)
     {
-        $log = new TimeLog();
-        $log->setMembership($shift->getShifter()->getMembership());
-        $log->setTime($shift->getDuration());
-        $log->setShift($shift);
-        $log->setCreatedAt($shift->getStart());
-        $log->setType(TimeLog::TYPE_SHIFT);
+        $log = $this->container->get('time_log_service')->initShiftLog($shift, $shift->getStart());
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -176,26 +171,23 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @param \DateTime $date
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createCycleBeginningLog(Membership $membership, \DateTime $date)
+    private function createCycleBeginningLog(Membership $member, \DateTime $date)
     {
-        $log = new TimeLog();
-        $log->setMembership($membership);
-        $log->setTime(-1 * $this->due_duration_by_cycle);
-        $log->setType(TimeLog::TYPE_CYCLE_END);
+        $log = $this->container->get('time_log_service')->initCycleBeginningLog($member);
         $this->em->persist($log);
 
-        $counter_today = $membership->getTimeCount($date);
+        $counter_today = $member->getTimeCount($date);
 
         $allowed_cumul = $this->maxTimeAtEndOfShift;
 
         if ($counter_today > ($this->due_duration_by_cycle + $allowed_cumul)) { //surbook
             $log = new TimeLog();
-            $log->setMembership($membership);
+            $log->setMembership($member);
             $log->setTime(-1 * ($counter_today - ($this->due_duration_by_cycle + $allowed_cumul)));
             $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);
