@@ -225,7 +225,7 @@ class PeriodController extends Controller
         $positionsBookForms = [];
         foreach ($period->getPositions() as $position) {
             if (!$position->getShifter()) {
-                $positionsBookForms[$position->getId()] = $this->createBookForm($period, $position)->createView();
+                $positionsBookForms[$position->getId()] = $this->createBookPeriodPositionForm($period, $position)->createView();
             }
         }
 
@@ -305,7 +305,7 @@ class PeriodController extends Controller
     {
         $session = new Session();
 
-        $form = $this->createBookForm($period, $position);
+        $form = $this->createBookPeriodPositionForm($period, $position);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -487,7 +487,7 @@ class PeriodController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createBookForm(Period $period, PeriodPosition $position)
+    private function createBookPeriodPositionForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_book_forms_' . $position->getId())
             ->setAction($this->generateUrl('book_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))

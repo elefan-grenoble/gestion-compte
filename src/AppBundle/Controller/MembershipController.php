@@ -169,8 +169,8 @@ class MembershipController extends Controller
         $shiftValidateInvalidateForms = [];
         foreach ($shifts_by_cycle as $shifts) {
             foreach ($shifts as $shift) {
-                $shiftFreeForms[$shift->getId()] = $this->createFreeForm($shift)->createView();
-                $shiftValidateInvalidateForms[$shift->getId()] = $this->createValidateInvalidateShiftForm($shift)->createView();
+                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeForm($shift)->createView();
+                $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
             }
         }
 
@@ -1180,36 +1180,36 @@ class MembershipController extends Controller
 
     /**
      * Creates a form to free a shift entity.
-     * // TODO: how to avoid having same createFreeForm in ShiftController ?
+     * // TODO: how to avoid having same createShiftFreeForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createFreeForm(Shift $shift)
+    private function createShiftFreeForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
-                                         ->setMethod('POST')
-                                         ->getForm();
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
      * Creates a form to validate / invalidate a shift entity.
-     * // TODO: how to avoid having same createValidateInvalidateShiftForm in ShiftController ?
+     * // TODO: how to avoid having same createShiftValidateInvalidateForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createValidateInvalidateShiftForm(Shift $shift)
+    private function createShiftValidateInvalidateForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-                                         ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
-                                         ->add('validate', HiddenType::class, [
-                                             'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
-                                         ])
-                                         ->setMethod('POST')
-                                         ->getForm();
+            ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+            ->add('validate', HiddenType::class, [
+                'data' => ($shift->getWasCarriedOut() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
     }
 }
