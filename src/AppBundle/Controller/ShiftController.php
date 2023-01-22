@@ -385,10 +385,7 @@ class ShiftController extends Controller
     {
         $session = new Session();
 
-        if (!$this->isGranted('dismiss', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau !");
-            return $this->redirectToRoute("homepage");
-        }
+        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
         $form = $this->createShiftDismissForm($shift);
 
