@@ -386,8 +386,8 @@ class ShiftController extends Controller
         $session = new Session();
 
         if (!$this->isGranted('dismiss', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
-            return $this->redirectToRoute("booking");
+            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau !");
+            return $this->redirectToRoute("homepage");
         }
 
         $form = $this->createShiftDismissForm($shift);
@@ -396,7 +396,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             if($shift->isFixe()) {
-                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
+                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
                 return $this->redirectToRoute("homepage");
             }
             if (!$shift->getShifter()) {
@@ -418,8 +418,7 @@ class ShiftController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
-
-        $session->getFlashBag()->add('success', "Le créneau a été annulé");
+        $session->getFlashBag()->add('success', "Le créneau a été annulé !");
         return $this->redirectToRoute('homepage');
     }
 
@@ -640,7 +639,7 @@ class ShiftController extends Controller
     {
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class)
+            ->add('reason', TextareaType::class, array('required' => false))
             ->setMethod('POST');
 
         return $form->getForm();

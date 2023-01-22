@@ -689,7 +689,7 @@ class BookingController extends Controller
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, ['label' => 'Justification éventuelle', 'attr' => [ 'class' => 'materialize-textarea']])
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST')
             ->getForm();
     }
