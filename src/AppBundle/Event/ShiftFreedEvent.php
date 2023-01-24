@@ -14,14 +14,12 @@ class ShiftFreedEvent extends Event
 
     private $shift;
     private $beneficiary;
-    private $createdBy;
     private $reason;
 
-    public function __construct(Shift $shift, Beneficiary $beneficiary, User $createdBy, $reason = null)
+    public function __construct(Shift $shift, Beneficiary $beneficiary, $reason = null)
     {
         $this->shift = $shift;
         $this->beneficiary = $beneficiary;
-        $this->createdBy = $createdBy;
         $this->reason = $reason;
     }
 
@@ -47,14 +45,6 @@ class ShiftFreedEvent extends Event
     public function getMember()
     {
         return $this->beneficiary->getMembership();
-    }
-
-    /**
-     * @return User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
     }
 
     /**

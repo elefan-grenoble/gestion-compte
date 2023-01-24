@@ -249,8 +249,6 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
-
         $form = $this->createShiftFreeForm($shift);
         $form->handleRequest($request);
 
@@ -259,17 +257,17 @@ class ShiftController extends Controller
                 $success = false;
                 $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
             } else {
-                // store shift beneficiary
+                // store shift beneficiary & reason
                 $beneficiary = $shift->getShifter();
-                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+                $reason = $form->get("reason")->getData();
 
                 // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
                 if ($wasCarriedOut) {
                     $shift->invalidateShiftParticipation();
                 }
 
                 // free shift
-                $reason = $form->get("reason")->getData();
                 $shift->free($reason);
 
                 $em = $this->getDoctrine()->getManager();
@@ -280,7 +278,7 @@ class ShiftController extends Controller
                 if ($wasCarriedOut) {
                     $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
                 }
-                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $current_user, $reason));
+                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
@@ -396,8 +394,6 @@ class ShiftController extends Controller
             return $this->redirectToRoute("homepage");
         }
 
-        $current_user = $this->get('security.token_storage')->getToken()->getUser();
-
         $form = $this->createShiftDismissForm($shift);
 
         $form->handleRequest($request);
@@ -411,11 +407,11 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
                 return $this->redirectToRoute("homepage");
             }
-            // store shift beneficiary
+            // store shift beneficiary & reason
             $beneficiary = $shift->getShifter();
+            $reason = $form->get("reason")->getData();
 
             // free shift
-            $reason = $form->get("reason")->getData();
             $shift->free($reason);
 
             $em = $this->getDoctrine()->getManager();
@@ -423,7 +419,7 @@ class ShiftController extends Controller
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $current_user, $reason));
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
         } else {
             return $this->redirectToRoute('homepage');
         }

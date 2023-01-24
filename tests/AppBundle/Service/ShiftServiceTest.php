@@ -43,7 +43,7 @@ class ShiftServiceTest extends TestCase
             ->getMock();
         $membershipService = new MembershipService($this->em, $this->registration_duration, $this->registration_every_civil_year, $this->cycle_type);
         $beneficiaryService = new BeneficiaryService($this->em, $membershipService);
-        $this->shiftService = new ShiftService($this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService);
+        $this->shiftService = new ShiftService($this->em, $beneficiaryService, $membershipService, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time);
     }
 
     public function testShiftTimeByCycle()

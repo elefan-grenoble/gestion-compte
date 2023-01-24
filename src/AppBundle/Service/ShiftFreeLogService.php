@@ -23,16 +23,18 @@ class ShiftFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary)
+    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary, $reason = null)
     {
-        $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
 
         $log = new ShiftFreeLog;
         $log->setShift($shift);
         $log->setBeneficiary($beneficiary);
-        $log->setReason($shift->getReason());
-        $log->setCreatedBy($user);
+        if ($reason) {
+            $log->setReason($reason);
+        }
+        $log->setCreatedBy($current_user);
         $log->setRequestRoute($request->get('_route'));
 
         return $log;
