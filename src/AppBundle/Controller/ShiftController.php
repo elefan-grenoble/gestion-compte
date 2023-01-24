@@ -171,7 +171,7 @@ class ShiftController extends Controller
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
-        $form = $this->createBookForm($shift);
+        $form = $this->createShiftBookForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -249,7 +249,7 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
-        $form = $this->createFreeForm($shift);
+        $form = $this->createShiftFreeForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -317,7 +317,7 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
 
-        $form = $this->createValidateInvalidateShiftForm($shift);
+        $form = $this->createShiftValidateInvalidateForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -386,21 +386,17 @@ class ShiftController extends Controller
         $session = new Session();
 
         if (!$this->isGranted('dismiss', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
-            return $this->redirectToRoute("booking");
+            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau !");
+            return $this->redirectToRoute("homepage");
         }
 
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_dismiss', ['id' => $shift->getId()]))
-            ->setMethod('POST')
-            ->add('reason', TextareaType::class)
-            ->getForm();
+        $form = $this->createShiftDismissForm($shift);
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             if($shift->isFixe()) {
-                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
+                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
                 return $this->redirectToRoute("homepage");
             }
             if (!$shift->getShifter()) {
@@ -422,8 +418,7 @@ class ShiftController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
-
-        $session->getFlashBag()->add('success', "Le créneau a été annulé");
+        $session->getFlashBag()->add('success', "Le créneau a été annulé !");
         return $this->redirectToRoute('homepage');
     }
 
@@ -509,7 +504,7 @@ class ShiftController extends Controller
      */
     public function removeShiftAction(Request $request, Shift $shift)
     {
-        $form = $this->createDeleteForm($shift);
+        $form = $this->createShiftDeleteForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -559,7 +554,7 @@ class ShiftController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createBookForm(Shift $shift)
+    private function createShiftBookForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
@@ -589,7 +584,7 @@ class ShiftController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(Shift $shift)
+    private function createShiftDeleteForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
@@ -605,7 +600,7 @@ class ShiftController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createFreeForm(Shift $shift)
+    private function createShiftFreeForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
@@ -621,13 +616,30 @@ class ShiftController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createValidateInvalidateShiftForm(Shift $shift)
+    private function createShiftValidateInvalidateForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
             ->add('validate', HiddenType::class, [
                 'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
+            ->setMethod('POST');
+
+        return $form->getForm();
+    }
+
+    /**
+     * Creates a form to dismiss a shift entity.
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftDismissForm(Shift $shift)
+    {
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false))
             ->setMethod('POST');
 
         return $form->getForm();
