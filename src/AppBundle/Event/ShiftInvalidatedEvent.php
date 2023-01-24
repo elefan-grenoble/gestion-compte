@@ -11,20 +11,20 @@ class ShiftInvalidatedEvent extends Event
     const NAME = 'shift.invalidated';
 
     private $shift;
-    private $membership;
+    private $member;
 
-    public function __construct(Shift $shift, Membership $membership)
+    public function __construct(Shift $shift, Membership $member)
     {
         $this->shift = $shift;
-        $this->membership = $membership;
+        $this->membership = $member;
     }
 
     /**
      * @return Membership
      */
-    public function getMembership()
+    public function getMember()
     {
-        return $this->membership;
+        return $this->member;
     }
 
     /**
