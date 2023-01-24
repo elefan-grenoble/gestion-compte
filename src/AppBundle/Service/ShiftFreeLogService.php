@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
-class ShiftFreeLogger
+class ShiftFreeLogService
 {
     private EntityManagerInterface $em;
     protected $requestStack;
@@ -23,17 +23,18 @@ class ShiftFreeLogger
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function log(Shift $shift, Beneficiary $beneficiary): void
+    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary)
     {
         $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
+
         $log = new ShiftFreeLog;
         $log->setShift($shift);
         $log->setBeneficiary($beneficiary);
         $log->setReason($shift->getReason());
         $log->setCreatedBy($user);
         $log->setRequestRoute($request->get('_route'));
-        $this->em->persist($log);
-        $this->em->flush();
+
+        return $log;
     }
 }

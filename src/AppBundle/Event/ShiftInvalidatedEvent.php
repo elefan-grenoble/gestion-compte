@@ -3,6 +3,7 @@
 namespace AppBundle\Event;
 
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
@@ -11,20 +12,12 @@ class ShiftInvalidatedEvent extends Event
     const NAME = 'shift.invalidated';
 
     private $shift;
-    private $member;
+    private $beneficiary;
 
-    public function __construct(Shift $shift, Membership $member)
+    public function __construct(Shift $shift, Membership $beneficiary)
     {
         $this->shift = $shift;
-        $this->membership = $member;
-    }
-
-    /**
-     * @return Membership
-     */
-    public function getMember()
-    {
-        return $this->member;
+        $this->beneficiary = $beneficiary;
     }
 
     /**
@@ -35,4 +28,19 @@ class ShiftInvalidatedEvent extends Event
         return $this->shift;
     }
 
+    /**
+     * @return Beneficiary
+     */
+    public function getBeneficiary()
+    {
+        return $this->beneficiary;
+    }
+
+    /**
+     * @return Membership
+     */
+    public function getMember()
+    {
+        return $this->beneficiary->getMembership();
+    }
 }
