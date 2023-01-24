@@ -19,18 +19,35 @@
                 {% endif %}
             {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
         {% endif %}
-        {% if is_granted('free',shift) %}
-            {{ form_start(shift_free_forms[shift.id]) }}
-                {% if shift.isPast %}
+        {% if is_granted('free', shift) %}
+            {% if shift.isPast %}
+                {{ form_start(shift_free_forms[shift.id]) }}
+                    {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
                     <button type="submit" class="btn red" title="Supprimer la participation">
                         <i class="material-icons left">delete</i>Supprimer la participation
                     </button>
-                {% else %}
-                    <button type="submit" class="btn orange" title="Libérer">
-                        <i class="material-icons left">lock_open</i>Libérer
-                    </button>
-                {% endif %}
-            {{ form_end(shift_free_forms[shift.id]) }}
+                {{ form_end(shift_free_forms[shift.id]) }}
+            {% else %}
+                <a href="#free{{ shift.id }}" class="modal-trigger btn orange" title="Libérer">
+                    <i class="material-icons left">lock_open</i>Libérer
+                </a>
+            {% endif %}
         {% endif %}
+    </div>
+    <div id="free{{ shift.id }}" class="modal black-text">
+        {{ form_start(shift_free_forms[shift.id]) }}
+            <div class="modal-content">
+                <h5>Ce membre ne peux pas faire son créneau</h5>
+                <div class="input-field">
+                    {{ form_label(shift_free_forms[shift.id].reason) }}
+                    {{ form_errors(shift_free_forms[shift.id].reason) }}
+                    {{ form_widget(shift_free_forms[shift.id].reason) }}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
+                <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, libérer le créneau !</button>
+            </div>
+        {{ form_end(shift_free_forms[shift.id]) }}
     </div>
 </div>

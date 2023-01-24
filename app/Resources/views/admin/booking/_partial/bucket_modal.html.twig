@@ -50,7 +50,8 @@ It use the materialize modal class https://materializecss.com/modals.html
                                 {% endif %}
                             {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
                         {% endif %}
-                        {{ form_start(shift_free_forms[shift.id], {'attr': { 'style':  'display:inline;'}}) }}
+                        {{ form_start(shift_free_forms[shift.id], {'attr': { 'style':  'display:inline;' }}) }}
+                            {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
                             {% if shift.isPast %}
                                 <button type="submit" class="btn red" title="Supprimer la participation">
                                     <i class="material-icons left">delete</i>Supprimer la participation

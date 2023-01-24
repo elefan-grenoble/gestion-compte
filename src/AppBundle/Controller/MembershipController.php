@@ -35,6 +35,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -1190,6 +1191,7 @@ class MembershipController extends Controller
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST')
             ->getForm();
     }

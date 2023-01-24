@@ -12,7 +12,6 @@ use AppBundle\Event\ShiftInvalidatedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,6 +22,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -264,7 +264,8 @@ class ShiftController extends Controller
                 if ($wasCarriedOut) {
                     $shift->invalidateShiftParticipation();
                 }
-                $shift->free();
+                $reason = $form->get("reason")->getData();
+                $shift->free($reason);
 
                 $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
@@ -405,11 +406,8 @@ class ShiftController extends Controller
             }
             // Store beneficiary entity before removing it
             $beneficiary = $shift->getShifter();
-            $shift->setShifter(null);
-            $shift->setBooker(null);
-            $shift->setFixe(false);
             $reason = $form->get("reason")->getData();
-            $shift->setReason($reason);
+            $shift->free($reason);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($shift);
@@ -604,6 +602,7 @@ class ShiftController extends Controller
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST');
 
         return $form->getForm();

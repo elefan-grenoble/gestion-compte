@@ -654,6 +654,7 @@ class BookingController extends Controller
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST')
             ->getForm();
     }
