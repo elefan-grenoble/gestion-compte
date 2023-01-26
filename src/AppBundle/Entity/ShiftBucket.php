@@ -165,9 +165,13 @@ class ShiftBucket
         return $this->shifts->first()->getDuration();
     }
 
-    public function canBookInterval(Beneficiary $beneficiary) // check if none of the shifts belong to the beneficiary ?
+    /**
+     * - check that none of the shifts belong to the beneficiary
+     * - check that the beneficiary doesn't already have a shift in the same interval
+     */
+    public function canBookInterval(Beneficiary $beneficiary)
     {
-        $alreadyBooked =  $beneficiary->getShifts()->exists(function ($key, Shift $shift) {
+        $alreadyBooked = $beneficiary->getShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
         });
         $alreadyReserved = $beneficiary->getReservedShifts()->exists(function ($key, Shift $shift) {
