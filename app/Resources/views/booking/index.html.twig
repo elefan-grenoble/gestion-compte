@@ -55,8 +55,7 @@
                             <li class="row">
                                 {% for job in jobs %}
                                     <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
-                                        <div style="padding: 3px;margin:5px"
-                                        class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
+                                        <div class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
                                             <p>{{ job.name }}</p>
                                         </div>
                                     </div>
@@ -64,22 +63,19 @@
                             </li>
                             <li class="row">
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px"
-                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                    <div class="z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
                                         <p>Aucun bénévole inscrit</p>
                                         <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px"
-                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                    <div class="z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
                                         <p>Pas assez de bénévoles inscrits pour ouvrir</p>
                                         <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px;cursor: not-allowed"
-                                         class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1">
+                                    <div class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1" style="padding: 3px;margin:5px;cursor: not-allowed">
                                         <i class="material-icons tiny">lock</i>
                                         <p class="black-text">Créneau complet ou inaccessible pour {{ beneficiary.firstname }} <small>(quota d'heures dépassé ou formation insuffisante)</small></p>
                                     </div>

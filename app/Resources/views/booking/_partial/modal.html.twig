@@ -81,16 +81,10 @@
                         <span>volant (une seule fois)</span>
                     </label>
                 </div>
-                <div>
-                    <label for="fixe{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">
-                        <input type="radio" id="fixe{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=1 />
-                        <span>fixe (reporté à chaque cycle)</span>
-                    </label>
-                </div>
             {% else %}
                 <input type="hidden" name="typeService" value=0 />
             {% endif %}
-            <div class="" style="position: fixed;top:0;width: 100%;left: 0;">
+            <div style="position: fixed;top:0;width: 100%;left: 0;">
                 {% if nbBookableShifts < nbShifts %}
                     {% for shifter in 1..(nbShifts - nbBookableShifts) %}
                         <div class="green lighten-2 left" style="height:10px; width: {{ 100/(nbShifts) }}%"></div>
@@ -105,8 +99,7 @@
         {% endif %}
     </div>
     <div class="modal-footer">
-        <a href="#!"
-           class="modal-action modal-close waves-effect waves-green btn-flat red-text" onclick="cancelAll()">Annuler</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text" onclick="cancelAll()">Annuler</a>
         {% if beneficiary.membership.beneficiaries | length >= 1 %}
             <button id="confirmButton" onclick="postSelectedId({{ beneficiary.id }})" class="waves-effect waves-green btn teal">Confirmer</button>
         {% endif %}
