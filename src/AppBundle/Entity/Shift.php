@@ -411,12 +411,15 @@ class Shift
      *
      * @return \AppBundle\Entity\Shift
      */
-    public function free()
+    public function free($reason = null)
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
         $this->setShifter(null);
         $this->setFixe(false);
+        if ($reason) {
+            $this->setReason($reason);
+        }
         return $this;
     }
 
