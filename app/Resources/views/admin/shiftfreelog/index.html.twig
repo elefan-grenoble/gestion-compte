@@ -18,10 +18,8 @@
                 <th>Auteur</th>
                 <th>Créneau</th>
                 <th>Bénéficiaire</th>
-                {% if is_granted("ROLE_ADMIN") %}
-                <th>Route</th>
-                {% endif %}
                 <th>Raison</th>
+                <th>Source</th>
             </tr>
         </thead>
 
@@ -48,10 +46,8 @@
                         {{ shiftFreeLog.beneficiary }}
                     </a>
                 </td>
-                {% if is_granted("ROLE_ADMIN") %}
-                <td>{{ shiftFreeLog.requestRoute }}</td>
-                {% endif %}
                 <td>{{ shiftFreeLog.reason }}</td>
+                <td>{{ shiftFreeLog.source }}</td>
             </tr>
         {% endfor %}
         </tbody>

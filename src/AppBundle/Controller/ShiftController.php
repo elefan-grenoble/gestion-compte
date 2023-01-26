@@ -260,6 +260,7 @@ class ShiftController extends Controller
                 // store shift beneficiary & reason
                 $beneficiary = $shift->getShifter();
                 $reason = $form->get("reason")->getData();
+                $source = "Admin";
 
                 // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
                 $wasCarriedOut = $shift->getWasCarriedOut() == 1;
@@ -278,7 +279,7 @@ class ShiftController extends Controller
                 if ($wasCarriedOut) {
                     $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
                 }
-                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
+                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $source, $reason));
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
@@ -410,6 +411,7 @@ class ShiftController extends Controller
             // store shift beneficiary & reason
             $beneficiary = $shift->getShifter();
             $reason = $form->get("reason")->getData();
+            $source = "Membre";
 
             // free shift
             $shift->free($reason);
@@ -419,7 +421,7 @@ class ShiftController extends Controller
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $source, $reason));
         } else {
             return $this->redirectToRoute('homepage');
         }

@@ -60,6 +60,13 @@ class ShiftFreeLog
      *
      * @ORM\Column(type="string", length=255, nullable=true)
      */
+    private $source;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private $requestRoute;
 
     public function getId(): ?int
@@ -124,6 +131,18 @@ class ShiftFreeLog
     public function setReason(?string $reason): self
     {
         $this->reason = $reason;
+
+        return $this;
+    }
+
+    public function getSource(): ?string
+    {
+        return $this->source;
+    }
+
+    public function setSource(?string $source): self
+    {
+        $this->source = $source;
 
         return $this;
     }
