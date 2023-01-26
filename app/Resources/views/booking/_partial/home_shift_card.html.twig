@@ -16,27 +16,27 @@
         {% if not shift.fixe or shift.isUpcoming %}
             <div class="card-action">
                 {% if not shift.fixe %}
-                    <a href="#dismiss{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
+                    <a href="#free{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
                 {% endif %}
                 {% if shift.isUpcoming %}
                     <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
                 {% endif %}
             </div>
-            <div id="dismiss{{ shift.id }}" class="modal black-text">
-                {{ form_start(shift_dismiss_forms[shift.id]) }}
+            <div id="free{{ shift.id }}" class="modal black-text">
+                {{ form_start(shift_free_forms[shift.id]) }}
                     <div class="modal-content">
                         <h5>Je ne peux pas faire mon créneau</h5>
                         <div class="input-field">
-                            {{ form_label(shift_dismiss_forms[shift.id].reason) }}
-                            {{ form_errors(shift_dismiss_forms[shift.id].reason) }}
-                            {{ form_widget(shift_dismiss_forms[shift.id].reason) }}
+                            {{ form_label(shift_free_forms[shift.id].reason) }}
+                            {{ form_errors(shift_free_forms[shift.id].reason) }}
+                            {{ form_widget(shift_free_forms[shift.id].reason) }}
                         </div>
                     </div>
                     <div class="modal-footer">
                         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
                         <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
                     </div>
-                {{ form_end(shift_dismiss_forms[shift.id]) }}
+                {{ form_end(shift_free_forms[shift.id]) }}
             </div>
         {% endif %}
     {% endif %}

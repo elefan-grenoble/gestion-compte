@@ -170,7 +170,7 @@ class MembershipController extends Controller
         $shiftValidateInvalidateForms = [];
         foreach ($shifts_by_cycle as $shifts) {
             foreach ($shifts as $shift) {
-                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeForm($shift)->createView();
+                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
                 $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
             }
         }
@@ -1180,14 +1180,14 @@ class MembershipController extends Controller
     }
 
     /**
-     * Creates a form to free a shift entity.
-     * // TODO: how to avoid having same createShiftFreeForm in ShiftController ?
+     * Creates a form to free a shift entity (admin side).
+     * // TODO: how to avoid having same createShiftFreeAdminForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createShiftFreeForm(Shift $shift)
+    private function createShiftFreeAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))

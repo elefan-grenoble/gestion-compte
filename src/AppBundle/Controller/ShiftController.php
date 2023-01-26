@@ -241,7 +241,52 @@ class ShiftController extends Controller
     }
 
     /**
-     * free a shift (admin side).
+     * Free a shift.
+     *
+     * @Route("/{id}/free", name="shift_free", methods={"POST"})
+     */
+    public function freeShiftAction(Request $request, Shift $shift)
+    {
+        $session = new Session();
+
+        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
+
+        $form = $this->createShiftFreeForm($shift);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            if($shift->isFixe()) {
+                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
+                return $this->redirectToRoute("homepage");
+            }
+            if (!$shift->getShifter()) {
+                $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
+                return $this->redirectToRoute("homepage");
+            }
+            // store shift beneficiary & reason
+            $beneficiary = $shift->getShifter();
+            $reason = $form->get("reason")->getData();
+
+            // free shift
+            $shift->free($reason);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
+
+        $session->getFlashBag()->add('success', "Le créneau a été annulé !");
+        return $this->redirectToRoute('homepage');
+    }
+
+    /**
+     * Free a shift (admin side).
      *
      * @Route("/{id}/free_admin", name="shift_free_admin", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
@@ -250,7 +295,7 @@ class ShiftController extends Controller
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
-        $form = $this->createShiftFreeForm($shift);
+        $form = $this->createShiftFreeAdminForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -380,52 +425,6 @@ class ShiftController extends Controller
             $referer = $request->headers->get('referer');
             return new RedirectResponse($referer);
         }
-    }
-
-    /**
-     * Dismiss a booked shift
-     *
-     * @Route("/{id}/dismiss", name="shift_dismiss", methods={"POST"})
-     */
-    public function dismissShiftAction(Request $request, Shift $shift)
-    {
-        $session = new Session();
-
-        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
-
-        $form = $this->createShiftDismissForm($shift);
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if($shift->isFixe()) {
-                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
-                return $this->redirectToRoute("homepage");
-            }
-            if (!$shift->getShifter()) {
-                $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
-                return $this->redirectToRoute("homepage");
-            }
-            // store shift beneficiary & reason
-            $beneficiary = $shift->getShifter();
-            $fixe = $shift->isFixe();
-            $reason = $form->get("reason")->getData();
-
-            // free shift
-            $shift->free($reason);
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
-        } else {
-            return $this->redirectToRoute('homepage');
-        }
-
-        $session->getFlashBag()->add('success', "Le créneau a été annulé !");
-        return $this->redirectToRoute('homepage');
     }
 
     /**
@@ -608,6 +607,23 @@ class ShiftController extends Controller
      */
     private function createShiftFreeForm(Shift $shift)
     {
+        $form = $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false))
+            ->setMethod('POST');
+
+        return $form->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity (admin side).
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftFreeAdminForm(Shift $shift)
+    {
         $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
             ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
@@ -630,23 +646,6 @@ class ShiftController extends Controller
             ->add('validate', HiddenType::class, [
                 'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
-            ->setMethod('POST');
-
-        return $form->getForm();
-    }
-
-    /**
-     * Creates a form to dismiss a shift entity.
-     *
-     * @param Shift $shift The shift entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createShiftDismissForm(Shift $shift)
-    {
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false))
             ->setMethod('POST');
 
         return $form->getForm();

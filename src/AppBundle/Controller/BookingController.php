@@ -70,15 +70,15 @@ class BookingController extends Controller
         $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($membership, $preceding_previous_cycle_start, $next_cycle_end);
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
 
-        $shiftDismissForms = [];
+        $shiftFreeForms = [];
         foreach ($shifts_by_cycle as $key => $shifts) {
             foreach ($shifts as $shift) {
-                $shiftDismissForms[$shift->getId()] = $this->createShiftDismissForm($shift)->createView();
+                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeForm($shift)->createView();
             }
         }
 
         return $this->render('booking/home_booked_shifts.html.twig', array(
-            'shift_dismiss_forms' => $shiftDismissForms,
+            'shift_free_forms' => $shiftFreeForms,
             'period_positions' => $period_positions,
             'shiftsByCycle' => $shifts_by_cycle,
         ));
@@ -396,7 +396,7 @@ class BookingController extends Controller
         foreach ($shifts as $shift) {
             $shiftBookForms[$shift->getId()] = $this->createShiftBookForm($shift)->createView();
             $shiftDeleteForms[$shift->getId()] = $this->createShiftDeleteForm($shift)->createView();
-            $shiftFreeForms[$shift->getId()] = $this->createShiftFreeForm($shift)->createView();
+            $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
             $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
         }
         $bucketAddForm = $this->get('form.factory')->createNamed(
@@ -644,13 +644,30 @@ class BookingController extends Controller
 
     /**
      * Creates a form to free a shift entity.
-     * // TODO: how to avoid having same createShiftFreeForm in ShiftController ?
+     * // TODO: how to avoid having similar createShiftFreeForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
     private function createShiftFreeForm(Shift $shift)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity (admin side).
+     * // TODO: how to avoid having same createShiftFreeAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftFreeAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
@@ -674,23 +691,6 @@ class BookingController extends Controller
             ->add('validate', HiddenType::class, [
                 'data' => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
-            ->setMethod('POST')
-            ->getForm();
-    }
-
-    /**
-     * Creates a form to dismiss a shift entity.
-     * // TODO: how to avoid having similar createShiftDismissForm in ShiftController ?
-     *
-     * @param Shift $shift The shift entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createShiftDismissForm(Shift $shift)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_dismiss', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST')
             ->getForm();
     }
