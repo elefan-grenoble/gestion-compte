@@ -193,42 +193,42 @@ class ShiftService
 
     public function isShiftBookable(Shift $shift, Beneficiary $beneficiary = null)
     {
-        // Do not book old or locked shifts
-        if ($shift->getIsPast() || $shift->isLocked()) {
+        if (!$beneficiary) {
+            return true;
+        }
+
+        // Do not book old or locked or booked shifts
+        if ($shift->getIsPast() || $shift->isLocked() || $shift->getShifter()) {
             return false;
         }
         // Do not book pre-booked shift
         if ($shift->getLastShifter() && $beneficiary->getId() != $shift->getLastShifter()->getId()) {
             return false;
         }
-        if (!$beneficiary) {
-            return true;
-        }
-        // Do not book shift i do not know how to handle (formation)
+        // Do not book shift the beneficiary cannot handle (formation)
         if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
             return false;
         }
-
-        $member = $beneficiary->getMembership();
-        if ($member->isCurrentlyExemptedFromShifts($shift->getStart()))
-            return false;
-
-        if ($member->isWithdrawn())
-            return false;
-
-        if ($member->getFirstShiftDate() > $shift->getStart())
-            return false;
-
         // First shift ever of the beneficiary, check he or she is not the first one to book the bucket
         if ($this->isBeginner($beneficiary) && $this->isShiftEmpty($shift)) {
             return false;
         }
-
         // Check that beneficiary did not book a shift that overlaps the current
         if (!$this->canBookShift($beneficiary, $shift)) {
             return false;
         }
 
+        // membership rules (exemption, withdrawn, frozen)
+        $member = $beneficiary->getMembership();
+        if ($member->isCurrentlyExemptedFromShifts($shift->getStart())) {
+            return false;
+        }
+        if ($member->isWithdrawn()) {
+            return false;
+        }
+        if ($member->getFirstShiftDate() > $shift->getStart()) {
+            return false;
+        }
         if ($member->getFrozen()) {
             $cycle_end = $this->membershipService->getEndOfCycle($member);
             //current cycle : cannot book when frozen
@@ -295,8 +295,9 @@ class ShiftService
     public function getBookableShifts(ShiftBucket $bucket, Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
+            // return all free shifts
             $bookableShifts = $bucket->getShifts()->filter(function (Shift $shift) {
-                return !$shift->getShifter(); // free
+                return !$shift->getShifter();
             });
         } else {
             if ($bucket->canBookInterval($beneficiary)) {
@@ -340,8 +341,11 @@ class ShiftService
     public function getBookableShiftsCount(ShiftBucket $bucket, Beneficiary $beneficiary = null)
     {
         $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
-        if (!$beneficiary)
+
+        if (!$beneficiary) {
             return count($bookableShifts);
+        }
+
         return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations()));
     }
 
