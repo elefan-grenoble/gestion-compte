@@ -164,7 +164,7 @@ class ShiftController extends Controller
     }
 
     /**
-     * Book a shift admin.
+     * Book a shift (admin side).
      *
      * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
@@ -241,11 +241,12 @@ class ShiftController extends Controller
     }
 
     /**
-     * free a shift.
+     * free a shift (admin side).
      *
-     * @Route("/{id}/free", name="shift_free", methods={"POST"})
+     * @Route("/{id}/free_admin", name="shift_free_admin", methods={"POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function freeShiftAction(Request $request, Shift $shift)
+    public function freeShiftAdminAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -608,7 +609,7 @@ class ShiftController extends Controller
     private function createShiftFreeForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
             ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST');
 

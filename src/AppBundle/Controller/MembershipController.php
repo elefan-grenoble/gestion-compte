@@ -1190,7 +1190,7 @@ class MembershipController extends Controller
     private function createShiftFreeForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
             ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
             ->setMethod('POST')
             ->getForm();
