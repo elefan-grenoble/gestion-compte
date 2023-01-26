@@ -7,7 +7,7 @@
      data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
      style="width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
     <div style="height:2px; width: 100%;position: absolute;top:-2px;">
-        {% if nbBookedShifts %}
+        {% if nbBookedShifts > 0 %}
             {% for shift in 1..nbBookedShifts %}
                 <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
             {% endfor %}
