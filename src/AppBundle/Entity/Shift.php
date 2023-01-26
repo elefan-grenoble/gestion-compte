@@ -44,11 +44,6 @@ class Shift
     private $bookedTime;
 
     /**
-     * @var string
-     */
-    private $reason;
-
-    /**
      * @var bool
      *
      * @ORM\Column(name="was_carried_out", type="boolean", options={"default" : 0})
@@ -224,30 +219,6 @@ class Shift
     public function getBookedTime()
     {
         return $this->bookedTime;
-    }
-
-    /**
-     * Set reason
-     *
-     * @param string $reason
-     *
-     * @return BookedShift
-     */
-    public function setreason($reason)
-    {
-        $this->reason = $reason;
-
-        return $this;
-    }
-
-    /**
-     * Get reason
-     *
-     * @return string
-     */
-    public function getreason()
-    {
-        return $this->reason;
     }
 
     /**
