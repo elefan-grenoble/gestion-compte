@@ -257,14 +257,17 @@ class ShiftController extends Controller
                 $success = false;
                 $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
             } else {
-                $membership = $shift->getShifter()->getMembership();
-                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+                // store shift beneficiary & reason
+                $beneficiary = $shift->getShifter();
+                $reason = $form->get("reason")->getData();
 
                 // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
                 if ($wasCarriedOut) {
                     $shift->invalidateShiftParticipation();
                 }
-                $reason = $form->get("reason")->getData();
+
+                // free shift
                 $shift->free($reason);
 
                 $em = $this->getDoctrine()->getManager();
@@ -273,9 +276,9 @@ class ShiftController extends Controller
 
                 $dispatcher = $this->get('event_dispatcher');
                 if ($wasCarriedOut) {
-                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
                 }
-                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
+                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
@@ -401,14 +404,19 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
                 return $this->redirectToRoute("homepage");
             }
-            // Store beneficiary entity before removing it
+            // store shift beneficiary & reason
             $beneficiary = $shift->getShifter();
             $reason = $form->get("reason")->getData();
+
+            // free shift
             $shift->free($reason);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($shift);
             $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
         } else {
             return $this->redirectToRoute('homepage');
         }

@@ -109,6 +109,14 @@ services:
             tags:
                 - { name: kernel.event_listener, event: commission.join, method: onJoin }
                 - { name: kernel.event_listener, event: commission.leave, method: onLeave }
+    shift_free_log_event_listener:
+            class: AppBundle\EventListener\ShiftFreeLogEventListener
+            arguments:
+                $entityManager: "@doctrine.orm.entity_manager"
+                $logger: "@logger"
+                $container: "@service_container"
+            tags:
+                - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
     time_log_event_listener:
             class: AppBundle\EventListener\TimeLogEventListener
             arguments:
@@ -146,22 +154,17 @@ services:
 
     # subscribers
     beneficiary_initialization_subscriber:
-            class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
-            arguments:
-                - "@doctrine.orm.entity_manager"
-            tags:
-                - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
-    shift_subscriber:
-            class: AppBundle\EventSubscriber\ShiftSubscriber
-            public: true
-            tags:
-                - { name: doctrine.event_subscriber }
+        class: AppBundle\EventListener\BeneficiaryInitializationSubscriber
+        arguments:
+            - "@doctrine.orm.entity_manager"
+        tags:
+            - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
 
     # validators
     validator_anonymous_beneficiary_unique_email:
-            class: AppBundle\Validator\Constraints\UniqueEmailValidator
-            arguments:
-              - "@doctrine.orm.entity_manager"
+        class: AppBundle\Validator\Constraints\UniqueEmailValidator
+        arguments:
+            - "@doctrine.orm.entity_manager"
     validator_anonymous_beneficiary_beneficiary_can_host:
         class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
         arguments:
@@ -182,8 +185,8 @@ services:
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
-    shift_free_service:
-            class: AppBundle\Service\ShiftFreeLogger
+    shift_free_log_service:
+            class: AppBundle\Service\ShiftFreeLogService
             public: true
             arguments:
                 $tokenStorage: '@security.token_storage'

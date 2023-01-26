@@ -74,7 +74,7 @@ class TimeLogEventListener
     public function onShiftInvalidated(ShiftInvalidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftInvalidated");
-        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
+        $this->deleteShiftLogs($event->getShift(), $event->getMember());
     }
 
     /**
@@ -84,7 +84,7 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
-        $this->deleteShiftLogs($event->getShift(), $event->getMembership());
+        $this->deleteShiftLogs($event->getShift(), $event->getMember());
     }
 
     /**
