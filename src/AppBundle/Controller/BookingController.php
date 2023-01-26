@@ -394,7 +394,7 @@ class BookingController extends Controller
         $shiftFreeForms = [];
         $shiftValidateInvalidateForms = [];
         foreach ($shifts as $shift) {
-            $shiftBookForms[$shift->getId()] = $this->createShiftBookForm($shift)->createView();
+            $shiftBookForms[$shift->getId()] = $this->createShiftBookAdminForm($shift)->createView();
             $shiftDeleteForms[$shift->getId()] = $this->createShiftDeleteForm($shift)->createView();
             $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
             $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
@@ -597,13 +597,13 @@ class BookingController extends Controller
 
     /**
      * Creates a form to book a shift entity.
-     * // TODO: how to avoid having same createShiftBookForm in ShiftController ?
+     * // TODO: how to avoid having same createShiftBookAdminForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createShiftBookForm(Shift $shift)
+    private function createShiftBookAdminForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))

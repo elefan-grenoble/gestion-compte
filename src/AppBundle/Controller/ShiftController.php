@@ -171,7 +171,7 @@ class ShiftController extends Controller
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
-        $form = $this->createShiftBookForm($shift);
+        $form = $this->createShiftBookAdminForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -266,6 +266,7 @@ class ShiftController extends Controller
             }
             // store shift beneficiary & reason
             $beneficiary = $shift->getShifter();
+            $fixe = $shift->isFixe();
             $reason = $form->get("reason")->getData();
 
             // free shift
@@ -276,7 +277,7 @@ class ShiftController extends Controller
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $reason));
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
         } else {
             return $this->redirectToRoute('homepage');
         }
@@ -559,7 +560,7 @@ class ShiftController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createShiftBookForm(Shift $shift)
+    private function createShiftBookAdminForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
