@@ -53,7 +53,7 @@ class TimeLogService
     public function initShiftTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
         $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
-        $log->setType(TimeLog::TYPE_SHIFT);
+        $log->setType(TimeLog::TYPE_SHIFT_VALIDATED);
         $log->setShift($shift);
         $log->setTime($shift->getDuration());
 
