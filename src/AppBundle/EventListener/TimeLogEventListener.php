@@ -93,7 +93,12 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
-        $this->deleteShiftLogs($event->getShift(), $event->getMember());
+        if ($this->use_card_reader_to_validate_shifts) {
+            // do nothing!
+            // TimeLogs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+        } else {
+            $this->deleteShiftLogs($event->getShift(), $event->getMember());
+        }
     }
 
     /**
