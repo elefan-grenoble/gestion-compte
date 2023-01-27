@@ -69,7 +69,7 @@ class TimeLogEventListener
             $now = new \DateTime('now');
             // why $now?
             // to avoid edge cases where the shift is validated manually later, we need to take it into account in the next cycle for instance
-            $this->createShiftLog($shift, $now);
+            $this->createShiftLog($shift, $now, $event->getSource());
         } else {
             // do nothing!
             // time log already created in onShiftBooked
@@ -156,9 +156,9 @@ class TimeLogEventListener
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createShiftLog(Shift $shift, \DateTime $date = null)
+    private function createShiftLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftLog($shift, $date);
+        $log = $this->container->get('time_log_service')->initShiftLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }

@@ -247,7 +247,7 @@ class DefaultController extends Controller
                     $shift->validateShiftParticipation();
                     $em->persist($shift);
                     $em->flush();
-                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift, "Badgeuse"));
                 }
             }
             return $this->render('user/check.html.twig', [

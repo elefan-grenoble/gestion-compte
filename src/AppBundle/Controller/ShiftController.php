@@ -390,7 +390,7 @@ class ShiftController extends Controller
 
                 $dispatcher = $this->get('event_dispatcher');
                 if ($validate) {
-                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift, "Admin"));
                 } else {
                     $beneficiary = $shift->getShifter();
                     $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
