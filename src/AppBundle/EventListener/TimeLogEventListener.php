@@ -52,7 +52,7 @@ class TimeLogEventListener
             // time log will be created in onShiftValidated
         } else {
             $shift = $event->getShift();
-            $this->createShiftLog($shift, $shift->getStart());
+            $this->createShiftValidatedTimeLog($shift, $shift->getStart());
         }
     }
 
@@ -69,7 +69,7 @@ class TimeLogEventListener
             $now = new \DateTime('now');
             // why $now? to avoid edge cases
             // example: if the shift is validated manually later, we might need to take it into account in the next cycle
-            $this->createShiftLog($shift, $now);
+            $this->createShiftValidatedTimeLog($shift, $now);
         } else {
             // do nothing!
             // time log already created in onShiftBooked
@@ -83,7 +83,22 @@ class TimeLogEventListener
     public function onShiftInvalidated(ShiftInvalidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftInvalidated");
-        $this->deleteShiftLogs($event->getShift(), $event->getMember());
+        if ($shift->getIsFuture()) {
+            // shift validated but in the future?
+            // can be the case if !$this->use_card_reader_to_validate_shifts
+            $this->deleteShiftLogs($event->getShift(), $event->getMember());
+        } else {
+            // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
+            // if true, create an inverse timelog
+            $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) {
+                return (($log->type == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $membership));
+            });
+            if ($shiftValidatedTimeLog->count() > 0) {
+                $this->createShiftInvalidatedTimeLog($shift);
+            } else {
+                // do nothing!
+            }
+        }
     }
 
     /**
@@ -161,9 +176,21 @@ class TimeLogEventListener
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createShiftLog(Shift $shift, \DateTime $date = null, $description = null)
+    private function createShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftTimeLog($shift, $date, $description);
+        $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
+        $this->em->persist($log);
+        $this->em->flush();
+    }
+
+    /**
+     * @param Shift $shift
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    {
+        $log = $this->container->get('time_log_service')->initShiftInvalidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -177,7 +204,7 @@ class TimeLogEventListener
     {
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
-            if ($log->getMembership()->getId() == $membership->getId()) {
+            if ($log->getMembership() == $membership) {
                 $this->em->remove($log);
             }
         }

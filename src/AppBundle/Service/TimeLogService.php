@@ -26,6 +26,13 @@ class TimeLogService
         $this->due_duration_by_cycle = $due_duration_by_cycle;
     }
 
+    /**
+     * Initialize a log with the member data
+     * 
+     * @param Membership $member
+     * @param \DateTime $date
+     * @return TimeLog
+     */
     public function initTimeLog(Membership $member, \DateTime $date = null, $description = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
@@ -46,11 +53,13 @@ class TimeLogService
     }
 
     /**
-     * Initialize a log with the shift data
+     * Initialize a "shift validation" log with the shift data
+     * 
      * @param Shift $shift
+     * @param \DateTime $date
      * @return TimeLog
      */
-    public function initShiftTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    public function initShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
         $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT_VALIDATED);
@@ -61,7 +70,25 @@ class TimeLogService
     }
 
     /**
-     * Initialize a log with the member data
+     * Initialize an "shift invalidation" log with the shift data
+     * 
+     * @param Shift $shift
+     * @param \DateTime $date
+     * @return TimeLog
+     */
+    public function initShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    {
+        $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
+        $log->setType(TimeLog::TYPE_SHIFT_INVALIDATED);
+        $log->setShift($shift);
+        $log->setTime(-1 * $shift->getDuration());
+
+        return $log;
+    }
+
+    /**
+     * Initialize a "cycle beginning" log with the member data
+     * 
      * @param Membership $member
      * @param \DateTime $date
      * @return TimeLog
@@ -76,7 +103,8 @@ class TimeLogService
     }
 
     /**
-     * Initialize a log with the member data
+     * Initialize a "current cycle beginning" log with the member data
+     * 
      * @param Membership $member
      * @return TimeLog
      */
@@ -89,7 +117,8 @@ class TimeLogService
     }
 
     /**
-     * Initialize a custom log with the member data
+     * Initialize a "custom" log with the member data
+     * 
      * @param Membership $member
      * @return TimeLog
      */

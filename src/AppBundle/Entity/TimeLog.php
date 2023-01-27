@@ -283,6 +283,13 @@ class TimeLog
                 } else {
                     return "Créneau (non renseigné)";
                 }
+            case self::TYPE_SHIFT_INVALIDATED:
+                if ($this->shift) {
+                    setlocale(LC_TIME, 'fr_FR.UTF8');
+                    return "Créneau *invalidé* " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                } else {
+                    return "Créneau *invalidé* (non renseigné)";
+                }
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:
