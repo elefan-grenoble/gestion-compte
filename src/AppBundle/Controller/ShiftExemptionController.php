@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 /**
  * Shiftexemption controller.
  *
- * @Route("admin/shiftexemption")
+ * @Route("admin/shifts/exemptions")
  */
 class ShiftExemptionController extends Controller
 {
