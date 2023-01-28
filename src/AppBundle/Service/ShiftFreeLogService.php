@@ -12,13 +12,13 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class ShiftFreeLogService
 {
-    private EntityManagerInterface $em;
+    protected $em;
     protected $requestStack;
     private $tokenStorage;
 
-    public function __construct(EntityManagerInterface $entityManager, RequestStack $requestStack, TokenStorage $tokenStorage)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorage $tokenStorage)
     {
-        $this->em = $entityManager;
+        $this->em = $em;
         $this->requestStack = $requestStack;
         $this->tokenStorage = $tokenStorage;
     }
