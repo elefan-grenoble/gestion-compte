@@ -18,8 +18,11 @@
                 <th>Auteur</th>
                 <th>Créneau</th>
                 <th>Bénéficiaire</th>
+                {% if use_fly_and_fixed %}
+                    <th>Fixe</th>
+                {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
-                <th>Route</th>
+                    <th>Route</th>
                 {% endif %}
                 <th>Raison</th>
             </tr>
@@ -48,8 +51,11 @@
                         {{ shiftFreeLog.beneficiary }}
                     </a>
                 </td>
+                {% if use_fly_and_fixed %}
+                    <td>{{ shiftFreeLog.fixe }}</td>
+                {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
-                <td>{{ shiftFreeLog.requestRoute }}</td>
+                    <td>{{ shiftFreeLog.requestRoute }}</td>
                 {% endif %}
                 <td>{{ shiftFreeLog.reason }}</td>
             </tr>

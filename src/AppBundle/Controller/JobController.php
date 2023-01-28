@@ -46,7 +46,6 @@ class JobController extends Controller
         $res["form"]->handleRequest($request);
 
         if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
-            var_dump($res["form"]->get("enabled")->getData());
             $res["enabled"] = $res["form"]->get("enabled")->getData();
         }
 
