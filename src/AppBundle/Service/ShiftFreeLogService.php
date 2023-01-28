@@ -23,7 +23,7 @@ class ShiftFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary, $reason = null)
+    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary, $fixe = false, $reason = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
@@ -31,6 +31,7 @@ class ShiftFreeLogService
         $log = new ShiftFreeLog;
         $log->setShift($shift);
         $log->setBeneficiary($beneficiary);
+        $log->setFixe($fixe);
         if ($reason) {
             $log->setReason($reason);
         }
