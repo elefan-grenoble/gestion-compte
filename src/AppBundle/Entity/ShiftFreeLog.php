@@ -49,6 +49,13 @@ class ShiftFreeLog
     private $beneficiary;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="fixe", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $fixe = false;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -114,6 +121,20 @@ class ShiftFreeLog
         $this->beneficiary = $beneficiary;
 
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFixe(): ?bool {
+        return $this->fixe;
+    }
+
+    /**
+     * @param bool $fixe
+     */
+    public function setFixe(?bool $fixe): void {
+        $this->fixe = $fixe;
     }
 
     public function getReason(): ?string
