@@ -64,7 +64,7 @@
 
         {% if shifter %}
             {# sombody is registered to this period #}
-            {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
+            {% set warning = shifter.hasWarningStatus %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
                class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter.getDisplayNameWithMemberNumberAndStatusIcon() | raw }} &#013;&#010; ({{ formation }})">
                 {% if warning %}

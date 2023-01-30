@@ -546,6 +546,31 @@ class Beneficiary
     }
 
     /**
+     * return true if the beneficiary is in a "warning" status
+     * useful for PeriodPositionController
+     * 
+     * @return bool
+     */
+    public function hasWarningStatus()
+    {
+        if ($this->getMembership()->getWithdrawn()) {
+            return true;
+        }
+        if ($this->getMembership()->getFrozen()) {
+            return true;
+        }
+        if ($this->isFlying()) {
+            return true;
+        }
+        if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
+            return true;
+        }
+        if (!$this->getMembership()->hasValidRegistration()) {
+            return true;
+        }
+    }
+
+    /**
      * return a string with emoji between brackets depending on the
      * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
      * or an empty string if none of those
@@ -553,31 +578,36 @@ class Beneficiary
      * @param bool $includeLeadingSpace if true add a space at the beginning
      * @return string with ether emoji(s) for the beneficiary's status or empty
      */
-    public function getStatusIcon(bool $includeLeadingSpace = false):string{
-
-
+    public function getStatusIcon(bool $includeLeadingSpace = false):string
+    {
         $symbols = array();
 
-        if($this->getMembership()->getWithdrawn()){
-            $symbols[]= "&#x26A0;";
+        if ($this->getMembership()->getWithdrawn()) {
+            $symbols[]= "&#x26A0;"; // ∅
         }
-        if ($this->getMembership()->getFrozen()){
-            $symbols[]= "&#x2744;";
+        if ($this->getMembership()->getFrozen()) {
+            $symbols[]= "&#x2744;"; // ❄
         }
-        if($this->isFlying()){
-            $symbols[]= "&#9992;";
+        if ($this->isFlying()) {
+            $symbols[]= "&#9992;"; // ✈
+        }
+        if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
+            $symbols[]= "&#x2602;"; // ☂
+        }
+        if (!$this->getMembership()->hasValidRegistration()) {
+            $symbols[]= "&#8364;"; // €
         }
 
-        if (count($symbols)){
+        if (count($symbols)) {
             $res = '[' . implode("/", $symbols) . ']';
 
-            if($includeLeadingSpace){
+            if ($includeLeadingSpace) {
                 $res = " " . $res;
             }
-        }else{
-            $res =  "";
+        } else {
+            $res = "";
         }
-        // 	for dispensed beneficiary &#127989;
+
         return $res;
 
     }
