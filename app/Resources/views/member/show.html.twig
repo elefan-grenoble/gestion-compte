@@ -23,6 +23,7 @@
         {% if member.isCurrentlyExemptedFromShifts() %}<i class="material-icons" title="Compte exempté">beach_access</i>{% endif %}
         {% if member.frozen %}<i class="material-icons" title="Compte gelé">ac_unit</i>{% endif %}
         {% if member.withdrawn %}<i class="material-icons" title="Compte fermé">block</i>{% endif %}
+        {% if not member.hasValidRegistration() and not member.withdrawn %}<i class="material-icons" title="Compte en attente d'adhésion">euro_symbol</i>{% endif %}
     </h4>
 
     {% if member.beneficiaries | length %}
@@ -421,7 +422,7 @@
         body {
             background-color: {{ member_frozen_background_color }};
         }
-        {% elseif member.isCurrentlyExemptedFromShifts() %}
+        {% elseif member.isCurrentlyExemptedFromShifts() or not member.hasValidRegistration() %}
         body {
             background-color: {{ member_exempted_background_color }};
         }
