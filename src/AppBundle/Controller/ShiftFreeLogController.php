@@ -14,16 +14,15 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 /**
  * ShiftFreeLog controller.
  *
- * @Route("admin/shifts/logs")
+ * @Route("admin/shifts/freelogs")
  */
 class ShiftFreeLogController extends Controller
 {
     /**
      * Lists all ShiftFreeLog entities.
      *
-     * @Route("/", name="admin_shiftfreelog_index")
+     * @Route("/", name="admin_shiftfreelog_index", methods={"GET"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("GET")
      */
     public function indexAction(Request $request)
     {
