@@ -108,7 +108,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
-            ->setConstructorArgs([$this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService])
+            ->setConstructorArgs([$this->em, $beneficiaryService, $membershipService, $this->due_duration_by_cycle, $this->min_shift_duration, $this->new_users_start_as_beginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time])
             ->getMock();
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
@@ -153,7 +153,7 @@ class ShiftServiceTest extends TestCase
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
             ->setMethods(['hasPreviousValidShifts'])
-            ->setConstructorArgs([$this->em, $this->due_duration_by_cycle, $this->min_shift_duration, $newUserStartAsBeginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time, $beneficiaryService, $membershipService])
+            ->setConstructorArgs([$this->em, $beneficiaryService, $membershipService, $this->due_duration_by_cycle, $this->min_shift_duration, $newUserStartAsBeginner, $this->allow_extra_shifts, $this->max_time_in_advance_to_book_extra_shifts, $this->forbid_shift_overlap_time])
             ->getMock()
         ;
 
@@ -182,7 +182,7 @@ class ShiftServiceTest extends TestCase
     {
         $date = new \DateTime();
         $date->add(new \DateInterval('P10D'));
-        $this->assertFalse($this->doTestHasPreviousValidShifts($date, true));
+        $this->assertFalse($this->doTestHasPreviousValidShifts($date));
     }
 
     public function testHasPreviousValidShiftsWithoutShift()
@@ -190,14 +190,13 @@ class ShiftServiceTest extends TestCase
         $this->assertFalse($this->doTestHasPreviousValidShifts(null));
     }
 
-    public function doTestHasPreviousValidShifts($shiftDate, $dismissed = false)
+    public function doTestHasPreviousValidShifts($shiftDate)
     {
         $shifts = new ArrayCollection();
 
         if ($shiftDate)
         {
             $shift = new Shift();
-            $shift->setIsDismissed($dismissed);
             $shift->setStart($shiftDate);
             $shifts->add($shift);
         }
