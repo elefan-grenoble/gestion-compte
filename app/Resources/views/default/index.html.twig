@@ -40,15 +40,16 @@
             </div>
         {% endif %}
         {% if app.user.beneficiary %}
+            {% set member = app.user.beneficiary.membership %}
             <div class="col s12">
                 <p>
                     Bienvenue sur ton espace personnel à {{ project_name }}
-                    {% if app.user.beneficiary.membership.beneficiaries | length > 1 %}
+                    {% if member.beneficiaries | length > 1 %}
                         <br />
-                        Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
+                        Tu partages ton compte avec {% for beneficiary in member.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
                     {% endif %}
                 </p>
-                {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
+                {% if member | uptodate and member | can_register %}
                     <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
                     <br />
                     <br />
@@ -58,11 +59,27 @@
     </div>
 
     {% if app.user.beneficiary %}
+        {% set member = app.user.beneficiary.membership %}
+
+        {% if member.isCurrentlyExemptedFromShifts() %}
+            <div class="row">
+                <div class="card-panel teal white-text">
+                    <i class="material-icons left">beach_access</i>
+                    <strong>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
+                    <ul class="list-unstyled">
+                        {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
+                            <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+
         <div id="home-actions" class="row center">
-            {% if app.user.beneficiary.membership | uptodate %}
+            {% if member | uptodate %}
                 <div class="col s12 l6">
                     <div class="homebox">
-                        <h5><span class="white">{% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
+                        <h5><span class="white">{% if member.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
                         {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
                     </div>
                 </div>
@@ -73,15 +90,15 @@
                 <div class="homebox">
                     <h5><span class="white">Mon compte</span></h5>
                     <div>
-                        {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
+                        {% if (member.registrations | length) and not member | uptodate %}
                             <p>
                                 <i class="material-icons">warning</i>
-                                {% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
+                                {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date("%R%a"))~" days")| date_fr_long }}
                             </p>
                             <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
                                 <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
                             </a>
-                        {% elseif not app.user.beneficiary.membership | uptodate %}
+                        {% elseif not member | uptodate %}
                             <p>
                                 <i class="material-icons">warning</i>
                                 Il est temps d'adhérer.
@@ -157,7 +174,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-                {% if app.user.beneficiary and (app.user.beneficiary.membership | uptodate) and display_keys_shop %}
+                {% if app.user.beneficiary and (member | uptodate) and display_keys_shop %}
                     <div class="homebox">
                         <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>
                         {% if display_keys_shop %}
@@ -168,7 +185,7 @@
             </div>
         </div>
     {% endif %}
-    {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
+    {% if app.user.beneficiary and member | uptodate %}
         <div id="home-shifts" class="row">
             <div class="col s12">
                 {# why render instead of include? because of forms init #}

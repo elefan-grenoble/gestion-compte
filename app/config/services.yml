@@ -190,6 +190,7 @@ services:
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
+                - "%use_card_reader_to_validate_shifts%"
     shift_free_log_service:
             class: AppBundle\Service\ShiftFreeLogService
             public: true

@@ -2,18 +2,6 @@
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
 
-    {% if member.isCurrentlyExemptedFromShifts() %}
-        <div class="card-panel teal white-text">
-            <i class="material-icons left">beach_access</i>
-            <strong>{% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
-            <ul class="list-unstyled">
-                {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
-                    <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-
     <ul class="collapsible collapsible-expandable">
         {% if use_fly_and_fixed %}
             <li class="active">

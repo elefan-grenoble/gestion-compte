@@ -671,12 +671,14 @@ class Membership
             $carry += $log->getTime();
             return $carry;
         };
+
         if ($before)
-            $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
+            $logs = $this->getTimeLogs()->filter(function ($log) use ($before) {
                 return ($log->getCreatedAt() < $before);
             });
         else
             $logs = $this->getTimeLogs();
+
         return array_reduce($logs->toArray(), $sum, 0);
     }
 

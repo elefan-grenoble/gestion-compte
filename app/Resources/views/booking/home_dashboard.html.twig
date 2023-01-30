@@ -44,34 +44,34 @@
             <p>
                 <i class="material-icons">warning</i>
                 {% if member.beneficiaries | length > 1 %}
-                    <span>Vous avez du retard sur votre bénévolat. Pensez à réserver vos créneaux.</span>
+                    <span>Vous avez du retard sur votre bénévolat.</span>
                 {% else %}
-                    <span>Tu as du retard sur ton bénévolat. Pense à réserver tes créneaux.</span>
+                    <span>Tu as du retard sur ton bénévolat.</span>
                 {% endif %}
             </p>
+        {% endif %}
+        {% set cycleRemainingToBook = shift_service.remainingToBook(member) %}
+        {% if cycleRemainingToBook > 0 %}
+            <p>
+                <span>{% if member.beneficiaries | length > 1 %}Pensez à réserver vos créneaux.{% else %}Pense à réserver tes créneaux.{% endif %}</span>
+                <br />
+                <span>{% if member.beneficiaries | length > 1 %}Vous avez{% else %}Tu as{% endif %} encore {{ cycleRemainingToBook | duration_from_minutes }} à réserver.</span>
+            </p>
         {% else %}
-            {% set remaining = shift_service.remainingToBook(member) %}
-            {% if remaining > 0 %}
-                <p>
-                    <i class="material-icons">warning</i>
-                    <span>{% if member.beneficiaries | length > 1 %}Pensez à réserver vos créneaux.{% else %}Pense à réserver tes créneaux.{% endif %}</span>
-                    <br />
-                    <span>{% if member.beneficiaries | length > 1 %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
-                </p>
-            {% else %}
-                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(end_current_cycle)) %}
-                <p>
-                    Bravo ! {% if member.beneficiaries | length > 1 %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
-                    ont été planifiées sur le cycle actuel.
-                </p>
-                {% if beneficiariesWhoCanBook | length > 0 and duration_to_book > 0 and not allow_extra_shifts %}
+            <p>
+                Bravo ! {% if member.beneficiaries | length > 1 %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
+                ont été planifiées sur le cycle actuel.
+            </p>
+            {% set cycleRemainingToBookExtra = shift_service.remainingToBookExtra(member) %}
+            {% if cycleRemainingToBookExtra > 0 %}
+                {% if beneficiariesWhoCanBook | length > 0 and not allow_extra_shifts %}
                     <p>
                         {% if beneficiariesWhoCanBook | length > 1 %}
                             {% for b in beneficiariesWhoCanBook %} {{ b.firstname }} {% if loop.index < loop.length %} et {% endif %}{% endfor %}peuvent
                         {% else %}
                             {{ (beneficiariesWhoCanBook | first).firstname }} peut
                         {% endif %} encore
-                        effectuer {{ duration_to_book | duration_from_minutes }}.
+                        effectuer {{ cycleRemainingToBookExtra | duration_from_minutes }}.
                     </p>
                 {% elseif (allow_extra_shifts) %}
                     <p>
@@ -81,11 +81,6 @@
                             Tu peux
                         {% endif %}
                         encore effectuer des créneaux.
-                    </p>
-                {% else %}
-                    <p>
-                        <i class="material-icons">stars</i> Bravo !
-                        Tous {% if member.beneficiaries | length > 1 %}vos{% else %}tes{% endif %} créneaux ont été planifiés sur le cycle actuel !
                     </p>
                 {% endif %}
             {% endif %}
@@ -100,5 +95,5 @@
         Réserver
     </a>
 
-    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ end_current_cycle | date_fr_long }}</p>
+    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ end_current_cycle | date_fr_long }}.</p>
 {% endif %}

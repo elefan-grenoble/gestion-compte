@@ -25,9 +25,10 @@ class ShiftService
     private $allowExtraShifts;
     private $maxTimeInAdvanceToBookExtraShifts;
     private $forbidShiftOverlapTime;
+    private $use_card_reader_to_validate_shifts;
 
     public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
-        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime)
+        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime, $use_card_reader_to_validate_shifts)
     {
         $this->em = $em;
         $this->beneficiaryService = $beneficiaryService;
@@ -38,6 +39,7 @@ class ShiftService
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
         $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
+        $this->use_card_reader_to_validate_shifts = $use_card_reader_to_validate_shifts;
     }
 
     /**
@@ -48,7 +50,41 @@ class ShiftService
     public function remainingToBook(Membership $member)
     {
         $cycle_end = $this->membershipService->getEndOfCycle($member);
-        return $this->due_duration_by_cycle - $member->getTimeCount($cycle_end);
+
+        $remaining = $this->due_duration_by_cycle - $member->getTimeCount($cycle_end);
+
+        // also take into account planned shifts
+        if ($this->use_card_reader_to_validate_shifts) {
+            $upcomingEndOfCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, new \DateTime('now'), $cycle_end);
+            foreach ($upcomingEndOfCycleShifts as $shift) {
+                $remaining = $remaining - $shift->getDuration();
+            }
+        }
+
+        return $remaining;
+    }
+
+    /**
+     * Return the remaining amount of time to book by the given membership in the current cycle
+     * Useful in the case of allow_extra_shifts
+     * @param Membership $member
+     * @return mixed
+     */
+    public function remainingToBookExtra(Membership $member)
+    {
+        $cycle_end = $this->membershipService->getEndOfCycle($member);
+
+        $remaining = $this->shiftTimeByCycle($member) - $member->getTimeCount($cycle_end);
+
+        // also take into account planned shifts
+        if ($this->use_card_reader_to_validate_shifts) {
+            $upcomingEndOfCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, new \DateTime('now'), $cycle_end);
+            foreach ($upcomingEndOfCycleShifts as $shift) {
+                $remaining = $remaining - $shift->getDuration();
+            }
+        }
+
+        return $remaining;
     }
 
     /**
@@ -94,7 +130,7 @@ class ShiftService
      */
     public function canBookSomething(Beneficiary $beneficiary)
     {
-        if (true === $this->allowExtraShifts) {
+        if ($this->allowExtraShifts === true) {
             return true;
         }
         return $this->canBookOnCycle($beneficiary, 0) || $this->canBookOnCycle($beneficiary, 1);
@@ -130,7 +166,7 @@ class ShiftService
      */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
-        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+        if ($this->allowExtraShifts === true && $this->maxTimeInAdvanceToBookExtraShifts === NULL) {
             return true;
         }
 
