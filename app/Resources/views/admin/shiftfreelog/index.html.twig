@@ -9,18 +9,40 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Historique des annulations de créneaux</h4>
+    <h4>Historique des annulations de créneaux ({{ shiftFreeLogs | length }})</h4>
+
+    {# Filter form  --------- #}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">tune</i>Filtres
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(filter_form) }}
+                <div class="row">
+                    <div class="col s4">
+                        <div class="input-field">
+                            {{ form_widget(filter_form.beneficiary) }}
+                            {{ form_label(filter_form.beneficiary) }}
+                        </div>
+                    </div>
+                </div>
+                {{ form_widget(filter_form.filter) }}
+                {{ form_end(filter_form) }}
+            </div>
+        </li>
+    </ul>
 
     <table class="responsive-table">
         <thead>
             <tr>
                 <th>Date</th>
-                <th>Auteur</th>
-                <th>Créneau</th>
                 <th>Bénéficiaire</th>
+                <th>Créneau</th>
                 {% if use_fly_and_fixed %}
                     <th>Fixe</th>
                 {% endif %}
+                <th>Auteur</th>
                 {% if is_granted("ROLE_ADMIN") %}
                     <th>Route</th>
                 {% endif %}
@@ -35,6 +57,17 @@
                     {{ shiftFreeLog.createdAt|date('d/m/Y H:i:s') }}
                 </td>
                 <td>
+                    <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">
+                        {{ shiftFreeLog.beneficiary }}
+                    </a>
+                </td>
+                <td>
+                    {{ shiftFreeLog.shift.job }} - {{ shiftFreeLog.shift.start | date('d/m/Y') }} de {{ shiftFreeLog.shift.start | date('H:i') }} à {{ shiftFreeLog.shift.end | date('H:i') }}
+                </td>
+                {% if use_fly_and_fixed %}
+                    <td>{{ shiftFreeLog.fixe }}</td>
+                {% endif %}
+                <td>
                     {% if shiftFreeLog.createdBy and shiftFreeLog.createdBy.beneficiary %}
                         <a href="{{ path("member_show",{'member_number': shiftFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
                             {{ shiftFreeLog.createdBy.beneficiary }}
@@ -43,17 +76,6 @@
                         {{ shiftFreeLog.createdBy }}
                     {% endif %}
                 </td>
-                <td>
-                    {{ shiftFreeLog.shift.job }} - {{ shiftFreeLog.shift.start | date('d/m/Y \\d\\e H:i')}} à {{ shiftFreeLog.shift.end | date('H:i')}}
-                </td>
-                <td>
-                    <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">
-                        {{ shiftFreeLog.beneficiary }}
-                    </a>
-                </td>
-                {% if use_fly_and_fixed %}
-                    <td>{{ shiftFreeLog.fixe }}</td>
-                {% endif %}
                 {% if is_granted("ROLE_ADMIN") %}
                     <td>{{ shiftFreeLog.requestRoute }}</td>
                 {% endif %}

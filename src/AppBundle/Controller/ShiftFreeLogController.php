@@ -3,12 +3,14 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\ShiftFreeLog;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
@@ -19,16 +21,54 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class ShiftFreeLogController extends Controller
 {
     /**
+     * Filter form.
+     */
+    private function filterFormFactory(Request $request): array
+    {
+        // default values
+        $res = [
+            "beneficiary" => null,
+        ];
+
+        // filter creation ----------------------
+        $res["form"] = $this->createFormBuilder()
+            ->setAction($this->generateUrl('admin_shiftfreelog_index'))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, array('label' => 'Bénéficiaire'))
+            ->add('filter', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
+            ->getForm();
+
+        $res['form']->handleRequest($request);
+
+        if ($res['form']->isSubmitted() && $res['form']->isValid()) {
+            $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
+        }
+
+        return $res;
+    }
+
+    /**
      * Lists all ShiftFreeLog entities.
      *
-     * @Route("/", name="admin_shiftfreelog_index", methods={"GET"})
+     * @Route("/", name="admin_shiftfreelog_index", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+        $filter = $this->filterFormFactory($request);
+        $sort = 'createdAt';
+        $order = 'DESC';
+
         $qb = $em->getRepository('AppBundle:ShiftFreeLog')->createQueryBuilder('s')
-                                                      ->orderBy('s.createdAt', 'DESC');
+            ->orderBy('s.' . $sort, $order);
+
+        if($filter["beneficiary"]) {
+            $qb = $qb->andWhere('s.beneficiary = :beneficiary')
+                ->setParameter('beneficiary', $filter['beneficiary']);
+        }
 
         $limitPerPage = 25;
         $paginator = new Paginator($qb);
@@ -44,6 +84,7 @@ class ShiftFreeLogController extends Controller
 
         return $this->render('admin/shiftfreelog/index.html.twig', array(
             'shiftFreeLogs' => $paginator,
+            'filter_form' => $filter['form']->createView(),
             'current_page' => $currentPage,
             'pages_count' => $pagesCount,
         ));
