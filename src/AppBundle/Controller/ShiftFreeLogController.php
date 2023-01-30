@@ -43,7 +43,7 @@ class ShiftFreeLogController extends Controller
                 'label' => 'Afficher seulement les annulations de créneaux fixes',
                 'required' => false,
             ))
-            ->add('filter', SubmitType::class, array(
+            ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
             ))

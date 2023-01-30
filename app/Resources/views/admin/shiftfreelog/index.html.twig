@@ -38,8 +38,9 @@
                         </div>
                     </div>
                 {% endif %}
-                {{ form_widget(filter_form.filter) }}
-                {{ form_end(filter_form) }}
+                {{ form_widget(filter_form.submit) }}
+                {{ form_row(filter_form._token) }}
+                {{ form_end(filter_form, {'render_rest': false}) }}
             </div>
         </li>
     </ul>

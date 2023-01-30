@@ -34,7 +34,7 @@ class JobController extends Controller
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('job_list'))
             ->add('enabled', CheckboxType::class, array(
-                'label' => 'Cacher les postes inactifs',
+                'label' => 'Afficher seulement les postes actifs',
                 'required' => false,
             ))
             ->add('filter', SubmitType::class, array(
