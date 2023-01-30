@@ -14,7 +14,7 @@ class ShiftInvalidatedEvent extends Event
     private $shift;
     private $beneficiary;
 
-    public function __construct(Shift $shift, Membership $beneficiary)
+    public function __construct(Shift $shift, Beneficiary $beneficiary)
     {
         $this->shift = $shift;
         $this->beneficiary = $beneficiary;

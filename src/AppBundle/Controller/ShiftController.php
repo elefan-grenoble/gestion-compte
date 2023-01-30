@@ -345,8 +345,8 @@ class ShiftController extends Controller
                 if ($validate) {
                     $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
                 } else {
-                    $membership = $shift->getShifter()->getMembership();
-                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
+                    $beneficiary = $shift->getShifter();
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
                 }
 
                 $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
