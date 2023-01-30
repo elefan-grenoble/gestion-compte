@@ -54,7 +54,7 @@
                                     {% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
                                         {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l, cycle: current_cycle, display_names: display_names } %}
                                     {% else %}
-                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l, display_names: display_names  } %}
+                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l, display_names: display_names } %}
                                     {% endif %}
                                 {% endfor %}
                             </div>
