@@ -44,7 +44,7 @@ class MembershipShiftExemption
     private $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ShiftExemption")
+     * @ORM\ManyToOne(targetEntity="ShiftExemption", inversedBy="membershipShiftExemptions")
      * @ORM\JoinColumn(name="shift_exemption_id", referencedColumnName="id")
      */
     private $shiftExemption;
