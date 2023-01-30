@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -27,13 +28,21 @@ class ShiftFreeLogController extends Controller
     {
         // default values
         $res = [
-            "beneficiary" => null,
+            'beneficiary' => null,
+            'fixe' => 0
         ];
 
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_shiftfreelog_index'))
-            ->add('beneficiary', AutocompleteBeneficiaryType::class, array('label' => 'Bénéficiaire'))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+                'label' => 'Bénéficiaire',
+                'required' => false,
+            ))
+            ->add('fixe', CheckboxType::class, array(
+                'label' => 'Afficher seulement les annulations de créneaux fixes',
+                'required' => false,
+            ))
             ->add('filter', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
@@ -44,6 +53,7 @@ class ShiftFreeLogController extends Controller
 
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
             $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
+            $res["fixe"] = $res["form"]->get("fixe")->getData();
         }
 
         return $res;
@@ -68,6 +78,10 @@ class ShiftFreeLogController extends Controller
         if($filter["beneficiary"]) {
             $qb = $qb->andWhere('s.beneficiary = :beneficiary')
                 ->setParameter('beneficiary', $filter['beneficiary']);
+        }
+        if($filter["fixe"]) {
+            $qb = $qb->andWhere('s.fixe = :fixe')
+                ->setParameter('fixe', $filter['fixe']);
         }
 
         $limitPerPage = 25;
