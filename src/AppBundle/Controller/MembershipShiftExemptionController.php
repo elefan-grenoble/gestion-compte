@@ -4,11 +4,14 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\MembershipShiftExemption;
+use AppBundle\Repository\ShiftExemptionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use \Datetime;
 
 /**
@@ -19,29 +22,73 @@ use \Datetime;
 class MembershipShiftExemptionController extends Controller
 {
     /**
+     * Filter form.
+     */
+    private function filterFormFactory(Request $request): array
+    {
+        // default values
+        $res = [
+            "shiftExemption" => null,
+        ];
+
+        // filter creation ----------------------
+        $res["form"] = $this->createFormBuilder()
+            ->setAction($this->generateUrl('admin_membershipshiftexemption_index'))
+            ->add('shiftExemption', EntityType::class, array(
+                'label' => 'Motif',
+                'class' => 'AppBundle:ShiftExemption',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+            ))
+            ->add('filter', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
+            ->getForm();
+
+        $res['form']->handleRequest($request);
+
+        if ($res['form']->isSubmitted() && $res['form']->isValid()) {
+            $res["shiftExemption"] = $res["form"]->get("shiftExemption")->getData();
+        }
+
+        return $res;
+    }
+
+    /**
      * Lists all membershipShiftExemption entities.
      *
-     * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET"})
+     * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      */
     public function indexAction(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+        $filter = $this->filterFormFactory($request);
+        $findByFilter = array();
+
+        if($filter["shiftExemption"]) {
+            $findByFilter["shiftExemption"] = $filter["shiftExemption"];
+        }
+
         $page = $request->get('page', 1);
         $limit = 50;
-        $em = $this->getDoctrine()->getManager();
+        $order = array('createdAt' => 'DESC');
+
         $nb_exemptions = $em->getRepository('AppBundle:MembershipShiftExemption')->count([]);
         if ($nb_exemptions == 0) {
             $max_page = 1;
         } else {
             $max_page = intval(($nb_exemptions-1) / $limit) + 1;
         }
-        $em = $this->getDoctrine()->getManager();
 
         $membershipShiftExemptions = $em->getRepository('AppBundle:MembershipShiftExemption')
-            ->findBy([], ['createdAt' => 'DESC'], $limit, ($page - 1) * $limit);
+            ->findBy($findByFilter, $order, $limit, ($page - 1) * $limit);
 
         return $this->render('admin/membershipshiftexemption/index.html.twig', array(
             'membershipShiftExemptions' => $membershipShiftExemptions,
+            'filter_form' => $filter['form']->createView(),
             'current_page' => $page,
             'max_page' => $max_page,
         ));

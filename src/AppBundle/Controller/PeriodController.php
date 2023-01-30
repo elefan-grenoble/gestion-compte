@@ -120,6 +120,8 @@ class PeriodController extends Controller
     {
         $filter = $this->filterFormFactory($request);
         $periodsByDay = array();
+        $order = array('start' => 'ASC');
+
         for($i=0;$i<7;$i++){
             $findByFilter = array('dayOfWeek'=>$i);
 
@@ -128,9 +130,10 @@ class PeriodController extends Controller
             }
 
             $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
-                ->findBy($findByFilter,array('start'=>'ASC'));
+                ->findBy($findByFilter, $order);
         }
-        return $this->render('admin/period/index.html.twig',array(
+
+        return $this->render('admin/period/index.html.twig', array(
             "periods_by_day" => $periodsByDay,
             "filter_form" => $filter['form']->createView(),
             "week_filter" => $filter['week'],
