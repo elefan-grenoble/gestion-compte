@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 /**
@@ -33,9 +33,13 @@ class JobController extends Controller
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('job_list'))
-            ->add('enabled', CheckboxType::class, array(
-                'label' => 'Cacher les postes inactifs',
+            ->add('enabled', ChoiceType::class, array(
+                'label' => 'Poste activé ?',
                 'required' => false,
+                'choices' => [
+                    'activé' => 2,
+                    'désactivé' => 1,
+                ]
             ))
             ->add('filter', SubmitType::class, array(
                 'label' => 'Filtrer',
@@ -63,8 +67,8 @@ class JobController extends Controller
         $filter = $this->filterFormFactory($request);
         $findByFilter = array();
 
-        if($filter["enabled"]) {
-            $findByFilter["enabled"] = $filter["enabled"];
+        if($filter["enabled"] > 0) {
+            $findByFilter["enabled"] = $filter["enabled"]-1;
         }
 
         $em = $this->getDoctrine()->getManager();

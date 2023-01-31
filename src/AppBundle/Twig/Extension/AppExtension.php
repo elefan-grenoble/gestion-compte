@@ -146,8 +146,10 @@ class AppExtension extends AbstractExtension
 
     /**
      * exemple output: "mercredi 29 juin 2022 à 11:31"
+     *
+     * @param: \DateTime|\DateTimeImmutable $date
      */
-    public function date_fr_with_time(\DateTime $date)
+    public function date_fr_with_time($date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
