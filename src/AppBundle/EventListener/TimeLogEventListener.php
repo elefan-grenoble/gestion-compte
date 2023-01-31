@@ -25,7 +25,7 @@ class TimeLogEventListener
     protected $cycle_duration;
     protected $registration_duration;
     protected $use_card_reader_to_validate_shifts;
-    protected $maxTimeAtEndOfShift;
+    protected $max_time_at_end_of_shift;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -36,7 +36,7 @@ class TimeLogEventListener
         $this->cycle_duration = $this->container->getParameter('cycle_duration');
         $this->registration_duration = $this->container->getParameter('registration_duration');
         $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
-        $this->maxTimeAtEndOfShift = $this->container->getParameter('max_time_at_end_of_shift');
+        $this->max_time_at_end_of_shift = $this->container->getParameter('max_time_at_end_of_shift');
     }
 
     /**
@@ -47,9 +47,12 @@ class TimeLogEventListener
     public function onShiftBooked(ShiftBookedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftBooked");
-        if (!$this->use_card_reader_to_validate_shifts) {
+        if ($this->use_card_reader_to_validate_shifts) {
+            // do nothing!
+            // time log will be created in onShiftValidated
+        } else {
             $shift = $event->getShift();
-            $this->createShiftLog($shift);
+            $this->createShiftLog($shift, $shift->getStart());
         }
     }
 
@@ -63,7 +66,13 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftValidated");
         if ($this->use_card_reader_to_validate_shifts) {
             $shift = $event->getShift();
-            $this->createShiftLog($shift);
+            $now = new \DateTime('now');
+            // why $now? to avoid edge cases
+            // example: if the shift is validated manually later, we might need to take it into account in the next cycle
+            $this->createShiftLog($shift, $now);
+        } else {
+            // do nothing!
+            // time log already created in onShiftBooked
         }
     }
 
@@ -147,9 +156,9 @@ class TimeLogEventListener
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createShiftLog(Shift $shift)
+    private function createShiftLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftLog($shift, $shift->getStart());
+        $log = $this->container->get('time_log_service')->initShiftLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -183,7 +192,7 @@ class TimeLogEventListener
 
         $counter_today = $member->getTimeCount($date);
 
-        $allowed_cumul = $this->maxTimeAtEndOfShift;
+        $allowed_cumul = $this->max_time_at_end_of_shift;
 
         if ($counter_today > ($this->due_duration_by_cycle + $allowed_cumul)) { //surbook
             $log = new TimeLog();
