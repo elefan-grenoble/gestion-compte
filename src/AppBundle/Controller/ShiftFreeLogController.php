@@ -104,7 +104,6 @@ class ShiftFreeLogController extends Controller
             ->orderBy('sfl.' . $sort, $order);
 
         if ($filter["created_at"]) {
-            var_dump($filter["created_at"]);
             $qb = $qb->andWhere("DATE_FORMAT(sfl.createdAt, '%Y-%m-%d') = :created_at")
                 ->setParameter('created_at', $filter['created_at']->format('Y-m-d'));
         }
