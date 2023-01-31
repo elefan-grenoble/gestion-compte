@@ -71,12 +71,12 @@
                 <td>{{ membershipShiftExemption.description }}</td>
                 <td>
                     {% if membershipShiftExemption.start %}
-                        {{ membershipShiftExemption.start | date('Y-m-d') }}
+                        {{ membershipShiftExemption.start | date('d/m/Y') }}
                     {% endif %}
                 </td>
                 <td>
                     {% if membershipShiftExemption.end %}
-                        {{ membershipShiftExemption.end | date('Y-m-d') }}
+                        {{ membershipShiftExemption.end | date('d/m/Y') }}
                     {% endif %}
                 </td>
                 <td>
@@ -88,8 +88,8 @@
                         {{ membershipShiftExemption.createdBy }}
                     {% endif %}
                 </td>
-                <td title="{{ membershipShiftExemption.createdAt | date('Y-m-d H:i:s') }}">
-                    {{ membershipShiftExemption.createdAt | date('Y-m-d') }}
+                <td title="{{ membershipShiftExemption.createdAt | date('d/m/Y H:i') }}">
+                    {{ membershipShiftExemption.createdAt | date('d/m/Y') }}
                 </td>
                 <td>
                     <a href="{{ path('admin_membershipshiftexemption_edit', { 'id': membershipShiftExemption.id }) }}">

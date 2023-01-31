@@ -67,14 +67,15 @@ class MembershipShiftExemptionController extends Controller
         $em = $this->getDoctrine()->getManager();
         $filter = $this->filterFormFactory($request);
         $findByFilter = array();
+        $sort = 'createdAt';
+        $order = 'DESC';
 
-        if($filter["shiftExemption"]) {
+        if ($filter["shiftExemption"]) {
             $findByFilter["shiftExemption"] = $filter["shiftExemption"];
         }
 
         $page = $request->get('page', 1);
         $limit = 50;
-        $order = array('createdAt' => 'DESC');
 
         $nb_exemptions = $em->getRepository('AppBundle:MembershipShiftExemption')->count([]);
         if ($nb_exemptions == 0) {
@@ -84,7 +85,7 @@ class MembershipShiftExemptionController extends Controller
         }
 
         $membershipShiftExemptions = $em->getRepository('AppBundle:MembershipShiftExemption')
-            ->findBy($findByFilter, $order, $limit, ($page - 1) * $limit);
+            ->findBy($findByFilter, array($sort => $order), $limit, ($page - 1) * $limit);
 
         return $this->render('admin/membershipshiftexemption/index.html.twig', array(
             'membershipShiftExemptions' => $membershipShiftExemptions,
