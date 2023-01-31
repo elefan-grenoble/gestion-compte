@@ -21,11 +21,10 @@
                 {{ form_start(filter_form) }}
                 <div class="row">
                     <div class="col s6">
-                        {{ form_errors(filter_form.enabled) }}
-                        <label>
+                        <div class="input-field">
                             {{ form_widget(filter_form.enabled) }}
-                            <span>{{ filter_form.enabled.vars.label }}</span>
-                        </label>
+                            {{ form_label(filter_form.enabled) }}
+                        </div>
                     </div>
                 </div>
                 {{ form_widget(filter_form.filter) }}
