@@ -103,23 +103,23 @@ class ShiftFreeLogController extends Controller
             ->leftJoin("sfl.shift", "s")
             ->orderBy('sfl.' . $sort, $order);
 
-        if($filter["created_at"]) {
+        if ($filter["created_at"]) {
             $qb = $qb->andWhere('sfl.createdAt >= :created_at_start')
                 ->andWhere('sfl.createdAt <= :created_at_end')
                 ->setParameter('created_at_start', $filter['created_at']->format('Y-m-d 00:00:00'))
                 ->setParameter('created_at_end', $filter['created_at']->format('Y-m-d 23:59:59'));
         }
-        if($filter["shift_start_date"]) {
+        if ($filter["shift_start_date"]) {
             $qb = $qb->andWhere('s.start >= :shift_start_date_start')
                 ->andWhere('s.start <= :shift_start_date_end')
                 ->setParameter('shift_start_date_start', $filter['shift_start_date']->format('Y-m-d 00:00:00'))
                 ->setParameter('shift_start_date_end', $filter['shift_start_date']->format('Y-m-d 23:59:59'));
         }
-        if($filter["beneficiary"]) {
+        if ($filter["beneficiary"]) {
             $qb = $qb->andWhere('sfl.beneficiary = :beneficiary')
                 ->setParameter('beneficiary', $filter['beneficiary']);
         }
-        if($filter["fixe"] > 0) {
+        if ($filter["fixe"] > 0) {
             $qb = $qb->andWhere('sfl.fixe = :fixe')
                 ->setParameter('fixe', $filter['fixe']-1);
         }
