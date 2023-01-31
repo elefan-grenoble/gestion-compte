@@ -123,6 +123,7 @@ class TimeLog
     public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->createdBy = $user;
+
         return $this;
     }
 

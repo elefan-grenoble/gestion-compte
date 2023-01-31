@@ -17,7 +17,7 @@ class TimeLogService
     private $membershipService;
     private $due_duration_by_cycle;
 
-    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorage $tokenStorage, MembershipService $membershipService, $due_duration_by_cycle)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorage $tokenStorage, MembershipService $membershipService, int $due_duration_by_cycle)
     {
         $this->em = $em;
         $this->requestStack = $requestStack;
@@ -39,6 +39,7 @@ class TimeLogService
         if ($date) {
             $log->setCreatedAt($date);
         } // else defaults to 'now'
+        $log->setCreatedBy($current_user);
         $log->setRequestRoute($request->get('_route'));
 
         return $log;
