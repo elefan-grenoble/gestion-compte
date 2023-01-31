@@ -11,12 +11,34 @@
 {% block content %}
     <h4>Liste des membres exempté.e.s de bénévolat ({{ membershipShiftExemptions | length }})</h4>
 
+    {# Filter form  --------- #}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">tune</i>Filtres
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(filter_form) }}
+                <div class="row">
+                    <div class="col s4">
+                        <div class="input-field">
+                            {{ form_widget(filter_form.shiftExemption) }}
+                            {{ form_label(filter_form.shiftExemption) }}
+                        </div>
+                    </div>
+                </div>
+                {{ form_widget(filter_form.submit) }}
+                {{ form_end(filter_form) }}
+            </div>
+        </li>
+    </ul>
+
     <table class="responsive-table">
         <thead>
             <tr>
                 <th>Etat</th>
                 <th>Membre</th>
-                <th>Raison</th>
+                <th>Motif</th>
                 <th>Description</th>
                 <th>Début</th>
                 <th>Fin</th>
@@ -40,35 +62,39 @@
                         <i class="material-icons" title="À venir">schedule</i>
                     {% endif %}
                 </td>
-                <td>{{ membershipShiftExemption.membership.beneficiaries | map(b => "<a href=\'#{path('member_show',{'member_number': b.membership.memberNumber})}\'>#{b}</a>") | join('<br/>') | raw }}</td>
+                <td>
+                    <a href="{{ path("member_show", { 'member_number': membershipShiftExemption.membership.memberNumber }) }}">
+                        {{ membershipShiftExemption.membership.beneficiaries | join('<br/>') | raw }}
+                    </a>
+                </td>
                 <td>{{ membershipShiftExemption.shiftExemption }}</td>
                 <td>{{ membershipShiftExemption.description }}</td>
                 <td>
                     {% if membershipShiftExemption.start %}
-                        {{ membershipShiftExemption.start|date('Y-m-d') }}
+                        {{ membershipShiftExemption.start | date('d/m/Y') }}
                     {% endif %}
                 </td>
                 <td>
                     {% if membershipShiftExemption.end %}
-                        {{ membershipShiftExemption.end|date('Y-m-d') }}
+                        {{ membershipShiftExemption.end | date('d/m/Y') }}
                     {% endif %}
                 </td>
                 <td>
                     {% if membershipShiftExemption.createdBy and membershipShiftExemption.createdBy.beneficiary %}
-                        <a href="{{ path("member_show",{'member_number': membershipShiftExemption.createdBy.beneficiary.membership.memberNumber}) }}">
+                        <a href="{{ path("member_show", { 'member_number': membershipShiftExemption.createdBy.beneficiary.membership.memberNumber }) }}">
                             {{ membershipShiftExemption.createdBy.beneficiary }}
                         </a>
                     {% else %}
-                        {{membershipShiftExemption.createdBy}}
+                        {{ membershipShiftExemption.createdBy }}
                     {% endif %}
                 </td>
-                <td>
-                    {% if membershipShiftExemption.createdAt %}
-                        {{ membershipShiftExemption.createdAt|date('Y-m-d H:i:s') }}
-                    {% endif %}
+                <td title="{{ membershipShiftExemption.createdAt | date('d/m/Y H:i') }}">
+                    {{ membershipShiftExemption.createdAt | date('d/m/Y') }}
                 </td>
                 <td>
-                    <a href="{{ path('admin_membershipshiftexemption_edit', { 'id': membershipShiftExemption.id }) }}"><i class="material-icons">edit</i>editer</a>
+                    <a href="{{ path('admin_membershipshiftexemption_edit', { 'id': membershipShiftExemption.id }) }}">
+                        <i class="material-icons">edit</i>Editer
+                    </a>
                 </td>
             </tr>
         {% endfor %}
@@ -93,7 +119,9 @@
 
     <ul>
         <li>
-            <a href="{{ path('admin_membershipshiftexemption_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une exemption</a>
+            <a href="{{ path('admin_membershipshiftexemption_new') }}" class="btn">
+                <i class="material-icons left">add</i>Ajouter une exemption
+            </a>
         </li>
     </ul>
 {% endblock %}
