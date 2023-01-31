@@ -6,18 +6,42 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\TimeLog;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class TimeLogService
 {
-    private $em;
+    protected $em;
+    protected $requestStack;
+    private $tokenStorage;
     private $membershipService;
     private $due_duration_by_cycle;
 
-    public function __construct(EntityManagerInterface $em, MembershipService $membershipService, $due_duration_by_cycle)
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorage $tokenStorage, MembershipService $membershipService, $due_duration_by_cycle)
     {
         $this->em = $em;
+        $this->requestStack = $requestStack;
+        $this->tokenStorage = $tokenStorage;
         $this->membershipService = $membershipService;
         $this->due_duration_by_cycle = $due_duration_by_cycle;
+    }
+
+    public function initTimeLog(Membership $member, \DateTime $date = null, $description = null)
+    {
+        $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        $request = $this->requestStack->getCurrentRequest();
+
+        $log = new TimeLog();
+        $log->setMembership($member);
+        if ($description) {
+            $log->setDescription($description);
+        }
+        if ($date) {
+            $log->setCreatedAt($date);
+        } // else defaults to 'now'
+        $log->setRequestRoute($request->get('_route'));
+
+        return $log;
     }
 
     /**
@@ -27,17 +51,11 @@ class TimeLogService
      */
     public function initShiftLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = new TimeLog();
-        $log->setMembership($shift->getShifter()->getMembership());
-        $log->setTime($shift->getDuration());
-        $log->setShift($shift);
+        $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT);
-        if ($description) {
-            $log->setDescription($description);
-        }
-        if ($date) {
-            $log->setCreatedAt($date);
-        }
+        $log->setShift($shift);
+        $log->setTime($shift->getDuration());
+
         return $log;
     }
 
@@ -49,13 +67,10 @@ class TimeLogService
      */
     public function initCycleBeginningLog(Membership $member, \DateTime $date = null)
     {
-        $log = new TimeLog();
-        $log->setMembership($member);
-        $log->setTime(-1 * $this->due_duration_by_cycle);
+        $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
-        if ($date) {
-            $log->setCreatedAt($date);
-        }
+        $log->setTime(-1 * $this->due_duration_by_cycle);
+
         return $log;
     }
 
@@ -68,6 +83,7 @@ class TimeLogService
     {
         $date = $this->membershipService->getStartOfCycle($member, 0);
         $log = $this->initCycleBeginningLog($member, $date);
+
         return $log;
     }
 }

@@ -7,7 +7,6 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Shift;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
 class ShiftFreeLogService
