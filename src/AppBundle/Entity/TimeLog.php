@@ -79,6 +79,13 @@ class TimeLog
     private $shift;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $requestRoute;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
