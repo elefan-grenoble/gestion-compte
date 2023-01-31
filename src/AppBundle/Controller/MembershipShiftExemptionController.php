@@ -41,7 +41,7 @@ class MembershipShiftExemptionController extends Controller
                 'multiple' => false,
                 'required' => false,
             ))
-            ->add('filter', SubmitType::class, array(
+            ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
             ))
