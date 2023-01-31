@@ -20,20 +20,42 @@
             <div class="collapsible-body">
                 {{ form_start(filter_form) }}
                 <div class="row">
-                    <div class="col s4">
-                        <div class="input-field">
-                            {{ form_widget(filter_form.beneficiary) }}
-                            {{ form_label(filter_form.beneficiary) }}
-                        </div>
-                    </div>
-                    {% if use_fly_and_fixed %}
-                        <div class="col s4">
-                            <div class="input-field">
-                                {{ form_widget(filter_form.fixe) }}
-                                {{ form_label(filter_form.fixe) }}
+                    <div class="col s12 m4">
+                        <h5>Annulation</h5>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field">
+                                    {{ form_widget(filter_form.created_at) }}
+                                    {{ form_label(filter_form.created_at) }}
+                                </div>
                             </div>
                         </div>
-                    {% endif %}
+                    </div>
+                    <div class="col s12 m4">
+                        <h5>Créneau</h5>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field">
+                                    {{ form_widget(filter_form.beneficiary) }}
+                                    {{ form_label(filter_form.beneficiary) }}
+                                </div>
+                            </div>
+                            <div class="col s12">
+                                <div class="input-field">
+                                    {{ form_widget(filter_form.shift_start_date) }}
+                                    {{ form_label(filter_form.shift_start_date) }}
+                                </div>
+                            </div>
+                            {% if use_fly_and_fixed %}
+                                <div class="col s12">
+                                    <div class="input-field">
+                                        {{ form_widget(filter_form.fixe) }}
+                                        {{ form_label(filter_form.fixe) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
                 {{ form_widget(filter_form.submit) }}
                 {{ form_row(filter_form._token) }}

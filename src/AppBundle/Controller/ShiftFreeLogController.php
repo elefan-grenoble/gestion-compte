@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -28,6 +29,8 @@ class ShiftFreeLogController extends Controller
     {
         // default values
         $res = [
+            'created_at' => null,
+            'shift_start_date' => null,
             'beneficiary' => null,
             'fixe' => 0
         ];
@@ -35,6 +38,24 @@ class ShiftFreeLogController extends Controller
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_shiftfreelog_index'))
+            ->add('created_at', DateType::class, [
+                'widget' => 'single_text',
+                'html5' => false,
+                'label' => "Date de l'annulation",
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ])
+            ->add('shift_start_date', DateType::class, [
+                'widget' => 'single_text',
+                'html5' => false,
+                'label' => 'Date du créneau',
+                'required' => false,
+                'attr' => [
+                    'class' => 'datepicker'
+                ]
+            ])
             ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
                 'label' => 'Bénéficiaire',
                 'required' => false,
@@ -56,6 +77,8 @@ class ShiftFreeLogController extends Controller
         $res['form']->handleRequest($request);
 
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
+            $res["created_at"] = $res["form"]->get("created_at")->getData();
+            $res["shift_start_date"] = $res["form"]->get("shift_start_date")->getData();
             $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
             $res["fixe"] = $res["form"]->get("fixe")->getData();
         }
@@ -76,15 +99,28 @@ class ShiftFreeLogController extends Controller
         $sort = 'createdAt';
         $order = 'DESC';
 
-        $qb = $em->getRepository('AppBundle:ShiftFreeLog')->createQueryBuilder('s')
-            ->orderBy('s.' . $sort, $order);
+        $qb = $em->getRepository('AppBundle:ShiftFreeLog')->createQueryBuilder('sfl')
+            ->leftJoin("sfl.shift", "s")
+            ->orderBy('sfl.' . $sort, $order);
 
+        if($filter["created_at"]) {
+            $qb = $qb->andWhere('sfl.createdAt >= :created_at_start')
+                ->andWhere('sfl.createdAt <= :created_at_end')
+                ->setParameter('created_at_start', $filter['created_at']->format('Y-m-d 00:00:00'))
+                ->setParameter('created_at_end', $filter['created_at']->format('Y-m-d 23:59:59'));
+        }
+        if($filter["shift_start_date"]) {
+            $qb = $qb->andWhere('s.start >= :shift_start_date_start')
+                ->andWhere('s.start <= :shift_start_date_end')
+                ->setParameter('shift_start_date_start', $filter['shift_start_date']->format('Y-m-d 00:00:00'))
+                ->setParameter('shift_start_date_end', $filter['shift_start_date']->format('Y-m-d 23:59:59'));
+        }
         if($filter["beneficiary"]) {
-            $qb = $qb->andWhere('s.beneficiary = :beneficiary')
+            $qb = $qb->andWhere('sfl.beneficiary = :beneficiary')
                 ->setParameter('beneficiary', $filter['beneficiary']);
         }
         if($filter["fixe"] > 0) {
-            $qb = $qb->andWhere('s.fixe = :fixe')
+            $qb = $qb->andWhere('sfl.fixe = :fixe')
                 ->setParameter('fixe', $filter['fixe']-1);
         }
 
