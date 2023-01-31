@@ -124,6 +124,7 @@ doctrine:
     auto_mapping: true
     dql:
       string_functions:
+        DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
         MONTH: DoctrineExtensions\Query\Mysql\Month
         YEAR: DoctrineExtensions\Query\Mysql\Year
         WEEK: DoctrineExtensions\Query\Mysql\Week
