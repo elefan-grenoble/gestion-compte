@@ -26,18 +26,15 @@
                             {{ form_label(filter_form.beneficiary) }}
                         </div>
                     </div>
-                </div>
-                {% if use_fly_and_fixed %}
-                    <div class="row">
-                        <div class="col s6">
-                            {{ form_errors(filter_form.fixe) }}
-                            <label>
+                    {% if use_fly_and_fixed %}
+                        <div class="col s4">
+                            <div class="input-field">
                                 {{ form_widget(filter_form.fixe) }}
-                                <span>{{ filter_form.fixe.vars.label }}</span>
-                            </label>
+                                {{ form_label(filter_form.fixe) }}
+                            </div>
                         </div>
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
                 {{ form_widget(filter_form.submit) }}
                 {{ form_row(filter_form._token) }}
                 {{ form_end(filter_form, {'render_rest': false}) }}
@@ -65,8 +62,8 @@
         <tbody>
         {% for shiftFreeLog in shiftFreeLogs %}
             <tr>
-                <td>
-                    {{ shiftFreeLog.createdAt|date('d/m/Y H:i:s') }}
+                <td title="{{ shiftFreeLog.createdAt | date_fr_with_time }}">
+                    {{ shiftFreeLog.createdAt | date('d/m/Y') }}
                 </td>
                 <td>
                     <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">

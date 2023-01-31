@@ -10,7 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -39,9 +39,13 @@ class ShiftFreeLogController extends Controller
                 'label' => 'Bénéficiaire',
                 'required' => false,
             ))
-            ->add('fixe', CheckboxType::class, array(
-                'label' => 'Afficher seulement les annulations de créneaux fixes',
+            ->add('fixe', ChoiceType::class, array(
+                'label' => 'Type de créneau',
                 'required' => false,
+                'choices' => [
+                    'fixe' => 2,
+                    'volant' => 1,
+                ]
             ))
             ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
@@ -79,9 +83,9 @@ class ShiftFreeLogController extends Controller
             $qb = $qb->andWhere('s.beneficiary = :beneficiary')
                 ->setParameter('beneficiary', $filter['beneficiary']);
         }
-        if($filter["fixe"]) {
+        if($filter["fixe"] > 0) {
             $qb = $qb->andWhere('s.fixe = :fixe')
-                ->setParameter('fixe', $filter['fixe']);
+                ->setParameter('fixe', $filter['fixe']-1);
         }
 
         $limitPerPage = 25;
