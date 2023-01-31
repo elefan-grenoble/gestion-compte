@@ -67,9 +67,9 @@ class TimeLogEventListener
         if ($this->use_card_reader_to_validate_shifts) {
             $shift = $event->getShift();
             $now = new \DateTime('now');
-            // why $now?
-            // to avoid edge cases where the shift is validated manually later, we need to take it into account in the next cycle for instance
-            $this->createShiftLog($shift, $now, $event->getSource());
+            // why $now? to avoid edge cases
+            // example: if the shift is validated manually later, we might need to take it into account in the next cycle
+            $this->createShiftLog($shift, $now);
         } else {
             // do nothing!
             // time log already created in onShiftBooked

@@ -10,21 +10,14 @@ class ShiftValidatedEvent extends Event
     const NAME = 'shift.validated';
 
     private $shift;
-    private $source;
 
-    public function __construct(Shift $shift, $source = null)
+    public function __construct(Shift $shift)
     {
         $this->shift = $shift;
-        $this->source = $source;
     }
 
     public function getShift()
     {
         return $this->shift;
-    }
-
-    public function getSource()
-    {
-        return $this->source;
     }
 }
