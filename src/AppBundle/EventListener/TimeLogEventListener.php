@@ -18,14 +18,22 @@ use Symfony\Component\DependencyInjection\Container;
 
 /**
  * if the coop uses the card_reader (use_card_reader_to_validate_shifts = true)
- * - booking a shift does not create a time log
- * - the time log is created only when the shift is validated (with the card_reader)
- * - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log)
+ * - general rules:
+ *  - shift time logs are created when shifts are validated (onShiftValidated)
+ *  - shift time logs are never deleted (see onShiftInvalidated)
+ * - more details:
+ *  - booking a shift does not create a time log
+ *  - the time log is created only when the shift is validated (with the card_reader) (with date = validation date)
+ *  - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log)
  *
  * if the coop doesn't use the card_reader (use_card_reader_to_validate_shifts = false)
- * - booking a shift creates the time log
- * - a book shift is validated by default
- * - when a shift is freed, we delete the existing time log
+ * - general rules:
+ *  - shift time logs are created when shifts are booked (onShiftBooked)
+ *  - shift time logs are deleted when shifts are freed (see onShiftFreed)
+ * - more details:
+ *  - booking a shift creates the time log (with date = shift start_date)
+ *  - a booked shift is validated by default
+ *  - when a shift is freed, we delete the existing time log
  */
 class TimeLogEventListener
 {
@@ -100,12 +108,13 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftInvalidated");
 
         $shift = $event->getShift();
+        $member = $event->getMember();
 
         if ($this->use_card_reader_to_validate_shifts) {
             // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
             // if true, create an inverse timelog
             $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) {
-                return (($log->type == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $membership));
+                return (($log->type == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
             });
             if ($shiftValidatedTimeLog->count() > 0) {
                 $this->createShiftInvalidatedTimeLog($shift);
@@ -127,12 +136,13 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftFreed");
 
         $shift = $event->getShift();
+        $member = $event->getMember();
 
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
             // time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
         } else {
-            $this->deleteShiftLogs($shift, $event->getMember());
+            $this->deleteShiftLogs($shift, $member);
         }
     }
 
@@ -219,14 +229,14 @@ class TimeLogEventListener
 
     /**
      * @param Shift $shift
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      */
-    private function deleteShiftLogs(Shift $shift, Membership $membership)
+    private function deleteShiftLogs(Shift $shift, Membership $member)
     {
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
-            if ($log->getMembership() == $membership) {
+            if ($log->getMembership() == $member) {
                 $this->em->remove($log);
             }
         }
@@ -259,14 +269,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createFrozenLog(Membership $membership)
+    private function createFrozenLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_FROZEN);
         $this->em->persist($log);
@@ -274,14 +284,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createExemptedLog(Membership $membership)
+    private function createExemptedLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_EXEMPTED);
         $this->em->persist($log);
@@ -289,14 +299,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createRegistrationExpiredLog(Membership $membership)
+    private function createRegistrationExpiredLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_EXPIRED_REGISTRATION);
         $this->em->persist($log);
