@@ -16,6 +16,17 @@ use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 
+/**
+ * if the coop uses the card_reader (use_card_reader_to_validate_shifts = true)
+ * - booking a shift does not create a time log
+ * - the time log is created only when the shift is validated (with the card_reader)
+ * - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log)
+ *
+ * if the coop doesn't use the card_reader (use_card_reader_to_validate_shifts = false)
+ * - booking a shift creates the time log
+ * - a book shift is validated by default
+ * - when a shift is freed, we delete the existing time log
+ */
 class TimeLogEventListener
 {
     protected $em;
@@ -47,11 +58,13 @@ class TimeLogEventListener
     public function onShiftBooked(ShiftBookedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftBooked");
+
+        $shift = $event->getShift();
+
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
             // time log will be created in onShiftValidated
         } else {
-            $shift = $event->getShift();
             $this->createShiftValidatedTimeLog($shift, $shift->getStart());
         }
     }
@@ -64,8 +77,10 @@ class TimeLogEventListener
     public function onShiftValidated(ShiftValidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftValidated");
+
+        $shift = $event->getShift();
+
         if ($this->use_card_reader_to_validate_shifts) {
-            $shift = $event->getShift();
             $now = new \DateTime('now');
             // why $now? to avoid edge cases
             // example: if the shift is validated manually later, we might need to take it into account in the next cycle
@@ -83,11 +98,10 @@ class TimeLogEventListener
     public function onShiftInvalidated(ShiftInvalidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftInvalidated");
-        if ($shift->getIsFuture()) {
-            // shift validated but in the future?
-            // can be the case if !$this->use_card_reader_to_validate_shifts
-            $this->deleteShiftLogs($event->getShift(), $event->getMember());
-        } else {
+
+        $shift = $event->getShift();
+
+        if ($this->use_card_reader_to_validate_shifts) {
             // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
             // if true, create an inverse timelog
             $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) {
@@ -98,6 +112,9 @@ class TimeLogEventListener
             } else {
                 // do nothing!
             }
+        } else {
+            // do nothing! shouldn't happen
+            // for coops without card_reader, only onShiftFreed should be called
         }
     }
 
@@ -108,11 +125,14 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
+
+        $shift = $event->getShift();
+
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
-            // TimeLogs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+            // time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
         } else {
-            $this->deleteShiftLogs($event->getShift(), $event->getMember());
+            $this->deleteShiftLogs($shift, $event->getMember());
         }
     }
 
@@ -123,7 +143,9 @@ class TimeLogEventListener
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftDeleted");
+
         $shift = $event->getShift();
+
         if ($shift->getShifter()) {
             $this->deleteShiftLogs($shift, $shift->getShifter()->getMembership());
         }
