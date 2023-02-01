@@ -79,6 +79,13 @@ class TimeLog
     private $shift;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $requestRoute;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
@@ -116,6 +123,7 @@ class TimeLog
     public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->createdBy = $user;
+
         return $this;
     }
 
@@ -235,6 +243,7 @@ class TimeLog
     public function setCreatedAt($date)
     {
         $this->createdAt = $date;
+
         return $this;
     }
 
@@ -246,6 +255,17 @@ class TimeLog
         $this->type = $type;
     }
 
+    public function getRequestRoute(): ?string
+    {
+        return $this->requestRoute;
+    }
+
+    public function setRequestRoute(?string $requestRoute): self
+    {
+        $this->requestRoute = $requestRoute;
+
+        return $this;
+    }
 
     /**
      * @return string

@@ -195,9 +195,9 @@ services:
         class: AppBundle\Service\TimeLogService
         public: true
         arguments:
-            - "@doctrine.orm.entity_manager"
-            - '@membership_service'
-            - "%due_duration_by_cycle%"
+            $em: "@doctrine.orm.entity_manager"
+            $membershipService: '@membership_service'
+            $due_duration_by_cycle: "%due_duration_by_cycle%"
 
     beneficiary_service:
             class: AppBundle\Service\BeneficiaryService

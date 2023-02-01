@@ -158,7 +158,7 @@ class TimeLogEventListener
      */
     private function createShiftLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftLog($shift, $date, $description);
+        $log = $this->container->get('time_log_service')->initShiftTimeLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }
@@ -187,7 +187,7 @@ class TimeLogEventListener
      */
     private function createCycleBeginningLog(Membership $member, \DateTime $date)
     {
-        $log = $this->container->get('time_log_service')->initCycleBeginningLog($member);
+        $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member);
         $this->em->persist($log);
 
         $counter_today = $member->getTimeCount($date);

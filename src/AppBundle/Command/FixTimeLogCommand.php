@@ -38,7 +38,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
                     });
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $log = $this->getContainer()->get('time_log_service')->initShiftLog($shift, $shift->getStart(), "Créneau réalisé");
+                        $log = $this->getContainer()->get('time_log_service')->initShiftTimeLog($shift, $shift->getStart(), "Créneau réalisé");
                         $em->persist($log);
                         $countShiftLogs++;
                     }
