@@ -48,7 +48,7 @@ class SearchUserFormHelper {
             ]
         ]);
         $formBuilder->add('exempted', ChoiceType::class, [
-            'label' => 'exempté',
+            'label' => '☂ exempté',
             'required' => false,
             'choices' => [
                 'exempté' => 2,

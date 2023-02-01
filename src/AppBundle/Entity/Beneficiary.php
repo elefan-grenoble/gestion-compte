@@ -546,6 +546,21 @@ class Beneficiary
     }
 
     /**
+     * return true if the beneficiary is in a "warning" status
+     * useful for PeriodPositionController
+     * 
+     * @return bool
+     */
+    public function hasWarningStatus()
+    {
+        return $this->getMembership()->getWithdrawn() ||
+            $this->getMembership()->getFrozen() ||
+            $this->isFlying() ||
+            $this->getMembership()->isCurrentlyExemptedFromShifts() ||
+            !$this->getMembership()->hasValidRegistration();
+    }
+
+    /**
      * return a string with emoji between brackets depending on the
      * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
      * or an empty string if none of those
@@ -553,31 +568,36 @@ class Beneficiary
      * @param bool $includeLeadingSpace if true add a space at the beginning
      * @return string with ether emoji(s) for the beneficiary's status or empty
      */
-    public function getStatusIcon(bool $includeLeadingSpace = false):string{
-
-
+    public function getStatusIcon(bool $includeLeadingSpace = false):string
+    {
         $symbols = array();
 
-        if($this->getMembership()->getWithdrawn()){
-            $symbols[]= "&#x26A0;";
+        if ($this->getMembership()->getWithdrawn()) {
+            $symbols[] = '∅';
         }
-        if ($this->getMembership()->getFrozen()){
-            $symbols[]= "&#x2744;";
+        if ($this->getMembership()->getFrozen()) {
+            $symbols[] = '❄';
         }
-        if($this->isFlying()){
-            $symbols[]= "&#9992;";
+        if ($this->isFlying()) {
+            $symbols[] = '✈';
+        }
+        if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
+            $symbols[] = '☂';
+        }
+        if (!$this->getMembership()->hasValidRegistration()) {
+            $symbols[] = '$';
         }
 
-        if (count($symbols)){
+        if (count($symbols)) {
             $res = '[' . implode("/", $symbols) . ']';
 
-            if($includeLeadingSpace){
+            if ($includeLeadingSpace) {
                 $res = " " . $res;
             }
-        }else{
-            $res =  "";
+        } else {
+            $res = "";
         }
-        // 	for dispensed beneficiary &#127989;
+
         return $res;
 
     }

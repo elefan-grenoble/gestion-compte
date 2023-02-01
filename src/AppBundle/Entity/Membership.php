@@ -502,12 +502,27 @@ class Membership
      */
     public function hasValidRegistrationBefore($date)
     {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
         foreach ($this->getRegistrations() as $registration) {
             if ($registration->getDate() < $date) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Return if the member has a valid registration
+     *
+     * @param \DateTime $date
+     * @return bool
+     */
+    public function hasValidRegistration()
+    {
+        $date = new \DateTime('now');
+        return $this->hasValidRegistrationBefore($date);
     }
 
     /**

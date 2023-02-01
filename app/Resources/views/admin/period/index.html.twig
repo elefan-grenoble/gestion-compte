@@ -40,31 +40,26 @@
 {% endblock %}
 
 {% block macro %}
-    {# generate a imput form, used for the filters #}
-    {% macro input(input_obj, hidden=false) %}
+    {# generate a form input, used for the filters #}
+    {% macro form_input(input_obj, hidden=false) %}
         <div class="input-field col m3">
             {% if hidden %}
                 {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
-
             {% else %}
                 {{ form_widget(input_obj) }}
                 {{ form_label(input_obj) }}
             {% endif %}
-
         </div>
     {% endmacro %}
 
-    {# generate one line with the icon and the member
-         # name and id and if needed a warning icon
-         # take a shifter (a benificiary object or null)
-    #}
-    {% macro one_line_shifter(position) %}
+    {# generate one line with the icon and the shifter id+name and if needed a warning icon #}
+    {% macro position_shifter_display(position) %}
         {% set shifter = position.shifter %}
         {% set formation = position.formation??"Sans formation" %}
 
         {% if shifter %}
-            {# sombody is registered to this period #}
-            {% set warning = shifter.isFlying or shifter.getMembership.getFrozen or shifter.getMembership.getWithdrawn %}
+            {# sombody is registered for this periodposition #}
+            {% set warning = shifter.hasWarningStatus %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
                class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter.getDisplayNameWithMemberNumberAndStatusIcon() | raw }} &#013;&#010; ({{ formation }})">
                 {% if warning %}
@@ -80,21 +75,18 @@
                 <strong><i>libre</i></strong>
             </div>
         {% endif %}
-    {% endmacro one_line_shifter %}
+    {% endmacro position_shifter_display %}
 
     {# generate a card for all positions in a period
      # period: a period object
      # week_filter: a string with the week to keep or null if no filter
     #}
     {% macro period_card(period, week_filter, pb_filter) %}
-        <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable"
-             style="padding: 15px;">
+        <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
 
             {# Card header #}
             <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
-
                 <div class="black-text editable-box">
-
                     {% if period.job %}
                         <b>{{ period.job.name }}</b>
                         <br>
@@ -103,7 +95,6 @@
                         {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
                         <br>
                     {% endif %}
-
                 </div>
             </a>
             {# if display by job/training #}
@@ -117,21 +108,20 @@
                 {% endfor %}
             </div>
 
-            {# if display by member name  #}
+            {# if display by member name #}
             {% if use_fly_and_fixed %}
                 <div id="shifter" style="margin-top:1em;">
                     {% for week, positions in period.positionsperweekcycle %}
                         {% if (week in week_filter) or not week_filter %}
                             <h6>Semaine {{ week }}</h6>
                             {% for position in positions %}
-                                {{ _self.one_line_shifter(position) }}
+                                {{ _self.position_shifter_display(position) }}
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
                 </div>
             {% endif %}
         </div>
-
     {% endmacro %}
 {% endblock macro %}
 
@@ -160,9 +150,9 @@
                     <div class="collapsible-body">
                         {{ form_start(filter_form) }}
                         <div class="row">
-                            {{ _self.input(filter_form.job) }}
-                            {{ _self.input(filter_form.week) }}
-                            {{ _self.input(filter_form.filling, not use_fly_and_fixed) }}
+                            {{ _self.form_input(filter_form.job) }}
+                            {{ _self.form_input(filter_form.week) }}
+                            {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
                         </div>
                         {{ form_widget(filter_form.filter) }}
                         {{ form_end(filter_form) }}
@@ -213,6 +203,62 @@
                                 </a>
                             </div>
                         {% endif %}
+                    </div>
+                </li>
+                {# Légende ----------------------------------- #}
+                <li>
+                    <div class="collapsible-header">
+                        <i class="material-icons">help_outline</i>Légende
+                    </div>
+                    <div class="collapsible-body">
+                        <table class="responsive-table striped">
+                            <thead>
+                                <tr>
+                                    <th>Texte</th>
+                                    <th>Explication</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
+                                    </td>
+                                    <td>
+                                        Un créneau fixe libre
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class="material-icons">person</i>&nbsp;Prénom N
+                                    </td>
+                                    <td>
+                                        Un créneau fixe avec un bénéficiaire d'inscrit
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
+                                    </td>
+                                    <td>
+                                        Un créneau fixe avec un bénéficiaire dans un état "anormal"
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Etats "anormaux"
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>∅ Membre clôturé</li>
+                                            <li>❄ Membre gelé</li>
+                                            <li>☂ Membre exempté de créneaux</li>
+                                            <li>$ Membre avec une adhésion expirée</li>
+                                            <li>✈ Bénéficiaire avec un statut "volant"</li>
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </li>
             </ul>
