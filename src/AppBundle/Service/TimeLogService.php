@@ -39,7 +39,9 @@ class TimeLogService
         if ($date) {
             $log->setCreatedAt($date);
         } // else defaults to 'now'
-        $log->setCreatedBy($current_user);
+        if ($current_user) {
+            $log->setCreatedBy($current_user);
+        }
         $log->setRequestRoute($request->get('_route'));
 
         return $log;
