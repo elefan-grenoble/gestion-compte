@@ -573,7 +573,7 @@ class Beneficiary
         $symbols = array();
 
         if ($this->getMembership()->getWithdrawn()) {
-            $symbols[] = '∅';
+            $symbols[] = $this->getParameter('member_withdrawn_icon');
         }
         if ($this->getMembership()->getFrozen()) {
             $symbols[] = '❄';

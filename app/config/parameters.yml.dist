@@ -115,6 +115,8 @@ parameters:
     profile_display_time_log: true
 
     # Member configuration
+    member_withdrawn_icon: '∅'
+    member_withdrawn_material_icon: 'block'
     member_withdrawn_background_color: rgba(255, 50, 0, 0.2)
     member_frozen_background_color: rgba(0, 138, 255, 0.1)
     member_exempted_background_color: rgb(0, 150, 136, 0.1)

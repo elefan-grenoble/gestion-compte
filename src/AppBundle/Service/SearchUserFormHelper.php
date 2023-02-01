@@ -22,7 +22,7 @@ class SearchUserFormHelper {
     public function getSearchForm($formBuilder, $type = null) {
         $formBuilder->add('withdrawn', ChoiceType::class, [
             'data' => 1,
-            'label' => '∅ fermé',
+            'label' => $this->getParameter('member_withdrawn_icon') . ' fermé',
             'required' => false,
             'choices' => [
                 'fermé' => 2,

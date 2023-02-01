@@ -27,7 +27,7 @@
             <i class="material-icons" title="Compte gelé">ac_unit</i>
         {% endif %}
         {% if member.withdrawn %}
-            <i class="material-icons" title="Compte fermé">block</i>
+            <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
         {% elseif not member.hasValidRegistration() %}
             <i class="material-icons" title="Compte en attente d'adhésion">attach_money</i>
         {% endif %}
