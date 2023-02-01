@@ -205,7 +205,7 @@ class MembershipController extends Controller
 
     private function createNewTimeLogForm(Membership $member)
     {
-        $newTimeLogAction = $this->generateUrl('time_log_new', array('id' => $member->getId()));
+        $newTimeLogAction = $this->generateUrl('timelog_new', array('id' => $member->getId()));
         return $this->createForm(TimeLogType::class, new TimeLog(), array('action' => $newTimeLogAction));
     }
 

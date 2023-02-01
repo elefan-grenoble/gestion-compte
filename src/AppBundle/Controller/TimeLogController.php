@@ -48,7 +48,7 @@ class TimeLogController extends Controller
     /**
      * Create a new log
      *
-     * @Route("/{id}/new", name="time_log_new", methods={"GET","POST"})
+     * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      * @param Membership $member
      */
