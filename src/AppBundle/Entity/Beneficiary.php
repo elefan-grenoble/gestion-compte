@@ -583,7 +583,7 @@ class Beneficiary
         $symbols = array();
 
         if ($this->getMembership()->getWithdrawn()) {
-            $symbols[]= "&#x26A0;"; // ∅
+            $symbols[]= "&#x2205;"; // ∅
         }
         if ($this->getMembership()->getFrozen()) {
             $symbols[]= "&#x2744;"; // ❄
@@ -595,7 +595,7 @@ class Beneficiary
             $symbols[]= "&#x2602;"; // ☂
         }
         if (!$this->getMembership()->hasValidRegistration()) {
-            $symbols[]= "&#8364;"; // €
+            $symbols[]= "&#36;"; // $
         }
 
         if (count($symbols)) {
