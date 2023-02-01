@@ -540,10 +540,11 @@ class BookingController extends Controller
                 'end' => $bucket->getEnd()
             ]);
             $count = 0;
-            foreach ($shifts as $s) {
+            foreach ($shifts as $shift) {
+                $beneficiary = $shift->getShifter();
                 $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
-                $em->remove($s);
+                $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+                $em->remove($shift);
                 $count++;
             }
             $em->flush();
