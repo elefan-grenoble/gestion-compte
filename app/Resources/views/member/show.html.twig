@@ -20,10 +20,17 @@
         {% if member.mainBeneficiary and not member.mainBeneficiary.user.isEnabled %}
             <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
         {% endif %}
-        {% if member.isCurrentlyExemptedFromShifts() %}<i class="material-icons" title="Compte exempté">beach_access</i>{% endif %}
-        {% if member.frozen %}<i class="material-icons" title="Compte gelé">ac_unit</i>{% endif %}
-        {% if member.withdrawn %}<i class="material-icons" title="Compte fermé">block</i>{% endif %}
-        {% if not member.hasValidRegistration() and not member.withdrawn %}<i class="material-icons" title="Compte en attente d'adhésion">euro_symbol</i>{% endif %}
+        {% if member.isCurrentlyExemptedFromShifts() %}
+            <i class="material-icons" title="Compte exempté">beach_access</i>
+        {% endif %}
+        {% if member.frozen %}
+            <i class="material-icons" title="Compte gelé">ac_unit</i>
+        {% endif %}
+        {% if member.withdrawn %}
+            <i class="material-icons" title="Compte fermé">block</i>
+        {% elseif not member.hasValidRegistration() %}
+            <i class="material-icons" title="Compte en attente d'adhésion">euro_symbol</i>
+        {% endif %}
     </h4>
 
     {% if member.beneficiaries | length %}
