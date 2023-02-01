@@ -553,19 +553,12 @@ class Beneficiary
      */
     public function hasWarningStatus()
     {
-        if ($this->getMembership()->getWithdrawn()) {
-            return true;
-        }
-        if ($this->getMembership()->getFrozen()) {
-            return true;
-        }
-        if ($this->isFlying()) {
-            return true;
-        }
-        if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
-            return true;
-        }
-        if (!$this->getMembership()->hasValidRegistration()) {
+        if ($this->getMembership()->getWithdrawn() ||
+            $this->getMembership()->getFrozen() ||
+            $this->isFlying() ||
+            $this->getMembership()->isCurrentlyExemptedFromShifts() ||
+            !$this->getMembership()->hasValidRegistration()
+        ) {
             return true;
         }
     }
@@ -583,19 +576,19 @@ class Beneficiary
         $symbols = array();
 
         if ($this->getMembership()->getWithdrawn()) {
-            $symbols[]= "&#x2205;"; // ∅
+            $symbols[] = '∅';
         }
         if ($this->getMembership()->getFrozen()) {
-            $symbols[]= "&#x2744;"; // ❄
+            $symbols[] = '❄';
         }
         if ($this->isFlying()) {
-            $symbols[]= "&#9992;"; // ✈
+            $symbols[] = '✈';
         }
         if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
-            $symbols[]= "&#x2602;"; // ☂
+            $symbols[] = '☂';
         }
         if (!$this->getMembership()->hasValidRegistration()) {
-            $symbols[]= "&#36;"; // $
+            $symbols[] = '$';
         }
 
         if (count($symbols)) {
