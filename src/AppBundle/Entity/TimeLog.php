@@ -243,6 +243,7 @@ class TimeLog
     public function setCreatedAt($date)
     {
         $this->createdAt = $date;
+
         return $this;
     }
 
@@ -254,6 +255,17 @@ class TimeLog
         $this->type = $type;
     }
 
+    public function getRequestRoute(): ?string
+    {
+        return $this->requestRoute;
+    }
+
+    public function setRequestRoute(?string $requestRoute): self
+    {
+        $this->requestRoute = $requestRoute;
+
+        return $this;
+    }
 
     /**
      * @return string

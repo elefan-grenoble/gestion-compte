@@ -87,4 +87,20 @@ class TimeLogService
 
         return $log;
     }
+
+    /**
+     * Initialize a custom log with the member data
+     * @param Membership $member
+     * @return TimeLog
+     */
+    public function initCustomTimeLog(Membership $member, $time = null, \DateTime $date = null, $description = null)
+    {
+        $log = $this->initTimeLog($member, $date, $description);
+        $log->setType(TimeLog::TYPE_CUSTOM);
+        if ($time) {
+            $log->setTime($time);
+        }
+
+        return $log;
+    }
 }

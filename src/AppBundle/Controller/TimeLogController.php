@@ -55,23 +55,19 @@ class TimeLogController extends Controller
     public function newAction(Request $request, Membership $member)
     {
         $session = new Session();
-        $timeLog = new TimeLog();
+        $timeLog = $this->get('time_log_service')->initCustomTimeLog($member);
 
         $form = $this->createForm(TimeLogType::class, $timeLog);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $timeLog->setMembership($member);
             $timeLog->setTime($form->get('time')->getData());
-            $current_user = $this->get('security.token_storage')->getToken()->getUser();
-            $timeLog->setCreatedBy($current_user);
             $timeLog->setDescription($form->get('description')->getData());
-            $timeLog->setType(TimeLog::TYPE_CUSTOM);
 
             $em = $this->getDoctrine()->getManager();
             $em->persist($timeLog);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
             return $this->redirectToShow($member);
         }
