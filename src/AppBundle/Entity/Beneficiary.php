@@ -553,14 +553,11 @@ class Beneficiary
      */
     public function hasWarningStatus()
     {
-        if ($this->getMembership()->getWithdrawn() ||
+        return $this->getMembership()->getWithdrawn() ||
             $this->getMembership()->getFrozen() ||
             $this->isFlying() ||
             $this->getMembership()->isCurrentlyExemptedFromShifts() ||
-            !$this->getMembership()->hasValidRegistration()
-        ) {
-            return true;
-        }
+            !$this->getMembership()->hasValidRegistration();
     }
 
     /**
