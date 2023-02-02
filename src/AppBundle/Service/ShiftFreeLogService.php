@@ -34,7 +34,9 @@ class ShiftFreeLogService
         if ($reason) {
             $log->setReason($reason);
         }
-        $log->setCreatedBy($current_user);
+        if (is_object($current_user)) {
+            $log->setCreatedBy($current_user);
+        }
         $log->setRequestRoute($request->get('_route'));
 
         return $log;
