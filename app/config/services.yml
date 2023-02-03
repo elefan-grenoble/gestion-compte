@@ -30,7 +30,7 @@ services:
         resource: '../../src/AppBundle/Controller'
         public: true
         tags: ['controller.service_arguments']
-    AppBundle\Controller\DefaultController:
+    AppBundle\Controller\CardReaderController:
         arguments:
             - '%swipe_card_logging%'
             - '%swipe_card_logging_anonymous%'
