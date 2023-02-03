@@ -219,6 +219,8 @@ class EmailingEventListener
      */
     public function onShiftBooked(ShiftBookedEvent $event)
     {
+        $this->logger->info("Emailing Listener: onShiftBooked");
+
         $shift = $event->getShift();
 
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
@@ -242,11 +244,14 @@ class EmailingEventListener
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
         $this->logger->info("Emailing Listener: onShiftDeleted");
+
         $shift = $event->getShift();
-        if ($shift->getShifter()) { //warn shifter
+        $beneficiary = $event->getBeneficiary();
+
+        if ($beneficiary) { // warn shifter
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
-                ->setTo($shift->getShifter()->getEmail())
+                ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/deleted_shift.html.twig',

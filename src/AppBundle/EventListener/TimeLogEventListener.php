@@ -155,9 +155,10 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftDeleted");
 
         $shift = $event->getShift();
+        $member = $event->getMember();
 
-        if ($shift->getShifter()) {
-            $this->deleteShiftLogs($shift, $shift->getShifter()->getMembership());
+        if ($member) {
+            $this->deleteShiftLogs($shift, $member);
         }
     }
 
