@@ -22,7 +22,7 @@
             <b>{{ bucket.start | date('H:i') }} à {{ bucket.end | date('H:i') }}</b>
         </div>
         <ul>
-            {% for shift in bucket.shifts %}
+            {% for shift in bucket.sortedShifts %}
                 <li style="height: 30px">
                     <div>
                         {% if use_card_reader_to_validate_shifts %}
