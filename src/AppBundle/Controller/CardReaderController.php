@@ -36,7 +36,7 @@ class CardReaderController extends Controller
     }
 
     /**
-     * @Route("/check", name="card_reader_check", methods={"GET","POST"})
+     * @Route("/check", name="card_reader_check", methods={"POST"})
      */
     public function checkAction(Request $request)
     {
@@ -46,7 +46,6 @@ class CardReaderController extends Controller
         $code = $request->get('swipe_code');
 
         if (!$code) {
-            var_dump("!code");
             return $this->redirectToRoute('cardReader');
         }
         if (!SwipeCard::checkEAN13($code)) {
