@@ -46,10 +46,10 @@ class CardReaderController extends Controller
         $code = $request->get('swipe_code');
 
         if (!$code) {
-            return $this->redirectToRoute('cardReader');
+            return $this->redirectToRoute('welcome');
         }
         if (!SwipeCard::checkEAN13($code)) {
-            return $this->redirectToRoute('cardReader');
+            return $this->redirectToRoute('welcome');
         }
 
         $code = substr($code, 0, -1); //remove controle
@@ -85,6 +85,6 @@ class CardReaderController extends Controller
             ]);
         }
 
-        return $this->redirectToRoute('cardReader');
+        return $this->redirectToRoute('welcome');
     }
 }

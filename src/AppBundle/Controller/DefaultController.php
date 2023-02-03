@@ -173,9 +173,9 @@ class DefaultController extends Controller
     }
 
     /**
-     * @Route("/cardReader", name="cardReader")
+     * @Route("/welcome", name="welcome")
      */
-    public function cardReaderAction(Request $request)
+    public function welcomeAction(Request $request)
     {
         $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
@@ -187,7 +187,7 @@ class DefaultController extends Controller
         $shifts_upcoming = $em->getRepository('AppBundle:Shift')->findUpcomingToday();
         $buckets_upcoming = $this->get('shift_service')->generateShiftBuckets($shifts_upcoming);
 
-        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('WELCOME')->getContent();
 
         return $this->render('default/card_reader/index.html.twig', [
             "buckets_in_progress" => $buckets_in_progress,
