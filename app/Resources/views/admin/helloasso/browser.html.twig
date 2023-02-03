@@ -4,22 +4,22 @@
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
     <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
     <a href="{{ path('helloasso_browser') }}"><i class="material-icons">contact_mail</i>&nbsp;Liste des campagnes Helloasso</a>
-    {% if campaigns is not defined and campaign is defined  %}
+    {% if campaigns is not defined and campaign is defined %}
         <i class="material-icons">chevron_right</i>
         <strong>{{ campaign.name }}</strong>
     {% endif %}
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Mes campagnes Helloasso</h4>
+    <h4>Mes campagnes Helloasso</h4>
     {% if campaigns is defined and campaigns | length %}
-    <div class="row">
-        {% for campaign in campaigns %}
-        <div class="col s12 m6 l6 xl4">
-            {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign } %}
+        <div class="row">
+            {% for campaign in campaigns %}
+            <div class="col s12 m6 l6 xl4">
+                {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign } %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
     {% elseif campaigns is defined and campaigns is not null %}
         <h5>campagne : <strong>{{ campaign.name }}</strong></h5>
         {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign, no_link: true } %}
