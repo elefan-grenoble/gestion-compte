@@ -15,7 +15,7 @@
 {% endif %}
 {% if app.user.beneficiary.getEnabledSwipeCards | length %}
     {% set card = app.user.beneficiary.getEnabledSwipeCards.first %}
-    {% if showBadgeImage %}
+    {% if (show_badge_image ?? false) %}
         <div class="badge_card">
             <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">
         </div>
