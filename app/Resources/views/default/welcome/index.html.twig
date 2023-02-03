@@ -16,7 +16,7 @@
                 <h5>Créneaux en cours</h5>
 
                 {% for bucket in buckets_in_progress %}
-                    {% include "default/card_reader/_partial/bucket_card.html.twig" with { bucket: bucket } %}
+                    {% include "default/welcome/_partial/bucket_card.html.twig" with { bucket: bucket } %}
                 {% endfor %}
                 <br />
             {% endif %}
@@ -24,7 +24,7 @@
             <h5>Créneaux à venir</h5>
 
             {% for bucket in buckets_upcoming %}
-                {% include "default/card_reader/_partial/bucket_card.html.twig" with { bucket: bucket } %}
+                {% include "default/welcome/_partial/bucket_card.html.twig" with { bucket: bucket } %}
             {% endfor %}
         </div>
 

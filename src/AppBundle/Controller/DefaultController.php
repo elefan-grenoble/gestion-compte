@@ -189,7 +189,7 @@ class DefaultController extends Controller
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('WELCOME')->getContent();
 
-        return $this->render('default/card_reader/index.html.twig', [
+        return $this->render('default/welcome/index.html.twig', [
             "buckets_in_progress" => $buckets_in_progress,
             "buckets_upcoming" => $buckets_upcoming,
             "dynamicContent" => $dynamicContent
