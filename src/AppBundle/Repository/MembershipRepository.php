@@ -12,6 +12,52 @@ use Doctrine\ORM\Query\Expr\Join;
  */
 class MembershipRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * findOneFromAutoComplete
+     *
+     * We consider that the $membership has the following format:
+     * "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname>"
+     * or "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname> & <Beneficiary2.firstname> <Beneficiary2.lastname>"
+     */
+    public function findOneFromAutoComplete($membership)
+    {
+        // extract member_number from $membership string
+        preg_match('/#(.*?)\s/s', $membership, $matches);
+        $membershipMemberNumber = $matches[0];
+
+        $qb = $this->createQueryBuilder('m')
+            ->where('member_number = :memberNumber')
+            ->setParameter('memberNumber', $membershipMemberNumber);
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * findFromAutoComplete
+     *
+     * We consider that each string of $memberships has the following format:
+     * "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname>"
+     * or "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname> & <Beneficiary2.firstname> <Beneficiary2.lastname>"
+     */
+    public function findFromAutoComplete($memberships)
+    {
+        $membershipMemberNumberList = array();
+        foreach ($memberships as $memberships) {
+            preg_match('/#(.*?)\s/s', $membership, $matches);
+            $membershipMemberNumberList[] = $matches[0];
+        }
+
+        $qb = $this->createQueryBuilder('m')
+            ->where('member_number IN (:memberNumberList)')
+            ->setParameter('memberNumberList', $membershipMemberNumberList);
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findAllActive()
     {
         $qb = $this->createQueryBuilder('m')
@@ -60,8 +106,8 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             }
         } else {
                 $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 14) = 0')
-                ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
-                ->setParameter('now', $date);
+                    ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
+                    ->setParameter('now', $date);
         }
 
         return $qb
@@ -76,8 +122,8 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findByRole($role)
     {
-        $qb = $this->_em->createQueryBuilder();
-        $qb->select('u')
+        $qb = $this->createQueryBuilder()
+            ->select('u')
             ->from($this->_entityName, 'u')
             ->where('u.roles LIKE :roles')
             ->setParameter('roles', '%"' . $role . '"%');

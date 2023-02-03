@@ -18,13 +18,14 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findOneFromAutoComplete($beneficiary)
     {
-        $qb = $this->createQueryBuilder('b');
-
-        $qb->leftJoin('b.membership', 'm')
+        $qb = $this->createQueryBuilder('b')
+            ->leftJoin('b.membership', 'm')
             ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) = :fullname')
             ->setParameter('fullname', $beneficiary);
 
-        return $qb->getQuery()->getOneOrNullResult();
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     /**
@@ -35,13 +36,14 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findFromAutoComplete($beneficiaries)
     {
-        $qb = $this->createQueryBuilder('b');
+        $qb = $this->createQueryBuilder('b')
+            ->leftJoin('b.membership', 'm')
+            ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) IN (:fullnameList)')
+            ->setParameter('fullnameList', $beneficiaries);
 
-        $qb->leftJoin('b.membership', 'm')
-            ->where('CONCAT(\'#\', m.member_number, \' \', b.firstname, \' \', b.lastname) IN (:fullname)')
-            ->setParameter('fullname', $beneficiaries);
-
-        return $qb->getQuery()->getResult();
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -53,29 +55,30 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
     public function findAllActive()
     {
 
-        $qb = $this->createQueryBuilder('beneficiary');
-
-        $qb->select('beneficiary, membership')
+        $qb = $this->createQueryBuilder('beneficiary')
+            ->select('beneficiary, membership')
             ->join('beneficiary.user', 'user')
             ->join('beneficiary.membership', 'membership')
             ->where('membership.withdrawn = 0');
 
-        return $qb->getQuery()->getResult();
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     public function findCoShifters($shift)
     {
         $qb = $this->createQueryBuilder('b')
-                   ->leftJoin('b.shifts', 's')
-                    ->where('s.start = :start')
-                    ->andWhere('s.end = :end')
-                    ->andWhere('s.job = :job')
-                    ->andWhere('s.id != :id')
-                    ->andWhere('s.shifter IS NOT NULL')
-                    ->setParameter('start', $shift->getStart())
-                    ->setParameter('end', $shift->getEnd())
-                    ->setParameter('job', $shift->getJob())
-                    ->setParameter('id', $shift->getId());
+            ->leftJoin('b.shifts', 's')
+            ->where('s.start = :start')
+            ->andWhere('s.end = :end')
+            ->andWhere('s.job = :job')
+            ->andWhere('s.id != :id')
+            ->andWhere('s.shifter IS NOT NULL')
+            ->setParameter('start', $shift->getStart())
+            ->setParameter('end', $shift->getEnd())
+            ->setParameter('job', $shift->getJob())
+            ->setParameter('id', $shift->getId());
 
         return $qb
             ->getQuery()
