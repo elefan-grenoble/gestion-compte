@@ -81,7 +81,7 @@
      # period: a period object
      # week_filter: a string with the week to keep or null if no filter
     #}
-    {% macro period_card(period, week_filter, pb_filter) %}
+    {% macro period_card(period, week_filter) %}
         <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
 
             {# Card header #}
@@ -153,6 +153,9 @@
                             {{ _self.form_input(filter_form.job) }}
                             {{ _self.form_input(filter_form.week) }}
                             {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
+                        </div>
+                        <div class="row">
+                            {{ _self.form_input(filter_form.beneficiary, not use_fly_and_fixed) }}
                         </div>
                         {{ form_widget(filter_form.filter) }}
                         {{ form_end(filter_form) }}
@@ -285,13 +288,13 @@
                         <td>
                             {% if periods_by_day[0]|length %}
                                 {% for period in periods_by_day[i] %}
-                                    {% if filling_filter == null
+                                    {% if ((filling_filter == null) and (beneficiary_filter == null))
                                         or (filling_filter == "problematic" and period.isProblematic(week_filter))
                                         or (filling_filter == "empty" and period.isEmpty(week_filter))
                                         or (filling_filter == "full" and period.isFull(week_filter))
-                                        or (filling_filter == "partial" and period.isPartial(week_filter)) %}
+                                        or (filling_filter == "partial" and period.isPartial(week_filter))
+                                        or (beneficiary_filter and period.hasShifter(beneficiary_filter) | length > 0) %}
                                         {{ _self.period_card(period, week_filter) }}
-
                                     {% endif %}
                                 {% endfor %}
                             {% endif %}

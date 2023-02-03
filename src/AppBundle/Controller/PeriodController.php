@@ -51,14 +51,19 @@ class PeriodController extends Controller
     {
         // default values
         $res = [
-            "job" => null,
-            "filling"=>null,
-            "week"=>null,
+            'beneficiary' => null,
+            'job' => null,
+            'filling' => null,
+            'week' => null,
         ];
 
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('period'))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+                'label' => 'Bénéficiaire',
+                'required' => false,
+            ))
             ->add('job', EntityType::class, array(
                 'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
@@ -102,6 +107,7 @@ class PeriodController extends Controller
         $res["form"]->handleRequest($request);
 
         if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
+            $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
             $res["job"] = $res["form"]->get("job")->getData();
             $res["filling"] = $res["form"]->get("filling")->getData();
             $res["week"] = $res["form"]->get("week")->getData();
@@ -122,11 +128,11 @@ class PeriodController extends Controller
         $periodsByDay = array();
         $order = array('start' => 'ASC');
 
-        for($i=0;$i<7;$i++){
-            $findByFilter = array('dayOfWeek'=>$i);
+        for($i=0; $i<7; $i++) {
+            $findByFilter = array('dayOfWeek' => $i);
 
-            if($filter["job"]){
-                $findByFilter["job"]=$filter["job"];
+            if ($filter['job']) {
+                $findByFilter['job'] = $filter['job'];
             }
 
             $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
@@ -134,10 +140,11 @@ class PeriodController extends Controller
         }
 
         return $this->render('admin/period/index.html.twig', array(
-            "periods_by_day" => $periodsByDay,
-            "filter_form" => $filter['form']->createView(),
-            "week_filter" => $filter['week'],
-            "filling_filter" => $filter["filling"]
+            'periods_by_day' => $periodsByDay,
+            'filter_form' => $filter['form']->createView(),
+            'beneficiary_filter' => $filter['beneficiary'],
+            'week_filter' => $filter['week'],
+            'filling_filter' => $filter["filling"]
         ));
     }
 
