@@ -16,13 +16,21 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SearchUserFormHelper {
+
+    private $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     public function getSearchForm($formBuilder, $type = null) {
         $formBuilder->add('withdrawn', ChoiceType::class, [
             'data' => 1,
-            'label' => $this->getParameter('member_withdrawn_icon') . ' fermé',
+            'label' => $this->container->getParameter('member_withdrawn_icon') . ' fermé',
             'required' => false,
             'choices' => [
                 'fermé' => 2,
@@ -40,7 +48,7 @@ class SearchUserFormHelper {
             ]);
         }
         $formBuilder->add('frozen', ChoiceType::class, [
-            'label' => '❄️ gelé',
+            'label' => $this->container->getParameter('member_frozen_icon') . ' gelé',
             'required' => false,
             'choices' => [
                 'gelé' => 2,
@@ -48,7 +56,7 @@ class SearchUserFormHelper {
             ]
         ]);
         $formBuilder->add('exempted', ChoiceType::class, [
-            'label' => '☂ exempté',
+            'label' => $this->container->getParameter('member_exempted_icon') . ' gelé',
             'required' => false,
             'choices' => [
                 'exempté' => 2,

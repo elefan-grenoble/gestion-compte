@@ -61,7 +61,7 @@
             {# sombody is registered for this periodposition #}
             {% set warning = shifter.hasWarningStatus %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
-               class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter.getDisplayNameWithMemberNumberAndStatusIcon() | raw }} &#013;&#010; ({{ formation }})">
+               class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ formation }})">
                 {% if warning %}
                     <i class="red-text material-icons warning-animation">warning</i>
                 {% else %}
@@ -250,8 +250,8 @@
                                     <td>
                                         <ul>
                                             <li>{{ member_withdrawn_icon }} Membre clôturé</li>
-                                            <li>❄ Membre gelé</li>
-                                            <li>☂ Membre exempté de créneaux</li>
+                                            <li>{{ member_frozen_icon }} Membre gelé</li>
+                                            <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
                                             <li>$ Membre avec une adhésion expirée</li>
                                             <li>✈ Bénéficiaire avec un statut "volant"</li>
                                         </ul>

@@ -10,7 +10,7 @@ use AppBundle\Entity\ShiftBucket;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use phpDocumentor\Reflection\Types\Array_;
-use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use \Datetime;
 
 class MembershipService
@@ -20,12 +20,12 @@ class MembershipService
     protected $registration_every_civil_year;
     protected $cycle_type;
 
-    public function __construct(EntityManagerInterface $em, $registration_duration, $registration_every_civil_year, $cycle_type)
+    public function __construct(ContainerInterface $container, EntityManagerInterface $em)
     {
         $this->em = $em;
-        $this->registration_duration = $registration_duration;
-        $this->registration_every_civil_year = $registration_every_civil_year;
-        $this->cycle_type = $cycle_type;
+        $this->registration_duration = $container->getParameter('registration_duration');
+        $this->registration_every_civil_year = $container->getParameter('registration_every_civil_year');
+        $this->cycle_type = $container->getParameter('cycle_type');
     }
 
     /**

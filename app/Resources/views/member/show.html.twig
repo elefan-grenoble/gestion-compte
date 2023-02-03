@@ -21,10 +21,10 @@
             <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
         {% endif %}
         {% if member.isCurrentlyExemptedFromShifts() %}
-            <i class="material-icons" title="Compte exempté">beach_access</i>
+            <i class="material-icons" title="Compte exempté">{{member_exempted_material_icon  }}</i>
         {% endif %}
         {% if member.frozen %}
-            <i class="material-icons" title="Compte gelé">ac_unit</i>
+            <i class="material-icons" title="Compte gelé">{{ member_frozen_material_icon }}</i>
         {% endif %}
         {% if member.withdrawn %}
             <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
