@@ -361,25 +361,64 @@ class ShiftService
         return $bucket->getShifts()->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
     }
 
+    /**
+     * build the bucket
+     * group similar shifts together (same time & same job)
+     */
     public function generateShiftBucketsByDayAndJob($shifts)
     {
         $bucketsByDay = array();
+
         foreach ($shifts as $shift) {
             $day = $shift->getStart()->format("d m Y");
-            $job = $shift->getJob()->getId();
+            $jobId = $shift->getJob()->getId();
             $interval = $shift->getIntervalCode();
+
             if (!isset($bucketsByDay[$day])) {
                 $bucketsByDay[$day] = array();
             }
-            if (!isset($bucketsByDay[$day][$job])) {
-                $bucketsByDay[$day][$job] = array();
+            if (!isset($bucketsByDay[$day][$jobId])) {
+                $bucketsByDay[$day][$jobId] = array();
             }
-            if (!isset($bucketsByDay[$day][$job][$interval])) {
+            if (!isset($bucketsByDay[$day][$jobId][$interval])) {
                 $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$job][$interval] = $bucket;
+                $bucketsByDay[$day][$jobId][$interval] = $bucket;
             }
-            $bucketsByDay[$day][$job][$interval]->addShift($shift);
+            $bucketsByDay[$day][$jobId][$interval]->addShift($shift);
         }
+
+        return $bucketsByDay;
+    }
+
+    /**
+     * Filter bucketsByDay by filling (empty / partial / full)
+     */
+    public function filterBucketsByDayAndJobByFilling($bucketsByDay, string $filling = null)
+    {
+        if ($filling) {
+            foreach ($bucketsByDay as $day => $bucketsByJob) {
+                foreach ($bucketsByJob as $jobId => $bucketByInterval) {
+                    foreach ($bucketByInterval as $interval => $bucket) {
+                        $nbShifts = count($bucket->getShifts());
+                        $nbBookableShifts = count($this->getBookableShifts($bucket));
+                        if (
+                            ($filling == 'empty' and $nbBookableShifts != $nbShifts) ||
+                            ($filling == 'full' and $nbBookableShifts != 0) ||
+                            ($filling == 'partial' and ($nbBookableShifts == $nbShifts or $nbBookableShifts == 0))
+                        ) {
+                            unset($bucketsByDay[$day][$jobId][$interval]);
+                            if (count($bucketsByDay[$day][$jobId]) == 0) {
+                                unset($bucketsByDay[$day][$jobId]);
+                                if (count($bucketsByDay[$day]) == 0) {
+                                    unset($bucketsByDay[$day]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         return $bucketsByDay;
     }
 

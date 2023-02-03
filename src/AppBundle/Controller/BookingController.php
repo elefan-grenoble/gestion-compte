@@ -297,63 +297,6 @@ class BookingController extends Controller
     }
 
     /**
-     * build the bucket (regrouping all the shift at the same time with the same job)
-     * // TODO Maybe it should be in the BucketRepository...
-     *
-     * @param array $shifts
-     * @param string|null $filling
-     * @return array
-     */
-    private function bucketFactory(array $shifts, string $filling = null): array
-    {
-        $bucketsByDay = array();
-
-        foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
-            $jobId = $shift->getJob()->getId();
-
-            $interval = $shift->getIntervalCode();
-            if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
-            }
-            if (!isset($bucketsByDay[$day][$jobId])) {
-                $bucketsByDay[$day][$jobId] = array();
-            }
-            if (!isset($bucketsByDay[$day][$jobId][$interval])) {
-                $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$jobId][$interval] = $bucket;
-            }
-            $bucketsByDay[$day][$jobId][$interval]->addShift($shift);
-        }
-
-        if ($filling) {
-            $shiftService = $this->container->get('shift_service');
-            foreach ($bucketsByDay as $day => $bucketsByJob) {
-                foreach ($bucketsByJob as $jobId => $bucketByInterval) {
-                    foreach ($bucketByInterval as $interval => $bucket) {
-                        $nbShifts = count($bucket->getShifts());
-                        $bookableShifts = count($shiftService->getBookableShifts($bucket));
-                        if  (($filling == 'empty' and $bookableShifts != $nbShifts)
-                        or ($filling == 'full' and $bookableShifts != 0)
-                        or ( $filling == 'partial' and ($bookableShifts == $nbShifts or $bookableShifts == 0))) {
-                            unset($bucketsByDay[$day][$jobId][$interval]);
-                            if (count($bucketsByDay[$day][$jobId]) == 0) {
-                                unset($bucketsByDay[$day][$jobId]);
-                                if (count($bucketsByDay[$day]) == 0) {
-                                    unset($bucketsByDay[$day]);
-                                }
-                            }
-
-                        }
-                    }
-                }
-            }
-        }
-
-        return $bucketsByDay;
-    }
-
-    /**
      * main administration page for booking shift
      *
      * @Route("/admin", name="booking_admin", methods={"GET","POST"})
@@ -370,7 +313,8 @@ class BookingController extends Controller
             ->getRepository(Shift::class)
             ->findFrom($filter["from"], $filter["to"], $filter["job"]);
 
-        $bucketsByDay = $this->bucketFactory($shifts, $filter["filling"]);
+        $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+        $bucketsByDay = $this->get('shift_service')->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
 
         return $this->render('admin/booking/index.html.twig', [
             'filterForm' => $filter["form"]->createView(),
