@@ -16,6 +16,25 @@ use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 
+/**
+ * if the coop uses the card_reader (use_card_reader_to_validate_shifts = true)
+ * - general rules:
+ *  - shift time logs are created when shifts are validated (onShiftValidated)
+ *  - shift time logs are never deleted (see onShiftInvalidated)
+ * - more details:
+ *  - booking a shift does not create a time log
+ *  - the time log is created only when the shift is validated (with the card_reader) (with date = validation date)
+ *  - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log)
+ *
+ * if the coop doesn't use the card_reader (use_card_reader_to_validate_shifts = false)
+ * - general rules:
+ *  - shift time logs are created when shifts are booked (onShiftBooked)
+ *  - shift time logs are deleted when shifts are freed (see onShiftFreed)
+ * - more details:
+ *  - booking a shift creates the time log (with date = shift start_date)
+ *  - a booked shift is validated by default
+ *  - when a shift is freed, we delete the existing time log
+ */
 class TimeLogEventListener
 {
     protected $em;
@@ -47,12 +66,14 @@ class TimeLogEventListener
     public function onShiftBooked(ShiftBookedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftBooked");
+
+        $shift = $event->getShift();
+
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
             // time log will be created in onShiftValidated
         } else {
-            $shift = $event->getShift();
-            $this->createShiftLog($shift, $shift->getStart());
+            $this->createShiftValidatedTimeLog($shift, $shift->getStart());
         }
     }
 
@@ -64,12 +85,14 @@ class TimeLogEventListener
     public function onShiftValidated(ShiftValidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftValidated");
+
+        $shift = $event->getShift();
+
         if ($this->use_card_reader_to_validate_shifts) {
-            $shift = $event->getShift();
             $now = new \DateTime('now');
             // why $now? to avoid edge cases
             // example: if the shift is validated manually later, we might need to take it into account in the next cycle
-            $this->createShiftLog($shift, $now);
+            $this->createShiftValidatedTimeLog($shift, $now);
         } else {
             // do nothing!
             // time log already created in onShiftBooked
@@ -83,7 +106,25 @@ class TimeLogEventListener
     public function onShiftInvalidated(ShiftInvalidatedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftInvalidated");
-        $this->deleteShiftLogs($event->getShift(), $event->getMember());
+
+        $shift = $event->getShift();
+        $member = $event->getMember();
+
+        if ($this->use_card_reader_to_validate_shifts) {
+            // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
+            // if true, create an inverse timelog
+            $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) use ($member) {
+                return (($log->type == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
+            });
+            if ($shiftValidatedTimeLog->count() > 0) {
+                $this->createShiftInvalidatedTimeLog($shift);
+            } else {
+                // do nothing!
+            }
+        } else {
+            // do nothing! shouldn't happen
+            // for coops without card_reader, only onShiftFreed should be called
+        }
     }
 
     /**
@@ -93,7 +134,16 @@ class TimeLogEventListener
     public function onShiftFreed(ShiftFreedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftFreed");
-        $this->deleteShiftLogs($event->getShift(), $event->getMember());
+
+        $shift = $event->getShift();
+        $member = $event->getMember();
+
+        if ($this->use_card_reader_to_validate_shifts) {
+            // do nothing!
+            // time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+        } else {
+            $this->deleteShiftLogs($shift, $member);
+        }
     }
 
     /**
@@ -103,7 +153,9 @@ class TimeLogEventListener
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
         $this->logger->info("Time Log Listener: onShiftDeleted");
+
         $shift = $event->getShift();
+
         if ($shift->getShifter()) {
             $this->deleteShiftLogs($shift, $shift->getShifter()->getMembership());
         }
@@ -156,23 +208,35 @@ class TimeLogEventListener
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createShiftLog(Shift $shift, \DateTime $date = null, $description = null)
+    private function createShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftTimeLog($shift, $date, $description);
+        $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }
 
     /**
      * @param Shift $shift
-     * @param Membership $membership
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function createShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    {
+        $log = $this->container->get('time_log_service')->initShiftInvalidatedTimeLog($shift, $date, $description);
+        $this->em->persist($log);
+        $this->em->flush();
+    }
+
+    /**
+     * @param Shift $shift
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      */
-    private function deleteShiftLogs(Shift $shift, Membership $membership)
+    private function deleteShiftLogs(Shift $shift, Membership $member)
     {
         $logs = $shift->getTimeLogs();
         foreach ($logs as $log) {
-            if ($log->getMembership()->getId() == $membership->getId()) {
+            if ($log->getMembership() == $member) {
                 $this->em->remove($log);
             }
         }
@@ -205,14 +269,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createFrozenLog(Membership $membership)
+    private function createFrozenLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_FROZEN);
         $this->em->persist($log);
@@ -220,14 +284,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createExemptedLog(Membership $membership)
+    private function createExemptedLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_EXEMPTED);
         $this->em->persist($log);
@@ -235,14 +299,14 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createRegistrationExpiredLog(Membership $membership)
+    private function createRegistrationExpiredLog(Membership $member)
     {
         $log = new TimeLog();
-        $log->setMembership($membership);
+        $log->setMembership($member);
         $log->setTime(0);
         $log->setType(TimeLog::TYPE_CYCLE_END_EXPIRED_REGISTRATION);
         $this->em->persist($log);

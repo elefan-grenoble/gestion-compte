@@ -424,6 +424,16 @@ class Shift
     }
 
     /**
+     * Return true if the shift is in the future
+     *
+     * @return boolean
+     */
+    public function getIsFuture()
+    {
+        return !$this->getIsPastOrCurrent();
+    }
+
+    /**
      * Return true if the shift is not in the past, not current, and close enough
      *
      * @return boolean
@@ -444,7 +454,7 @@ class Shift
     {
         $futureDate = new \DateTime($duration);
         $futureDate->setTime(23, 59, 59);
-        return !$this->getIsPast() && !$this->getIsCurrent() && ($futureDate > $this->start);
+        return $this->getIsFuture() && ($this->start < $futureDate);
     }
 
     /**

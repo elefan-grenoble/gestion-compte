@@ -15,7 +15,8 @@ class TimeLog
 {
     const TYPE_CUSTOM = 0;
 
-    const TYPE_SHIFT = 1;
+    const TYPE_SHIFT_VALIDATED = 1;
+    const TYPE_SHIFT_INVALIDATED = 10;
 
     const TYPE_CYCLE_END = 2;
     const TYPE_CYCLE_END_FROZEN = 3;
@@ -275,12 +276,19 @@ class TimeLog
         switch ($this->type) {
             case self::TYPE_CUSTOM:
                 return $this->description;
-            case self::TYPE_SHIFT:
+            case self::TYPE_SHIFT_VALIDATED:
                 if ($this->shift) {
                     setlocale(LC_TIME, 'fr_FR.UTF8');
                     return "Créneau " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
                 } else {
                     return "Créneau (non renseigné)";
+                }
+            case self::TYPE_SHIFT_INVALIDATED:
+                if ($this->shift) {
+                    setlocale(LC_TIME, 'fr_FR.UTF8');
+                    return "Créneau *invalidé* " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                } else {
+                    return "Créneau *invalidé* (non renseigné)";
                 }
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";

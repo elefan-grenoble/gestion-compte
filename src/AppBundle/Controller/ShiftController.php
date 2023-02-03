@@ -264,7 +264,7 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
                 return $this->redirectToRoute("homepage");
             }
-            // store shift beneficiary & reason
+            // store shift beneficiary & reason (before shift free())
             $beneficiary = $shift->getShifter();
             $fixe = $shift->isFixe();
             $reason = $form->get("reason")->getData();
@@ -304,7 +304,7 @@ class ShiftController extends Controller
                 $success = false;
                 $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
             } else {
-                // store shift beneficiary & reason
+                // store shift beneficiary & reason (before shift free())
                 $beneficiary = $shift->getShifter();
                 $fixe = $shift->isFixe();
                 $reason = $form->get("reason")->getData();
