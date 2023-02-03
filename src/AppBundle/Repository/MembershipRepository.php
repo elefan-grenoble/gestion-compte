@@ -12,6 +12,15 @@ use Doctrine\ORM\Query\Expr\Join;
  */
 class MembershipRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAllActive()
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.withdrawn = 0');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findWithNewCycleStarting($date, $cycle_type)
     {
@@ -73,7 +82,9 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->where('u.roles LIKE :roles')
             ->setParameter('roles', '%"' . $role . '"%');
 
-        return $qb->getQuery()->getResult();
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -93,7 +104,9 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere("r.date <= :from")
             ->setParameter('from', $from);
 
-        return $qb->getQuery()->getResult();
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     public function findLateShifters($time_after_which_members_are_late_with_shifts = null)
@@ -105,9 +118,9 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere('m.frozen = 0')
             ->andWhere('m IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
             ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
+
         return $qb
               ->getQuery()
               ->getResult();
     }
-
 }
