@@ -13,7 +13,7 @@
     </tbody>
 </table>
 
-{% if from_admin is defined and is_granted("ROLE_SHIFT_MANAGER") %}
+{% if (from_admin ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
     <a href="#add-time-log" class="modal-trigger waves-effect waves-light btn teal">
         <i class="material-icons left">add</i>Ajouter un log de temps
     </a>
@@ -38,10 +38,10 @@
             <th>Auteur</th>
             <th>Temps</th>
             <th>Motif</th>
-            {% if from_admin and is_granted("ROLE_ADMIN") %}
+            {% if (from_admin ?? false) and is_granted("ROLE_ADMIN") %}
                 <th>Route</th>
             {% endif %}
-            {% if from_admin is defined and is_granted("ROLE_SUPER_ADMIN") %}
+            {% if (from_admin ?? false) and is_granted("ROLE_SUPER_ADMIN") %}
                 <th>Actions</th>
             {% endif %}
         </tr>
@@ -53,10 +53,10 @@
                 <td>{{ timeLog.createdBy }}</td>
                 <td>{{ timeLog.time | duration_from_minutes }}</td>
                 <td>{{ timeLog.computedDescription }}</td>
-                {% if from_admin and is_granted("ROLE_ADMIN") %}
+                {% if (from_admin ?? false) and is_granted("ROLE_ADMIN") %}
                     <td>{{ timeLog.requestRoute }}</td>
                 {% endif %}
-                {% if from_admin is defined and is_granted("ROLE_SUPER_ADMIN") %}
+                {% if (from_admin ?? false) and is_granted("ROLE_SUPER_ADMIN") %}
                     <td title="Supprimer">
                         <a href="{{ path('member_timelog_delete', { "id": member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
                     </td>
