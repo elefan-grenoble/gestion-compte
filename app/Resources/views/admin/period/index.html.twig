@@ -208,62 +208,64 @@
                         {% endif %}
                     </div>
                 </li>
-                {# Légende ----------------------------------- #}
-                <li>
-                    <div class="collapsible-header">
-                        <i class="material-icons">help_outline</i>Légende
-                    </div>
-                    <div class="collapsible-body">
-                        <table class="responsive-table striped">
-                            <thead>
-                                <tr>
-                                    <th>Texte</th>
-                                    <th>Explication</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
-                                    </td>
-                                    <td>
-                                        Un créneau fixe libre
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <i class="material-icons">person</i>&nbsp;Prénom N
-                                    </td>
-                                    <td>
-                                        Un créneau fixe avec un bénéficiaire d'inscrit
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
-                                    </td>
-                                    <td>
-                                        Un créneau fixe avec un bénéficiaire dans un état "anormal"
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        Etats "anormaux"
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            <li>{{ member_withdrawn_icon }} Membre clôturé</li>
-                                            <li>{{ member_frozen_icon }} Membre gelé</li>
-                                            <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
-                                            <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
-                                            <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </li>
+                {% if use_fly_and_fixed %}
+                    {# Légende ----------------------------------- #}
+                    <li>
+                        <div class="collapsible-header">
+                            <i class="material-icons">help_outline</i>Légende
+                        </div>
+                        <div class="collapsible-body">
+                            <table class="responsive-table striped">
+                                <thead>
+                                    <tr>
+                                        <th>Texte</th>
+                                        <th>Explication</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
+                                        </td>
+                                        <td>
+                                            Un créneau fixe libre
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="material-icons">person</i>&nbsp;Prénom N
+                                        </td>
+                                        <td>
+                                            Un créneau fixe avec un bénéficiaire d'inscrit
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
+                                        </td>
+                                        <td>
+                                            Un créneau fixe avec un bénéficiaire dans un état "anormal"
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Etats "anormaux"
+                                        </td>
+                                        <td>
+                                            <ul>
+                                                <li>{{ member_withdrawn_icon }} Membre clôturé</li>
+                                                <li>{{ member_frozen_icon }} Membre gelé</li>
+                                                <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
+                                                <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
+                                                <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
