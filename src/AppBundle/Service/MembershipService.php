@@ -34,7 +34,7 @@ class MembershipService
     public function getAutocompleteMemberships()
     {
         $returnArray = array();
-        $beneficiaries = $this->em->getRepository('AppBundle:Membership')->findAllActive();
+        $memberships = $this->em->getRepository('AppBundle:Membership')->findAllActive();
 
         foreach ($memberships as $membership) {
             $returnArray[$membership->getMemberNumberWithBeneficiaryListString()] = '';

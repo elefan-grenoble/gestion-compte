@@ -23,10 +23,11 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
     {
         // extract member_number from $membership string
         preg_match('/#(.*?)\s/s', $membership, $matches);
-        $membershipMemberNumber = $matches[0];
+        $membershipMemberNumber = $matches[1];
+
 
         $qb = $this->createQueryBuilder('m')
-            ->where('member_number = :memberNumber')
+            ->where('m.member_number = :memberNumber')
             ->setParameter('memberNumber', $membershipMemberNumber);
 
         return $qb
@@ -43,14 +44,15 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findFromAutoComplete($memberships)
     {
+        // extract member_number from $memberships list of string
         $membershipMemberNumberList = array();
         foreach ($memberships as $memberships) {
             preg_match('/#(.*?)\s/s', $membership, $matches);
-            $membershipMemberNumberList[] = $matches[0];
+            $membershipMemberNumberList[] = $matches[1];
         }
 
         $qb = $this->createQueryBuilder('m')
-            ->where('member_number IN (:memberNumberList)')
+            ->where('m.member_number IN (:memberNumberList)')
             ->setParameter('memberNumberList', $membershipMemberNumberList);
 
         return $qb
