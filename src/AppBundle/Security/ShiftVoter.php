@@ -77,6 +77,10 @@ class ShiftVoter extends Voter
                 }
                 return $this->shiftService->isShiftBookable($shift, $user->getBeneficiary());
             case self::FREE:
+                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                    return true;
+                }
+                return $this->isShifter($shift, $user);
             case self::LOCK:
                 if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
                     return true;
@@ -102,6 +106,14 @@ class ShiftVoter extends Voter
         throw new \LogicException('This code should not be reached!');
     }
 
+    private function isShifter(Shift $shift, User $user = null)
+    {
+        if ($user instanceof User) {
+            return $user->getBeneficiary() === $shift->getShifter();
+        }
+        return false;
+    }
+
     private function canReject(Shift $shift, User $user = null)
     {
         if ($user instanceof User) {  // the user is logged in
@@ -124,6 +136,4 @@ class ShiftVoter extends Voter
     {
         return $this->canReject($shift, $user);
     }
-
-
 }
