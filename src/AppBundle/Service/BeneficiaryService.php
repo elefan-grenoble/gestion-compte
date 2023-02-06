@@ -80,16 +80,16 @@ class BeneficiaryService
             $symbols[] = $this->container->getParameter('member_withdrawn_icon');
         }
         if ($beneficiary->getMembership()->getFrozen()) {
-            $symbols[] = '❄';
+            $symbols[] = $this->container->getParameter('member_frozen_icon');
         }
         if ($beneficiary->isFlying()) {
             $symbols[] = '✈';
         }
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
-            $symbols[] = '☂';
+            $symbols[] = $this->container->getParameter('member_exempted_icon');
         }
         if (!$beneficiary->getMembership()->hasValidRegistration()) {
-            $symbols[] = '$';
+            $symbols[] = $this->container->getParameter('member_registration_missing_icon');
         }
 
         if (count($symbols)) {

@@ -124,6 +124,9 @@ parameters:
     member_exempted_icon: '☂'
     member_exempted_material_icon: 'beach_access'
     member_exempted_background_color: rgb(0, 150, 136, 0.1)
+    member_registration_missing_icon: '$'
+    member_registration_missing_material_icon: 'attach_money'
+    member_registration_missing_background_color: rgb(0, 150, 136, 0.1)
 
     # Swipe card configuration
     swipe_card_logging: true
