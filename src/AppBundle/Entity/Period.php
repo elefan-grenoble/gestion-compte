@@ -320,9 +320,9 @@ class Period
 
         foreach ($this->positions as $position) {
             if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
-                if($position->getShifter()){
+                if ($position->getShifter()) {
                     $slotTaken = True;
-                }else{
+                } else {
                     $slotEmpty = True;
                 }
             }
@@ -332,6 +332,16 @@ class Period
         }
 
         return false;
+    }
+
+    public function hasShifter(Beneficiary $beneficiary = null)
+    {
+        if (!$beneficiary) {
+            return true;
+        }
+        return $this->getPositions()->filter(function (\AppBundle\Entity\PeriodPosition $position) use ($beneficiary) {
+            return ($position->getShifter() === $beneficiary);
+        });
     }
 
     /**

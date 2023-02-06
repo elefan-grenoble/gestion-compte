@@ -81,7 +81,7 @@
      # period: a period object
      # week_filter: a string with the week to keep or null if no filter
     #}
-    {% macro period_card(period, week_filter, pb_filter) %}
+    {% macro period_card(period, week_filter) %}
         <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
 
             {# Card header #}
@@ -154,6 +154,9 @@
                             {{ _self.form_input(filter_form.week) }}
                             {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
                         </div>
+                        <div class="row">
+                            {{ _self.form_input(filter_form.beneficiary, not use_fly_and_fixed) }}
+                        </div>
                         {{ form_widget(filter_form.filter) }}
                         {{ form_end(filter_form) }}
                     </div>
@@ -205,62 +208,64 @@
                         {% endif %}
                     </div>
                 </li>
-                {# Légende ----------------------------------- #}
-                <li>
-                    <div class="collapsible-header">
-                        <i class="material-icons">help_outline</i>Légende
-                    </div>
-                    <div class="collapsible-body">
-                        <table class="responsive-table striped">
-                            <thead>
-                                <tr>
-                                    <th>Texte</th>
-                                    <th>Explication</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
-                                    </td>
-                                    <td>
-                                        Un créneau fixe libre
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <i class="material-icons">person</i>&nbsp;Prénom N
-                                    </td>
-                                    <td>
-                                        Un créneau fixe avec un bénéficiaire d'inscrit
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
-                                    </td>
-                                    <td>
-                                        Un créneau fixe avec un bénéficiaire dans un état "anormal"
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        Etats "anormaux"
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            <li>{{ member_withdrawn_icon }} Membre clôturé</li>
-                                            <li>{{ member_frozen_icon }} Membre gelé</li>
-                                            <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
-                                            <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
-                                            <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
-                                        </ul>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </li>
+                {% if use_fly_and_fixed %}
+                    {# Légende ----------------------------------- #}
+                    <li>
+                        <div class="collapsible-header">
+                            <i class="material-icons">help_outline</i>Légende
+                        </div>
+                        <div class="collapsible-body">
+                            <table class="responsive-table striped">
+                                <thead>
+                                    <tr>
+                                        <th>Texte</th>
+                                        <th>Explication</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
+                                        </td>
+                                        <td>
+                                            Un créneau fixe libre
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="material-icons">person</i>&nbsp;Prénom N
+                                        </td>
+                                        <td>
+                                            Un créneau fixe avec un bénéficiaire d'inscrit
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
+                                        </td>
+                                        <td>
+                                            Un créneau fixe avec un bénéficiaire dans un état "anormal"
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            Etats "anormaux"
+                                        </td>
+                                        <td>
+                                            <ul>
+                                                <li>{{ member_withdrawn_icon }} Membre clôturé</li>
+                                                <li>{{ member_frozen_icon }} Membre gelé</li>
+                                                <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
+                                                <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
+                                                <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -285,13 +290,13 @@
                         <td>
                             {% if periods_by_day[0]|length %}
                                 {% for period in periods_by_day[i] %}
-                                    {% if filling_filter == null
+                                    {% if ((filling_filter == null) and (beneficiary_filter == null))
                                         or (filling_filter == "problematic" and period.isProblematic(week_filter))
                                         or (filling_filter == "empty" and period.isEmpty(week_filter))
                                         or (filling_filter == "full" and period.isFull(week_filter))
-                                        or (filling_filter == "partial" and period.isPartial(week_filter)) %}
+                                        or (filling_filter == "partial" and period.isPartial(week_filter))
+                                        or (beneficiary_filter and period.hasShifter(beneficiary_filter) | length > 0) %}
                                         {{ _self.period_card(period, week_filter) }}
-
                                     {% endif %}
                                 {% endfor %}
                             {% endif %}
