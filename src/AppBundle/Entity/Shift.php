@@ -572,4 +572,20 @@ class Shift
     {
         return $this->createdAt;
     }
+
+    /**
+     * Return true if this is the first ever shift by the shifter
+     *
+     * @return bool
+     */
+    public function isFirstByShifter()
+    {
+        if ($this->getShifter()) {
+            // last? beneficiary->shifts are ordered by start DESC
+            if ($this === $this->getShifter()->getShifts()->last()) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

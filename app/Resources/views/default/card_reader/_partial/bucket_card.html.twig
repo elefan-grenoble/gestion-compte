@@ -40,10 +40,15 @@
                                 <strong>{{ shift.formation }}</strong>
                             </span>
                         {% endif %}
-                        {% if shift.shifter and shift.shifter.isNew %}
-                            <span class="chip red white-text" style="margin-left: 5px">
-                                {{ beneficiary_new_icon }} <strong>Premier créneau</strong>
-                            </span>
+                        {% if shift.shifter %}
+                            {% if shift.shifter.isNew %}
+                                <span>{{ beneficiary_new_icon }}</span>
+                            {% endif %}
+                            {% if shift.isFirstByShifter %}
+                                <span class="chip red white-text" style="margin-left: 5px">
+                                    <strong>Premier créneau</strong>
+                                </span>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </li>

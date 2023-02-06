@@ -696,6 +696,6 @@ class Beneficiary
      */
     public function isNew()
     {
-        return $this->shifts->count() <= 1;
+        return $this->shifts->count() <= 3;
     }
 }

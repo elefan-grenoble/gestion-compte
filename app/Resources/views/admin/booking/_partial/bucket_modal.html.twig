@@ -36,10 +36,13 @@ id = "modal-bucket"
                             {{ shift.shifter.displayNameWithMemberNumber }}
                             {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}
-                                &nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>
+                                &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
                             {% endif %}
                             {% if shift.shifter.isNew %}
                                 &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                            {% endif %}
+                            {% if shift.isFirstByShifter %}
+                                &nbsp;<strong class="red-text">(Premier créneau)</strong>
                             {% endif %}
                         </div>
                     </div>
