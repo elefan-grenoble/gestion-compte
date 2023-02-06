@@ -63,16 +63,27 @@ class BeneficiaryService
         return $label;
     }
 
+    /**
+     * Return true if the beneficiary is in a "warning" status
+     */
+    public function hasWarningStatus(Beneficiary $beneficiary): bool
+    {
+        return $beneficiary->getMembership()->getWithdrawn() ||
+            $beneficiary->getMembership()->getFrozen() ||
+            $beneficiary->isFlying() ||
+            $beneficiary->getMembership()->isCurrentlyExemptedFromShifts() ||
+            !$this->membershipService->isUptodate($beneficiary->getMembership());
+    }
 
     /**
-     * return a string with emoji between brackets depending on the
+     * Return a string with emoji between brackets depending on the
      * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
      * or an empty string if none of those
      *
      * @param bool $includeLeadingSpace if true add a space at the beginning
      * @return string with ether emoji(s) for the beneficiary's status or empty
      */
-    public function getStatusIcon(Beneficiary $beneficiary):string
+    public function getStatusIcon(Beneficiary $beneficiary): string
     {
         $symbols = array();
 
@@ -88,7 +99,7 @@ class BeneficiaryService
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
             $symbols[] = $this->container->getParameter('member_exempted_icon');
         }
-        if (!$beneficiary->getMembership()->hasValidRegistration()) {
+        if (!$this->membershipService->isUptodate($beneficiary->getMembership())) {
             $symbols[] = $this->container->getParameter('member_registration_missing_icon');
         }
 

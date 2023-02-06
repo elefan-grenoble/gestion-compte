@@ -538,22 +538,6 @@ class Beneficiary
     }
 
     /**
-     * return true if the beneficiary is in a "warning" status
-     * useful for PeriodPositionController
-     * 
-     * @return bool
-     */
-    public function hasWarningStatus()
-    {
-        return $this->getMembership()->getWithdrawn() ||
-            $this->getMembership()->getFrozen() ||
-            $this->isFlying() ||
-            $this->getMembership()->isCurrentlyExemptedFromShifts() ||
-            !$this->getMembership()->hasValidRegistration();
-    }
-
-
-    /**
      * Add reservedShift
      *
      * @param \AppBundle\Entity\Shift $reservedShift

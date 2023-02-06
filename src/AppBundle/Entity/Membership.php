@@ -514,18 +514,6 @@ class Membership
     }
 
     /**
-     * Return if the member has a valid registration
-     *
-     * @param \DateTime $date
-     * @return bool
-     */
-    public function hasValidRegistration()
-    {
-        $date = new \DateTime('now');
-        return $this->hasValidRegistrationBefore($date);
-    }
-
-    /**
      * Get all reserved shifts for all beneficiaries
      */
     public function getReservedShifts()

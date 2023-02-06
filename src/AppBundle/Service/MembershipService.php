@@ -60,14 +60,14 @@ class MembershipService
     public function getExpire($membership): ?\DateTime
     {
         if ($this->registration_every_civil_year) {
-            if ($membership->getLastRegistration()){
+            if ($membership->getLastRegistration()) {
                 $expire = $membership->getLastRegistration()->getDate();
             } else {
                 $expire = new \DateTime('-1 year');
             }
-            $expire = new \DateTime('last day of December '.$expire->format('Y'));
+            $expire = new \DateTime('last day of December ' . $expire->format('Y'));
         } else {
-            if ($membership->getLastRegistration()){
+            if ($membership->getLastRegistration()) {
                 $expire = clone $membership->getLastRegistration()->getDate();
                 $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
                 $expire->modify('-1 day');
@@ -80,13 +80,13 @@ class MembershipService
     }
 
     /**
-     * @param Membership $membership
+     * @param Membership $member
      * @return bool
      * @throws \Exception
      */
-    public function isUptodate(Membership $membership)
+    public function isUptodate(Membership $member)
     {
-        $expire = $this->getExpire($membership);
+        $expire = $this->getExpire($member);
         $today = new \DateTime('now');
         $today->setTime(0,0);
         return ($expire > $today);
