@@ -245,14 +245,6 @@ class Beneficiary
         return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
     }
 
-    public function getDisplayNameWithMemberNumberAndStatusIcon(): string
-    {
-        $label = '#' . $this->getMemberNumber();
-        $label .= $this->getStatusIcon(true);
-        $label .=  ' ' . $this->getDisplayName();
-        return $label;
-    }
-
     public function getPublicDisplayName(): string
     {
         return $this->getFirstname() . ' ' . $this->getLastname()[0];
@@ -560,47 +552,6 @@ class Beneficiary
             !$this->getMembership()->hasValidRegistration();
     }
 
-    /**
-     * return a string with emoji between brackets depending on the
-     * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
-     * or an empty string if none of those
-     *
-     * @param bool $includeLeadingSpace if true add a space at the beginning
-     * @return string with ether emoji(s) for the beneficiary's status or empty
-     */
-    public function getStatusIcon(bool $includeLeadingSpace = false):string
-    {
-        $symbols = array();
-
-        if ($this->getMembership()->getWithdrawn()) {
-            $symbols[] = '∅';
-        }
-        if ($this->getMembership()->getFrozen()) {
-            $symbols[] = '❄';
-        }
-        if ($this->isFlying()) {
-            $symbols[] = '✈';
-        }
-        if ($this->getMembership()->isCurrentlyExemptedFromShifts()) {
-            $symbols[] = '☂';
-        }
-        if (!$this->getMembership()->hasValidRegistration()) {
-            $symbols[] = '$';
-        }
-
-        if (count($symbols)) {
-            $res = '[' . implode("/", $symbols) . ']';
-
-            if ($includeLeadingSpace) {
-                $res = " " . $res;
-            }
-        } else {
-            $res = "";
-        }
-
-        return $res;
-
-    }
 
     /**
      * Add reservedShift

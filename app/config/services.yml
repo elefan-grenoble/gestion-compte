@@ -73,6 +73,11 @@ services:
       arguments: ['@service_container']
       tags:
         - { name: twig.extension }
+    app.twig.extensions.beneficiary:
+      class: AppBundle\Twig\Extension\BeneficiaryExtension
+      arguments: ['@service_container']
+      tags:
+        - { name: twig.extension }
     app.form.registration:
         class: AppBundle\Form\RegistrationType
         tags:
@@ -202,9 +207,6 @@ services:
     beneficiary_service:
             class: AppBundle\Service\BeneficiaryService
             public: true
-            arguments:
-                - "@doctrine.orm.entity_manager"
-                - '@membership_service'
     mailer_service:
             class: AppBundle\Service\MailerService
             public: true
@@ -220,11 +222,6 @@ services:
     membership_service:
             class: AppBundle\Service\MembershipService
             public: true
-            arguments:
-                - "@doctrine.orm.entity_manager"
-                - "%registration_duration%"
-                - "%registration_every_civil_year%"
-                - "%cycle_type%"
     event_service:
             class: AppBundle\Service\EventService
             public: true
