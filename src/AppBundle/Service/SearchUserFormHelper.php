@@ -39,7 +39,7 @@ class SearchUserFormHelper {
         ]);
         if (!$type) {
             $formBuilder->add('enabled', ChoiceType::class, [
-                'label' => 'activé',
+                'label' => $this->container->getParameter('user_account_enabled_icon') . ' activé',
                 'required' => false,
                 'choices' => [
                     'activé' => 2,
@@ -211,12 +211,12 @@ class SearchUserFormHelper {
                 'label'=>'Hors de la/les commissions(s)'
             ])
             ->add('flying', ChoiceType::class, [
+                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                'required' => false,
                 'choices' => [
                     'Oui' => 2,
-                    'Non' => 1,
+                    'Non (fixe)' => 1,
                 ],
-                'required' => false,
-                'label'=>'Equipe volante'
             ]);
         }
         $formBuilder->add('action', HiddenType::class, [

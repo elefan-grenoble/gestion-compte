@@ -18,7 +18,7 @@
         {% if member.withdrawn %}<del>{% endif %}
         Membre #{{ member.memberNumber }}{% if member.withdrawn %}</del>{% endif %}
         {% if member.mainBeneficiary and not member.mainBeneficiary.user.isEnabled %}
-            <i class="material-icons" title="Compte pas encore activé">phonelink_off</i>
+            <i class="material-icons" title="Compte pas encore activé">{{ user_account_not_enabled_material_icon }}</i>
         {% endif %}
         {% if member.isCurrentlyExemptedFromShifts() %}
             <i class="material-icons" title="Compte exempté">{{member_exempted_material_icon }}</i>

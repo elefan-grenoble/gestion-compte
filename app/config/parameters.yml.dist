@@ -114,6 +114,11 @@ parameters:
     profile_display_task_list: true
     profile_display_time_log: true
 
+    # User configuration
+    user_account_not_enabled_material_icon: 'phonelink_off'
+    user_account_enabled_icon: '☑'
+    user_account_enabled_material_icon: 'devices'
+
     # Member configuration
     member_withdrawn_icon: '∅'
     member_withdrawn_material_icon: 'block'
@@ -127,6 +132,9 @@ parameters:
     member_registration_missing_icon: '$'
     member_registration_missing_material_icon: 'attach_money'
     member_registration_missing_background_color: rgb(0, 150, 136, 0.1)
+
+    # Beneficiary configuration
+    beneficiary_flying_icon: '✈'
 
     # Swipe card configuration
     swipe_card_logging: true

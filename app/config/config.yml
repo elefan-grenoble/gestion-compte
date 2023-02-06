@@ -65,6 +65,9 @@ twig:
     max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
     profile_display_task_list: '%profile_display_task_list%'
     profile_display_time_log: '%profile_display_time_log%'
+    # user
+    user_account_not_enabled_material_icon: '%user_account_not_enabled_material_icon%'
+    user_account_enabled_material_icon: '%user_account_enabled_material_icon%'
     # member
     member_withdrawn_icon: '%member_withdrawn_icon%'
     member_withdrawn_material_icon: '%member_withdrawn_material_icon%'
@@ -78,6 +81,8 @@ twig:
     member_registration_missing_icon: '%member_registration_missing_icon%'
     member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
     member_registration_missing_background_color: '%member_registration_missing_background_color%'
+    # beneficiary
+    beneficiary_flying_icon: '%beneficiary_flying_icon%'
     # swipe card
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
