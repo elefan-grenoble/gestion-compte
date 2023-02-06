@@ -22,7 +22,7 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
     public function findOneFromAutoComplete($membership)
     {
         // extract member_number from $membership string
-        preg_match('/#(.*?)\s/s', $membership, $matches);
+        preg_match('/#(\d+)\s/s', $membership, $matches);
         $membershipMemberNumber = $matches[1];
 
 
@@ -33,31 +33,6 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         return $qb
             ->getQuery()
             ->getOneOrNullResult();
-    }
-
-    /**
-     * findFromAutoComplete
-     *
-     * We consider that each string of $memberships has the following format:
-     * "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname>"
-     * or "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname> & <Beneficiary2.firstname> <Beneficiary2.lastname>"
-     */
-    public function findFromAutoComplete($memberships)
-    {
-        // extract member_number from $memberships list of string
-        $membershipMemberNumberList = array();
-        foreach ($memberships as $memberships) {
-            preg_match('/#(.*?)\s/s', $membership, $matches);
-            $membershipMemberNumberList[] = $matches[1];
-        }
-
-        $qb = $this->createQueryBuilder('m')
-            ->where('m.member_number IN (:memberNumberList)')
-            ->setParameter('memberNumberList', $membershipMemberNumberList);
-
-        return $qb
-            ->getQuery()
-            ->getResult();
     }
 
     public function findAllActive()
@@ -111,24 +86,6 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
                     ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
                     ->setParameter('now', $date);
         }
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @param string $role
-     *
-     * @return array
-     */
-    public function findByRole($role)
-    {
-        $qb = $this->createQueryBuilder()
-            ->select('u')
-            ->from($this->_entityName, 'u')
-            ->where('u.roles LIKE :roles')
-            ->setParameter('roles', '%"' . $role . '"%');
 
         return $qb
             ->getQuery()
