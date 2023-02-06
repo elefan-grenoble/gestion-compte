@@ -115,7 +115,7 @@
                 {{ form_start(remove_beneficiary_form) }}
                 <div class="chips">
                     {% for beneficiary in commission.beneficiaries %}
-                        {% include "beneficiary/_partial/chip.html.twig" with { close: true } %}
+                        {% include "beneficiary/_partial/chip.html.twig" with { show_close: true } %}
                     {% endfor %}
                 </div>
                 <input type="hidden" name="beneficiary" value="" />

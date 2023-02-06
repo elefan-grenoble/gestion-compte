@@ -1,7 +1,7 @@
 <div class="chip black-text">
     <img src="{{ gravatar(beneficiary.email) }}" alt="{{ beneficiary.displayNameWithMemberNumber }}">
     {{ beneficiary.displayName }}
-    {% if close is defined and close %}
+    {% if (show_close ?? false) %}
         <i class="close material-icons" data-target="{{ beneficiary.id }}">close</i>
     {% endif %}
 </div>
