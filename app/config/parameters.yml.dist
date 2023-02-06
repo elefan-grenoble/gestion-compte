@@ -134,6 +134,7 @@ parameters:
     member_registration_missing_background_color: rgb(0, 150, 136, 0.1)
 
     # Beneficiary configuration
+    beneficiary_new_icon: '★'
     beneficiary_flying_icon: '✈'
 
     # Swipe card configuration

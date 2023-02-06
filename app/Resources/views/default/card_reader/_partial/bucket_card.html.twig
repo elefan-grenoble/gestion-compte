@@ -36,10 +36,14 @@
                             <strong><i>libre</i></strong>
                         {% endif %}
                         {% if shift.formation %}
-                            <span class="chip" style="margin-left: 5px"><b>{{ shift.formation }}</b></span>
+                            <span class="chip" style="margin-left: 5px">
+                                <strong>{{ shift.formation }}</strong>
+                            </span>
                         {% endif %}
-                        {% if shift.shifter and shift.shifter.shifts | length == 1 %}
-                            <span class="chip red white-text" style="margin-left: 5px">Premier créneau</span>
+                        {% if shift.shifter and shift.shifter.isNew %}
+                            <span class="chip red white-text" style="margin-left: 5px">
+                                {{ beneficiary_new_icon }} <strong>Premier créneau</strong>
+                            </span>
                         {% endif %}
                     </div>
                 </li>
