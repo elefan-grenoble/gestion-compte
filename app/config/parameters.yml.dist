@@ -118,7 +118,7 @@ parameters:
     member_withdrawn_icon: '∅'
     member_withdrawn_material_icon: 'block'
     member_withdrawn_background_color: rgba(255, 50, 0, 0.2)
-    member_frozen_icon: '❄️ '
+    member_frozen_icon: '❄️'
     member_frozen_material_icon: 'ac_unit'
     member_frozen_background_color: rgba(0, 138, 255, 0.1)
     member_exempted_icon: '☂'
