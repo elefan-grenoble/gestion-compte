@@ -82,6 +82,7 @@ twig:
     member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
     member_registration_missing_background_color: '%member_registration_missing_background_color%'
     # beneficiary
+    beneficiary_main_icon: '%beneficiary_main_icon%'
     beneficiary_new_icon: '%beneficiary_new_icon%'
     beneficiary_flying_icon: '%beneficiary_flying_icon%'
     # swipe card
