@@ -148,4 +148,15 @@ class MembershipService
         $date->setTime(23, 59, 59);
         return $date;
     }
+
+    /**
+     * Return true if the membership is in a "warning" status
+     */
+    public function hasWarningStatus(Membership $member): bool
+    {
+        return $member->getWithdrawn() ||
+            $member->getFrozen() ||
+            $member->isCurrentlyExemptedFromShifts() ||
+            !$this->isUptodate($member);
+    }
 }
