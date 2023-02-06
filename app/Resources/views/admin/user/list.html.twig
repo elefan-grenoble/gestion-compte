@@ -227,7 +227,7 @@
                     <td class="hide-on-med-and-down">
                         {% if member.withdrawn %}
                             <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
-                        {% elseif not member.hasValidRegistration() %}
+                        {% elseif not member | uptodate %}
                             <i class="material-icons" title="Compte en attente d'adhésion">{{ member_registration_missing_material_icon }}</i>
                         {% endif %}
                         {% if member.frozen %}

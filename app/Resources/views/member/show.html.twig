@@ -28,7 +28,7 @@
         {% endif %}
         {% if member.withdrawn %}
             <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
-        {% elseif not member.hasValidRegistration() %}
+        {% elseif not member | uptodate %}
             <i class="material-icons" title="Compte en attente d'adhésion">{{ member_registration_missing_material_icon }}</i>
         {% endif %}
     </h4>
@@ -433,7 +433,7 @@
         body {
             background-color: {{ member_exempted_background_color }};
         }
-        {% elseif not member.hasValidRegistration() %}
+        {% elseif not member | uptodate %}
         body {
             background-color: {{ member_registration_missing_background_color }};
         }

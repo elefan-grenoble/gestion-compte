@@ -28,14 +28,13 @@ class CloseMembershipCommand extends ContainerAwareCommand
         $date = new \DateTime('now');
         if ($registration_every_civil_year) {
             $date->modify('-1 year');
-            $date->modify('-'.$delay);
-            $date = new \DateTime('last day of December '.$date->format('Y'));
+            $date->modify('-' . $delay);
+            $date = new \DateTime('last day of December ' . $date->format('Y'));
         } else {
-            $registration_duration = \DateInterval::createFromDateString(
-                $this->getContainer()->getParameter('registration_duration'));
+            $registration_duration = \DateInterval::createFromDateString($this->getContainer()->getParameter('registration_duration'));
             $date->sub($registration_duration);
             $date->modify('-1 day');
-            $date->modify('-'.$delay);
+            $date->modify('-' . $delay);
         }
 
         $em = $this->getContainer()->get('doctrine')->getManager();

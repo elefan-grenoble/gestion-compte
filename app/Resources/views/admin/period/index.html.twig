@@ -59,7 +59,7 @@
 
         {% if shifter %}
             {# sombody is registered for this periodposition #}
-            {% set warning = shifter.hasWarningStatus %}
+            {% set warning = beneficiary_service.hasWarningStatus(shifter) %}
             <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}"
                class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ formation }})">
                 {% if warning %}
