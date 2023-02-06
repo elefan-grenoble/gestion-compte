@@ -31,12 +31,13 @@ class BeneficiaryService
      */
     public function getAutocompleteBeneficiaries()
     {
+        $returnArray = array();
         $beneficiaries = $this->em->getRepository('AppBundle:Beneficiary')->findAllActive();
 
-        $returnArray = array();
-        foreach ($beneficiaries as $beneficiary){
+        foreach ($beneficiaries as $beneficiary) {
             $returnArray[$beneficiary->getDisplayNameWithMemberNumber()] = '';
         }
+
         return $returnArray;
     }
 

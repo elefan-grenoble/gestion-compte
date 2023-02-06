@@ -22,6 +22,12 @@
                 <div class="row">
                     <div class="col s4">
                         <div class="input-field">
+                            {{ form_widget(filter_form.membership) }}
+                            {{ form_label(filter_form.membership) }}
+                        </div>
+                    </div>
+                    <div class="col s4">
+                        <div class="input-field">
                             {{ form_widget(filter_form.shiftExemption) }}
                             {{ form_label(filter_form.shiftExemption) }}
                         </div>

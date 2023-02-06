@@ -9,6 +9,21 @@
     </div>
 {%- endblock form_row -%}
 
+{% block autocomplete_membership_widget %}
+    {% spaceless %}
+        <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% endspaceless %}
+    <script>
+        defer(function(){
+            // Init autocomplete
+            $('#{{ id }}').autocomplete({
+                data: {{ membership_service.autocompleteMemberships | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                limit: 6,
+            });
+        });
+    </script>
+{% endblock %}
+
 {% block autocomplete_beneficiary_widget %}
     {% spaceless %}
         <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>

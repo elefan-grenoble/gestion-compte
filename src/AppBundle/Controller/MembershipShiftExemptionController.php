@@ -4,6 +4,7 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\MembershipShiftExemption;
+use AppBundle\Form\AutocompleteMembershipType;
 use AppBundle\Repository\ShiftExemptionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -28,12 +29,17 @@ class MembershipShiftExemptionController extends Controller
     {
         // default values
         $res = [
+            "membership" => null,
             "shiftExemption" => null,
         ];
 
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_membershipshiftexemption_index'))
+            ->add('membership', AutocompleteMembershipType::class, array(
+                'label' => 'Membre',
+                'required' => false,
+            ))
             ->add('shiftExemption', EntityType::class, array(
                 'label' => 'Motif',
                 'class' => 'AppBundle:ShiftExemption',
@@ -50,6 +56,7 @@ class MembershipShiftExemptionController extends Controller
         $res['form']->handleRequest($request);
 
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
+            $res["membership"] = $res["form"]->get("membership")->getData();
             $res["shiftExemption"] = $res["form"]->get("shiftExemption")->getData();
         }
 
@@ -70,8 +77,11 @@ class MembershipShiftExemptionController extends Controller
         $sort = 'createdAt';
         $order = 'DESC';
 
-        if ($filter["shiftExemption"]) {
-            $findByFilter["shiftExemption"] = $filter["shiftExemption"];
+        if ($filter['membership']) {
+            $findByFilter['membership'] = $filter['membership'];
+        }
+        if ($filter['shiftExemption']) {
+            $findByFilter['shiftExemption'] = $filter['shiftExemption'];
         }
 
         $page = $request->get('page', 1);

@@ -12,6 +12,38 @@ use Doctrine\ORM\Query\Expr\Join;
  */
 class MembershipRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+     * findOneFromAutoComplete
+     *
+     * We consider that the $membership has the following format:
+     * "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname>"
+     * or "#<Membership.member_number> <Beneficiary1.firstname> <Beneficiary1.lastname> & <Beneficiary2.firstname> <Beneficiary2.lastname>"
+     */
+    public function findOneFromAutoComplete($membership)
+    {
+        // extract member_number from $membership string
+        preg_match('/#(\d+)\s/s', $membership, $matches);
+        $membershipMemberNumber = $matches[1];
+
+
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.member_number = :memberNumber')
+            ->setParameter('memberNumber', $membershipMemberNumber);
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findAllActive()
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->where('m.withdrawn = 0');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 
     public function findWithNewCycleStarting($date, $cycle_type)
     {
@@ -51,29 +83,13 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             }
         } else {
                 $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 14) = 0')
-                ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
-                ->setParameter('now', $date);
+                    ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
+                    ->setParameter('now', $date);
         }
 
         return $qb
             ->getQuery()
             ->getResult();
-    }
-
-    /**
-     * @param string $role
-     *
-     * @return array
-     */
-    public function findByRole($role)
-    {
-        $qb = $this->_em->createQueryBuilder();
-        $qb->select('u')
-            ->from($this->_entityName, 'u')
-            ->where('u.roles LIKE :roles')
-            ->setParameter('roles', '%"' . $role . '"%');
-
-        return $qb->getQuery()->getResult();
     }
 
     /**
@@ -93,7 +109,9 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere("r.date <= :from")
             ->setParameter('from', $from);
 
-        return $qb->getQuery()->getResult();
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 
     public function findLateShifters($time_after_which_members_are_late_with_shifts = null)
@@ -105,9 +123,9 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->andWhere('m.frozen = 0')
             ->andWhere('m IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
             ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
+
         return $qb
               ->getQuery()
               ->getResult();
     }
-
 }

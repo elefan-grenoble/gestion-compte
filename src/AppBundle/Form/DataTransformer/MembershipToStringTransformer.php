@@ -2,13 +2,13 @@
 
 namespace AppBundle\Form\DataTransformer;
 
-use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 
-class BeneficiaryToStringTransformer implements DataTransformerInterface
+class MembershipToStringTransformer implements DataTransformerInterface
 {
     private $entityManager;
 
@@ -18,26 +18,26 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
     }
 
     /**
-    * Transforms an object (Beneficiary) to a string.
+    * Transforms an object (Membership) to a string.
     *
-    * @param  Beneficiary|null $beneficiary
+    * @param  Membership|null $membership
     * @return string
     */
-    public function transform($beneficiary)
+    public function transform($membership)
     {
-        if ($beneficiary === null) {
+        if (null === $membership) {
             return '';
         }
 
-        return $beneficiary->getDisplayNameWithMemberNumber();
+        return $membership->getDisplayNameWithMemberNumber();
     }
 
     /**
-     * Transforms a string to an object (Beneficiary).
+     * Transforms a string to an object (Membership).
      *
      * @param  string $autocomplete
-     * @return Beneficiary
-     * @throws TransformationFailedException if object (Beneficiary) is not found
+     * @return Membership
+     * @throws TransformationFailedException if object (Membership) is not found
      */
     public function reverseTransform($autocomplete)
     {
@@ -45,17 +45,17 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
             return null;
         }
 
-        $beneficiary = $this->entityManager
-            ->getRepository(Beneficiary::class)
+        $membership = $this->entityManager
+            ->getRepository(Membership::class)
             ->findOneFromAutoComplete($autocomplete);
 
-        if ($beneficiary === null) {
+        if ($membership === null) {
             throw new TransformationFailedException(sprintf(
                 'Aucun utilisateur trouvé avec ces données "%s".',
                 $autocomplete
             ));
         }
 
-        return $beneficiary;
+        return $membership;
     }
 }

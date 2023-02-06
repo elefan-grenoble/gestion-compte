@@ -28,6 +28,21 @@ class MembershipService
         $this->cycle_type = $container->getParameter('cycle_type');
     }
 
+     /**
+     * Return autocomplete information
+     */
+    public function getAutocompleteMemberships()
+    {
+        $returnArray = array();
+        $memberships = $this->em->getRepository('AppBundle:Membership')->findAllActive();
+
+        foreach ($memberships as $membership) {
+            $returnArray[$membership->getMemberNumberWithBeneficiaryListString()] = '';
+        }
+
+        return $returnArray;
+    }
+
     /**
      * get remainder
      * @param Membership $membership
