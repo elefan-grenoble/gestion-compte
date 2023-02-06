@@ -1,5 +1,6 @@
 {% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
 {% set nbShifts = (bucket.shifts() | length) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
 
 <div id="main-bucket-{{ bucket.id }}" data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
     style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left: {{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
@@ -7,7 +8,7 @@
         <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
             <div style="height:2px; width: 100%; position: absolute;">
                 {% if nbBookableShifts < nbShifts %}
-                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                    {% for shifter in 1..nbBookedShifts %}
                         <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
                     {% endfor %}
                 {% endif %}
