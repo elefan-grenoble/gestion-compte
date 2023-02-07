@@ -676,10 +676,15 @@ class Beneficiary
     }
 
     /**
+     * Simple method to detect new beneficiaires.
+     * TODO: move to Membership? Look at registration data instead?
+     * 
      * @return bool
      */
     public function isNew()
     {
-        return $this->shifts->count() <= 3;
+        $shiftCountThreshold = 3;
+
+        return $this->shifts->count() <= $shiftCountThreshold;
     }
 }
