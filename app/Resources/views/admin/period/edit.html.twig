@@ -58,11 +58,21 @@
                                     {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
                                     {{ position.shifter.displayNameWithMemberNumber }}
                                     {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
-                                    {% if not position.formation and position.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>{% endif %}
+                                    {% if not position.formation and position.shifter.formations | length > 0 %}
+                                        &nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>
+                                    {% endif %}
+                                    {% if position.shifter.isNew %}
+                                        &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="collapsible-body">
-                                Créneau fixe réservé pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}">{{ position.shifter }}</a> le <i>{{ position.bookedTime | date_fr_with_time }}</i> par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
+                                <p>
+                                    Créneau fixe réservé
+                                    pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}" target="_blank">{{ position.shifter }}</a>
+                                    le <i>{{ position.bookedTime | date_fr_with_time }}</i>
+                                    par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
+                                </p>
                                 <form action="{{ path('free_position_from_period', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">
                                         <i class="material-icons left">lock_open</i>Libérer
