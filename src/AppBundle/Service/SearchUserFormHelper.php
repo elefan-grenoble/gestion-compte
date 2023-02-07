@@ -420,6 +420,28 @@ class SearchUserFormHelper {
             $qb = $qb->andWhere('r.date < :registrationdatelt')
                 ->setParameter('registrationdatelt', $form->get('registrationdatelt')->getData());
         }
+
+        if ($form->get('lastregistrationdate')->getData() || $form->get('lastregistrationdategt')->getData() || $form->get('lastregistrationdatelt')->getData()) {
+            $qb = $qb
+                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->andWhere('lr.id IS NULL');
+            if ($form->get('lastregistrationdate')->getData()) {
+                $qb = $qb
+                    ->andWhere('r.date LIKE :lastregistrationdate')
+                    ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData()->format('Y-m-d').'%');
+            }
+            if ($form->get('lastregistrationdategt')->getData()) {
+                $qb = $qb
+                    ->andWhere('r.date > :lastregistrationdategt')
+                    ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
+            }
+            if ($form->get('lastregistrationdatelt')->getData()) {
+                $qb = $qb
+                    ->andWhere('r.date < :lastregistrationdatelt')
+                    ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
+            }
+        }
+
         if (!is_null($form->get('compteurlt')->getData())) {
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $form->get('compteurlt')->getData());
@@ -428,27 +450,7 @@ class SearchUserFormHelper {
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $form->get('compteurgt')->getData());
         }
-        if ($form->get('lastregistrationdate')->getData()) {
-            $qb = $qb
-                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-                ->andWhere('lr.id IS NULL')
-                ->andWhere('r.date LIKE :lastregistrationdate')
-                ->setParameter('lastregistrationdate', $form->get('lastregistrationdate')->getData()->format('Y-m-d').'%');
-        }
-        if ($form->get('lastregistrationdategt')->getData()) {
-            $qb = $qb
-                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-                ->andWhere('lr.id IS NULL')
-                ->andWhere('r.date > :lastregistrationdategt')
-                ->setParameter('lastregistrationdategt', $form->get('lastregistrationdategt')->getData());
-        }
-        if ($form->get('lastregistrationdatelt')->getData()) {
-            $qb = $qb
-                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-                ->andWhere('lr.id IS NULL')
-                ->andWhere('r.date < :lastregistrationdatelt')
-                ->setParameter('lastregistrationdatelt', $form->get('lastregistrationdatelt')->getData());
-        }
+
         if ($form->get('membernumber')->getData()) {
             $list  = explode(', ', $form->get('membernumber')->getData());
             if (count($list)>1) {
