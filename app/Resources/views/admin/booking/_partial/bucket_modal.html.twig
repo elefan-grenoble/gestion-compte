@@ -49,12 +49,16 @@ id = "modal-bucket"
                 </div>
                 <div class="collapsible-body">
                     <p>
+                        Créneau
                         {% if use_fly_and_fixed %}
-                            Créneau <b>{% if shift.fixe %}fixe{% else %}volant{% endif %}</b>, réservé
-                        {% else %}
-                            Réservé
+                            <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
                         {% endif %}
-                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i> par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show",{'member_number': shift.booker.beneficiary.membership.memberNumber}) }}">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
+                        réservé
+                        {% if shift.shifter != shift.booker.beneficiary %}
+                            pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
+                        {% endif %}
+                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i>
+                        par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
                     </p>
                     {% if is_granted('free',shift) %}
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}

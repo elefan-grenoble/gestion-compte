@@ -16,12 +16,14 @@
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
         <ul class="collapsible">
             <li>
-                <div class="collapsible-header"><i class="material-icons">tune</i>Filtres (
+                <div class="collapsible-header">
+                    <i class="material-icons">tune</i>Filtres
                     {% if to is not null %}
-                    du {{ from | date_fr_full }} au {{ to | date_fr_full }}
+                        (du {{ from | date_fr_full }} au {{ to | date_fr_full }})
                     {% else %}
-                    à partir du {{ from | date_fr_full }}
-                    {% endif %})</div>
+                        (à partir du {{ from | date_fr_full }})
+                    {% endif %}
+                </div>
                 <div class="collapsible-body">
                     <form name="form" method="get" action="">
                         <div class="row">
@@ -41,6 +43,7 @@
         </ul>
 
         <h5>Total sur toute la période : {{ grand_total['grand_total'] }}€</h5>
+
         <ul class="collapsible">
             <li>
                 <div class="row">
@@ -61,15 +64,18 @@
                 <li>
                     <div class="row">
                         {% for i in 1..6 %}
-                        <div class="col s2 center">
-                            <small>Total {{ i | payment_mode }}</small>{% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}<br><b>{{ totaux[datekey]['sum_'~i] }}</b>€{% endif %}
-                        </div>
+                            <div class="col s2 center">
+                                <small>Total {{ i | payment_mode }}</small>
+                                {% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}
+                                    <br />
+                                    <strong>{{ totaux[datekey]['sum_'~i] }}</strong>€
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     </div>
                 </li>
             {% endif %}
             {% if not date or date != (registration.date | date('d F Y')) %}
-
                 {% if date %}
                     </ul>
                 {% endif %}
@@ -78,7 +84,7 @@
                 <h5>{{ registration.date | date_fr_long }}</h5>
                 <ul class="collapsible">
             {% endif %}
-            <li class="">
+            <li>
                 <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">
                     {% if registration.amount is not null %}
                         {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
@@ -96,7 +102,7 @@
                     {% if registration.registrar %}
                         par&nbsp;
                         {% if registration.registrar.beneficiary %}
-                            <a href="{{ path("member_show",{"member_number":registration.registrar.beneficiary.membership.memberNumber}) }}">{{ registration.registrar.username }}</a>
+                            <a href="{{ path("member_show", { "member_number": registration.registrar.beneficiary.membership.memberNumber }) }}" target="_blank">{{ registration.registrar.beneficiary }}</a>
                         {% else %}
                             {{ registration.registrar.username }}
                         {% endif %}
@@ -104,9 +110,7 @@
                         {{ registration.date | date('H:i') }}
                     {% endif %}
                     {% if registration.membership %}
-                        pour #<a
-                            href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
-                        {{ registration.beneficiary }}
+                        pour <a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership }}</a>&nbsp;
                         {% if(registration.membership.registrations | length) > 1 %}
                             (Ré-adhésion) effective le {{ registration.startDate | date('d F Y') }}
                         {% endif %}
