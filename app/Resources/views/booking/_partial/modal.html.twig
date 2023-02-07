@@ -1,7 +1,9 @@
 {% set nbShifts = bucket.shifts | length %}
 {% set bookableShifts = shift_service.bookableShifts(bucket, beneficiary) %}
 {% set nbBookableShifts = bookableShifts | length %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
 {% set firstBookable = shift_service.firstBookable(bucket, beneficiary) %}
+
 <div id="book{{ firstBookable.id }}" class="modal">
     <div class="modal-content">
         <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span></h5>
@@ -83,7 +85,7 @@
             {% endif %}
             <div style="position: fixed;top:0;width: 100%;left: 0;">
                 {% if nbBookableShifts < nbShifts %}
-                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                    {% for shifter in 1..nbBookedShifts %}
                         <div class="green lighten-2 left" style="height:10px; width: {{ 100/(nbShifts) }}%"></div>
                     {% endfor %}
                 {% endif %}

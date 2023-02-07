@@ -2,10 +2,12 @@
     <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img" />
     {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
     {% if beneficiary.isMain and maximum_nb_of_beneficiaries_in_membership > 1 %}
-        <span class="teal white-text badge">⚐ principal</span>
+        <span class="teal white-text badge">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
     {% if beneficiary.membership.withdrawn %}
         <span class="red white-text badge">{{ member_withdrawn_icon }} fermé</span>
+    {% elseif beneficiary.isNew %}
+        <span class="red white-text badge">{{ beneficiary_new_icon }} nouveau</span>
     {% endif %}
     {% if beneficiary.membership.frozenChange %}
         {% if beneficiary.membership.frozen %}

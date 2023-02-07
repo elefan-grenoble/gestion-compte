@@ -675,4 +675,11 @@ class Beneficiary
         return $this->createdAt;
     }
 
+    /**
+     * @return bool
+     */
+    public function isNew()
+    {
+        return $this->shifts->count() <= 3;
+    }
 }

@@ -1,16 +1,28 @@
 {#
-Template for the modal popup used to change the user register for a shift bucket in  /booking/admin
+Template for the modal popup used to change the user register for a shift bucket in /booking/admin
 It use the materialize modal class https://materializecss.com/modals.html
+id = "modal-bucket"
 #}
 {% set nbBookableShifts = shifts | filter ( shift => not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
 {% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
+
+{# header #}
 {% if bucket.locked %}
     <i class="material-icons left large">lock</i>
 {% endif %}
-<h4>Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span></h4>
-<h5>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h5>
-<span>remplissage : {{ nbShifts-nbBookableShifts }}/{{ nbShifts }} ({{ (((nbShifts-nbBookableShifts) / nbShifts)*100) | round }}%)</span>
+<h4>
+    Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span>
+</h4>
+<h5>
+    {{ bucket.start | date_fr_long }} de {{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}
+</h5>
+<span>
+    remplissage : {{ nbBookedShifts }}/{{ nbShifts }} ({{ ((nbBookedShifts / nbShifts)*100) | round }}%)
+</span>
+
+{# bucket shifts #}
 <ul class="collapsible">
     {% for shift in shifts %}
         {% if shift.shifter %}{# is booked #}
@@ -23,7 +35,15 @@ It use the materialize modal class https://materializecss.com/modals.html
                             {% endif %}
                             {{ shift.shifter.displayNameWithMemberNumber }}
                             {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
-                            {% if not shift.formation and shift.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ shift.shifter.formations | join(', ') }})</b>{% endif %}
+                            {% if not shift.formation and shift.shifter.formations | length > 0 %}
+                                &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
+                            {% endif %}
+                            {% if shift.shifter.isNew %}
+                                &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                            {% endif %}
+                            {% if shift.isFirstByShifter %}
+                                &nbsp;<strong class="red-text">(Premier créneau)</strong>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -119,6 +139,8 @@ It use the materialize modal class https://materializecss.com/modals.html
         {% endif %}
     {% endfor %}
 </ul>
+
+{# add shift form #}
 {{ form_start(bucket_add_form, {'attr': { 'style':  'display:inline;'}}) }}
 <input type="hidden" id="{{ bucket_add_form.start.date.vars.id }}" name="{{ bucket_add_form.start.date.vars.full_name }}" value="{{ bucket_add_form.start.date.vars.value }}">
 <input type="hidden" id="{{ bucket_add_form.start.time.vars.id }}" name="{{ bucket_add_form.start.time.vars.full_name }}" value="{{ bucket_add_form.start.time.vars.value }}">
@@ -142,6 +164,8 @@ It use the materialize modal class https://materializecss.com/modals.html
 </div>
 {{ form_row(bucket_add_form._token) }}
 {{ form_end(bucket_add_form,  {'render_rest': false}) }}
+
+{# bucket actions #}
 <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
     <i class="material-icons left">mail</i>Envoyer un email
 </a>
@@ -164,6 +188,7 @@ It use the materialize modal class https://materializecss.com/modals.html
     <i class="material-icons left">delete</i>Supprimer
 </button>
 {{ form_end(bucket_delete_form) }}
+
 <script>
     function makeAjaxCall(event) {
         if (event.data.confirmation) {
