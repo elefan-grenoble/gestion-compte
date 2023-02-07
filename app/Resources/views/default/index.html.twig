@@ -184,14 +184,15 @@
                 {% endif %}
             </div>
         </div>
-    {% endif %}
-    {% if app.user.beneficiary and member | uptodate %}
-        <div id="home-shifts" class="row">
-            <div class="col s12">
-                {# why render instead of include? because of forms init #}
-                {{ render(controller("AppBundle:Booking:homepageShifts")) }}
+
+        {% if member | uptodate %}
+            <div id="home-shifts" class="row">
+                <div class="col s12">
+                    {# why render instead of include? because of forms init #}
+                    {{ render(controller("AppBundle:Booking:homepageShifts")) }}
+                </div>
             </div>
-        </div>
+        {% endif %}
     {% endif %}
 {% else %}
     <br>
