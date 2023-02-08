@@ -56,7 +56,7 @@ class SearchUserFormHelper {
             ]
         ]);
         $formBuilder->add('exempted', ChoiceType::class, [
-            'label' => $this->container->getParameter('member_exempted_icon') . ' gelé',
+            'label' => $this->container->getParameter('member_exempted_icon') . ' exempté',
             'required' => false,
             'choices' => [
                 'exempté' => 2,
