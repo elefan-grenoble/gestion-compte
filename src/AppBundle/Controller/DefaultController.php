@@ -100,7 +100,7 @@ class DefaultController extends Controller
                 }
             }
         } else {
-            return $this->render('default/index.html.twig', [
+            return $this->render('default/index_anon.html.twig', [
                 'bucketsByDay' => $this->getSchedule(),
                 'hours' => $this->getHours()
             ]);
