@@ -2,7 +2,11 @@
     <div class="col-12">
         <div class="card-panel teal white-text">
             <i class="material-icons left">beach_access</i>
-            <strong>{% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
+            {% if (from_admin ?? false) %}
+                <strong>Compte exempté de créneau !</strong>
+            {% else %}
+                <strong>{% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
+            {% endif %}
 
             <ul class="list-unstyled" style="margin-bottom: 0;">
                 {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
