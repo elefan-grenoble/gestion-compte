@@ -1,19 +1,19 @@
-{% if display_names is not defined or display_names == true %}
+{% if (display_names ?? true) %}
     {% set display_names = display_name_shifters %}
 {% endif %}
+{% if beneficiary is not defined %}
+    {% set beneficiary = null %}
+{% endif %}
+{% set previousWeekIndex = -1 %}
+{% set weekCycle = ["A", "B", "C", "D"] %}
+{% set current_cycle = 0 %}
 
 </div> <!-- end div.section -->
-</div> <!-- end div.container -->
+</div> <!-- end div.container: we want full-screen display -->
 <div style="padding: 5px;">
-    {% set current_cycle = 0 %}
-    {% if beneficiary is not defined %}
-        {% set beneficiary = null %}
-    {% endif %}
-    {% set previousWeekIndex = -1 %}
-    {% set weekCycle = ["A", "B", "C", "D"] %}
-
     {% for bucketsByjob in bucketsByDay %}
         {% set weekIndex = (((bucketsByjob|first|first).start | date('W') - 1) % 4) %}
+
         {% if previousWeekIndex != weekIndex %}
             {% if previousWeekIndex != -1 %}</ul>{% endif %}
             <h5>
@@ -23,9 +23,10 @@
             {% set previousWeekIndex = weekIndex %}
             <ul class="collapsible collapsible-expandable">
         {% endif %}
-        <li class="{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}active{% endif %}">
-            <div class="collapsible-header {% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}{% else %}not-allowed{% endif %}">
-                <i class="material-icons">{% if (not beneficiary or shift_service.canBookOnCycle(beneficiary,current_cycle) or shift_service.canBookExtraShiftBucket(beneficiary, bucketsByjob|first|first)) %}event_available{% else %}event_busy{% endif %}</i>{{ (bucketsByjob|first|first).start|date_fr_long }}
+        <li class="active">
+            <div class="collapsible-header">
+                <i class="material-icons">{% if date('now') > (bucketsByjob|last|last).end %}event_busy{% else %}event_available{% endif %}</i>
+                {{ (bucketsByjob|first|first).start | date_fr_long }}
             </div>
             <div class="collapsible-body" style="padding: 1rem 0">
                 {% for buckets in bucketsByjob %}
