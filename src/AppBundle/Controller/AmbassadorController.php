@@ -46,7 +46,7 @@ class AmbassadorController extends Controller
     public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
     {
         if ($this->registrationEveryCivilYear) {
-            $endLastRegistration = new \DateTime('last day of last year');
+            $endLastRegistration = new \DateTime('last day of December last year');
         } else {
             $endLastRegistration = new \DateTime('last year');
         }
