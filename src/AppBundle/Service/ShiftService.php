@@ -197,15 +197,15 @@ class ShiftService
             return true;
         }
 
-        // Do not book old or locked or booked shifts
+        // Cannot not book old or locked or booked shifts
         if ($shift->getIsPast() || $shift->isLocked() || $shift->getShifter()) {
             return false;
         }
-        // Do not book pre-booked shift
+        // Cannot book pre-booked shift
         if ($shift->getLastShifter() && $beneficiary->getId() != $shift->getLastShifter()->getId()) {
             return false;
         }
-        // Do not book shift the beneficiary cannot handle (formation)
+        // Cannot book shift the beneficiary cannot handle (formation)
         if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
             return false;
         }
@@ -213,16 +213,14 @@ class ShiftService
         if ($this->isBeginner($beneficiary) && $this->isShiftEmpty($shift)) {
             return false;
         }
-        // Check that beneficiary did not book a shift that overlaps the current
+        // Cannot book a shift that overlaps a currently booked shift
         if (!$this->canBookShift($beneficiary, $shift)) {
             return false;
         }
 
-        // membership rules (exemption, withdrawn, frozen)
+        // membership rules (withdrawn, firstShiftDate, frozen)
+        // note: exempted members can still book shifts if they want
         $member = $beneficiary->getMembership();
-        if ($member->isCurrentlyExemptedFromShifts($shift->getStart())) {
-            return false;
-        }
         if ($member->isWithdrawn()) {
             return false;
         }
@@ -239,6 +237,7 @@ class ShiftService
                 return false;
         }
 
+        // get cycle of shift
         // TODO refactor code to remove shift_cycle
         // canBookDuration method should not use TimeLog but request shifts
         $shift_cycle = 0;
