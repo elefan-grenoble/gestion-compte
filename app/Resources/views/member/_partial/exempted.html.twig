@@ -1,0 +1,18 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card-panel teal white-text">
+            <i class="material-icons left">beach_access</i>
+            {% if (from_admin ?? false) %}
+                <strong>Compte exempté de créneau !</strong>
+            {% else %}
+                <strong>{% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
+            {% endif %}
+
+            <ul class="list-unstyled" style="margin-bottom: 0;">
+                {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
+                    <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>

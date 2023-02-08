@@ -1,17 +1,7 @@
 {% set firstShiftDate = member.firstShiftDate %}
 
 {% if member.isCurrentlyExemptedFromShifts() %}
-    <div class="row">
-        <div class="card-panel teal white-text">
-            <i class="material-icons left">beach_access</i>
-            <strong>Compte exempté de créneau !</strong>
-            <ul class="list-unstyled">
-                {% for currentMembershipShiftExemption in member.getCurrentMembershipShiftExemptions() %}
-                    <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    </div>
+    {% include "member/_partial/exempted.html.twig" with { member: member, from_admin: true } %}
 {% endif %}
 
 {% if use_fly_and_fixed %}

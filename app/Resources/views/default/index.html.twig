@@ -58,6 +58,10 @@
     </div>
 
     {% if app.user.beneficiary %}
+        {% if app.user.beneficiary.membership.isCurrentlyExemptedFromShifts() %}
+            {% include "member/_partial/exempted.html.twig" with { member: app.user.beneficiary.membership } %}
+        {% endif %}
+
         <div id="home-actions" class="row center">
             {% if app.user.beneficiary.membership | uptodate %}
                 <div class="col s12 l6">
