@@ -58,6 +58,18 @@
     </div>
 
     {% if app.user.beneficiary %}
+        {% if app.user.beneficiary.membership.isCurrentlyExemptedFromShifts() %}
+            <div class="card-panel teal white-text">
+                <i class="material-icons left">beach_access</i>
+                <strong>{% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} compte est exempté de créneau !</strong>
+                <ul class="list-unstyled">
+                    {% for currentMembershipShiftExemption in app.user.beneficiary.membership.getCurrentMembershipShiftExemptions() %}
+                        <li><i>{{ currentMembershipShiftExemption.shiftExemption }}</i> du {{ currentMembershipShiftExemption.start | date_fr_full }} au {{ currentMembershipShiftExemption.end | date_fr_full }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
         <div id="home-actions" class="row center">
             {% if app.user.beneficiary.membership | uptodate %}
                 <div class="col s12 l6">
