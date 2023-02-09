@@ -34,10 +34,13 @@ class ShiftDeletedEvent extends Event
     }
 
     /**
-     * @return Membership
+     * @return Membership|null
      */
     public function getMember()
     {
-        return $this->beneficiary->getMembership();
+        if ($this->beneficiary) {
+            return $this->beneficiary->getMembership();
+        }
+        return null;
     }
 }

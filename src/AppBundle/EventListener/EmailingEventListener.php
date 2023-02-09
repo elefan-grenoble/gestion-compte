@@ -263,7 +263,6 @@ class EmailingEventListener
         }
     }
 
-
     /**
      * @param MemberCycleStartEvent $event
      * @throws \Exception
