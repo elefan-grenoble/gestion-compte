@@ -36,7 +36,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * Lists all users with a registration date older than one year.
+     * List all users with a registration date older than one year.
      *
      * @Route("/membership", name="ambassador_membership_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
@@ -64,51 +64,50 @@ class AmbassadorController extends Controller
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
         $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
+            ->where('lr.id IS NULL') // registration is the last one registered
             ->leftJoin("o.timeLogs", "c")->addSelect("c")
             ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
-
-        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formHelper->processSearchFormAmbassadorData($form, $qb);
             $sort = $form->get('sort')->getData();
             $order = $form->get('dir')->getData();
-            $page = $form->get('page')->getData();
+            $currentPage = $form->get('page')->getData();
         } else {
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
-            $page = 1;
+            $currentPage = 1;
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                    ->setParameter('withdrawn', $defaults['withdrawn']-1);
+                ->setParameter('withdrawn', $defaults['withdrawn']-1);
             $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                    ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
+                ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
         }
 
-        $limit = 25;
+        $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
-        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-        $members = new Paginator($qb->getQuery());
-        $max = sizeof($members);
-        if ($max == 0) {
-            $nbOfPages = 1;
-        } else {
-            $nbOfPages = intval(($max-1) / $limit) + 1;
-        }
+        $paginator = new Paginator($qb);
+        $totalItems = count($paginator);
+        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
+        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
             'reason' => "d'adhésion",
-            'members' => $members,
+            'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $max,
-            'page' => $page,
-            'nb_of_pages' => $nbOfPages
+            'nb_of_result' => $totalItems,
+            'page' => $currentPage,
+            'nb_of_pages' => $pagesCount
         ));
 
     }
 
     /**
-     * Lists all users with shift time logs older than 9 hours.
+     * List all users with shift time logs older than 9 hours.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
@@ -129,24 +128,22 @@ class AmbassadorController extends Controller
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
         $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
+            ->where('lr.id IS NULL') // registration is the last one registered
             ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
-
-        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
             $sort = $form->get('sort')->getData();
             $order = $form->get('dir')->getData();
             $currentPage = $form->get('page')->getData();
-        }else{
+        } else {
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
             $currentPage = 1;
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                    ->setParameter('withdrawn', $defaults['withdrawn']-1);
+                ->setParameter('withdrawn', $defaults['withdrawn']-1);
             $qb = $qb->andWhere('o.frozen = :frozen')
-                    ->setParameter('frozen', $defaults['frozen']-1);
+                ->setParameter('frozen', $defaults['frozen']-1);
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $defaults['compteurlt']);
         }

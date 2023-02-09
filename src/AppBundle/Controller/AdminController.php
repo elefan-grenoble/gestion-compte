@@ -97,7 +97,7 @@ class AdminController extends Controller
             $order = $defaults['dir'];
             $currentPage = 1;
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                    ->setParameter('withdrawn', $defaults['withdrawn']-1);
+                ->setParameter('withdrawn', $defaults['withdrawn']-1);
         }
         $qb = $qb->orderBy($sort, $order);
 

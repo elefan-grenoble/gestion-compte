@@ -55,15 +55,15 @@ class SearchUserFormHelper {
                 'Non gelé' => 1,
             ]
         ]);
-        $formBuilder->add('exempted', ChoiceType::class, [
-            'label' => $this->container->getParameter('member_exempted_icon') . ' exempté',
-            'required' => false,
-            'choices' => [
-                'exempté' => 2,
-                'Non exempté' => 1,
-            ]
-        ]);
         if (!$type) {
+            $formBuilder->add('exempted', ChoiceType::class, [
+                'label' => $this->container->getParameter('member_exempted_icon') . ' exempté',
+                'required' => false,
+                'choices' => [
+                    'exempté' => 2,
+                    'Non exempté' => 1,
+                ]
+            ]);
             $formBuilder->add('beneficiary_count', ChoiceType::class, [
                 'label' => 'nb de bénéficiaires',
                 'required' => false,
@@ -284,7 +284,7 @@ class SearchUserFormHelper {
         $options['required'] = true;
         $options['constraints'] = [
             new NotBlank(),
-                new LessThanOrEqual($defaults['lastregistrationdatelt'])
+            new LessThanOrEqual($defaults['lastregistrationdatelt'])
         ];
         $form->add('lastregistrationdatelt', DateType::class, $options);
         foreach ($defaults as $k => $v) {
