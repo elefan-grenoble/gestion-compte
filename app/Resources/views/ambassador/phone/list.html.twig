@@ -1,11 +1,11 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des retardataires - {{ site_name }}{% endblock %}
+{% block title %}Liste des membres en retard {{ reason }} - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">list</i>&nbsp;Liste des retardataires
+<i class="material-icons">list</i>&nbsp;Liste des membres en retard {{ reason }}
 {% endblock %}
 
 {% block content %}
