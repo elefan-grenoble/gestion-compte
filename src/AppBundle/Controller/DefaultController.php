@@ -100,8 +100,16 @@ class DefaultController extends Controller
                 }
             }
         } else {
+            $today = strtotime('today');
+            $from = new \DateTime();
+            $from->setTimestamp($today);
+            $to = new \DateTime();
+            $to->modify('+7 days');
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
+            $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+
             return $this->render('default/index_anon.html.twig', [
-                'bucketsByDay' => $this->getSchedule(),
+                'bucketsByDay' => $bucketsByDay,
                 'hours' => $this->getHours()
             ]);
         }
@@ -129,8 +137,13 @@ class DefaultController extends Controller
      */
     public function scheduleAction()
     {
+        $em = $this->getDoctrine()->getManager();
+
+        $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+        $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+
         return $this->render('booking/schedule.html.twig', [
-            'bucketsByDay' => $this->getSchedule(),
+            'bucketsByDay' => $bucketsByDay,
             'hours' => $this->getHours()
         ]);
     }
@@ -143,33 +156,6 @@ class DefaultController extends Controller
         return $hours;
     }
 
-    private function getSchedule() {
-        $em = $this->getDoctrine()->getManager();
-        $today = strtotime('today');
-        $from = new \DateTime();
-        $from->setTimestamp($today);
-        $to = new \DateTime();
-        $to->modify('+7 days');
-        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
-        $bucketsByDay = array();
-        foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
-            $job = $shift->getJob()->getId();
-            $interval = $shift->getIntervalCode();
-            if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job])) {
-                $bucketsByDay[$day][$job] = array();
-            }
-            if (!isset($bucketsByDay[$day][$job][$interval])) {
-                $bucket = new ShiftBucket();
-                $bucketsByDay[$day][$job][$interval] = $bucket;
-            }
-            $bucketsByDay[$day][$job][$interval]->addShift($shift);
-        }
-        return $bucketsByDay;
-    }
 
     /**
      * @Route("/cardReader", name="cardReader")
