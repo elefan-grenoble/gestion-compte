@@ -1,0 +1,28 @@
+{% if not (member | uptodate) or (member | uptodate) and (member | can_register) %}
+    <div class="row" style="margin-bottom: 0;">
+        <div class="col s12">
+            {% if not (member | uptodate) %}
+                {% if (member.registrations | length) %}{# existing member #}
+                    <div class="card-panel teal error lighten-1">
+                        <span class="white-text">
+                            Oups, ton adhésion a expiré il y a {{ membership_service.getRemainder(member) | date("%a") }} jours... n'oublie pas de ré-adhérer !
+                        </span>
+                    </div>
+                {% else %}{# new member #}
+                    <div class="card-panel teal warning lighten-1">
+                        <span class="white-text">
+                            Pour poursuivre entre ton adhésion en ligne !
+                        </span>
+                    </div>
+                {% endif %}
+            {% elseif (member | uptodate) and (member | can_register) %}
+                <div class="card-panel teal warning lighten-1">
+                    <span class="white-text">
+                        Ton adhésion expire dans {{ membership_service.getRemainder(member) | date("%a") }} jours.<br />
+                        Tu peux ré-adhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou {{ local_currency_name }}.
+                    </span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

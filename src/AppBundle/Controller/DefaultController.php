@@ -78,26 +78,6 @@ class DefaultController extends Controller
                         ', le <strong>' . $this->container->get('twig')->getExtension(AppExtension::class)->date_fr_long($dayAfterEndOfCycle) . '</strong>.' .
                         "<br />Pour annuler, visite " . $profileUrlHtml);
                 }
-
-                if ($this->get('membership_service')->canRegister($membership)) {
-                    if ($membership->getRegistrations()->count() <= 0) {
-                        $session->getFlashBag()->add('warning', 'Pour poursuivre entre ton adhésion en ligne !');
-                    }else{
-                        $remainder = $this->get('membership_service')->getRemainder($membership);
-                        $remainingDays = intval($remainder->format("%R%a"));
-                        if ($remainingDays < 0)
-                            $session->getFlashBag()->add('error', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
-                        else {
-                            $session->getFlashBag()->add('warning',
-                                'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
-                                'Tu peux ré-adhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou ' .
-                                $this->getParameter('local_currency_name') .
-                                '.');
-                        }
-                    }
-                } elseif ($membership->getRegistrations()->count() <= 0) {
-                    $session->getFlashBag()->add('error', 'Aucune adhésion enregistrée !');
-                }
             }
         } else {
             return $this->render('default/index_anon.html.twig', [

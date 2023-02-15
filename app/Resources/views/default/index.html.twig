@@ -1,6 +1,12 @@
 {% extends 'layout.html.twig' %}
 
 {% block beforecontainer %}
+{% if app.user.beneficiary %}
+    {% set member = app.user.beneficiary.membership %}
+    <div id="home-notices">
+        {% include "member/_partial/registration_notices.html.twig" with { member: member } %}
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block aftercontainer %}
