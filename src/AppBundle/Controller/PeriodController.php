@@ -192,7 +192,7 @@ class PeriodController extends Controller
      * @Route("/{id}/edit", name="period_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function editAction(Request $request, Period $period)
+    public function editPeriodAction(Request $request, Period $period)
     {
         $session = new Session();
 
@@ -279,7 +279,7 @@ class PeriodController extends Controller
 
     /**
      * @Route("/{id}/position/{position}", name="period_position_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
@@ -393,7 +393,7 @@ class PeriodController extends Controller
      * @Route("/copyPeriod/", name="period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function periodCopyAction(Request $request){
+    public function copyPeriodAction(Request $request){
         $days = array(
             "Lundi" => 0,
             "Mardi" => 1,

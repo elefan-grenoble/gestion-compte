@@ -109,12 +109,14 @@
                                     </div>
                                 </div>
                                 {{ form_end(positions_book_forms[position.id]) }}
-                                <div class="row">
-                                    {{ form_start(positions_delete_forms[position.id]) }}
-                                    {{ form_widget(positions_delete_forms[position.id]) }}
-                                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
-                                    {{ form_end(positions_delete_forms[position.id]) }}
-                                </div>
+                                {% if is_granted("ROLE_ADMIN") %}
+                                    <div class="row">
+                                        {{ form_start(positions_delete_forms[position.id]) }}
+                                        {{ form_widget(positions_delete_forms[position.id]) }}
+                                        <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
+                                        {{ form_end(positions_delete_forms[position.id]) }}
+                                    </div>
+                                {% endif %}
                             </div>
                         </li>
                     {% endif %}
