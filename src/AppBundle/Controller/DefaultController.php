@@ -100,12 +100,9 @@ class DefaultController extends Controller
                 }
             }
         } else {
-            $today = strtotime('today');
-            $from = new \DateTime();
-            $from->setTimestamp($today);
             $to = new \DateTime();
             $to->modify('+7 days');
-            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($to);
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
 
             return $this->render('default/index_anon.html.twig', [
