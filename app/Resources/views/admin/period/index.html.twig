@@ -275,21 +275,17 @@
         <div class="section">
             <table>
                 <thead>
-                <tr>
-                    {% for day in ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] %}
-                        {% if periods_by_day[loop.index0]|length %}
-                            <th> {{ day }} </th>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
+                    <tr>
+                        {% for key,day in days_of_week %}
+                            <th>{{ day }}</th>
+                        {% endfor %}
+                    </tr>
                 </thead>
                 <tbody>
-                <tr>
-                    {% for i in 0..6 %}
-                        {# for the 7 days of a week #}
-                        <td>
-                            {% if periods_by_day[0]|length %}
-                                {% for period in periods_by_day[i] %}
+                    <tr>
+                        {% for key,day in days_of_week %}
+                            <td>
+                                {% for period in periods_by_day[key] %}
                                     {% if ((filling_filter == null) and (beneficiary_filter == null))
                                         or (filling_filter == "problematic" and period.isProblematic(week_filter))
                                         or (filling_filter == "empty" and period.isEmpty(week_filter))
@@ -299,10 +295,9 @@
                                         {{ _self.period_card(period, week_filter) }}
                                     {% endif %}
                                 {% endfor %}
-                            {% endif %}
-                        </td>
-                    {% endfor %}
-                </tr>
+                            </td>
+                        {% endfor %}
+                    </tr>
                 </tbody>
             </table>
         </div>

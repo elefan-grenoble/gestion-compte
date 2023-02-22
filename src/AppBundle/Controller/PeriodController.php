@@ -124,11 +124,12 @@ class PeriodController extends Controller
      */
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
+        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
         $filter = $this->filterFormFactory($request);
         $periodsByDay = array();
         $order = array('start' => 'ASC');
 
-        for($i=0; $i<7; $i++) {
+        foreach ($daysOfWeek as $i => $value) {
             $findByFilter = array('dayOfWeek' => $i);
 
             if ($filter['job']) {
@@ -140,6 +141,7 @@ class PeriodController extends Controller
         }
 
         return $this->render('admin/period/index.html.twig', array(
+            'days_of_week' => $daysOfWeek,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $filter['form']->createView(),
             'beneficiary_filter' => $filter['beneficiary'],
