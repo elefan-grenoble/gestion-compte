@@ -106,6 +106,7 @@ parameters:
     use_card_reader_to_validate_shifts: false
     max_time_at_end_of_shift: 0
     max_nb_of_past_cycles_to_display: 3
+    use_time_log_saving: false
 
     # Events
     max_event_proxy_per_member: 1
