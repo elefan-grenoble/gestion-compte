@@ -245,10 +245,10 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/add", name="add_position_to_period", methods={"POST"})
+     * @Route("/{id}/position/add", name="period_position_new", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function addPositionToPeriodAction(Request $request, Period $period)
+    public function newPeriodPositionAction(Request $request, Period $period)
     {
         $session = new Session();
 
@@ -278,10 +278,10 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/{position}", name="remove_position_from_period", methods={"DELETE"})
+     * @Route("/{id}/position/{position}", name="period_position_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function removePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position)
+    public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
 
@@ -302,10 +302,10 @@ class PeriodController extends Controller
     /**
      * Book a period.
      *
-     * @Route("/{id}/position/{position}/book", name="book_position_from_period", methods={"POST"})
+     * @Route("/{id}/position/{position}/book", name="period_position_book", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function bookPositionToPeriodAction(Request $request, Period $period, PeriodPosition $position): Response
+    public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
     {
         $session = new Session();
 
@@ -346,10 +346,10 @@ class PeriodController extends Controller
     /**
      * free a position.
      *
-     * @Route("/{id}/position/{position}/free", name="free_position_from_period", methods={"POST"})
+     * @Route("/{id}/position/{position}/free", name="period_position_free", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function freePositionToPeriodAction(Request $request, Period $period, PeriodPosition $position)
+    public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
 
@@ -368,7 +368,7 @@ class PeriodController extends Controller
      * @Route("/{id}", name="period_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function deleteAction(Request $request, Period $period)
+    public function deletePeriodAction(Request $request, Period $period)
     {
         $session = new Session();
 
@@ -512,7 +512,7 @@ class PeriodController extends Controller
             new PeriodPosition(),
             array(
                 'action' => $this->generateUrl(
-                    'add_position_to_period',
+                    'period_position_new',
                     array('id' => $period->getId())
                 )
             ));
@@ -529,7 +529,7 @@ class PeriodController extends Controller
     private function createPeriodPositionBookForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_book_forms_' . $position->getId())
-            ->setAction($this->generateUrl('book_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setAction($this->generateUrl('period_position_book', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('POST')
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
             ->getForm();
@@ -546,7 +546,7 @@ class PeriodController extends Controller
     private function createPeriodPositionDeleteForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_delete_forms_' . $position->getId())
-            ->setAction($this->generateUrl('remove_position_from_period', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setAction($this->generateUrl('period_position_delete', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }
