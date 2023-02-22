@@ -58,8 +58,9 @@ class AmbassadorController extends Controller
             'withdrawn' => 1,
             'lastregistrationdatelt' => $endLastRegistration
         ];
+        $disabledFields = ['withdrawn', 'lastregistrationdatelt'];
 
-        $form = $formHelper->createMembershipFilterForm($this->createFormBuilder(), $defaults);
+        $form = $formHelper->createMembershipFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
@@ -123,7 +124,9 @@ class AmbassadorController extends Controller
             'frozen' => 1,
             'compteurlt' => 0
         ];
-        $form = $formHelper->createShiftTimeLogFilterForm($this->createFormBuilder(), $defaults);
+        $disabledFields = ['withdrawn', 'compteurlt'];
+
+        $form = $formHelper->createShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());

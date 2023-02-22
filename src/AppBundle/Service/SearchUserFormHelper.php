@@ -27,15 +27,16 @@ class SearchUserFormHelper {
         $this->container = $container;
     }
 
-    public function getSearchForm($formBuilder, $type = null) {
+    public function getSearchForm($formBuilder, $type = null, $disabledFields = []) {
         $formBuilder->add('withdrawn', ChoiceType::class, [
-            'data' => 1,
             'label' => $this->container->getParameter('member_withdrawn_icon') . ' fermé',
             'required' => false,
+            'disabled' => in_array("withdrawn", $disabledFields) ? true : false,
             'choices' => [
                 'fermé' => 2,
                 'ouvert' => 1,
-            ]
+            ],
+            'data' => 1
         ]);
         if (!$type) {
             $formBuilder->add('enabled', ChoiceType::class, [
@@ -135,8 +136,9 @@ class SearchUserFormHelper {
             'html5' => false,
             'label' => 'avant le',
             'required' => false,
+            'disabled' => in_array("lastregistrationdatelt", $disabledFields) ? true : false,
             'attr' => [
-                'class' => 'datepicker'
+                'class' => 'datepicker',
             ]
         ]);
         if (!$type) {
@@ -147,7 +149,8 @@ class SearchUserFormHelper {
         }
         $formBuilder->add('compteurlt', NumberType::class, [
             'label' => 'max',
-            'required' => false
+            'required' => false,
+            'disabled' => in_array("compteurlt", $disabledFields) ? true : false,
         ])
         ->add('compteurgt', NumberType::class, [
             'label' => 'min',
@@ -261,8 +264,8 @@ class SearchUserFormHelper {
         return $form;
     }
 
-    public function createShiftTimeLogFilterForm($formBuilder, $defaults) {
-        $form = $this->getSearchForm($formBuilder, "shifttimelog");
+    public function createShiftTimeLogFilterForm($formBuilder, $defaults = [], $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, "shifttimelog", $disabledFields);
         // set compteurlt default
         $options = $form->get('compteurlt')->getConfig()->getOptions();
         $options['required'] = true;
@@ -277,8 +280,8 @@ class SearchUserFormHelper {
         return $form;
     }
 
-    public function createMembershipFilterForm($formBuilder, $defaults) {
-        $form = $this->getSearchForm($formBuilder, "membership");
+    public function createMembershipFilterForm($formBuilder, $defaults, $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, "membership", $disabledFields);
         // set lastregistrationdatelt default
         $options = $form->get('lastregistrationdatelt')->getConfig()->getOptions();
         $options['required'] = true;
