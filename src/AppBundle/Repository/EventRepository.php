@@ -15,15 +15,16 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('e');
 
         $qb
-            ->Where("e.date > :now")
-            ->setParameter('now', new \Datetime('now'))
-            ->Where("e.date > :now");
+            ->where("e.date > :now")
+            ->setParameter('now', new \Datetime('now'));
 
         if ($max) {
             $qb
                 ->andWhere('e.date < :max')
                 ->setParameter('max', $max);
         }
+
+        $qb->orderBy("e.id", 'ASC');
 
         return $qb
             ->getQuery()
