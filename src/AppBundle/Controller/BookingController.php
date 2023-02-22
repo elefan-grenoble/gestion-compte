@@ -343,20 +343,13 @@ class BookingController extends Controller
             $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
             $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
         }
-        $bucketAddForm = $this->get('form.factory')->createNamed(
-            'bucket_add_form',
-            ShiftType::class,
-            $bucket,
-            array(
-                'action' => $this->generateUrl('shift_new'),
-                'only_add_formation' => true,
-            ));
+        $bucketShiftAddForm = $this->createBucketShiftAddForm($bucket);
         $bucketDeleteform = $this->createBucketDeleteForm($bucket);
         $bucketLockUnlockForm = $this->createBucketLockUnlockForm($bucket);
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'bucket_add_form' => $bucketAddForm->createView(),
+            'bucket_shift_add_form' => $bucketShiftAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
             'shift_delete_forms' => $shiftDeleteForms,
             'shift_free_forms' => $shiftFreeForms,
@@ -464,11 +457,11 @@ class BookingController extends Controller
     }
 
     /**
-     * delete all shifts in bucket, used when the user click on the 'supprimer'
-     * button on the bucket popup.
+     * delete all shifts in bucket
+     * (used when the user clicks on the 'supprimer' button in the bucket popup)
      *
      * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function deleteBucketAction(Request $request, Shift $bucket)
     {
@@ -523,6 +516,25 @@ class BookingController extends Controller
             ])
             ->setMethod('POST')
             ->getForm();
+    }
+
+    /**
+     * Creates a form to add a bucket (shift(s)).
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createBucketShiftAddForm(Shift $bucket)
+    {
+        return $this->get('form.factory')->createNamed(
+            'bucket_shift_add_form',
+            ShiftType::class,
+            $bucket,
+            array(
+                'action' => $this->generateUrl('shift_new'),
+                'only_add_formation' => true,
+            ));
     }
 
     /**

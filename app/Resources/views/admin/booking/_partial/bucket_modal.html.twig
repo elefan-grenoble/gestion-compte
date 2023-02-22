@@ -147,20 +147,20 @@ id = "modal-bucket"
 </ul>
 
 {# add shift form #}
-{{ form_start(bucket_add_form, {'attr': { 'style': 'display:inline;' }}) }}
-<input type="hidden" id="{{ bucket_add_form.start.date.vars.id }}" name="{{ bucket_add_form.start.date.vars.full_name }}" value="{{ bucket_add_form.start.date.vars.value }}">
-<input type="hidden" id="{{ bucket_add_form.start.time.vars.id }}" name="{{ bucket_add_form.start.time.vars.full_name }}" value="{{ bucket_add_form.start.time.vars.value }}">
-<input type="hidden" id="{{ bucket_add_form.end.date.vars.id }}" name="{{ bucket_add_form.end.date.vars.full_name }}" value="{{ bucket_add_form.end.date.vars.value }}">
-<input type="hidden" id="{{ bucket_add_form.end.time.vars.id }}" name="{{ bucket_add_form.end.time.vars.full_name }}" value="{{ bucket_add_form.end.time.vars.value }}">
-{{ form_widget(bucket_add_form.job) }}
+{{ form_start(bucket_shift_add_form, {'attr': { 'style': 'display:inline;' }}) }}
+<input type="hidden" id="{{ bucket_shift_add_form.start.date.vars.id }}" name="{{ bucket_shift_add_form.start.date.vars.full_name }}" value="{{ bucket_shift_add_form.start.date.vars.value }}">
+<input type="hidden" id="{{ bucket_shift_add_form.start.time.vars.id }}" name="{{ bucket_shift_add_form.start.time.vars.full_name }}" value="{{ bucket_shift_add_form.start.time.vars.value }}">
+<input type="hidden" id="{{ bucket_shift_add_form.end.date.vars.id }}" name="{{ bucket_shift_add_form.end.date.vars.full_name }}" value="{{ bucket_shift_add_form.end.date.vars.value }}">
+<input type="hidden" id="{{ bucket_shift_add_form.end.time.vars.id }}" name="{{ bucket_shift_add_form.end.time.vars.full_name }}" value="{{ bucket_shift_add_form.end.time.vars.value }}">
+{{ form_widget(bucket_shift_add_form.job) }}
 <div class="row valign-wrapper">
     <div class="col s3">
-        {{ form_label(bucket_add_form.number) }}
-        {{ form_widget(bucket_add_form.number) }}
+        {{ form_label(bucket_shift_add_form.number) }}
+        {{ form_widget(bucket_shift_add_form.number) }}
     </div>
     <div class="col s6">
-        {{ form_label(bucket_add_form.formation) }}
-        {{ form_widget(bucket_add_form.formation) }}
+        {{ form_label(bucket_shift_add_form.formation) }}
+        {{ form_widget(bucket_shift_add_form.formation) }}
     </div>
     <div class="col s3">
         <button type="submit" class="btn waves-effect waves-light teal">
@@ -168,8 +168,8 @@ id = "modal-bucket"
         </button>
     </div>
 </div>
-{{ form_row(bucket_add_form._token) }}
-{{ form_end(bucket_add_form, {'render_rest': false}) }}
+{{ form_row(bucket_shift_add_form._token) }}
+{{ form_end(bucket_shift_add_form, {'render_rest': false}) }}
 
 {# bucket actions #}
 <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
@@ -189,11 +189,13 @@ id = "modal-bucket"
 <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
     <i class="material-icons left">edit</i>Editer
 </a>
-{{ form_start(bucket_delete_form, {'attr': { 'style': 'display:inline;' }}) }}
-<button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
-    <i class="material-icons left">delete</i>Supprimer
-</button>
-{{ form_end(bucket_delete_form) }}
+{% if is_granted("ROLE_ADMIN") %}
+    {{ form_start(bucket_delete_form, {'attr': { 'style': 'display:inline;' }}) }}
+    <button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste">
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
+    {{ form_end(bucket_delete_form) }}
+{% endif %}
 
 <script>
     function makeAjaxCall(event) {
@@ -234,7 +236,7 @@ id = "modal-bucket"
     $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ces créneaux et leurs réservations ?!"}, makeAjaxCall);
     $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ce poste ?!"}, makeAjaxCall);
     $('form[name^="shift_free_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir libérer ce poste ?!"}, makeAjaxCall);
-    $('form[name="bucket_add_form"]').on('submit', {}, makeAjaxCall);
+    $('form[name="bucket_shift_add_form"]').on('submit', {}, makeAjaxCall);
     $('form[name="bucket_lock_unlock_form"]').on('submit', {}, makeAjaxCall);
     $('form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
     $('form[name^="shift_validate_invalidate_forms_"]').on('submit', {}, makeAjaxCall);

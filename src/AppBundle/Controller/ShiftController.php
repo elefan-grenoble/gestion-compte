@@ -9,6 +9,7 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
@@ -60,7 +61,7 @@ class ShiftController extends Controller
         }
 
         $shift = new Shift();
-        $form = $this->get('form.factory')->createNamed('bucket_add_form', ShiftType::class, $shift);
+        $form = $this->get('form.factory')->createNamed('bucket_shift_add_form', ShiftType::class, $shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
