@@ -35,11 +35,6 @@
                     Tu partages ton compte avec {% for beneficiary in member.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
                 {% endif %}
             </p>
-            {% if (member | uptodate) and (member | can_register) %}
-                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
-                <br />
-                <br />
-            {% endif %}
         </div>
     {% else %}
         <div class="col s12">
@@ -77,39 +72,55 @@
             <div class="col show-on-xl-only xl3"></div>
         {% endif %}
         <div class="col s12 l6">
-            <div class="homebox">
-                <h5><span class="white">Mon compte</span></h5>
-                <div>
-                    {% if (member.registrations | length) and not member | uptodate %}
-                        <p>
-                            <i class="material-icons">warning</i>
-                            {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date("%R%a"))~" days")| date_fr_long }}
-                        </p>
-                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                            <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
-                        </a>
-                    {% elseif not member | uptodate %}
-                        <p>
-                            <i class="material-icons">warning</i>
-                            Il est temps d'adhérer.
-                        </p>
-                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                            <i class="material-icons left">card_membership</i>Adhèrer en ligne
-                        </a>
-                    {% else %}
-                        <div>
-                            <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
-                                <i class="material-icons left">settings</i>Gérer mon compte
-                            </a>
-                            {% if display_freeze_account %}
-                                <br />
-                                {# why render instead of include? because of forms init #}
-                                {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
+            {% if not (member | uptodate) or (member | uptodate) and (member | can_register) %}
+                <div class="homebox">
+                    <h5><span class="white">Adhésion</span></h5>
+                    <div>
+                        {% if not (member | uptodate) %}
+                            {% if (member.registrations | length) %}{# existing member #}
+                                <p>
+                                    <i class="material-icons">warning</i>
+                                    {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date("%R%a"))~" days")| date_fr_long }}.
+                                </p>
+                                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                    <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
+                                </a>
+                            {% else %}{# new member #}
+                                <p>
+                                    <i class="material-icons">warning</i>
+                                    Il est temps d'adhérer :)
+                                </p>
+                                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                    <i class="material-icons left">card_membership</i>Adhèrer en ligne
+                                </a>
                             {% endif %}
-                        </div>
-                    {% endif %}
+                        {% elseif (member | uptodate) and (member | can_register) %}
+                            <p>
+                                <i class="material-icons">warning</i>
+                                {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion expire dans {{ membership_service.getRemainder(member) | date("%a") }} jours.
+                            </p>
+                            <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                <i class="material-icons left">card_membership</i>Je ré-adhère en ligne
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+            {% endif %}
+            {% if (member.registrations | length) %}
+                <div class="homebox">
+                    <h5><span class="white">Mon compte</span></h5>
+                    <div>
+                        <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
+                            <i class="material-icons left">settings</i>Gérer mon compte
+                        </a>
+                        {% if display_freeze_account %}
+                            <br />
+                            {# why render instead of include? because of forms init #}
+                            {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
             <div class="homebox">
                 <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
                 <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1">
