@@ -45,14 +45,22 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFutures()
+    public function findFutures(\DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('s');
 
         $qb
+            ->select('s, j')
+            ->leftJoin('s.job', 'j')
             ->where('s.start > :now')
             ->setParameter('now', new \Datetime('now'))
             ->orderBy('s.start', 'ASC');
+
+        if ($max) {
+            $qb
+                ->andWhere('s.end < :max')
+                ->setParameter('max', $max);
+        }
 
         return $qb
             ->getQuery()
