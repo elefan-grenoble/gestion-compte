@@ -12,192 +12,172 @@
 {% endblock %}
 
 {% block content %}
-{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    <div id="home-announcements" class="center">
-        {{ dynamicContent | markdown | raw }}
-    </div>
+<div id="home-announcements" class="center">
+    {{ dynamicContent | markdown | raw }}
+</div>
 
-    <div id="home-welcome" class="row center">
-        <div class="col s12">
-            <h4 class="header">
-                Bonjour
-                {% if app.user.beneficiary %}
-                    {{ app.user.beneficiary.firstname }}
-                    <br />
-                    #{{ app.user.beneficiary.membership.memberNumber }}
-                {% else %}
-                    {{ app.user.username }}
-                {% endif %}
-            </h4>
-        </div>
-        {% if is_granted("ROLE_SUPER_ADMIN") %}
-            <div class="col s12">
-                <p>
-                    <span class="orange-text">&lt;warning&gt;</span>
-                    <span>With great power comes great responsibility</span>
-                    <span class="orange-text">&lt;/warning&gt;</span>
-                </p>
-            </div>
-        {% endif %}
-        {% if app.user.beneficiary %}
-            <div class="col s12">
-                <p>
-                    Bienvenue sur ton espace personnel à {{ project_name }}
-                    {% if app.user.beneficiary.membership.beneficiaries | length > 1 %}
-                        <br />
-                        Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
-                    {% endif %}
-                </p>
-                {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
-                    <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
-                    <br />
-                    <br />
-                {% endif %}
-            </div>
-        {% endif %}
-    </div>
-
-    {% if app.user.beneficiary %}
-        {% if app.user.beneficiary.membership.isCurrentlyExemptedFromShifts() %}
-            {% include "member/_partial/exempted.html.twig" with { member: app.user.beneficiary.membership } %}
-        {% endif %}
-
-        <div id="home-actions" class="row center">
-            {% if app.user.beneficiary.membership | uptodate %}
-                <div class="col s12 l6">
-                    <div class="homebox">
-                        <h5><span class="white">{% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
-                        {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
-                    </div>
-                </div>
+<div id="home-welcome" class="row center">
+    <div class="col s12">
+        <h4 class="header">
+            Bonjour
+            {% if app.user.beneficiary %}
+                {{ app.user.beneficiary.firstname }}
+                <br />
+                #{{ app.user.beneficiary.membership.memberNumber }}
             {% else %}
-                <div class="col show-on-xl-only xl3"></div>
+                {{ app.user.username }}
             {% endif %}
+        </h4>
+    </div>
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <div class="col s12">
+            <p>
+                <span class="orange-text">&lt;warning&gt;</span>
+                <span>With great power comes great responsibility</span>
+                <span class="orange-text">&lt;/warning&gt;</span>
+            </p>
+        </div>
+    {% endif %}
+    {% if app.user.beneficiary %}
+        <div class="col s12">
+            <p>
+                Bienvenue sur ton espace personnel à {{ project_name }}
+                {% if app.user.beneficiary.membership.beneficiaries | length > 1 %}
+                    <br />
+                    Tu partages ton compte avec {% for beneficiary in app.user.beneficiary.membership.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
+                {% endif %}
+            </p>
+            {% if app.user.beneficiary.membership | uptodate and app.user.beneficiary.membership | can_register %}
+                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn"><i class="material-icons left">card_membership</i>Je ré-adhère en ligne</a>
+                <br />
+                <br />
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+{% if app.user.beneficiary %}
+    {% if app.user.beneficiary.membership.isCurrentlyExemptedFromShifts() %}
+        {% include "member/_partial/exempted.html.twig" with { member: app.user.beneficiary.membership } %}
+    {% endif %}
+
+    <div id="home-actions" class="row center">
+        {% if app.user.beneficiary.membership | uptodate %}
             <div class="col s12 l6">
                 <div class="homebox">
-                    <h5><span class="white">Mon compte</span></h5>
-                    <div>
-                        {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
-                            <p>
-                                <i class="material-icons">warning</i>
-                                {% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
-                            </p>
-                            <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
-                            </a>
-                        {% elseif not app.user.beneficiary.membership | uptodate %}
-                            <p>
-                                <i class="material-icons">warning</i>
-                                Il est temps d'adhérer.
-                            </p>
-                            <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
-                                <i class="material-icons left">card_membership</i>Adhèrer en ligne
-                            </a>
-                        {% else %}
-                            <div>
-                                <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
-                                    <i class="material-icons left">settings</i>Gérer mon compte
-                                </a>
-                                {% if display_freeze_account %}
-                                    <br />
-                                    {# why render instead of include? because of forms init #}
-                                    {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
-                                {% endif %}
-                            </div>
-                        {% endif %}
-                    </div>
+                    <h5><span class="white">{% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
+                    {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
                 </div>
-                <div class="homebox">
-                    <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
-                    <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1">
-                        <i class="material-icons left">schedule</i>Planning
-                    </a>
-                    <br />
-                    <br />
-                    {% if profile_display_task_list %}
-                        <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn blue-grey">
-                            <i class="material-icons left">list</i>Tâches en cours
+            </div>
+        {% else %}
+            <div class="col show-on-xl-only xl3"></div>
+        {% endif %}
+        <div class="col s12 l6">
+            <div class="homebox">
+                <h5><span class="white">Mon compte</span></h5>
+                <div>
+                    {% if (app.user.beneficiary.membership.registrations | length) and not app.user.beneficiary.membership | uptodate %}
+                        <p>
+                            <i class="material-icons">warning</i>
+                            {% if app.user.beneficiary.membership.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((app.user.beneficiary.membership | remainder | date("%R%a"))~" days")| date_fr_long }}
+                        </p>
+                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                            <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
                         </a>
-                        <br />
-                    {% endif %}
-                    <a href="{{ path("process_update_list") }}" class="btn blue-grey" id="news_home_button" style="position: relative">
-                        <i class="material-icons left" >info</i>Les nouveautés
-                        <span class="bubble_counter red white-text" style="display:none;">{{ app.user.beneficiary | last_shift_date | count_updates_list_from_date }}</span>
-                    </a>
-                    <script>
-                        defer(function () {
-                            var cookie_data = myCookieInit({'last_processupdates_check' : "{{ app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
-                            jQuery.ajax(process_update_count_unread_url,{
-                                data: {date: cookie_data.last_processupdates_check.replace('_','+')},
-                                method: "post",
-                                dataType: "json"
-                            }).done(function (data, textStatus, jqXHR) {
-                            if (textStatus == "success"){
-                                if (data.count > 0){
-                                    $('#news_home_button').find('.bubble_counter').html(data.count).show();
-                                    $('head title').prepend('('+data.count+') ');
-                                }
-                            }
-                            });
-                        });
-                    </script>
-
-                    <div class="row">
-                        {% if events | length > 0 %}
-                            <h5>Les événements</h5>
-                            {% for event in events %}
-                                {% include "default/event/_event.html.twig" with { event: event } %}
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-                </div>
-                {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
-                    <div class="homebox">
-                        <h5><span class="white">Mes commissions</h5>
-                        {% for commission in app.user.beneficiary.ownedCommissions %}
-                            <a href="{{ path("commission_edit",{'id': commission.id }) }}" class="waves-effect waves-light btn blue-grey">
-                                Gérer la commission {{ commission.name }}
+                    {% elseif not app.user.beneficiary.membership | uptodate %}
+                        <p>
+                            <i class="material-icons">warning</i>
+                            Il est temps d'adhérer.
+                        </p>
+                        <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                            <i class="material-icons left">card_membership</i>Adhèrer en ligne
+                        </a>
+                    {% else %}
+                        <div>
+                            <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
+                                <i class="material-icons left">settings</i>Gérer mon compte
                             </a>
+                            {% if display_freeze_account %}
+                                <br />
+                                {# why render instead of include? because of forms init #}
+                                {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="homebox">
+                <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
+                <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1">
+                    <i class="material-icons left">schedule</i>Planning
+                </a>
+                <br />
+                <br />
+                {% if profile_display_task_list %}
+                    <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn blue-grey">
+                        <i class="material-icons left">list</i>Tâches en cours
+                    </a>
+                    <br />
+                {% endif %}
+                <a href="{{ path("process_update_list") }}" class="btn blue-grey" id="news_home_button" style="position: relative">
+                    <i class="material-icons left" >info</i>Les nouveautés
+                    <span class="bubble_counter red white-text" style="display:none;">{{ app.user.beneficiary | last_shift_date | count_updates_list_from_date }}</span>
+                </a>
+                <script>
+                    defer(function () {
+                        var cookie_data = myCookieInit({'last_processupdates_check' : "{{ app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
+                        jQuery.ajax(process_update_count_unread_url,{
+                            data: {date: cookie_data.last_processupdates_check.replace('_','+')},
+                            method: "post",
+                            dataType: "json"
+                        }).done(function (data, textStatus, jqXHR) {
+                        if (textStatus == "success"){
+                            if (data.count > 0){
+                                $('#news_home_button').find('.bubble_counter').html(data.count).show();
+                                $('head title').prepend('('+data.count+') ');
+                            }
+                        }
+                        });
+                    });
+                </script>
+
+                <div class="row">
+                    {% if events | length > 0 %}
+                        <h5>Les événements</h5>
+                        {% for event in events %}
+                            {% include "default/event/_event.html.twig" with { event: event } %}
                         {% endfor %}
-                    </div>
-                {% endif %}
-                {% if app.user.beneficiary and (app.user.beneficiary.membership | uptodate) and display_keys_shop %}
-                    <div class="homebox">
-                        <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>
-                        {% if display_keys_shop %}
-                            {{ render(controller("AppBundle:Code:homepageDashboard")) }}
-                        {% endif %}
-                    </div>
-                {% endif %}
+                    {% endif %}
+                </div>
             </div>
+            {% if app.user.beneficiary and app.user.beneficiary.ownedCommissions | length %}
+                <div class="homebox">
+                    <h5><span class="white">Mes commissions</h5>
+                    {% for commission in app.user.beneficiary.ownedCommissions %}
+                        <a href="{{ path("commission_edit",{'id': commission.id }) }}" class="waves-effect waves-light btn blue-grey">
+                            Gérer la commission {{ commission.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if app.user.beneficiary and (app.user.beneficiary.membership | uptodate) and display_keys_shop %}
+                <div class="homebox">
+                    <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>
+                    {% if display_keys_shop %}
+                        {{ render(controller("AppBundle:Code:homepageDashboard")) }}
+                    {% endif %}
+                </div>
+            {% endif %}
         </div>
-    {% endif %}
-    {% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
-        <div id="home-shifts" class="row">
-            <div class="col s12">
-                {# why render instead of include? because of forms init #}
-                {{ render(controller("AppBundle:Booking:homepageShifts")) }}
-            </div>
+    </div>
+{% endif %}
+{% if app.user.beneficiary and app.user.beneficiary.membership | uptodate %}
+    <div id="home-shifts" class="row">
+        <div class="col s12">
+            {# why render instead of include? because of forms init #}
+            {{ render(controller("AppBundle:Booking:homepageShifts")) }}
         </div>
-    {% endif %}
-{% else %}
-    <br>
-    <br>
-    <h3 class="header center orange-text">Mon compte à {{ project_name }}</h3>
-    <div class="row center">
-        <p class="col s12 light">Bienvenue sur l'espace membre</p>
     </div>
-    <div class="row center">
-        <a href="{{ path('fos_user_security_login') }}" class="btn-large waves-effect waves-light">
-            <i class="material-icons left">lock_outline</i>Se connecter
-        </a>
-    </div>
-    <div class="row center">
-        <p class=" col s12 light"> Pas encore d'identifiant ?
-            <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
-        </p>
-    </div>
-    {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay, display_names: false } %}
 {% endif %}
 {% endblock %}
 
@@ -205,17 +185,4 @@
 {% endblock %}
 
 {% block javascripts %}
-<script>
-    jQuery(function () {
-        $(".collapsible .modal-trigger").on('click', function (e) {
-            e.preventDefault();
-        });
-    })
-    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-        var barcode_submit_url = "{{ path('card_reader_check') }}";
-    {% endif %}
-</script>
-{% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
-{% endif %}
 {% endblock %}
