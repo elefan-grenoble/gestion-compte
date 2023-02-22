@@ -10,4 +10,23 @@ namespace AppBundle\Repository;
  */
 class EventRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findFutures(\DateTime $max = null)
+    {
+        $qb = $this->createQueryBuilder('e');
+
+        $qb
+            ->Where("e.date > :now")
+            ->setParameter('now', new \Datetime('now'))
+            ->Where("e.date > :now");
+
+        if ($max) {
+            $qb
+                ->andWhere('e.date < :max')
+                ->setParameter('max', $max);
+        }
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

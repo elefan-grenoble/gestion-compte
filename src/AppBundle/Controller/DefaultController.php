@@ -42,6 +42,7 @@ class DefaultController extends Controller
         $first = null;
         $em = $this->getDoctrine()->getManager();
         $securityContext = $this->container->get('security.authorization_checker');
+
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $session = new Session();
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -110,18 +111,12 @@ class DefaultController extends Controller
                 'hours' => $this->getHours()
             ]);
         }
-        $qb = $em->createQueryBuilder();
-        $futur_events = $qb->select('e')->from('AppBundle\Entity\Event', 'e')
-            ->Where("e.date > :now")
-            ->orderBy("e.id", 'ASC')
-            ->setParameter('now', new \DateTime())
-            ->getQuery()
-            ->getResult();
 
+        $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME")->getContent();
 
         return $this->render('default/index.html.twig', [
-            'events' => $futur_events,
+            'events' => $eventsFuture,
             'dynamicContent' => $dynamicContent
         ]);
     }
