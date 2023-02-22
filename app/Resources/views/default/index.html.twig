@@ -106,9 +106,9 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="homebox">
-                <h5><span class="white">Mon compte</span></h5>
-                {% if (member.registrations | length) %}
+            {% if (member.registrations | length) %}
+                <div class="homebox">
+                    <h5><span class="white">Mon compte</span></h5>
                     <div>
                         <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
                             <i class="material-icons left">settings</i>Gérer mon compte
@@ -119,8 +119,8 @@
                             {{ render(controller("AppBundle:Membership:homepageFreeze")) }}
                         {% endif %}
                     </div>
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
             <div class="homebox">
                 <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
                 <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1">
