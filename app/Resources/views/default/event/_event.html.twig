@@ -31,7 +31,7 @@
                             <div><b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></div>
                         {% endif %}
                     {% endfor %}
-                    {% if (proxy_given is null) and (proxy_received|length == 0) %}
+                    {% if (proxy_given is null) and (proxy_received | length == 0) %}
                         <button class="activator waves-effect waves-light btn orange hide-on-small-only">
                             <i class="material-icons">list</i>
                             {% if event.anonymousProxy %}
@@ -49,7 +49,7 @@
             {% endif %}
             {% if is_granted("ROLE_SUPER_ADMIN") %}
                 <a href="{{ path("event_edit",{'id':event.id}) }}" class="btn">
-                    <i class="material-icons">edit</i> Editer
+                    <i class="material-icons">edit</i>&nbsp;Editer
                 </a>
             {% endif %}
         </div>
@@ -63,18 +63,20 @@
                 {% if not app.user.beneficiary or not app.user.beneficiary.membership or not app.user.beneficiary.membership.lastRegistration %}
                     <b>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</b>
                 {% else %}
+                    {% set member = app.user.beneficiary.membership %}
                     {% set proxy_given = event | givenProxy %}
                     {% set proxy_received = event | receivedProxies %}
+
                     {% if (registration_duration is not null) %}
                         {% set minDateOfLastRegistration = event.maxDateOfLastRegistration | date_modify('-' ~ registration_duration) %}
                     {% else %}
                         {% set minDateOfLastRegistration = null %}
                     {% endif %}
-                    {% if (minDateOfLastRegistration is not null and app.user.beneficiary.membership.lastRegistration.date < minDateOfLastRegistration) %}
+                    {% if (minDateOfLastRegistration is not null and member.lastRegistration.date < minDateOfLastRegistration) %}
                         <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br />
                         Pense à mettre à jour ton adhésion pour participer ! :)
-                    {% elseif (app.user.beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
+                    {% elseif (member.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
                         <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à <b>{{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
                         <br />
                         Pense à rattraper tes créneaux pour la prochaine fois ! :)

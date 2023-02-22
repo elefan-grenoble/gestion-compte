@@ -53,14 +53,15 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->select('s, j')
             ->leftJoin('s.job', 'j')
             ->where('s.start > :now')
-            ->setParameter('now', new \Datetime('now'))
-            ->orderBy('s.start', 'ASC');
+            ->setParameter('now', new \Datetime('now'));
 
         if ($max) {
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
         }
+
+        $qb->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()
