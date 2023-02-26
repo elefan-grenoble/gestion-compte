@@ -114,7 +114,7 @@ class TimeLogEventListener
             // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
             // if true, create an inverse timelog
             $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) use ($member) {
-                return (($log->type == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
+                return (($log->getType() == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
             });
             if ($shiftValidatedTimeLog->count() > 0) {
                 $this->createShiftInvalidatedTimeLog($shift);
