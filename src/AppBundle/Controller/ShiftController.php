@@ -9,6 +9,7 @@ use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
+use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
@@ -60,7 +61,7 @@ class ShiftController extends Controller
         }
 
         $shift = new Shift();
-        $form = $this->get('form.factory')->createNamed('bucket_add_form', ShiftType::class, $shift);
+        $form = $this->get('form.factory')->createNamed('bucket_shift_add_form', ShiftType::class, $shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -506,15 +507,18 @@ class ShiftController extends Controller
      * delete a shift.
      *
      * @Route("/{id}", name="shift_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
-    public function removeShiftAction(Request $request, Shift $shift)
+    public function deleteShiftAction(Request $request, Shift $shift)
     {
         $form = $this->createShiftDeleteForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $beneficiary = $shift->getShifter();
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
             $em->remove($shift);
             $em->flush();
 
