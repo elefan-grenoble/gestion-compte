@@ -49,3 +49,6 @@ LICENSE
 /updateLocalDbFromProd.sh
 
 **/*~
+
+.direnv
+.devenv
