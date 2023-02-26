@@ -217,10 +217,11 @@ class TimeLogEventListener
 
         $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
+        $this->em->flush();
 
         if ($this->use_time_log_saving) {
-            $counter_today = $member->getShiftTimeCount($date);
-            $extra_counter_time = $counter_today - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
+            $counter_now = $member->getShiftTimeCount();
+            $extra_counter_time = $counter_now - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
 
             // the extra time will go in the member's saving account
             if ($extra_counter_time > 0) {
@@ -230,10 +231,9 @@ class TimeLogEventListener
                 // then increment the savingTimeCount
                 $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time);
                 $this->em->persist($log);
+                $this->em->flush();
             }
         }
-
-        $this->em->flush();
     }
 
     /**

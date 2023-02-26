@@ -129,13 +129,11 @@ class TimeLogService
      * @param int $time
      * @return TimeLog
      */
-    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time = null)
+    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time)
     {
         $log = $this->initTimeLog($member);
         $log->setType(TimeLog::TYPE_REGULATE_OPTIONAL_SHIFTS);
-        if ($time) {
-            $log->setTime($time);
-        }
+        $log->setTime($time);
 
         return $log;
     }
@@ -147,13 +145,11 @@ class TimeLogService
      * @param int $time
      * @return TimeLog
      */
-    public function initSavingTimeLog(Membership $member, $time = null)
+    public function initSavingTimeLog(Membership $member, $time)
     {
         $log = $this->initTimeLog($member);
         $log->setType(TimeLog::TYPE_SAVING);
-        if ($time) {
-            $log->setTime($time);
-        }
+        $log->setTime($time);
 
         return $log;
     }
