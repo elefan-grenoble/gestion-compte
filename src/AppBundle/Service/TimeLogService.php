@@ -119,6 +119,21 @@ class TimeLogService
     }
 
     /**
+     * Initialize a "cycle end regulation" log with the member data
+     * 
+     * @param Membership $member
+     * @param \DateTime $date
+     * @return TimeLog
+     */
+    public function initCycleEndRegulateOptionalShiftsTimeLog(Membership $member)
+    {
+        $log = $this->initTimeLog($member);
+        $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
+
+        return $log;
+    }
+
+    /**
      * Initialize a "custom" log with the member data
      * 
      * @param Membership $member

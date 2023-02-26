@@ -1,5 +1,5 @@
-{% for membership_late_alert in membership_late_alerts %}
-{% set beneficiaries = membership_late_alert.beneficiaries | map(b => b.displayNameWithMemberNumber) | join(', ') %}
-{% set timeCount = membership_late_alert.timeCount | duration_from_minutes %}
-- Compteur de {{ beneficiaries }} : {{ timeCount }}
+{% for member in membership_late_alerts %}
+    {% set beneficiaries = member.beneficiaries | map(b => b.displayNameWithMemberNumber) | join(', ') %}
+    {% set timeCount = member.shiftTimeCount | duration_from_minutes %}
+    - Compteur de {{ beneficiaries }} : {{ timeCount }}
 {% endfor %}

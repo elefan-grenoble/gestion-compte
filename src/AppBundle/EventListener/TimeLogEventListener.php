@@ -43,8 +43,8 @@ class TimeLogEventListener
     protected $due_duration_by_cycle;
     protected $cycle_duration;
     protected $registration_duration;
-    protected $use_card_reader_to_validate_shifts;
     protected $max_time_at_end_of_shift;
+    protected $use_card_reader_to_validate_shifts;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -54,8 +54,8 @@ class TimeLogEventListener
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->cycle_duration = $this->container->getParameter('cycle_duration');
         $this->registration_duration = $this->container->getParameter('registration_duration');
-        $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
         $this->max_time_at_end_of_shift = $this->container->getParameter('max_time_at_end_of_shift');
+        $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
     }
 
     /**
@@ -255,15 +255,13 @@ class TimeLogEventListener
         $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member);
         $this->em->persist($log);
 
-        $counter_today = $member->getTimeCount($date);
+        $counter_today = $member->getShiftTimeCount($date);
 
         $allowed_cumul = $this->max_time_at_end_of_shift;
 
         if ($counter_today > ($this->due_duration_by_cycle + $allowed_cumul)) { //surbook
-            $log = new TimeLog();
-            $log->setMembership($member);
+            $log = $this->container->get('time_log_service')->initCycleEndRegulateOptionalShiftsTimeLog($member);
             $log->setTime(-1 * ($counter_today - ($this->due_duration_by_cycle + $allowed_cumul)));
-            $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
             $this->em->persist($log);
         }
         $this->em->flush();

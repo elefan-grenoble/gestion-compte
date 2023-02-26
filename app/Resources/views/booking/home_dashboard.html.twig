@@ -4,6 +4,7 @@
     {% set beneficiariesWhoCanBook = shift_service.beneficiariesWhoCanBook(member) %}
     {% set due_duration_hour = due_duration_by_cycle / 60 %}
     {% set end_current_cycle = membership_service.endOfCycle(member) %}
+
     {% if not member.frozen %}
         {% if display_gauge %}
             <div class="gauge_container">
@@ -11,12 +12,12 @@
                         data-type="radial-gauge"
                         data-width="300"
                         data-height="300"
-                        data-units="{{ member.timeCount / 60 }}h"
+                        data-units="{{ member.shiftTimeCount / 60 }}h"
                         data-min-value="{{ due_duration_hour * -3 }}"
                         data-start-angle="90"
                         data-ticks-angle="180"
                         data-value-box="false"
-                        data-value="{{ member.timeCount / 60 }}"
+                        data-value="{{ member.shiftTimeCount / 60 }}"
                         data-max-value="{{ ((member.beneficiaries | length) * due_duration_by_cycle) / 60 }}"
                         data-major-ticks="{{ due_duration_hour * -3 }}h,{{ due_duration_hour * -2 }}h,{{ due_duration_hour * -1}}h,0,{{ due_duration_hour }}h{% if (member.beneficiaries | length) > 1 %},{{ due_duration_hour *2 }}h{% endif %}"
                         data-minor-ticks="2"
@@ -40,7 +41,7 @@
                 </canvas>
             </div>
         {% endif %}
-        {% if member.timeCount < 0 %}
+        {% if member.shiftTimeCount < 0 %}
             <p>
                 <i class="material-icons">warning</i>
                 {% if member.beneficiaries | length > 1 %}
@@ -59,7 +60,7 @@
                     <span>{% if member.beneficiaries | length > 1 %}Vous avez{% else %}Tu as{% endif %} encore {{ remaining | duration_from_minutes }} à effectuer.</span>
                 </p>
             {% else %}
-                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.timeCount(end_current_cycle)) %}
+                {% set duration_to_book = (shift_service.shiftTimeByCycle(member) - member.shiftTimeCount(end_current_cycle)) %}
                 <p>
                     Bravo ! {% if member.beneficiaries | length > 1 %}Vos{% else %}Tes{% endif %} {{ due_duration_by_cycle | duration_from_minutes }}
                     ont été planifiées sur le cycle actuel.

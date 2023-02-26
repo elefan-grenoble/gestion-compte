@@ -655,6 +655,66 @@ class Membership
     }
 
     /**
+     * Get shiftTimeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShiftTimeLogs()
+    {
+        return $this->timeLogs->filter(function (TimeLog $log) {
+            return ($log->getType() != TimeLog::TYPE_SAVING);
+        });
+    }
+
+    /**
+     * Get savingTimeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSavingTimeLogs()
+    {
+        return $this->timeLogs->filter(function (TimeLog $log) {
+            return ($log->getType() == TimeLog::TYPE_SAVING);
+        });
+    }
+
+    public function getShiftTimeCount($before = null)
+    {
+        $sum = function($carry, TimeLog $log)
+        {
+            $carry += $log->getTime();
+            return $carry;
+        };
+
+        $logs = $this->getShiftTimeLogs();
+        if ($before) {
+            $logs = $this->getShiftTimeLogs()->filter(function (TimeLog $log) use ($before) {
+                return ($log->getCreatedAt() < $before);
+            });
+        }
+
+        return array_reduce($logs->toArray(), $sum, 0);
+    }
+
+    public function getSavingTimeCount($before = null)
+    {
+        $sum = function($carry, TimeLog $log)
+        {
+            $carry += $log->getTime();
+            return $carry;
+        };
+
+        $logs = $this->getSavingTimeLogs();
+        if ($before) {
+            $logs = $logs->filter(function (TimeLog $log) use ($before) {
+                return ($log->getCreatedAt() < $before);
+            });
+        }
+
+        return array_reduce($logs->toArray(), $sum, 0);
+    }
+
+    /**
      * Get createdAt
      *
      * @return \DateTime
@@ -662,22 +722,6 @@ class Membership
     public function getCreatedAt()
     {
         return $this->createdAt;
-    }
-
-    public function getTimeCount($before = null)
-    {
-        $sum = function($carry, TimeLog $log)
-        {
-            $carry += $log->getTime();
-            return $carry;
-        };
-        if ($before)
-            $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
-                return ($log->getCreatedAt() < $before);
-            });
-        else
-            $logs = $this->getTimeLogs();
-        return array_reduce($logs->toArray(), $sum, 0);
     }
 
     /**
