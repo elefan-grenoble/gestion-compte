@@ -21,8 +21,9 @@ class TimeLog
     const TYPE_CYCLE_END = 2;
     const TYPE_CYCLE_END_FROZEN = 3;
     const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
-    const TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS = 5;
     const TYPE_CYCLE_END_EXEMPTED = 6;
+
+    const TYPE_REGULATE_OPTIONAL_SHIFTS = 5;
 
     const TYPE_SAVING = 20;
 
@@ -298,14 +299,14 @@ class TimeLog
                 return "Début de cycle (compte gelé)";
             case self::TYPE_CYCLE_END_EXPIRED_REGISTRATION:
                 return "Début de cycle (compte expiré)";
-            case self::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS:
-                return "Régulation du bénévolat facultatif";
             case self::TYPE_CYCLE_END_EXEMPTED:
                 return "Début de cycle (compte exempté de créneau - exemption n°" . join(",", $this->membership->getMembershipShiftExemptions()->filter(function($membershipShiftExemption) {
                     return $membershipShiftExemption->isCurrent($this->createdAt);
                 })->map(function($element) {
                     return $element->getId();
                 })->toArray()) . ")";
+            case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
+                return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
                 if ($this->getTime() >= 0) {
                     return "Compteur épargne incrémenté de " . $this->getTime() . " minutes";

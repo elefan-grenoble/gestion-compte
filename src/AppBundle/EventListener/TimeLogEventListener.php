@@ -256,14 +256,14 @@ class TimeLogEventListener
         $this->em->persist($log);
 
         $counter_today = $member->getShiftTimeCount($date);
-
         $allowed_cumul = $this->max_time_at_end_of_shift;
+        $extra_counter_time = $counter_today - ($this->due_duration_by_cycle + $allowed_cumul);  // surbook
 
-        if ($counter_today > ($this->due_duration_by_cycle + $allowed_cumul)) { //surbook
-            $log = $this->container->get('time_log_service')->initCycleEndRegulateOptionalShiftsTimeLog($member);
-            $log->setTime(-1 * ($counter_today - ($this->due_duration_by_cycle + $allowed_cumul)));
+        if ($extra_counter_time > 0) {
+            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
             $this->em->persist($log);
         }
+
         $this->em->flush();
     }
 
