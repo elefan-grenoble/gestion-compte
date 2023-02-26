@@ -23,7 +23,7 @@
         <a href="#remove-period-confirmation-modal" class="modal-trigger btn waves-effect waves-light red" title="Supprimer le créneau type">
             Supprimer
         </a>
-        {{ form_start(delete_form) }}
+        {{ form_start(period_delete_form) }}
         <div id="remove-period-confirmation-modal" class="modal">
             <div class="modal-content">
                 <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
@@ -38,7 +38,7 @@
                 </button>
             </div>
         </div>
-        {{ form_end(delete_form) }}
+        {{ form_end(period_delete_form) }}
     {% endif %}
 
     <h5>Postes disponibles</h5>
@@ -48,7 +48,7 @@
             Aucun poste n'existe pour ce créneau
         {% endif %}
         {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{week}}</h6>
+            <h6>Semaine {{ week }}</h6>
             <ul class="collapsible">
                 {% for position in positions %}
                     {% if position.shifter %}
@@ -73,7 +73,7 @@
                                     le <i>{{ position.bookedTime | date_fr_with_time }}</i>
                                     par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
                                 </p>
-                                <form action="{{ path('free_position_from_period', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
+                                <form action="{{ path('period_position_free', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">
                                         <i class="material-icons left">lock_open</i>Libérer
                                     </button>
@@ -109,12 +109,14 @@
                                     </div>
                                 </div>
                                 {{ form_end(positions_book_forms[position.id]) }}
-                                <div class="row">
-                                    {{ form_start(positions_delete_forms[position.id]) }}
-                                    {{ form_widget(positions_delete_forms[position.id]) }}
-                                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
-                                    {{ form_end(positions_delete_forms[position.id]) }}
-                                </div>
+                                {% if is_granted("ROLE_ADMIN") %}
+                                    <div class="row">
+                                        {{ form_start(positions_delete_forms[position.id]) }}
+                                        {{ form_widget(positions_delete_forms[position.id]) }}
+                                        <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
+                                        {{ form_end(positions_delete_forms[position.id]) }}
+                                    </div>
+                                {% endif %}
                             </div>
                         </li>
                     {% endif %}
@@ -137,23 +139,23 @@
         {% endfor %}
     {% endif %}
     <h5>Ajouter un poste</h5>
-    {{ form_start(position_form) }}
+    {{ form_start(position_add_form) }}
     <div class="row">
         <div class="col s3">
-            {{ form_label(position_form.nb_of_shifter) }}
-            {{ form_widget(position_form.nb_of_shifter) }}
+            {{ form_label(position_add_form.nb_of_shifter) }}
+            {{ form_widget(position_add_form.nb_of_shifter) }}
         </div>
         <div class="col s3">
-            {{ form_label(position_form.week_cycle) }}
-            {{ form_widget(position_form.week_cycle) }}
+            {{ form_label(position_add_form.week_cycle) }}
+            {{ form_widget(position_add_form.week_cycle) }}
         </div>
         <div class="col s6">
-            {{ form_label(position_form.formation) }}
-            {{ form_widget(position_form.formation) }}
+            {{ form_label(position_add_form.formation) }}
+            {{ form_widget(position_add_form.formation) }}
         </div>
         <div class="col s6">
             <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
         </div>
     </div>
-    {{ form_end(position_form) }}
+    {{ form_end(position_add_form) }}
 {% endblock %}
