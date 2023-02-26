@@ -45,6 +45,7 @@ class TimeLogEventListener
     protected $registration_duration;
     protected $max_time_at_end_of_shift;
     protected $use_card_reader_to_validate_shifts;
+    protected $use_time_log_saving;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -56,6 +57,7 @@ class TimeLogEventListener
         $this->registration_duration = $this->container->getParameter('registration_duration');
         $this->max_time_at_end_of_shift = $this->container->getParameter('max_time_at_end_of_shift');
         $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
+        $this->use_time_log_saving = $this->container->getParameter('use_time_log_saving');
     }
 
     /**
@@ -211,8 +213,26 @@ class TimeLogEventListener
      */
     private function createShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
+        $member = $shift->getShifter()->getMembership();
+
         $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
+
+        if ($this->use_time_log_saving) {
+            $counter_today = $member->getShiftTimeCount($date);
+            $extra_counter_time = $counter_today - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
+
+            // the extra time will go in the member's saving account
+            if ($extra_counter_time > 0) {
+                // first decrement the shiftTimeCount
+                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
+                $this->em->persist($log);
+                // then increment the savingTimeCount
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time);
+                $this->em->persist($log);
+            }
+        }
+
         $this->em->flush();
     }
 
