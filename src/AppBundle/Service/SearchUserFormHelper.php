@@ -327,12 +327,12 @@ class SearchUserFormHelper {
         }
         if (!is_null($form->get('compteurlt')->getData())) {
             $compteurlt = $form->get('compteurlt')->getData();
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 WHERE t1.type != 20 GROUP BY t1.membership HAVING SUM(t1.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $compteurlt);
         }
         if (!is_null($form->get('compteurgt')->getData())) {
             $compteurgt = $form->get('compteurgt')->getData();
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t2.membership) FROM AppBundle\Entity\TimeLog t2 WHERE t2.type != 20 GROUP BY t2.membership HAVING SUM(t2.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $compteurgt);
         }
         if ($form->get('lastregistrationdategt')->getData()) {
@@ -446,11 +446,11 @@ class SearchUserFormHelper {
         }
 
         if (!is_null($form->get('compteurlt')->getData())) {
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 WHERE t1.type != 20 GROUP BY t1.membership HAVING SUM(t1.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $form->get('compteurlt')->getData());
         }
         if (!is_null($form->get('compteurgt')->getData())) {
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t1.membership) FROM AppBundle\Entity\TimeLog t1 GROUP BY t1.membership HAVING SUM(t1.time) > :compteurgt * 60)')
+            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t2.membership) FROM AppBundle\Entity\TimeLog t2 WHERE t2.type != 20 GROUP BY t2.membership HAVING SUM(t2.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $form->get('compteurgt')->getData());
         }
 
