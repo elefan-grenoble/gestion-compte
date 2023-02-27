@@ -274,28 +274,25 @@ class TimeLog
     /**
      * @return string
      */
-    public function getShiftString(\AppBundle\Entity\Shift $shift = null): string
-    {
-        if ($shift) {
-            setlocale(LC_TIME, 'fr_FR.UTF8');
-            return "(" . $shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $shift->getStart()->getTimestamp()) . " à " . strftime("%R", $shift->getEnd()->getTimestamp()) . " [" . $shift->getShifter() . "])";
-        } else {
-            return "(non renseigné)";
-        }
-    }
-
-    /**
-     * @return string
-     */
     public function getComputedDescription(): string
     {
         switch ($this->type) {
             case self::TYPE_CUSTOM:
                 return $this->description;
             case self::TYPE_SHIFT_VALIDATED:
-                return "Créneau " . $this->getShiftString($this->shift);
+                if ($this->shift) {
+                    setlocale(LC_TIME, 'fr_FR.UTF8');
+                    return "Créneau " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                } else {
+                    return "Créneau (non renseigné)";
+                }
             case self::TYPE_SHIFT_INVALIDATED:
-                return "Créneau *invalidé* " . $this->getShiftString($this->shift);
+                if ($this->shift) {
+                    setlocale(LC_TIME, 'fr_FR.UTF8');
+                    return "Créneau *invalidé* " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                } else {
+                    return "Créneau *invalidé* (non renseigné)";
+                }
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:
@@ -312,9 +309,9 @@ class TimeLog
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
                 if ($this->getTime() >= 0) {
-                    return "Compteur épargne incrémenté de " . $this->getTime() . " minutes " . $this->getShiftString($this->shift);
+                    return "Compteur épargne incrémenté de " . $this->getTime() . " minutes";
                 } else {
-                    return "Compteur épargne décrémenté de " . $this->getTime() . " minutes " . $this->getShiftString($this->shift);
+                    return "Compteur épargne décrémenté de " . $this->getTime() . " minutes";
                 }
         }
         return "Type de log de temps inconnu: " . $this->type;
