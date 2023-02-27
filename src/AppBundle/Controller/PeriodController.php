@@ -3,7 +3,6 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
@@ -117,10 +116,13 @@ class PeriodController extends Controller
         return $res;
     }
 
-
     /**
+     * Display all the period (available and reserved)
+     *
+     * if the user is 'ROLE_USER' the display is anonymized by the twig
+     *
      * @Route("/", name="period")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("has_role('ROLE_SHIFT_MANAGER') or has_role('ROLE_USER')")
      */
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {

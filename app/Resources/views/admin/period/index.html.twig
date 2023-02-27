@@ -1,3 +1,10 @@
+{#
+    twig template for Controller/PeriodController.php/indexAction()
+    for the route: /period/
+    It display a page with all the avaible periods (a.k.a the "Semaine type")
+    (and also display the periods reserved for a members if use_fly_and_fixed==true)
+#}
+
 {% extends 'layout.html.twig' %}
 
 {% block title %}Semaine type - {{ site_name }}{% endblock %}
@@ -40,7 +47,10 @@
 {% endblock %}
 
 {% block macro %}
-    {# generate a form input, used for the filters #}
+    {# generate a form input, used for the filters
+    input_obj: the symfony form object for the input
+    hidden: if tru the form object id hidden
+    #}
     {% macro form_input(input_obj, hidden=false) %}
         <div class="input-field col m3">
             {% if hidden %}
@@ -52,7 +62,9 @@
         </div>
     {% endmacro %}
 
-    {# generate one line with the icon and the shifter id+name and if needed a warning icon #}
+    {# generate one line with the icon and the shifter id+name and if needed a warning icon
+     # period: an Entity/Period object
+    #}
     {% macro position_shifter_display(position) %}
         {% set shifter = position.shifter %}
         {% set formation = position.formation??"Sans formation" %}
@@ -77,11 +89,34 @@
         {% endif %}
     {% endmacro position_shifter_display %}
 
+    {# generate one line with the icon and but without the shifer name or info
+     # period: an Entity/Period object
+    #}
+    {% macro position_anonymized_display(position) %}
+        {% set shifter = position.shifter %}
+        {% set formation = position.formation??"Sans formation" %}
+
+        {% if shifter %}
+            {# sombody is registered for this periodposition #}
+            {% set warning = beneficiary_service.hasWarningStatus(shifter) %}
+            <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="Formation : {{ formation }}">
+                <i class="material-icons">person</i>
+                <strong><i>réservé</i></strong>
+            </div>
+        {% else %}
+            <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ formation }}">
+                <i class="material-icons">person</i>
+                <strong><i>libre</i></strong>
+            </div>
+        {% endif %}
+    {% endmacro position_anonymized_display %}
+
     {# generate a card for all positions in a period
      # period: a period object
      # week_filter: a string with the week to keep or null if no filter
     #}
     {% macro period_card(period, week_filter) %}
+        {% set anonymized=true %}
         <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
 
             {# Card header #}
@@ -115,7 +150,11 @@
                         {% if (week in week_filter) or not week_filter %}
                             <h6>Semaine {{ week }}</h6>
                             {% for position in positions %}
-                                {{ _self.position_shifter_display(position) }}
+                                {% if is_granted("ROLE_SHIFT_MANAGER") %}
+                                    {{ _self.position_shifter_display(position) }}
+                                {% else %}
+                                    {{ _self.position_anonymized_display(position) }}
+                                {% endif %}
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
@@ -142,7 +181,7 @@
 
             {# Header section -------------------------------------------------- #}
             <ul class="collapsible">
-                {# Filters  ---------------------------------- #}
+                {# Filters  ---------------------------------------------------- #}
                 <li>
                     <div class="collapsible-header">
                         <i class="material-icons">tune</i>Filtres
@@ -161,7 +200,7 @@
                         {{ form_end(filter_form) }}
                     </div>
                 </li>
-                {# Actions ----------------------------------- #}
+                {# Actions ----------------------------------------------------- #}
                 <li>
                     <div class="collapsible-header">
                         <i class="material-icons">build</i>Actions
@@ -209,7 +248,7 @@
                     </div>
                 </li>
                 {% if use_fly_and_fixed %}
-                    {# Légende ----------------------------------- #}
+                    {# Legende ------------------------------------------------- #}
                     <li>
                         <div class="collapsible-header">
                             <i class="material-icons">help_outline</i>Légende
@@ -270,7 +309,7 @@
         </div>
     </div>
 
-    {# Table with all the periods in a schedule --------- #}
+    {# Table with all the periods in a schedule -------------------------------- #}
     <div class="container" style="width: 90%; max-width: 1880px;">
         <div class="section">
             <table>
@@ -283,9 +322,12 @@
                 </thead>
                 <tbody>
                     <tr>
+                        {# one colone per day ----------------------------------- #}
                         {% for key,day in days_of_week %}
                             <td>
+
                                 {% for period in periods_by_day[key] %}
+                                    {# block per period bucket  ----------------- #}
                                     {% if ((filling_filter == null) and (beneficiary_filter == null))
                                         or (filling_filter == "problematic" and period.isProblematic(week_filter))
                                         or (filling_filter == "empty" and period.isEmpty(week_filter))
