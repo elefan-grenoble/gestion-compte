@@ -24,6 +24,8 @@ class TimeLog
     const TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS = 5;
     const TYPE_CYCLE_END_EXEMPTED = 6;
 
+    const TYPE_SAVING = 20;
+
     /**
      * @var int
      *
@@ -304,6 +306,12 @@ class TimeLog
                 })->map(function($element) {
                     return $element->getId();
                 })->toArray()) . ")";
+            case self::TYPE_SAVING:
+                if ($this->getTime() >= 0) {
+                    return "Compteur épargne incrémenté de " . $this->getTime() . " minutes";
+                } else {
+                    return "Compteur épargne décrémenté de " . $this->getTime() . " minutes";
+                }
         }
         return "Type de log de temps inconnu: " . $this->type;
     }

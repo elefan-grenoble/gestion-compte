@@ -510,7 +510,7 @@ class EventController extends Controller
 
             $filtered_beneficiaries = array_filter(
                 $beneficiaries,
-                function($b) use ($min_time_count) {return $b->getMembership()->getTimeCount()>$min_time_count*60;}
+                function($b) use ($min_time_count) { return $b->getMembership()->getShiftTimeCount()>$min_time_count*60; }
             );
 
             if (count($filtered_beneficiaries) != count($beneficiaries)){

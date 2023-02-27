@@ -48,7 +48,7 @@ class ShiftService
     public function remainingToBook(Membership $member)
     {
         $cycle_end = $this->membershipService->getEndOfCycle($member);
-        return $this->due_duration_by_cycle - $member->getTimeCount($cycle_end);
+        return $this->due_duration_by_cycle - $member->getShiftTimeCount($cycle_end);
     }
 
     /**
@@ -135,13 +135,13 @@ class ShiftService
         }
 
         $member = $beneficiary->getMembership();
-        $beneficiary_counter = $this->beneficiaryService->getTimeCount($beneficiary, $cycle);
+        $beneficiary_cycle_shift_duration = $this->beneficiaryService->getCycleShiftDurationSum($beneficiary, $cycle);
         $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
-        $membership_counter = $member->getTimeCount($cycle_end);
+        $membership_counter = $member->getShiftTimeCount($cycle_end);
 
         //check if beneficiary booked time is ok
         //if timecount < due_duration_by_cycle : some shift to catchup, can book more than what's due
-        if ($membership_counter >= $this->due_duration_by_cycle && $beneficiary_counter >= $this->due_duration_by_cycle) { //Beneficiary is already ok
+        if ($membership_counter >= $this->due_duration_by_cycle && $beneficiary_cycle_shift_duration >= $this->due_duration_by_cycle) { //Beneficiary is already ok
             return false;
         }
 
@@ -151,7 +151,7 @@ class ShiftService
         }
 
         // No time to catchup, check if this beneficiary can book on this cycle
-        return $duration + $beneficiary_counter <= ($cycle + 1) * $this->due_duration_by_cycle;
+        return $duration + $beneficiary_cycle_shift_duration <= ($cycle + 1) * $this->due_duration_by_cycle;
     }
 
     /**

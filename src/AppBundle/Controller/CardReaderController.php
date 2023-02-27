@@ -61,7 +61,7 @@ class CardReaderController extends Controller
             $beneficiary = $card->getBeneficiary();
             $membership = $beneficiary->getMembership();
             $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
-            $counter = $membership->getTimeCount($cycle_end);
+            $counter = $membership->getShiftTimeCount($cycle_end);
             if ($this->swipeCardLogging) {
                 $dispatcher = $this->get('event_dispatcher');
                 if ($this->swipeCardLoggingAnonymous) {

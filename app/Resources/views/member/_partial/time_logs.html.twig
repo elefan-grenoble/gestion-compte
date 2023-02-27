@@ -7,8 +7,8 @@
     </thead>
     <tbody>
         <tr>
-            <td>{{ member.timeCount | duration_from_minutes }}</td>
-            <td>{{ member.timeCount(membership_service.endOfCycle(member)) | duration_from_minutes }}</td>
+            <td>{{ member.shiftTimeCount | duration_from_minutes }}</td>
+            <td>{{ member.shiftTimeCount(membership_service.endOfCycle(member)) | duration_from_minutes }}</td>
         </tr>
     </tbody>
 </table>

@@ -41,7 +41,7 @@ class BeneficiaryService
         return $returnArray;
     }
 
-    public function getTimeCount(Beneficiary $beneficiary, $cycle = 0)
+    public function getCycleShiftDurationSum(Beneficiary $beneficiary, $cycle = 0)
     {
         $member = $beneficiary->getMembership();
         $cycle_start = $this->membershipService->getStartOfCycle($member, $cycle);
