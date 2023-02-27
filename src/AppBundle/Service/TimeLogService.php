@@ -145,11 +145,14 @@ class TimeLogService
      * @param int $time
      * @return TimeLog
      */
-    public function initSavingTimeLog(Membership $member, $time)
+    public function initSavingTimeLog(Membership $member, $time, $shift = null)
     {
         $log = $this->initTimeLog($member);
         $log->setType(TimeLog::TYPE_SAVING);
         $log->setTime($time);
+        if ($shift) {
+            $log->setShift($shift);
+        }
 
         return $log;
     }

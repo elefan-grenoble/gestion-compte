@@ -146,6 +146,13 @@ class TimeLogEventListener
         } else {
             $this->deleteShiftLogs($shift, $member);
         }
+
+        if ($this->use_time_log_saving) {
+            // decrement the savingTimeCount
+            $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
+            $this->em->persist($log);
+            $this->em->flush();
+        }
     }
 
     /**

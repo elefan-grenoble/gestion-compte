@@ -1,3 +1,5 @@
+{% set member = shift.shifter.membership %}
+
 <div class="card center sticky-action {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
@@ -23,20 +25,41 @@
                 {% endif %}
             </div>
             <div id="free{{ shift.id }}" class="modal black-text">
-                {{ form_start(shift_free_forms[shift.id]) }}
+                {% if use_time_log_saving and shift.duration > member.savingTimeCount %}
                     <div class="modal-content">
-                        <h5>Je ne peux pas faire mon créneau</h5>
-                        <div class="input-field">
-                            {{ form_label(shift_free_forms[shift.id].reason) }}
-                            {{ form_errors(shift_free_forms[shift.id].reason) }}
-                            {{ form_widget(shift_free_forms[shift.id].reason) }}
+                        <h5>Annuler un créneau</h5>
+                        <br />
+                        <div class="card-panel teal warning">
+                            Vous ne pouvez pas annuler ce créneau.
+                            <br />
+                            La durée du créneau ({{ shift.duration | duration_from_minutes }}) dépasse la capacité de votre compteur épargne ({{ member.savingTimeCount | duration_from_minutes }}).
                         </div>
                     </div>
                     <div class="modal-footer">
                         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
-                        <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
                     </div>
-                {{ form_end(shift_free_forms[shift.id]) }}
+                {% else %}
+                    {{ form_start(shift_free_forms[shift.id]) }}
+                        <div class="modal-content">
+                            <h5>Je ne peux pas faire mon créneau</h5>
+                            <div class="input-field">
+                                {{ form_label(shift_free_forms[shift.id].reason) }}
+                                {{ form_errors(shift_free_forms[shift.id].reason) }}
+                                {{ form_widget(shift_free_forms[shift.id].reason) }}
+                            </div>
+                            {% if use_time_log_saving %}
+                                <div class="card-panel blue lighten-3">
+                                    <i class="material-icons left">info</i>
+                                    <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés de votre compteur épargne ({{ member.savingTimeCount | duration_from_minutes }})
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
+                            <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
+                        </div>
+                    {{ form_end(shift_free_forms[shift.id]) }}
+                {% endif %}
             </div>
         {% endif %}
     {% endif %}
