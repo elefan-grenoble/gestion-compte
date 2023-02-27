@@ -63,7 +63,9 @@ class TimeLogService
      */
     public function initShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
+        $member = $shift->getShifter()->getMembership();
+
+        $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT_VALIDATED);
         $log->setShift($shift);
         $log->setTime($shift->getDuration());
@@ -80,7 +82,9 @@ class TimeLogService
      */
     public function initShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $log = $this->initTimeLog($shift->getShifter()->getMembership(), $date, $description);
+        $member = $shift->getShifter()->getMembership();
+
+        $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT_INVALIDATED);
         $log->setShift($shift);
         $log->setTime(-1 * $shift->getDuration());
@@ -119,16 +123,33 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "cycle end regulation" log with the member data
+     * Initialize a "regulation optjonal shifts" log with the member data
      * 
      * @param Membership $member
-     * @param \DateTime $date
+     * @param int $time
      * @return TimeLog
      */
-    public function initCycleEndRegulateOptionalShiftsTimeLog(Membership $member)
+    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time)
     {
         $log = $this->initTimeLog($member);
-        $log->setType(TimeLog::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS);
+        $log->setType(TimeLog::TYPE_REGULATE_OPTIONAL_SHIFTS);
+        $log->setTime($time);
+
+        return $log;
+    }
+
+    /**
+     * Initialize a "saving" log with the member data
+     * 
+     * @param Membership $member
+     * @param int $time
+     * @return TimeLog
+     */
+    public function initSavingTimeLog(Membership $member, $time)
+    {
+        $log = $this->initTimeLog($member);
+        $log->setType(TimeLog::TYPE_SAVING);
+        $log->setTime($time);
 
         return $log;
     }
