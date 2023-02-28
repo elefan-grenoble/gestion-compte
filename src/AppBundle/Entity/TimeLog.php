@@ -17,6 +17,7 @@ class TimeLog
 
     const TYPE_SHIFT_VALIDATED = 1;
     const TYPE_SHIFT_INVALIDATED = 10;
+    const TYPE_SHIFT_FREED_SAVING = 21;
 
     const TYPE_CYCLE_END = 2;
     const TYPE_CYCLE_END_FROZEN = 3;
@@ -282,7 +283,7 @@ class TimeLog
             case self::TYPE_SHIFT_VALIDATED:
                 if ($this->shift) {
                     setlocale(LC_TIME, 'fr_FR.UTF8');
-                    return "Créneau " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
+                    return "Créneau *validé*" . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
                 } else {
                     return "Créneau (non renseigné)";
                 }
@@ -293,6 +294,8 @@ class TimeLog
                 } else {
                     return "Créneau *invalidé* (non renseigné)";
                 }
+            case self::TYPE_SHIFT_FREED_SAVING:
+                return "Créneau *libéré* et *incrémenté* grâce au compteur épargne";
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:

@@ -293,7 +293,7 @@ class ShiftController extends Controller
 
         $session->getFlashBag()->add('success', "Le créneau a été annulé !");
         if ($this->use_time_log_saving) {
-            $session->getFlashBag()->add("warning", "Votre compteur épargne a été décrémenté de la durée du créneau.");
+            $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé.<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
         }
         return $this->redirectToRoute('homepage');
     }
