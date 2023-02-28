@@ -29,6 +29,7 @@ security:
         switch_user:
             role: ROLE_ADMIN
             parameter: _login_as
+        logout_on_user_change: true
       oauth_token:
         pattern:    ^/oauth/v2/token
         security:   false
@@ -40,6 +41,7 @@ security:
           check_path: fos_user_security_check
           login_path: fos_user_security_login
         anonymous: true
+        logout_on_user_change: true
       api:
         pattern:    ^/api
         fos_oauth:  true

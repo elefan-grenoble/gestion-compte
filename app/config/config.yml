@@ -10,6 +10,7 @@ parameters:
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
+  container.autowiring.strict_mode: true
 
 framework:
   translator: { fallbacks: ['%locale%'] }
@@ -132,12 +133,25 @@ doctrine:
         WEEK: DoctrineExtensions\Query\Mysql\Week
 
 doctrine_migrations:
-  dir_name: "%kernel.root_dir%/DoctrineMigrations"
-  namespace: Application\Migrations
-  table_name: migration_versions
-  name: Application Migrations
-  column_length: 191
-  organize_migrations: false # Version >=1.2 Possible values are: "BY_YEAR", "BY_YEAR_AND_MONTH", false
+  # List of namespace/path pairs to search for migrations, at least one required
+  migrations_paths:
+    'Application\Migrations': '%kernel.root_dir%/DoctrineMigrations'
+
+  storage:
+    # Default (SQL table) metadata storage configuration
+    table_storage:
+      table_name: migration_versions
+      version_column_name: 'version'
+      executed_at_column_name: 'executed_at'
+
+  # Possible values: "BY_YEAR", "BY_YEAR_AND_MONTH", false
+  organize_migrations: false
+
+  # Path to your custom migrations template
+  custom_template: ~
+
+  # Run all migrations in a transaction.
+  all_or_nothing: false
 
 sensio_framework_extra:
   router:
