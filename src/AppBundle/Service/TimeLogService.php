@@ -49,7 +49,9 @@ class TimeLogService
         if (is_object($current_user)) {
             $log->setCreatedBy($current_user);
         }
-        $log->setRequestRoute($request->get('_route'));
+        if ($request) {
+            $log->setRequestRoute($request->get('_route'));
+        }
 
         return $log;
     }
