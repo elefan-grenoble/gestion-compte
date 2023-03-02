@@ -40,7 +40,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('date_fr', array($this, 'date_fr')),
             new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
             new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
-            new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
+            new TwigFilter('date_fr_full_with_time', array($this, 'date_fr_full_with_time')),
             new TwigFilter('date_time', array($this, 'date_time')),
             new TwigFilter('date_w3c', array($this, 'date_w3c')),
             new TwigFilter('duration_from_minutes', array($this, 'duration_from_minutes')),
@@ -159,7 +159,7 @@ class AppExtension extends AbstractExtension
      *
      * @param: \DateTime|\DateTimeImmutable $date
      */
-    public function date_fr_with_time($date)
+    public function date_fr_full_with_time($date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());

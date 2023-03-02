@@ -43,7 +43,7 @@
             {% for processUpdate in processUpdates %}
                 {% if processUpdate.date < lastShiftDate and new %}
                     <tr class="last-shift">
-                        <td><i class="material-icons left">date_range</i>{{ lastShiftDate | date_fr_with_time }}</td>
+                        <td><i class="material-icons left">date_range</i>{{ lastShiftDate | date_fr_full_with_time }}</td>
                         <td colspan="{% if is_granted("ROLE_PROCESS_MANAGER") %}3{% endif %}" style="text-align: center">⬆️ Depuis et ⬇️ Avant mon dernier créneau️</td>
                         <td></td>
                     </tr>

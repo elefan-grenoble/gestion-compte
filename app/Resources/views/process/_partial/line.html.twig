@@ -1,6 +1,6 @@
 <tr class="{% if check_date < processUpdate.date %}new {% else %}{% endif %}">
     <td>
-        <i class="material-icons left">content_paste</i><a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails">{{ processUpdate.date | date_fr_with_time }}</a>
+        <i class="material-icons left">content_paste</i><a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails">{{ processUpdate.date | date_fr_full_with_time }}</a>
     </td>
     <td>
         {{ processUpdate.title }}

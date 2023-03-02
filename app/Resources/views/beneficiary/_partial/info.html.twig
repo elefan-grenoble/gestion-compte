@@ -48,7 +48,7 @@
         {% if is_granted("ROLE_ADMIN") %}
             (<i class="material-icons tiny" title="dernière connexion">exit_to_app</i>
             {% if beneficiary.user.lastlogin %}
-                {{ beneficiary.user.lastlogin | date_fr_with_time }}
+                {{ beneficiary.user.lastlogin | date_fr_full_with_time }}
             {% else %}
                 <span class="orange-text">la personne ne s'est jamais connectée</span>
             {% endif %})
