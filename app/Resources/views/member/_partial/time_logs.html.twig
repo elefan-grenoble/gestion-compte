@@ -49,6 +49,7 @@
             <th>Auteur</th>
             <th>Temps</th>
             <th>Motif</th>
+            <th>Créneau</th>
             {% if (from_admin ?? false) and is_granted("ROLE_ADMIN") %}
                 <th>Route</th>
             {% endif %}
@@ -63,7 +64,15 @@
                 <td title="{{ timeLog.createdAt | date_fr_with_time }}">{{ timeLog.createdAt | date("d/m/Y") }}</td>
                 <td>{{ timeLog.createdBy }}</td>
                 <td>{{ timeLog.time | duration_from_minutes }}</td>
-                <td>{{ timeLog.computedDescription }}</td>
+                <td>{{ timeLog.typeDisplay }}</td>
+                <td>
+                    {% if timeLog.shift %}
+                        {{ timeLog.shift.job.name }} du {{ timeLog.shift.start | date("d/m/Y") }} de {{ timeLog.shift.start | date("H:i") }} à {{ timeLog.shift.end | date("H:i") }}
+                        {% if timeLog.shift.shifter %}
+                            ({{ timeLog.shift.shifter }})
+                        {% endif %}
+                    {% endif %}
+                </td>
                 {% if (from_admin ?? false) and is_granted("ROLE_ADMIN") %}
                     <td>{{ timeLog.requestRoute }}</td>
                 {% endif %}

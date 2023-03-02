@@ -275,27 +275,17 @@ class TimeLog
     /**
      * @return string
      */
-    public function getComputedDescription(): string
+    public function getTypeDisplay(): string
     {
         switch ($this->type) {
             case self::TYPE_CUSTOM:
                 return $this->description;
             case self::TYPE_SHIFT_VALIDATED:
-                if ($this->shift) {
-                    setlocale(LC_TIME, 'fr_FR.UTF8');
-                    return "Créneau *validé*" . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
-                } else {
-                    return "Créneau (non renseigné)";
-                }
+                return "Créneau validé";
             case self::TYPE_SHIFT_INVALIDATED:
-                if ($this->shift) {
-                    setlocale(LC_TIME, 'fr_FR.UTF8');
-                    return "Créneau *invalidé* " . $this->shift->getJob()->getName() . strftime(" du %d/%m/%y de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
-                } else {
-                    return "Créneau *invalidé* (non renseigné)";
-                }
+                return "Créneau invalidé";
             case self::TYPE_SHIFT_FREED_SAVING:
-                return "Créneau *libéré* et *incrémenté* grâce au compteur épargne";
+                return "Créneau libéré et compteur temps incrémenté (grâce au compteur épargne)";
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:
@@ -312,12 +302,11 @@ class TimeLog
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
                 if ($this->getTime() >= 0) {
-                    return "Compteur épargne incrémenté de " . $this->getTime() . " minutes";
+                    return "Compteur épargne incrémenté";
                 } else {
-                    return "Compteur épargne décrémenté de " . $this->getTime() . " minutes";
+                    return "Compteur épargne décrémenté";
                 }
         }
-        return "Type de log de temps inconnu: " . $this->type;
+        return "Type de log de temps inconnu : " . $this->type;
     }
-
 }
