@@ -37,6 +37,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('json_decode', array($this, 'jsonDecode')),
             new TwigFilter('email_encode', array($this, 'encodeText')),
             new TwigFilter('priority_to_color', array($this, 'priority_to_color')),
+            new TwigFilter('date_fr', array($this, 'date_fr')),
             new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
             new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
             new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
@@ -115,6 +116,15 @@ class AppExtension extends AbstractExtension
     public function getName()
     {
         return 'my_app_extension';
+    }
+
+    /**
+     * exemple output: "29 juin 2022"
+     */
+    public function date_fr(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%e %B %Y", $date->getTimestamp());
     }
 
     /**
