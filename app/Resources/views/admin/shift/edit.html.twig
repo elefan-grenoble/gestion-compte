@@ -9,7 +9,7 @@
 
 {% block content %}
     <h4> Editer créneaux / <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
-    <h5>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h5>
+    <h5>{{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}</h5>
     {{ form_start(form) }}
     <div class="row">
         <div class="col s12">

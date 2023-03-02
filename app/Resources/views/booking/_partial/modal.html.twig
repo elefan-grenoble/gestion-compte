@@ -7,7 +7,7 @@
 <div id="book{{ firstBookable.id }}" class="modal">
     <div class="modal-content">
         <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span></h5>
-        <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
+        <h6>{{ bucket.start | date_fr_long }} de {{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}</h6>
 
         {% if not shift_service.canBookDuration(beneficiary, bucket.getFirst.getDuration, cycle) %}
             <div class="alert card red lighten-4 red-text text-darken-4">
