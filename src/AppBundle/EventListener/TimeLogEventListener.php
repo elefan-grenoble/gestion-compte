@@ -146,6 +146,17 @@ class TimeLogEventListener
         } else {
             $this->deleteShiftLogs($shift, $member);
         }
+
+        // the shift time will be taken from the member's saving account
+        if ($this->use_time_log_saving) {
+            // decrement the savingTimeCount
+            $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
+            $this->em->persist($log);
+            // increment the shiftTimeCount
+            $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
+            $this->em->persist($log);
+            $this->em->flush();
+        }
     }
 
     /**
@@ -229,7 +240,7 @@ class TimeLogEventListener
                 $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
                 $this->em->persist($log);
                 // then increment the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time, $shift);
                 $this->em->persist($log);
                 $this->em->flush();
             }

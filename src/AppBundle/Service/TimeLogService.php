@@ -95,6 +95,23 @@ class TimeLogService
     }
 
     /**
+     * Initialize an "shift freed saving" log with the shift data
+     * 
+     * @param Shift $shift
+     * @param \DateTime $date
+     * @return TimeLog
+     */
+    public function initShiftFreedSavingTimeLog(Membership $member, $time, $shift)
+    {
+        $log = $this->initTimeLog($member);
+        $log->setType(TimeLog::TYPE_SHIFT_FREED_SAVING);
+        $log->setShift($shift);
+        $log->setTime($time);  // $shift->getDuration()
+
+        return $log;
+    }
+
+    /**
      * Initialize a "cycle beginning" log with the member data
      * 
      * @param Membership $member
@@ -147,11 +164,14 @@ class TimeLogService
      * @param int $time
      * @return TimeLog
      */
-    public function initSavingTimeLog(Membership $member, $time)
+    public function initSavingTimeLog(Membership $member, $time, $shift = null)
     {
         $log = $this->initTimeLog($member);
         $log->setType(TimeLog::TYPE_SAVING);
         $log->setTime($time);
+        if ($shift) {
+            $log->setShift($shift);
+        }
 
         return $log;
     }

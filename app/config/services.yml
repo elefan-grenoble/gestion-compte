@@ -44,6 +44,7 @@ services:
     AppBundle\Controller\ShiftController:
         arguments:
             - "%use_fly_and_fixed%"
+            - "%use_time_log_saving%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']

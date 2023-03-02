@@ -34,14 +34,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class ShiftController extends Controller
 {
-    /**
-     * @var boolean
-     */
-    private $useFlyAndFixed;
+    private $use_fly_and_fixed;
+    private $use_time_log_saving;
 
-    public function __construct(bool $useFlyAndFixed)
+    public function __construct(bool $use_fly_and_fixed, bool $use_time_log_saving)
     {
-        $this->useFlyAndFixed = $useFlyAndFixed;
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->use_time_log_saving = $use_time_log_saving;
     }
 
     /**
@@ -265,6 +264,15 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
                 return $this->redirectToRoute("homepage");
             }
+
+            if ($this->use_time_log_saving) {
+                $member = $shift->getShifter()->getMembership();
+                if ($shift->getDuration() > $member->getSavingTimeCount()) {
+                    $session->getFlashBag()->add("warning", "Impossible de libérer le créneau car la capacité de votre compteur épargne est trop faible.");
+                    return $this->redirectToRoute("homepage");
+                }
+            }
+
             // store shift beneficiary & reason (before shift free())
             $beneficiary = $shift->getShifter();
             $fixe = $shift->isFixe();
@@ -284,6 +292,9 @@ class ShiftController extends Controller
         }
 
         $session->getFlashBag()->add('success', "Le créneau a été annulé !");
+        if ($this->use_time_log_saving) {
+            $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé.<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
+        }
         return $this->redirectToRoute('homepage');
     }
 
@@ -570,7 +581,7 @@ class ShiftController extends Controller
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
 
-        if ($this->useFlyAndFixed) {
+        if ($this->use_fly_and_fixed) {
             $form = $form->add('fixe', RadioChoiceType::class, [
                 'choices'  => [
                     'Volant' => 0,
