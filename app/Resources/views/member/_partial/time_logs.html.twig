@@ -1,14 +1,25 @@
 <table>
     <thead>
         <tr>
-            <th>TOTAL</th>
+            <th>
+                TOTAL
+                {% if use_time_log_saving %}
+                    <span>TEMPS</span>
+                {% endif %}
+            </th>
             <th>TOTAL CYCLE EN COURS</th>
+            {% if use_time_log_saving %}
+                <th>TOTAL EPARGNE</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
         <tr>
             <td>{{ member.shiftTimeCount | duration_from_minutes }}</td>
             <td>{{ member.shiftTimeCount(membership_service.endOfCycle(member)) | duration_from_minutes }}</td>
+            {% if use_time_log_saving %}
+                <td>{{ member.savingTimeCount | duration_from_minutes }}</td>
+            {% endif %}
         </tr>
     </tbody>
 </table>
@@ -48,7 +59,7 @@
     </thead>
     <tbody>
         {% for timeLog in member.timeLogs %}
-            <tr class="{% if timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
+            <tr class="{% if timeLog.type == 20 %}blue{% elseif timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
                 <td title="{{ timeLog.createdAt | date_fr_with_time }}">{{ timeLog.createdAt | date("d/m/Y") }}</td>
                 <td>{{ timeLog.createdBy }}</td>
                 <td>{{ timeLog.time | duration_from_minutes }}</td>

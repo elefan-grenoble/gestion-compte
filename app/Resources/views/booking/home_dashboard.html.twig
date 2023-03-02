@@ -91,6 +91,17 @@
                 {% endif %}
             {% endif %}
         {% endif %}
+        {% if use_time_log_saving %}
+            <div class="row">
+                <div class="col s12">
+                    <div class="card">
+                        <div class="card-content">
+                            <p>Compteur épargne : <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     {% endif %}
 
     <a href="{{ path("booking") }}" class="btn teal hide-on-small-only" title="Je réserve un créneau{% if use_fly_and_fixed %} volant{% endif %}" {% if beneficiariesWhoCanBook | length == 0 %}disabled{% endif %}>
