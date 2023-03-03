@@ -40,6 +40,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('date_fr', array($this, 'date_fr')),
             new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
             new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
+            new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
             new TwigFilter('date_fr_full_with_time', array($this, 'date_fr_full_with_time')),
             new TwigFilter('date_time', array($this, 'date_time')),
             new TwigFilter('date_w3c', array($this, 'date_w3c')),
@@ -152,6 +153,15 @@ class AppExtension extends AbstractExtension
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
+    }
+
+        /**
+     * exemple output: "29 juin 2022 à 11:31"
+     */
+    public function date_fr_with_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%e %B %Y à %H:%M", $date->getTimestamp());
     }
 
     /**
