@@ -38,7 +38,7 @@
                 {% if beneficiary.address.street2 %}
                     {{ beneficiary.address.street2 }}
                 {% endif %}
-                {{ "%05d"|format(beneficiary.address.zipCode) }}
+                {{ "%d"|format(beneficiary.address.zipCode) }}
                 {{ beneficiary.address.city }}
             </div>
         {% endif %}
