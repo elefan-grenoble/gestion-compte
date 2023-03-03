@@ -37,9 +37,8 @@
         <tbody>
         {% for anonymousBeneficiary in anonymousBeneficiaries %}
             <tr class="{% if app.user.id == anonymousBeneficiary.registrar.id %}myself{% endif %}">
-                <td>{{ anonymousBeneficiary.createdAt | date('d-m-Y H:i') }}</td>
+                <td>{{ anonymousBeneficiary.createdAt | date('d/m/Y H:i') }}</td>
                 <td>{{ anonymousBeneficiary.email }}</td>
-
                 <td>
                     {% if anonymousBeneficiary.registrar %}
                         {% if anonymousBeneficiary.registrar.beneficiary %}
@@ -65,7 +64,6 @@
                         Nouvelle adhésion
                     {% endif %}
                 </td>
-
                 <td>
                     {% if anonymousBeneficiary.recallDate %}
                         Dernière relance faite le {{ anonymousBeneficiary.recallDate | date_fr_full_with_time }}
@@ -73,7 +71,6 @@
                         Jamais relancé
                     {% endif %}&nbsp;
                 </td>
-
                 <td>
                     {% if is_granted("ROLE_USER_VIEWER") %}
                         <a href="{{ path('pre_user_recall', { 'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2">
