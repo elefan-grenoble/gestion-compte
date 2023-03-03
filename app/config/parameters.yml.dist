@@ -74,6 +74,8 @@ parameters:
     project_url_display: yourcoop.local
     main_color: #51CAE9
     local_currency_name: 'monnaie locale'
+    # Whether to enable IP check of the spot
+    enable_place_local_ip_address_check: true
     #ip of the spot, comma separated if many
     place_local_ip_address: '127.0.0.1,192.168.0.x'
 
