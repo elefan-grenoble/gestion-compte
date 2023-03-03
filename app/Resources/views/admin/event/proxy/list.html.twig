@@ -27,7 +27,7 @@
     {% endif %}
 
     {% if event %}
-        <h5>{{ event.title }} <small>{{ event.date | date('d F Y H:i') }}</small></h5>
+        <h5>{{ event.title }} <small>{{ event.date | date_fr_full_with_time }}</small></h5>
     {% endif %}
 
     <table class="responsive-table striped">
@@ -69,8 +69,8 @@
                             {{ proxy.owner.membership.memberNumberWithBeneficiaryListString }}
                         {% endif %}
                     </td>
-                    <td title="{{ proxy.createdAt | date('d F Y H:i') }}">
-                        {{ proxy.createdAt | date('d F Y') }}
+                    <td title="{{ proxy.createdAt | date_fr_with_time }}">
+                        {{ proxy.createdAt | date_fr }}
                     </td>
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         <td>

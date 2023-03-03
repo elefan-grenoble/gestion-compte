@@ -322,9 +322,9 @@
             <div class="subpage">
                 <div class="title" id="main_title">
                     Liste des votants pour l'événement "{{ event.title() }}"
-                    <span style="white-space: nowrap;">le {{ event.date | date('d F Y H:i') }}</span>
+                    <span style="white-space: nowrap;">le {{ event.date | date_fr_full_with_time }}</span>
                     <br />
-                    <small>généré le <span style="white-space: nowrap;">{{ "now" | date('d F Y H:i') }}</span></small>
+                    <small>généré le <span style="white-space: nowrap;">{{ date('now') | date_fr_full_with_time }}</span></small>
                 </div>
                 <div class="center" id="member_count">
                     <p>{{ _self.member_count(beneficiaries, event) }}</p>

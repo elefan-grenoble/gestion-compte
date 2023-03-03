@@ -16,7 +16,7 @@
             {% if event.date < date() %}
                 <div class="col s12">
                     <a href="{{ path("event_edit",{'id':event.id}) }}">
-                        <i class="material-icons left black-text">event</i>{{ event.title }} - <i><span class="black-text">{{ event.date | date('d F Y H:i') }}</span></i>
+                        <i class="material-icons left black-text">event</i>{{ event.title }} - <i><span class="black-text">{{ event.date | date_fr_full_with_time }}</span></i>
                     </a>
                     {% if event.needProxy %}
                         <br>
@@ -36,7 +36,7 @@
                             {% if not event.img %}
                                 <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
                             {% endif %}
-                            <i>{{ event.date | date('d F Y H:i') }}</i>
+                            <i>{{ event.date | date_fr_full_with_time }}</i>
                             {{ event.description | markdown | raw }}
                         </div>
                         <div class="card-action">
