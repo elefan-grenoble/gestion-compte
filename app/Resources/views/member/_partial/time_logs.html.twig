@@ -61,13 +61,13 @@
     <tbody>
         {% for timeLog in member.timeLogs %}
             <tr class="{% if timeLog.type == 20 %}blue{% elseif timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
-                <td title="{{ timeLog.createdAt | date_fr_full_with_time }}">{{ timeLog.createdAt | date("d/m/Y") }}</td>
+                <td title="{{ timeLog.createdAt | date_fr_full_with_time }}">{{ timeLog.createdAt | date('d/m/Y') }}</td>
                 <td>{{ timeLog.createdBy }}</td>
                 <td>{{ timeLog.time | duration_from_minutes }}</td>
                 <td>{{ timeLog.typeDisplay }}</td>
                 <td>
                     {% if timeLog.shift %}
-                        {{ timeLog.shift.job.name }} du {{ timeLog.shift.start | date("d/m/Y") }} de {{ timeLog.shift.start | date("H:i") }} à {{ timeLog.shift.end | date("H:i") }}
+                        {{ timeLog.shift.job.name }} du {{ timeLog.shift.start | date('d/m/Y') }} de {{ timeLog.shift.start | date('H:i') }} à {{ timeLog.shift.end | date('H:i') }}
                         {% if timeLog.shift.shifter %}
                             ({{ timeLog.shift.shifter }})
                         {% endif %}
