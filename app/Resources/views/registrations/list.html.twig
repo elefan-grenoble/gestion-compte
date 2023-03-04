@@ -137,7 +137,7 @@
                     <div class="collapsible-body">
                         <div>
                             {% if registration | recall_date %}
-                                Dernière relance faite le {{ registration | recall_date | date_fr_with_time }}
+                                Dernière relance faite le {{ registration | recall_date | date_fr_full_with_time }}
                             {% else %}
                                 Jamais relancé
                             {% endif %}&nbsp;

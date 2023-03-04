@@ -17,7 +17,7 @@
         <div class="col s12 m6">
             <div class="card blue-grey">
                 <div class="card-content white-text">
-                    <span class="card-title">{{ payment.date | date_fr_with_time }}</span>
+                    <span class="card-title">{{ payment.date | date_fr_full_with_time }}</span>
                     <p>{{ payment.amount }}€ de la part de <b>{{ payment.payerFirstName }} {{ payment.payerLastName }}</b> ({{ payment.email }})</p>
                 </div>
                 <div class="card-action">

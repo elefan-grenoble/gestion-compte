@@ -20,10 +20,10 @@
         {% if frontend_cookie and frontend_cookie.last_processupdates_check is defined %}
             {% set check_date = frontend_cookie.last_processupdates_check|replace({'_':'+'}) | w3c_to_date %}
         {% else %}
-            {% set check_date = app.user.beneficiary | last_shift_date  %}
+            {% set check_date = app.user.beneficiary | last_shift_date %}
         {% endif %}
     {% else %}
-        {% set check_date = date('now')  %}
+        {% set check_date = date('now') %}
     {% endif %}
     <div class="row">
         <table class="process-update-list" style="table-layout:fixed">
@@ -43,7 +43,7 @@
             {% for processUpdate in processUpdates %}
                 {% if processUpdate.date < lastShiftDate and new %}
                     <tr class="last-shift">
-                        <td><i class="material-icons left">date_range</i>{{ lastShiftDate | date_fr_with_time }}</td>
+                        <td><i class="material-icons left">date_range</i>{{ lastShiftDate | date_fr_full_with_time }}</td>
                         <td colspan="{% if is_granted("ROLE_PROCESS_MANAGER") %}3{% endif %}" style="text-align: center">⬆️ Depuis et ⬇️ Avant mon dernier créneau️</td>
                         <td></td>
                     </tr>

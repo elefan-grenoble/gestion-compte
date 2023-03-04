@@ -20,12 +20,12 @@
         {% if not date %}
             {% set date = true %}
             <div class="row center show-on-small hide-on-med-and-up">
-                {{ (buckets|first).start|date_fr_long }}
+                {{ (buckets|first).start | date_fr_long }}
             </div>
 
             <div class="col m2 hide-on-small-only valign-wrapper">
                 <div>
-                    <b>{{ (buckets|first).start|date_fr_long }}</b><br>
+                    <b>{{ (buckets|first).start | date_fr_long }}</b><br>
                 </div>
             </div>
         {% endif %}

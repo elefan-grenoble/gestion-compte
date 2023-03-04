@@ -57,7 +57,7 @@ id = "modal-bucket"
                         {% if shift.shifter != shift.booker.beneficiary %}
                             pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
                         {% endif %}
-                        le <i>{{ shift.bookedTime | date_fr_with_time }}</i>
+                        le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
                         par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
                     </p>
                     {% if is_granted('free',shift) %}

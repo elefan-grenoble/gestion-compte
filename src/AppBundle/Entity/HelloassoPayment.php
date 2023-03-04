@@ -96,7 +96,7 @@ class HelloassoPayment
      */
     public function __toString()
     {
-        return '#'.$this->getId().' de '.$this->getEmail().' le '. $this->getCreatedAt()->format('d-M-Y à H:i').' '.$this->getAmount().' €';
+        return '#'.$this->getId().' de '.$this->getEmail().' le '. $this->getCreatedAt()->format('d/m/Y à H:i').' '.$this->getAmount().' €';
     }
 
     /**

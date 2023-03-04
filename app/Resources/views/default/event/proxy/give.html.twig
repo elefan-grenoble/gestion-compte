@@ -9,7 +9,7 @@
 
 {% block content %}
     <h4>Donner une procuration</h4>
-    <h5>{{ event.title }}&nbsp;<i>{{ event.date | date('d F Y H:i') }}</i></h5>
+    <h5>{{ event.title }}&nbsp;<i>{{ event.date | date_fr_full_with_time }}</i></h5>
 
     {% if search_form is defined %}
         {{ form_start(search_form) }}

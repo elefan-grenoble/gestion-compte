@@ -30,7 +30,7 @@
                 <tr class="{% if payment.registration and payment.registration.membership  %}teal{% else %}red{% endif %} lighten-5">
                     <td>{{ payment.id }}</td>
                     <td><span class="{% if campaigns[payment.campaignId].url != helloasso_registration_campaign_url  %}red-text{% else %}green-text{% endif %}">{{ campaigns[payment.campaignId].name }}</span><br>({{ payment.paymentId }})</td>
-                    <td title="reçu le {{ payment.createdAt | date_fr_with_time }}">{{ payment.date | date("d/m/Y")}}</td>
+                    <td title="reçu le {{ payment.createdAt | date_fr_full_with_time }}">{{ payment.date | date('d/m/Y')}}</td>
                     <td>{{ payment.amount }}€</td>
                     <td>{{ payment.payerFirstName }}</td>
                     <td>{{ payment.payerLastName }}</td>

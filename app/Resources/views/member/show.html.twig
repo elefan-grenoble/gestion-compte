@@ -84,7 +84,7 @@
                                 {% else %}
                                     <i class="material-icons tiny">attach_money</i>
                                 {% endif %}
-                                {{ registration.date | date('d F Y') }}
+                                {{ registration.date | date_fr }}
                                 {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}
                                     <span class="badge right">Helloasso</span>
                                 {% endif %}
@@ -339,7 +339,7 @@
                     {% else %}
                         {% if member.withdrawnDate %}
                             <p>
-                                Compte fermé le <i>{{ member.withdrawnDate | date('d F Y H:i') }}</i>
+                                Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
                                 {% if member.withdrawnBy %}
                                     par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
                                 {% endif %}

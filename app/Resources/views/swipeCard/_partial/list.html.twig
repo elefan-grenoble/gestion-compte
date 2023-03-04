@@ -39,8 +39,8 @@
             <tr>
                 <td>{{ swipeCard.number }}</td>
                 <td><img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}" alt="barecode"></td>
-                <td>{{ swipeCard.createdAt | date_fr_with_time }}</td>
-                <td>{% if swipeCard.disabledAt %}{{ swipeCard.disabledAt | date_fr_with_time }}{% endif %}</td>
+                <td>{{ swipeCard.createdAt | date_fr_full_with_time }}</td>
+                <td>{% if swipeCard.disabledAt %}{{ swipeCard.disabledAt | date_fr_full_with_time }}{% endif %}</td>
                 <td>
                     {% if beneficiary_id > 0 %}
                         <form action="{% if swipeCard.enable %}{{ path('disable_swipe_for_beneficiary',{id : beneficiary_id})}}{% else %}{{ path('enable_swipe_for_beneficiary',{id : beneficiary_id})}}{% endif %}" method="post" class="swipe-card-status-switcher">

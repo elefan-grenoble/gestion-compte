@@ -482,7 +482,7 @@ class Shift
     }
 
     public function getTmpToken($key = ''){
-        return md5($this->getId().$this->getStart()->format('d-m-Y').$this->getEnd()->format('d-m-Y').$key);
+        return md5($this->getId().$this->getStart()->format('d/m/Y').$this->getEnd()->format('d/m/Y').$key);
     }
 
     /**

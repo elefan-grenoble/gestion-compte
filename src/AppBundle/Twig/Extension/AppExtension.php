@@ -37,9 +37,11 @@ class AppExtension extends AbstractExtension
             new TwigFilter('json_decode', array($this, 'jsonDecode')),
             new TwigFilter('email_encode', array($this, 'encodeText')),
             new TwigFilter('priority_to_color', array($this, 'priority_to_color')),
+            new TwigFilter('date_fr', array($this, 'date_fr')),
             new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
             new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
             new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
+            new TwigFilter('date_fr_full_with_time', array($this, 'date_fr_full_with_time')),
             new TwigFilter('date_time', array($this, 'date_time')),
             new TwigFilter('date_w3c', array($this, 'date_w3c')),
             new TwigFilter('duration_from_minutes', array($this, 'duration_from_minutes')),
@@ -118,6 +120,15 @@ class AppExtension extends AbstractExtension
     }
 
     /**
+     * exemple output: "29 juin 2022"
+     */
+    public function date_fr(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%e %B %Y", $date->getTimestamp());
+    }
+
+    /**
      * exemple output: "mercredi 29 juin"
      */
     public function date_fr_long(\DateTime $date)
@@ -144,12 +155,21 @@ class AppExtension extends AbstractExtension
         return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
+        /**
+     * exemple output: "29 juin 2022 à 11:31"
+     */
+    public function date_fr_with_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%e %B %Y à %H:%M", $date->getTimestamp());
+    }
+
     /**
      * exemple output: "mercredi 29 juin 2022 à 11:31"
      *
      * @param: \DateTime|\DateTimeImmutable $date
      */
-    public function date_fr_with_time($date)
+    public function date_fr_full_with_time($date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
