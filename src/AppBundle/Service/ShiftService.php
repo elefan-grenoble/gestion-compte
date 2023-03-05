@@ -252,15 +252,7 @@ class ShiftService
 
         // TODO refactor code to remove shift_cycle
         // canBookDuration method should not use TimeLog but request shifts
-        $shift_cycle = 0;
-        for ($cycle = 0; $cycle < 3; $cycle++) {
-            $current_cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
-            if ($shift->getStart() <= $current_cycle_end) {
-                $shift_cycle = $cycle;
-                break;
-            }
-        }
-
+        $shift_cycle = $this->membershipService->getCycleNumber($member, $shift->getStart());
         return $this->canBookDuration($beneficiary, $shift->getDuration(), $shift_cycle) or $this->canBookExtraShift($beneficiary, $shift);
     }
 

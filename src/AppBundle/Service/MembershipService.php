@@ -164,6 +164,17 @@ class MembershipService
         return $date;
     }
 
+    public function getCycleNumber(Membership $membership, $date) {
+        $cycle_end = $this->getEndOfCycle($member, -1);
+        for ($cycle = -1; $cycle < 3; $cycle++) {
+            if ($date <= $current_cycle_end) {
+                return $cycle
+            }
+            $cycle_end->modify("+28 days");
+        }
+        return null
+    }
+
     /**
      * Return true if the membership is in a "warning" status
      */
