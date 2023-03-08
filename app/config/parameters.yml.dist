@@ -146,6 +146,9 @@ parameters:
     swipe_card_logging_anonymous: true
     display_swipe_cards_settings: true
 
+    # Fly and fixed
+    fly_and_fixed_allow_fixed_shift_free: false
+
     # Time log saving
     time_log_saving_shift_free_min_time_in_advance_days: null
 
