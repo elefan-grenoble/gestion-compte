@@ -28,7 +28,7 @@
             <div id="free{{ shift.id }}" class="modal black-text">
                 {{ form_start(shift_free_forms[shift.id]) }}
                     <div class="modal-content">
-                        <h5>Je ne peux pas faire mon créneau</h5>
+                        <h5>Je ne peux pas faire mon créneau{% if shift.fixe %} fixe{% endif %}</h5>
                         <div class="input-field">
                             {{ form_label(shift_free_forms[shift.id].reason) }}
                             {{ form_errors(shift_free_forms[shift.id].reason) }}
