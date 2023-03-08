@@ -36,11 +36,13 @@ class ShiftController extends Controller
 {
     private $use_fly_and_fixed;
     private $use_time_log_saving;
+    private $time_log_saving_shift_free_min_time_in_advance_days;
 
-    public function __construct(bool $use_fly_and_fixed, bool $use_time_log_saving)
+    public function __construct(bool $use_fly_and_fixed, bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->use_time_log_saving = $use_time_log_saving;
+        $this->time_log_saving_shift_free_min_time_in_advance_days = $time_log_saving_shift_free_min_time_in_advance_days;
     }
 
     /**
@@ -256,7 +258,7 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if($shift->isFixe()) {
+            if ($shift->isFixe()) {
                 $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
                 return $this->redirectToRoute("homepage");
             }
@@ -267,8 +269,15 @@ class ShiftController extends Controller
 
             if ($this->use_time_log_saving) {
                 $member = $shift->getShifter()->getMembership();
-                if ($shift->getDuration() > $member->getSavingTimeCount()) {
+                $member_saving_now = $member->getSavingTimeCount();
+                // the saving account must have the necessary amount
+                if ($shift->getDuration() > $member_saving_now) {
                     $session->getFlashBag()->add("warning", "Impossible de libérer le créneau car la capacité de votre compteur épargne est trop faible.");
+                    return $this->redirectToRoute("homepage");
+                }
+                // check if there is a time_in_advance rule
+                if (isset($this->time_log_saving_shift_free_min_time_in_advance_days) && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                    $session->getFlashBag()->add("warning", "Impossible de libérer le créneau car il a lieu dans moins de " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours.");
                     return $this->redirectToRoute("homepage");
                 }
             }

@@ -146,6 +146,9 @@ parameters:
     swipe_card_logging_anonymous: true
     display_swipe_cards_settings: true
 
+    # Time log saving
+    time_log_saving_shift_free_min_time_in_advance_days: null
+
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
     logging.mattermost.url: 'http://mattermost.yourcoop.local'
