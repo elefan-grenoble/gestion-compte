@@ -65,6 +65,14 @@
                         </div>
                     </div>
                     <div class="col s12 m4">
+                        <h5>Adhésion(s)</h5>
+                        <div class="row">
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.registration) }}
+                                {{ form_label(form.registration) }}
+                                {{ form_errors(form.registration) }}
+                            </div>
+                        </div>
                         <h5>Dernière Adhésion</h5>
                         <div class="row">
                             <div class="col s6 input-field">

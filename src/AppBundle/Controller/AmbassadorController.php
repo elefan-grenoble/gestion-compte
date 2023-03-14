@@ -36,7 +36,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all users with a registration date older than one year.
+     * List all members with a registration date older than one year.
      *
      * @Route("/membership", name="ambassador_membership_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
@@ -56,9 +56,10 @@ class AmbassadorController extends Controller
             'sort' => 'r.date',
             'dir' => 'DESC',
             'withdrawn' => 1,
-            'lastregistrationdatelt' => $endLastRegistration
+            'lastregistrationdatelt' => $endLastRegistration,
+            'registration' => 2,
         ];
-        $disabledFields = ['withdrawn', 'lastregistrationdatelt'];
+        $disabledFields = ['withdrawn', 'lastregistrationdatelt', 'registration'];
 
         $form = $formHelper->createMembershipFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
@@ -97,7 +98,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "d'adhésion",
+            'reason' => "de ré-adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
             'nb_of_result' => $totalItems,
@@ -108,7 +109,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all users with shift time logs older than 9 hours.
+     * List all members with shift time logs older than 9 hours.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
@@ -122,9 +123,10 @@ class AmbassadorController extends Controller
             'dir' => 'DESC',
             'withdrawn' => 1,
             'frozen' => 1,
-            'compteurlt' => 0
+            'compteurlt' => 0,
+            'registration' => 2,
         ];
-        $disabledFields = ['withdrawn', 'compteurlt'];
+        $disabledFields = ['withdrawn', 'compteurlt', 'registration'];
 
         $form = $formHelper->createShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
