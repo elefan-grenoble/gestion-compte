@@ -43,7 +43,7 @@ class AmbassadorController extends Controller
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
-    public function membershipNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
+    public function memberNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
             'sort' => 'r.date',
@@ -99,12 +99,12 @@ class AmbassadorController extends Controller
     /**
      * List all members with a registration date older than one year.
      *
-     * @Route("/membership", name="ambassador_membership_list", methods={"GET","POST"})
+     * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
-    public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
+    public function memberLateRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
         if ($this->registrationEveryCivilYear) {
             $endLastRegistration = new \DateTime('last day of December last year');
@@ -122,7 +122,7 @@ class AmbassadorController extends Controller
         ];
         $disabledFields = ['withdrawn', 'lastregistrationdatelt', 'registration'];
 
-        $form = $formHelper->createMembershipFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form = $formHelper->createMemberLateRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
@@ -176,7 +176,7 @@ class AmbassadorController extends Controller
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
-    public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
+    public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
             'sort' => 'time',
@@ -188,7 +188,7 @@ class AmbassadorController extends Controller
         ];
         $disabledFields = ['withdrawn', 'compteurlt', 'registration'];
 
-        $form = $formHelper->createShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form = $formHelper->createMemberShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());

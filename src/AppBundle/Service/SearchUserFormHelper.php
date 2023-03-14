@@ -284,7 +284,7 @@ class SearchUserFormHelper {
         return $form;
     }
 
-    public function createMembershipFilterForm($formBuilder, $defaults, $disabledFields = []) {
+    public function createMemberLateRegistrationFilterForm($formBuilder, $defaults, $disabledFields = []) {
         $form = $this->getSearchForm($formBuilder, 'membership', $disabledFields);
         // set lastregistrationdatelt default
         $options = $form->get('lastregistrationdatelt')->getConfig()->getOptions();
@@ -300,7 +300,7 @@ class SearchUserFormHelper {
         return $form;
     }
 
-    public function createShiftTimeLogFilterForm($formBuilder, $defaults = [], $disabledFields = []) {
+    public function createMemberShiftTimeLogFilterForm($formBuilder, $defaults = [], $disabledFields = []) {
         $form = $this->getSearchForm($formBuilder, 'shifttimelog', $disabledFields);
         // set compteurlt default
         $options = $form->get('compteurlt')->getConfig()->getOptions();
