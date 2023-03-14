@@ -159,8 +159,8 @@
                     {% endfor %}
                 </td>
                 <td>
-                    <strong>{{ member.lastregistration.date | date('d/m/Y') }}</strong>
                     {% if member.lastregistration %}
+                        <strong>{{ member.lastregistration.date | date('d/m/Y') }}</strong>
                         <br />
                         {% set difference = member.lastregistration.date.diff(date('now')) %}
                         {% set m = difference.m %}

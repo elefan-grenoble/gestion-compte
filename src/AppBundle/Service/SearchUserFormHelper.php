@@ -133,16 +133,7 @@ class SearchUserFormHelper {
                 ]
             ]);
         }
-        $formBuilder->add('lastregistrationdategt', DateType::class, [
-            'widget' => 'single_text',
-            'html5' => false,
-            'label' => 'après le',
-            'required' => false,
-            'attr' => [
-                'class' => 'datepicker'
-            ]
-        ])
-        ->add('lastregistrationdatelt', DateType::class, [
+        $formBuilder->add('lastregistrationdatelt', DateType::class, [
             'widget' => 'single_text',
             'html5' => false,
             'label' => 'avant le',
@@ -150,6 +141,16 @@ class SearchUserFormHelper {
             'disabled' => in_array('lastregistrationdatelt', $disabledFields) ? true : false,
             'attr' => [
                 'class' => 'datepicker',
+            ]
+        ])
+        ->add('lastregistrationdategt', DateType::class, [
+            'widget' => 'single_text',
+            'html5' => false,
+            'label' => 'après le',
+            'required' => false,
+            'disabled' => in_array('lastregistrationdategt', $disabledFields) ? true : false,
+            'attr' => [
+                'class' => 'datepicker'
             ]
         ]);
         if (!$type) {
@@ -275,16 +276,8 @@ class SearchUserFormHelper {
         return $form;
     }
 
-    public function createShiftTimeLogFilterForm($formBuilder, $defaults = [], $disabledFields = []) {
-        $form = $this->getSearchForm($formBuilder, 'shifttimelog', $disabledFields);
-        // set compteurlt default
-        $options = $form->get('compteurlt')->getConfig()->getOptions();
-        $options['required'] = true;
-        $options['constraints'] = [
-            new NotBlank(),
-            new LessThanOrEqual($defaults['compteurlt'])
-        ];
-        $form->add('compteurlt', NumberType::class, $options);
+    public function createMemberNoRegistrationFilterForm($formBuilder, $defaults, $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, 'membership', $disabledFields);
         foreach ($defaults as $k => $v) {
             $form->get($k)->setData($v);
         }
@@ -301,6 +294,22 @@ class SearchUserFormHelper {
             new LessThanOrEqual($defaults['lastregistrationdatelt'])
         ];
         $form->add('lastregistrationdatelt', DateType::class, $options);
+        foreach ($defaults as $k => $v) {
+            $form->get($k)->setData($v);
+        }
+        return $form;
+    }
+
+    public function createShiftTimeLogFilterForm($formBuilder, $defaults = [], $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, 'shifttimelog', $disabledFields);
+        // set compteurlt default
+        $options = $form->get('compteurlt')->getConfig()->getOptions();
+        $options['required'] = true;
+        $options['constraints'] = [
+            new NotBlank(),
+            new LessThanOrEqual($defaults['compteurlt'])
+        ];
+        $form->add('compteurlt', NumberType::class, $options);
         foreach ($defaults as $k => $v) {
             $form->get($k)->setData($v);
         }
@@ -345,6 +354,13 @@ class SearchUserFormHelper {
             $compteurgt = $form->get('compteurgt')->getData();
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t2.membership) FROM AppBundle\Entity\TimeLog t2 WHERE t2.type != 20 GROUP BY t2.membership HAVING SUM(t2.time) > :compteurgt * 60)')
                 ->setParameter('compteurgt', $compteurgt);
+        }
+        if ($form->get('registration')->getData()) {
+            if ($form->get('registration')->getData() == 2) {
+                $qb = $qb->andWhere('r.date IS NOT NULL');
+            } else if ($form->get('registration')->getData() == 1) {
+                $qb = $qb->andWhere('r.date IS NULL');
+            }
         }
         if ($form->get('lastregistrationdategt')->getData()) {
             $date = $form->get('lastregistrationdategt')->getData();

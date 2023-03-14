@@ -36,6 +36,67 @@ class AmbassadorController extends Controller
     }
 
     /**
+     * List all members without a registration.
+     *
+     * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     */
+    public function membershipNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
+    {
+        $defaults = [
+            'sort' => 'r.date',
+            'dir' => 'DESC',
+            'withdrawn' => 1,
+            'registration' => 1,
+        ];
+        $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt', 'lastregistrationdategt'];
+
+        $form = $formHelper->createMemberNoRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form->handleRequest($request);
+
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
+        $qb = $qb->leftJoin("o.timeLogs", "c")->addSelect("c")
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $formHelper->processSearchFormAmbassadorData($form, $qb);
+            $sort = $form->get('sort')->getData();
+            $order = $form->get('dir')->getData();
+            $currentPage = $form->get('page')->getData();
+        } else {
+            $sort = $defaults['sort'];
+            $order = $defaults['dir'];
+            $currentPage = 1;
+            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+                ->setParameter('withdrawn', $defaults['withdrawn']-1);
+            $qb = $qb->andWhere('r.date IS NULL');
+        }
+
+        $limitPerPage = 25;
+        $qb = $qb->orderBy($sort, $order);
+        $paginator = new Paginator($qb);
+        $totalItems = count($paginator);
+        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
+        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "adhésion",
+            'members' => $paginator,
+            'form' => $form->createView(),
+            'nb_of_result' => $totalItems,
+            'page' => $currentPage,
+            'nb_of_pages' => $pagesCount
+        ));
+    }
+
+    /**
      * List all members with a registration date older than one year.
      *
      * @Route("/membership", name="ambassador_membership_list", methods={"GET","POST"})
@@ -105,7 +166,6 @@ class AmbassadorController extends Controller
             'page' => $currentPage,
             'nb_of_pages' => $pagesCount
         ));
-
     }
 
     /**
