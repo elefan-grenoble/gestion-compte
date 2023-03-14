@@ -90,8 +90,18 @@ class SearchUserFormHelper {
             $formBuilder->add('membernumberdiff', TextType::class, [
                 'label' => '# <>',
                 'required' => false
-            ])
-            ->add('registrationdate', TextType::class, [
+            ]);
+        }
+        $formBuilder->add('registration', ChoiceType::class, [
+            'label' => $this->container->getParameter('member_registration_missing_icon') . ' adhéré',
+            'required' => false,
+            'choices' => [
+                'adhéré' => 2,
+                'Non adhéré' => 1,
+            ]
+        ]);
+        if (!$type) {
+            $formBuilder->add('registrationdate', TextType::class, [
                 'label' => 'le',
                 'required' => false,
                 'attr' => [
@@ -411,6 +421,13 @@ class SearchUserFormHelper {
                 ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
         }
 
+        if ($form->get('registration')->getData()) {
+            if ($form->get('registration')->getData() == 2) {
+                $qb = $qb->andWhere('r.date IS NOT NULL');
+            } else if ($form->get('registration')->getData() == 1) {
+                $qb = $qb->andWhere('r.date IS NULL');
+            }
+        }
         if ($form->get('registrationdate')->getData()) {
             $qb = $qb->andWhere('r.date LIKE :registrationdate')
                 ->setParameter('registrationdate', $form->get('registrationdate')->getData().'%');
