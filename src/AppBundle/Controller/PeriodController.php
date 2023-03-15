@@ -3,7 +3,6 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
@@ -12,7 +11,6 @@ use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
 use AppBundle\Repository\JobRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -30,8 +28,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
-* @Route("period")
-*/
+ * Controller to manage the period shift (a.k.a. "semaine type")
+ *
+ * @Route("period")
+ */
 class PeriodController extends Controller
 {
     /**
@@ -40,14 +40,19 @@ class PeriodController extends Controller
      *
      * the return object :
      * array(
-     *      "form":FormBuilderInterface
+     *      "form" => FormBuilderInterface
      *      "from" => DateTime,
      *      "to" => DateTime,
      *      "job"=> Job|null,
-     *      "filling"=>str|null,
+     *      "filling" => str|null,
+     *      "beneficiary" => Entity/Beneficiary
      *      )
+     *
+     * @param Request $request the request sent by the client, used to process the form
+     * @param bool $withBeneficiaryField if true will add a beneficiary and a 'problematic' filter field
+     * @return array
      */
-    private function filterFormFactory(Request $request): array
+    private function filterFormFactory(Request $request, bool $withBeneficiaryField): array
     {
         // default values
         $res = [
@@ -58,12 +63,8 @@ class PeriodController extends Controller
         ];
 
         // filter creation ----------------------
-        $res["form"] = $this->createFormBuilder()
+        $formBuilder = $this->createFormBuilder()
             ->setAction($this->generateUrl('period'))
-            ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
-                'label' => 'Bénéficiaire',
-                'required' => false,
-            ))
             ->add('job', EntityType::class, array(
                 'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
@@ -78,16 +79,7 @@ class PeriodController extends Controller
                         ->orderBy('j.name', 'ASC');
                 }
             ))
-            ->add('filling', ChoiceType::class, array(
-                'label' => 'Remplissage',
-                'required' => false,
-                'choices' => array(
-                    'Complet' => 'full',
-                    'Partiel' => 'partial',
-                    'Vide' => 'empty',
-                    'Problématique' => 'problematic'
-                ),
-            ))
+
             ->add('week', ChoiceType::class, array(
                 'label' => 'Semaine',
                 'required' => false,
@@ -101,13 +93,43 @@ class PeriodController extends Controller
             ->add('filter', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
-            ))
-            ->getForm();
+            ));
 
+        if ($withBeneficiaryField) {
+            $formBuilder->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+                'label' => 'Bénéficiaire',
+                'required' => false,
+            ));
+            $formBuilder->add('filling', ChoiceType::class, array(
+                'label' => 'Remplissage',
+                'required' => false,
+                'choices' => array(
+                    'Complet' => 'full',
+                    'Partiel' => 'partial',
+                    'Vide' => 'empty',
+                    'Problématique' => 'problematic'
+                ),
+            ));
+
+        }else{
+            $formBuilder->add('filling', ChoiceType::class, array(
+                'label' => 'Remplissage',
+                'required' => false,
+                'choices' => array(
+                    'Complet' => 'full',
+                    'Partiel' => 'partial',
+                    'Vide' => 'empty',
+                ),
+            ));
+        }
+
+        $res["form"] = $formBuilder->getForm();
         $res["form"]->handleRequest($request);
 
         if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
-            $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
+            if ($withBeneficiaryField) {
+                $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
+            }
             $res["job"] = $res["form"]->get("job")->getData();
             $res["filling"] = $res["form"]->get("filling")->getData();
             $res["week"] = $res["form"]->get("week")->getData();
@@ -117,15 +139,49 @@ class PeriodController extends Controller
         return $res;
     }
 
-
     /**
-     * @Route("/", name="period")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * Display all the period (available and reserved) anonymized
+     *
+     * @Route("/", name="period", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
         $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-        $filter = $this->filterFormFactory($request);
+        $filter = $this->filterFormFactory($request, False);
+        $periodsByDay = array();
+        $order = array('start' => 'ASC');
+
+        foreach ($daysOfWeek as $i => $value) {
+            $findByFilter = array('dayOfWeek' => $i);
+
+            if ($filter['job']) {
+                $findByFilter['job'] = $filter['job'];
+            }
+
+            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+                ->findBy($findByFilter, $order);
+        }
+
+        return $this->render('period/index.html.twig', array(
+            'days_of_week' => $daysOfWeek,
+            'periods_by_day' => $periodsByDay,
+            'filter_form' => $filter['form']->createView(),
+            'week_filter' => $filter['week'],
+            'filling_filter' => $filter["filling"]
+        ));
+    }
+
+    /**
+     * Display all the periods in a schedule (available and reserved)
+     *
+     * @Route("/admin", name="period_index", methods={"GET","POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     */
+    public function adminIndexAction(Request $request, EntityManagerInterface $em): Response
+    {
+        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+        $filter = $this->filterFormFactory($request, True);
         $periodsByDay = array();
         $order = array('start' => 'ASC');
 
