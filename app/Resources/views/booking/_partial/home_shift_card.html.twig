@@ -38,19 +38,6 @@
                     <div class="modal-footer">
                         <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
                     </div>
-                {% elseif use_time_log_saving and time_log_saving_shift_free_min_time_in_advance_days and shift.isBefore(time_log_saving_shift_free_min_time_in_advance_days|trans ~ ' days') %}
-                    <div class="modal-content">
-                        <h5>Annuler mon créneau</h5>
-                        <br />
-                        <div class="card-panel teal warning">
-                            Vous ne pouvez pas annuler ce créneau.
-                            <br />
-                            Ce créneau a lieu dans moins de {{ time_log_saving_shift_free_min_time_in_advance_days }} jours.
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
-                    </div>
                 {% else %}
                     {{ form_start(shift_free_forms[shift.id]) }}
                         <div class="modal-content">
