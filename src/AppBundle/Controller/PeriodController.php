@@ -175,7 +175,7 @@ class PeriodController extends Controller
     /**
      * Display all the periods in a schedule (available and reserved)
      *
-     * @Route("/admin", name="period_index", methods={"GET","POST"})
+     * @Route("/admin", name="period_admin", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function adminIndexAction(Request $request, EntityManagerInterface $em): Response
