@@ -84,19 +84,25 @@
                         </div>
                         <h5>Adhésion(s)</h5>
                         <div class="row">
-                            <div class="col s4">
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.registration) }}
+                                    {{ form_label(form.registration) }}
+                                </div>
+                            </div>
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.registrationdate) }}
                                     {{ form_label(form.registrationdate) }}
                                 </div>
                             </div>
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.registrationdategt) }}
                                     {{ form_label(form.registrationdategt) }}
                                 </div>
                             </div>
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.registrationdatelt) }}
                                     {{ form_label(form.registrationdatelt) }}
