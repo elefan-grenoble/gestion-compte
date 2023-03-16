@@ -302,13 +302,15 @@ class ShiftService
         // - check if there is a min time in advance rule
         // - check if the shifter has enough time on its time log saving account
         if ($this->use_time_log_saving) {
+            $member = $shift->getShifter()->getMembership();
+            $member_saving_now = $member->getSavingTimeCount();
             if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
                 if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
                     $result = false;
                     $message = "Impossible de libérer un créneau si peu de temps en avance (minumum " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours).";
                 }
             }
-            if ($shift->getDuration() > $shift->getShifter()->getMembership()->getSavingTimeCount()) {
+            if ($shift->getDuration() > $member_saving_now) {
                 $result = false;
                 $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
             }

@@ -267,21 +267,6 @@ class ShiftController extends Controller
                 return $this->redirectToRoute("homepage");
             }
 
-            if ($this->use_time_log_saving) {
-                $member = $shift->getShifter()->getMembership();
-                $member_saving_now = $member->getSavingTimeCount();
-                // the saving account must have the necessary amount
-                if ($shift->getDuration() > $member_saving_now) {
-                    $session->getFlashBag()->add("warning", "Impossible de libérer le créneau car la capacité de votre compteur épargne est trop faible.");
-                    return $this->redirectToRoute("homepage");
-                }
-                // check if there is a time_in_advance rule
-                if (isset($this->time_log_saving_shift_free_min_time_in_advance_days) && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
-                    $session->getFlashBag()->add("warning", "Impossible de libérer le créneau car il a lieu dans moins de " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours.");
-                    return $this->redirectToRoute("homepage");
-                }
-            }
-
             // store shift beneficiary & reason (before shift free())
             $beneficiary = $shift->getShifter();
             $fixe = $shift->isFixe();
