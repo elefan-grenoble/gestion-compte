@@ -261,9 +261,9 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if beneficiary can free this shift
-            $beneficiary_can_free_shift = $this->get('shift_service')->canFreeShift($beneficiary, $shift);
-            if (!$beneficiary_can_free_shift['result']) {
-                $session->getFlashBag()->add("error", $beneficiary_can_free_shift['message'] || "Impossible d'annuler ce créneau.");
+            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($beneficiary, $shift);
+            if (!$shift_can_be_freed['result']) {
+                $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
             }
 
@@ -306,37 +306,39 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (!$shift->getShifter()) {
-                $success = false;
-                $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
-            } else {
-                // store shift beneficiary & reason (before shift free())
-                $beneficiary = $shift->getShifter();
-                $fixe = $shift->isFixe();
-                $reason = $form->get("reason")->getData();
-
-                // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
-                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
-                if ($wasCarriedOut) {
-                    $shift->invalidateShiftParticipation();
-                }
-
-                // free shift
-                $shift->free($reason);
-
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                if ($wasCarriedOut) {
-                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
-                }
-                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
-
-                $success = true;
-                $message = "Le créneau a bien été libéré !";
+            // check if shift can be freed
+            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
+            if (!$shift_can_be_freed['result']) {
+                $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
+                return $this->redirectToRoute("homepage");
             }
+
+            // store shift beneficiary & reason (before shift free())
+            $beneficiary = $shift->getShifter();
+            $fixe = $shift->isFixe();
+            $reason = $form->get("reason")->getData();
+
+            // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+            $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+            if ($wasCarriedOut) {
+                $shift->invalidateShiftParticipation();
+            }
+
+            // free shift
+            $shift->free($reason);
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($shift);
+            $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            if ($wasCarriedOut) {
+                $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+            }
+            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+
+            $success = true;
+            $message = "Le créneau a bien été libéré !";
         } else {
             $success = false;
             $message = "Une erreur s'est produite... Impossible de libérer le créneau. " . (string) $form->getErrors(true, false);

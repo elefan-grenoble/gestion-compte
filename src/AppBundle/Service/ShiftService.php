@@ -269,50 +269,54 @@ class ShiftService
      * @param Shift $shift
      * @return array
      */
-    public function canFreeShift(Beneficiary $beneficiary, Shift $shift) {
+    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = true) {
         // init
         $result = true;
         $message = "";
 
-        // cannot free a past or current shift
-        if ($shift->getIsPast() || $shift->getIsCurrent()) {
-            $result = false;
-            $message = "Impossible de libérer un créneau dans le passé.";
-        }
         // cannot free a shift without shifter
         if (!$shift->getShifter()) {
             $result = false;
             $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
         }
         // can only free your own shift
-        if ($shift->getShifter() != $beneficiary) {
+        elseif ($shift->getShifter() != $beneficiary) {
             $result = false;
-            $message = "Impossible de libérer le créneau car il n'est réservé par ce membre.";
+            $message = "Impossible de libérer le créneau car il n'est pas réservé par ce membre.";
         }
 
-        // Fly & fixed: check if there is a rule allowing to free fixed shifts
-        if ($this->use_fly_and_fixed) {
-            if ($shift->isFixe() && !$this->fly_and_fixed_allow_fixed_shift_free) {
+        // extra rules if free action not coming from admin
+        if (!$from_admin) {
+            // cannot free a past or current shift
+            if ($shift->getIsPast() || $shift->getIsCurrent()) {
                 $result = false;
-                $message = "Impossible de libérer un créneau fixe.";
+                $message = "Impossible de libérer un créneau dans le passé.";
             }
-        }
 
-        // Time log saving:
-        // - check if there is a min time in advance rule
-        // - check if the shifter has enough time on its time log saving account
-        if ($this->use_time_log_saving) {
-            $member = $shift->getShifter()->getMembership();
-            $member_saving_now = $member->getSavingTimeCount();
-            if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
-                if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+            // Fly & fixed: check if there is a rule allowing to free fixed shifts
+            if ($this->use_fly_and_fixed) {
+                if ($shift->isFixe() && !$this->fly_and_fixed_allow_fixed_shift_free) {
                     $result = false;
-                    $message = "Impossible de libérer un créneau si peu de temps en avance (minumum " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours).";
+                    $message = "Impossible de libérer un créneau fixe.";
                 }
             }
-            if ($shift->getDuration() > $member_saving_now) {
-                $result = false;
-                $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
+
+            // Time log saving:
+            // - check if there is a min time in advance rule
+            // - check if the shifter has enough time on its time log saving account
+            if ($this->use_time_log_saving) {
+                $member = $shift->getShifter()->getMembership();
+                $member_saving_now = $member->getSavingTimeCount();
+                if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
+                    if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                        $result = false;
+                        $message = "Impossible de libérer un créneau si peu de temps en avance (minumum " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours).";
+                    }
+                }
+                if ($shift->getDuration() > $member_saving_now) {
+                    $result = false;
+                    $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
+                }
             }
         }
 
