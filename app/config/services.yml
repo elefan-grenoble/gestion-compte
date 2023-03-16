@@ -45,6 +45,7 @@ services:
         arguments:
             - "%use_fly_and_fixed%"
             - "%use_time_log_saving%"
+            - "%time_log_saving_shift_free_min_time_in_advance_days%"
     AppBundle\Helper\:
         resource: '../../src/AppBundle/Helper'
         arguments: ['@service_container']
@@ -191,6 +192,8 @@ services:
                 - "%allow_extra_shifts%"
                 - "%max_time_in_advance_to_book_extra_shifts%"
                 - "%forbid_shift_overlap_time%"
+                - "%use_time_log_saving%"
+                - "%time_log_saving_shift_free_min_time_in_advance_days%"
     shift_free_log_service:
             class: AppBundle\Service\ShiftFreeLogService
             public: true
