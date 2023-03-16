@@ -290,10 +290,15 @@ class ShiftService
             }
         }
 
-        // Time log saving: check if there is a min time in advance rule
+        // Time log saving:
+        // - check if there is a min time in advance rule
+        // - check if the shifter has enough time on its time log saving account
         if ($this->use_time_log_saving) {
             if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
                 if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                    return false;
+                }
+                if ($shift->getDuration() > $shift->getShifter()->getMembership()->getSavingTimeCount()) {
                     return false;
                 }
             }
