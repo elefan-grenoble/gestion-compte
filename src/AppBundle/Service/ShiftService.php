@@ -298,9 +298,9 @@ class ShiftService
                 if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
                     return false;
                 }
-                if ($shift->getDuration() > $shift->getShifter()->getMembership()->getSavingTimeCount()) {
-                    return false;
-                }
+            }
+            if ($shift->getDuration() > $shift->getShifter()->getMembership()->getSavingTimeCount()) {
+                return false;
             }
         }
 
