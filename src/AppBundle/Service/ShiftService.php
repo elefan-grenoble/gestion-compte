@@ -25,9 +25,12 @@ class ShiftService
     private $allowExtraShifts;
     private $maxTimeInAdvanceToBookExtraShifts;
     private $forbidShiftOverlapTime;
+    private $use_time_log_saving;
+    private $time_log_saving_shift_free_min_time_in_advance_days;
 
     public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
-        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime)
+        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime,
+        $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
     {
         $this->em = $em;
         $this->beneficiaryService = $beneficiaryService;
@@ -38,6 +41,8 @@ class ShiftService
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
         $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
+        $this->use_time_log_saving = $use_time_log_saving;
+        $this->time_log_saving_shift_free_min_time_in_advance_days = $time_log_saving_shift_free_min_time_in_advance_days;
     }
 
     /**
@@ -251,6 +256,42 @@ class ShiftService
         }
 
         return $this->canBookDuration($beneficiary, $shift->getDuration(), $shift_cycle) or $this->canBookExtraShift($beneficiary, $shift);
+    }
+
+    /**
+     * Check if the beneficiary is able to free the shift
+     * @param Beneficiary $beneficiary
+     * @param Shift $shift
+     * @return bool
+     */
+    public function canFreeShift(Beneficiary $beneficiary, Shift $shift) {
+        // cannot free a past or current shift
+        if ($shift->getIsPast() || $shift->getIsCurrent()) {
+            return false;
+        }
+        // cannot free a shift without shifter
+        if (!$shift->getShifter()) {
+            return false;
+        }
+        // can only free your own shift
+        if ($shift->getShifter() != $beneficiary) {
+            return false;
+        }
+        // cannot free a fixed shift
+        if ($shift->isFixe()) {
+            return false;
+        }
+
+        // Time log saving: check if there is a min time in advance rule
+        if ($this->use_time_log_saving) {
+            if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
+                if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

@@ -1,4 +1,5 @@
-{% set member = shift.shifter.membership %}
+{% set beneficiary = app.user.beneficiary %}
+{% set member = beneficiary.membership %}
 
 <div class="card center sticky-action {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
@@ -15,9 +16,9 @@
             {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
         {% endif %}
     {% else %}
-        {% if not shift.fixe or shift.isUpcoming %}
+        {% if shift_service.canFreeShift(beneficiary, shift) or shift.isUpcoming %}
             <div class="card-action">
-                {% if not shift.fixe %}
+                {% if shift_service.canFreeShift(beneficiary, shift) %}
                     <a href="#free{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
                 {% endif %}
                 {% if shift.isUpcoming %}
