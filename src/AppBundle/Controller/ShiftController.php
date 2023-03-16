@@ -250,6 +250,8 @@ class ShiftController extends Controller
     public function freeShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $beneficiary = $current_app_user->getBeneficiary();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -258,12 +260,10 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($shift->isFixe()) {
-                $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe !");
-                return $this->redirectToRoute("homepage");
-            }
-            if (!$shift->getShifter()) {
-                $session->getFlashBag()->add("error", "Impossible de libérer le créneau car il n'est actuellement pas réservé.");
+            // check if beneficiary can free this shift
+            $beneficiary_can_free_shift = $this->get('shift_service')->canFreeShift($beneficiary, $shift);
+            if (!$beneficiary_can_free_shift['result']) {
+                $session->getFlashBag()->add("error", $beneficiary_can_free_shift['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
             }
 
