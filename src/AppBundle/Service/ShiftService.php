@@ -25,11 +25,14 @@ class ShiftService
     private $allowExtraShifts;
     private $maxTimeInAdvanceToBookExtraShifts;
     private $forbidShiftOverlapTime;
+    private $use_fly_and_fixed;
+    private $fly_and_fixed_allow_fixed_shift_free;
     private $use_time_log_saving;
     private $time_log_saving_shift_free_min_time_in_advance_days;
 
     public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
         $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime,
+        $use_fly_and_fixed, $fly_and_fixed_allow_fixed_shift_free,
         $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
     {
         $this->em = $em;
@@ -41,6 +44,8 @@ class ShiftService
         $this->allowExtraShifts = $allowExtraShifts;
         $this->maxTimeInAdvanceToBookExtraShifts = $maxTimeInAdvanceToBookExtraShifts;
         $this->forbidShiftOverlapTime = $forbidShiftOverlapTime;
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->fly_and_fixed_allow_fixed_shift_free = $fly_and_fixed_allow_fixed_shift_free;
         $this->use_time_log_saving = $use_time_log_saving;
         $this->time_log_saving_shift_free_min_time_in_advance_days = $time_log_saving_shift_free_min_time_in_advance_days;
     }
@@ -277,9 +282,12 @@ class ShiftService
         if ($shift->getShifter() != $beneficiary) {
             return false;
         }
-        // cannot free a fixed shift
-        if ($shift->isFixe()) {
-            return false;
+
+        // Fly & fixed: check if there is a rule allowing to free fixed shifts
+        if ($this->use_fly_and_fixed) {
+            if ($shift->isFixe() && !$this->fly_and_fixed_allow_fixed_shift_free) {
+                return false;
+            }
         }
 
         // Time log saving: check if there is a min time in advance rule
