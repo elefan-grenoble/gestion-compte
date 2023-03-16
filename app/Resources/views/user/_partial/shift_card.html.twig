@@ -1,3 +1,7 @@
+{% set beneficiary = app.user.beneficiary %}
+{% set member = beneficiary.membership %}
+{% set shift_member = shift.shifter.membership %}
+
 <div class="card center {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
@@ -43,6 +47,24 @@
                     {{ form_errors(shift_free_forms[shift.id].reason) }}
                     {{ form_widget(shift_free_forms[shift.id].reason) }}
                 </div>
+                {% if use_time_log_saving %}
+                    <div class="card-panel blue lighten-3">
+                        <i class="material-icons left">info</i>
+                        {% if time_log_saving_shift_free_min_time_in_advance_days and shift.isBefore(time_log_saving_shift_free_min_time_in_advance_days|trans ~ ' days') %}
+                            Ce créneau a lieu dans <strong>moins de {{ time_log_saving_shift_free_min_time_in_advance_days }} jours</strong>.
+                            <br />
+                            Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
+                        {% elseif shift.duration > shift_member.savingTimeCount %}
+                            Ce membre <strong>n'a pas assez de temps sur son compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                            <br />
+                            Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
+                        {% else %}
+                            Grâce au compteur épargne du membre, ce créneau sera comptabilisé !
+                            <br />
+                            En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés du compteur épargne (<strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>) du membre.
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
             <div class="modal-footer">
                 <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
