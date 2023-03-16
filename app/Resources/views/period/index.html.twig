@@ -1,0 +1,158 @@
+{#
+twig template for Controller/PeriodController.php/indexAction()
+for the route: /period/
+It display a page with all the avaible periods (a.k.a the "Semaine type")
+(and also display the periods reserved for a members if use_fly_and_fixed==true but without any names)
+#}
+
+{% extends 'layout.html.twig' %}
+
+{# generate a form input, used for the filters #}
+{% macro form_input(input_obj, hidden=false) %}
+    <div class="input-field col m3">
+        {% if hidden %}
+            {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
+        {% else %}
+            {{ form_widget(input_obj) }}
+            {{ form_label(input_obj) }}
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% block title %}Semaine type - {{ site_name }}{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/app/css/custom_animation.css') }}?060820191303">
+    <style>
+        .card .material-icons {
+            display: inline-flex;
+            vertical-align: top;
+        }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <i class="material-icons">date_range</i>&nbsp;Semaine type
+{% endblock breadcrumbs %}
+
+{% block container %}
+    <div class="container">
+        <div class="section">
+
+            {# Title Section --------------------------------------------------- #}
+            <div class="row center">
+                <h4 class="header">Semaine type</h4>
+            </div>
+
+            {# Header section -------------------------------------------------- #}
+            <ul class="collapsible">
+                <li>
+                    {# Filters ----------------------------------- #}
+                    <div class="collapsible-header">
+                        <i class="material-icons">tune</i>Filtres
+                    </div>
+                    <div class="collapsible-body">
+                        {{ form_start(filter_form) }}
+                        <div class="row">
+                            {{ _self.form_input(filter_form.job) }}
+                            {{ _self.form_input(filter_form.week) }}
+                            {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
+                        </div>
+                        <div class="row">
+                            {{ form_widget(filter_form.filter, { 'attr': {'class': 'btn col m3'} }) }}
+                            {{ form_end(filter_form) }}
+                        </div>
+                        {% if use_fly_and_fixed %}
+                        <div class="row">
+                            <a id="shifter" style="display: None;" onClick="showShifters()"
+                               class="btn col m3 waves-effect waves-light purple tooltipped"
+                               data-position="bottom"
+                               data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
+                                <i class="material-icons left">accessibility</i>Afficher les membres
+                            </a>
+                            <a id="training" onClick="showTraining()"
+                               class="btn col m3 waves-effect waves-light purple tooltipped"
+                               data-position="bottom"
+                               data-tooltip="Afficher la formation demandée pour être inscrit à un créneau">
+                                <i class="material-icons left">accessibility</i>Afficher les formations
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {# Table with all the periods in a schedule --------- #}
+    <div class="container" style="width: 90%; max-width: 1880px;">
+        <div class="section">
+            <table>
+                <thead>
+                <tr>
+                    {% for key,day in days_of_week %}
+                        <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    {% for key,day in days_of_week %}
+                        <td>
+                            {% for period in periods_by_day[key] %}
+                                {% if (filling_filter == null)
+                                    or (filling_filter == "empty" and period.isEmpty(week_filter))
+                                    or (filling_filter == "full" and period.isFull(week_filter))
+                                    or (filling_filter == "partial" and period.isPartial(week_filter)) %}
+                                    {% include 'period/_partial/period_card.html.twig'
+                                        with {'period':period, 'week_filter':week_filter, 'anonymized':true} %}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock container %}
+
+{% block javascripts %}
+    {% if use_fly_and_fixed %}
+        <script>
+            $(document).ready(function ($) {
+                    showShifters();
+                }
+            )
+
+            /**
+             * when user click on the showShifters
+             * ("Afficher les membres") bottom
+             */
+            function showShifters() {
+                $('div[id="training"]').hide();
+                $('div[id="shifter"]').show();
+                $('a[id="training"]').show();
+                $('a[id="shifter"]').hide();
+            }
+
+            /**
+             * when user click on the showTraining
+             * ("Afficher les formations") bottom
+             */
+            function showTraining() {
+                $('div[id="training"]').show();
+                $('div[id="shifter"]').hide();
+                $('a[id="training"]').hide();
+                $('a[id="shifter"]').show();
+            }
+
+            function truncate(str, maxlength) {
+                return (str.length > maxlength) ?
+                    str.slice(0, maxlength - 1) + '…' : str;
+            }
+
+        </script>
+    {% endif %}
+{% endblock javascripts %}

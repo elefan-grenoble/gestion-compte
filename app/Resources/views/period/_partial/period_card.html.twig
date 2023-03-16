@@ -1,0 +1,64 @@
+{# Generate a card for all positions in a period
+# period: a Entity/Period object to be display
+# week_filter: a string with the week to keep or null if no filter
+# anonymized: if true will not display the shifter name
+
+# will use the editable-box css class if anonymized is false
+#}
+
+{# generate a form input, used for the filters #}
+{% macro period_title(period) %}
+    {% if period.job %}
+        <b>{{ period.job.name }}</b>
+        <br>
+        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+    {% else %}
+        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
+        <br>
+    {% endif %}
+{% endmacro %}
+
+
+<div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
+
+    {# Card header #}
+    {%  if anonymized %}
+        <div>
+            {{ _self.period_title(period) }}
+        </div>
+
+    {% else %}
+        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+            <div class="black-text editable-box">
+                {{ _self.period_title(period) }}
+            </div>
+        </a>
+    {% endif %}
+
+
+    {# if display by job/training #}
+    <div id="training" style="margin-top:1em;">
+        {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
+            <h6>Semaine {{ week }}</h6>
+            {% for training, nb_shifters in positions %}
+                <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                <br/>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    {# if display by member name #}
+    {% if use_fly_and_fixed %}
+        <div id="shifter" style="margin-top:1em;">
+            {% for week, positions in period.positionsperweekcycle %}
+                {% if (week in week_filter) or not week_filter %}
+                    <h6>Semaine {{ week }}</h6>
+                    {% for position in positions %}
+                        {% include 'period/_partial/position_shifter_display.html.twig'
+                            with {'position':position, 'anonymized':anonymized} %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

@@ -1,4 +1,23 @@
+{#
+    twig template for Controller/PeriodController.php/adminIndexAction()
+    for the route: /period/admin
+    It display a page with all the avaible periods (a.k.a the "Semaine type")
+    (and also display the periods reserved for a members if use_fly_and_fixed==true)
+#}
+
 {% extends 'layout.html.twig' %}
+
+{# generate a form input, used for the filters #}
+{% macro form_input(input_obj, hidden=false) %}
+    <div class="input-field col m3">
+        {% if hidden %}
+            {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
+        {% else %}
+            {{ form_widget(input_obj) }}
+            {{ form_label(input_obj) }}
+        {% endif %}
+    </div>
+{% endmacro %}
 
 {% block title %}Semaine type - {{ site_name }}{% endblock %}
 
@@ -39,92 +58,6 @@
     </style>
 {% endblock %}
 
-{% block macro %}
-    {# generate a form input, used for the filters #}
-    {% macro form_input(input_obj, hidden=false) %}
-        <div class="input-field col m3">
-            {% if hidden %}
-                {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
-            {% else %}
-                {{ form_widget(input_obj) }}
-                {{ form_label(input_obj) }}
-            {% endif %}
-        </div>
-    {% endmacro %}
-
-    {# generate one line with the icon and the shifter id+name and if needed a warning icon #}
-    {% macro position_shifter_display(position) %}
-        {% set shifter = position.shifter %}
-        {% set formation = position.formation??"Sans formation" %}
-
-        {% if shifter %}
-            {# sombody is registered for this periodposition #}
-            {% set warning = beneficiary_service.hasWarningStatus(shifter) %}
-            <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}" target="_blank"
-               class="black-text tooltipped editable-box truncate" data-position="bottom" data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ formation }})">
-                {% if warning %}
-                    <i class="red-text material-icons warning-animation">warning</i>
-                {% else %}
-                    <i class="material-icons">person</i>
-                {% endif %}
-                {{ shifter.getFirstname() }} {{ shifter.getLastname() | first }}
-            </a>
-        {% else %}
-            <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ formation }}">
-                <i class="material-icons">person</i>
-                <strong><i>libre</i></strong>
-            </div>
-        {% endif %}
-    {% endmacro position_shifter_display %}
-
-    {# generate a card for all positions in a period
-     # period: a period object
-     # week_filter: a string with the week to keep or null if no filter
-    #}
-    {% macro period_card(period, week_filter) %}
-        <div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
-
-            {# Card header #}
-            <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
-                <div class="black-text editable-box">
-                    {% if period.job %}
-                        <b>{{ period.job.name }}</b>
-                        <br>
-                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-                    {% else %}
-                        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-                        <br>
-                    {% endif %}
-                </div>
-            </a>
-            {# if display by job/training #}
-            <div id="training" style="margin-top:1em;">
-                {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-                    <h6>Semaine {{ week }}</h6>
-                    {% for training, nb_shifters in positions %}
-                        <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
-                        <br/>
-                    {% endfor %}
-                {% endfor %}
-            </div>
-
-            {# if display by member name #}
-            {% if use_fly_and_fixed %}
-                <div id="shifter" style="margin-top:1em;">
-                    {% for week, positions in period.positionsperweekcycle %}
-                        {% if (week in week_filter) or not week_filter %}
-                            <h6>Semaine {{ week }}</h6>
-                            {% for position in positions %}
-                                {{ _self.position_shifter_display(position) }}
-                            {% endfor %}
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
-    {% endmacro %}
-{% endblock macro %}
-
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
@@ -142,8 +75,8 @@
 
             {# Header section -------------------------------------------------- #}
             <ul class="collapsible">
-                {# Filters  ---------------------------------- #}
                 <li>
+                    {# Filters ----------------------------------- #}
                     <div class="collapsible-header">
                         <i class="material-icons">tune</i>Filtres
                     </div>
@@ -170,7 +103,8 @@
                         <div class="row">
                             <a href="{{ path("period_new") }}"
                                class="btn col m4 waves-effect waves-light tooltipped"
-                               data-position="bottom" data-tooltip="Créer un groupe de créneaux type à une heure et un jour donné">
+                               data-position="bottom"
+                               data-tooltip="Créer un groupe de créneaux type à une heure et un jour donné">
                                 <i class="material-icons left">note_add</i>Nouveau créneau type
                             </a>
                         </div>
@@ -179,15 +113,18 @@
                             <div class="row">
                                 <a href="{{ path("period_copy") }}"
                                    class="btn col m4 waves-effect waves-light tooltipped"
-                                   data-position="bottom" data-tooltip="Dupliquer des créneaux types d'un jour vers un autre">
+                                   data-position="bottom"
+                                   data-tooltip="Dupliquer des créneaux types d'un jour vers un autre">
                                     <i class="material-icons left">content_copy</i>Dupliquer des créneaux
                                 </a>
                             </div>
                             <div class="row">
                                 <a href="{{ path("shifts_generation") }}"
                                    class="btn col m4 waves-effect waves-light tooltipped"
-                                   data-position="bottom" data-tooltip="Générer automatiquement des créneaux à partir de la semaine type">
-                                    <i class="material-icons left">date_range</i> <i class="material-icons left">build</i>Générer des créneaux
+                                   data-position="bottom"
+                                   data-tooltip="Générer automatiquement des créneaux à partir de la semaine type">
+                                    <i class="material-icons left">date_range</i> <i
+                                            class="material-icons left">build</i>Générer des créneaux
                                 </a>
                             </div>
                         {% endif %}
@@ -195,77 +132,80 @@
                         {% if use_fly_and_fixed %}
                             <div class="row">
                                 <a id="shifter" style="display: None;" onClick="showShifters()"
-                                class="btn col m4 waves-effect waves-light purple tooltipped"
-                                data-position="bottom" data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
+                                   class="btn col m4 waves-effect waves-light purple tooltipped"
+                                   data-position="bottom"
+                                   data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
                                     <i class="material-icons left">accessibility</i>Afficher les membres
                                 </a>
                                 <a id="training" onClick="showTraining()"
-                                class="btn col m4 waves-effect waves-light purple tooltipped"
-                                data-position="bottom" data-tooltip="Afficher la formation demandée pour étre inscrit à un créneau">
+                                   class="btn col m4 waves-effect waves-light purple tooltipped"
+                                   data-position="bottom"
+                                   data-tooltip="Afficher la formation demandée pour être inscrit à un créneau">
                                     <i class="material-icons left">accessibility</i>Afficher les formations
                                 </a>
                             </div>
                         {% endif %}
                     </div>
                 </li>
-                {% if use_fly_and_fixed %}
+                <li>
                     {# Légende ----------------------------------- #}
-                    <li>
-                        <div class="collapsible-header">
-                            <i class="material-icons">help_outline</i>Légende
-                        </div>
-                        <div class="collapsible-body">
+                    <div class="collapsible-header">
+                        <i class="material-icons">help_outline</i>Légende
+                    </div>
+                    <div class="collapsible-body">
+                        {% if use_fly_and_fixed %}
+                            {# Légende ----------------------------------- #}
                             <table class="responsive-table striped">
                                 <thead>
-                                    <tr>
-                                        <th>Texte</th>
-                                        <th>Explication</th>
-                                    </tr>
+                                <tr>
+                                    <th>Texte</th>
+                                    <th>Explication</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    <tr>
-                                        <td>
-                                            <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
-                                        </td>
-                                        <td>
-                                            Un créneau fixe libre
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <i class="material-icons">person</i>&nbsp;Prénom N
-                                        </td>
-                                        <td>
-                                            Un créneau fixe avec un bénéficiaire d'inscrit
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
-                                        </td>
-                                        <td>
-                                            Un créneau fixe avec un bénéficiaire dans un état "anormal"
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            Etats "anormaux"
-                                        </td>
-                                        <td>
-                                            <ul>
-                                                <li>{{ member_withdrawn_icon }} Membre clôturé</li>
-                                                <li>{{ member_frozen_icon }} Membre gelé</li>
-                                                <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
-                                                <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
-                                                <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
-                                            </ul>
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td>
+                                        <i class="material-icons">person</i>&nbsp;<strong><i>libre</i></strong>
+                                    </td>
+                                    <td>
+                                        Un créneau fixe libre
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class="material-icons">person</i>&nbsp;Prénom N
+                                    </td>
+                                    <td>
+                                        Un créneau fixe avec un bénéficiaire d'inscrit
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <i class="red-text material-icons warning-animation">warning</i>&nbsp;Prénom N
+                                    </td>
+                                    <td>
+                                        Un créneau fixe avec un bénéficiaire dans un état "anormal"
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        Etats "anormaux"
+                                    </td>
+                                    <td>
+                                        <ul>
+                                            <li>{{ member_withdrawn_icon }} Membre clôturé</li>
+                                            <li>{{ member_frozen_icon }} Membre gelé</li>
+                                            <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
+                                            <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
+                                            <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
+                                        </ul>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
-                        </div>
-                    </li>
-                {% endif %}
+                        {% endif %}
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
@@ -292,7 +232,8 @@
                                         or (filling_filter == "full" and period.isFull(week_filter))
                                         or (filling_filter == "partial" and period.isPartial(week_filter))
                                         or (beneficiary_filter and period.hasShifter(beneficiary_filter) | length > 0) %}
-                                        {{ _self.period_card(period, week_filter) }}
+                                        {% include 'period/_partial/period_card.html.twig'
+                                                with {'period':period, 'week_filter':week_filter, 'anonymized':false} %}
                                     {% endif %}
                                 {% endfor %}
                             </td>
