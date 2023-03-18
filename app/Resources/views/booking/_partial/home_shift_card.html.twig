@@ -16,9 +16,9 @@
             {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
         {% endif %}
     {% else %}
-        {% if shift_service.canFreeShift(beneficiary, shift) or shift.isUpcoming %}
+        {% if shift_service.canFreeShift(beneficiary, shift)['result'] or shift.isUpcoming %}
             <div class="card-action">
-                {% if shift_service.canFreeShift(beneficiary, shift) %}
+                {% if shift_service.canFreeShift(beneficiary, shift)['result'] %}
                     <a href="#free{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
                 {% endif %}
                 {% if shift.isUpcoming %}
