@@ -46,6 +46,7 @@ class TimeLogEventListener
     protected $max_time_at_end_of_shift;
     protected $use_card_reader_to_validate_shifts;
     protected $use_time_log_saving;
+    protected $time_log_saving_shift_free_min_time_in_advance_days;
 
     public function __construct(EntityManager $entityManager, Logger $logger, Container $container)
     {
@@ -58,6 +59,7 @@ class TimeLogEventListener
         $this->max_time_at_end_of_shift = $this->container->getParameter('max_time_at_end_of_shift');
         $this->use_card_reader_to_validate_shifts = $this->container->getParameter('use_card_reader_to_validate_shifts');
         $this->use_time_log_saving = $this->container->getParameter('use_time_log_saving');
+        $this->time_log_saving_shift_free_min_time_in_advance_days = $this->container->getParameter('time_log_saving_shift_free_min_time_in_advance_days');
     }
 
     /**
@@ -147,15 +149,27 @@ class TimeLogEventListener
             $this->deleteShiftLogs($shift, $member);
         }
 
-        // the shift time will be taken from the member's saving account
+        // the shift time will be "validated" and taken from the member's saving account
+        // if and only if:
+        // - there is a min time in advance rule
+        // - the shifter has enough time on its time log saving account
         if ($this->use_time_log_saving) {
-            // decrement the savingTimeCount
-            $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
-            $this->em->persist($log);
-            // increment the shiftTimeCount
-            $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
-            $this->em->persist($log);
-            $this->em->flush();
+            $member_saving_now = $member->getSavingTimeCount();
+            if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                // do nothing!
+                // too late to use the member's saving account
+            } elseif ($shift->getDuration() > $member_saving_now) {
+                // do nothing!
+                // the member's saving account does not have enough time
+            } else {
+                // decrement the savingTimeCount
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
+                $this->em->persist($log);
+                // increment the shiftTimeCount
+                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
+                $this->em->persist($log);
+                $this->em->flush();
+            }
         }
     }
 
