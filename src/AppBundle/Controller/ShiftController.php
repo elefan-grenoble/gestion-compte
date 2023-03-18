@@ -251,7 +251,6 @@ class ShiftController extends Controller
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $beneficiary = $current_app_user->getBeneficiary();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -261,7 +260,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if beneficiary can free this shift
-            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($beneficiary, $shift);
+            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_app_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
                 $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
@@ -300,6 +299,9 @@ class ShiftController extends Controller
      */
     public function freeShiftAdminAction(Request $request, Shift $shift)
     {
+        $session = new Session();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
         $form = $this->createShiftFreeAdminForm($shift);
@@ -361,7 +363,6 @@ class ShiftController extends Controller
                 return new JsonResponse(array('message'=>$message), 400);
             }
         } else {
-            $session = new Session();
             $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             $referer = $request->headers->get('referer');
             return new RedirectResponse($referer);
