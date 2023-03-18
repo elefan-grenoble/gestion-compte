@@ -269,7 +269,7 @@ class ShiftService
      * @param Shift $shift
      * @return array
      */
-    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = true) {
+    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = false) {
         // init
         $result = true;
         $message = "";

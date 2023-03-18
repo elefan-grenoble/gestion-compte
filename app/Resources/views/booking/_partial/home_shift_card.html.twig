@@ -18,6 +18,7 @@
     {% else %}
         {% if shift_service.canFreeShift(beneficiary, shift)['result'] or shift.isUpcoming %}
             <div class="card-action">
+                {{ shift_service.canFreeShift(beneficiary, shift)['result'] }}
                 {% if shift_service.canFreeShift(beneficiary, shift)['result'] %}
                     <a href="#free{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
                 {% endif %}
