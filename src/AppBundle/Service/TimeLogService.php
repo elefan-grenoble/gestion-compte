@@ -112,6 +112,22 @@ class TimeLogService
     }
 
     /**
+     * Initialize an "shift end saving" log with the shift data
+     * 
+     * @param Shift $shift
+     * @param \DateTime $date
+     * @return TimeLog
+     */
+    public function initShiftEndSavingTimeLog(Membership $member, $time)
+    {
+        $log = $this->initTimeLog($member);
+        $log->setType(TimeLog::TYPE_SHIFT_END_SAVING);
+        $log->setTime($time);
+
+        return $log;
+    }
+
+    /**
      * Initialize a "cycle beginning" log with the member data
      * 
      * @param Membership $member

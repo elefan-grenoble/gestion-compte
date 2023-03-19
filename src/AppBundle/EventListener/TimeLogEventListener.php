@@ -327,7 +327,7 @@ class TimeLogEventListener
                 $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
                 $this->em->persist($log);
                 // then increment the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, 1 * $withdraw_from_saving);
+                $log = $this->container->get('time_log_service')->initShiftEndSavingTimeLog($member, 1 * $withdraw_from_saving);
                 $this->em->persist($log);
             }
         }
