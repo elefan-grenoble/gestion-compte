@@ -298,7 +298,6 @@ class EmailingEventListener
                     );
                 $this->mailer->send($mail);
             }
-
         }
     }
 

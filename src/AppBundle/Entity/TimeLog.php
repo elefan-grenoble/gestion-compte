@@ -287,8 +287,6 @@ class TimeLog
                 return "Créneau invalidé";
             case self::TYPE_SHIFT_FREED_SAVING:
                 return "Créneau libéré et compteur temps incrémenté (grâce au compteur épargne)";
-            case self::TYPE_SHIFT_END_SAVING:
-                return "Compteur temps incrémenté grâce au compteur épargne";
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:
@@ -301,6 +299,8 @@ class TimeLog
                 })->map(function($element) {
                     return $element->getId();
                 })->toArray()) . ")";
+            case self::TYPE_CYCLE_END_SAVING:
+                return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
             case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
