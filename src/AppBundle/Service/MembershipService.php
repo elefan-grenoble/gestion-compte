@@ -175,6 +175,13 @@ class MembershipService
         return null
     }
 
+    public function getCycleMissedShiftsCount(Membership $membership, $date) {
+        $shift_cycle = $this->getCycleNumber($membership, $date);
+        $cycle_start = $this->getStartOfCycle($membership, $shift_cycle);
+        $cycle_end = $this->getEndOfCycle($membership, $shift_cycle);
+        return $this->em->getRepository('AppBundle:Shift')->getMissedShiftsCount($membership, $cycle_start, $cycle_end);
+    }
+
     /**
      * Return true if the membership is in a "warning" status
      */

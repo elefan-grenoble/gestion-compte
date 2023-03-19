@@ -316,15 +316,12 @@ class TimeLogEventListener
         } elseif ($this->use_time_log_saving && $extra_counter_time < 0) {
             // retrieve member's savings
             $saving_now = $member->getSavingTimeCount();
-            // count missing shifts for last cycle
+            // count missed shifts for last cycle
             $date_minus_one_day = clone($date)->modify("-1 days");
-            $shift_cycle = $this->membershipService->getCycleNumber($member, $date_minus_one_day);
-            $cycle_start = $this->get('membership_service')->getStartOfCycle($membership, $shift_cycle);
-            $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, $shift_cycle);
-            $missing_shifts = $em->getRepository('AppBundle:Shift')->hasMissingShifts($member, $cycle_start, $cycle_end);
-            // check if member has savings and no missing shifts
-            if ($saving_now > 0 && $missing_shifts == 0) {
-                $missing_due_time = ($counter_today <= 0) ? $this->due_duration_by_cycle : $this->due_duration_by_cycle - $counter_today;
+            $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleMissedShiftsCount($membership, $date_minus_one_day);
+            // check if member has savings and no missed shifts
+            if ($saving_now > 0 && $previous_cycle_missed_shifts_count == 0) {
+                $missing_due_time = ($counter_today > 0) ? $this->due_duration_by_cycle - $counter_today : $this->due_duration_by_cycle;
                 $withdraw_from_saving = min($saving_now, $missing_due_time);
                 // first decrement the savingTimeCount
                 $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
