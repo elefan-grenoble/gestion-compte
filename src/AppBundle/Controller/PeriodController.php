@@ -29,7 +29,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 /**
  * Period controller (a.k.a. "semaine type")
- * No routes (managed per action)
+ * No global route (managed per action)
  */
 class PeriodController extends Controller
 {
@@ -501,7 +501,7 @@ class PeriodController extends Controller
     }
 
     /**
-     * @Route("admin/periods/generateShifts", name="admin_period_shifts_generate", methods={"GET","POST"})
+     * @Route("admin/periods/shifts_generate", name="admin_period_shifts_generate", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function adminGenerateShiftsForDateAction(Request $request, KernelInterface $kernel)
