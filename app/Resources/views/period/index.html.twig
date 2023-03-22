@@ -64,20 +64,20 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
                             {{ form_end(filter_form) }}
                         </div>
                         {% if use_fly_and_fixed %}
-                        <div class="row">
-                            <a id="shifter" style="display: None;" onClick="showShifters()"
-                               class="btn col m3 waves-effect waves-light purple tooltipped"
-                               data-position="bottom"
-                               data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
-                                <i class="material-icons left">accessibility</i>Afficher les membres
-                            </a>
-                            <a id="training" onClick="showTraining()"
-                               class="btn col m3 waves-effect waves-light purple tooltipped"
-                               data-position="bottom"
-                               data-tooltip="Afficher la formation demandée pour être inscrit à un créneau">
-                                <i class="material-icons left">accessibility</i>Afficher les formations
-                            </a>
-                        </div>
+                            <div class="row">
+                                <a id="shifter" style="display: None;" onClick="showShifters()"
+                                class="btn col m3 waves-effect waves-light purple tooltipped"
+                                data-position="bottom"
+                                data-tooltip="Afficher le nom des membres inscrits en créneaux fixes">
+                                    <i class="material-icons left">accessibility</i>Afficher les membres
+                                </a>
+                                <a id="training" onClick="showTraining()"
+                                class="btn col m3 waves-effect waves-light purple tooltipped"
+                                data-position="bottom"
+                                data-tooltip="Afficher la formation demandée pour être inscrit à un créneau">
+                                    <i class="material-icons left">accessibility</i>Afficher les formations
+                                </a>
+                            </div>
                         {% endif %}
                     </div>
                 </li>
