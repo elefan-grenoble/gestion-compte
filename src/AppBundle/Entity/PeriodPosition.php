@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * PeriodRoom
  *
  * @ORM\Table(name="period_position")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PeriodPositionRepository")
  */
 class PeriodPosition
@@ -35,6 +36,12 @@ class PeriodPosition
     private $period;
 
     /**
+     * @var string
+     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=false)
+     */
+    private $weekCycle;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Beneficiary")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
@@ -47,17 +54,18 @@ class PeriodPosition
     private $booker;
 
     /**
-     * @var string
-     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=false)
-     */
-    private $weekCycle;
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(name="booked_time", type="datetime", nullable=true)
      */
     private $bookedTime;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
      * Constructor
@@ -72,6 +80,14 @@ class PeriodPosition
             return $this->getFormation()->getName();
         else
             return "Membre";
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -225,6 +241,16 @@ class PeriodPosition
     public function getBookedTime()
     {
         return $this->bookedTime;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 
     /**
