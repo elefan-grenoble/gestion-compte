@@ -28,7 +28,7 @@
         </div>
 
     {% else %}
-        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+        <a href="{{ path("admin_period_edit",{'id': period.id}) }}" class="black-text">
             <div class="black-text editable-box">
                 {{ _self.period_title(period) }}
             </div>

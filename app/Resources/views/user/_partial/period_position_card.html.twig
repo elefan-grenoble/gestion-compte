@@ -16,7 +16,7 @@
     </div>
     {% if (show_actions ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
         <div class="card-action">
-            <a href="{{ path("period_edit", { 'id': period_position.period.id }) }}" class="waves-effect waves-light btn white black-text" target="_blank" title="Voir le créneau">
+            <a href="{{ path("admin_period_edit", { 'id': period_position.period.id }) }}" class="waves-effect waves-light btn white black-text" target="_blank" title="Voir le créneau">
                 <i class="material-icons left orange-text">date_range</i>Voir le créneau
             </a>
         </div>

@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('period') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_period_list') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">edit</i>&nbsp;Editer
 {% endblock %}
 
@@ -73,7 +73,7 @@
                                     le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
                                     par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
                                 </p>
-                                <form action="{{ path('period_position_free', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
+                                <form action="{{ path('admin_period_position_free', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">
                                         <i class="material-icons left">lock_open</i>Libérer
                                     </button>
