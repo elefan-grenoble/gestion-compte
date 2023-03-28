@@ -1,5 +1,3 @@
-{% set beneficiary = app.user.beneficiary %}
-{% set member = beneficiary.membership %}
 {% set shift_member = shift.shifter.membership %}
 
 <div class="card center {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
@@ -55,13 +53,13 @@
                             <br />
                             Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
                         {% elseif shift.duration > shift_member.savingTimeCount %}
-                            Ce membre <strong>n'a pas assez de temps sur son compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                            Ce membre <strong>n'a pas assez de temps sur son compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ shift_member.savingTimeCount | duration_from_minutes }}</strong>).
                             <br />
                             Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
                         {% else %}
                             Grâce au compteur épargne du membre, ce créneau sera comptabilisé !
                             <br />
-                            En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés du compteur épargne (<strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>) du membre.
+                            En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés du compteur épargne (<strong>{{ shift_member.savingTimeCount | duration_from_minutes }}</strong>) du membre.
                         {% endif %}
                     </div>
                 {% endif %}
