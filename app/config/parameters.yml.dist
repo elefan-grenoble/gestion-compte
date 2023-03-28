@@ -100,14 +100,15 @@ parameters:
     allow_extra_shifts: true
     max_time_in_advance_to_book_extra_shifts: '3 days'
     display_gauge: true
-    use_fly_and_fixed: false
     time_after_which_members_are_late_with_shifts: -9
     reserve_new_shift_to_prior_shifter: true
     forbid_shift_overlap_time: 30
-    display_name_shifters: false
-    use_card_reader_to_validate_shifts: false
     max_time_at_end_of_shift: 0
+    forbid_own_shift_free_in_admin: false
+    display_name_shifters: false
     max_nb_of_past_cycles_to_display: 3
+    use_fly_and_fixed: false
+    use_card_reader_to_validate_shifts: false
     use_time_log_saving: false
 
     # Events
