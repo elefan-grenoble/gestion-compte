@@ -48,28 +48,18 @@ twig:
     project_name: "%project_name%"
     project_url: "%project_url%"
     project_url_display: "%project_url_display%"
-    helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
-    due_duration_by_cycle: '%due_duration_by_cycle%'
-    registration_duration: '%registration_duration%'
     support_email: '%transactional_mailer_user%'
     images_tmp_dir: '%images_tmp_dir%'
-    maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
-    allow_extra_shifts: '%allow_extra_shifts%'
-    time_after_which_members_are_late_with_shifts: '%time_after_which_members_are_late_with_shifts%'
-    max_time_in_advance_to_book_extra_shifts : '%max_time_in_advance_to_book_extra_shifts%'
     code_generation_enabled: '%code_generation_enabled%'
     local_currency_name: '%local_currency_name%'
-    use_fly_and_fixed: '%use_fly_and_fixed%'
-    max_event_proxy_per_member: '%max_event_proxy_per_member%'
-    use_time_log_saving: '%use_time_log_saving%'
-    display_gauge: '%display_gauge%'
-    max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
-    profile_display_task_list: '%profile_display_task_list%'
-    profile_display_time_log: '%profile_display_time_log%'
+    # registration
+    helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
+    registration_duration: '%registration_duration%'
     # user
     user_account_not_enabled_material_icon: '%user_account_not_enabled_material_icon%'
     user_account_enabled_material_icon: '%user_account_enabled_material_icon%'
     # member
+    maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
     member_withdrawn_icon: '%member_withdrawn_icon%'
     member_withdrawn_material_icon: '%member_withdrawn_material_icon%'
     member_withdrawn_background_color: '%member_withdrawn_background_color%'
@@ -86,6 +76,16 @@ twig:
     beneficiary_main_icon: '%beneficiary_main_icon%'
     beneficiary_new_icon: '%beneficiary_new_icon%'
     beneficiary_flying_icon: '%beneficiary_flying_icon%'
+    # profile display
+    display_gauge: '%display_gauge%'
+    max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
+    profile_display_task_list: '%profile_display_task_list%'
+    profile_display_time_log: '%profile_display_time_log%'
+    # shifts
+    due_duration_by_cycle: '%due_duration_by_cycle%'
+    allow_extra_shifts: '%allow_extra_shifts%'
+    time_after_which_members_are_late_with_shifts: '%time_after_which_members_are_late_with_shifts%'
+    max_time_in_advance_to_book_extra_shifts: '%max_time_in_advance_to_book_extra_shifts%'
     # swipe card
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
@@ -94,9 +94,13 @@ twig:
     display_name_shifters: '%display_name_shifters%'
     use_card_reader_to_validate_shifts: '%use_card_reader_to_validate_shifts%'
     # fly and fixed
+    use_fly_and_fixed: '%use_fly_and_fixed%'
     fly_and_fixed_allow_fixed_shift_free: '%fly_and_fixed_allow_fixed_shift_free%'
     # time log saving
+    use_time_log_saving: '%use_time_log_saving%'
     time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
+    # events
+    max_event_proxy_per_member: '%max_event_proxy_per_member%'
     # role names & icons
     role_user_name: Utilisateur
     role_user_material_icon: person
