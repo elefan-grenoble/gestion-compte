@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * Period
  *
  * @ORM\Table(name="period")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PeriodRepository")
  */
 class Period
@@ -51,10 +52,17 @@ class Period
     private $job;
 
     /**
-     * One Period have Many Positions.
+     * One Period has Many Positions.
      * @ORM\OneToMany(targetEntity="PeriodPosition", mappedBy="period", cascade={"persist", "remove"}), orphanRemoval=true)
      */
     private $positions;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
      * Constructor
@@ -62,6 +70,14 @@ class Period
     public function __construct()
     {
         $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        $this->createdAt = new \DateTime();
     }
 
     /**
@@ -214,6 +230,16 @@ class Period
     public function getPositions()
     {
         return $this->positions;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 
     /**
