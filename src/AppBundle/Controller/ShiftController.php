@@ -308,39 +308,39 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // check if shift can be freed
             $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
+            // check if shift can be freed
             if (!$shift_can_be_freed['result']) {
-                $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
-                return $this->redirectToRoute("homepage");
+                $success = false;
+                $message = $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.";
+            } else {
+                // store shift beneficiary & reason (before shift free())
+                $beneficiary = $shift->getShifter();
+                $fixe = $shift->isFixe();
+                $reason = $form->get("reason")->getData();
+
+                // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
+                $wasCarriedOut = $shift->getWasCarriedOut() == 1;
+                if ($wasCarriedOut) {
+                    $shift->invalidateShiftParticipation();
+                }
+
+                // free shift
+                $shift->free($reason);
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($shift);
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                if ($wasCarriedOut) {
+                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+                }
+                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+
+                $success = true;
+                $message = "Le créneau a bien été libéré !";
             }
-
-            // store shift beneficiary & reason (before shift free())
-            $beneficiary = $shift->getShifter();
-            $fixe = $shift->isFixe();
-            $reason = $form->get("reason")->getData();
-
-            // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
-            $wasCarriedOut = $shift->getWasCarriedOut() == 1;
-            if ($wasCarriedOut) {
-                $shift->invalidateShiftParticipation();
-            }
-
-            // free shift
-            $shift->free($reason);
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            if ($wasCarriedOut) {
-                $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
-            }
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
-
-            $success = true;
-            $message = "Le créneau a bien été libéré !";
         } else {
             $success = false;
             $message = "Une erreur s'est produite... Impossible de libérer le créneau. " . (string) $form->getErrors(true, false);
