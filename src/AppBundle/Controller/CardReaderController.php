@@ -70,7 +70,7 @@ class CardReaderController extends Controller
                 }
                 $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
             }
-            // validate ongoing beneficiary shift(s)
+            // validate beneficiary ongoing shift(s)
             $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
             $dispatcher = $this->get('event_dispatcher');
             foreach ($shifts as $shift) {

@@ -44,7 +44,7 @@ services:
     AppBundle\Controller\ShiftController:
         arguments:
             - "%forbid_own_shift_free_admin%"
-            - "%forbid_own_shift_validate%"
+            - "%forbid_own_shift_validate_admin%"
             - "%use_fly_and_fixed%"
             - "%use_time_log_saving%"
             - "%time_log_saving_shift_free_min_time_in_advance_days%"
