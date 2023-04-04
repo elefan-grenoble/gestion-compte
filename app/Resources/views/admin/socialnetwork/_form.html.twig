@@ -1,0 +1,33 @@
+<div class="row">
+    <div class="col s12">
+        <div class="errors">
+            {{ form_errors(form.name) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.name) }}
+            {{ form_label(form.name) }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        <div class="errors">
+            {{ form_errors(form.description) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.description) }}
+            {{ form_label(form.description) }}
+        </div>
+    </div>
+</div>
+<div>
+    <div class="col s12">
+        <div class="errors">
+            {{ form_errors(form.url) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.url) }}
+            {{ form_label(form.url) }}
+        </div>
+    </div>
+</div>

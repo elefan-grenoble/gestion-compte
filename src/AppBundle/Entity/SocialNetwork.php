@@ -5,13 +5,13 @@ namespace AppBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * SocialMedia
+ * SocialNetwork
  *
- * @ORM\Table(name="social_media")
+ * @ORM\Table(name="social_network")
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="AppBundle\Repository\SocialMediaRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\SocialNetworkRepository")
  */
-class SocialMedia
+class SocialNetwork
 {
     /**
      * @var int
@@ -28,6 +28,13 @@ class SocialMedia
      * @ORM\Column(name="name", type="string", length=255, unique=true)
      */
     private $name;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="description", type="text")
+     */
+    private $description;
 
     /**
      * @var string
@@ -66,7 +73,7 @@ class SocialMedia
      *
      * @param string $name
      *
-     * @return SocialMedia
+     * @return SocialNetwork
      */
     public function setName($name)
     {
@@ -86,11 +93,35 @@ class SocialMedia
     }
 
     /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return SocialNetwork
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
      * Set url.
      *
      * @param string $url
      *
-     * @return SocialMedia
+     * @return SocialNetwork
      */
     public function setUrl($url)
     {
@@ -114,7 +145,7 @@ class SocialMedia
      *
      * @param \DateTime $createdAt
      *
-     * @return SocialMedia
+     * @return SocialNetwork
      */
     public function setCreatedAt($createdAt)
     {
