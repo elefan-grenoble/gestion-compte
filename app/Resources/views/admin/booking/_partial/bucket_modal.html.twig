@@ -87,6 +87,12 @@ id = "modal-bucket"
                             {% endif %}
                         {{ form_end(shift_free_forms[shift.id]) }}
                     {% endif %}
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% if shift.createdBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.createdBy.beneficiary.membership.memberNumber }) }}">{{ shift.createdBy.beneficiary }}</a>{% else %}{{ shift.createdBy }}{% endif %}.
+                        </p>
+                    {% endif %}
                 </div>
             </li>
         {% else %}
@@ -139,6 +145,12 @@ id = "modal-bucket"
                             </button>
                             {{ form_end(shift_delete_forms[shift.id]) }}
                         {% endif %}
+                    {% endif %}
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% if shift.createdBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.createdBy.beneficiary.membership.memberNumber }) }}">{{ shift.createdBy.beneficiary }}</a>{% else %}{{ shift.createdBy }}{% endif %}.
+                        </p>
                     {% endif %}
                 </div>
             </li>
