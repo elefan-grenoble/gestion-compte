@@ -341,7 +341,7 @@
                             <p>
                                 Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
                                 {% if member.withdrawnBy %}
-                                    par {% if member.withdrawnBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': member.withdrawnBy.beneficiary.membership.memberNumber }) }}">{{ member.withdrawnBy.beneficiary }}</a>{% else %}{{ member.withdrawnBy }}{% endif %}
+                                    par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
                                 {% endif %}
                             </p>
                         {% endif %}

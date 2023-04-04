@@ -58,7 +58,7 @@ id = "modal-bucket"
                             pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
                         {% endif %}
                         le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
-                        par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
+                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true } %}.
                     </p>
                     <!-- shift (in)validate & free forms -->
                     {% if is_granted('free', shift) %}
@@ -92,7 +92,7 @@ id = "modal-bucket"
                     {% if shift.createdBy %}
                         <p>
                             Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
-                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy } %}.
+                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true } %}.
                         </p>
                     {% endif %}
                 </div>
