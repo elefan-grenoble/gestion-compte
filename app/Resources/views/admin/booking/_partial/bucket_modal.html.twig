@@ -60,7 +60,8 @@ id = "modal-bucket"
                         le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
                         par {% if shift.booker and shift.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ shift.booker.beneficiary }}</a>{% else %}{{ shift.booker }}{% endif %}.
                     </p>
-                    {% if is_granted('free',shift) %}
+                    <!-- shift (in)validate & free forms -->
+                    {% if is_granted('free', shift) %}
                         {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                             {{ form_start(shift_validate_invalidate_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
                                 {% if shift.wasCarriedOut %}
@@ -87,10 +88,11 @@ id = "modal-bucket"
                             {% endif %}
                         {{ form_end(shift_free_forms[shift.id]) }}
                     {% endif %}
+                    <!-- shift.createdBy -->
                     {% if shift.createdBy %}
                         <p>
                             Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
-                            par {% if shift.createdBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.createdBy.beneficiary.membership.memberNumber }) }}">{{ shift.createdBy.beneficiary }}</a>{% else %}{{ shift.createdBy }}{% endif %}.
+                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy } %}.
                         </p>
                     {% endif %}
                 </div>
@@ -116,6 +118,7 @@ id = "modal-bucket"
                     </div>
                 </div>
                 <div class="collapsible-body">
+                    <!-- shift book form -->
                     {{ form_start(shift_book_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
                     <div class="row">
                         <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
@@ -137,6 +140,7 @@ id = "modal-bucket"
                         </div>
                     </div>
                     {{ form_end(shift_book_forms[shift.id]) }}
+                    <!-- shift delete form -->
                     {% if is_granted("ROLE_ADMIN") %}
                         {% if not shift.lastShifter %}
                             {{ form_start(shift_delete_forms[shift.id]) }}
@@ -146,10 +150,11 @@ id = "modal-bucket"
                             {{ form_end(shift_delete_forms[shift.id]) }}
                         {% endif %}
                     {% endif %}
+                    <!-- shift.createdBy -->
                     {% if shift.createdBy %}
                         <p>
                             Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
-                            par {% if shift.createdBy.beneficiary %}<a href="{{ path("member_show", { 'member_number': shift.createdBy.beneficiary.membership.memberNumber }) }}">{{ shift.createdBy.beneficiary }}</a>{% else %}{{ shift.createdBy }}{% endif %}.
+                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true } %}.
                         </p>
                     {% endif %}
                 </div>
