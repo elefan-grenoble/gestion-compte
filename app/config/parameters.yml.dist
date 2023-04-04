@@ -105,6 +105,7 @@ parameters:
     forbid_shift_overlap_time: 30
     max_time_at_end_of_shift: 0
     forbid_own_shift_free_admin: false
+    forbid_own_shift_validate: false
     display_name_shifters: false
     max_nb_of_past_cycles_to_display: 3
     use_fly_and_fixed: false
