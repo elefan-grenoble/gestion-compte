@@ -52,6 +52,7 @@ class ShiftController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
@@ -67,13 +68,16 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $number = $form->get('number')->getData();
-            while (1 < $number) {
+            while ($number > 1) {
                 $s = clone($shift);
+                $s->setCreatedBy($current_user);
                 $em->persist($s);
                 $number --;
             }
+            $shift->setCreatedBy($current_user);
             $em->persist($shift);
             $em->flush();
+
             $success = true;
             $message = 'Le créneau a bien été créé !';
         } else {

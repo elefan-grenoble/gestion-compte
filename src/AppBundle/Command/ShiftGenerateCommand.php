@@ -79,7 +79,6 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                 $shift->setEnd($end);
 
                 foreach ($period->getPositions() as $position) {
-
                     // Semaine #A-B-C-D
                     // Ignorer les periodes en dehors du cycle semaine
                     $weekCycleIndex = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51

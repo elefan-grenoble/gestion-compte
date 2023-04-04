@@ -363,7 +363,6 @@ class BookingController extends Controller
      * When the user click on the 'edit' button on the bucket popup.
      *
      * @Route("/bucket/{id}/edit", name="bucket_edit", methods={"GET", "POST"})
-     * @Route("/bucket/{id}/edit", name="bucket_edit")
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function editBucketAction(Request $request,Shift $shift)
