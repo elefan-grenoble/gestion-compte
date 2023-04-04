@@ -58,6 +58,7 @@ class CardReaderController extends Controller
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
         } else {
+            // find corresponding beneficiary
             $beneficiary = $card->getBeneficiary();
             $membership = $beneficiary->getMembership();
             $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
@@ -69,6 +70,7 @@ class CardReaderController extends Controller
                 }
                 $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
             }
+            // validate ongoing beneficiary shift(s)
             $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
             $dispatcher = $this->get('event_dispatcher');
             foreach ($shifts as $shift) {

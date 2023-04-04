@@ -314,7 +314,7 @@ class ShiftController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
             $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
-            // check if admin user is allowed to free shift
+            // check if user is allowed to free shift
             if ($shifter_is_current_user && $this->forbid_own_shift_free_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
                 $message = "Vous ne pouvez pas annuler votre propre créneau.";
@@ -384,6 +384,7 @@ class ShiftController extends Controller
      * validate / invalidate a shift.
      *
      * @Route("/{id}/validate", name="shift_validate", methods={"POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function validateShiftAction(Request $request, Shift $shift)
     {
@@ -397,7 +398,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
-            // check if admin user is allowed to (in)validate shift
+            // check if user is allowed to (in)validate shift
             if ($shifter_is_current_user && $this->forbid_own_shift_validate && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
                 $message = "Vous ne pouvez pas (in)valider votre propre créneau.";
