@@ -86,6 +86,11 @@
                 <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">mail</i>Modèles d'emails
                 </a>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <a href="{{ path("admin_socialnetwork_list") }}" class="waves-effect waves-light btn teal">
+                        <i class="material-icons left">public</i>Réseaux sociaux
+                    </a>
+                {% endif %}
             {% endif %}
 
             {% if is_granted("ROLE_FINANCE_MANAGER") %}
