@@ -397,25 +397,27 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $validate = $form->get('validate')->getData() == 1;
+            $current = $shift->getWasCarriedOut() == 1;
             $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
             // check if user is allowed to (in)validate shift
             if ($shifter_is_current_user && $this->forbid_own_shift_validate_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
-                $message = "Vous ne pouvez pas (in)valider votre propre créneau.";
+                $message = "Vous ne pouvez pas " . ($validate ? "valider" : "invalider") . " votre propre créneau.";
             }
-
-            $em = $this->getDoctrine()->getManager();
-            $validate = $form->get('validate')->getData() == 1;
-            $current = $shift->getWasCarriedOut() == 1;
-            if ($validate == $current) {
+            // check mismatch between $validate & $current
+            elseif ($validate == $current) {
                 $success = false;
                 $message = "La participation au créneau a déjà été " . ($validate ? "validée" : "invalidée");
-            } else {
+            }
+            else {
                 if ($validate) {
                     $shift->validateShiftParticipation();
                 } else {
                     $shift->invalidateShiftParticipation();
                 }
+
+                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
