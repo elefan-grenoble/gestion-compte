@@ -107,6 +107,7 @@ parameters:
     forbid_own_shift_book_admin: false
     forbid_own_shift_free_admin: false
     forbid_own_shift_validate_admin: false
+    forbid_own_timelog_new_admin: false
     display_name_shifters: false
     max_nb_of_past_cycles_to_display: 3
     use_fly_and_fixed: false
