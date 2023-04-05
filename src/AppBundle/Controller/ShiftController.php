@@ -267,7 +267,7 @@ class ShiftController extends Controller
     public function freeShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -277,7 +277,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if beneficiary can free this shift
-            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_app_user->getBeneficiary(), $shift);
+            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
                 $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
@@ -317,7 +317,7 @@ class ShiftController extends Controller
     public function freeShiftAdminAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -325,7 +325,7 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
+            $shifter_is_current_user = $current_user->getBeneficiary() == $shift->getShifter();
             $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
             // check if user is allowed to free shift
             if ($shifter_is_current_user && $this->forbid_own_shift_free_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
@@ -402,7 +402,7 @@ class ShiftController extends Controller
     public function validateShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
 
@@ -412,7 +412,7 @@ class ShiftController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $validate = $form->get('validate')->getData() == 1;
             $current = $shift->getWasCarriedOut() == 1;
-            $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
+            $shifter_is_current_user = $current_user->getBeneficiary() == $shift->getShifter();
             // check if user is allowed to (in)validate shift
             if ($shifter_is_current_user && $this->forbid_own_shift_validate_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
