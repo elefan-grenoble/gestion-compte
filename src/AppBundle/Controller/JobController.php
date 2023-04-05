@@ -134,9 +134,11 @@ class JobController extends Controller
             return $this->redirectToRoute('job_list');
         }
 
+        $delete_form = $this->getDeleteForm($job);
+
         return $this->render('admin/job/edit.html.twig', array(
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($job)->createView()
+            'delete_form' => $delete_form->createView()
         ));
     }
 
@@ -149,6 +151,7 @@ class JobController extends Controller
     public function removeAction(Request $request,Job $job)
     {
         $session = new Session();
+
         $form = $this->getDeleteForm($job);
         $form->handleRequest($request);
 
