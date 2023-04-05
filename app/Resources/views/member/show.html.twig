@@ -79,7 +79,8 @@
                 <ul class="collapsible">
                     {% for registration in member.registrations %}
                         <li>
-                            <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
+                            <div class="collapsible-header" style="cursor: default;">
+                                {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
                                     <i class="material-icons tiny">credit_card</i>
                                 {% else %}
                                     <i class="material-icons tiny">attach_money</i>
