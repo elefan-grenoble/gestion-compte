@@ -2,6 +2,7 @@
     <div class="card-content">
         <span class="card-title">
             {{ period_position.period.getDayOfWeekString() }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
+            <br />
             <small>(Semaine {{ period_position.weekCycle }})</small>
         </span>
         <p>
@@ -14,6 +15,20 @@
             {% endif %}
         </p>
     </div>
+    {% if (show_actions ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
+        {% set period_position_shift_carried_out_count = period_position.getShiftCount(true) %}
+        {% set period_position_shift_not_carried_out_count = period_position.getShiftCount(false) %}
+        <div class="card-action">
+            <span class="chip green-text" title="{{ period_position_shift_carried_out_count }} créneaux effectués">
+                <i class="material-icons tiny">check</i>
+                {{ period_position_shift_carried_out_count }}
+            </span>
+            <span class="chip red-text" title="{{ period_position_shift_not_carried_out_count }} créneaux non effectués">
+                <i class="material-icons tiny">close</i>
+                {{ period_position_shift_not_carried_out_count }}
+            </span>
+        </div>
+    {% endif %}
     {% if (show_actions ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
         <div class="card-action">
             <a href="{{ path("period_edit", { 'id': period_position.period.id }) }}" class="waves-effect waves-light btn white black-text" target="_blank" title="Voir le créneau">

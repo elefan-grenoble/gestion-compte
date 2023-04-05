@@ -84,7 +84,7 @@ class Shift
 
     /**
      * One Shift may have been created from One PeriodPosition.
-     * @ORM\ManyToOne(targetEntity="PeriodPosition")
+     * @ORM\ManyToOne(targetEntity="PeriodPosition", inversedBy="shifts")
      * @ORM\JoinColumn(name="position_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $position;
