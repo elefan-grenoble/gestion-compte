@@ -64,7 +64,6 @@ class PeriodController extends Controller
 
         // filter creation ----------------------
         $formBuilder = $this->createFormBuilder()
-            ->setAction($this->generateUrl('period'))
             ->add('job', EntityType::class, array(
                 'label' => 'Type de créneau',
                 'class' => 'AppBundle:Job',
@@ -96,11 +95,15 @@ class PeriodController extends Controller
             ));
 
         if ($withBeneficiaryField) {
-            $formBuilder->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+            $formBuilder
+                ->setAction($this->generateUrl('period_admin'))
+
+                ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
                 'label' => 'Bénéficiaire',
-                'required' => false,
-            ));
-            $formBuilder->add('filling', ChoiceType::class, array(
+                'required' => false,)
+                )
+
+                ->add('filling', ChoiceType::class, array(
                 'label' => 'Remplissage',
                 'required' => false,
                 'choices' => array(
@@ -110,9 +113,11 @@ class PeriodController extends Controller
                     'Problématique' => 'problematic'
                 ),
             ));
-
         }else{
-            $formBuilder->add('filling', ChoiceType::class, array(
+            $formBuilder
+                ->setAction($this->generateUrl('period'))
+
+                ->add('filling', ChoiceType::class, array(
                 'label' => 'Remplissage',
                 'required' => false,
                 'choices' => array(
