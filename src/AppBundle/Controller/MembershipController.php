@@ -171,7 +171,7 @@ class MembershipController extends Controller
         foreach ($shifts_by_cycle as $shifts) {
             foreach ($shifts as $shift) {
                 $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
-                $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateForm($shift)->createView();
+                $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateAdminForm($shift)->createView();
             }
         }
 
@@ -1198,16 +1198,16 @@ class MembershipController extends Controller
 
     /**
      * Creates a form to validate / invalidate a shift entity.
-     * // TODO: how to avoid having same createShiftValidateInvalidateForm in ShiftController ?
+     * // TODO: how to avoid having same createShiftValidateInvalidateAdminForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createShiftValidateInvalidateForm(Shift $shift)
+    private function createShiftValidateInvalidateAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_validate', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
             ->add('validate', HiddenType::class, [
                 'data' => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
