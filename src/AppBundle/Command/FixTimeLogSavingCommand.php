@@ -46,16 +46,16 @@ class FixTimeLogSavingCommand extends ContainerAwareCommand
 
                         // get member last timelog
                         $log = $member->getTimeLogs()->first();
-                        $output->writeln('dernier timelog ' . $log);
+                        $output->writeln('dernier timelog (id) ' . $log->getId());
                         $output->writeln('créneau du dernier timelog ' . $log->getShift());
 
-                        // // first decrement the shiftTimeCount
-                        // $log = $this->getContainer()->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
-                        // $this->em->persist($log);
-                        // // then increment the savingTimeCount
-                        // $log = $this->getContainer()->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time, $shift);
-                        // $this->em->persist($log);
-                        // $this->em->flush();
+                        // first decrement the shiftTimeCount
+                        $log = $this->getContainer()->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
+                        $this->em->persist($log);
+                        // then increment the savingTimeCount
+                        $log = $this->getContainer()->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time, $shift);
+                        $this->em->persist($log);
+                        $this->em->flush();
 
                         $member_counter_now = $member->getShiftTimeCount();
                         $extra_counter_time = $member_counter_now - $due_duration_by_cycle;
