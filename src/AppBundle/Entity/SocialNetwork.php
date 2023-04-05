@@ -44,6 +44,13 @@ class SocialNetwork
     private $url;
 
     /**
+     * @var bool
+     * 
+     * @ORM\Column(name="displayed_footer", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $displayedFooter;
+
+    /**
      * @var \DateTime
      * 
      * @ORM\Column(name="created_at", type="datetime")
@@ -138,6 +145,30 @@ class SocialNetwork
     public function getUrl()
     {
         return $this->url;
+    }
+
+    /**
+     * Set displayedFooter.
+     *
+     * @param bool|null $displayedFooter
+     *
+     * @return SocialNetwork
+     */
+    public function setDisplayedFooter($displayedFooter = null)
+    {
+        $this->displayedFooter = $displayedFooter;
+
+        return $this;
+    }
+
+    /**
+     * Get displayedFooter.
+     *
+     * @return bool|null
+     */
+    public function getDisplayedFooter()
+    {
+        return $this->displayedFooter;
     }
 
     /**
