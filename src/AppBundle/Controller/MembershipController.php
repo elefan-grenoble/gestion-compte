@@ -213,7 +213,7 @@ class MembershipController extends Controller
     /**
      * Add a new registration.
      *
-     * @Route("/newRegistration/{member_number}/", name="member_new_registration", methods={"GET","POST"})
+     * @Route("/{member_number}/newRegistration", name="member_new_registration", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -293,7 +293,7 @@ class MembershipController extends Controller
     /**
      * Add a beneficiary from admin to a member
      *
-     * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary", methods={"GET","POST"})
+     * @Route("/{member_number}/newBeneficiary", name="member_new_beneficiary", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
