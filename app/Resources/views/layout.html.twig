@@ -70,7 +70,7 @@
             {% endblock %}
         </main>
 
-        {% include "_partial/footer.html.twig" %}
+        {{ render(controller("AppBundle:Default:footer")) }}
 
         <script src="{{ asset('bundles/app/js/jquery-3.6.min.js') }}"></script>
         <script src="{{ asset('bundles/app/materialize/js/materialize-1.2.1.min.js') }}"></script>
