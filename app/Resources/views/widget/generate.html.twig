@@ -66,13 +66,15 @@
     {{ form_end(form) }}
 
     {% if query_string is defined %}
-    <hr />
+    <br />
     <h4>Résultat</h4>
     <div class="row">
-        <div class="col s6">
+        <div class="col">
             <iframe src="{{ path('widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
         </div>
-        <div class="col s6">
+    </div>
+    <div class="row">
+        <div class="col">
             <pre>&lt;iframe src="{{ absolute_url(path('widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
         </div>
     </div>
