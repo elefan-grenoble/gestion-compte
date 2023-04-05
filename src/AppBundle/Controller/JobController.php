@@ -114,7 +114,7 @@ class JobController extends Controller
     /**
      * Edit job.
      *
-     * @Route("/edit/{id}", name="job_edit", methods={"GET","POST"})
+     * @Route("/{id}/edit", name="job_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Job $job)
