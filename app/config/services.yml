@@ -43,6 +43,7 @@ services:
             - "%use_fly_and_fixed%"
     AppBundle\Controller\ShiftController:
         arguments:
+            - "%forbid_own_shift_book_admin%"
             - "%forbid_own_shift_free_admin%"
             - "%forbid_own_shift_validate_admin%"
             - "%use_fly_and_fixed%"
