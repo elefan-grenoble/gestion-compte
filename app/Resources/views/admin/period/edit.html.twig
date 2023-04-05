@@ -71,7 +71,7 @@
                                     Créneau fixe réservé
                                     pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}" target="_blank">{{ position.shifter }}</a>
                                     le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
-                                    par {% if position.booker and position.booker.beneficiary %}<a href="{{ path("member_show", { 'member_number': position.booker.beneficiary.membership.memberNumber }) }}" target="_blank">{{ position.booker.beneficiary }}</a>{% else %}{{ position.booker }}{% endif %}.
+                                    par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.booker, target_blank: true } %}.
                                 </p>
                                 <form action="{{ path('period_position_free', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
                                     <button type="submit" class="btn orange">

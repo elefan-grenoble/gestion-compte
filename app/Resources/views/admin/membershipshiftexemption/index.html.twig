@@ -86,13 +86,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if membershipShiftExemption.createdBy and membershipShiftExemption.createdBy.beneficiary %}
-                        <a href="{{ path("member_show", { 'member_number': membershipShiftExemption.createdBy.beneficiary.membership.memberNumber }) }}">
-                            {{ membershipShiftExemption.createdBy.beneficiary }}
-                        </a>
-                    {% else %}
-                        {{ membershipShiftExemption.createdBy }}
-                    {% endif %}
+                    {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: membershipShiftExemption.createdBy, target_blank: true } %}
                 </td>
                 <td title="{{ membershipShiftExemption.createdAt | date('d/m/Y H:i') }}">
                     {{ membershipShiftExemption.createdAt | date('d/m/Y') }}
