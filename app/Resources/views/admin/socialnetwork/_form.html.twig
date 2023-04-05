@@ -20,7 +20,7 @@
         </div>
     </div>
 </div>
-<div>
+<div class="row">
     <div class="col s12">
         <div class="errors">
             {{ form_errors(form.url) }}
@@ -30,4 +30,11 @@
             {{ form_label(form.url) }}
         </div>
     </div>
+</div>
+<div class="row">
+    {{ form_errors(form.displayed_footer) }}
+    <label>
+        {{ form_widget(form.displayed_footer) }}
+        <span>{{ form.displayed_footer.vars.label }}</span>
+    </label>
 </div>

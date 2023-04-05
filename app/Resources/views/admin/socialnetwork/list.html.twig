@@ -17,6 +17,7 @@
                 <th>Réseau social</th>
                 <th>Description</th>
                 <th>Url</th>
+                <th>Affiché dans le footer ?</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -29,7 +30,16 @@
                     <a href="{{ socialNetwork.url }}">{{ socialNetwork.url }}</a>
                 </td>
                 <td>
-                    <a href="{{ path("admin_socialnetwork_edit", { 'id': socialNetwork.id }) }}"><i class="material-icons">edit</i>editer</a>
+                    {% if socialNetwork.displayedFooter %}
+                        <i class="material-icons">check</i>
+                    {% else %}
+                        <i class="material-icons">close</i>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path("admin_socialnetwork_edit", { 'id': socialNetwork.id }) }}">
+                        <i class="material-icons">edit</i>editer
+                    </a>
                 </td>
             </tr>
         {% endfor %}
@@ -37,5 +47,7 @@
     </table>
 
     <br />
-    <a href="{{ path('admin_socialnetwork_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un réseau social</a>
+    <a href="{{ path('admin_socialnetwork_new') }}" class="btn">
+        <i class="material-icons left">add</i>Ajouter un réseau social
+    </a>
 {% endblock %}
