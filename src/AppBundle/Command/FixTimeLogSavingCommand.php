@@ -32,14 +32,36 @@ class FixTimeLogSavingCommand extends ContainerAwareCommand
             $output->writeln('Parameter use_time_log_saving is true');
             $output->writeln('Parameter due_duration_by_cycle = '. $due_duration_by_cycle);
             foreach ($members as $member) {
-                if ($member->getFirstShiftDate()) {
-                    $counter_now = $member->getShiftTimeCount();
-                    $extra_counter_time = $counter_now - $due_duration_by_cycle;
+                if (!$member->isWithdrawn() && $member->getFirstShiftDate()) {
+                    $member_counter_now = $member->getShiftTimeCount();
+                    $extra_counter_time = $member_counter_now - $due_duration_by_cycle;
 
+                    // the extra time will go in the member's saving account
+                    // same logic as TimeLogEventListener > createShiftValidatedTimeLog
                     if ($extra_counter_time > 0) {
                         $output->writeln('=====');
                         $output->writeln('Member ' . $member);
-                        $output->writeln('extra_counter_time = ' . $extra_counter_time);
+                        $output->writeln('counter_now before ' . $member_counter_now);
+                        $output->writeln('extra_counter_time before = ' . $extra_counter_time);
+
+                        // get member last timelog
+                        $log = $member->getTimeLogs()->first();
+                        $output->writeln('dernier timelog ' . $log);
+                        $output->writeln('créneau du dernier timelog ' . $log->getShift());
+
+                        // // first decrement the shiftTimeCount
+                        // $log = $this->getContainer()->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
+                        // $this->em->persist($log);
+                        // // then increment the savingTimeCount
+                        // $log = $this->getContainer()->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time, $shift);
+                        // $this->em->persist($log);
+                        // $this->em->flush();
+
+                        $member_counter_now = $member->getShiftTimeCount();
+                        $extra_counter_time = $member_counter_now - $due_duration_by_cycle;
+
+                        $output->writeln('counter_now after ' . $member_counter_now);
+                        $output->writeln('extra_counter_time after = ' . $extra_counter_time);
                     }
                 }
             }

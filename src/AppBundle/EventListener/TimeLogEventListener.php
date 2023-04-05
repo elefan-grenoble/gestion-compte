@@ -245,8 +245,8 @@ class TimeLogEventListener
         $this->em->flush();
 
         if ($this->use_time_log_saving) {
-            $counter_now = $member->getShiftTimeCount();
-            $extra_counter_time = $counter_now - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
+            $member_counter_now = $member->getShiftTimeCount();
+            $extra_counter_time = $member_counter_now - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
 
             // the extra time will go in the member's saving account
             if ($extra_counter_time > 0) {
@@ -300,9 +300,9 @@ class TimeLogEventListener
         $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member);
         $this->em->persist($log);
 
-        $counter_today = $member->getShiftTimeCount($date);
+        $member_counter_date = $member->getShiftTimeCount($date);
         $allowed_cumul = $this->max_time_at_end_of_shift;
-        $extra_counter_time = $counter_today - ($this->due_duration_by_cycle + $allowed_cumul);  // surbook
+        $extra_counter_time = $member_counter_date - ($this->due_duration_by_cycle + $allowed_cumul);  // surbook
 
         if ($extra_counter_time > 0) {
             $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
