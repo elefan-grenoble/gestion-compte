@@ -1,8 +1,9 @@
 {% set shifter = shift.shifter %}
+
 <div id="contact{{ shift.id }}" class="modal modal-fixed-footer left-align">
     <div class="modal-content">
-        <h5>Envoyer un mail aux membres du créneau <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h5>
-        <h6>{{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}</h6>
+        <h4>Envoyer un mail aux membres du créneau <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
+        <h5>{{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}</h5>
         {{ form_start(form, {'attr': {'id': 'contactform'~shift.id}})}}
         <div class="row left-align">
             <div class="col s12">
@@ -24,8 +25,7 @@
     </div>
     <div class="modal-footer">
         <a href="#!" class=" modal-close waves-effect waves-green btn-flat red-text">Retour</a>
-        <a href="#"
-           class="modal-close waves-effect waves-green btn-flat teal white-text"
+        <a href="#" class="modal-close waves-effect waves-green btn-flat teal white-text"
            onclick="javascript:$('#contactform{{ shift.id }}').submit();return false;"><i class="material-icons right">send</i>Envoyer</a>
     </div>
 </div>

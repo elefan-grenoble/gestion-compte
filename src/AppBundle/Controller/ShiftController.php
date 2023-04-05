@@ -11,6 +11,7 @@ use AppBundle\Event\ShiftValidatedEvent;
 use AppBundle\Event\ShiftInvalidatedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
+use AppBundle\Form\AutocompleteBeneficiaryCollectionType;
 use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
 use AppBundle\Security\MembershipVoter;
@@ -593,6 +594,63 @@ class ShiftController extends Controller
     }
 
     /**
+     * @Route("/{id}/contact_form", name="shift_contact_form", methods={"GET","POST"})
+     */
+    public function contactFormAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
+        $coShifters = $em->getRepository('AppBundle:Beneficiary')->findCoShifters($shift);
+        $form = $this->createShiftContactForm($shift, $coShifters);
+
+        if ($form->handleRequest($request)->isValid()) {
+            $beneficiaries = $form->get('to')->getData();
+            $from = $form->get('from')->getData();
+            $from = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id' => $from));
+            $emails = array();
+            $firstnames = array();
+            foreach ($beneficiaries as $beneficiary) {
+                $emails[] = $beneficiary->getEmail();
+                $firstnames[] = $beneficiary->getFirstname();
+            }
+            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1)))
+                ->setFrom($this->getParameter('transactional_mailer_user'))
+                ->setReplyTo($from->getEmail())
+                ->setBcc($emails)
+                ->setBody(
+                    $this->renderView(
+                        'emails/coshifter_message.html.twig',
+                        array(
+                            'message' => trim($form->get('message')->getData()),
+                            'from' => $from,
+                            'firstnames' => $firstnames,
+                            'shift' => $shift
+                        )
+                    ),
+                    'text/html'
+                );
+            $mailer->send($message);
+
+            if (count($firstnames) > 1) {
+                $last_firstname = array_pop($firstnames);
+                $firstnames = implode(', ', $firstnames);
+                $firstnames .= ' et ' . $last_firstname;
+            } else {
+                $firstnames = $firstnames[0];
+            }
+
+            $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
+            return $this->redirectToRoute('homepage');
+        }
+
+        return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
+            'shift' => $shift,
+            'form' => $form->createView()
+        ));
+    }
+
+    /**
      * Creates a form to book a shift entity.
      *
      * @param Shift $shift The shift entity
@@ -688,6 +746,33 @@ class ShiftController extends Controller
             ])
             ->setMethod('POST');
 
+        return $form->getForm();
+    }
+
+    /**
+     * Create a form to contact co shifters.
+     * 
+     * @param Shift $shift The shift entity
+     * @param $coShifters
+     * 
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftContactForm(Shift $shift, $coShifters = null)
+    {
+        $form = $this->get('form.factory')->createNamedBuilder('shift_contact_form_' . $shift->getId())
+            ->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()))
+            ->add('to', AutocompleteBeneficiaryCollectionType::class, [
+                'label' => 'A',
+                'data' => $coShifters
+            ])
+            ->add('message', TextareaType::class, [
+                'attr' => ['class' => 'materialize-textarea'],
+                'label' => 'Message',
+                'data' => 'Bonjour XX,'.PHP_EOL."Tu n'es toujours pas arrivé pour notre créneau.".PHP_EOL."Est-ce que tout va bien ?".PHP_EOL."A très vite,".PHP_EOL.$shift->getShifter()->getFirstName().PHP_EOL.PHP_EOL."Bonjour à tou.te.s,".PHP_EOL."Je vais en être en retard pour mon créneau.".PHP_EOL."Je serai à l'épicerie d'ici XX minutes.".PHP_EOL."A tout de suite,".PHP_EOL.$shift->getShifter()->getFirstName()
+            ])
+            ->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())))
+            ->setMethod('POST');
+        
         return $form->getForm();
     }
 }
