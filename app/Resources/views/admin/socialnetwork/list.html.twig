@@ -25,7 +25,11 @@
         {% for socialNetwork in socialNetworks %}
             <tr>
                 <td>{{ socialNetwork.name }}</td>
-                <td>{{ socialNetwork.description }}</td>
+                <td class="center-align">
+                    {% if socialNetwork.description is not empty %}
+                        <i class="material-icons" title="{{ socialNetwork.description }}">playlist_add_check</i>
+                    {% endif %}
+                </td>
                 <td>
                     <a href="{{ socialNetwork.url }}">{{ socialNetwork.url }}</a>
                 </td>

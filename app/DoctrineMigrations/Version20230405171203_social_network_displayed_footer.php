@@ -23,6 +23,7 @@ final class Version20230405171203 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE social_network ADD displayed_footer TINYINT(1) DEFAULT \'0\' NOT NULL');
+        $this->addSql('ALTER TABLE social_network CHANGE description description LONGTEXT DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -31,5 +32,6 @@ final class Version20230405171203 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE social_network DROP displayed_footer');
+        $this->addSql('ALTER TABLE social_network CHANGE description description LONGTEXT CHARACTER SET utf8mb4 NOT NULL COLLATE `utf8mb4_unicode_ci`');
     }
 }
