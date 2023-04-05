@@ -1,9 +1,10 @@
 {% if member.mainBeneficiary and member.mainBeneficiary.user.recordedRegistrations | length %}
-<h6>Recorded registrations</h6>
-<ul class="collapsible">
+<h6>Adhésions enregistrées</h6>
+<ul class="collapsible" style="cursor: default;">
     {% for registration in member.mainBeneficiary.user.recordedRegistrations %}
         <li>
-            <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
+            <div class="collapsible-header" style="cursor: default;">
+                {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                     <i class="material-icons tiny">credit_card</i>
                 {% else %}
                     <i class="material-icons tiny">attach_money</i>
@@ -11,21 +12,20 @@
                 {{ registration.date | date('d F Y') }} {{ registration.date | date('H:i') }} {{ registration.amount }}
                 {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) %}
                     € en CARTE CREDIT
-                {% elseif registration.mode ==  constant('TYPE_LOCAL', registration) %}
+                {% elseif registration.mode == constant('TYPE_LOCAL', registration) %}
                     {{ local_currency_name }}
-                {% elseif registration.mode ==  constant('TYPE_CASH', registration) %}
+                {% elseif registration.mode == constant('TYPE_CASH', registration) %}
                     € en ESPECE
-                {% elseif registration.mode ==  constant('TYPE_CHECK', registration) %}
+                {% elseif registration.mode == constant('TYPE_CHECK', registration) %}
                     € en CHEQUE
                 {% endif %}
                 {% if registration.membership %}
-                pour #<a
-                        href="{{ path("member_new_registration",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
-                {% if registration.membership.mainBeneficiary %}
-                    {{ registration.membership.mainBeneficiary.firstname }} {{ registration.membership.mainBeneficiary.lastname }}
+                    pour #<a href="{{ path("member_new_registration",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
+                    {% if registration.membership.mainBeneficiary %}
+                        {{ registration.membership.mainBeneficiary.firstname }} {{ registration.membership.mainBeneficiary.lastname }}
+                    {% endif %}
                 {% endif %}
             </div>
-            {% endif %}
         </li>
     {% endfor %}
 </ul>
