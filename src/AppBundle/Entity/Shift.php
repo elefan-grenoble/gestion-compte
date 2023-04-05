@@ -120,6 +120,12 @@ class Shift
      */
     private $createdAt;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
     public function __construct()
     {
         $this->wasCarriedOut = false;
@@ -481,10 +487,6 @@ class Shift
         return $this->lastShifter;
     }
 
-    public function getTmpToken($key = ''){
-        return md5($this->getId().$this->getStart()->format('d/m/Y').$this->getEnd()->format('d/m/Y').$key);
-    }
-
     /**
      * Add timeLog
      *
@@ -538,14 +540,16 @@ class Shift
     /**
      * @return bool
      */
-    public function isFixe(): ?bool {
+    public function isFixe(): ?bool
+    {
         return $this->fixe;
     }
 
     /**
      * @param bool $fixe
      */
-    public function setFixe(?bool $fixe): void {
+    public function setFixe(?bool $fixe): void
+    {
         $this->fixe = $fixe;
     }
 
@@ -574,6 +578,30 @@ class Shift
     }
 
     /**
+     * Set createdBy.
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return Shift
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
      * Return true if this is the first ever shift by the shifter
      *
      * @return bool
@@ -587,5 +615,13 @@ class Shift
             }
         }
         return false;
+    }
+
+    /**
+     * Generate token from key
+     */
+    public function getTmpToken($key = '')
+    {
+        return md5($this->getId().$this->getStart()->format('d/m/Y').$this->getEnd()->format('d/m/Y').$key);
     }
 }
