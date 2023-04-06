@@ -146,9 +146,10 @@ class EventController extends Controller
      * @Route("/{id}", name="event_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function removeAction(Request $request,Event $event)
+    public function deleteAction(Request $request, Event $event)
     {
         $session = new Session();
+
         $form = $this->getDeleteForm($event);
         $form->handleRequest($request);
 
@@ -156,6 +157,7 @@ class EventController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($event);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'L\'événement a bien été supprimé !');
         }
 
@@ -168,9 +170,10 @@ class EventController extends Controller
      * @Route("/proxy/{id}", name="proxy_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeProxyAction(Request $request, Proxy $proxy)
+    public function deleteProxyAction(Request $request, Proxy $proxy)
     {
         $session = new Session();
+
         $form = $this->getProxyDeleteForm($proxy);
         $form->handleRequest($request);
 
@@ -178,6 +181,7 @@ class EventController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($proxy);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'La procuration a bien été supprimée !');
         }
 
@@ -269,7 +273,8 @@ class EventController extends Controller
      * @param Event $event
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Event $event){
+    protected function getDeleteForm(Event $event)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('event_delete', array('id' => $event->getId())))
             ->setMethod('DELETE')
@@ -280,7 +285,8 @@ class EventController extends Controller
      * @param Proxy $proxy
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getProxyDeleteForm(Proxy $proxy){
+    protected function getProxyDeleteForm(Proxy $proxy)
+    {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('proxy_delete', array('id' => $proxy->getId())))
             ->setMethod('DELETE')
