@@ -139,7 +139,6 @@ class ServiceController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le service a bien été supprimé !');
-            return $this->redirectToRoute('service_list');
         }
 
         return $this->redirectToRoute('service_list');

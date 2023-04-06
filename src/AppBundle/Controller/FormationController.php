@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- * User controller.
+ * Formation controller.
  *
  * @Route("admin/formations")
  * @Security("has_role('ROLE_ADMIN')")
@@ -22,7 +22,7 @@ class FormationController extends Controller
     /**
      * Formations list
      *
-     * @Route("/", name="admin_formations", methods={"GET"})
+     * @Route("/", name="formation_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction()
@@ -42,18 +42,17 @@ class FormationController extends Controller
         $session = new Session();
 
         $formation = new Formation();
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
             $em->persist($formation);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle formation a bien été créée !');
-
-            return $this->redirectToRoute('admin_formations');
+            return $this->redirectToRoute('formation_list');
         }
 
         return $this->render('admin/formation/new.html.twig', array(
@@ -81,8 +80,7 @@ class FormationController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La formation a bien été éditée !');
-
-            return $this->redirectToRoute('admin_formations');
+            return $this->redirectToRoute('formation_list');
         }
 
         return $this->render('admin/formation/edit.html.twig', array(
@@ -98,18 +96,22 @@ class FormationController extends Controller
      * @Route("/{id}", name="formation_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request, Formation $formation)
+    public function deleteAction(Request $request, Formation $formation)
     {
         $session = new Session();
+
         $form = $this->getDeleteForm($formation);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($formation);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'La formation a bien été supprimée !');
         }
-        return $this->redirectToRoute('admin_formations');
+
+        return $this->redirectToRoute('formation_list');
     }
 
     /**
@@ -123,5 +125,4 @@ class FormationController extends Controller
             ->setMethod('DELETE')
             ->getForm();
     }
-
 }
