@@ -472,7 +472,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('beneficiaries', $member->getBeneficiaries())
             ->setParameter('start_after', $start_after)
             ->setParameter('end_before', $end_before);
-
+     
         return $qb->getQuery()
             ->getSingleScalarResult();
     }

@@ -182,6 +182,13 @@ class MembershipService
         return $this->em->getRepository('AppBundle:Shift')->countMemberShiftsMissed($member, $cycle_start, $cycle_end);
     }
 
+    public function getCycleShiftsFreedCount(Membership $member, $date, $less_than_min_time_in_advance_days = null) {
+        $shift_cycle = $this->getCycleNumber($member, $date);
+        $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
+        $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
+        return $this->em->getRepository('AppBundle:ShiftFreeLog')->countMemberShiftsFreed($member, $cycle_start, $cycle_end, $less_than_min_time_in_advance_days);
+    }
+
     /**
      * Return true if the membership is in a "warning" status
      */

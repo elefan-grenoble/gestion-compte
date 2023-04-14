@@ -319,12 +319,15 @@ class TimeLogEventListener
                 // retrieve member's savings
                 $member_saving_now = $member->getSavingTimeCount();
                 if ($member_saving_now > 0) {
-                    // count missed shifts for last cycle
                     $date_minus_one_day = clone($date)->modify("-1 days");
+                    // count missed shifts in the previous cycle
                     $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleShiftsMissedCount($membership, $date_minus_one_day);
+                    // count freed shifts within the min_time_in_advance in the previous cycle
+                    $previous_cycle_freed_shifts_less_than_min_time_in_advance_count = $this->get('membership_service')->getCycleShiftsFreedCount($membership, $date_minus_one_day, $this->time_log_saving_shift_free_min_time_in_advance_days);
                     // we can use the member's savings only if:
                     // - the member has no missed shifts in the previous cycle
-                    if ($previous_cycle_missed_shifts_count == 0) {
+                    // - the member has no freed shifts within the min_time_in_advance 
+                    if ($previous_cycle_missed_shifts_count == 0 && previous_cycle_freed_shifts_less_than_min_time_in_advance_count == 0) {
                         $missing_due_time = ($member_counter_date > 0) ? $this->due_duration_by_cycle - $member_counter_date : $this->due_duration_by_cycle;
                         $withdraw_from_saving = min($member_saving_now, $missing_due_time);
                         // first decrement the savingTimeCount
