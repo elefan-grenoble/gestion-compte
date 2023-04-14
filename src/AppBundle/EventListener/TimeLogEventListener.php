@@ -245,6 +245,7 @@ class TimeLogEventListener
         $this->em->flush();
 
         if ($this->use_time_log_saving) {
+            $this->em->refresh($member);
             $counter_now = $member->getShiftTimeCount();
             $extra_counter_time = $counter_now - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
 
