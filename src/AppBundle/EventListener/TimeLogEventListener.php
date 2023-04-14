@@ -245,9 +245,9 @@ class TimeLogEventListener
         $this->em->flush();
 
         if ($this->use_time_log_saving) {
-            $this->em->refresh($member);  // added to prevent getShiftTimeCount() from returning a cached (old) value
-            $counter_now = $member->getShiftTimeCount();
-            $extra_counter_time = $counter_now - $this->due_duration_by_cycle; // + max_time_at_end_of_shift ??
+            $this->em->refresh($member);  // added to prevent from returning cached (old) data
+            $member_counter_now = $member->getShiftTimeCount();
+            $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
             // the extra time will go in the member's saving account
             if ($extra_counter_time > 0) {
@@ -300,10 +300,10 @@ class TimeLogEventListener
     {
         $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member);
         $this->em->persist($log);
+        $this->em->flush();
 
-        $counter_today = $member->getShiftTimeCount($date);
-        $allowed_cumul = $this->max_time_at_end_of_shift;
-        $extra_counter_time = $counter_today - ($this->due_duration_by_cycle + $allowed_cumul);  // surbook
+        $member_counter_date = $member->getShiftTimeCount($date);
+        $extra_counter_time = $member_counter_date - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
         if ($extra_counter_time > 0) {
             $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
@@ -313,22 +313,28 @@ class TimeLogEventListener
                 $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $extra_counter_time);
                 $this->em->persist($log);
             }
-        } elseif ($this->use_time_log_saving && $extra_counter_time < 0) {
-            // retrieve member's savings
-            $saving_now = $member->getSavingTimeCount();
-            // count missed shifts for last cycle
-            $date_minus_one_day = clone($date)->modify("-1 days");
-            $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleMissedShiftsCount($membership, $date_minus_one_day);
-            // check if member has savings and no missed shifts
-            if ($saving_now > 0 && $previous_cycle_missed_shifts_count == 0) {
-                $missing_due_time = ($counter_today > 0) ? $this->due_duration_by_cycle - $counter_today : $this->due_duration_by_cycle;
-                $withdraw_from_saving = min($saving_now, $missing_due_time);
-                // first decrement the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
-                $this->em->persist($log);
-                // then increment the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 1 * $withdraw_from_saving);
-                $this->em->persist($log);
+        } elseif ($extra_counter_time < 0) {
+            if ($this->use_time_log_saving) {
+                $this->em->refresh($member);  // added to prevent from returning cached (old) data
+                // retrieve member's savings
+                $member_saving_now = $member->getSavingTimeCount();
+                if ($member_saving_now > 0) {
+                    // count missed shifts for last cycle
+                    $date_minus_one_day = clone($date)->modify("-1 days");
+                    $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleShiftsMissedCount($membership, $date_minus_one_day);
+                    // we can use the member's savings only if:
+                    // - the member has no missed shifts in the previous cycle
+                    if ($previous_cycle_missed_shifts_count == 0) {
+                        $missing_due_time = ($member_counter_date > 0) ? $this->due_duration_by_cycle - $member_counter_date : $this->due_duration_by_cycle;
+                        $withdraw_from_saving = min($member_saving_now, $missing_due_time);
+                        // first decrement the savingTimeCount
+                        $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
+                        $this->em->persist($log);
+                        // then increment the shiftTimeCount
+                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 1 * $withdraw_from_saving);
+                        $this->em->persist($log);
+                    }
+                }
             }
         }
 

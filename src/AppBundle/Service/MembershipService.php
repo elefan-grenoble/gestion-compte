@@ -152,34 +152,34 @@ class MembershipService
 
     /**
      * Get end date of current cycle
-     * @param Membership $membership
+     * @param Membership $member
      * @param int $cycleIndex
      * @return DateTime|null
      */
-    public function getEndOfCycle(Membership $membership, $cycleOffset = 0)
+    public function getEndOfCycle(Membership $member, $cycleOffset = 0)
     {
-        $date = clone($this->getStartOfCycle($membership, $cycleOffset));
+        $date = clone($this->getStartOfCycle($member, $cycleOffset));
         $date->modify("+27 days");
         $date->setTime(23, 59, 59);
         return $date;
     }
 
-    public function getCycleNumber(Membership $membership, $date) {
+    public function getCycleNumber(Membership $member, $date) {
         $cycle_end = $this->getEndOfCycle($member, -1);
         for ($cycle = -1; $cycle < 3; $cycle++) {
-            if ($date <= $current_cycle_end) {
-                return $cycle
+            if ($date <= $cycle_end) {
+                return $cycle;
             }
             $cycle_end->modify("+28 days");
         }
-        return null
+        return null;
     }
 
-    public function getCycleMissedShiftsCount(Membership $membership, $date) {
-        $shift_cycle = $this->getCycleNumber($membership, $date);
-        $cycle_start = $this->getStartOfCycle($membership, $shift_cycle);
-        $cycle_end = $this->getEndOfCycle($membership, $shift_cycle);
-        return $this->em->getRepository('AppBundle:Shift')->getMissedShiftsCount($membership, $cycle_start, $cycle_end);
+    public function getCycleShiftsMissedCount(Membership $member, $date) {
+        $shift_cycle = $this->getCycleNumber($member, $date);
+        $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
+        $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
+        return $this->em->getRepository('AppBundle:Shift')->countMemberShiftsMissed($member, $cycle_start, $cycle_end);
     }
 
     /**

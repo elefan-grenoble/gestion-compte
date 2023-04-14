@@ -462,19 +462,18 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     /**
      * Note: dates must be in the past to have valid results 
      */
-    private function hasMissingShifts($beneficiaries, $start_after, $end_before) {
+    public function countMemberShiftsMissed(Membership $member, $start_after, $end_before) {
         $qb = $this->createQueryBuilder('s')
             ->select('count(s.id)')
             ->where('s.shifter IN (:beneficiaries)')
             ->andwhere('s.start > :start_after')
             ->andwhere('s.end < :end_before')
             ->andwhere('s.wasCarriedOut = 0')
-            ->setParameter('beneficiaries', $membership->getBeneficiaries())
+            ->setParameter('beneficiaries', $member->getBeneficiaries())
             ->setParameter('start_after', $start_after)
             ->setParameter('end_before', $end_before);
 
-        return $qb
-            ->getQuery()
+        return $qb->getQuery()
             ->getSingleScalarResult();
     }
 }
