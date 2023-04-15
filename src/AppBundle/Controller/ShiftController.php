@@ -35,14 +35,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class ShiftController extends Controller
 {
+    private $forbid_own_shift_book_admin;
     private $forbid_own_shift_free_admin;
     private $forbid_own_shift_validate_admin;
     private $use_fly_and_fixed;
     private $use_time_log_saving;
     private $time_log_saving_shift_free_min_time_in_advance_days;
 
-    public function __construct(bool $forbid_own_shift_free_admin, bool $forbid_own_shift_validate_admin, bool $use_fly_and_fixed, bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
+    public function __construct(bool $forbid_own_shift_book_admin, bool $forbid_own_shift_free_admin, bool $forbid_own_shift_validate_admin, bool $use_fly_and_fixed, bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
     {
+        $this->forbid_own_shift_book_admin = $forbid_own_shift_book_admin;
         $this->forbid_own_shift_free_admin = $forbid_own_shift_free_admin;
         $this->forbid_own_shift_validate_admin = $forbid_own_shift_validate_admin;
         $this->use_fly_and_fixed = $use_fly_and_fixed;
@@ -182,24 +184,31 @@ class ShiftController extends Controller
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
+        $session = new Session();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $form = $this->createShiftBookAdminForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $fixe = $form->get("fixe")->getData();
             $beneficiary = $form->get("shifter")->getData();
+            $fixe = $form->get("fixe")->getData();
+            $shifter_is_current_user = $current_user->getBeneficiary() == $beneficiary;
 
             if ($shift->getShifter()) {
+                $success = false;
                 $message = "Désolé, ce créneau est déjà réservé";
-                $success = false;
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
+                $success = false;
                 $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")";
-                $success = false;
             } elseif ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts($shift->getStart())) {
-                $message = "Désolé, ce bénévole est exempté de créneau sur cette période";
                 $success = false;
+                $message = "Désolé, ce bénévole est exempté de créneau sur cette période";
+            // check if user is allowed to book shift
+            } elseif ($shifter_is_current_user && $this->forbid_own_shift_book_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+                $success = false;
+                $message = "Vous ne pouvez pas réserver votre propre créneau.";
             } else {
-                $current_user = $this->get('security.token_storage')->getToken()->getUser();
                 $shift->setBooker($current_user);
                 $shift->setBookedTime(new DateTime('now'));
                 $shift->setShifter($beneficiary);
@@ -225,9 +234,10 @@ class ShiftController extends Controller
                 $success = true;
             }
         } else {
-            $message = "Une erreur s'est produite... Impossible de réserver le créneau. " . (string) $form->getErrors(true, false);
             $success = false;
+            $message = "Une erreur s'est produite... Impossible de réserver le créneau. " . (string) $form->getErrors(true, false);
         }
+
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
@@ -240,12 +250,11 @@ class ShiftController extends Controller
                 $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
                     'bucket' => $bucket->getShiftWithMinId()
                 ])->getContent();
-                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
+                return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
             } else {
-                return new JsonResponse(array('message'=>$message), 400);
+                return new JsonResponse(array('message' => $message), 400);
             }
         } else {
-            $session = new Session();
             $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
@@ -259,7 +268,7 @@ class ShiftController extends Controller
     public function freeShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -269,7 +278,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if beneficiary can free this shift
-            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_app_user->getBeneficiary(), $shift);
+            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
                 $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
@@ -309,7 +318,7 @@ class ShiftController extends Controller
     public function freeShiftAdminAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
 
@@ -317,7 +326,7 @@ class ShiftController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
+            $shifter_is_current_user = $current_user->getBeneficiary() == $shift->getShifter();
             $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
             // check if user is allowed to free shift
             if ($shifter_is_current_user && $this->forbid_own_shift_free_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
@@ -394,7 +403,7 @@ class ShiftController extends Controller
     public function validateShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
 
@@ -404,7 +413,7 @@ class ShiftController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $validate = $form->get('validate')->getData() == 1;
             $current = $shift->getWasCarriedOut() == 1;
-            $shifter_is_current_user = $current_app_user->getBeneficiary() == $shift->getShifter();
+            $shifter_is_current_user = $current_user->getBeneficiary() == $shift->getShifter();
             // check if user is allowed to (in)validate shift
             if ($shifter_is_current_user && $this->forbid_own_shift_validate_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;

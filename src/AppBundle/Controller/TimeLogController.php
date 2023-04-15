@@ -19,6 +19,51 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class TimeLogController extends Controller
 {
+    private $forbid_own_timelog_new_admin;
+
+    public function __construct(bool $forbid_own_timelog_new_admin)
+    {
+        $this->forbid_own_timelog_new_admin = $forbid_own_timelog_new_admin;
+    }
+
+    /**
+     * Create a new log
+     *
+     * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @param Membership $member
+     */
+    public function newAction(Request $request, Membership $member)
+    {
+        $session = new Session();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $timeLog = $this->get('time_log_service')->initCustomTimeLog($member);
+
+        $form = $this->createForm(TimeLogType::class, $timeLog);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $member_is_current_user = $current_user->getMembership() == $member;
+            // check if user is allowed to create timelog
+            if ($member_is_current_user && $this->forbid_own_timelog_new_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+                $session->getFlashBag()->add('error', 'Vous ne pouvez pas vous rajouter de log de temps.');
+                return $this->redirectToShow($member);
+            } else {
+                $timeLog->setTime($form->get('time')->getData());
+                $timeLog->setDescription($form->get('description')->getData());
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($timeLog);
+                $em->flush();
+
+                $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
+                return $this->redirectToShow($member);
+            }
+        }
+
+        return $this->redirectToShow($member);
+    }
 
     /**
      * Delete time log
@@ -42,36 +87,6 @@ class TimeLogController extends Controller
             $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
             $session->getFlashBag()->add('error', $timeLog->getId());
         }
-        return $this->redirectToShow($member);
-    }
-
-    /**
-     * Create a new log
-     *
-     * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @param Membership $member
-     */
-    public function newAction(Request $request, Membership $member)
-    {
-        $session = new Session();
-        $timeLog = $this->get('time_log_service')->initCustomTimeLog($member);
-
-        $form = $this->createForm(TimeLogType::class, $timeLog);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $timeLog->setTime($form->get('time')->getData());
-            $timeLog->setDescription($form->get('description')->getData());
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($timeLog);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
-            return $this->redirectToShow($member);
-        }
-
         return $this->redirectToShow($member);
     }
 
