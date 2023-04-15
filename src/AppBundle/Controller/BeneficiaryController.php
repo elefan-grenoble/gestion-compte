@@ -57,10 +57,9 @@ class BeneficiaryController extends Controller
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $em = $this->getDoctrine()->getManager();
-
             $em->flush();
-            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
 
+            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
             return $this->redirectToShow($member);
         }
 
@@ -73,7 +72,7 @@ class BeneficiaryController extends Controller
     /**
      * Set as main beneficiary
      *
-     * @Route("/beneficiary/{id}/set_main", name="beneficiary_set_main", methods={"GET"})
+     * @Route("/{id}/set_main", name="beneficiary_set_main", methods={"GET"})
      * @param Beneficiary $beneficiary
      * @return RedirectResponse
      */
@@ -81,11 +80,14 @@ class BeneficiaryController extends Controller
     {
         $session = new Session();
         $member = $beneficiary->getMembership();
+
         $this->denyAccessUnlessGranted('edit', $member);
-        $em = $this->getDoctrine()->getManager();
+
         $member->setMainBeneficiary($beneficiary);
+        $em = $this->getDoctrine()->getManager();
         $em->persist($member);
         $em->flush();
+
         $session->getFlashBag()->add('success', 'Le changement de bénéficiaire principal a été effectué');
         return $this->redirectToShow($member);
     }
@@ -159,7 +161,7 @@ class BeneficiaryController extends Controller
     /**
      * Deletes a beneficiary entity.
      *
-     * @Route("/beneficiary/{id}", name="beneficiary_delete", methods={"GET", "POST"})
+     * @Route("/{id}", name="beneficiary_delete", methods={"GET", "POST"})
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return RedirectResponse
