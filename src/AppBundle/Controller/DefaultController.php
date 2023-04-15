@@ -2,7 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\BookedShift;
 use AppBundle\Entity\Code;
 use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Membership;
@@ -11,25 +10,14 @@ use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\AutocompleteBeneficiaryCollectionType;
-use AppBundle\Service\MembershipService;
 use AppBundle\Twig\Extension\AppExtension;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Serializer\Encoder\JsonDecode;
 
 class DefaultController extends Controller
 {
@@ -253,72 +241,5 @@ class DefaultController extends Controller
 
         return $this->json(array('success' => true));
 
-    }
-
-    /**
-     * @Route("/shift/{id}/contact_form", name="shift_contact_form", methods={"GET","POST"})
-     */
-    public function shiftContactFormAction(Shift $shift, Request $request, \Swift_Mailer $mailer)
-    {
-
-        $em = $this->getDoctrine()->getManager();
-        $coShifters = $em->getRepository('AppBundle:Beneficiary')->findCoShifters($shift);
-        $formBuilder = $this->createFormBuilder();
-        $formBuilder->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()));
-        $formBuilder->add('to', AutocompleteBeneficiaryCollectionType::class, [
-            'label' => 'A',
-            'data' => $coShifters,
-        ]);
-        $formBuilder->add('message', TextareaType::class, [
-            'attr' => ['class' => 'materialize-textarea'],
-            'label' => 'Message',
-            'data' => 'Bonjour XX,'.PHP_EOL."Tu n'es toujours pas arrivé pour notre créneau.".PHP_EOL."Est-ce que tout va bien ?".PHP_EOL."A très vite,".PHP_EOL.$shift->getShifter()->getFirstName().PHP_EOL.PHP_EOL."Bonjour à tou.te.s,".PHP_EOL."Je vais en être en retard pour mon créneau.".PHP_EOL."Je serai à l'épicerie d'ici XX minutes.".PHP_EOL."A tout de suite,".PHP_EOL.$shift->getShifter()->getFirstName()
-        ]);
-        $formBuilder->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())));
-        $formBuilder->setMethod('POST');
-        $form = $formBuilder->getForm();
-
-        if ($form->handleRequest($request)->isValid()) {
-            $beneficiaries = $form->get('to')->getData();
-            $from = $form->get('from')->getData();
-            $from = $em->getRepository('AppBundle:Beneficiary')->findOneBy(array('id' => $from));
-            $emails = array();
-            $firstnames = array();
-            foreach ($beneficiaries as $beneficiary) {
-                $emails[] = $beneficiary->getEmail();
-                $firstnames[] = $beneficiary->getFirstname();
-            }
-            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1)))
-                ->setFrom($this->getParameter('transactional_mailer_user'))
-                ->setReplyTo($from->getEmail())
-                ->setBcc($emails)
-                ->setBody(
-                    $this->renderView(
-                        'emails/coshifter_message.html.twig',
-                        array(
-                            'message' => trim($form->get('message')->getData()),
-                            'from' => $from,
-                            'firstnames' => $firstnames,
-                            'shift' => $shift)
-                    ),
-                    'text/html'
-                );
-            $mailer->send($message);
-            $session = new Session();
-            if (count($firstnames) > 1) {
-                $last_firstname = array_pop($firstnames);
-                $firstnames = implode(', ', $firstnames);
-                $firstnames .= ' et ' . $last_firstname;
-            } else {
-                $firstnames = $firstnames[0];
-            }
-
-            $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
-            return $this->redirectToRoute('homepage');
-        }
-        return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
-            'shift' => $shift,
-            'form' => $form->createView()
-        ));
     }
 }

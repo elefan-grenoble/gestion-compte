@@ -53,5 +53,5 @@
     {% endif %}
 </div>
 {% if (shift.isUpcoming or shift.isCurrent) %}
-    {{ render(controller("AppBundle:Default:shiftContactForm", { "shift": shift })) }}
+    {{ render(controller("AppBundle:Shift:contactForm", { "shift": shift })) }}
 {% endif %}
