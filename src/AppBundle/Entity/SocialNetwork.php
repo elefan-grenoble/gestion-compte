@@ -32,7 +32,7 @@ class SocialNetwork
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="text")
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
@@ -42,6 +42,13 @@ class SocialNetwork
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
+
+    /**
+     * @var bool
+     * 
+     * @ORM\Column(name="displayed_footer", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $displayedFooter;
 
     /**
      * @var \DateTime
@@ -138,6 +145,30 @@ class SocialNetwork
     public function getUrl()
     {
         return $this->url;
+    }
+
+    /**
+     * Set displayedFooter.
+     *
+     * @param bool|null $displayedFooter
+     *
+     * @return SocialNetwork
+     */
+    public function setDisplayedFooter($displayedFooter = null)
+    {
+        $this->displayedFooter = $displayedFooter;
+
+        return $this;
+    }
+
+    /**
+     * Get displayedFooter.
+     *
+     * @return bool|null
+     */
+    public function getDisplayedFooter()
+    {
+        return $this->displayedFooter;
     }
 
     /**

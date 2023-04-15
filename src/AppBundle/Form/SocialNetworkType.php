@@ -43,7 +43,8 @@ class SocialNetworkType extends AbstractType
 
             $form->add('name', TextType::class, array('label' => 'nom', 'required' => true))
                 ->add('description', TextType::class, array('label' => 'Description', 'required' => false))
-                ->add('url', TextType::class, array('label' => 'Adresse web', 'required' => false));
+                ->add('url', TextType::class, array('label' => 'Adresse web', 'required' => false))
+                ->add('displayed_footer', CheckboxType::class, array('required' => false, 'label' => 'Afficher dans le footer', 'attr' => array('class' => 'filled-in')));
         });
     }
     

@@ -109,6 +109,17 @@ class DefaultController extends Controller
         ]);
     }
 
+    public function footerAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $socialNetworks = $em->getRepository('AppBundle:SocialNetwork')->findAllDisplayedFooter();
+
+        return $this->render('_partial/footer.html.twig', [
+            'socialNetworks' => $socialNetworks,
+        ]);
+    }
+
     /**
      * @Route("/schedule", name="schedule", methods={"GET","POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")

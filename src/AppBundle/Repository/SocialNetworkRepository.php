@@ -10,4 +10,13 @@ namespace AppBundle\Repository;
  */
 class SocialNetworkRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAllDisplayedFooter()
+    {
+        $qb = $this->createQueryBuilder('sn')
+            ->where('sn.displayedFooter = 1');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
