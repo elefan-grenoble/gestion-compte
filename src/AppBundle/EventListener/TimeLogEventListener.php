@@ -321,9 +321,9 @@ class TimeLogEventListener
                 if ($member_saving_now > 0) {
                     $date_minus_one_day = clone($date)->modify("-1 days");
                     // count missed shifts in the previous cycle
-                    $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleShiftsMissedCount($membership, $date_minus_one_day);
+                    $previous_cycle_missed_shifts_count = $this->get('membership_service')->getCycleShiftsMissedCount($member, $date_minus_one_day);
                     // count freed shifts within the min_time_in_advance in the previous cycle
-                    $previous_cycle_freed_shifts_less_than_min_time_in_advance_count = $this->get('membership_service')->getCycleShiftsFreedCount($membership, $date_minus_one_day, $this->time_log_saving_shift_free_min_time_in_advance_days);
+                    $previous_cycle_freed_shifts_less_than_min_time_in_advance_count = $this->get('membership_service')->getCycleShiftsFreedCount($member, $date_minus_one_day, $this->time_log_saving_shift_free_min_time_in_advance_days);
                     // we can use the member's savings only if:
                     // - the member has no missed shifts in the previous cycle
                     // - the member has no freed shifts within the min_time_in_advance 
