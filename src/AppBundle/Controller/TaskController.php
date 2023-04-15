@@ -86,7 +86,7 @@ class TaskController extends Controller
      *
      * @Route("/edit/{id}", name="task_edit", methods={"GET","POST"})
      */
-    public function editAction(Request $request,Task $task)
+    public function editAction(Request $request, Task $task)
     {
         $session = new Session();
 
@@ -134,10 +134,12 @@ class TaskController extends Controller
      *
      * @Route("/{id}", name="task_delete", methods={"DELETE"})
      */
-    public function removeAction(Request $request,Task $task)
+    public function deleteAction(Request $request, Task $task)
     {
-        $this->denyAccessUnlessGranted('delete',$task);
+        $this->denyAccessUnlessGranted('delete', $task);
+
         $session = new Session();
+
         $form = $this->getDeleteForm($task);
         $form->handleRequest($request);
 
@@ -145,6 +147,7 @@ class TaskController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
         }
 

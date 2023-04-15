@@ -41,7 +41,8 @@ class CodeController extends Controller
      * @Route("/", name="codes_list", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request){
+    public function listAction(Request $request)
+    {
         $session = new Session();
 
         $logger = $this->get('logger');
@@ -130,7 +131,8 @@ class CodeController extends Controller
      * @Route("/generate", name="code_generate", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function generateAction(Request $request) {
+    public function generateAction(Request $request)
+    {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -202,7 +204,8 @@ class CodeController extends Controller
      * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function toggleAction(Request $request, Code $code) {
+    public function toggleAction(Request $request, Code $code)
+    {
         $session = new Session();
 
         if ($code->getClosed())
@@ -227,7 +230,8 @@ class CodeController extends Controller
      *
      * @Route("/close_all", name="code_change_done", methods={"GET"})
      */
-    public function closeAllButMineAction(Request $request){
+    public function closeAllButMineAction(Request $request)
+    {
         $session = new Session();
         $securityContext = $this->container->get('security.authorization_checker');
 
@@ -286,16 +290,20 @@ class CodeController extends Controller
      *
      * @Route("/{id}", name="code_delete", methods={"DELETE"})
      */
-    public function removeAction(Request $request,Code $code)
+    public function deleteAction(Request $request, Code $code)
     {
-        $this->denyAccessUnlessGranted('delete',$code);
+        $this->denyAccessUnlessGranted('delete', $code);
+
         $session = new Session();
+
         $form = $this->getDeleteForm($code);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($code);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');
         }
         return $this->redirectToRoute('codes_list');
