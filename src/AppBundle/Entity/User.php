@@ -62,6 +62,15 @@ class User extends BaseUser
      */
     private $processUpdates;
 
+    public function __toString()
+    {
+        if (!$this->getBeneficiary())
+            return $this->getUsername();
+        else{
+            return (string)$this->getBeneficiary();
+        }
+    }
+
     public function getGroups()
     {
         if ($this->getBeneficiary()){
@@ -69,7 +78,6 @@ class User extends BaseUser
         }else{
             return new ArrayCollection();
         }
-
     }
 
     public function __get($property) {
@@ -103,15 +111,6 @@ class User extends BaseUser
             return $beneficiary->getLastname();
         else
             return '';
-    }
-
-    public function __toString()
-    {
-        if (!$this->getBeneficiary())
-            return $this->getUsername();
-        else{
-            return (string)$this->getBeneficiary();
-        }
     }
 
     public function getTmpToken($key = '')
@@ -276,7 +275,6 @@ class User extends BaseUser
         return $this->clients;
     }
 
-
     /**
      * Add annotation
      *
@@ -312,6 +310,14 @@ class User extends BaseUser
     }
 
     /**
+     * @param mixed $beneficiary
+     */
+    public function setBeneficiary($beneficiary)
+    {
+        $this->beneficiary = $beneficiary;
+    }
+
+    /**
      * @return Beneficiary
      */
     public function getBeneficiary()
@@ -320,11 +326,15 @@ class User extends BaseUser
     }
 
     /**
-     * @param mixed $beneficiary
+     * @return Membership
      */
-    public function setBeneficiary($beneficiary)
+    public function getMembership()
     {
-        $this->beneficiary = $beneficiary;
+        if ($this->getBeneficiary()) {
+            return $this->getBeneficiary()->getMembership();
+        } else {
+            return null;
+        }
     }
 
     /**
