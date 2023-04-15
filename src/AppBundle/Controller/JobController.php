@@ -114,7 +114,7 @@ class JobController extends Controller
     /**
      * Edit job.
      *
-     * @Route("/edit/{id}", name="job_edit", methods={"GET","POST"})
+     * @Route("/{id}/edit", name="job_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Job $job)
@@ -134,9 +134,11 @@ class JobController extends Controller
             return $this->redirectToRoute('job_list');
         }
 
+        $delete_form = $this->getDeleteForm($job);
+
         return $this->render('admin/job/edit.html.twig', array(
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($job)->createView()
+            'delete_form' => $delete_form->createView()
         ));
     }
 
@@ -146,9 +148,10 @@ class JobController extends Controller
      * @Route("/{id}", name="job_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Job $job)
+    public function deleteAction(Request $request,Job $job)
     {
         $session = new Session();
+
         $form = $this->getDeleteForm($job);
         $form->handleRequest($request);
 

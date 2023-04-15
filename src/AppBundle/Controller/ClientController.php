@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 /**
  * Task controller.
  *
- * @Route("clients")
+ * @Route("admin/clients")
  */
 class ClientController extends Controller
 {
@@ -26,32 +26,31 @@ class ClientController extends Controller
     /**
      * Lists all clients.
      *
-     * @Route("/", name="admin_clients", methods={"GET"})
+     * @Route("/", name="client_list", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function listAction()
     {
         $clients = $this->getDoctrine()->getManager()->getRepository('AppBundle:Client')->findAll();
+
         return $this->render('admin/client/list.html.twig',array('clients'=>$clients));
     }
 
     /**
      * Add new Client //todo put this auto in service création
      *
-     * @Route("/client_new", name="client_new", methods={"GET","POST"})
+     * @Route("/new", name="client_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function newAction(Request $request){
-
+    public function newAction(Request $request)
+    {
         $session = new Session();
 
         $form = $this->createForm(ClientType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $urls = $form->get('urls')->getData();
-
             $service = $form->get('service')->getData();
 
             $clientManager = $this->container->get('fos_oauth_server.client_manager.default');
@@ -62,8 +61,7 @@ class ClientController extends Controller
             $clientManager->updateClient($client);
 
             $session->getFlashBag()->add('success', 'Le client a bien été créé !');
-
-            return $this->redirectToRoute('admin_clients');
+            return $this->redirectToRoute('client_list');
 
 //            return $this->redirect($this->generateUrl('fos_oauth_server_authorize', array(
 //                'client_id' => $client->getPublicId(),
@@ -71,6 +69,7 @@ class ClientController extends Controller
 //                'response_type' => 'code'
 //            )));
         }
+
         return $this->render('admin/client/new.html.twig', array(
             'form' => $form->createView()
         ));
@@ -80,10 +79,11 @@ class ClientController extends Controller
     /**
      * edit client.
      *
-     * @Route("/edit/{id}", name="client_edit", methods={"GET","POST"})
+     * @Route("/{id}/edit", name="client_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Client $client){
+    public function editAction(Request $request, Client $client)
+    {
         $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
@@ -106,7 +106,7 @@ class ClientController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le client a bien été édité !');
-            return $this->redirectToRoute('admin_clients');
+            return $this->redirectToRoute('client_list');
 
         } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
@@ -114,10 +114,7 @@ class ClientController extends Controller
             }
         }
 
-        $delete_form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('client_remove', array('id' => $client->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
+        $delete_form = $this->getDeleteForm($client);
 
         return $this->render('admin/client/edit.html.twig', array(
             'form' => $form->createView(),
@@ -127,28 +124,38 @@ class ClientController extends Controller
     }
 
     /**
-     * remove client.
+     * delete client.
      *
-     * @Route("/remove/{id}", name="client_remove", methods={"DELETE"})
+     * @Route("/{id}", name="client_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Client $client)
+    public function deleteAction(Request $request, Client $client)
     {
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('client_remove', array('id' => $client->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
+
+        $form = $this->getDeleteForm($client);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($client);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le client a bien été supprimé !');
         }
 
-        return $this->redirectToRoute('admin_clients');
+        return $this->redirectToRoute('client_list');
     }
 
+    /**
+     * @param Client $client
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(Client $client)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('client_delete', array('id' => $client->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
 }
