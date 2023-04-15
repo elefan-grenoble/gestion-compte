@@ -87,7 +87,7 @@
             <li>
                 <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">
                     {% if registration.amount is not null %}
-                        {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
+                        {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or registration.mode == constant('TYPE_HELLOASSO', R)  %}
                             <i class="material-icons tiny">credit_card</i>
                         {% else %}
                             <i class="material-icons tiny">attach_money</i>
@@ -100,18 +100,13 @@
                         Bénéficiaire rattaché
                     {% endif %}
                     {% if registration.registrar %}
-                        par&nbsp;
-                        {% if registration.registrar.beneficiary %}
-                            <a href="{{ path("member_show", { "member_number": registration.registrar.beneficiary.membership.memberNumber }) }}" target="_blank">{{ registration.registrar.beneficiary }}</a>
-                        {% else %}
-                            {{ registration.registrar.username }}
-                        {% endif %}
+                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: registration.registrar, target_blank: true } %}
                         &nbsp;&agrave;&nbsp;
                         {{ registration.date | date('H:i') }}
                     {% endif %}
                     {% if registration.membership %}
-                        pour <a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership }}</a>&nbsp;
-                        {% if(registration.membership.registrations | length) > 1 %}
+                        pour <a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership.memberNumberWithBeneficiaryListString }}</a>&nbsp;
+                        {% if (registration.membership.registrations | length) > 1 %}
                             (Ré-adhésion) effective le {{ registration.startDate | date('d F Y') }}
                         {% endif %}
                     {% else %}
