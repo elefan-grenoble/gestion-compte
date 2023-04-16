@@ -32,53 +32,11 @@ class EventController extends Controller
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+
         $events = $em->getRepository('AppBundle:Event')->findAll();
 
         return $this->render('admin/event/list.html.twig', array(
             'events' => $events,
-        ));
-    }
-
-    /**
-     * Lists all proxy
-     *
-     * @Route("/proxies_list", name="proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
-     */
-    public function listProxiesAction()
-    {
-        $em = $this->getDoctrine()->getManager();
-        $proxies = $em->getRepository('AppBundle:Proxy')->findAll();
-        $delete_forms = array();
-        foreach ($proxies as $proxy){
-            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
-        }
-
-        return $this->render('admin/event/proxy/list.html.twig', array(
-            'proxies' => $proxies,
-            'delete_forms' => $delete_forms,
-            'event' => null,
-        ));
-    }
-
-    /**
-     * Lists all proxy for one event.
-     *
-     * @Route("/{id}/proxies_list", name="event_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
-     */
-    public function listEventProxiesAction(Event $event, Request $request)
-    {
-        $proxies = $event->getProxies();
-        $delete_forms = array();
-        foreach ($proxies as $proxy){
-            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
-        }
-
-        return $this->render('admin/event/proxy/list.html.twig', array(
-            'proxies' => $proxies,
-            'delete_forms' => $delete_forms,
-            'event' => $event,
         ));
     }
 
@@ -91,13 +49,16 @@ class EventController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
-        $event = new Event();
         $em = $this->getDoctrine()->getManager();
+
+        $event = new Event();
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($event);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');
             return $this->redirectToRoute('event_edit', array('id' => $event->getId()));
         }
@@ -118,18 +79,16 @@ class EventController extends Controller
     public function editAction(Request $request, Event $event)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-
             $em->persist($event);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'L\'événement a bien été édité !');
-
             return $this->redirectToRoute('event_list');
         }
 
@@ -149,12 +108,12 @@ class EventController extends Controller
     public function deleteAction(Request $request, Event $event)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($event);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($event);
             $em->flush();
 
@@ -165,20 +124,66 @@ class EventController extends Controller
     }
 
     /**
+     * Lists all proxy
+     *
+     * @Route("/proxies", name="proxies_list", methods={"GET"})
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     */
+    public function listProxiesAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $proxies = $em->getRepository('AppBundle:Proxy')->findAll();
+
+        $delete_forms = array();
+        foreach ($proxies as $proxy){
+            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
+        }
+
+        return $this->render('admin/event/proxy/list.html.twig', array(
+            'proxies' => $proxies,
+            'delete_forms' => $delete_forms,
+            'event' => null,
+        ));
+    }
+
+    /**
+     * Lists all proxy for one event.
+     *
+     * @Route("/{id}/proxies", name="event_proxies_list", methods={"GET"})
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     */
+    public function listEventProxiesAction(Event $event, Request $request)
+    {
+        $proxies = $event->getProxies();
+
+        $delete_forms = array();
+        foreach ($proxies as $proxy) {
+            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
+        }
+
+        return $this->render('admin/event/proxy/list.html.twig', array(
+            'proxies' => $proxies,
+            'delete_forms' => $delete_forms,
+            'event' => $event,
+        ));
+    }
+
+    /**
      * Proxy delete
      *
-     * @Route("/proxy/{id}", name="proxy_delete", methods={"DELETE"})
+     * @Route("/proxies/{id}", name="proxy_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function deleteProxyAction(Request $request, Proxy $proxy)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->getProxyDeleteForm($proxy);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($proxy);
             $em->flush();
 
@@ -191,17 +196,19 @@ class EventController extends Controller
     /**
      * Proxy edit
      *
-     * @Route("/proxy/{id}", name="proxy_edit", methods={"GET","POST"})
+     * @Route("/proxies/{id}", name="proxy_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editProxyAction(Request $request,Proxy $proxy,\Swift_Mailer $mailer)
+    public function editProxyAction(Request $request, Proxy $proxy, \Swift_Mailer $mailer)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $event = $proxy->getEvent();
         $form = $this->createForm(ProxyType::class, $proxy);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             if ($proxy->getOwner()){
                 $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
                 if ($existing_proxy && $existing_proxy != $proxy){
@@ -259,7 +266,6 @@ class EventController extends Controller
                 return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
             }
 
-
             return $this->redirectToRoute('event_proxies_list',array('id'=>$event->getId()));
         }
 
@@ -267,30 +273,6 @@ class EventController extends Controller
             'form' => $form->createView(),
             'delete_form' => $this->getProxyDeleteForm($proxy)->createView(),
         ));
-    }
-
-    /**
-     * @param Event $event
-     * @return \Symfony\Component\Form\FormInterface
-     */
-    protected function getDeleteForm(Event $event)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('event_delete', array('id' => $event->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
-    }
-
-    /**
-     * @param Proxy $proxy
-     * @return \Symfony\Component\Form\FormInterface
-     */
-    protected function getProxyDeleteForm(Proxy $proxy)
-    {
-        return $this->createFormBuilder()
-            ->setAction($this->generateUrl('proxy_delete', array('id' => $proxy->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
     }
 
     /**
@@ -471,6 +453,7 @@ class EventController extends Controller
      */
     public function findBeneficiaryAction(Event $event, Request $request)
     {
+        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $membership = $current_app_user->getBeneficiary()->getMembership();
 
@@ -483,8 +466,6 @@ class EventController extends Controller
             ->add('firstname', TextType::class, array('label' => 'le prénom'))
             ->setMethod('POST')
             ->getForm();
-
-        $session = new Session();
 
         if ($search_form->handleRequest($request)->isValid()) {
             $firstname = $search_form->get('firstname')->getData();
@@ -545,13 +526,16 @@ class EventController extends Controller
     public function removeProxyLiteAction(Event $event, Proxy $proxy, Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
         if (($proxy->getEvent() === $event) && ($proxy->getOwner()->getUser() == $current_app_user)) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($proxy);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Ok, bien reçu');
         }
+
         return $this->redirectToRoute('homepage');
     }
 
@@ -562,8 +546,8 @@ class EventController extends Controller
      */
     public function acceptProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
     {
-        $em = $this->getDoctrine()->getManager();
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         // check if member hasn't already given a proxy
@@ -631,6 +615,72 @@ class EventController extends Controller
 
     }
 
+    /**
+     * Generate a printable list Signatures list. Automatically remove the
+     * withdrawn members and if a registration_duration is defined, the
+     * member with an expired registration.
+     *
+     * Goes with the twig template views/admin/event/signatures.html.twig
+     *
+     * @Route("/{id}/signatures/", name="event_signatures", methods={"GET","POST"})
+     */
+    public function signaturesListAction(Request $request,Event $event): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $beneficiaries_request = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b')
+                ->leftJoin('b.membership', 'm')
+                ->leftJoin("m.registrations", "r")
+                ->andWhere("r.date is NOT NULL" )
+                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" );
+
+        if (!is_null($registrationDuration = $this->getParameter('registration_duration'))) {
+            $minLastRegistration = clone $event->getMaxDateOfLastRegistration();
+            $minLastRegistration->modify('-'.$registrationDuration);
+
+            $beneficiaries_request = $beneficiaries_request
+                ->andWhere('r.date >= :min_last_registration')
+                ->setParameter('min_last_registration', $minLastRegistration)
+                ->andWhere('r.date < :max_last_registration')
+                ->setParameter('max_last_registration', $event->getMaxDateOfLastRegistration());
+        }
+
+        $beneficiaries = $beneficiaries_request
+            ->orderBy("b.lastname", 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('admin/event/signatures.html.twig', array(
+            'event' => $event,
+            'beneficiaries' => $beneficiaries,
+        ));
+    }
+
+
+    /**
+     * @param Event $event
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(Event $event)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('event_delete', array('id' => $event->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * @param Proxy $proxy
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getProxyDeleteForm(Proxy $proxy)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('proxy_delete', array('id' => $proxy->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
     public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer){
 
         $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
@@ -666,46 +716,5 @@ class EventController extends Controller
             );
         $mailer->send($owner);
         $mailer->send($giver);
-
-    }
-
-    /**
-     * Generate a printable list Signatures list. Automatically remove the
-     * withdrawn members and if a registration_duration is defined, the
-     * member with an expired registration.
-     *
-     * Goes with the twig template views/admin/event/signatures.html.twig
-     *
-     * @Route("/{id}/signatures/", name="event_signatures", methods={"GET","POST"})
-     */
-    public function signaturesListAction(Request $request,Event $event): Response
-    {
-        $em = $this->getDoctrine()->getManager();
-        $qb = $em->getRepository("AppBundle:Beneficiary")->createQueryBuilder('b');
-        $beneficiaries_request = $qb->leftJoin('b.membership', 'm')
-                ->leftJoin("m.registrations", "r")
-                ->andWhere("r.date is NOT NULL" )
-                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL" );
-
-        if (!is_null($registrationDuration = $this->getParameter('registration_duration'))) {
-            $minLastRegistration = clone $event->getMaxDateOfLastRegistration();
-            $minLastRegistration->modify('-'.$registrationDuration);
-
-            $beneficiaries_request = $beneficiaries_request
-                ->andWhere('r.date >= :min_last_registration')
-                ->setParameter('min_last_registration', $minLastRegistration)
-                ->andWhere('r.date < :max_last_registration')
-                ->setParameter('max_last_registration', $event->getMaxDateOfLastRegistration());
-        }
-
-        $beneficiaries =$beneficiaries_request
-            ->orderBy("b.lastname", 'ASC')
-            ->getQuery()
-            ->getResult();
-
-        return $this->render('admin/event/signatures.html.twig', array(
-            'event' => $event,
-            'beneficiaries' => $beneficiaries,
-        ));
     }
 }
