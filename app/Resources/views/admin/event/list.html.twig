@@ -54,7 +54,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>editer</a>
+                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
                 </td>
             </tr>
         {% endfor %}
@@ -62,6 +62,7 @@
 </table>
 
 {% if is_granted("ROLE_ADMIN") %}
+    <br />
     <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
     <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
 {% endif %}

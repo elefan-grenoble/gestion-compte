@@ -21,10 +21,15 @@
     <tbody>
         {% for eventKind in eventKinds %}
             <tr>
-                <td class="{{ event.title }}">{{ event.title }}</td>
-                <td></td>
+                <td class="{{ eventKind.name }}">{{ eventKind.name }}</td>
+                <td>
+                    <a href="{{ path('admin_event_kind_edit', { 'id': eventKind.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<br />
+<a href="{{ path('admin_event_kind_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un type d'événement</a>
 {% endblock %}
