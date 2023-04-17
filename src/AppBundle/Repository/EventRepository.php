@@ -12,9 +12,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
 {
     public function findFutures(\DateTime $max = null)
     {
-        $qb = $this->createQueryBuilder('e');
-
-        $qb
+        $qb = $this->createQueryBuilder('e')
             ->where("e.date > :now")
             ->setParameter('now', new \Datetime('now'));
 
@@ -24,7 +22,19 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('max', $max);
         }
 
-        $qb->orderBy("e.id", 'ASC');
+        $qb->orderBy("e.date", 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findPast()
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->where("e.date < :now")
+            ->setParameter('now', new \Datetime('now'))
+            ->orderBy("e.date", 'DESC');
 
         return $qb
             ->getQuery()
