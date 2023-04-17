@@ -15,6 +15,7 @@
     <thead>
         <tr>
             <th>Type d'événement</th>
+            <th>Nombre d'événements</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -22,6 +23,7 @@
         {% for eventKind in eventKinds %}
             <tr>
                 <td class="{{ eventKind.name }}">{{ eventKind.name }}</td>
+                <td>{{ eventKind.events | length }}</td>
                 <td>
                     <a href="{{ path('admin_event_kind_edit', { 'id': eventKind.id }) }}"><i class="material-icons">edit</i>Editer</a>
                 </td>
