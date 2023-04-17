@@ -82,6 +82,14 @@ class Event
     /**
      * @var \DateTime
      *
+     * @Assert\DateTime()
+     * @ORM\Column(name="end", type="datetime", nullable=true)
+     */
+    private $end;
+
+    /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
      */
     private $max_date_of_last_registration;
@@ -213,6 +221,30 @@ class Event
     public function setDate($date)
     {
         $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get end
+     *
+     * @return \DateTime
+     */
+    public function getEnd()
+    {
+        return $this->end;
+    }
+
+    /**
+     * Set end
+     *
+     * @param \DateTime $date
+     *
+     * @return Event
+     */
+    public function setEnd($end)
+    {
+        $this->end = $end;
 
         return $this;
     }
@@ -457,5 +489,28 @@ class Event
     public function getUpdatedAt()
     {
         return $this->updatedAt;
+    }
+
+    public function getDuration($scale = 'hours')
+    {
+        if ($this->end) {
+            $diff = date_diff($this->date, $this->end);
+            if ($scale == 'minutes') {
+                return ($diff->h * 60 + $diff->i) . ' min';  # "180 min"
+            }
+            # scale = "hours"
+            $duration = "";
+            if ($diff->d) {
+                $duration = $duration . $diff->d . ' jour' . ($diff->d > 1 ? 's' : '');
+            }
+            if ($diff->h) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->h . 'h';
+            }
+            if ($diff->i) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->i . ' min';
+            }
+            return $duration;
+        }
+        return null;
     }
 }

@@ -40,7 +40,12 @@
                         <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
                     {% endif %}
                 </td>
-                <td>{{ event.date | date_fr_full_with_time }}</td>
+                <td>
+                    {{ event.date | date_fr_full_with_time }}
+                    {% if event.end %}
+                        <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
+                    {% endif %}
+                </td>
                 <td>
                     {% if event.needProxy %}
                         <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>

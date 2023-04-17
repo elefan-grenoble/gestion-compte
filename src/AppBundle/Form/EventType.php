@@ -46,25 +46,35 @@ class EventType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            $form->add('title', TextType::class,array('label' => 'Titre'))
-                ->add('date', DateTimeType::class,array(
+            $form->add('title', TextType::class, array('label' => 'Titre'))
+                ->add('date', DateTimeType::class, array(
                     'required' => true,
                     'input'  => 'datetime',
                     'date_widget' => 'single_text',
                     'time_widget' => 'single_text',
-                    'label' => 'Date & heure',
+                    'label' => 'Date & heure de début',
                     'attr' => array(
                         'class' => 'datepicker'
                     )
                 ))
-                ->add('description',MarkdownEditorType::class,array('label'=>'Description', 'required' => false));
-            $form->add('imgFile', VichImageType::class, array(
+                ->add('end', DateTimeType::class, array(
+                    'required' => false,
+                    'input'  => 'datetime',
+                    'date_widget' => 'single_text',
+                    'time_widget' => 'single_text',
+                    'label' => 'Date & heure de fin (optionnel)',
+                    'attr' => array(
+                        'class' => 'datepicker'
+                    )
+                ))
+                ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false))
+                ->add('imgFile', VichImageType::class, array(
                 'required' => false,
                 'allow_delete' => true,
                 'download_link' => true,
             ));
 
-            if ($userData && $userData->getId()){
+            if ($userData && $userData->getId()) {
                 $form->add('need_proxy', CheckboxType::class, array(
                     'required' => false,
                     'label' => 'Utilise des procurations (AG, ...)',
@@ -81,10 +91,7 @@ class EventType extends AbstractType
                     'attr' => array('class' => 'datepicker')
                 ));
             }
-
         });
-
-
     }
     
     /**
@@ -104,6 +111,4 @@ class EventType extends AbstractType
     {
         return 'appbundle_event';
     }
-
-
 }

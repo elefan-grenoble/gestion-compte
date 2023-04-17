@@ -17,7 +17,12 @@
         {{ form_row(form.title) }}
     </div>
     <div class="row">
-        {{ form_row(form.date) }}
+        <div class="col s6">
+            {{ form_row(form.date) }}
+        </div>
+        <div class="col s6">
+            {{ form_row(form.end) }}
+        </div>
     </div>
     <div class="row">
         {{ form_row(form.description) }}
