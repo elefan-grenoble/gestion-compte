@@ -73,7 +73,7 @@ class EventType extends AbstractType
                     'allow_delete' => true,
                     'download_link' => true,
                 ))
-                ->add('kind', null, ['label' => 'Type d\'exemption']);
+                ->add('kind', null, ['label' => 'Type d\'événement']);
 
             if ($userData && $userData->getId()) {
                 $form->add('need_proxy', CheckboxType::class, array(

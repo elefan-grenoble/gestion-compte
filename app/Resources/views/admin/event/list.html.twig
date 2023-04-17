@@ -25,6 +25,7 @@
     <thead>
         <tr>
             <th>Événement</th>
+            <th>Type</th>
             <th>Description</th>
             <th>Date</th>
             <th>Procurations</th>
@@ -34,7 +35,8 @@
     <tbody>
         {% for event in eventsPast %}
             <tr>
-                <td class="{{ event.title }}">{{ event.title }}</td>
+                <td>{{ event.title }}</td>
+                <td>{{ event.kind }}</td>
                 <td class="center-align">
                     {% if event.description is not empty %}
                         <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
