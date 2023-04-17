@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des types d'événements - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des types d'événements
+{% endblock %}
+
+{% block content %}
+<h4>Liste des types d'événements ({{ eventKinds | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Type d'événement</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for eventKind in eventKinds %}
+            <tr>
+                <td class="{{ event.title }}">{{ event.title }}</td>
+                <td></td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
