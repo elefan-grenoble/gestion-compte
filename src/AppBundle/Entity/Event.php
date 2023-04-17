@@ -226,6 +226,26 @@ class Event
     }
 
     /**
+     * Get date
+     *
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * Get time
+     *
+     * @return \DateTime
+     */
+    public function getTime()
+    {
+        return $this->date;
+    }
+
+    /**
      * Get end
      *
      * @return \DateTime
@@ -247,26 +267,6 @@ class Event
         $this->end = $end;
 
         return $this;
-    }
-
-    /**
-     * Get date
-     *
-     * @return \DateTime
-     */
-    public function getDate()
-    {
-        return $this->date;
-    }
-
-    /**
-     * Get time
-     *
-     * @return \DateTime
-     */
-    public function getTime()
-    {
-        return $this->date;
     }
 
     /**

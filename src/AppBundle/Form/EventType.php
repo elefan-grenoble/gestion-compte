@@ -69,10 +69,10 @@ class EventType extends AbstractType
                 ))
                 ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false))
                 ->add('imgFile', VichImageType::class, array(
-                'required' => false,
-                'allow_delete' => true,
-                'download_link' => true,
-            ));
+                    'required' => false,
+                    'allow_delete' => true,
+                    'download_link' => true,
+                ));
 
             if ($userData && $userData->getId()) {
                 $form->add('need_proxy', CheckboxType::class, array(
