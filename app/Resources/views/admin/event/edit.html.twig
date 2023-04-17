@@ -14,27 +14,26 @@
 
     {{ form_start(form) }}
     <div class="row">
-        <div class="col s6">
+        {{ form_row(form.title) }}
+    </div>
+    <div class="row">
+        {{ form_row(form.date) }}
+    </div>
+    <div class="row">
+        {{ form_row(form.description) }}
+    </div>
+    <div class="row">
+        <div class="col s12">
             <div class="errors">
-                {{ form_errors(form.title) }}
+                {{ form_errors(form.imgFile) }}
             </div>
-            <div class="input-field">
-                {{ form_widget(form.title) }}
-                {{ form_label(form.title) }}
-            </div>
-        </div>
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.date) }}
-            </div>
-            <div>
-                {{ form_label(form.date) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.date) }}
+            <div class="">
+                {{ form_widget(form.imgFile) }}
+                {{ form_label(form.imgFile) }}
             </div>
         </div>
     </div>
+    <h5>Nécessite un vote ?</h5>
     <div class="row">
         <div class="col s6">
             {{ form_errors(form.need_proxy) }}
@@ -53,29 +52,7 @@
     </div>
     <div class="row">
         <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.max_date_of_last_registration) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.max_date_of_last_registration) }}
-                {{ form_label(form.max_date_of_last_registration) }}
-            </div>
-        </div>
-    </div>
-    <div class="errors">
-        {{ form_errors(form.description) }}
-    </div>
-    {{ form_label(form.description) }}
-    {{ form_widget(form.description) }}
-    <div class="row">
-        <div class="col s12">
-            <div class="errors">
-                {{ form_errors(form.imgFile) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.imgFile) }}
-                {{ form_label(form.imgFile) }}
-            </div>
+            {{ form_row(form.max_date_of_last_registration) }}
         </div>
     </div>
     <br />
@@ -103,4 +80,13 @@
         </div>
         {{ form_end(delete_form) }}
     {% endif %}
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .vich-image {
+        max-height: 300px;
+        overflow: auto;
+    }
+</style>
 {% endblock %}
