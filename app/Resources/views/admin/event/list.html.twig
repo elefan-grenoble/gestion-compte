@@ -12,6 +12,28 @@
 {% block content %}
 <h4>Liste des événements ({{ events | length }})</h4>
 
+{# Filter form  --------- #}
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header">
+            <i class="material-icons">tune</i>Filtres
+        </div>
+        <div class="collapsible-body">
+            {{ form_start(filter_form) }}
+            <div class="row">
+                <div class="col s6">
+                    <div class="input-field">
+                        {{ form_widget(filter_form.kind) }}
+                        {{ form_label(filter_form.kind) }}
+                    </div>
+                </div>
+            </div>
+            {{ form_widget(filter_form.submit) }}
+            {{ form_end(filter_form) }}
+        </div>
+    </li>
+</ul>
+
 {% include "admin/event/_partial/table.html.twig" with { events: events } %}
 
 {% if is_granted("ROLE_ADMIN") %}

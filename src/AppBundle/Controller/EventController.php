@@ -6,9 +6,11 @@ use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
 use AppBundle\Form\EventType;
 use AppBundle\Form\ProxyType;
+use AppBundle\Repository\EventKindRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -23,6 +25,45 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class EventController extends Controller
 {
+    /**
+     * Filter form.
+     */
+    private function filterFormFactory(Request $request): array
+    {
+        // default values
+        $res = [
+            "kind" => null,
+        ];
+
+        // filter creation ----------------------
+        $res["form"] = $this->createFormBuilder()
+            ->setAction($this->generateUrl('event_list'))
+            ->add('kind', EntityType::class, array(
+                'label' => 'Type',
+                'class' => 'AppBundle:EventKind',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'query_builder' => function (EventKindRepository $repository) {
+                    return $repository->createQueryBuilder('ek')
+                        ->orderBy('ek.name', 'ASC');
+                },
+            ))
+            ->add('submit', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
+            ->getForm();
+
+        $res["form"]->handleRequest($request);
+
+        if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
+            $res["kind"] = $res["form"]->get("kind")->getData();
+        }
+
+        return $res;
+    }
+
     /**
      * Event home page
      *
@@ -45,17 +86,28 @@ class EventController extends Controller
     /**
      * Event list
      *
-     * @Route("/list", name="event_list", methods={"GET"})
+     * @Route("/list", name="event_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $events = $em->getRepository('AppBundle:Event')->findAll();
+        $filter = $this->filterFormFactory($request);
+        $findByFilter = array();
+        $sort = 'date';
+        $order = 'DESC';
+
+        if ($filter['kind']) {
+            $findByFilter['kind'] = $filter['kind'];
+        }
+
+        $events = $em->getRepository('AppBundle:Event')
+            ->findBy($findByFilter, array($sort => $order));
 
         return $this->render('admin/event/list.html.twig', array(
             'events' => $events,
+            'filter_form' => $filter['form']->createView(),
         ));
     }
 
