@@ -15,6 +15,9 @@
                 <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
             {% endif %}
         </i>
+        {% if event.kind %}
+            <span class="badge teal white-text">{{ event.kind }}</span>
+        {% endif %}
         {{ event.description | markdown | raw }}
     </div>
     <div class="card-action">

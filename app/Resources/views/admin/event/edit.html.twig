@@ -17,13 +17,18 @@
     {{ form_errors(form) }}
 </div>
 <div class="row">
-    {{ form_row(form.title) }}
+    <div class="col m6">
+        {{ form_row(form.title) }}
+    </div>
+    <div class="col m6">
+        {{ form_row(form.kind) }}
+    </div>
 </div>
 <div class="row">
-    <div class="col s6">
+    <div class="col m6">
         {{ form_row(form.date) }}
     </div>
-    <div class="col s6">
+    <div class="col m6">
         {{ form_row(form.end) }}
     </div>
 </div>
@@ -43,14 +48,14 @@
 </div>
 <h5>Nécessite un vote ?</h5>
 <div class="row">
-    <div class="col s6">
+    <div class="col m6">
         {{ form_errors(form.need_proxy) }}
         <label>
             {{ form_widget(form.need_proxy) }}
             <span>{{ form.need_proxy.vars.label }}</span>
         </label>
     </div>
-    <div class="col s6">
+    <div class="col m6">
         {{ form_errors(form.anonymous_proxy) }}
         <label>
             {{ form_widget(form.anonymous_proxy) }}
@@ -59,7 +64,7 @@
     </div>
 </div>
 <div class="row">
-    <div class="col s6">
+    <div class="col m6">
         {{ form_row(form.max_date_of_last_registration) }}
     </div>
 </div>

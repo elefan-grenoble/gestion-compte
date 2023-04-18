@@ -32,11 +32,26 @@ class EventKind
     private $name;
 
     /**
+     * @ORM\OneToMany(targetEntity="Event", mappedBy="kind", cascade={"persist"})
+     */
+    private $events;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
+
+    /**
+     * Define toString.
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->name;
+    }
 
     /**
      * @ORM\PrePersist
@@ -78,6 +93,16 @@ class EventKind
     public function getName()
     {
         return $this->name;
+    }
+
+    /**
+     * Get events.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getEvents()
+    {
+        return $this->events;
     }
 
     /**

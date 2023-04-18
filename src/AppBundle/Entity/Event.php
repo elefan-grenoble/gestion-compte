@@ -88,6 +88,12 @@ class Event
     private $end;
 
     /**
+     * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events")
+     * @ORM\JoinColumn(name="event_kind_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $kind;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
@@ -278,6 +284,30 @@ class Event
             return $this->date < $this->end;
         }
         return true;
+    }
+
+    /**
+     * Set kind
+     *
+     * @param \AppBundle\Entity\EventKind $eventKind
+     *
+     * @return Event
+     */
+    public function setKind(\AppBundle\Entity\EventKind $eventKind = null)
+    {
+        $this->kind = $eventKind;
+
+        return $this;
+    }
+
+    /**
+     * Get kind
+     *
+     * @return EventKind
+     */
+    public function getKind()
+    {
+        return $this->kind;
     }
 
     /**
