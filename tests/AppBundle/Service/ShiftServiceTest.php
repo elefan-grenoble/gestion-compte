@@ -14,8 +14,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use \Datetime;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class ShiftServiceTest extends TestCase
+class ShiftServiceTest extends KernelTestCase
 {
     /**
      * @var ShiftService
@@ -37,6 +38,7 @@ class ShiftServiceTest extends TestCase
 
     public function setUp()
     {
+        self::bootKernel();
         $this->em = $this
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
