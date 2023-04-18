@@ -10,7 +10,7 @@
 
 {% block content %}
     <div class="row center">
-        <h4 class="header">Liste des membres ({{ nb_of_result }})</h4>
+        <h4 class="header">Liste des membres ({{ result_count }})</h4>
     </div>
 
     <ul class="collapsible">
@@ -311,52 +311,52 @@
     </table>
 <div class="container">
     <div class="section">
-    {% if nb_of_pages > 1 %}
+    {% if page_count > 1 %}
     <ul class="pagination">
-        <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(page==1) %}#!{% else %}{{ path("user_index",{'page':page-1}) }}{% endif %}" data-page="{{ page-1 }}">
+        <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("user_index", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
                 <i class="material-icons">chevron_left</i>
             </a>
         </li>
-        {% if nb_of_pages < 10 %}
-            {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+        {% if page_count < 10 %}
+            {% for i in range(1, page_count) %}
+                <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
         {% else %}
-            {% if page <= 3 %}
-                {% for i in range(1,page+1) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+            {% if current_page <= 3 %}
+                {% for i in range(1, current_page+1) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
                 <li>...</li>
-                {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                {% for i in range(page_count-1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
             {% else %}
-                {% if nb_of_pages - page <= 3 %}
-                    {% for i in range(1,2) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                {% if page_count - current_page <= 3 %}
+                    {% for i in range(1, 2) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(page-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(current_page-1, page_count) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% else %}
-                    {% for i in range(1,2) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(1, 2) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(page-1,page+1) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(current_page-1, current_page+1) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(page_count-1, page_count) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% endif %}
             {% endif %}
         {% endif %}
-        <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("user_index",{'page':page+1}) }}{% endif %}" data-page="{{ page+1}}">
+        <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("user_index", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
                 <i class="material-icons">chevron_right</i>
             </a>
         </li>
