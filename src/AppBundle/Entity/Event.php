@@ -500,8 +500,14 @@ class Event
             }
             # scale = "hours"
             $duration = "";
+            if ($diff->y) {
+                $duration = $duration . $diff->y . ' an' . ($diff->y > 1 ? 's' : '');
+            }
+            if ($diff->m) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->m . ' mois';
+            }
             if ($diff->d) {
-                $duration = $duration . $diff->d . ' jour' . ($diff->d > 1 ? 's' : '');
+                $duration = $duration . ($duration ? ' ' : '') . $diff->d . ' jour' . ($diff->d > 1 ? 's' : '');
             }
             if ($diff->h) {
                 $duration = $duration . ($duration ? ' ' : '') . $diff->h . 'h';
