@@ -30,8 +30,8 @@ class HelloassoController extends Controller
      */
     public function helloassoPaymentsAction(Request $request)
     {
-        if (!($page = $request->get('page'))) {
-            $page = 1;
+        if (!($currentPage = $request->get('page'))) {
+            $currentPage = 1;
         }
         $limit = 50;
         $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('AppBundle\Entity\HelloassoPayment', 'n')
@@ -39,13 +39,15 @@ class HelloassoController extends Controller
             ->getQuery()
             ->getSingleScalarResult();
 
-        $nb_of_pages = intval($max / $limit);
+        $page_count = intval($max / $limit);
         if ($max > 0) {
-            $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+            $page_count += (($max % $limit) > 0) ? 1 : 0;
         }
+
         $payments = $this->getDoctrine()->getManager()
             ->getRepository('AppBundle:HelloassoPayment')
-            ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($page - 1) * $limit);
+            ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($currentPage - 1) * $limit);
+
         $delete_forms = array();
         foreach ($payments as $payment) {
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
@@ -67,13 +69,13 @@ class HelloassoController extends Controller
 
         }
 
-        return $this->render(
-            'admin/helloasso/payments.html.twig',
-            array('payments' => $payments,
-                'campaigns' => $campaigns,
-                'delete_forms' => $delete_forms,
-                'page' => $page,
-                'nb_of_pages' => $nb_of_pages));
+        return $this->render('admin/helloasso/payments.html.twig', array(
+            'payments' => $payments,
+            'campaigns' => $campaigns,
+            'delete_forms' => $delete_forms,
+            'current_page' => $currentPage,
+            'page_count' => $page_count
+        ));
     }
 
     /**
@@ -84,8 +86,8 @@ class HelloassoController extends Controller
      */
     public function helloassoBrowserAction(Request $request)
     {
-        if (!($page = $request->get('page')))
-            $page = 1;
+        if (!($currentPage = $request->get('page')))
+            $currentPage = 1;
 
         if (!($campaignId = $request->get('campaign'))) {
             $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
@@ -94,9 +96,7 @@ class HelloassoController extends Controller
             } else {
                 $campaigns = null;
             }
-            return $this->render(
-                'admin/helloasso/browser.html.twig',
-                array('campaigns' => $campaigns));
+            return $this->render('admin/helloasso/browser.html.twig', array('campaigns' => $campaigns));
         } else {
             $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
             $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId);
@@ -106,15 +106,16 @@ class HelloassoController extends Controller
                 return $this->redirectToRoute('helloasso_browser');
             }
             $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $page));
-            $page = $payments_json->pagination->page;
-            $nb_of_pages = $payments_json->pagination->max_page;
+            $currentPage = $payments_json->pagination->page;
+            $page_count = $payments_json->pagination->max_page;
             $results_per_page = $payments_json->pagination->results_per_page;
-            return $this->render(
-                'admin/helloasso/browser.html.twig',
-                array('payments' => $payments_json->resources,
-                    'page' => $page,
-                    'campaign' => $campaign_json,
-                    'nb_of_pages' => $nb_of_pages));
+
+            return $this->render('admin/helloasso/browser.html.twig', array(
+                'payments' => $payments_json->resources,
+                'campaign' => $campaign_json,
+                'current_page' => $currentPage,
+                'page_count' => $page_count
+            ));
         }
 
     }
@@ -181,8 +182,10 @@ class HelloassoController extends Controller
     public function removePaymentAction(Request $request, HelloassoPayment $payment)
     {
         $session = new Session();
+
         $form = $this->getPaymentDeleteForm($payment);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             if ($payment->getRegistration()) {
@@ -193,6 +196,7 @@ class HelloassoController extends Controller
             $em->flush();
             $session->getFlashBag()->add('success', 'Le paiement a bien été supprimé !');
         }
+
         return $this->redirectToRoute('helloasso_payments');
     }
 
@@ -255,9 +259,9 @@ class HelloassoController extends Controller
     private function createPaymentEditForm(HelloassoPayment $payment)
     {
         return $this->createFormBuilder()
-                    ->setAction($this->generateUrl('helloasso_payment_edit', array('id' => $payment->getId())))
-                    ->add('subscriber', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
-                    ->getForm();
+            ->setAction($this->generateUrl('helloasso_payment_edit', array('id' => $payment->getId())))
+            ->add('subscriber', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
+            ->getForm();
     }
 
     /**
