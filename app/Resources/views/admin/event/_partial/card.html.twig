@@ -9,7 +9,12 @@
         {% if not event.img %}
             <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
         {% endif %}
-        <i>{{ event.date | date_fr_full_with_time }}</i>
+        <i>
+            {{ event.date | date_fr_full_with_time }}
+            {% if event.end %}
+                <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
+            {% endif %}
+        </i>
         {{ event.description | markdown | raw }}
     </div>
     <div class="card-action">

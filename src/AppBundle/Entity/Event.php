@@ -82,6 +82,14 @@ class Event
     /**
      * @var \DateTime
      *
+     * @Assert\DateTime()
+     * @ORM\Column(name="end", type="datetime", nullable=true)
+     */
+    private $end;
+
+    /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
      */
     private $max_date_of_last_registration;
@@ -235,6 +243,41 @@ class Event
     public function getTime()
     {
         return $this->date;
+    }
+
+    /**
+     * Get end
+     *
+     * @return \DateTime
+     */
+    public function getEnd()
+    {
+        return $this->end;
+    }
+
+    /**
+     * Set end
+     *
+     * @param \DateTime $date
+     *
+     * @return Event
+     */
+    public function setEnd($end)
+    {
+        $this->end = $end;
+
+        return $this;
+    }
+
+    /**
+     * @Assert\IsTrue(message="La date de début doit être avant celle de fin")
+     */
+    public function isStartBeforeEnd()
+    {
+        if ($this->end) {
+            return $this->date < $this->end;
+        }
+        return true;
     }
 
     /**
@@ -457,5 +500,34 @@ class Event
     public function getUpdatedAt()
     {
         return $this->updatedAt;
+    }
+
+    public function getDuration($scale = 'hours')
+    {
+        if ($this->end) {
+            $diff = date_diff($this->date, $this->end);
+            if ($scale == 'minutes') {
+                return ($diff->h * 60 + $diff->i) . ' min';  # "180 min"
+            }
+            # scale = "hours"
+            $duration = "";
+            if ($diff->y) {
+                $duration = $duration . $diff->y . ' an' . ($diff->y > 1 ? 's' : '');
+            }
+            if ($diff->m) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->m . ' mois';
+            }
+            if ($diff->d) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->d . ' jour' . ($diff->d > 1 ? 's' : '');
+            }
+            if ($diff->h) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->h . 'h';
+            }
+            if ($diff->i) {
+                $duration = $duration . ($duration ? ' ' : '') . $diff->i . ' min';
+            }
+            return $duration;
+        }
+        return null;
     }
 }

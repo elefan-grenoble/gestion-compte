@@ -19,7 +19,9 @@
 
         <div class="col s8 offset-s2">
             {{ form_start(form) }}
-            {{ form_errors(form) }}
+            <div class="errors">
+                {{ form_errors(form) }}
+            </div>
             <div class="row">
                 <div class="col s7">
                     <div class="file-field input-field">
@@ -40,7 +42,6 @@
                     <button type="submit" class="btn"><i class="material-icons left">file_upload</i>Importer</button>
                 </div>
             </div>
-
             {{ form_end(form) }}
         </div>
         <div class="col s12">

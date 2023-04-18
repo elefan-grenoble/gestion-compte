@@ -15,7 +15,9 @@
             <h3 class="header center">Recherche numéro d'adhérent</h3>
             {% if form %}
                 {{ form_start(form) }}
-                {{ form_errors(form) }}
+                    <div class="errors">
+                        {{ form_errors(form) }}
+                    </div>
                     <div class="row center">
                         <div class="input-field col s6">
                             {{ form_widget(form.firstname) }}

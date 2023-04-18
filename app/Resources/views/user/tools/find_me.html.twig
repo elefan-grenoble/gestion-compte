@@ -6,7 +6,9 @@
             <br><br>
             <h2 class="header center orange-text">Première connexion</h2>
             {{ form_start(form) }}
-            {{ form_errors(form) }}
+                <div class="errors">
+                    {{ form_errors(form) }}
+                </div>
                 <div class="row">
                     <div class="input-field col s6">
                         {{ form_widget(form.member_number) }}
