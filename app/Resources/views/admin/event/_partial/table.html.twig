@@ -1,0 +1,41 @@
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Événement</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Procurations</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in events %}
+            <tr>
+                <td>{{ event.title }}</td>
+                <td>{{ event.kind }}</td>
+                <td class="center-align">
+                    {% if event.description is not empty %}
+                        <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ event.date | date_fr_full_with_time }}
+                    {% if event.end %}
+                        <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if event.needProxy %}
+                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
+                        <br />
+                        <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -34,11 +34,28 @@ class EventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
-        $eventsPast = $em->getRepository('AppBundle:Event')->findPast();
+        $eventsPast = $em->getRepository('AppBundle:Event')->findPast(10);  # only the 10 last
 
         return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
             'eventsPast' => $eventsPast,
+        ));
+    }
+
+    /**
+     * Event list
+     *
+     * @Route("/list", name="event_list", methods={"GET"})
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     */
+    public function listAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $events = $em->getRepository('AppBundle:Event')->findAll();
+
+        return $this->render('admin/event/list.html.twig', array(
+            'events' => $events,
         ));
     }
 
