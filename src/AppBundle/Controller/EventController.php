@@ -24,19 +24,19 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class EventController extends Controller
 {
     /**
-     * Lists all events.
+     * Event home page
      *
-     * @Route("/", name="event_list", methods={"GET"})
+     * @Route("/", name="event_index", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
-    public function listAction(Request $request)
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
         $eventsPast = $em->getRepository('AppBundle:Event')->findPast();
 
-        return $this->render('admin/event/list.html.twig', array(
+        return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
             'eventsPast' => $eventsPast,
         ));
@@ -89,7 +89,7 @@ class EventController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'L\'événement a bien été édité !');
-            return $this->redirectToRoute('event_list');
+            return $this->redirectToRoute('event_index');
         }
 
         return $this->render('admin/event/edit.html.twig', array(
@@ -120,7 +120,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'L\'événement a bien été supprimé !');
         }
 
-        return $this->redirectToRoute('event_list');
+        return $this->redirectToRoute('event_index');
     }
 
     /**
