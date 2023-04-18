@@ -293,7 +293,7 @@ class Event
      *
      * @return Event
      */
-    public function setKind(\AppBundle\Entity\EventKind $eventKind)
+    public function setKind(\AppBundle\Entity\EventKind $eventKind = null)
     {
         $this->kind = $eventKind;
 

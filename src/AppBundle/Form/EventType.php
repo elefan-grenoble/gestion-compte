@@ -5,6 +5,7 @@ namespace AppBundle\Form;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Task;
+use AppBundle\Repository\EventKindRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -73,7 +74,17 @@ class EventType extends AbstractType
                     'allow_delete' => true,
                     'download_link' => true,
                 ))
-                ->add('kind', null, ['label' => 'Type d\'événement']);
+                ->add('kind', EntityType::class, array(
+                    'label' => 'Type d\'événement',
+                    'class' => 'AppBundle:EventKind',
+                    'choice_label' => 'name',
+                    'multiple' => false,
+                    'required' => false,
+                    'query_builder' => function (EventKindRepository $repository) {
+                        return $repository->createQueryBuilder('ek')
+                            ->orderBy('ek.name', 'ASC');
+                    },
+                ));
 
             if ($userData && $userData->getId()) {
                 $form->add('need_proxy', CheckboxType::class, array(
