@@ -33,7 +33,8 @@ class ShiftFreeLogController extends Controller
             'created_at' => null,
             'shift_start_date' => null,
             'beneficiary' => null,
-            'fixe' => 0
+            'fixe' => 0,
+            'page' => 1,
         ];
 
         // filter creation ----------------------
@@ -129,7 +130,7 @@ class ShiftFreeLogController extends Controller
         $paginator = new Paginator($qb);
         $resultCount = count($paginator);
         $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
-        $currentPage = isset($filter['page']) ? $filter['page'] : 1;
+        $currentPage = $filter['page'];
         $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
         $paginator
