@@ -75,8 +75,13 @@
                     <i class="material-icons left">assignment</i>Gérer les nouveautés
                 </a>
                 <a href="{{ path("event_list") }}" class="waves-effect waves-light btn teal">
-                    <i class="material-icons left">event</i>Gérer les événements
+                    <i class="material-icons left">event</i>Événements
                 </a>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <a href="{{ path("admin_event_kind_list") }}" class="waves-effect waves-light btn teal">
+                        <i class="material-icons left">event</i>Types d'événements
+                    </a>
+                {% endif %}
                 <a href="{{ path("widget_generator") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">tune</i>Générer un widget
                 </a>
