@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -68,6 +69,9 @@ class ShiftFreeLogController extends Controller
                     'volant' => 1,
                 ]
             ))
+            ->add('page', HiddenType::class, [
+                'data' => '1'
+            ])
             ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
@@ -81,6 +85,7 @@ class ShiftFreeLogController extends Controller
             $res["shift_start_date"] = $res["form"]->get("shift_start_date")->getData();
             $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
             $res["fixe"] = $res["form"]->get("fixe")->getData();
+            $res["page"] = $res["form"]->get("page")->getData();
         }
 
         return $res;
@@ -122,10 +127,10 @@ class ShiftFreeLogController extends Controller
 
         $limitPerPage = 25;
         $paginator = new Paginator($qb);
-        $totalItems = count($paginator);
-        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
-        $currentPage = $request->get('page', 1);
-        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = isset($filter['page']) ? $filter['page'] : 1;
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
         $paginator
             ->getQuery()
@@ -135,9 +140,9 @@ class ShiftFreeLogController extends Controller
         return $this->render('admin/shiftfreelog/index.html.twig', array(
             'shiftFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
+            'result_count' => $resultCount,
             'current_page' => $currentPage,
-            'pages_count' => $pagesCount,
+            'page_count' => $pageCount,
         ));
     }
-
 }

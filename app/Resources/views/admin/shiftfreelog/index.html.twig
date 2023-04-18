@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Historique des annulations de créneaux ({{ shiftFreeLogs | length }})</h4>
+    <h4>Historique des annulations de créneaux ({{ result_count }})</h4>
 
     {# Filter form  --------- #}
     <ul class="collapsible">
@@ -58,6 +58,7 @@
                     </div>
                 </div>
                 {{ form_widget(filter_form.submit) }}
+                {{ form_row(filter_form.page) }}
                 {{ form_row(filter_form._token) }}
                 {{ form_end(filter_form, {'render_rest': false}) }}
             </div>
@@ -118,18 +119,31 @@
 
     <ul class="pagination">
         <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_shiftfreelog_index",{'page':current_page-1}) }}{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_shiftfreelog_index", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
                 <i class="material-icons">chevron_left</i>
             </a>
         </li>
-        {% for i in range(1,pages_count) %}
-        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("admin_shiftfreelog_index",{'page':i}) }}">{{ i }}</a></li>
+        {% for i in range(1, page_count) %}
+            <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ i }}">{{ i }}</a>
+            </li>
         {% endfor %}
-        <li class="{% if(current_page==pages_count) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(current_page==pages_count) %}#!{% else %}{{ path("admin_shiftfreelog_index",{'page':current_page+1}) }}{% endif %}">
+        <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("admin_shiftfreelog_index", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
                 <i class="material-icons">chevron_right</i>
             </a>
         </li>
     </ul>
+{% endblock %}
 
+{% block javascripts %}
+<script>
+    jQuery(function() {
+        $('.pagination li:not(.disabled) a').click(function(e) {
+            e.preventDefault();
+            $('#form_page').val($(this).data('page'));
+            $('form[name=form]').submit();
+        });
+    });
+</script>
 {% endblock %}
