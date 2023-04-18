@@ -13,6 +13,9 @@
 <h4>Editer un type d'événement</h4>
 
 {{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
 <div class="row">
     {{ form_row(form.name) }}
 </div>
