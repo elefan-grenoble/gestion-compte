@@ -270,6 +270,17 @@ class Event
     }
 
     /**
+     * @Assert\IsTrue(message="La date de début doit être avant celle de fin")
+     */
+    public function isStartBeforeEnd()
+    {
+        if ($this->end) {
+            return $this->date < $this->end;
+        }
+        return true;
+    }
+
+    /**
      * Add proxy
      *
      * @param \AppBundle\Entity\Proxy $proxy
