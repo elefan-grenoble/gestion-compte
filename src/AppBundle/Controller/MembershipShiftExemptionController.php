@@ -96,7 +96,7 @@ class MembershipShiftExemptionController extends Controller
                 ->setParameter('shiftExemption', $filter['shiftExemption']);
         }
 
-        $limitPerPage = 1;
+        $limitPerPage = 25;
         $paginator = new Paginator($qb);
         $resultCount = count($paginator);
         $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
