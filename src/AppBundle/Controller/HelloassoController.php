@@ -105,7 +105,7 @@ class HelloassoController extends Controller
                 $session->getFlashBag()->add('error','campaign not found');
                 return $this->redirectToRoute('helloasso_browser');
             }
-            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $page));
+            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $currentPage));
             $currentPage = $payments_json->pagination->page;
             $page_count = $payments_json->pagination->max_page;
             $results_per_page = $payments_json->pagination->results_per_page;
