@@ -9,59 +9,55 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des événements ({{ events | length }})</h4>
+<h4>Événements à venir ({{ eventsFuture | length }})</h4>
 
-    <div class="row">
-        {% for event in events %}
-            {% if event.date < date() %}
-                <div class="col s12">
-                    <a href="{{ path("event_edit",{'id':event.id}) }}">
-                        <i class="material-icons left black-text">event</i>{{ event.title }} - <i><span class="black-text">{{ event.date | date_fr_full_with_time }}</span></i>
-                    </a>
-                    {% if event.needProxy %}
-                        <br>
-                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a> - <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+<div class="row">
+    {% for event in eventsFuture %}
+        <div class="col s12 m6">
+            {% include "admin/event/_partial/card.html.twig" with { event: event } %}
+        </div>
+    {% endfor %}
+</div>
+
+<h4>Événements passés ({{ eventsPast | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Événement</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Procurations</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for event in eventsPast %}
+            <tr>
+                <td class="{{ event.title }}">{{ event.title }}</td>
+                <td class="center-align">
+                    {% if event.description is not empty %}
+                        <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
                     {% endif %}
-                </div>
-            {% else %}
-                <div class="col s12 m6">
-                    <div class="card blue-grey darken-1 small">
-                        {% if event.img %}
-                            <div class="card-image">
-                                <img src="{{ event|img('imgFile','card') }}" />
-                                <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
-                            </div>
-                        {% endif %}
-                        <div class="card-content white-text">
-                            {% if not event.img %}
-                                <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
-                            {% endif %}
-                            <i>{{ event.date | date_fr_full_with_time }}</i>
-                            {{ event.description | markdown | raw }}
-                        </div>
-                        <div class="card-action">
-                            <div class="left">
-                                <a href="{{ path("event_edit",{'id':event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                            </div>
-                            {% if event.needProxy %}
-                                <div class="left">
-                                    <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
-                                </div>
-                                <div class="left">
-                                    <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons left">print</i>Emargement</a>
-                                </div>
-                            {% endif %}
-                            <div>
-                                &nbsp;
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
+                </td>
+                <td>{{ event.date | date_fr_full_with_time }}</td>
+                <td>
+                    {% if event.needProxy %}
+                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
+                        <br />
+                        <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>editer</a>
+                </td>
+            </tr>
         {% endfor %}
-    </div>
-    {% if is_granted("ROLE_ADMIN") %}
-        <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
-        <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
-    {% endif %}
+    </tbody>
+</table>
+
+{% if is_granted("ROLE_ADMIN") %}
+    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+    <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
+{% endif %}
 {% endblock %}
