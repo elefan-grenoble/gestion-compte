@@ -11,11 +11,13 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
@@ -33,6 +35,7 @@ class EventController extends Controller
         // default values
         $res = [
             "kind" => null,
+            'page' => 1,
         ];
 
         // filter creation ----------------------
@@ -49,6 +52,9 @@ class EventController extends Controller
                         ->orderBy('ek.name', 'ASC');
                 },
             ))
+            ->add('page', HiddenType::class, [
+                'data' => '1'
+            ])
             ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
@@ -59,6 +65,7 @@ class EventController extends Controller
 
         if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
             $res["kind"] = $res["form"]->get("kind")->getData();
+            $res["page"] = $res["form"]->get("page")->getData();
         }
 
         return $res;
@@ -94,20 +101,35 @@ class EventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $filter = $this->filterFormFactory($request);
-        $findByFilter = array();
         $sort = 'date';
         $order = 'DESC';
 
+        $qb = $em->getRepository('AppBundle:Event')->createQueryBuilder('e')
+            ->orderBy('e.' . $sort, $order);
+
         if ($filter['kind']) {
-            $findByFilter['kind'] = $filter['kind'];
+            $qb = $qb->andWhere('e.kind = :kind')
+                ->setParameter('kind', $filter['kind']);
         }
 
-        $events = $em->getRepository('AppBundle:Event')
-            ->findBy($findByFilter, array($sort => $order));
+        $limitPerPage = 25;
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = $filter['page'];
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('admin/event/list.html.twig', array(
-            'events' => $events,
+            'events' => $paginator,
             'filter_form' => $filter['form']->createView(),
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount,
         ));
     }
 
