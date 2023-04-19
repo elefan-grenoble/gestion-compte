@@ -1,71 +1,45 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des événements - {{ site_name }}{% endblock %}
+{% block title %}Événements - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">list</i>&nbsp;Liste des événements
 {% endblock %}
 
 {% block content %}
-<h4>Événements à venir ({{ eventsFuture | length }})</h4>
+<h4>Liste des événements ({{ events | length }})</h4>
 
-<div class="row">
-    {% for event in eventsFuture %}
-        <div class="col s12 m6">
-            {% include "admin/event/_partial/card.html.twig" with { event: event } %}
+{# Filter form  --------- #}
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header">
+            <i class="material-icons">tune</i>Filtres
         </div>
-    {% endfor %}
-</div>
+        <div class="collapsible-body">
+            {{ form_start(filter_form) }}
+            <div class="row">
+                <div class="col s6">
+                    <div class="input-field">
+                        {{ form_widget(filter_form.kind) }}
+                        {{ form_label(filter_form.kind) }}
+                    </div>
+                </div>
+            </div>
+            {{ form_widget(filter_form.submit) }}
+            {{ form_end(filter_form) }}
+        </div>
+    </li>
+</ul>
 
-<h4>Événements passés ({{ eventsPast | length }})</h4>
-
-<table class="responsive-table">
-    <thead>
-        <tr>
-            <th>Événement</th>
-            <th>Type</th>
-            <th>Description</th>
-            <th>Date</th>
-            <th>Procurations</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for event in eventsPast %}
-            <tr>
-                <td>{{ event.title }}</td>
-                <td>{{ event.kind }}</td>
-                <td class="center-align">
-                    {% if event.description is not empty %}
-                        <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
-                    {% endif %}
-                </td>
-                <td>
-                    {{ event.date | date_fr_full_with_time }}
-                    {% if event.end %}
-                        <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if event.needProxy %}
-                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
-                        <br />
-                        <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% include "admin/event/_partial/table.html.twig" with { events: events } %}
 
 {% if is_granted("ROLE_ADMIN") %}
     <br />
     <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+    <br />
     <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
 {% endif %}
 {% endblock %}

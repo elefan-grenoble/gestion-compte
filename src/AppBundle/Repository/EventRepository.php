@@ -10,10 +10,15 @@ namespace AppBundle\Repository;
  */
 class EventRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll()
+    {
+        return $this->findBy(array(), array('date' => 'DESC'));
+    }
+
     public function findFutures(\DateTime $max = null)
     {
         $qb = $this->createQueryBuilder('e')
-            ->where("e.date > :now")
+            ->where('e.date > :now')
             ->setParameter('now', new \Datetime('now'));
 
         if ($max) {
@@ -22,19 +27,24 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('max', $max);
         }
 
-        $qb->orderBy("e.date", 'ASC');
+        $qb->orderBy('e.date', 'ASC');
 
         return $qb
             ->getQuery()
             ->getResult();
     }
 
-    public function findPast()
+    public function findPast(int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
-            ->where("e.date < :now")
-            ->setParameter('now', new \Datetime('now'))
-            ->orderBy("e.date", 'DESC');
+            ->where('e.date < :now')
+            ->setParameter('now', new \Datetime('now'));
+
+        if ($limit) {
+            $qb->setMaxResults($limit);
+        }
+
+        $qb->orderBy('e.date', 'DESC');
 
         return $qb
             ->getQuery()
