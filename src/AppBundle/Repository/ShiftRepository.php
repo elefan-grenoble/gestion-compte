@@ -3,8 +3,9 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Membership;
 use AppBundle\Entity\Job;
+use AppBundle\Entity\Membership;
+use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
 use Doctrine\Common\Collections\ArrayCollection;
 use \Datetime;
@@ -420,5 +421,35 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
 
         return new ArrayCollection($result);
+    }
+
+    /**
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition & wasCarriedOut
+     * @param Beneficiary $beneficiary
+     * @param PeriodPosition $position
+     * @param bool $wasCarriedOut
+     */
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null)
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('count(s.id)')
+            ->where('s.shifter = :beneficiary')
+            ->setParameter('beneficiary', $beneficiary);
+
+        if ($position != null) {
+            $qb = $qb->andwhere('s.position = :position')
+            ->setParameter('position', $position);
+        }
+
+        if ($wasCarriedOut == true) {
+            $qb = $qb->andwhere('s.wasCarriedOut = 1');
+        }
+        elseif ($wasCarriedOut == false) {
+            $qb = $qb->andwhere('s.wasCarriedOut = 0');
+        }
+
+        return $qb
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

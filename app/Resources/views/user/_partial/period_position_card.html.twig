@@ -16,8 +16,8 @@
         </p>
     </div>
     {% if (show_actions ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
-        {% set period_position_shift_carried_out_count = period_position.getShiftCount(true) %}
-        {% set period_position_shift_not_carried_out_count = period_position.getShiftCount(false) %}
+        {% set period_position_shift_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, true) %}
+        {% set period_position_shift_not_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, false) %}
         <div class="card-action">
             <span class="chip green-text" title="{{ period_position_shift_carried_out_count }} créneau{% if period_position_shift_carried_out_count > 1 %}x{% endif %} effectué{% if period_position_shift_carried_out_count > 1 %}s{% endif %}">
                 <i class="material-icons tiny">check</i>

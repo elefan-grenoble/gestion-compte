@@ -253,34 +253,11 @@ class PeriodPosition
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getShifts($wasCarriedOut = null)
+    public function getShifts()
     {
         $shifts = $this->shifts;
 
-        if ($wasCarriedOut == true) {
-            $shifts = $shifts->filter(function (Shift $shift) {
-                return ($shift->getWasCarriedOut());
-            });
-        }
-        elseif ($wasCarriedOut == false) {
-            $shifts = $shifts->filter(function (Shift $shift) {
-                return ($shift->getIsPast() && !$shift->getWasCarriedOut());
-            });
-        }
-
         return $shifts;
-    }
-
-    /**
-     * Get shift count
-     *
-     * @return int
-     */
-    public function getShiftCount($wasCarriedOut = null)
-    {
-        $shifts = $this->getShifts($wasCarriedOut);
-
-        return $shifts->count();
     }
 
     /**
