@@ -581,4 +581,17 @@ class ShiftService
             $wasCarriedOut
         );
     }
+
+    /**
+     * Get number of freed shifts for a given beneficiary, with possible filter on PeriodPosition
+     * @param Beneficiary $beneficiary
+     * @param PeriodPosition $position
+     */
+    public function getBeneficiaryShiftFreedCount(Beneficiary $beneficiary, PeriodPosition $position = null)
+    {
+        return $this->em->getRepository('AppBundle:ShiftFreeLog')->getBeneficiaryShiftFreedCount(
+            $beneficiary,
+            $position
+        );
+    }
 }

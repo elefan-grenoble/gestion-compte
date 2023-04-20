@@ -438,7 +438,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
 
         if ($position != null) {
             $qb = $qb->andwhere('s.position = :position')
-            ->setParameter('position', $position);
+                ->setParameter('position', $position);
         }
 
         if ($wasCarriedOut == true) {

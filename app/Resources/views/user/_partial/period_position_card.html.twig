@@ -18,6 +18,7 @@
     {% if (show_actions ?? false) and is_granted("ROLE_SHIFT_MANAGER") %}
         {% set period_position_shift_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, true) %}
         {% set period_position_shift_not_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, false) %}
+        {% set period_position_shift_freed_count = shift_service.getBeneficiaryShiftFreedCount(period_position.shifter, period_position) %}
         <div class="card-action">
             <span class="chip green-text" title="{{ period_position_shift_carried_out_count }} créneau{% if period_position_shift_carried_out_count > 1 %}x{% endif %} effectué{% if period_position_shift_carried_out_count > 1 %}s{% endif %}">
                 <i class="material-icons tiny">check</i>
@@ -26,6 +27,10 @@
             <span class="chip red-text" title="{{ period_position_shift_not_carried_out_count }} créneau{% if period_position_shift_not_carried_out_count > 1 %}x{% endif %} non effectué{% if period_position_shift_not_carried_out_count > 1 %}s{% endif %}">
                 <i class="material-icons tiny">close</i>
                 {{ period_position_shift_not_carried_out_count }}
+            </span>
+            <span class="chip red-text" title="{{ period_position_shift_freed_count }} créneau{% if period_position_shift_freed_count > 1 %}x{% endif %} annulé{% if period_position_shift_freed_count > 1 %}s{% endif %}">
+                <i class="material-icons tiny">delete_sweep</i>
+                {{ period_position_shift_freed_count }}
             </span>
         </div>
         <div class="card-action">
