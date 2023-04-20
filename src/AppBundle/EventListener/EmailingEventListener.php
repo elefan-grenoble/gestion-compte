@@ -12,6 +12,7 @@ use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
@@ -252,6 +253,35 @@ class EmailingEventListener
     }
 
     /**
+     * @param ShiftFreedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftFreed(ShiftFreedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftFreed");
+
+        $shift = $event->getShift();
+        $beneficiary = $event->getBeneficiary();
+
+        if ($beneficiary) { // warn shifter
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau libéré'))
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                ->setTo($beneficiary->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/shift_freed.html.twig',
+                        array(
+                            'shift' => $shift,
+                            'beneficiary' => $beneficiary
+                        )
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($warn);
+        }
+    }
+
+    /**
      * @param ShiftDeletedEvent $event
      * @throws \Exception
      */
@@ -269,7 +299,10 @@ class EmailingEventListener
                 ->setBody(
                     $this->renderView(
                         'emails/shift_deleted.html.twig',
-                        array('shift' => $shift)
+                        array(
+                            'shift' => $shift,
+                            'beneficiary' => $beneficiary
+                        )
                     ),
                     'text/html'
                 );
