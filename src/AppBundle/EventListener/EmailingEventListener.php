@@ -229,7 +229,7 @@ class EmailingEventListener
             ->setTo($shift->getShifter()->getEmail())
             ->setBody(
                 $this->renderView(
-                    'emails/new_booking_confirmation.html.twig',
+                    'emails/shift_booked_confirmation.html.twig',
                     array('shift' => $shift)
                 ),
                 'text/html'
@@ -243,7 +243,7 @@ class EmailingEventListener
             ->setReplyTo($shift->getShifter()->getEmail())
             ->setBody(
                 $this->renderView(
-                    'emails/new_booking_archive.html.twig',
+                    'emails/shift_booked_archive.html.twig',
                     array('shift' => $shift)
                 ),
                 'text/html'
