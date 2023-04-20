@@ -268,7 +268,7 @@ class EmailingEventListener
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
-                        'emails/deleted_shift.html.twig',
+                        'emails/shift_deleted.html.twig',
                         array('shift' => $shift)
                     ),
                     'text/html'
