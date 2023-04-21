@@ -90,8 +90,8 @@ class RegistrationsController extends Controller
 
 
         $em = $this->getDoctrine()->getManager();
-        if (!($page = $request->get('page')))
-            $page = 1;
+        if (!($currentPage = $request->get('page')))
+            $currentPage = 1;
         $limit = 25;
         $qb = $em->createQueryBuilder()->from('AppBundle\Entity\AbstractRegistration', 'r')
             ->select('count(r.id)')
@@ -103,8 +103,8 @@ class RegistrationsController extends Controller
 
         $max = $qb->getQuery()
             ->getSingleScalarResult();
-        $nb_of_pages = intval($max / $limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+        $pageCount = intval($max / $limit);
+        $pageCount += (($max % $limit) > 0) ? 1 : 0;
         $repository = $em->getRepository('AppBundle:AbstractRegistration');
         $queryb = $repository->createQueryBuilder('r')
             ->where('r.date >= :from')
@@ -113,7 +113,7 @@ class RegistrationsController extends Controller
             $queryb = $queryb->andwhere('r.date <= :to')->setParameter('to', $to);
         }
         $queryb = $queryb->orderBy('r.date', 'DESC')
-            ->setFirstResult(($page - 1) * $limit)
+            ->setFirstResult(($currentPage - 1) * $limit)
             ->setMaxResults($limit);
 
         $registrations = $queryb->getQuery()->getResult();
@@ -181,10 +181,10 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
                 'grand_total' => $grand_total,
                 'totaux' => $totaux,
                 'delete_forms' => $delete_forms,
-                'page' => $page,
                 'from' => $from,
                 'to' => $to,
-                'nb_of_pages' => $nb_of_pages));
+                'current_page' => $currentPage,
+                'page_count' => $pageCount));
     }
 
     /**

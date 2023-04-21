@@ -160,32 +160,32 @@
         <br>
         <ul class="pagination">
             {% if to is not null %}
-                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==1) %}#!{% else %}{{ path("registrations",{'page':current_page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
-                {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                {% for i in range(1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a
                                 href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
-                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==page_count) %}#!{% else %}{{ path("registrations",{'page':current_page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>
             {% else %}
-                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==1) %}#!{% else %}{{ path("registrations",{'page':current_page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
-                {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                {% for i in range(1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a
                                 href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
-                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("registrations",{'page':current_page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>

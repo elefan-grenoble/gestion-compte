@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
- * Task controller.
+ * Ambassador controller.
  *
  * @Route("ambassador")
  */
@@ -77,9 +77,9 @@ class AmbassadorController extends Controller
         $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
         $paginator = new Paginator($qb);
-        $totalItems = count($paginator);
-        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
-        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
         $paginator
             ->getQuery()
@@ -90,9 +90,9 @@ class AmbassadorController extends Controller
             'reason' => "adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $totalItems,
-            'page' => $currentPage,
-            'nb_of_pages' => $pagesCount
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
     }
 
@@ -149,9 +149,9 @@ class AmbassadorController extends Controller
         $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
         $paginator = new Paginator($qb);
-        $totalItems = count($paginator);
-        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
-        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
         $paginator
             ->getQuery()
@@ -162,9 +162,9 @@ class AmbassadorController extends Controller
             'reason' => "de ré-adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $totalItems,
-            'page' => $currentPage,
-            'nb_of_pages' => $pagesCount
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
     }
 
@@ -216,9 +216,9 @@ class AmbassadorController extends Controller
         $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
         $paginator = new Paginator($qb);
-        $totalItems = count($paginator);
-        $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
-        $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
         $paginator
             ->getQuery()
@@ -229,9 +229,9 @@ class AmbassadorController extends Controller
             'reason' => "de créneaux",
             'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $totalItems,
-            'page' => $currentPage,
-            'nb_of_pages' => $pagesCount
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
     }
 

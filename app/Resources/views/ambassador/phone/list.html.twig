@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h4>
+    <h4>Liste des membres en retard {{ reason }} ({{ result_count }})</h4>
 
     <ul class="collapsible">
         <li>
@@ -193,20 +193,20 @@
         </tbody>
     </table>
 
-    {% if nb_of_pages > 1 %}
+    {% if page_count > 1 %}
         <ul class="pagination">
-            <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="#" data-page="{{ page-1 }}">
+            <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ current_page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
-            {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}">
+            {% for i in range(1, page_count) %}
+                <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}">
                     <a href="#" data-page="{{ i }}">{{ i }}</a>
                 </li>
             {% endfor %}
-            <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="#" data-page="{{ page+1 }}">
+            <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ current_page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </li>

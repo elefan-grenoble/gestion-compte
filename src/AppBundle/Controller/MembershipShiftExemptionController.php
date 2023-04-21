@@ -11,8 +11,10 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use \Datetime;
 
 /**
@@ -31,6 +33,7 @@ class MembershipShiftExemptionController extends Controller
         $res = [
             "membership" => null,
             "shiftExemption" => null,
+            'page' => 1,
         ];
 
         // filter creation ----------------------
@@ -47,6 +50,9 @@ class MembershipShiftExemptionController extends Controller
                 'multiple' => false,
                 'required' => false,
             ))
+            ->add('page', HiddenType::class, [
+                'data' => '1'
+            ])
             ->add('submit', SubmitType::class, array(
                 'label' => 'Filtrer',
                 'attr' => array('class' => 'btn', 'value' => 'filtrer')
@@ -58,6 +64,7 @@ class MembershipShiftExemptionController extends Controller
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
             $res["membership"] = $res["form"]->get("membership")->getData();
             $res["shiftExemption"] = $res["form"]->get("shiftExemption")->getData();
+            $res["page"] = $res["form"]->get("page")->getData();
         }
 
         return $res;
@@ -77,31 +84,36 @@ class MembershipShiftExemptionController extends Controller
         $sort = 'createdAt';
         $order = 'DESC';
 
+        $qb = $em->getRepository('AppBundle:MembershipShiftExemption')->createQueryBuilder('mse')
+            ->orderBy('mse.' . $sort, $order);
+
         if ($filter['membership']) {
-            $findByFilter['membership'] = $filter['membership'];
+            $qb = $qb->andWhere('mse.membership = :membership')
+                ->setParameter('membership', $filter['membership']);
         }
         if ($filter['shiftExemption']) {
-            $findByFilter['shiftExemption'] = $filter['shiftExemption'];
+            $qb = $qb->andWhere('mse.shiftExemption = :shiftExemption')
+                ->setParameter('shiftExemption', $filter['shiftExemption']);
         }
 
-        $page = $request->get('page', 1);
-        $limit = 50;
+        $limitPerPage = 25;
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = $filter['page'];
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
-        $nb_exemptions = $em->getRepository('AppBundle:MembershipShiftExemption')->count([]);
-        if ($nb_exemptions == 0) {
-            $max_page = 1;
-        } else {
-            $max_page = intval(($nb_exemptions-1) / $limit) + 1;
-        }
-
-        $membershipShiftExemptions = $em->getRepository('AppBundle:MembershipShiftExemption')
-            ->findBy($findByFilter, array($sort => $order), $limit, ($page - 1) * $limit);
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('admin/membershipshiftexemption/index.html.twig', array(
-            'membershipShiftExemptions' => $membershipShiftExemptions,
+            'membershipShiftExemptions' => $paginator,
             'filter_form' => $filter['form']->createView(),
-            'current_page' => $page,
-            'max_page' => $max_page,
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount,
         ));
     }
 

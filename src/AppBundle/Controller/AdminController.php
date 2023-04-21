@@ -130,9 +130,9 @@ class AdminController extends Controller
         } else {
             $limitPerPage = 25;
             $paginator = new Paginator($qb);
-            $totalItems = count($paginator);
-            $pagesCount = ($totalItems == 0) ? 1 : ceil($totalItems / $limitPerPage);
-            $currentPage = ($currentPage > $pagesCount) ? $pagesCount : $currentPage;
+            $resultCount = count($paginator);
+            $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+            $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
 
             $paginator
                 ->getQuery()
@@ -143,9 +143,9 @@ class AdminController extends Controller
         return $this->render('admin/user/list.html.twig', array(
             'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $totalItems,
-            'page' => $currentPage,
-            'nb_of_pages' => $pagesCount
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
     }
 
