@@ -424,12 +424,13 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     }
 
     /**
-     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition & wasCarriedOut
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow
      * @param Beneficiary $beneficiary
      * @param PeriodPosition $position
      * @param bool $wasCarriedOut
+     * @param bool $endBeforeNow
      */
-    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null)
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
     {
         $qb = $this->createQueryBuilder('s')
             ->select('count(s.id)')
@@ -446,6 +447,11 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         }
         elseif ($wasCarriedOut == false) {
             $qb = $qb->andwhere('s.wasCarriedOut = 0');
+        }
+
+        if ($endBeforeNow == true) {
+            $qb = $qb->andwhere('s.end < :now')
+                ->setParameter('now', new \Datetime('now'));
         }
 
         return $qb

@@ -568,17 +568,19 @@ class ShiftService
     }
 
     /**
-     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition & wasCarriedOut
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow
      * @param Beneficiary $beneficiary
      * @param PeriodPosition $position
      * @param bool $wasCarriedOut
+     * @param bool $endBeforeNow
      */
-    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null)
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
     {
         return $this->em->getRepository('AppBundle:Shift')->getBeneficiaryShiftCount(
             $beneficiary,
             $position,
-            $wasCarriedOut
+            $wasCarriedOut,
+            $endBeforeNow
         );
     }
 
