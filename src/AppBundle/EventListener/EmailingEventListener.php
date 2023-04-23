@@ -223,13 +223,27 @@ class EmailingEventListener
 
         $shift = $event->getShift();
 
+        // send a "confirmation" e-mail to the beneficiary
+        $confirmation = (new \Swift_Message('[ESPACE MEMBRES] Réservation de ton créneau confirmée'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setTo($shift->getShifter()->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/shift_booked_confirmation.html.twig',
+                    array('shift' => $shift)
+                ),
+                'text/html'
+            );
+        $this->mailer->send($confirmation);
+
+        // send an "archive" e-mail to the admin
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($this->shiftEmail['address'])
             ->setReplyTo($shift->getShifter()->getEmail())
             ->setBody(
                 $this->renderView(
-                    'emails/new_booking.html.twig',
+                    'emails/shift_booked_archive.html.twig',
                     array('shift' => $shift)
                 ),
                 'text/html'

@@ -1,0 +1,8 @@
+Bonjour {{ shift.shifter.firstname | lower | capitalize }},<br />
+<br />
+Ta réservation du créneau
+{{ shift.job.name }} le {{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}
+est confirmée.<br />
+<br />
+Merci, et belle journée à toi.<br />
+Céleste, la petite fée des créneaux :)

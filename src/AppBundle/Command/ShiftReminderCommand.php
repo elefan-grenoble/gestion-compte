@@ -15,17 +15,16 @@ class ShiftReminderCommand extends ContainerAwareCommand
     {
         $this
             ->setName('app:shift:reminder')
-            ->setDescription('Send reminder for shits')
-            ->setHelp('This command send email reminder for all shifter of date given in param')
-            ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
-        ;
+            ->setDescription('Send reminder for shifts')
+            ->setHelp('This command sends email reminder for all shifter of date given in param')
+            ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $from_given = $input->getArgument('date');
         $from = date_create_from_format('Y-m-d',$from_given);
-        if (!$from || $from->format('Y-m-d') != $from_given){
+        if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
             return;
         }
@@ -36,10 +35,9 @@ class ShiftReminderCommand extends ContainerAwareCommand
         ////////////////////////
         $em = $this->getContainer()->get('doctrine')->getManager();
         $mailer = $this->getContainer()->get('mailer');
-        $shiftRepository = $em->getRepository('AppBundle:Shift');
-        $qb = $shiftRepository
-            ->createQueryBuilder('s');
-        $qb->where('s.start >= :start')
+
+        $qb = $em->getRepository('AppBundle:Shift')->createQueryBuilder('s')
+            ->where('s.start >= :start')
             ->andWhere('s.end < :end')
             ->setParameter('start', $from->format('Y-m-d'))
             ->setParameter('end', $from->add(\DateInterval::createFromDateString('+1 day'))->format('Y-m-d'));
@@ -48,12 +46,11 @@ class ShiftReminderCommand extends ContainerAwareCommand
         $shiftEmail = $this->getContainer()->getParameter('emails.shift');
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
-
         $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent);
 
         /** @var Shift $shift */
         foreach ($shifts as $shift) {
-            if ($shift->getShifter()){ //send reminder
+            if ($shift->getShifter()) { //send reminder
                 $dynamicContent = $this->getContainer()->get('twig')->render($template, array('beneficiary' => $shift->getShifter()));
                 $reminder = (new \Swift_Message('[ESPACE MEMBRES] Ton créneau'))
                     ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
