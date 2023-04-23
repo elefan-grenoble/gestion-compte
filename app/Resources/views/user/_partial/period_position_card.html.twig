@@ -1,7 +1,7 @@
 <div class="card center">
     <div class="card-content">
         <span class="card-title">
-            {{ period_position.period.getDayOfWeekString() }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
+            {{ period_position.period.dayOfWeekString }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
             <br />
             <small>(Semaine {{ period_position.weekCycle }})</small>
         </span>
