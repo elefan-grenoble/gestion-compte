@@ -336,6 +336,18 @@ class TimeLogEventListener
                         // then increment the shiftTimeCount
                         $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 1 * $withdraw_from_saving);
                         $this->em->persist($log);
+                    } else {
+                        // not allowed to use member's saving
+                        // give explanation
+                        $description = "(compteur épargne (" . $member_saving_now . " minutes) non utilisé car ";
+                        if ($previous_cycle_missed_shifts_count) {
+                            $description = $description . $previous_cycle_missed_shifts_count . " créneau" . (($previous_cycle_missed_shifts_count > 1) ? 'x' : '') . " raté" . (($previous_cycle_missed_shifts_count > 1) ? 's' : '');
+                        }
+                        if ($previous_cycle_freed_shifts_less_than_min_time_in_advance_count) {
+                            $description = $description . (($previous_cycle_missed_shifts_count > 0) ? ' & ' : '') . $previous_cycle_freed_shifts_less_than_min_time_in_advance_count . " créneau" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 'x' : '') . " annulé" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 's' : '') . " sous les " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours)";
+                        }
+                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 0, $description);
+                        $this->em->persist($log);
                     }
                 }
             }

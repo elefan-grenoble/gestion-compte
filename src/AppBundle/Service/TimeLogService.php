@@ -148,9 +148,9 @@ class TimeLogService
      * @param \DateTime $date
      * @return TimeLog
      */
-    public function initCycleEndSavingTimeLog(Membership $member, $time)
+    public function initCycleEndSavingTimeLog(Membership $member, $time, $description = null)
     {
-        $log = $this->initTimeLog($member);
+        $log = $this->initTimeLog($member, null, $description);
         $log->setType(TimeLog::TYPE_CYCLE_END_SAVING);
         $log->setTime($time);
 

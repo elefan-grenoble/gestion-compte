@@ -300,7 +300,11 @@ class TimeLog
                     return $element->getId();
                 })->toArray()) . ")";
             case self::TYPE_CYCLE_END_SAVING:
-                return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
+                if ($this->getTime() > 0) {
+                    return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
+                } else {
+                    return "Début de cycle " . $this->description;
+                }
             case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
