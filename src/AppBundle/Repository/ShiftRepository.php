@@ -454,7 +454,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('now', new \Datetime('now'));
         }
 
-        return $qb
+        return (int) $qb
             ->getQuery()
             ->getSingleScalarResult();
     }
@@ -462,7 +462,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     /**
      * Note: dates must be in the past to have valid results 
      */
-    public function countMemberShiftsMissed(Membership $member, $start_after, $end_before) {
+    public function getMemberShiftMissedCount(Membership $member, $start_after, $end_before) {
         $qb = $this->createQueryBuilder('s')
             ->select('count(s.id)')
             ->where('s.shifter IN (:beneficiaries)')
@@ -473,7 +473,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->setParameter('start_after', $start_after)
             ->setParameter('end_before', $end_before);
      
-        return $qb->getQuery()
+        return (int) $qb->getQuery()
             ->getSingleScalarResult();
     }
 }

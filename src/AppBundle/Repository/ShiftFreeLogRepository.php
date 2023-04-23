@@ -3,6 +3,7 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\PeriodPosition;
 
 /**
@@ -32,12 +33,12 @@ class ShiftFreeLogRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('position', $position);
         }
 
-        return $qb
+        return (int) $qb
             ->getQuery()
             ->getSingleScalarResult();
     }
 
-    public function countMemberShiftsFreed($membership, $start_after, $end_before, $less_than_min_time_in_advance_days = null) {
+    public function getMemberShiftFreedCount(Membership $membership, \DateTime $start_after, \DateTime $end_before, $less_than_min_time_in_advance_days = null) {
         $qb = $this->createQueryBuilder('sfl')
             ->leftJoin('sfl.shift', 's')
             ->addSelect('s')
@@ -54,7 +55,7 @@ class ShiftFreeLogRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('min_time_in_advance_days', $less_than_min_time_in_advance_days);
         }
 
-        return $qb->getQuery()
+        return (int) $qb->getQuery()
             ->getSingleScalarResult();
     }
 }

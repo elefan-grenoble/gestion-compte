@@ -175,18 +175,18 @@ class MembershipService
         return null;
     }
 
-    public function getCycleShiftsMissedCount(Membership $member, $date) {
+    public function getCycleShiftMissedCount(Membership $member, $date) {
         $shift_cycle = $this->getCycleNumber($member, $date);
         $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
         $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
-        return $this->em->getRepository('AppBundle:Shift')->countMemberShiftsMissed($member, $cycle_start, $cycle_end);
+        return $this->em->getRepository('AppBundle:Shift')->getMemberShiftMissedCount($member, $cycle_start, $cycle_end);
     }
 
-    public function getCycleShiftsFreedCount(Membership $member, $date, $less_than_min_time_in_advance_days = null) {
+    public function getCycleShiftFreedCount(Membership $member, $date, $less_than_min_time_in_advance_days = null) {
         $shift_cycle = $this->getCycleNumber($member, $date);
         $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
         $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
-        return $this->em->getRepository('AppBundle:ShiftFreeLog')->countMemberShiftsFreed($member, $cycle_start, $cycle_end, $less_than_min_time_in_advance_days);
+        return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreedCount($member, $cycle_start, $cycle_end, $less_than_min_time_in_advance_days);
     }
 
     /**
