@@ -10,19 +10,19 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Editer l'horaire d'ouverture</h4>
+<h4>Editer l'horaire d'ouverture</h4>
 
-    {{ form_start(form) }}
-    {% include "/admin/openinghour/_form.html.twig" with { form: form } %}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
-    </div>
-    {{ form_end(form) }}
+{{ form_start(form) }}
+{% include "/admin/openinghour/_form.html.twig" with { form: form } %}
+<div>
+    <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+</div>
+{{ form_end(form) }}
 
-    {{ form_start(delete_form) }}
-    {{ form_widget(delete_form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-    </div>
-    {{ form_end(delete_form) }}
+{{ form_start(delete_form) }}
+{{ form_widget(delete_form) }}
+<div>
+    <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+</div>
+{{ form_end(delete_form) }}
 {% endblock %}

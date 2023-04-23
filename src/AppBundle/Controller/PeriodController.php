@@ -261,6 +261,11 @@ class PeriodController extends Controller
         $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
+        if ($request->isMethod('GET')) {
+            $form->get('start')->setData($period->getStart()->format('H:i'));
+            $form->get('end')->setData($period->getEnd()->format('H:i'));
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             $start = $form->get('start')->getData();
             $period->setStart(new \DateTime($start));
@@ -275,9 +280,6 @@ class PeriodController extends Controller
         }
 
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
-
-        $form->get('start')->setData($period->getStart()->format('H:i'));
-        $form->get('end')->setData($period->getEnd()->format('H:i'));
 
         $periodDeleteForm = $this->createPeriodDeleteForm($period);
 

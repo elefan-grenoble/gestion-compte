@@ -9,35 +9,35 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des horaires d'ouvertures ({{ openingHours | length }})</h4>
+<h4>Liste des horaires d'ouvertures ({{ openingHours | length }})</h4>
 
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>Jour d'ouverture</th>
-                <th>Heure de début</th>
-                <th>Heure de fin</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for openingHour in openingHours %}
-            <tr>
-                <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
-                <td>{{ openingHour.start | date('H:i') }}</td>
-                <td>{{ openingHour.end | date('H:i') }}</td>
-                <td>
-                    <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">
-                        <i class="material-icons">edit</i>editer
-                    </a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Jour d'ouverture</th>
+            <th>Heure de début</th>
+            <th>Heure de fin</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for openingHour in openingHours %}
+        <tr>
+            <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
+            <td>{{ openingHour.start | date('H:i') }}</td>
+            <td>{{ openingHour.end | date('H:i') }}</td>
+            <td>
+                <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">
+                    <i class="material-icons">edit</i>editer
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 
-    <br />
-    <a href="{{ path('admin_openinghour_new') }}" class="btn">
-        <i class="material-icons left">add</i>Ajouter une horaire d'ouverture
-    </a>
+<br />
+<a href="{{ path('admin_openinghour_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter une horaire d'ouverture
+</a>
 {% endblock %}

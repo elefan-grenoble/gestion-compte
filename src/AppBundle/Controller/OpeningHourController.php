@@ -88,6 +88,11 @@ class OpeningHourController extends Controller
         $form = $this->createForm(OpeningHourType::class, $openingHour);
         $form->handleRequest($request);
 
+        if ($request->isMethod('GET')) {
+            $form->get('start')->setData($openingHour->getStart()->format('H:i'));
+            $form->get('end')->setData($openingHour->getEnd()->format('H:i'));
+        }
+
         if ($form->isSubmitted() && $form->isValid()) {
             $start = $form->get('start')->getData();
             $openingHour->setStart(new \DateTime($start));
