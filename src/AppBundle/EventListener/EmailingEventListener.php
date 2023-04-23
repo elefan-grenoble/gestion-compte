@@ -223,11 +223,12 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onShiftBooked");
 
         $shift = $event->getShift();
+        $beneficiary = $shift->getShifter();
 
         // send a "confirmation" e-mail to the beneficiary
         $confirmation = (new \Swift_Message('[ESPACE MEMBRES] Réservation de ton créneau confirmée'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
-            ->setTo($shift->getShifter()->getEmail())
+            ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
                     'emails/shift_booked_confirmation.html.twig',
@@ -241,7 +242,7 @@ class EmailingEventListener
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($this->shiftEmail['address'])
-            ->setReplyTo($shift->getShifter()->getEmail())
+            ->setReplyTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
                     'emails/shift_booked_archive.html.twig',
@@ -263,7 +264,7 @@ class EmailingEventListener
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
 
-        if ($beneficiary) { // warn shifter
+        if ($beneficiary) { // warn beneficiary
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau libéré'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
@@ -292,7 +293,7 @@ class EmailingEventListener
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
 
-        if ($beneficiary) { // warn shifter
+        if ($beneficiary) { // warn beneficiary
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
