@@ -3,7 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\OrderBy;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Period
@@ -171,6 +171,14 @@ class Period
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * @Assert\IsTrue(message="L'heure de début doit être avant celle de fin")
+     */
+    public function isStartBeforeEnd()
+    {
+        return $this->start < $this->end;
     }
 
     /**

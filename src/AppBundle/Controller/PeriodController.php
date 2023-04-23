@@ -218,9 +218,9 @@ class PeriodController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
-        $period = new Period();
-
         $em = $this->getDoctrine()->getManager();
+
+        $period = new Period();
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
@@ -232,14 +232,14 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $time = $form->get('start')->getData();
-            $period->setStart(new \DateTime($time));
-            $time = $form->get('end')->getData();
-            $period->setEnd(new \DateTime($time));
+            $start = $form->get('start')->getData();
+            $period->setStart(new \DateTime($start));
+            $end = $form->get('end')->getData();
+            $period->setEnd(new \DateTime($end));
 
             $em->persist($period);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le nouveau créneau type a bien été créé !');
             return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
@@ -256,19 +256,20 @@ class PeriodController extends Controller
     public function editPeriodAction(Request $request, Period $period)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
 
-        $em = $this->getDoctrine()->getManager();
         if ($form->isSubmitted() && $form->isValid()) {
-            $time = $form->get('start')->getData();
-            $period->setStart(new \DateTime($time));
-            $time = $form->get('end')->getData();
-            $period->setEnd(new \DateTime($time));
+            $start = $form->get('start')->getData();
+            $period->setStart(new \DateTime($start));
+            $end = $form->get('end')->getData();
+            $period->setEnd(new \DateTime($end));
 
             $em->persist($period);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le créneau type a bien été édité !');
             return $this->redirectToRoute('period');
         }

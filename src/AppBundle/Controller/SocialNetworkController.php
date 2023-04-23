@@ -103,7 +103,7 @@ class SocialNetworkController extends Controller
      * @Route("/{id}", name="admin_socialnetwork_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request, SocialNetwork $socialNetwork)
+    public function deleteAction(Request $request, SocialNetwork $socialNetwork)
     {
         $session = new Session();
 

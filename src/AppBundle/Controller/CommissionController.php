@@ -229,7 +229,7 @@ class CommissionController extends Controller
      * @Route("/{id}", name="commission_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Commission $commission)
+    public function deleteAction(Request $request,Commission $commission)
     {
         $session = new Session();
         $form = $this->getDeleteForm($commission);

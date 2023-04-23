@@ -10,4 +10,8 @@ namespace AppBundle\Repository;
  */
 class OpeningHourRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll()
+    {
+        return $this->findBy(array(), array('dayOfWeek' => 'ASC', 'start' => 'ASC'));
+    }
 }

@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * OpeningHour
@@ -149,6 +150,14 @@ class OpeningHour
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * @Assert\IsTrue(message="L'heure de début doit être avant celle de fin")
+     */
+    public function isStartBeforeEnd()
+    {
+        return $this->start < $this->end;
     }
 
     /**

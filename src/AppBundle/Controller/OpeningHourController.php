@@ -57,10 +57,10 @@ class OpeningHourController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $time = $form->get('start')->getData();
-            $openingHour->setStart(new \DateTime($time));
-            $time = $form->get('end')->getData();
-            $openingHour->setEnd(new \DateTime($time));
+            $start = $form->get('start')->getData();
+            $openingHour->setStart(new \DateTime($start));
+            $end = $form->get('end')->getData();
+            $openingHour->setEnd(new \DateTime($end));
 
             $em->persist($openingHour);
             $em->flush();
@@ -83,12 +83,17 @@ class OpeningHourController extends Controller
     public function editAction(Request $request, OpeningHour $openingHour)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(OpeningHourType::class, $openingHour);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $start = $form->get('start')->getData();
+            $openingHour->setStart(new \DateTime($start));
+            $end = $form->get('end')->getData();
+            $openingHour->setEnd(new \DateTime($end));
+
             $em->persist($openingHour);
             $em->flush();
 
@@ -108,7 +113,7 @@ class OpeningHourController extends Controller
      * @Route("/{id}", name="admin_openinghour_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function removeAction(Request $request, OpeningHour $openingHour)
+    public function deleteAction(Request $request, OpeningHour $openingHour)
     {
         $session = new Session();
 

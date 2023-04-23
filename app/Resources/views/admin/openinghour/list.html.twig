@@ -23,7 +23,7 @@
         <tbody>
         {% for openingHour in openingHours %}
             <tr>
-                <td>{{ openingHour.dayOfWeekString }}</td>
+                <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
                 <td>{{ openingHour.start | date('H:i') }}</td>
                 <td>{{ openingHour.end | date('H:i') }}</td>
                 <td>
