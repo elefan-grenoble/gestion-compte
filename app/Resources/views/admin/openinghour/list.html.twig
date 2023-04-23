@@ -1,15 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des horaires d'ouvertures - {{ site_name }}{% endblock %}
+{% block title %}Horaires d'ouverture - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">public</i>&nbsp;Liste des horaires d'ouvertures
+<i class="material-icons">schedule</i>&nbsp;Horaires d'ouverture
 {% endblock %}
 
 {% block content %}
-<h4>Liste des horaires d'ouvertures ({{ openingHours | length }})</h4>
+<h4>Horaires d'ouverture ({{ openingHours | length }})</h4>
 
 <table class="responsive-table">
     <thead>
