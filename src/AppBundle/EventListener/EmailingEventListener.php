@@ -12,6 +12,7 @@ use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
+use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use Monolog\Logger;
 use Swift_Mailer;
@@ -222,11 +223,12 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onShiftBooked");
 
         $shift = $event->getShift();
+        $beneficiary = $shift->getShifter();
 
         // send a "confirmation" e-mail to the beneficiary
         $confirmation = (new \Swift_Message('[ESPACE MEMBRES] Réservation de ton créneau confirmée'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
-            ->setTo($shift->getShifter()->getEmail())
+            ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
                     'emails/shift_booked_confirmation.html.twig',
@@ -240,7 +242,7 @@ class EmailingEventListener
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
             ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($this->shiftEmail['address'])
-            ->setReplyTo($shift->getShifter()->getEmail())
+            ->setReplyTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
                     'emails/shift_booked_archive.html.twig',
@@ -249,6 +251,35 @@ class EmailingEventListener
                 'text/html'
             );
         $this->mailer->send($archive);
+    }
+
+    /**
+     * @param ShiftFreedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftFreed(ShiftFreedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftFreed");
+
+        $shift = $event->getShift();
+        $beneficiary = $event->getBeneficiary();
+
+        if ($beneficiary) { // warn beneficiary
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau libéré'))
+                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                ->setTo($beneficiary->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'emails/shift_freed.html.twig',
+                        array(
+                            'shift' => $shift,
+                            'beneficiary' => $beneficiary
+                        )
+                    ),
+                    'text/html'
+                );
+            $this->mailer->send($warn);
+        }
     }
 
     /**
@@ -262,14 +293,17 @@ class EmailingEventListener
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
 
-        if ($beneficiary) { // warn shifter
+        if ($beneficiary) { // warn beneficiary
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
-                        'emails/deleted_shift.html.twig',
-                        array('shift' => $shift)
+                        'emails/shift_deleted.html.twig',
+                        array(
+                            'shift' => $shift,
+                            'beneficiary' => $beneficiary
+                        )
                     ),
                     'text/html'
                 );
