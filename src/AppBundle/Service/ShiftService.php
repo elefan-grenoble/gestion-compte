@@ -4,6 +4,7 @@ namespace AppBundle\Service;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -556,10 +557,43 @@ class ShiftService
      */
     public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $start_before, \Datetime $end_after)
     {
-        return !$this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary($beneficiary,
-                $start_after,
-                null,
-                $start_before,
-                $end_after)->isEmpty();
+        $beneficiaryShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForBeneficiary(
+            $beneficiary,
+            $start_after,
+            null,
+            $start_before,
+            $end_after
+        );
+        return !$beneficiaryShifts->isEmpty();
+    }
+
+    /**
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow
+     * @param Beneficiary $beneficiary
+     * @param PeriodPosition $position
+     * @param bool $wasCarriedOut
+     * @param bool $endBeforeNow
+     */
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
+    {
+        return $this->em->getRepository('AppBundle:Shift')->getBeneficiaryShiftCount(
+            $beneficiary,
+            $position,
+            $wasCarriedOut,
+            $endBeforeNow
+        );
+    }
+
+    /**
+     * Get number of freed shifts for a given beneficiary, with possible filter on PeriodPosition
+     * @param Beneficiary $beneficiary
+     * @param PeriodPosition $position
+     */
+    public function getBeneficiaryShiftFreedCount(Beneficiary $beneficiary, PeriodPosition $position = null)
+    {
+        return $this->em->getRepository('AppBundle:ShiftFreeLog')->getBeneficiaryShiftFreedCount(
+            $beneficiary,
+            $position
+        );
     }
 }

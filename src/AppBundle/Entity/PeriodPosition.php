@@ -61,6 +61,11 @@ class PeriodPosition
     private $bookedTime;
 
     /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="position", cascade={"persist"})
+     */
+    private $shifts;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -241,6 +246,18 @@ class PeriodPosition
     public function getBookedTime()
     {
         return $this->bookedTime;
+    }
+
+    /**
+     * Get shifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShifts()
+    {
+        $shifts = $this->shifts;
+
+        return $shifts;
     }
 
     /**
