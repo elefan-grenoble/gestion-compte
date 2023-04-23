@@ -23,6 +23,7 @@ class TimeLog
     const TYPE_CYCLE_END_FROZEN = 3;
     const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
     const TYPE_CYCLE_END_EXEMPTED = 6;
+    const TYPE_CYCLE_END_SAVING = 7;
 
     const TYPE_REGULATE_OPTIONAL_SHIFTS = 5;
 
@@ -298,6 +299,12 @@ class TimeLog
                 })->map(function($element) {
                     return $element->getId();
                 })->toArray()) . ")";
+            case self::TYPE_CYCLE_END_SAVING:
+                if ($this->getTime() > 0) {
+                    return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
+                } else {
+                    return "Début de cycle " . $this->description;
+                }
             case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
                 return "Régulation du bénévolat facultatif";
             case self::TYPE_SAVING:
