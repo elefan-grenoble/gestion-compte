@@ -148,7 +148,7 @@ class ShiftFreeLogController extends Controller
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
-            'delete_forms' => $shiftFreeLogDeleteForms,
+            'shift_free_log_delete_forms_' => $shiftFreeLogDeleteForms,
         ));
     }
 
@@ -182,7 +182,7 @@ class ShiftFreeLogController extends Controller
      */
     protected function getDeleteForm(ShiftFreeLog $shiftFreeLog)
     {
-        return $this->createFormBuilder()
+        return $this->get('form.factory')->createNamedBuilder('shift_free_log_delete_forms_' . $shiftFreeLog->getId())
             ->setAction($this->generateUrl('admin_shiftfreelog_delete', array('id' => $shiftFreeLog->getId())))
             ->setMethod('DELETE')
             ->getForm();

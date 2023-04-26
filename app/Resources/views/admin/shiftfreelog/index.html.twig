@@ -117,12 +117,12 @@
                 <td>{{ shiftFreeLog.reason }}</td>
                 {% if is_granted("ROLE_SUPER_ADMIN") %}
                     <td>
-                        {{ form_start(delete_forms[shiftFreeLog.id]) }}
-                        {{ form_widget(delete_forms[shiftFreeLog.id]) }}
+                        {{ form_start(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
+                        {{ form_widget(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
                         <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer">
                             <i class="material-icons left">delete</i>
                         </button>
-                        {{ form_end(delete_forms[shiftFreeLog.id]) }}
+                        {{ form_end(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
                     </td>
                 {% endif %}
             </tr>
