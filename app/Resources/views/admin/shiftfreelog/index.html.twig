@@ -79,6 +79,9 @@
                     <th>Route</th>
                 {% endif %}
                 <th>Raison</th>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <th>Actions</th>
+                {% endif %}
             </tr>
         </thead>
 
@@ -112,6 +115,16 @@
                     <td>{{ shiftFreeLog.requestRoute }}</td>
                 {% endif %}
                 <td>{{ shiftFreeLog.reason }}</td>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <td>
+                        {{ form_start(delete_forms[shiftFreeLog.id]) }}
+                        {{ form_widget(delete_forms[shiftFreeLog.id]) }}
+                        <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer">
+                            <i class="material-icons left">delete</i>
+                        </button>
+                        {{ form_end(delete_forms[shiftFreeLog.id]) }}
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
         </tbody>

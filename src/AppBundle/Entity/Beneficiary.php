@@ -130,6 +130,11 @@ class Beneficiary
     private $received_proxies;
 
     /**
+     * @ORM\OneToMany(targetEntity="ShiftFreeLog", mappedBy="beneficiary")
+     */
+    private $shiftFreeLogs;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")

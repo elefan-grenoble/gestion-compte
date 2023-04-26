@@ -37,7 +37,7 @@ class ShiftFreeLog
     private $shiftString;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shiftFreeLogs", cascade={"remove"})
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
     private $beneficiary;
@@ -64,9 +64,9 @@ class ShiftFreeLog
     private $requestRoute;
 
     /**
-     * @var \DateTimeImmutable
+     * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime_immutable")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
@@ -75,6 +75,10 @@ class ShiftFreeLog
      * @ORM\JoinColumn(referencedColumnName="id")
      */
     private $createdBy;
+
+    public function __construct()
+    {
+    }
 
     public function getId(): ?int
     {
@@ -86,7 +90,7 @@ class ShiftFreeLog
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTime();
     }
 
     public function getShift(): ?Shift
@@ -163,7 +167,7 @@ class ShiftFreeLog
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
