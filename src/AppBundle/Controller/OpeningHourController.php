@@ -27,15 +27,15 @@ class OpeningHourController extends Controller
     /**
      * List all opening hours.
      *
-     * @Route("/", name="admin_openinghour_list", methods={"GET"})
+     * @Route("/", name="admin_openinghour_index", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function listAction(Request $request)
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll();
 
-        return $this->render('admin/openinghour/list.html.twig', array(
+        return $this->render('admin/openinghour/index.html.twig', array(
             'openingHours' => $openingHours
         ));
     }
@@ -66,7 +66,7 @@ class OpeningHourController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été crée !");
-            return $this->redirectToRoute('admin_openinghour_list');
+            return $this->redirectToRoute('admin_openinghour_index');
         }
 
         return $this->render('admin/openinghour/new.html.twig', array(
@@ -103,7 +103,7 @@ class OpeningHourController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été éditée !");
-            return $this->redirectToRoute('admin_openinghour_list');
+            return $this->redirectToRoute('admin_openinghour_index');
         }
 
         return $this->render('admin/openinghour/edit.html.twig', array(
@@ -131,10 +131,10 @@ class OpeningHourController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été supprimée !");
-            return $this->redirectToRoute('admin_openinghour_list');
+            return $this->redirectToRoute('admin_openinghour_index');
         }
 
-        return $this->redirectToRoute('admin_openinghour_list');
+        return $this->redirectToRoute('admin_openinghour_index');
     }
 
     /**

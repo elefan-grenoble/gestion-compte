@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('admin_openinghour_list') }}"><i class="material-icons">schedule</i>&nbsp;Horaires d'ouverture</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_openinghour_index') }}"><i class="material-icons">schedule</i>&nbsp;Horaires d'ouverture</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
@@ -13,7 +13,7 @@
 <h4>Nouvelle horaire d'ouverture</h4>
 
 {{ form_start(form) }}
-{% include "/admin/openinghour/_form.html.twig" with { form: form } %}
+{% include "/admin/openinghour/_partial/form.html.twig" with { form: form } %}
 <div>
     <button type="submit" class="btn waves-effect waves-light">Créer</button>
 </div>
