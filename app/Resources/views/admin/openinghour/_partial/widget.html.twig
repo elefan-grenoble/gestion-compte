@@ -1,0 +1,22 @@
+<div class="card-panel">
+    <table style=" width: max-content; margin-top: 10px; margin-left: auto; margin-right: auto; border-collapse: separate; border-spacing: 10px 0px" class="no-padding">
+        <tbody>
+            {% set dayOfWeek = -1 %}
+            {% for openingHour in openingHours %}
+                {% if openingHour.dayOfWeek == dayOfWeek %}
+                    & {{ openingHour.start | date('G\\hi') }}-{{ openingHour.end | date('G\\hi') }}
+                {% else %}
+                    {# close previous day #}
+                    {% if loop.index > 0 %}</td></tr>{% endif %}
+                    {# open new day #}
+                    <tr>
+                        <td class="no-padding" style="text-align:right">{{ openingHour.dayOfWeekString | capitalize }} : </td>
+                        <td class="no-padding">{{ openingHour.start | date('G\\hi') }}-{{ openingHour.end | date('G\\hi') }}
+                {% endif %}
+                {% set dayOfWeek = openingHour.dayOfWeek %}
+            {% endfor %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
