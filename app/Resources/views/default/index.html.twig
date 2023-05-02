@@ -61,17 +61,15 @@
     {% endif %}
 
     <div id="home-actions" class="row center">
-        {% if member | uptodate %}
-            <div class="col s12 l6">
+        <div class="col s12 l6">
+            {% if (member | uptodate) %}
                 <div class="homebox">
-                    <h5><span class="white">{% if member.beneficiaries | length %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
+                    <h5><span class="white">{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} Bénévolat</span></h5>
                     {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
                 </div>
-            </div>
-        {% else %}
-            <div class="col show-on-xl-only xl3"></div>
-        {% endif %}
-        <div class="col s12 l6">
+            {% else %}
+                <div class="col show-on-xl-only xl3"></div>
+            {% endif %}
             {% if not (member | uptodate) or (member | uptodate) and (member | can_register) %}
                 <div class="homebox">
                     <h5><span class="white">Adhésion</span></h5>
@@ -80,7 +78,7 @@
                             {% if (member.registrations | length) %}{# existing member #}
                                 <p>
                                     <i class="material-icons">warning</i>
-                                    {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date('%R%a'))~" days")| date_fr_long }}.
+                                    {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date('%R%a'))~" days")| date_fr_long }}.
                                 </p>
                                 <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
                                     <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
@@ -121,6 +119,8 @@
                     </div>
                 </div>
             {% endif %}
+        </div>
+        <div class="col s12 l6">
             <div class="homebox">
                 <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
                 <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal darken-1">
