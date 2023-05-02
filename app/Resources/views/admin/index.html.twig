@@ -69,6 +69,16 @@
                 </a>
             {% endif %}
 
+            {% if is_granted("ROLE_ADMIN") %}
+                <h6><i class="material-icons">settings</i>&nbsp;Informations</h6>
+                <a href="{{ path("admin_openinghour_index") }}" class="waves-effect waves-light btn teal">
+                    <i class="material-icons left">schedule</i>Horaires d'ouverture
+                </a>
+                <a href="{{ path("admin_socialnetwork_list") }}" class="waves-effect waves-light btn teal">
+                    <i class="material-icons left">public</i>Réseaux sociaux
+                </a>
+            {% endif %}
+
             {% if is_granted("ROLE_PROCESS_MANAGER") %}
                 <h6><i class="material-icons">content_paste</i>&nbsp;Contenus</h6>
                 <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
@@ -91,11 +101,6 @@
                 <a href="{{ path("email_template_list") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">mail</i>Modèles d'emails
                 </a>
-                {% if is_granted("ROLE_ADMIN") %}
-                    <a href="{{ path("admin_socialnetwork_list") }}" class="waves-effect waves-light btn teal">
-                        <i class="material-icons left">public</i>Réseaux sociaux
-                    </a>
-                {% endif %}
             {% endif %}
 
             {% if is_granted("ROLE_FINANCE_MANAGER") %}

@@ -1,0 +1,32 @@
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col m4">
+        <div class="errors">
+            {{ form_errors(form.dayOfWeek) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.dayOfWeek) }}
+            {{ form_label(form.dayOfWeek) }}
+        </div>
+    </div>
+    <div class="col m4">
+        <div class="errors">
+            {{ form_errors(form.start) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.start) }}
+            {{ form_label(form.start) }}
+        </div>
+    </div>
+    <div class="col m4">
+        <div class="errors">
+            {{ form_errors(form.end) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.end) }}
+            {{ form_label(form.end) }}
+        </div>
+    </div>
+</div>

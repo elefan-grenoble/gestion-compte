@@ -1,0 +1,57 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Horaires d'ouverture - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">schedule</i>&nbsp;Horaires d'ouverture
+{% endblock %}
+
+{% block content %}
+<h4>Horaires d'ouverture</h4>
+
+{% if openingHours %}
+    <div class="row">
+        <div class="col m6">
+            {% include "/admin/openinghour/_partial/widget.html.twig" with { openingHours: openingHours } %}
+        </div>
+    </div>
+{% else %}
+    <div class="card-panel yellow lighten-3">
+        Aucune horaire d'ouverture à afficher.
+    </div>
+{% endif %}
+
+<h4>Liste des horaires d'ouverture ({{ openingHours | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Jour d'ouverture</th>
+            <th>Heure de début</th>
+            <th>Heure de fin</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for openingHour in openingHours %}
+        <tr>
+            <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
+            <td>{{ openingHour.start | date('H:i') }}</td>
+            <td>{{ openingHour.end | date('H:i') }}</td>
+            <td>
+                <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">
+                    <i class="material-icons">edit</i>editer
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<br />
+<a href="{{ path('admin_openinghour_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter une horaire d'ouverture
+</a>
+{% endblock %}
