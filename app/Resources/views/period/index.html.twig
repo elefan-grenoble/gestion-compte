@@ -105,8 +105,7 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
                                     or (filling_filter == "empty" and period.isEmpty(week_filter))
                                     or (filling_filter == "full" and period.isFull(week_filter))
                                     or (filling_filter == "partial" and period.isPartial(week_filter)) %}
-                                    {% include 'period/_partial/period_card.html.twig'
-                                        with {'period':period, 'week_filter':week_filter, 'anonymized':true} %}
+                                    {% include "period/_partial/period_card.html.twig" with { period: period, week_filter: week_filter, anonymized: true} %}
                                 {% endif %}
                             {% endfor %}
                         </td>

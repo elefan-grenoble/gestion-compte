@@ -215,7 +215,7 @@ class PeriodController extends Controller
      * @Route("/new", name="period_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
-    public function newAction(Request $request)
+    public function newPeriodAction(Request $request)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
