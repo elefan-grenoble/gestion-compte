@@ -1,0 +1,41 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Générer un widget (événement) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">tune</i>&nbsp;Générer un widget
+{% endblock %}
+
+{% block content %}
+<h4>Générer un widget (événement)</h4>
+
+{{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form_label(form.kind) }}
+        {{ form_widget(form.kind) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form.title.vars.label }}
+        <div class="switch">
+            <label>
+                masquer le titre
+                {{ form_widget(form.title) }}
+                <span class="lever"></span>
+                afficher le titre
+            </label>
+        </div>
+    </div>
+</div>
+<br />
+{{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+{{ form_end(form) }}
+{% endblock %}
