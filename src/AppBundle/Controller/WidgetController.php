@@ -17,7 +17,7 @@ class WidgetController extends Controller
 {
 
     /**
-     * Shift widget display
+     * Widget display
      * 
      * @Route("/", name="widget", methods={"GET"})
      */
@@ -45,7 +45,7 @@ class WidgetController extends Controller
             }
         }
 
-        return $this->render('widget/widget.html.twig', [
+        return $this->render('admin/shift/widget/widget.html.twig', [
             'job' => $job,
             'buckets' => $buckets,
             'display_end' => $display_end,

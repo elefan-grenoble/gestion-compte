@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use DateTime;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\ShiftBucket;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
@@ -698,6 +699,46 @@ class ShiftController extends Controller
         return $this->render('admin/shift/widget/generate.html.twig', array(
             'form' => $form->createView(),
         ));
+    }
+
+    /**
+     * Widget display
+     * 
+     * @Route("/widget", name="shift_widget", methods={"GET"})
+     */
+    public function widgetAction(Request $request)
+    {
+        $buckets = array();
+        $job = null;
+
+        $job_id = $request->get('job_id');
+        $display_end = $request->query->has('display_end') ? ($request->get('display_end') == 1) : false;
+        $display_on_empty = $request->query->has('display_on_empty') ? ($request->get('display_on_empty') == 1) : false;
+        $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+
+        if ($job_id) {
+            $em = $this->getDoctrine()->getManager();
+            $job = $em->getRepository('AppBundle:Job')->find($job_id);
+            if ($job) {
+                $shifts = $em->getRepository('AppBundle:Shift')->findFuturesWithJob($job);
+                foreach ($shifts as $shift) {
+                    $day = $shift->getStart()->format("d m Y");
+                    $interval = $shift->getIntervalCode();
+                    if (!isset($buckets[$interval . $day])) {
+                        $buckets[$interval . $day] = new ShiftBucket();
+                    }
+                    $buckets[$interval . $day]->addShift($shift);
+                }
+            }
+        }
+
+        return $this->render('admin/shift/widget/widget.html.twig', [
+            'job' => $job,
+            'buckets' => $buckets,
+            'display_end' => $display_end,
+            'display_on_empty' => $display_on_empty,
+            'title' => $title
+        ]);
     }
 
     /**
