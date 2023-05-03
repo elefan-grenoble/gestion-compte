@@ -68,6 +68,17 @@
         {{ form_row(form.max_date_of_last_registration) }}
     </div>
 </div>
+{% if event.createdBy or event.updatedBy %}
+    <div class="card-panel">
+        {% if event.createdBy %}
+            <i>Création le {{ event.createdAt | date_fr_full_with_time }} par {{ event.createdBy }}</i>
+            <br />
+        {% endif %}
+        {% if event.updatedBy %}
+            <i>Dernière modification le {{ event.updatedAt | date_fr_full_with_time }} par {{ event.updatedBy }}</i>
+        {% endif %}
+    </div>
+{% endif %}
 <br />
 <div>
     <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>

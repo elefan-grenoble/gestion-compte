@@ -23,7 +23,7 @@
                             {% if dynamicContent.updatedBy %}
                                 <br />
                                 <br />
-                                <i>Dernière modification le {{ dynamicContent.updatedAt | date('d/m/Y H:i') }} par {{ dynamicContent.updatedBy }}</i>
+                                <i>Dernière modification le {{ dynamicContent.updatedAt | date_fr_full_with_time }} par {{ dynamicContent.updatedBy }}</i>
                             {% endif %}
                         </div>
                         <div class="card-action">

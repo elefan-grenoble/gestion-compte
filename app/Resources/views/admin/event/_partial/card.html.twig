@@ -2,14 +2,15 @@
     {% if event.img %}
         <div class="card-image">
             <img src="{{ event|img('imgFile', 'card') }}" />
-            <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
+            <span class="card-title">{{ event.title }}</span>
         </div>
     {% endif %}
     <div class="card-content white-text">
         {% if not event.img %}
-            <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
+            <span class="card-title">{{ event.title }}</span>
         {% endif %}
         <i>
+            <i class="material-icons tiny">event</i>
             {{ event.date | date_fr_full_with_time }}
             {% if event.end %}
                 <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
