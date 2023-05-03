@@ -677,7 +677,7 @@ class ShiftController extends Controller
             $em = $this->getDoctrine()->getManager();
             $job = $em->getRepository('AppBundle:Job')->find($job_id);
             if ($job) {
-                $shifts = $em->getRepository('AppBundle:Shift')->findFuturesWithJob($job);
+                $shifts = $em->getRepository('AppBundle:Shift')->findFutures(null, $job);
                 foreach ($shifts as $shift) {
                     $day = $shift->getStart()->format("d m Y");
                     $interval = $shift->getIntervalCode();

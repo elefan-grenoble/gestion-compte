@@ -47,11 +47,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFutures(\DateTime $max = null)
+    public function findFutures(\DateTime $max = null, Job $job = null)
     {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
+        $qb = $this->createQueryBuilder('s')
             ->select('s, j')
             ->leftJoin('s.job', 'j')
             ->where('s.start > :now')
@@ -63,30 +61,10 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('max', $max);
         }
 
-        $qb->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findFuturesWithJob(Job $job = null, \DateTime $max = null)
-    {
-        $qb = $this->createQueryBuilder('s')
-            ->where('s.start > :now')
-            ->setParameter('now', new \Datetime('now'));
-
         if ($job) {
             $qb
-                ->leftJoin('s.job', 'j')
                 ->andwhere('s.job = :job')
                 ->setParameter('job', $job);
-        }
-
-        if ($max) {
-            $qb
-                ->andWhere('s.end < :max')
-                ->setParameter('max', $max);
         }
 
         $qb->orderBy('s.start', 'ASC');
@@ -101,19 +79,22 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->select('s, f')
+            ->select('s, j, f')
+            ->leftJoin('s.job', 'j')
             ->leftJoin('s.formation', 'f')
-            ->leftJoin('s.shifter', 'u')
-            ->addSelect('u')
-            ->leftJoin('u.formations', 'f1')
-            ->addSelect('f1')
+            ->leftJoin('s.shifter', 'b')
+            ->addSelect('b')
+            ->leftJoin('b.formations', 'bf')
+            ->addSelect('bf')
             ->where('s.start > :from')
             ->setParameter('from', $from);
+
         if ($max) {
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
         }
+
         if ($job) {
             $qb
                 ->andWhere('s.job = :job')

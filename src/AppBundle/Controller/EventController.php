@@ -768,7 +768,7 @@ class EventController extends Controller
                 'multiple' => false,
                 'required' => true
             ))
-            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre ?'))
+            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
@@ -805,7 +805,7 @@ class EventController extends Controller
             $em = $this->getDoctrine()->getManager();
             $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
             if ($eventKind) {
-                $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind);
+                $events = $em->getRepository('AppBundle:Event')->findFutures(null, $eventKind);
             }
         }
 

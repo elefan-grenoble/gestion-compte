@@ -309,9 +309,7 @@ class BookingController extends Controller
 
         $jobs = $em->getRepository(Job::class)->findByEnabled(true);
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
-        $shifts = $em
-            ->getRepository(Shift::class)
-            ->findFrom($filter["from"], $filter["to"], $filter["job"]);
+        $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"]);
 
         $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
         $bucketsByDay = $this->get('shift_service')->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
