@@ -1,15 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Générer un widget - {{ site_name }}{% endblock %}
+{% block title %}Générer un widget (créneau) - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">add</i>&nbsp;Générer un widget
+<i class="material-icons">add</i>&nbsp;Générer un widget (créneau)
 {% endblock %}
 
 {% block content %}
-    <h4>Générer un widget</h4>
+    <h4>Générer un widget (créneau)</h4>
 
     {{ form_start(form) }}
     <div class="errors">
@@ -60,21 +60,23 @@
             </div>
         </div>
     </div>
+    <br />
     {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
     {{ form_end(form) }}
 
     {% if query_string is defined %}
-    <br />
-    <h4>Résultat</h4>
-    <div class="row">
-        <div class="col">
-            <iframe src="{{ path('widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+        <br />
+        <h4>Résultat</h4>
+        <div class="row">
+            <div class="col m4">
+                <iframe src="{{ path('widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+            </div>
+            <div class="col m8">
+                texte à copier-coller 👇
+                <div class="card-panel" style="overflow:scroll;">
+                    <pre>&lt;iframe src="{{ absolute_url(path('widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
+                </div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <pre>&lt;iframe src="{{ absolute_url(path('widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
-        </div>
-    </div>
     {% endif %}
 {% endblock %}

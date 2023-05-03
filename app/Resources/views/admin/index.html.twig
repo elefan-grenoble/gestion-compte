@@ -81,9 +81,6 @@
 
             {% if is_granted("ROLE_PROCESS_MANAGER") %}
                 <h6><i class="material-icons">content_paste</i>&nbsp;Contenus</h6>
-                <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
-                    <i class="material-icons left">assignment</i>Gérer les nouveautés
-                </a>
                 <a href="{{ path("event_index") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">event</i>Événements
                 </a>
@@ -92,8 +89,12 @@
                         <i class="material-icons left">event</i>Types d'événements
                     </a>
                 {% endif %}
-                <a href="{{ path("widget_generator") }}" class="waves-effect waves-light btn teal">
-                    <i class="material-icons left">tune</i>Générer un widget
+                <br />
+                <a href="{{ path("process_update_list") }}" class="waves-effect waves-light btn lime darken-1">
+                    <i class="material-icons left">assignment</i>Gérer les nouveautés
+                </a>
+                <a href="{{ path("shift_widget_generator") }}" class="waves-effect waves-light btn teal">
+                    <i class="material-icons left">tune</i>Générer un widget (créneau)
                 </a>
                 <a href="{{ path("dynamic_content_list") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">content_paste</i>Contenus dynamiques

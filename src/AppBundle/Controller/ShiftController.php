@@ -16,13 +16,16 @@ use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
 use AppBundle\Security\MembershipVoter;
 use AppBundle\Security\ShiftVoter;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -656,6 +659,44 @@ class ShiftController extends Controller
         return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
             'shift' => $shift,
             'form' => $form->createView()
+        ));
+    }
+
+    /**
+     * Shift widget generator
+     *
+     * @Route("/widget_generator", name="shift_widget_generator", methods={"GET","POST"})
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     */
+    public function widgetGeneratorAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('job', EntityType::class, array(
+                'label' => 'Quel poste ?',
+                'class' => 'AppBundle:Job',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => true
+            ))
+            ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin ?'))
+            ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides ?'))
+            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre ?'))
+            ->add('generate', SubmitType::class, array('label' => 'Générer'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $data = $form->getData();
+
+            $widgetQueryString = 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0);
+
+            return $this->render('admin/shift/widget/generate.html.twig', array(
+                'query_string' => $widgetQueryString,
+                'form' => $form->createView(),
+            ));
+        }
+
+        return $this->render('admin/shift/widget/generate.html.twig', array(
+            'form' => $form->createView(),
         ));
     }
 
