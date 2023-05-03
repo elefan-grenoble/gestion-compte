@@ -153,9 +153,12 @@
                 {{ form_end(form) }}
 
                 {% if is_granted("ROLE_ADMIN") %}
-                    <a href="#remove-period-confirmation-modal" class="btn red modal-trigger" title="Supprimer le créneau type">
+                    <a href="#remove-period-confirmation-modal" class="btn red modal-trigger" title="Supprimer le créneau type" {% if use_fly_and_fixed and not period.isEmpty %}disabled{% endif %}>
                         <i class="material-icons left">delete</i>Supprimer
                     </a>
+                    {% if use_fly_and_fixed and not period.isEmpty %}
+                        <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les postes doivent être libérés avant de pouvoir supprimer le créneau type">info</i>
+                    {% endif %}
                     {{ form_start(period_delete_form) }}
                     <div id="remove-period-confirmation-modal" class="modal">
                         <div class="modal-content">

@@ -280,7 +280,6 @@ class Period
      */
     public function isProblematic(?String $weekFilter=null): bool
     {
-
         foreach ($this->positions as $position) {
             if($shifter = $position->getShifter()){
                 if((($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter)

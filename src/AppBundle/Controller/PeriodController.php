@@ -78,7 +78,6 @@ class PeriodController extends Controller
                         ->orderBy('j.name', 'ASC');
                 }
             ))
-
             ->add('week', ChoiceType::class, array(
                 'label' => 'Semaine',
                 'required' => false,
@@ -97,35 +96,32 @@ class PeriodController extends Controller
         if ($withBeneficiaryField) {
             $formBuilder
                 ->setAction($this->generateUrl('period_admin'))
-
                 ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
-                'label' => 'Bénéficiaire',
-                'required' => false,)
-                )
-
+                    'label' => 'Bénéficiaire',
+                    'required' => false,
+                ))
                 ->add('filling', ChoiceType::class, array(
-                'label' => 'Remplissage',
-                'required' => false,
-                'choices' => array(
-                    'Complet' => 'full',
-                    'Partiel' => 'partial',
-                    'Vide' => 'empty',
-                    'Problématique' => 'problematic'
-                ),
-            ));
+                    'label' => 'Remplissage',
+                    'required' => false,
+                    'choices' => array(
+                        'Complet' => 'full',
+                        'Partiel' => 'partial',
+                        'Vide' => 'empty',
+                        'Problématique' => 'problematic'
+                    ),
+                ));
         }else{
             $formBuilder
                 ->setAction($this->generateUrl('period'))
-
                 ->add('filling', ChoiceType::class, array(
-                'label' => 'Remplissage',
-                'required' => false,
-                'choices' => array(
-                    'Complet' => 'full',
-                    'Partiel' => 'partial',
-                    'Vide' => 'empty',
-                ),
-            ));
+                    'label' => 'Remplissage',
+                    'required' => false,
+                    'choices' => array(
+                        'Complet' => 'full',
+                        'Partiel' => 'partial',
+                        'Vide' => 'empty',
+                    ),
+                ));
         }
 
         $res["form"] = $formBuilder->getForm();
@@ -276,7 +272,7 @@ class PeriodController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le créneau type a bien été édité !');
-            return $this->redirectToRoute('period');
+            return $this->redirectToRoute('period_admin');
         }
 
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
@@ -449,7 +445,7 @@ class PeriodController extends Controller
             $session->getFlashBag()->add('success', 'Le créneau type a bien été supprimé !');
         }
 
-        return $this->redirectToRoute('period');
+        return $this->redirectToRoute('period_admin');
 
     }
 
@@ -497,7 +493,7 @@ class PeriodController extends Controller
             $session = new Session();
             $session->getFlashBag()->add('success',$count.' creneaux copiés de'.array_search($from,$days).' à '.array_search($to,$days));
 
-            return $this->redirectToRoute('period');
+            return $this->redirectToRoute('period_admin');
         }
 
         return $this->render('admin/period/copy_periods.html.twig',array(
@@ -539,7 +535,7 @@ class PeriodController extends Controller
             $session = new Session();
             $session->getFlashBag()->add('success',$content);
 
-            return $this->redirectToRoute('period');
+            return $this->redirectToRoute('period_admin');
         }
 
         return $this->render('admin/period/generate_shifts.html.twig',array(
