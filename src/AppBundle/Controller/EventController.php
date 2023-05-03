@@ -788,6 +788,34 @@ class EventController extends Controller
         ));
     }
 
+    /**
+     * Event widget display
+     * 
+     * @Route("/widget", name="event_widget", methods={"GET"})
+     */
+    public function widgetAction(Request $request)
+    {
+        $buckets = array();
+        $eventKind = null;
+
+        $event_kind_id = $request->get('event_kind_id');
+        $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+
+        if ($event_kind_id) {
+            $em = $this->getDoctrine()->getManager();
+            $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
+            if ($eventKind) {
+                $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind);
+            }
+        }
+
+        return $this->render('admin/event/widget/widget.html.twig', [
+            'events' => $events,
+            'eventKind' => $eventKind,
+            'title' => $title
+        ]);
+    }
+
 
     /**
      * @param Event $event

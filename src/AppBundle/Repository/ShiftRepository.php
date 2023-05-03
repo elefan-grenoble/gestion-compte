@@ -7,6 +7,7 @@ use AppBundle\Entity\Job;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use \Datetime;
 
@@ -69,16 +70,18 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFuturesWithJob($job, \DateTime $max = null)
+    public function findFuturesWithJob(Job $job = null, \DateTime $max = null)
     {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->join('s.job', "job")
+        $qb = $this->createQueryBuilder('s')
             ->where('s.start > :now')
-            ->andwhere('job.id = :jid')
-            ->setParameter('now', new \Datetime('now'))
-            ->setParameter('jid', $job->getId());
+            ->setParameter('now', new \Datetime('now'));
+
+        if ($job) {
+            $qb
+                ->leftJoin('s.job', 'j')
+                ->andwhere('s.job = :job')
+                ->setParameter('job', $job);
+        }
 
         if ($max) {
             $qb
@@ -129,7 +132,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @return mixed
      * @throws NonUniqueResultException
      */
-    public function findFirst($user)
+    public function findFirst(User $user)
     {
         $qb = $this->createQueryBuilder('s');
 
