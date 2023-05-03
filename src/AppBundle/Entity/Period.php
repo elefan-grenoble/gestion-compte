@@ -269,6 +269,18 @@ class Period
     }
 
     /**
+     * Get all the positions booked
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPositionsBooked()
+    {
+        return $this->getPositions()->filter(function (\AppBundle\Entity\PeriodPosition $position) {
+            return $position->getShifter();
+        });
+    }
+
+    /**
      * Return true if at least one shifter (a.k.a. beneficiary) registered for
      * this period is "problematic", meaning with a withdrawn or frozen membership
      * of if the shifter is member of the flying team.

@@ -22,45 +22,47 @@
 {% endmacro %}
 
 
-<div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
-    {# Card header #}
-    {%  if anonymized %}
-        <div>
-            {{ _self.period_title(period, show_day_of_week) }}
-        </div>
-    {% else %}
-        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
-            <div class="black-text editable-box">
+<div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable">
+    <div class="card-content">
+        {# Card title #}
+        {%  if anonymized %}
+            <div>
                 {{ _self.period_title(period, show_day_of_week) }}
             </div>
-        </a>
-    {% endif %}
+        {% else %}
+            <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+                <div class="black-text editable-box">
+                    {{ _self.period_title(period, show_day_of_week) }}
+                </div>
+            </a>
+        {% endif %}
 
-    {% if show_details %}
-        {# if display by job/training #}
-        <div id="training" style="margin-top:1em;">
-            {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-                <h6>Semaine {{ week }}</h6>
-                {% for training, nb_shifters in positions %}
-                    <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
-                    <br/>
-                {% endfor %}
-            {% endfor %}
-        </div>
-
-        {# if display by member name #}
-        {% if use_fly_and_fixed %}
-            <div id="shifter" style="margin-top:1em;">
-                {% for week, positions in period.positionsperweekcycle %}
-                    {% if (week in week_filter) or not week_filter %}
-                        <h6>Semaine {{ week }}</h6>
-                        {% for position in positions %}
-                            {% include 'period/_partial/position_shifter_display.html.twig'
-                                with {'position':position, 'anonymized':anonymized} %}
-                        {% endfor %}
-                    {% endif %}
+        {% if show_details %}
+            {# if display by job/training #}
+            <div id="training" style="margin-top:1em;">
+                {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
+                    <h6>Semaine {{ week }}</h6>
+                    {% for training, nb_shifters in positions %}
+                        <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                        <br/>
+                    {% endfor %}
                 {% endfor %}
             </div>
+
+            {# if display by member name #}
+            {% if use_fly_and_fixed %}
+                <div id="shifter" style="margin-top:1em;">
+                    {% for week, positions in period.positionsperweekcycle %}
+                        {% if (week in week_filter) or not week_filter %}
+                            <h6>Semaine {{ week }}</h6>
+                            {% for position in positions %}
+                                {% include 'period/_partial/position_shifter_display.html.twig'
+                                    with {'position':position, 'anonymized':anonymized} %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endif %}
-    {% endif %}
+    </div>
 </div>

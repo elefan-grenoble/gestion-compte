@@ -6,8 +6,12 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('period_admin') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">edit</i>&nbsp;Editer
+<i class="material-icons">edit</i>&nbsp;Editer le créneau type
 {% endblock %}
+
+{% set periodPositionCount = period.positions | length %}
+{% set periodPositionBookedCount = period.positionsBooked | length %}
+{% set periodPositionFreeCount = periodPositionCount - periodPositionBookedCount %}
 
 {% block content %}
     <h4>Editer le créneau type</h4>
@@ -15,6 +19,18 @@
     <div class="row">
         <div class="col m4">
             {% include "period/_partial/period_card.html.twig" with { period: period, anonymized: true, show_day_of_week: true, show_details: false } %}
+        </div>
+        <div class="col m8">
+            <div class="card">
+                <div class="card-content">
+                    Ce créneau type comporte <strong>{{ periodPositionCount }}</strong> poste{% if periodPositionCount > 1 %}s{% endif %} type{% if periodPositionCount > 1 %}s{% endif %}.
+                    {% if use_fly_and_fixed %}
+                        <br />
+                        <span class="red-text">&#9673;</span>&nbsp;<strong>{{ periodPositionFreeCount }}</strong> poste{% if periodPositionFreeCount > 1 %}s{% endif %} libre{% if periodPositionFreeCount > 1 %}s{% endif %}<br />
+                        <span class="green-text">&#9673;</span>&nbsp;<strong>{{ periodPositionBookedCount }}</strong> poste{% if periodPositionBookedCount > 1 %}s{% endif %} réservé{% if periodPositionBookedCount > 1 %}s{% endif %}
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 
