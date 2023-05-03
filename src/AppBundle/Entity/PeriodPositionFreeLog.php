@@ -2,17 +2,17 @@
 
 namespace AppBundle\Entity;
 
-use AppBundle\Repository\ShiftFreeLogRepository;
+use AppBundle\Repository\PeriodPositionFreeLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * ShiftFreeLog
+ * PeriodPositionFreeLog
  *
- * @ORM\Table(name="shiftfreelog")
+ * @ORM\Table(name="period_position_free_log")
  * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="AppBundle\Repository\ShiftFreeLogRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\PeriodPositionFreeLogRepository")
  */
-class ShiftFreeLog
+class PeriodPositionFreeLog
 {
     /**
      * @var int
@@ -24,30 +24,16 @@ class ShiftFreeLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="shiftFreeLogs", cascade={"remove"}, fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="PeriodPosition", cascade={"remove"})
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
-    private $shift;
+    private $periodPosition;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
     private $beneficiary;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="fixe", type="boolean", options={"default" : 0}, nullable=false)
-     */
-    private $fixe = false;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $reason;
 
     /**
      * @var string
@@ -57,9 +43,9 @@ class ShiftFreeLog
     private $requestRoute;
 
     /**
-     * @var \DateTimeImmutable
+     * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime_immutable")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
@@ -79,17 +65,17 @@ class ShiftFreeLog
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new \DateTime();
     }
 
-    public function getShift(): ?Shift
+    public function getPeriodPosition(): ?PeriodPosition
     {
-        return $this->shift;
+        return $this->periodPosition;
     }
 
-    public function setShift(?Shift $shift): self
+    public function setPeriodPosition(?PeriodPosition $periodPosition): self
     {
-        $this->shift = $shift;
+        $this->periodPosition = $periodPosition;
 
         return $this;
     }
@@ -106,32 +92,6 @@ class ShiftFreeLog
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isFixe(): ?bool {
-        return $this->fixe;
-    }
-
-    /**
-     * @param bool $fixe
-     */
-    public function setFixe(?bool $fixe): void {
-        $this->fixe = $fixe;
-    }
-
-    public function getReason(): ?string
-    {
-        return $this->reason;
-    }
-
-    public function setReason(?string $reason): self
-    {
-        $this->reason = $reason;
-
-        return $this;
-    }
-
     public function getRequestRoute(): ?string
     {
         return $this->requestRoute;
@@ -144,7 +104,7 @@ class ShiftFreeLog
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
