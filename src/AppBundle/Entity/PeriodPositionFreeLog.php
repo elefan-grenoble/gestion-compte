@@ -24,10 +24,17 @@ class PeriodPositionFreeLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="PeriodPosition", cascade={"remove"})
-     * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="PeriodPosition")
+     * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $periodPosition;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="period_position_string", type="text")
+     */
+    private $periodPositionString;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
@@ -83,6 +90,18 @@ class PeriodPositionFreeLog
     public function setPeriodPosition(?PeriodPosition $periodPosition): self
     {
         $this->periodPosition = $periodPosition;
+
+        return $this;
+    }
+
+    public function getPeriodPositionString(): string
+    {
+        return $this->periodPositionString;
+    }
+
+    public function setPeriodPositionString(?string $periodPositionString): self
+    {
+        $this->periodPositionString = $periodPositionString;
 
         return $this;
     }

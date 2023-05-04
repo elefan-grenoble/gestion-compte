@@ -29,6 +29,7 @@ class PeriodPositionFreeLogService
 
         $log = new PeriodPositionFreeLog;
         $log->setPeriodPosition($periodPosition);
+        $log->setPeriodPositionString($periodPosition);
         $log->setBeneficiary($beneficiary);
         if ($bookedTime) {
             $log->setBookedTime($bookedTime);
