@@ -22,14 +22,17 @@ class PeriodPositionFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function initPeriodPositionFreeLog(PeriodPosition $period_position, Beneficiary $beneficiary)
+    public function initPeriodPositionFreeLog(PeriodPosition $periodPosition, Beneficiary $beneficiary, $bookedTime = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
 
         $log = new PeriodPositionFreeLog;
-        $log->setPeriodPosition($period_position);
+        $log->setPeriodPosition($periodPosition);
         $log->setBeneficiary($beneficiary);
+        if ($bookedTime) {
+            $log->setBookedTime($bookedTime);
+        }
         if (is_object($current_user)) {
             $log->setCreatedBy($current_user);
         }

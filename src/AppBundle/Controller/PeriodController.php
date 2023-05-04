@@ -414,8 +414,9 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // store position beneficiary (before position free())
+            // store position beneficiary & bookedTime (before position free())
             $beneficiary = $position->getShifter();
+            $bookedTime = $position->getBookedTime();
 
             // free position
             $position->free();
@@ -425,7 +426,7 @@ class PeriodController extends Controller
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary));
+            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }

@@ -57,6 +57,7 @@
                 <th>Date</th>
                 <th>Bénéficiaire</th>
                 <th>Poste type</th>
+                <th>Réservé depuis le</th>
                 <th>Auteur</th>
                 {% if is_granted("ROLE_ADMIN") %}
                     <th>Route</th>
@@ -77,6 +78,14 @@
                 </td>
                 <td>
                     {{ periodPositionFreeLog.periodPosition }}
+                </td>
+                {% if periodPositionFreeLog.bookedTime %}
+                    <td title="{{ periodPositionFreeLog.bookedTime | date_fr_full_with_time }}">
+                        {{ periodPositionFreeLog.bookedTime | date('d/m/Y') }}
+                    </td>
+                {% else %}
+                    <td></td>
+                {% endif %}
                 </td>
                 <td>
                     {% if periodPositionFreeLog.createdBy and periodPositionFreeLog.createdBy.beneficiary %}

@@ -29,7 +29,7 @@ class PeriodPositionFreeLogEventListener
     public function onPeriodPositionFreed(PeriodPositionFreedEvent $event)
     {
         $this->logger->info("PeriodPosition Free Log Listener: onPeriodPositionFreed");
-        $log = $this->container->get('period_position_free_log_service')->initPeriodPositionFreeLog($event->getPeriodPosition(), $event->getBeneficiary());
+        $log = $this->container->get('period_position_free_log_service')->initPeriodPositionFreeLog($event->getPeriodPosition(), $event->getBeneficiary(), $event->getBookedTime());
         $this->em->persist($log);
         $this->em->flush();
     }

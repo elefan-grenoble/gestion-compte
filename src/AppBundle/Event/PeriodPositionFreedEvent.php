@@ -11,13 +11,14 @@ class PeriodPositionFreedEvent extends Event
 {
     const NAME = 'period_position.freed';
 
-    private $period_position;
+    private $periodPosition;
     private $beneficiary;
 
-    public function __construct(PeriodPosition $period_position, Beneficiary $beneficiary)
+    public function __construct(PeriodPosition $periodPosition, Beneficiary $beneficiary, $bookedTime = null)
     {
-        $this->period_position = $period_position;
+        $this->periodPosition = $periodPosition;
         $this->beneficiary = $beneficiary;
+        $this->bookedTime = $bookedTime;
     }
 
     /**
@@ -25,7 +26,7 @@ class PeriodPositionFreedEvent extends Event
      */
     public function getPeriodPosition()
     {
-        return $this->period_position;
+        return $this->periodPosition;
     }
 
     /**
@@ -42,5 +43,13 @@ class PeriodPositionFreedEvent extends Event
     public function getMember()
     {
         return $this->beneficiary->getMembership();
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getBookedTime()
+    {
+        return $this->bookedTime;
     }
 }

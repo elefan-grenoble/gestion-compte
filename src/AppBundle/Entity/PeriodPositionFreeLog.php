@@ -36,6 +36,13 @@ class PeriodPositionFreeLog
     private $beneficiary;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="booked_time", type="datetime", nullable=true)
+     */
+    private $bookedTime;
+
+    /**
      * @var string
      *
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -88,6 +95,18 @@ class PeriodPositionFreeLog
     public function setBeneficiary(?Beneficiary $beneficiary): self
     {
         $this->beneficiary = $beneficiary;
+
+        return $this;
+    }
+
+    public function getBookedTime()
+    {
+        return $this->bookedTime;
+    }
+
+    public function setBookedTime($bookedTime)
+    {
+        $this->bookedTime = $bookedTime;
 
         return $this;
     }
