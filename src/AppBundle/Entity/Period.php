@@ -94,6 +94,11 @@ class Period
         $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function __toString()
+    {
+        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('H:i') . ' à ' . $this->getEnd()->format('H:i');
+    }
+
     /**
      * Example: Epicerie/Livraison - Lundi - 09:30 à 12:30
      */
