@@ -90,11 +90,19 @@ class PeriodPosition
      */
     public function __toString()
     {
+<<<<<<< HEAD
         $name = $this->getPeriod() . ' (Semaine ' . $this->getWeekCycle() . ')';
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
         } else {
             $name .= ' (sans formation)';
+=======
+        $name = "Semaine " . $this->getWeekCycle();
+        if ($this->getFormation()) {
+            $name .= " (" . $this->getFormation()->getName() . ")";
+        } else {
+            $name .= " (sans formation)";
+>>>>>>> ce1be52c (Dispatch PeriodPositionFreedEvent)
         }
         return $name;
     }

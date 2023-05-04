@@ -3,13 +3,13 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\ShiftFreeLog;
+use AppBundle\Entity\PeriodPosition;
+use AppBundle\Entity\PeriodPositionFreeLog;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 
-class ShiftFreeLogService
+class PeriodPositionFreeLogService
 {
     protected $em;
     protected $requestStack;
@@ -22,18 +22,14 @@ class ShiftFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary, $fixe = false, $reason = null)
+    public function initPeriodPositionFreeLog(PeriodPosition $period_position, Beneficiary $beneficiary)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
 
-        $log = new ShiftFreeLog;
-        $log->setShift($shift);
+        $log = new PeriodPositionFreeLog;
+        $log->setPeriodPosition($period_position);
         $log->setBeneficiary($beneficiary);
-        $log->setFixe($fixe);
-        if ($reason) {
-            $log->setReason($reason);
-        }
         if (is_object($current_user)) {
             $log->setCreatedBy($current_user);
         }

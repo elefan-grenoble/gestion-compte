@@ -6,6 +6,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
+use AppBundle\Event\PeriodPositionFreedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
@@ -21,7 +22,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -414,9 +414,18 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // store position beneficiary (before position free())
+            $beneficiary = $position->getShifter();
+
+            // free position
             $position->free();
+
+            $em = $this->getDoctrine()->getManager();
             $em->persist($position);
             $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary));
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
