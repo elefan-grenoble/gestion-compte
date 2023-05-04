@@ -608,6 +608,22 @@ class PeriodController extends Controller
     }
 
     /**
+     * Creates a form to free a period position entity.
+     *
+     * @param Period $period The period entity
+     * @param PeriodPosition $position The period position entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
+    {
+        return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
+            ->setAction($this->generateUrl('period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
      * Creates a form to delete a period position entity.
      *
      * @param Period $period The period entity
