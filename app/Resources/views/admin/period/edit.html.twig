@@ -66,11 +66,12 @@
                                     le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
                                     par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.booker, target_blank: true } %}.
                                 </p>
-                                <form action="{{ path('period_position_free', {'id': period.id, 'position' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
-                                    <button type="submit" class="btn orange">
-                                        <i class="material-icons left">lock_open</i>Libérer
-                                    </button>
-                                </form>
+                                {{ form_start(positions_free_forms[position.id]) }}
+                                {{ form_widget(positions_free_forms[position.id]) }}
+                                <button type="submit" class="btn orange">
+                                    <i class="material-icons left">lock_open</i>Libérer
+                                </button>
+                                {{ form_end(positions_free_forms[position.id]) }}
                             </div>
                         </li>
                     {% else %}

@@ -286,14 +286,18 @@ class PeriodController extends Controller
         $positionAddForm = $this->createPeriodPositionAddForm($period);
 
         $positionsBookForms = [];
+        $positionsFreeForms = [];
+        $positionsDeleteForms = [];
         foreach ($period->getPositions() as $position) {
+            // book forms
             if (!$position->getShifter()) {
                 $positionsBookForms[$position->getId()] = $this->createPeriodPositionBookForm($period, $position)->createView();
             }
-        }
-
-        $positionsDeleteForms = array();
-        foreach($period->getPositions() as $position) {
+            // free forms
+            else {
+                $positionsFreeForms[$position->getId()] = $this->createPeriodPositionFreeForm($period, $position)->createView();
+            }
+            // delete forms
             $positionsDeleteForms[$position->getId()] = $this->createPeriodPositionDeleteForm($period, $position)->createView();
         }
 
@@ -304,6 +308,7 @@ class PeriodController extends Controller
             "period_delete_form" => $periodDeleteForm->createView(),
             "position_add_form" => $positionAddForm->createView(),
             "positions_book_forms" => $positionsBookForms,
+            "positions_free_forms" => $positionsFreeForms,
             "positions_delete_forms" => $positionsDeleteForms,
         ));
     }
@@ -359,8 +364,8 @@ class PeriodController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->remove($position);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le poste '.$position.' a bien été supprimé !');
-            return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
@@ -375,12 +380,12 @@ class PeriodController extends Controller
     public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createPeriodPositionBookForm($period, $position);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             if ($position->getShifter()) {
                 $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
                 return new Response($this->generateUrl('period_edit',array('id'=>$period->getId())), 205);
@@ -400,18 +405,18 @@ class PeriodController extends Controller
                 $position->setBookedTime(new \DateTime('now'));
             }
 
-            $em = $this->getDoctrine()->getManager();
             $position->setShifter($beneficiary);
             $em->persist($position);
             $em->flush();
 
             $session->getFlashBag()->add("success", "Créneau fixe réservé avec succès pour " . $position->getShifter());
         }
+
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
     }
 
     /**
-     * free a position.
+     * Free a position.
      *
      * @Route("/{id}/position/{position}/free", name="period_position_free", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
@@ -419,13 +424,19 @@ class PeriodController extends Controller
     public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
-
         $em = $this->getDoctrine()->getManager();
-        $position->free();
-        $em->persist($position);
-        $em->flush();
 
-        $session->getFlashBag()->add('success', "Le poste a bien été libéré");
+        $form = $this->createPeriodPositionFreeForm($period, $position);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $position->free();
+            $em->persist($position);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', "Le poste a bien été libéré");
+        }
+
         return $this->redirectToRoute('period_edit',array('id'=>$position->getPeriod()->getId()));
     }
 
@@ -438,6 +449,7 @@ class PeriodController extends Controller
     public function deletePeriodAction(Request $request, Period $period)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('period_delete', array('id' => $period->getId())))
@@ -446,9 +458,9 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($period);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le créneau type a bien été supprimé !');
         }
 
@@ -548,6 +560,22 @@ class PeriodController extends Controller
         return $this->render('admin/period/generate_shifts.html.twig',array(
             "form" => $form->createView()
         ));
+    }
+
+    /**
+     * Creates a form to free a period position entity.
+     *
+     * @param Period $period The period entity
+     * @param PeriodPosition $position The period position entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
+    {
+        return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
+            ->setAction($this->generateUrl('period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
