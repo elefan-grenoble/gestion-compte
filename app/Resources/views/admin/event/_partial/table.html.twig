@@ -6,6 +6,7 @@
             <th>Description</th>
             <th>Date</th>
             <th>Procurations</th>
+            <th>Auteur</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -32,6 +33,7 @@
                         <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
                     {% endif %}
                 </td>
+                <td title="{{ event.createdAt | date_fr_full_with_time }}">{{ event.createdBy }}</td>
                 <td>
                     <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
                 </td>

@@ -61,18 +61,6 @@ class DynamicContent
     protected $content;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
-     */
-    private $createdBy;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
-     */
-    private $updatedBy;
-
-    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -80,11 +68,23 @@ class DynamicContent
     private $createdAt;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
      * @ORM\Column(name="updated_at", type="datetime")
      *
      * @var \DateTime
      */
     private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
 
     /**
      * Constructor
@@ -225,11 +225,21 @@ class DynamicContent
     }
 
     /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
      * Set createdBy
      *
      * @param \AppBundle\Entity\User $createBy
      *
-     * @return TimeLog
+     * @return DynamicContent
      */
     public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
@@ -248,15 +258,26 @@ class DynamicContent
     }
 
     /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
      * Set updatedBy
      *
      * @param \AppBundle\Entity\User $createBy
      *
-     * @return TimeLog
+     * @return DynamicContent
      */
     public function setUpdatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->updatedBy = $user;
+
         return $this;
     }
 
@@ -268,25 +289,5 @@ class DynamicContent
     public function getUpdatedBy()
     {
         return $this->updatedBy;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
     }
 }
