@@ -134,7 +134,6 @@
                     $('#modal-bucket-content').html('');
                 },
                 onOpenStart: function(modal, trigger) {
-                    console.log("onOpenStart");
                     var url = $(trigger).attr('data-source');
                     $.get(url, function( data ) {
                         $('#modal-bucket-content').html(data);
