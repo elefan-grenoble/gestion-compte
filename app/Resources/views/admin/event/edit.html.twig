@@ -71,11 +71,11 @@
 {% if event.createdBy or event.updatedBy %}
     <div class="card-panel">
         {% if event.createdBy %}
-            <i>Création le {{ event.createdAt | date_fr_full_with_time }} par {{ event.createdBy }}</i>
+            <i>Création le {{ event.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: event.createdBy, target_blank: true } %}</i>
             <br />
         {% endif %}
         {% if event.updatedBy %}
-            <i>Dernière modification le {{ event.updatedAt | date_fr_full_with_time }} par {{ event.updatedBy }}</i>
+            <i>Dernière modification le {{ event.updatedAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: event.updatedBy, target_blank: true } %}</i>
         {% endif %}
     </div>
 {% endif %}

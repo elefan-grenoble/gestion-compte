@@ -215,6 +215,7 @@ class PeriodController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $period = new Period();
         $job = $em->getRepository(Job::class)->findOneBy(array());
@@ -232,6 +233,7 @@ class PeriodController extends Controller
             $period->setStart(new \DateTime($start));
             $end = $form->get('end')->getData();
             $period->setEnd(new \DateTime($end));
+            $period->setCreatedBy($current_user);
 
             $em->persist($period);
             $em->flush();
@@ -253,6 +255,7 @@ class PeriodController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $form = $this->createForm(PeriodType::class, $period);
         $form->handleRequest($request);
@@ -267,6 +270,7 @@ class PeriodController extends Controller
             $period->setStart(new \DateTime($start));
             $end = $form->get('end')->getData();
             $period->setEnd(new \DateTime($end));
+            $period->setUpdatedBy($current_user);
 
             $em->persist($period);
             $em->flush();
