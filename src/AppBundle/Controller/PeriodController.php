@@ -238,7 +238,7 @@ class PeriodController extends Controller
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le nouveau créneau type a bien été créé !');
+            $session->getFlashBag()->add('success', 'Le nouveau créneau type ' . $period . ' a bien été créé !');
             return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
@@ -275,7 +275,7 @@ class PeriodController extends Controller
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le créneau type a bien été édité !');
+            $session->getFlashBag()->add('success', 'Le créneau type ' . $period . ' a bien été édité !');
             return $this->redirectToRoute('period_admin');
         }
 
@@ -328,22 +328,20 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $count = $form["nb_of_shifter"]->getData();
             foreach ($form["week_cycle"]->getData() as $week_cycle) {
                 $position->setWeekCycle($week_cycle);
                 $position->setCreatedBy($current_user);
-                $nb_of_shifter = $form["nb_of_shifter"]->getData();
-                while (0 < $nb_of_shifter) {
+                foreach (range(0, $count-1) as $iteration) {
                     $p = clone($position);
                     $period->addPosition($p);
                     $em->persist($p);
-                    $nb_of_shifter--;
                 }
             }
-
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le poste '.$position.' a bien été ajouté');
+            $session->getFlashBag()->add('success', $count . ' poste' . (($count>1) ? 's':'') . ' ajouté ' . (($count>1) ? 's':'') . ' (pour chaque cycle sélectionné) !');
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
@@ -365,7 +363,7 @@ class PeriodController extends Controller
             $em->remove($position);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le poste '.$position.' a bien été supprimé !');
+            $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été supprimé !');
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
@@ -409,7 +407,7 @@ class PeriodController extends Controller
             $em->persist($position);
             $em->flush();
 
-            $session->getFlashBag()->add("success", "Créneau fixe réservé avec succès pour " . $position->getShifter());
+            $session->getFlashBag()->add('success', 'Créneau fixe réservé avec succès pour ' . $position->getShifter() . ' : ' . $position);
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
@@ -434,7 +432,7 @@ class PeriodController extends Controller
             $em->persist($position);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Le poste a bien été libéré");
+            $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$position->getPeriod()->getId()));
@@ -461,7 +459,7 @@ class PeriodController extends Controller
             $em->remove($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le créneau type a bien été supprimé !');
+            $session->getFlashBag()->add('success', 'Le créneau type ' . $period . ' a bien été supprimé !');
         }
 
         return $this->redirectToRoute('period_admin');

@@ -92,6 +92,14 @@ class Period
     }
 
     /**
+     * Example: Epicerie/Livraison - Lundi - 09:30 à 12:30
+     */
+    public function __toString()
+    {
+        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('H:i') . ' à ' . $this->getEnd()->format('H:i');
+    }
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()

@@ -77,7 +77,7 @@ class ShiftExemptionController extends Controller
         if ($editForm->isSubmitted() && $editForm->isValid()) {
             $this->getDoctrine()->getManager()->flush();
 
-            $session->getFlashBag()->add('success', 'Le motif d\'exemption a bien été modifié !');
+            $session->getFlashBag()->add('success', 'Le motif d\'exemption a bien été édité !');
             return $this->redirectToRoute('admin_shiftexemption_index');
         }
 

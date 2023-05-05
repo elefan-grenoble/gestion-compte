@@ -85,12 +85,18 @@ class PeriodPosition
     {
     }
 
+    /**
+     * Example: Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)
+     */
     public function __toString()
     {
-        if ($this->getFormation())
-            return $this->getFormation()->getName();
-        else
-            return "Membre";
+        $name = $this->getPeriod() . ' (Semaine ' . $this->getWeekCycle() . ')';
+        if ($this->getFormation()) {
+            $name .= ' (' . $this->getFormation()->getName() . ')';
+        } else {
+            $name .= ' (sans formation)';
+        }
+        return $name;
     }
 
     /**
