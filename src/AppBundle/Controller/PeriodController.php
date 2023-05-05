@@ -315,27 +315,30 @@ class PeriodController extends Controller
     public function newPeriodPositionAction(Request $request, Period $period)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $position = new PeriodPosition();
         $form = $this->createForm(PeriodPositionType::class, $position);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             foreach ($form["week_cycle"]->getData() as $week_cycle) {
                 $position->setWeekCycle($week_cycle);
+                $position->setCreatedBy($current_user);
                 $nb_of_shifter = $form["nb_of_shifter"]->getData();
-                while (0 < $nb_of_shifter ){
+                while (0 < $nb_of_shifter) {
                     $p = clone($position);
                     $period->addPosition($p);
                     $em->persist($p);
                     $nb_of_shifter--;
                 }
             }
+
             $em->persist($period);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le poste '.$position.' a bien été ajouté');
-            return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));
         }
 
         return $this->redirectToRoute('period_edit',array('id'=>$period->getId()));

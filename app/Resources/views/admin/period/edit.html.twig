@@ -110,6 +110,12 @@
                                         {{ form_end(positions_delete_forms[position.id]) }}
                                     </div>
                                 {% endif %}
+                                {% if position.createdBy %}
+                                    <p>
+                                        Poste type créé le <i>{{ position.createdAt | date_fr_full_with_time }}</i>
+                                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.createdBy, target_blank: true } %}.
+                                    </p>
+                                {% endif %}
                             </div>
                         </li>
                     {% endif %}
