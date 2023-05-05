@@ -6,59 +6,63 @@
 # will use the editable-box css class if anonymized is false
 #}
 
+{% set week_filter = week_filter ?? null %}
+{% set anonymized = anonymized ?? true %}
+{% set show_day_of_week = show_day_of_week ?? false %}
+{% set show_details = show_details ?? true %}
+
 {# generate a form input, used for the filters #}
-{% macro period_title(period) %}
+{% macro period_title(period, show_day_of_week) %}
     {% if period.job %}
         <b>{{ period.job.name }}</b>
-        <br>
-        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-    {% else %}
-        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
-        <br>
+        <br />
     {% endif %}
+        {% if show_day_of_week %}{{ period.dayOfweekString | capitalize }}{% endif %}
+        {{ period.start | date('H:i') }}-{{ period.end | date('H:i') }}
 {% endmacro %}
 
 
-<div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable" style="padding: 15px;">
-
-    {# Card header #}
-    {%  if anonymized %}
-        <div>
-            {{ _self.period_title(period) }}
-        </div>
-
-    {% else %}
-        <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
-            <div class="black-text editable-box">
-                {{ _self.period_title(period) }}
+<div class="card {{ period.job? period.job.color : "blue" }} lighten-2 hoverable">
+    <div class="card-content">
+        {# Card title #}
+        {%  if anonymized %}
+            <div>
+                {{ _self.period_title(period, show_day_of_week) }}
             </div>
-        </a>
-    {% endif %}
+        {% else %}
+            <a href="{{ path("period_edit",{'id': period.id}) }}" class="black-text">
+                <div class="black-text editable-box">
+                    {{ _self.period_title(period, show_day_of_week) }}
+                </div>
+            </a>
+        {% endif %}
 
-
-    {# if display by job/training #}
-    <div id="training" style="margin-top:1em;">
-        {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-            <h6>Semaine {{ week }}</h6>
-            {% for training, nb_shifters in positions %}
-                <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
-                <br/>
-            {% endfor %}
-        {% endfor %}
-    </div>
-
-    {# if display by member name #}
-    {% if use_fly_and_fixed %}
-        <div id="shifter" style="margin-top:1em;">
-            {% for week, positions in period.positionsperweekcycle %}
-                {% if (week in week_filter) or not week_filter %}
+        {% if show_details %}
+            {# if display by job/training #}
+            <div id="training" style="margin-top:1em;">
+                {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
                     <h6>Semaine {{ week }}</h6>
-                    {% for position in positions %}
-                        {% include 'period/_partial/position_shifter_display.html.twig'
-                            with {'position':position, 'anonymized':anonymized} %}
+                    {% for training, nb_shifters in positions %}
+                        <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
+                        <br/>
                     {% endfor %}
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# if display by member name #}
+            {% if use_fly_and_fixed %}
+                <div id="shifter" style="margin-top:1em;">
+                    {% for week, positions in period.positionsperweekcycle %}
+                        {% if (week in week_filter) or not week_filter %}
+                            <h6>Semaine {{ week }}</h6>
+                            {% for position in positions %}
+                                {% include 'period/_partial/position_shifter_display.html.twig'
+                                    with {'position':position, 'anonymized':anonymized} %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
 </div>

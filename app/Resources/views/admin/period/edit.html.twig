@@ -5,41 +5,34 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('period') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">edit</i>&nbsp;Editer
+<a href="{{ path('period_admin') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer le créneau type
 {% endblock %}
+
+{% set periodPositionCount = period.positions | length %}
+{% set periodPositionBookedCount = period.positionsBooked | length %}
+{% set periodPositionFreeCount = periodPositionCount - periodPositionBookedCount %}
 
 {% block content %}
     <h4>Editer le créneau type</h4>
 
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
-    </div>
-    {{ form_end(form) }}
-
-    {% if is_granted("ROLE_ADMIN") %}
-        <a href="#remove-period-confirmation-modal" class="modal-trigger btn waves-effect waves-light red" title="Supprimer le créneau type">
-            Supprimer
-        </a>
-        {{ form_start(period_delete_form) }}
-        <div id="remove-period-confirmation-modal" class="modal">
-            <div class="modal-content">
-                <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
-                <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
-            </div>
-            <div class="modal-footer">
-                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
-                    Retour à la raison
-                </a>
-                <button type="submit" class="btn waves-effect waves-light orange">
-                    <i class="material-icons left">check</i>Je sais ce que je fais !
-                </button>
+    <div class="row">
+        <div class="col m4">
+            {% include "period/_partial/period_card.html.twig" with { period: period, anonymized: true, show_day_of_week: true, show_details: false } %}
+        </div>
+        <div class="col m8">
+            <div class="card">
+                <div class="card-content">
+                    Ce créneau type comporte <strong>{{ periodPositionCount }}</strong> poste{% if periodPositionCount > 1 %}s{% endif %} type{% if periodPositionCount > 1 %}s{% endif %}.
+                    {% if use_fly_and_fixed %}
+                        <br />
+                        <span class="red-text">&#9673;</span>&nbsp;<strong>{{ periodPositionFreeCount }}</strong> poste{% if periodPositionFreeCount > 1 %}s{% endif %} libre{% if periodPositionFreeCount > 1 %}s{% endif %}<br />
+                        <span class="green-text">&#9673;</span>&nbsp;<strong>{{ periodPositionBookedCount }}</strong> poste{% if periodPositionBookedCount > 1 %}s{% endif %} réservé{% if periodPositionBookedCount > 1 %}s{% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
-        {{ form_end(period_delete_form) }}
-    {% endif %}
+    </div>
 
     <h5>Postes disponibles</h5>
 
@@ -138,24 +131,75 @@
             </ul>
         {% endfor %}
     {% endif %}
-    <h5>Ajouter un poste</h5>
-    {{ form_start(position_add_form) }}
-    <div class="row">
-        <div class="col s3">
-            {{ form_label(position_add_form.nb_of_shifter) }}
-            {{ form_widget(position_add_form.nb_of_shifter) }}
-        </div>
-        <div class="col s3">
-            {{ form_label(position_add_form.week_cycle) }}
-            {{ form_widget(position_add_form.week_cycle) }}
-        </div>
-        <div class="col s6">
-            {{ form_label(position_add_form.formation) }}
-            {{ form_widget(position_add_form.formation) }}
-        </div>
-        <div class="col s6">
-            <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
-        </div>
-    </div>
-    {{ form_end(position_add_form) }}
+
+    <br />
+    <h5>Actions supplémentaires</h5>
+
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">add</i>Ajouter un poste
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(position_add_form) }}
+                <div class="row">
+                    <div class="col s3">
+                        {{ form_label(position_add_form.nb_of_shifter) }}
+                        {{ form_widget(position_add_form.nb_of_shifter) }}
+                    </div>
+                    <div class="col s3">
+                        {{ form_label(position_add_form.week_cycle) }}
+                        {{ form_widget(position_add_form.week_cycle) }}
+                    </div>
+                    <div class="col s6">
+                        {{ form_label(position_add_form.formation) }}
+                        {{ form_widget(position_add_form.formation) }}
+                    </div>
+                    <div class="col s6">
+                        <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+                    </div>
+                </div>
+                {{ form_end(position_add_form) }}
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">edit</i>Editer le créneau type
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(form, {'attr': { 'style': 'display:inline;' }}) }}
+                {{ form_widget(form) }}
+                <br />
+                <button type="submit" class="btn waves-effect waves-light">
+                    <i class="material-icons left">save</i>Enregistrer
+                </button>
+                {{ form_end(form) }}
+
+                {% if is_granted("ROLE_ADMIN") %}
+                    <a href="#remove-period-confirmation-modal" class="btn red modal-trigger" title="Supprimer le créneau type" {% if use_fly_and_fixed and not period.isEmpty %}disabled{% endif %}>
+                        <i class="material-icons left">delete</i>Supprimer
+                    </a>
+                    {% if use_fly_and_fixed and not period.isEmpty %}
+                        <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les postes doivent être libérés avant de pouvoir supprimer le créneau type">info</i>
+                    {% endif %}
+                    {{ form_start(period_delete_form) }}
+                    <div id="remove-period-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
+                            <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
+                                Retour à la raison
+                            </a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                        </div>
+                    </div>
+                    {{ form_end(period_delete_form) }}
+                {% endif %}
+            </div>
+        </li>
+    </ul>
 {% endblock %}

@@ -232,8 +232,7 @@
                                         or (filling_filter == "full" and period.isFull(week_filter))
                                         or (filling_filter == "partial" and period.isPartial(week_filter))
                                         or (beneficiary_filter and period.hasShifter(beneficiary_filter) | length > 0) %}
-                                        {% include 'period/_partial/period_card.html.twig'
-                                                with {'period':period, 'week_filter':week_filter, 'anonymized':false} %}
+                                        {% include "period/_partial/period_card.html.twig" with { period: period, week_filter: week_filter, anonymized: false } %}
                                     {% endif %}
                                 {% endfor %}
                             </td>
