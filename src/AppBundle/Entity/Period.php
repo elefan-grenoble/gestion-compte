@@ -65,6 +65,25 @@ class Period
     private $createdAt;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\Column(type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -78,6 +97,15 @@ class Period
     public function setCreatedAtValue()
     {
         $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     /**
@@ -248,6 +276,64 @@ class Period
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return Period
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return Period
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+
+        return $this;
     }
 
     /**
