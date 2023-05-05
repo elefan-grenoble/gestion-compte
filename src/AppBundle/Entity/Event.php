@@ -537,7 +537,7 @@ class Event
     /**
      * Set createdBy
      *
-     * @param \AppBundle\Entity\User $createBy
+     * @param \AppBundle\Entity\User $user
      *
      * @return Event
      */
@@ -571,7 +571,7 @@ class Event
     /**
      * Set updatedBy
      *
-     * @param \AppBundle\Entity\User $createBy
+     * @param \AppBundle\Entity\User $user
      *
      * @return Event
      */
