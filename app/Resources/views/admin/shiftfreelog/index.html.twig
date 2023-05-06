@@ -119,7 +119,7 @@
                     <td>
                         {{ form_start(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
                         {{ form_widget(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
-                        <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer">
+                        <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer" onclick="return confirm('Etes-vous sûr de vouloir supprimer cette annulation de créneau ?!');">
                             <i class="material-icons left">delete</i>
                         </button>
                         {{ form_end(shift_free_log_delete_forms_[shiftFreeLog.id]) }}
