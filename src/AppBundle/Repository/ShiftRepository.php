@@ -7,6 +7,7 @@ use AppBundle\Entity\Job;
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use \Datetime;
 
@@ -46,11 +47,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFutures(\DateTime $max = null)
+    public function findFutures(\DateTime $max = null, Job $job = null)
     {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
+        $qb = $this->createQueryBuilder('s')
             ->select('s, j')
             ->leftJoin('s.job', 'j')
             ->where('s.start > :now')
@@ -62,28 +61,10 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('max', $max);
         }
 
-        $qb->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findFuturesWithJob($job, \DateTime $max = null)
-    {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->join('s.job', "job")
-            ->where('s.start > :now')
-            ->andwhere('job.id = :jid')
-            ->setParameter('now', new \Datetime('now'))
-            ->setParameter('jid', $job->getId());
-
-        if ($max) {
+        if ($job) {
             $qb
-                ->andWhere('s.end < :max')
-                ->setParameter('max', $max);
+                ->andwhere('s.job = :job')
+                ->setParameter('job', $job);
         }
 
         $qb->orderBy('s.start', 'ASC');
@@ -98,19 +79,22 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->select('s, f')
+            ->select('s, j, f')
+            ->leftJoin('s.job', 'j')
             ->leftJoin('s.formation', 'f')
-            ->leftJoin('s.shifter', 'u')
-            ->addSelect('u')
-            ->leftJoin('u.formations', 'f1')
-            ->addSelect('f1')
+            ->leftJoin('s.shifter', 'b')
+            ->addSelect('b')
+            ->leftJoin('b.formations', 'bf')
+            ->addSelect('bf')
             ->where('s.start > :from')
             ->setParameter('from', $from);
+
         if ($max) {
             $qb
                 ->andWhere('s.end < :max')
                 ->setParameter('max', $max);
         }
+
         if ($job) {
             $qb
                 ->andWhere('s.job = :job')
@@ -129,7 +113,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @return mixed
      * @throws NonUniqueResultException
      */
-    public function findFirst($user)
+    public function findFirst(User $user)
     {
         $qb = $this->createQueryBuilder('s');
 

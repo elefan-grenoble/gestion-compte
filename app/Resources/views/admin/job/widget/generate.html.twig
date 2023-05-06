@@ -6,78 +6,78 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('job_list') }}"><i class="material-icons">list</i>&nbsp;Liste des postes de bénévolat</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">add</i>&nbsp;Générer un widget (créneaux d'un poste)
+<i class="material-icons">tune</i>&nbsp;Générer un widget (créneaux d'un poste)
 {% endblock %}
 
 {% block content %}
-    <h4>Générer un widget (créneaux d'un poste)</h4>
+<h4>Générer un widget (créneaux d'un poste)</h4>
 
-    {{ form_start(form) }}
-    <div class="errors">
-        {{ form_errors(form) }}
+{{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form_label(form.job) }}
+        {{ form_widget(form.job) }}
     </div>
-    <div class="row">
-        <div class="col s12">
-            {{ form_label(form.job) }}
-            {{ form_widget(form.job) }}
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form.display_end.vars.label }}
+        <div class="switch">
+            <label>
+                heure de début (à X:XX)
+                {{ form_widget(form.display_end) }}
+                <span class="lever"></span>
+                heure de début et de fin (de X:XX à X:XX)
+            </label>
         </div>
     </div>
-    <div class="row">
-        <div class="col s12">
-            {{ form.display_end.vars.label }}
-            <div class="switch">
-                <label>
-                    heure de début (à X:XX)
-                    {{ form_widget(form.display_end) }}
-                    <span class="lever"></span>
-                    heure de début et de fin (de X:XX à X:XX)
-                </label>
-            </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form.display_on_empty.vars.label }}
+        <div class="switch">
+            <label>
+                uniquement les créneaux occupés
+                {{ form_widget(form.display_on_empty) }}
+                <span class="lever"></span>
+                tous les créneaux
+            </label>
         </div>
     </div>
-    <div class="row">
-        <div class="col s12">
-            {{ form.display_on_empty.vars.label }}
-            <div class="switch">
-                <label>
-                    uniquement les créneaux occupés
-                    {{ form_widget(form.display_on_empty) }}
-                    <span class="lever"></span>
-                    tous les créneaux
-                </label>
-            </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form.title.vars.label }}
+        <div class="switch">
+            <label>
+                masquer le titre
+                {{ form_widget(form.title) }}
+                <span class="lever"></span>
+                afficher le titre
+            </label>
         </div>
     </div>
-    <div class="row">
-        <div class="col s12">
-            {{ form.title.vars.label }}
-            <div class="switch">
-                <label>
-                    masquer le titre
-                    {{ form_widget(form.title) }}
-                    <span class="lever"></span>
-                    afficher le titre
-                </label>
-            </div>
-        </div>
-    </div>
+</div>
+<br />
+{{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+{{ form_end(form) }}
+
+{% if query_string is defined %}
     <br />
-    {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
-    {{ form_end(form) }}
-
-    {% if query_string is defined %}
-        <br />
-        <h4>Résultat</h4>
-        <div class="row">
-            <div class="col m4">
-                <iframe src="{{ path('shift_widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
-            </div>
-            <div class="col m8">
-                texte à copier-coller 👇
-                <div class="card-panel" style="overflow:scroll;">
-                    <pre>&lt;iframe src="{{ absolute_url(path('shift_widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
-                </div>
+    <h4>Résultat</h4>
+    <div class="row">
+        <div class="col m4">
+            <iframe src="{{ path('shift_widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+        </div>
+        <div class="col m8">
+            texte à copier-coller 👇
+            <div class="card-panel" style="overflow:scroll;">
+                <pre>&lt;iframe src="{{ absolute_url(path('shift_widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
             </div>
         </div>
-    {% endif %}
+    </div>
+{% endif %}
 {% endblock %}

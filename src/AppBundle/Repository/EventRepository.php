@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\EventKind;
+
 /**
  * EventRepository
  *
@@ -15,9 +17,11 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         return $this->findBy(array(), array('date' => 'DESC'));
     }
 
-    public function findFutures(\DateTime $max = null)
+    public function findFutures(\DateTime $max = null, EventKind $eventKind = null)
     {
         $qb = $this->createQueryBuilder('e')
+            ->select('e, ek')
+            ->leftJoin('e.kind', 'ek')
             ->where('e.date > :now')
             ->setParameter('now', new \Datetime('now'));
 
@@ -25,6 +29,12 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             $qb
                 ->andWhere('e.date < :max')
                 ->setParameter('max', $max);
+        }
+
+        if ($eventKind) {
+            $qb
+                ->andwhere('e.kind = :kind')
+                ->setParameter('kind', $eventKind);
         }
 
         $qb->orderBy('e.date', 'ASC');

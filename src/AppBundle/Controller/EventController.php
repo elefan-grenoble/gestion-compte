@@ -9,9 +9,10 @@ use AppBundle\Form\ProxyType;
 use AppBundle\Repository\EventKindRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -749,6 +750,70 @@ class EventController extends Controller
             'event' => $event,
             'beneficiaries' => $beneficiaries,
         ));
+    }
+
+    /**
+     * Event widget generator
+     *
+     * @Route("/widget_generator", name="event_widget_generator", methods={"GET","POST"})
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     */
+    public function widgetGeneratorAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('kind', EntityType::class, array(
+                'label' => "Quel type d'événement ?",
+                'class' => 'AppBundle:EventKind',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => true
+            ))
+            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'))
+            ->add('generate', SubmitType::class, array('label' => 'Générer'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $data = $form->getData();
+
+            $widgetQueryString = 'event_kind_id='.$data['kind']->getId().'&title='.($data['title'] ? 1 : 0);
+
+            return $this->render('admin/event/widget/generate.html.twig', array(
+                'query_string' => $widgetQueryString,
+                'form' => $form->createView(),
+            ));
+        }
+
+        return $this->render('admin/event/widget/generate.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * Event widget display
+     * 
+     * @Route("/widget", name="event_widget", methods={"GET"})
+     */
+    public function widgetAction(Request $request)
+    {
+        $buckets = array();
+        $eventKind = null;
+
+        $event_kind_id = $request->get('event_kind_id');
+        $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+
+        if ($event_kind_id) {
+            $em = $this->getDoctrine()->getManager();
+            $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
+            if ($eventKind) {
+                $events = $em->getRepository('AppBundle:Event')->findFutures(null, $eventKind);
+            }
+        }
+
+        return $this->render('admin/event/widget/widget.html.twig', [
+            'events' => $events,
+            'eventKind' => $eventKind,
+            'title' => $title
+        ]);
     }
 
 

@@ -1,0 +1,14 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block content %}
+{% if title %}liste des prochains événements <strong>{{ eventKind.name }}</strong> :{% endif %}
+<ul>
+    {% for event in events %}
+        <li>
+            - <strong>{{ event.title }}</strong>
+            {{ event.date | date_fr_full_with_time }}
+            {% if event.end %}<i>({{ event.duration }})</i>{% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}
