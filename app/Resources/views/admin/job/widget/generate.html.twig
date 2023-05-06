@@ -1,15 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Générer un widget (créneau) - {{ site_name }}{% endblock %}
+{% block title %}Générer un widget (créneaux d'un poste) - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">add</i>&nbsp;Générer un widget (créneau)
+<a href="{{ path('job_list') }}"><i class="material-icons">list</i>&nbsp;Liste des postes de bénévolat</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Générer un widget (créneaux d'un poste)
 {% endblock %}
 
 {% block content %}
-    <h4>Générer un widget (créneau)</h4>
+    <h4>Générer un widget (créneaux d'un poste)</h4>
 
     {{ form_start(form) }}
     <div class="errors">

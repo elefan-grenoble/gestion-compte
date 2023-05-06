@@ -19,6 +19,8 @@ class WidgetController extends Controller
     /**
      * Widget display
      * 
+     * Note: moved to ShiftController. Duplicate left here to avoid breaking existing widgets.
+     * 
      * @Route("/", name="widget", methods={"GET"})
      */
     public function widgetAction(Request $request)
