@@ -24,13 +24,13 @@ class PeriodPosition
 
     /**
      * One Period has One Formation.
-     * @ORM\ManyToOne(targetEntity="Formation")
+     * @ORM\ManyToOne(targetEntity="Formation", fetch="EAGER")
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $formation;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions", fetch="EAGER")
      * @ORM\JoinColumn(name="period_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $period;
