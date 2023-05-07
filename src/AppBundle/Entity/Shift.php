@@ -77,7 +77,7 @@ class Shift
 
     /**
      * One Shift has One Job.
-     * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts")
+     * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts", fetch="EAGER")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
