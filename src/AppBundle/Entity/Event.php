@@ -88,7 +88,7 @@ class Event
     private $end;
 
     /**
-     * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events")
+     * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events", fetch="EAGER")
      * @ORM\JoinColumn(name="event_kind_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $kind;
