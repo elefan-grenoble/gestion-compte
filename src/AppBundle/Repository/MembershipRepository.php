@@ -25,7 +25,6 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
         preg_match('/#(\d+)\s/s', $membership, $matches);
         $membershipMemberNumber = $matches[1];
 
-
         $qb = $this->createQueryBuilder('m')
             ->where('m.member_number = :memberNumber')
             ->setParameter('memberNumber', $membershipMemberNumber);
@@ -35,10 +34,19 @@ class MembershipRepository extends \Doctrine\ORM\EntityRepository
             ->getOneOrNullResult();
     }
 
-    public function findAllActive()
+    /**
+     * return all the active memberships
+     */
+    public function findAllActive($prefetchBeneficiaries = true)
     {
         $qb = $this->createQueryBuilder('m')
             ->where('m.withdrawn = 0');
+
+        if ($prefetchBeneficiaries) {
+            $qb
+                ->leftJoin('m.beneficiaries', 'b')
+                ->addSelect('b');
+        }
 
         return $qb
             ->getQuery()
