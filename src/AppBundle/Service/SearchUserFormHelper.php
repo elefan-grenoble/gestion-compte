@@ -322,14 +322,14 @@ class SearchUserFormHelper {
      */
     public function initSearchQuery($doctrineManager, $type = null) {
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")
-            ->leftJoin("b.user", "u")
+        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("o.registrations", "r")->addSelect("r")
             ->leftJoin("r.helloassoPayment", "rhp")->addSelect("rhp")
             ->leftJoin("o.membershipShiftExemptions", "mse")->addSelect("mse");
         if ($type == 'search') {
-            $qb->leftJoin("b.commissions", "c")->addSelect("b, c");
-            $qb->leftJoin("b.formations", "f")->addSelect("b, f");
+            $qb->leftJoin("b.commissions", "c")->addSelect("c");
+            $qb->leftJoin("b.formations", "f")->addSelect("f");
         }
         // do not include admin user
         $qb = $qb->andWhere('o.member_number > 0');
