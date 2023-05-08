@@ -325,6 +325,7 @@ class SearchUserFormHelper {
         $qb = $qb->leftJoin("o.beneficiaries", "b")
             ->leftJoin("b.user", "u")
             ->leftJoin("o.registrations", "r")->addSelect("r")
+            ->leftJoin("r.helloassoPayment", "rhp")->addSelect("rhp")
             ->leftJoin("o.membershipShiftExemptions", "mse")->addSelect("mse");
         if ($type == 'search') {
             $qb->leftJoin("b.commissions", "c")->addSelect("b, c");
