@@ -24,11 +24,11 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     {
         $qb = $this->createQueryBuilder('s');
         $qb
-            ->leftJoin('s.shifter', 'u')
-            ->addSelect('u')
-            ->leftJoin('u.formations', 'f')
+            ->leftJoin('s.shifter', 'b')
+            ->addSelect('b')
+            ->leftJoin('b.formations', 'f')
             ->addSelect('f')
-            ->leftJoin('u.membership', 'm')
+            ->leftJoin('b.membership', 'm')
             ->addSelect('m')
             ->where('s.start = :start')
             ->andWhere('s.end = :end')
@@ -47,45 +47,13 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFutures(\DateTime $max = null, Job $job = null)
+    public function findFrom(\DateTime $from, \DateTime $max = null, Job $job = null, $withShifters = null)
     {
         $qb = $this->createQueryBuilder('s')
-            ->select('s, j')
             ->leftJoin('s.job', 'j')
-            ->where('s.start > :now')
-            ->setParameter('now', new \Datetime('now'));
-
-        if ($max) {
-            $qb
-                ->andWhere('s.end < :max')
-                ->setParameter('max', $max);
-        }
-
-        if ($job) {
-            $qb
-                ->andwhere('s.job = :job')
-                ->setParameter('job', $job);
-        }
-
-        $qb->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findFrom(\DateTime $from, \DateTime $max = null, Job $job=null)
-    {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->select('s, j, f')
-            ->leftJoin('s.job', 'j')
-            ->leftJoin('s.formation', 'f')
-            ->leftJoin('s.shifter', 'b')
-            ->addSelect('b')
-            ->leftJoin('b.formations', 'bf')
-            ->addSelect('bf')
+            ->addSelect('j')
+            ->leftJoin('s.formation', 'sf')
+            ->addSelect('sf')
             ->where('s.start > :from')
             ->setParameter('from', $from);
 
@@ -101,11 +69,28 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('job', $job);
         }
 
+        if ($withShifters) {
+            $qb
+                ->leftJoin('s.shifter', 'b')
+                ->addSelect('b')
+                ->leftJoin('b.formations', 'bf')
+                ->addSelect('bf')
+                ->leftJoin('b.shifts', 'bs')  // for Beneficiary.isNew()
+                ->addSelect('bs');
+        }
+
         $qb->orderBy('s.start', 'ASC');
 
         return $qb
             ->getQuery()
             ->getResult();
+    }
+
+    public function findFutures(\DateTime $max = null, Job $job = null, $withShifters = null)
+    {
+        $now = new \Datetime('now');
+
+        return $this->findFrom($now, $max, $job, $withShifters);
     }
 
     /**
