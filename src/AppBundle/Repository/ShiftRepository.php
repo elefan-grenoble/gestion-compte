@@ -363,27 +363,27 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     private function findShifts($beneficiaries, $start_after, $end_before, $start_before = null, $end_after = null)
     {
         $qb = $this->createQueryBuilder('s')
-                    ->where('s.shifter IN (:beneficiaries)')
-                    ->andwhere('s.start > :start_after')
-                    ->setParameter('beneficiaries', $beneficiaries)
-                    ->setParameter('start_after', $start_after);
+            ->where('s.shifter IN (:beneficiaries)')
+            ->andwhere('s.start > :start_after')
+            ->setParameter('beneficiaries', $beneficiaries)
+            ->setParameter('start_after', $start_after);
 
         if ($end_before != null) {
-            $qb = $qb->andwhere('s.end < :end_before')
-                     ->setParameter('end_before', $end_before);
+            $qb->andwhere('s.end < :end_before')
+                ->setParameter('end_before', $end_before);
         }
 
         if ($start_before != null) {
-            $qb = $qb->andwhere('s.start < :start_before')
-                     ->setParameter('start_before', $start_before);
+            $qb->andwhere('s.start < :start_before')
+                ->setParameter('start_before', $start_before);
         }
 
         if ($end_after != null) {
-            $qb = $qb->andwhere('s.end > :end_after')
-                     ->setParameter('end_after', $end_after);
+            $qb->andwhere('s.end > :end_after')
+                ->setParameter('end_after', $end_after);
         }
 
-        $qb = $qb->orderBy("s.start", "ASC");
+        $qb->orderBy("s.start", "ASC");
 
         $result = $qb
             ->getQuery()
