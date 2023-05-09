@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Job;
+
 /**
  * PeriodRepository
  *
@@ -10,7 +12,7 @@ namespace AppBundle\Repository;
  */
 class PeriodRepository extends \Doctrine\ORM\EntityRepository
 {
-    public function findAll($dayOfWeek = null, $job = null, $withShifters = null)
+    public function findAll($dayOfWeek = null, Job $job = null, $withShifters = null)
     {
         $qb = $this->createQueryBuilder('p')
             ->leftJoin('p.job', 'j')
