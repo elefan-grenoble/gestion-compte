@@ -39,7 +39,7 @@ class AnonymousBeneficiary
     private $email;
 
     /**
-     * @ORM\OneToOne(targetEntity="Beneficiary")
+     * @ORM\OneToOne(targetEntity="Beneficiary", fetch="EAGER")
      * @ORM\JoinColumn(name="join_to", referencedColumnName="id", onDelete="SET NULL")
      * @AppAssert\BeneficiaryCanHost
      */
@@ -67,7 +67,7 @@ class AnonymousBeneficiary
     private $mode;
 
     /**
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity="User", fetch="EAGER")
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
