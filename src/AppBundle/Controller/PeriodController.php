@@ -456,20 +456,12 @@ class PeriodController extends Controller
      * @Route("/copyPeriod/", name="period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function copyPeriodAction(Request $request){
-        $days = array(
-            "Lundi" => 0,
-            "Mardi" => 1,
-            "Mercredi" => 2,
-            "Jeudi" => 3,
-            "Vendredi" => 4,
-            "Samedi" => 5,
-            "Dimanche" => 6,
-        );
+    public function copyPeriodAction(Request $request)
+    {
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('period_copy'))
-            ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => $days))
-            ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => $days))
+            ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
+            ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->getForm();
 
         $form->handleRequest($request);
@@ -494,7 +486,7 @@ class PeriodController extends Controller
             $em->flush();
 
             $session = new Session();
-            $session->getFlashBag()->add('success',$count.' creneaux copiés de'.array_search($from,$days).' à '.array_search($to,$days));
+            $session->getFlashBag()->add('success', $count . ' creneaux copiés de' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
 
             return $this->redirectToRoute('period_admin');
         }
@@ -508,7 +500,8 @@ class PeriodController extends Controller
      * @Route("/generateShifts/", name="shifts_generation", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
+    public function generateShiftsForDateAction(Request $request, KernelInterface $kernel)
+    {
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shifts_generation'))
             ->add('date_from',TextType::class,array('label'=>'du*','attr'=>array('class'=>'datepicker')))
