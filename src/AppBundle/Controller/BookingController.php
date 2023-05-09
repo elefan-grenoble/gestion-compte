@@ -41,11 +41,13 @@ class BookingController extends Controller
     /**
      * @var boolean
      */
-    private $useFlyAndFixed;
+    private $use_fly_and_fixed;
+    private $display_name_shifters;
 
-    public function __construct(bool $useFlyAndFixed)
+    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters)
     {
-        $this->useFlyAndFixed = $useFlyAndFixed;
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->display_name_shifters = $display_name_shifters;
     }
 
     /**
@@ -138,7 +140,7 @@ class BookingController extends Controller
                 $beneficiary = $beneficiaries->first();
             }
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
 
             $hours = array();
@@ -558,7 +560,7 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
 
-        if ($this->useFlyAndFixed) {
+        if ($this->use_fly_and_fixed) {
             $form = $form->add('fixe', RadioChoiceType::class, [
                 'choices'  => [
                     'Volant' => 0,
