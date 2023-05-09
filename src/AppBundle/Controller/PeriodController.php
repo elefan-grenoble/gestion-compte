@@ -148,19 +148,18 @@ class PeriodController extends Controller
      */
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
-        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
         $filter = $this->filterFormFactory($request, false);
         $sort = 'start';
         $order = 'ASC';
         $periodsByDay = array();
 
-        foreach ($daysOfWeek as $i => $value) {
+        foreach (Period::DAYS_OF_WEEK as $i => $value) {
             $findByFilter = array('dayOfWeek' => $i);
             $periodsByDay[$i] = $em->getRepository('AppBundle:Period')->findAll($i, $filter['job'], false);
         }
 
         return $this->render('period/index.html.twig', array(
-            'days_of_week' => $daysOfWeek,
+            'days_of_week' => Period::DAYS_OF_WEEK,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $filter['form']->createView(),
             'week_filter' => $filter['week'],
@@ -176,17 +175,16 @@ class PeriodController extends Controller
      */
     public function adminIndexAction(Request $request, EntityManagerInterface $em): Response
     {
-        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
         $filter = $this->filterFormFactory($request, true);
         $periodsByDay = array();
 
-        foreach ($daysOfWeek as $i => $value) {
+        foreach (Period::DAYS_OF_WEEK as $i => $value) {
             $findByFilter = array('dayOfWeek' => $i);
             $periodsByDay[$i] = $em->getRepository('AppBundle:Period')->findAll($i, $filter['job'], true);
         }
 
         return $this->render('admin/period/index.html.twig', array(
-            'days_of_week' => $daysOfWeek,
+            'days_of_week' => Period::DAYS_OF_WEEK,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $filter['form']->createView(),
             'beneficiary_filter' => $filter['beneficiary'],
