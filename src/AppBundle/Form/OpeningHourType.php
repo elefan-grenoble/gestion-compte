@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\OpeningHour;
+use AppBundle\Entity\Period;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -19,15 +20,7 @@ class OpeningHourType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('dayOfWeek', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => array(
-                "Lundi" => 0,
-                "Mardi" => 1,
-                "Mercredi" => 2,
-                "Jeudi" => 3,
-                "Vendredi" => 4,
-                "Samedi" => 5,
-                "Dimanche" => 6,
-            )))
+            ->add('dayOfWeek', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')));
     }

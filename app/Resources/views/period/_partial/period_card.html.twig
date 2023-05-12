@@ -56,8 +56,7 @@
                         {% if (week in week_filter) or not week_filter %}
                             <h6>Semaine {{ week }}</h6>
                             {% for position in positions %}
-                                {% include 'period/_partial/position_shifter_display.html.twig'
-                                    with {'position':position, 'anonymized':anonymized} %}
+                                {% include 'period/_partial/position_shifter_display.html.twig' with {'position': position, 'anonymized': anonymized} %}
                             {% endfor %}
                         {% endif %}
                     {% endfor %}
