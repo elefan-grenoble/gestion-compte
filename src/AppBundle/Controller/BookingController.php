@@ -41,11 +41,13 @@ class BookingController extends Controller
     /**
      * @var boolean
      */
-    private $useFlyAndFixed;
+    private $use_fly_and_fixed;
+    private $display_name_shifters;
 
-    public function __construct(bool $useFlyAndFixed)
+    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters)
     {
-        $this->useFlyAndFixed = $useFlyAndFixed;
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->display_name_shifters = $display_name_shifters;
     }
 
     /**
@@ -94,6 +96,7 @@ class BookingController extends Controller
     public function indexAction(Request $request)
     {
         $session = new Session();
+
         $mode = null;
         if ($this->getUser()->getBeneficiary() == null) {
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
@@ -129,15 +132,15 @@ class BookingController extends Controller
 
         //beneficiary selected, or only one beneficiary
         if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
-
             $em = $this->getDoctrine()->getManager();
+
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
             } else {
                 $beneficiary = $beneficiaries->first();
             }
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
 
             $hours = array();
@@ -153,7 +156,6 @@ class BookingController extends Controller
             ]);
 
         } else { // no beneficiary selected
-
             return $this->render('booking/index.html.twig', [
                 'beneficiary_form' => $beneficiaryForm->createView(),
             ]);
@@ -307,18 +309,13 @@ class BookingController extends Controller
         $em = $this->getDoctrine()->getManager();
         $filter = $this->adminFilterFormFactory($em, $request);
 
-        $jobs = $em->getRepository(Job::class)->findByEnabled(true);
-        $beneficiaries = $em->getRepository(Beneficiary::class)->findAllActive();
-        $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"]);
-
+        $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"], true);
         $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
         $bucketsByDay = $this->get('shift_service')->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
 
         return $this->render('admin/booking/index.html.twig', [
             'filterForm' => $filter["form"]->createView(),
             'bucketsByDay' => $bucketsByDay,
-            'jobs' => $jobs,
-            'beneficiaries' => $beneficiaries,
         ]);
     }
 
@@ -563,7 +560,7 @@ class BookingController extends Controller
             ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
 
-        if ($this->useFlyAndFixed) {
+        if ($this->use_fly_and_fixed) {
             $form = $form->add('fixe', RadioChoiceType::class, [
                 'choices'  => [
                     'Volant' => 0,

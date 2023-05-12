@@ -85,6 +85,7 @@ class MembershipController extends Controller
         $this->denyAccessUnlessGranted('view', $member);
 
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
@@ -112,6 +113,7 @@ class MembershipController extends Controller
 
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
+
         $newReg = new Registration();
         $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
@@ -155,12 +157,10 @@ class MembershipController extends Controller
                     ->setMethod('DELETE')->getForm()->createView();
             }
         }
-
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
 
         $timeLogForm = $this->createNewTimeLogForm($member);
 
-        $em = $this->getDoctrine()->getManager();
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
         $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
@@ -181,11 +181,11 @@ class MembershipController extends Controller
             'member' => $member,
             'note' => $note,
             'note_form' => $note_form->createView(),
-            'new_registration_form' => $registrationForm->createView(),
-            'new_beneficiary_form' => $beneficiaryForm->createView(),
             'notes_form' => $notes_form,
             'notes_delete_form' => $notes_delete_form,
             'new_notes_form' => $new_notes_form,
+            'new_registration_form' => $registrationForm->createView(),
+            'new_beneficiary_form' => $beneficiaryForm->createView(),
             'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
             'freeze_form' => $freezeForm->createView(),
