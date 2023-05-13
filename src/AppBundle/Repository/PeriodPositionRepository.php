@@ -35,8 +35,8 @@ class PeriodPositionRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findByBeneficiaries($beneficiaries)
     {
-        $qb = $this->createQueryBuilder('pp');
-        $qb->where('pp.shifter IN (:shiftersId)')
+        $qb = $this->createQueryBuilder('pp')
+            ->where('pp.shifter IN (:shiftersId)')
             ->setParameter('shiftersId', array_map(function(Beneficiary $beneficiary) {
                 return $beneficiary->getId();
             }, $beneficiaries->toArray()))
