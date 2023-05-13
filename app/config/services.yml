@@ -41,6 +41,7 @@ services:
     AppBundle\Controller\BookingController:
         arguments:
             - "%use_fly_and_fixed%"
+            - "%display_name_shifters%"
     AppBundle\Controller\ShiftController:
         arguments:
             - "%forbid_own_shift_book_admin%"
