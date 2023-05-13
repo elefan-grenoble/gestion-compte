@@ -148,18 +148,24 @@ class PeriodController extends Controller
      */
     public function indexAction(Request $request, EntityManagerInterface $em): Response
     {
-        $filter = $this->filterFormFactory($request, false);
-        $sort = 'start';
-        $order = 'ASC';
+        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+        $filter = $this->filterFormFactory($request, False);
         $periodsByDay = array();
+        $order = array('start' => 'ASC');
 
-        foreach (Period::DAYS_OF_WEEK as $i => $value) {
+        foreach ($daysOfWeek as $i => $value) {
             $findByFilter = array('dayOfWeek' => $i);
-            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')->findAll($i, $filter['job'], false);
+
+            if ($filter['job']) {
+                $findByFilter['job'] = $filter['job'];
+            }
+
+            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+                ->findBy($findByFilter, $order);
         }
 
         return $this->render('period/index.html.twig', array(
-            'days_of_week' => Period::DAYS_OF_WEEK,
+            'days_of_week' => $daysOfWeek,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $filter['form']->createView(),
             'week_filter' => $filter['week'],
@@ -175,16 +181,24 @@ class PeriodController extends Controller
      */
     public function adminIndexAction(Request $request, EntityManagerInterface $em): Response
     {
-        $filter = $this->filterFormFactory($request, true);
+        $daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+        $filter = $this->filterFormFactory($request, True);
         $periodsByDay = array();
+        $order = array('start' => 'ASC');
 
-        foreach (Period::DAYS_OF_WEEK as $i => $value) {
+        foreach ($daysOfWeek as $i => $value) {
             $findByFilter = array('dayOfWeek' => $i);
-            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')->findAll($i, $filter['job'], true);
+
+            if ($filter['job']) {
+                $findByFilter['job'] = $filter['job'];
+            }
+
+            $periodsByDay[$i] = $em->getRepository('AppBundle:Period')
+                ->findBy($findByFilter, $order);
         }
 
         return $this->render('admin/period/index.html.twig', array(
-            'days_of_week' => Period::DAYS_OF_WEEK,
+            'days_of_week' => $daysOfWeek,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $filter['form']->createView(),
             'beneficiary_filter' => $filter['beneficiary'],
@@ -456,12 +470,20 @@ class PeriodController extends Controller
      * @Route("/copyPeriod/", name="period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function copyPeriodAction(Request $request)
-    {
+    public function copyPeriodAction(Request $request){
+        $days = array(
+            "Lundi" => 0,
+            "Mardi" => 1,
+            "Mercredi" => 2,
+            "Jeudi" => 3,
+            "Vendredi" => 4,
+            "Samedi" => 5,
+            "Dimanche" => 6,
+        );
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('period_copy'))
-            ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
-            ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
+            ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => $days))
+            ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => $days))
             ->getForm();
 
         $form->handleRequest($request);
@@ -486,7 +508,7 @@ class PeriodController extends Controller
             $em->flush();
 
             $session = new Session();
-            $session->getFlashBag()->add('success', $count . ' creneaux copiés de' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
+            $session->getFlashBag()->add('success',$count.' creneaux copiés de'.array_search($from,$days).' à '.array_search($to,$days));
 
             return $this->redirectToRoute('period_admin');
         }
@@ -500,8 +522,7 @@ class PeriodController extends Controller
      * @Route("/generateShifts/", name="shifts_generation", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function generateShiftsForDateAction(Request $request, KernelInterface $kernel)
-    {
+    public function generateShiftsForDateAction(Request $request, KernelInterface $kernel){
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('shifts_generation'))
             ->add('date_from',TextType::class,array('label'=>'du*','attr'=>array('class'=>'datepicker')))

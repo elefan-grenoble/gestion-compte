@@ -29,6 +29,7 @@ class RegistrationType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+
         // grab the user, do a quick sanity check that one exists
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$user) {
@@ -52,7 +53,7 @@ class RegistrationType extends AbstractType
                 ]
             ));
 
-            if (!is_object($user) || !$user->hasRole('ROLE_SUPER_ADMIN')) {
+            if (!is_object($user)||!$user->hasRole('ROLE_SUPER_ADMIN')){
                 if ($registration){
                     if (!$registration->getAmount()){
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),
@@ -65,8 +66,6 @@ class RegistrationType extends AbstractType
                         'class' => 'AppBundle:User',
                         'query_builder' => function (EntityRepository $er) {
                             return $er->createQueryBuilder('u')
-                                ->leftJoin('u.beneficiary', 'b')
-                                ->addSelect('b')
                                 ->orderBy('u.username', 'ASC');
                         },
                         'choice_label' => 'username',
@@ -87,15 +86,13 @@ class RegistrationType extends AbstractType
                         )
                     )); //todo, make it dynamic
                 }
-            } else {
+            }else{
                 $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
                 $form->add('registrar',EntityType::class,array(
                     'label' => 'Enregistré par',
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
-                            ->leftJoin('u.beneficiary', 'b')
-                            ->addSelect('b')
                             ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',

@@ -39,7 +39,7 @@ class User extends BaseUser
     /**
      * Beneficiary's user.
      * @Assert\Valid()
-     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user", fetch="EAGER")
+     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user")
      */
     private $beneficiary;
 
