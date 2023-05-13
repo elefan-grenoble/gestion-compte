@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Job;
+
 /**
  * PeriodRepository
  *
@@ -10,4 +12,46 @@ namespace AppBundle\Repository;
  */
 class PeriodRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll($dayOfWeek = null, Job $job = null, $withShifters = null)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.job', 'j')
+            ->addSelect('j')
+            ->leftJoin('p.positions', 'pp')
+            ->addSelect('pp');
+
+        if (isset($dayOfWeek)) {
+            $qb
+                ->andWhere('p.dayOfWeek = :dayOfWeek')
+                ->setParameter('dayOfWeek', $dayOfWeek);
+        }
+
+        if ($job) {
+            $qb
+                ->andWhere('p.job = :job')
+                ->setParameter('job', $job);
+        }
+
+        if ($withShifters) {
+            $qb
+                ->leftJoin('pp.shifter', 'b')
+                ->addSelect('b')
+                ->leftJoin('b.user', 'u')
+                ->addSelect('u')
+                ->leftJoin('b.membership', 'm')
+                ->addSelect('m')
+                ->leftJoin("m.registrations", "r")
+                ->addSelect("r")
+                ->leftJoin("r.helloassoPayment", "rhp")
+                ->addSelect("rhp")
+                ->leftJoin("m.membershipShiftExemptions", "mse")
+                ->addSelect("mse");
+        }
+
+        $qb->orderBy('p.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
