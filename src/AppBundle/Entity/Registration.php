@@ -74,7 +74,7 @@ class Registration
     private $registrar;
 
     /**
-     * @ORM\OneToOne(targetEntity="HelloassoPayment", mappedBy="registration", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="HelloassoPayment", mappedBy="registration", cascade={"persist"}, fetch="EAGER")
      */
     private $helloassoPayment;
 

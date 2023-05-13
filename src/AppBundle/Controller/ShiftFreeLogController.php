@@ -106,7 +106,6 @@ class ShiftFreeLogController extends Controller
         $order = 'DESC';
 
         $qb = $em->getRepository('AppBundle:ShiftFreeLog')->createQueryBuilder('sfl')
-            ->leftJoin("sfl.shift", "s")
             ->orderBy('sfl.' . $sort, $order);
 
         if ($filter["created_at"]) {

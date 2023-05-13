@@ -20,8 +20,8 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
     public function findFutures(\DateTime $max = null, EventKind $eventKind = null)
     {
         $qb = $this->createQueryBuilder('e')
-            ->select('e, ek')
             ->leftJoin('e.kind', 'ek')
+            ->addSelect('ek')
             ->where('e.date > :now')
             ->setParameter('now', new \Datetime('now'));
 
@@ -44,14 +44,22 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findPast(int $limit = null)
+    public function findPast(int $limit = null, EventKind $eventKind = null)
     {
         $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.kind', 'ek')
+            ->addSelect('ek')
             ->where('e.date < :now')
             ->setParameter('now', new \Datetime('now'));
 
         if ($limit) {
             $qb->setMaxResults($limit);
+        }
+
+        if ($eventKind) {
+            $qb
+                ->andwhere('e.kind = :kind')
+                ->setParameter('kind', $eventKind);
         }
 
         $qb->orderBy('e.date', 'DESC');

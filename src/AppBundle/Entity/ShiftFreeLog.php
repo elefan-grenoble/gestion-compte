@@ -37,7 +37,7 @@ class ShiftFreeLog
     private $createdBy;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Shift", cascade={"remove"})
+     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="shiftFreeLogs", cascade={"remove"}, fetch="EAGER")
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
     private $shift;

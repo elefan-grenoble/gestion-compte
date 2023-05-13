@@ -320,12 +320,17 @@ class SearchUserFormHelper {
      * @param EntityManager $doctrineManager
      * @return QueryBuilder
      */
-    public function initSearchQuery($doctrineManager) {
+    public function initSearchQuery($doctrineManager, $type = null) {
         $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")
-            ->leftJoin("b.user", "u")
+        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+            ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("o.registrations", "r")->addSelect("r")
-            ->leftJoin("o.membershipShiftExemptions", "e");
+            ->leftJoin("r.helloassoPayment", "rhp")->addSelect("rhp")
+            ->leftJoin("o.membershipShiftExemptions", "mse")->addSelect("mse");
+        if ($type == 'search') {
+            $qb->leftJoin("b.commissions", "c")->addSelect("c");
+            $qb->leftJoin("b.formations", "f")->addSelect("f");
+        }
         // do not include admin user
         $qb = $qb->andWhere('o.member_number > 0');
         return $qb;
@@ -426,10 +431,10 @@ class SearchUserFormHelper {
         }
         if ($form->get('exempted')->getData() > 0) {
             if ($form->get('exempted')->getData() == 2) {
-                $qb = $qb->andWhere('e.start <= :date AND e.end >= :date')
+                $qb = $qb->andWhere('mse.start <= :date AND mse.end >= :date')
                          ->setParameter('date', $now);
             } else if ($form->get('exempted')->getData() == 1) {
-                $qb = $qb->andWhere('e.start IS NULL OR e.start > :date OR e.end < :date')
+                $qb = $qb->andWhere('mse.start IS NULL OR mse.start > :date OR mse.end < :date')
                          ->setParameter('date', $now);
             }
         }
@@ -559,9 +564,8 @@ class SearchUserFormHelper {
                 $ids_groups = array();
                 foreach ($formations as $formation) {
                     $tmp_qb = clone $qb;
-                    $tmp_qb = $tmp_qb->leftjoin("b.formations", "ro")
-                        ->andWhere('ro.id IN (:rid)')
-                        ->setParameter('rid', $formation );
+                    $tmp_qb = $tmp_qb->andWhere('f.id IN (:fid)')
+                        ->setParameter('fid', $formation);
                     $ids_groups[] = $tmp_qb->select('DISTINCT o.id')->getQuery()->getArrayResult();
                 }
                 $ids = $ids_groups[0];
@@ -576,26 +580,23 @@ class SearchUserFormHelper {
                 $qb = $qb->andWhere('o.id IN (:all_formations)')
                     ->setParameter('all_formations', $ids);
             } else {
-                $qb = $qb->leftjoin("b.formations", "ro")
-                    ->andWhere('ro.id IN (:rids)')
-                    ->setParameter('rids', $form->get('formations')->getData());
+                $qb = $qb->andWhere('f.id IN (:fids)')
+                    ->setParameter('fids', $form->get('formations')->getData());
                 $join_formations = true;
             }
         }
         $join_commissions = false;
         if ($form->get('commissions')->getData() && count($form->get('commissions')->getData())) {
-            $qb = $qb->leftjoin("b.commissions", "c")
-                ->andWhere('c.id IN (:cids)')
-                ->setParameter('cids', $form->get('commissions')->getData() );
+            $qb->andWhere('c.id IN (:cids)')
+                ->setParameter('cids', $form->get('commissions')->getData());
             $join_commissions = true;
         }
         if ($form->get('not_formations')->getData() && count($form->get('not_formations')->getData())) {
             $nrqb = clone $qb;
             if (!$join_formations) {
-                $nrqb = $nrqb->leftjoin("b.formations", "ro")
-                    ->andWhere('ro.id IN (:rids)');
+                $nrqb = $nrqb->andWhere('f.id IN (:fids)');
             }
-            $nrqb->setParameter('rids', $form->get('not_formations')->getData() );
+            $nrqb->setParameter('fids', $form->get('not_formations')->getData() );
             $subQuery = $nrqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
 
             if (count($subQuery)) {
@@ -607,10 +608,9 @@ class SearchUserFormHelper {
         if ($form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())) {
             $ncqb = clone $qb;
             if (!$join_commissions) {
-                $ncqb = $ncqb->leftjoin("b.commissions", "c")
-                    ->andWhere('c.id IN (:cids)');
+                $ncqb->andWhere('c.id IN (:cids)');
             }
-            $ncqb->setParameter('cids', $form->get('not_commissions')->getData() );
+            $ncqb->setParameter('cids', $form->get('not_commissions')->getData());
             $subQuery = $ncqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
 
             if (count($subQuery)) {

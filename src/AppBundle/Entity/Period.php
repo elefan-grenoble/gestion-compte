@@ -46,7 +46,7 @@ class Period
 
     /**
      * One Period has One Job.
-     * @ORM\ManyToOne(targetEntity="Job", inversedBy="periods")
+     * @ORM\ManyToOne(targetEntity="Job", inversedBy="periods", fetch="EAGER")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;

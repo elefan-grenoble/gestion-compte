@@ -194,7 +194,9 @@ class AmbassadorController extends Controller
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
         $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
             ->where('lr.id IS NULL') // registration is the last one registered
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time")
+            ->leftJoin("o.timeLogs", "tl")->addSelect("tl")
+            ->leftJoin("o.notes", "n")->addSelect("n");
 
         if ($form->isSubmitted() && $form->isValid()) {
             $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
