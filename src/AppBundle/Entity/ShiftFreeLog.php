@@ -24,19 +24,6 @@ class ShiftFreeLog
     private $id;
 
     /**
-     * @var \DateTimeImmutable
-     *
-     * @ORM\Column(name="created_at", type="datetime_immutable")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(referencedColumnName="id")
-     */
-    private $createdBy;
-
-    /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="shiftFreeLogs", cascade={"remove"}, fetch="EAGER")
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
@@ -69,6 +56,19 @@ class ShiftFreeLog
      */
     private $requestRoute;
 
+    /**
+     * @var \DateTimeImmutable
+     *
+     * @ORM\Column(name="created_at", type="datetime_immutable")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(referencedColumnName="id")
+     */
+    private $createdBy;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -80,23 +80,6 @@ class ShiftFreeLog
     public function setCreatedAtValue()
     {
         $this->createdAt = new \DateTimeImmutable();
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function getCreatedBy(): ?User
-    {
-        return $this->createdBy;
-    }
-
-    public function setCreatedBy(?User $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
     }
 
     public function getShift(): ?Shift
@@ -157,6 +140,23 @@ class ShiftFreeLog
     public function setRequestRoute(?string $requestRoute): self
     {
         $this->requestRoute = $requestRoute;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->createdBy;
+    }
+
+    public function setCreatedBy(?User $user): self
+    {
+        $this->createdBy = $user;
 
         return $this;
     }

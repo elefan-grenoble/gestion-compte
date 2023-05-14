@@ -6,6 +6,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
+use AppBundle\Event\PeriodPositionFreedEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\PeriodPositionType;
 use AppBundle\Form\PeriodType;
@@ -21,7 +22,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -414,9 +414,19 @@ class PeriodController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // store position beneficiary & bookedTime (before position free())
+            $beneficiary = $position->getShifter();
+            $bookedTime = $position->getBookedTime();
+
+            // free position
             $position->free();
+
+            $em = $this->getDoctrine()->getManager();
             $em->persist($position);
             $em->flush();
+
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
@@ -449,7 +459,6 @@ class PeriodController extends Controller
         }
 
         return $this->redirectToRoute('period_admin');
-
     }
 
     /**
@@ -540,22 +549,6 @@ class PeriodController extends Controller
     }
 
     /**
-     * Creates a form to free a period position entity.
-     *
-     * @param Period $period The period entity
-     * @param PeriodPosition $position The period position entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
-    {
-        return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
-            ->setAction($this->generateUrl('period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
-            ->setMethod('POST')
-            ->getForm();
-    }
-
-    /**
      * Creates a form to delete a period entity.
      *
      * @param Period $period The period entity
@@ -604,6 +597,22 @@ class PeriodController extends Controller
             ->setAction($this->generateUrl('period_position_book', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('POST')
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to free a period position entity.
+     *
+     * @param Period $period The period entity
+     * @param PeriodPosition $position The period position entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
+    {
+        return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
+            ->setAction($this->generateUrl('period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setMethod('POST')
             ->getForm();
     }
 

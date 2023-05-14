@@ -737,11 +737,10 @@ class ShiftController extends Controller
      */
     private function createShiftDeleteForm(Shift $shift)
     {
-        $form = $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-            ->setMethod('DELETE');
-
-        return $form->getForm();
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     /**
@@ -753,12 +752,11 @@ class ShiftController extends Controller
      */
     private function createShiftFreeForm(Shift $shift)
     {
-        $form = $this->createFormBuilder()
+        return $this->createFormBuilder()
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
             ->add('reason', TextareaType::class, array('required' => false))
-            ->setMethod('POST');
-
-        return $form->getForm();
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
@@ -770,12 +768,11 @@ class ShiftController extends Controller
      */
     private function createShiftFreeAdminForm(Shift $shift)
     {
-        $form = $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
             ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
-            ->setMethod('POST');
-
-        return $form->getForm();
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
@@ -787,14 +784,13 @@ class ShiftController extends Controller
      */
     private function createShiftValidateInvalidateAdminForm(Shift $shift)
     {
-        $form = $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
             ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
             ->add('validate', HiddenType::class, [
                 'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
-            ->setMethod('POST');
-
-        return $form->getForm();
+            ->setMethod('POST')
+            >getForm();
     }
 
     /**
@@ -807,7 +803,7 @@ class ShiftController extends Controller
      */
     private function createShiftContactForm(Shift $shift, $coShifters = null)
     {
-        $form = $this->get('form.factory')->createNamedBuilder('shift_contact_form_' . $shift->getId())
+        return $this->get('form.factory')->createNamedBuilder('shift_contact_form_' . $shift->getId())
             ->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()))
             ->add('to', AutocompleteBeneficiaryCollectionType::class, [
                 'label' => 'A',
@@ -819,8 +815,7 @@ class ShiftController extends Controller
                 'data' => 'Bonjour XX,'.PHP_EOL."Tu n'es toujours pas arrivé pour notre créneau.".PHP_EOL."Est-ce que tout va bien ?".PHP_EOL."A très vite,".PHP_EOL.$shift->getShifter()->getFirstName().PHP_EOL.PHP_EOL."Bonjour à tou.te.s,".PHP_EOL."Je vais en être en retard pour mon créneau.".PHP_EOL."Je serai à l'épicerie d'ici XX minutes.".PHP_EOL."A tout de suite,".PHP_EOL.$shift->getShifter()->getFirstName()
             ])
             ->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())))
-            ->setMethod('POST');
-        
-        return $form->getForm();
+            ->setMethod('POST')
+            ->getForm();
     }
 }

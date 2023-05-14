@@ -2,10 +2,9 @@
 
 namespace AppBundle\Event;
 
-use AppBundle\Entity\Membership;
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
 use Symfony\Component\EventDispatcher\Event;
 
 class ShiftFreedEvent extends Event

@@ -1,0 +1,136 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Historique des annulations de postes types - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Historique des annulations de postes types
+{% endblock %}
+
+{% block content %}
+    <h4>Historique des annulations de postes types ({{ result_count }})</h4>
+
+    {# Filter form  --------- #}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">tune</i>Filtres
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(filter_form) }}
+                <div class="row">
+                    <div class="col s12 m4">
+                        <h5>Annulation</h5>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field">
+                                    {{ form_widget(filter_form.created_at) }}
+                                    {{ form_label(filter_form.created_at) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col s12 m4">
+                        <h5>Poste type</h5>
+                        <div class="row">
+                            <div class="col s12">
+                                <div class="input-field">
+                                    {{ form_widget(filter_form.beneficiary) }}
+                                    {{ form_label(filter_form.beneficiary) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{ form_widget(filter_form.submit) }}
+                {{ form_row(filter_form.page) }}
+                {{ form_row(filter_form._token) }}
+                {{ form_end(filter_form, {'render_rest': false}) }}
+            </div>
+        </li>
+    </ul>
+
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Bénéficiaire</th>
+                <th>Poste type</th>
+                <th>Réservé depuis le</th>
+                <th>Auteur</th>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <th>Route</th>
+                {% endif %}
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for periodPositionFreeLog in periodPositionFreeLogs %}
+            <tr>
+                <td title="{{ periodPositionFreeLog.createdAt | date_fr_full_with_time }}">
+                    {{ periodPositionFreeLog.createdAt | date('d/m/Y') }}
+                </td>
+                <td>
+                    <a href="{{ path("member_show",{'member_number': periodPositionFreeLog.beneficiary.membership.memberNumber}) }}">
+                        {{ periodPositionFreeLog.beneficiary }}
+                    </a>
+                </td>
+                <td>
+                    {{ periodPositionFreeLog.periodPositionString }}
+                </td>
+                {% if periodPositionFreeLog.bookedTime %}
+                    <td title="{{ periodPositionFreeLog.bookedTime | date_fr_full_with_time }}">
+                        {{ periodPositionFreeLog.bookedTime | date('d/m/Y') }}
+                    </td>
+                {% else %}
+                    <td></td>
+                {% endif %}
+                </td>
+                <td>
+                    {% if periodPositionFreeLog.createdBy and periodPositionFreeLog.createdBy.beneficiary %}
+                        <a href="{{ path("member_show",{'member_number': periodPositionFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
+                            {{ periodPositionFreeLog.createdBy.beneficiary }}
+                        </a>
+                    {% else %}
+                        {{ periodPositionFreeLog.createdBy }}
+                    {% endif %}
+                </td>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <td>{{ periodPositionFreeLog.requestRoute }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul class="pagination">
+        <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_periodpositionfreelog_list", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
+                <i class="material-icons">chevron_left</i>
+            </a>
+        </li>
+        {% for i in range(1, page_count) %}
+            <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ i }}">{{ i }}</a>
+            </li>
+        {% endfor %}
+        <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("admin_periodpositionfreelog_list", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
+                <i class="material-icons">chevron_right</i>
+            </a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    jQuery(function() {
+        $('.pagination li:not(.disabled) a').click(function(e) {
+            e.preventDefault();
+            $('#form_page').val($(this).data('page'));
+            $('form[name=form]').submit();
+        });
+    });
+</script>
+{% endblock %}

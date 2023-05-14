@@ -3,13 +3,13 @@
 namespace AppBundle\EventListener;
 
 use AppBundle\Entity\Membership;
-use AppBundle\Entity\Shift;
-use AppBundle\Event\ShiftFreedEvent;
+use AppBundle\Entity\PeriodPosition;
+use AppBundle\Event\PeriodPositionFreedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 
-class ShiftFreeLogEventListener
+class PeriodPositionFreeLogEventListener
 {
     protected $em;
     protected $logger;
@@ -23,13 +23,13 @@ class ShiftFreeLogEventListener
     }
 
     /**
-     * @param ShiftFreedEvent $event
+     * @param PeriodPositionFreedEvent $event
      * @throws \Doctrine\ORM\ORMException
      */
-    public function onShiftFreed(ShiftFreedEvent $event)
+    public function onPeriodPositionFreed(PeriodPositionFreedEvent $event)
     {
-        $this->logger->info("Shift Free Log Listener: onShiftFreed");
-        $log = $this->container->get('shift_free_log_service')->initShiftFreeLog($event->getShift(), $event->getBeneficiary(), $event->getFixe(), $event->getReason());
+        $this->logger->info("PeriodPosition Free Log Listener: onPeriodPositionFreed");
+        $log = $this->container->get('period_position_free_log_service')->initPeriodPositionFreeLog($event->getPeriodPosition(), $event->getBeneficiary(), $event->getBookedTime());
         $this->em->persist($log);
         $this->em->flush();
     }
