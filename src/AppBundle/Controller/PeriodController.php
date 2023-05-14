@@ -459,7 +459,6 @@ class PeriodController extends Controller
         }
 
         return $this->redirectToRoute('period_admin');
-
     }
 
     /**
@@ -547,22 +546,6 @@ class PeriodController extends Controller
         return $this->render('admin/period/generate_shifts.html.twig',array(
             "form" => $form->createView()
         ));
-    }
-
-    /**
-     * Creates a form to free a period position entity.
-     *
-     * @param Period $period The period entity
-     * @param PeriodPosition $position The period position entity
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
-    {
-        return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
-            ->setAction($this->generateUrl('period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
-            ->setMethod('POST')
-            ->getForm();
     }
 
     /**

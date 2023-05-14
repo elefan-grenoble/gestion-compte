@@ -137,7 +137,7 @@ class ShiftFreeLogController extends Controller
             ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
             ->setMaxResults($limitPerPage); // set the limit
 
-        return $this->render('admin/shiftfreelog/list.html.twig', array(
+        return $this->render('admin/shiftfreelog/index.html.twig', array(
             'shiftFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,

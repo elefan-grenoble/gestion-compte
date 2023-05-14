@@ -19,7 +19,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 /**
  * PeriodPositionFreeLog controller.
  *
- * @Route("admin/periodpositions/freelogs")
+ * @Route("admin/period/positionfreelogs")
  */
 class PeriodPositionFreeLogController extends Controller
 {
