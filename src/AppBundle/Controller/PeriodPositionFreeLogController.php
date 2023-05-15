@@ -108,12 +108,54 @@ class PeriodPositionFreeLogController extends Controller
             ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
             ->setMaxResults($limitPerPage); // set the limit
 
+        $periodPositionFreeLogDeleteForms = [];
+        foreach ($paginator as $periodPositionFreeLog) {
+            $periodPositionFreeLogDeleteForms[$periodPositionFreeLog->getId()] = $this->getDeleteForm($periodPositionFreeLog)->createView();
+        }
+
         return $this->render('admin/periodpositionfreelog/list.html.twig', array(
             'periodPositionFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
+            'period_position_free_log_delete_forms_' => $periodPositionFreeLogDeleteForms,
         ));
+    }
+
+    /**
+     * Delete PeriodPositionFreeLog
+     *
+     * @Route("/{id}", name="admin_periodpositionfreelog_delete", methods={"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function deleteAction(Request $request, PeriodPositionFreeLog $periodPositionFreeLog)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->getDeleteForm($periodPositionFreeLog);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->remove($periodPositionFreeLog);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le log d\'annulation de poste type a bien été supprimé !');
+        }
+
+        return $this->redirectToRoute('admin_periodpositionfreelog_list');
+    }
+
+    /**
+     * @param PeriodPositionFreeLog $periodPositionFreeLog
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(PeriodPositionFreeLog $periodPositionFreeLog)
+    {
+        return $this->get('form.factory')->createNamedBuilder('period_position_free_log_delete_forms_' . $periodPositionFreeLog->getId())
+            ->setAction($this->generateUrl('admin_periodpositionfreelog_delete', array('id' => $periodPositionFreeLog->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 }

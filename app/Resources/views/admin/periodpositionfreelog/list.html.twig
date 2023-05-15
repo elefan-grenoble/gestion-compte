@@ -62,6 +62,9 @@
                 {% if is_granted("ROLE_ADMIN") %}
                     <th>Route</th>
                 {% endif %}
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <th>Actions</th>
+                {% endif %}
             </tr>
         </thead>
 
@@ -98,6 +101,16 @@
                 </td>
                 {% if is_granted("ROLE_ADMIN") %}
                     <td>{{ periodPositionFreeLog.requestRoute }}</td>
+                {% endif %}
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <td>
+                        {{ form_start(period_position_free_log_delete_forms_[periodPositionFreeLog.id]) }}
+                        {{ form_widget(period_position_free_log_delete_forms_[periodPositionFreeLog.id]) }}
+                        <button type="submit" class="btn-floating waves-effect waves-light red" title="Supprimer" onclick="return confirm('Etes-vous sûr de vouloir supprimer cette annulation de poste type ?!');">
+                            <i class="material-icons left">delete</i>
+                        </button>
+                        {{ form_end(period_position_free_log_delete_forms_[periodPositionFreeLog.id]) }}
+                    </td>
                 {% endif %}
             </tr>
         {% endfor %}
