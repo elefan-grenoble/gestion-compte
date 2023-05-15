@@ -790,7 +790,7 @@ class ShiftController extends Controller
                 'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
             ->setMethod('POST')
-            >getForm();
+            ->getForm();
     }
 
     /**

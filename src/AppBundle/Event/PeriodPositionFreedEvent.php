@@ -13,6 +13,7 @@ class PeriodPositionFreedEvent extends Event
 
     private $periodPosition;
     private $beneficiary;
+    private $bookedTime;
 
     public function __construct(PeriodPosition $periodPosition, Beneficiary $beneficiary, $bookedTime = null)
     {

@@ -445,10 +445,7 @@ class PeriodController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('period_delete', array('id' => $period->getId())))
-            ->setMethod('DELETE')
-            ->getForm();
+        $form = $this->createPeriodDeleteForm($period);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
