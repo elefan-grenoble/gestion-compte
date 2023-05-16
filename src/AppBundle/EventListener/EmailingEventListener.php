@@ -14,6 +14,7 @@ use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
+use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
@@ -28,8 +29,9 @@ class EmailingEventListener
     private $memberEmail;
     private $shiftEmail;
     private $wikiKeysUrl;
+    private $entity_manager;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, $memberEmail, $shiftEmail, $wikiKeysUrl)
+    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, EntityManagerInterface $entity_manager, $memberEmail, $shiftEmail, $wikiKeysUrl)
     {
         $this->mailer = $mailer;
         $this->logger = $logger;
@@ -38,6 +40,7 @@ class EmailingEventListener
         $this->memberEmail = $memberEmail;
         $this->shiftEmail = $shiftEmail;
         $this->wikiKeysUrl = $wikiKeysUrl;
+        $this->entity_manager = $entity_manager;
     }
 
     /**
@@ -49,6 +52,8 @@ class EmailingEventListener
         $this->logger->info("Emailing Listener: onAnonymousBeneficiaryCreated");
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
+
+        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
@@ -63,7 +68,8 @@ class EmailingEventListener
                 $this->renderView(
                     'emails/needInfo.html.twig',
                     array(
-                        'register_url' => $url
+                        'register_url' => $url,
+                        'dynamicContent' => $dynamicContent,
                     )
                 ),
                 'text/html'
@@ -82,6 +88,8 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
+        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
         }else{
@@ -96,6 +104,7 @@ class EmailingEventListener
                     'emails/needInfoRecall.html.twig',
                     array(
                         'register_url' => $url,
+                        'dynamicContent' => $dynamicContent,
                         'rdate' => $event->getAnonymousBeneficiary()->getCreatedAt()
                     )
                 ),
