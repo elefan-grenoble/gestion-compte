@@ -75,6 +75,24 @@ class EventController extends Controller
     /**
      * Event home page
      *
+     * @Route("/public", name="event_public_list", methods={"GET"})
+     */
+    public function publicListAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
+        $eventsPast = $em->getRepository('AppBundle:Event')->findPast();
+
+        return $this->render('event/public.html.twig', array(
+            'eventsFuture' => $eventsFuture,
+            'eventsPast' => $eventsPast,
+        ));
+    }
+
+    /**
+     * Event home page
+     *
      * @Route("/", name="event_index", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */

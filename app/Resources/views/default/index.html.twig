@@ -160,14 +160,12 @@
                     });
                 </script>
 
-                <div class="row">
-                    {% if events | length > 0 %}
-                        <h5>Les événements</h5>
-                        {% for event in events %}
-                            {% include "default/event/_event.html.twig" with { event: event } %}
-                        {% endfor %}
-                    {% endif %}
-                </div>
+                <br />
+                <br />
+                <a href="{{ path("event_public_list") }}" class="btn blue" style="position: relative">
+                    <i class="material-icons left" >event</i>Les événements à venir
+                    <span class="bubble_counter red white-text">{{ eventsFuture | length }}</span>
+                </a>
             </div>
             {% if app.user.beneficiary.ownedCommissions | length %}
                 <div class="homebox">
