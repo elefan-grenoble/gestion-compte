@@ -95,16 +95,16 @@ class MembershipController extends Controller
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
-        $note_form = $this->createForm(NoteType::class, $note, array(
+        $noteNewForm = $this->createForm(NoteType::class, $note, array(
             'action' => $this->generateUrl('ambassador_new_note', array("member_number" => $member->getMemberNumber())),
             'method' => 'POST',
         ));
-        $notes_form = array();
-        $notes_delete_form = array();
+        $noteEditForms = array();
+        $noteDeleteForms = array();
         $new_notes_form = array();
         foreach ($member->getNotes() as $n) {
-            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
-            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+            $noteEditForms[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $noteDeleteForms[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
             $response_note->setParent($n);
@@ -160,6 +160,12 @@ class MembershipController extends Controller
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
 
         $timeLogNewForm = $this->createNewTimeLogForm($member);
+        $timeLogDeleteForms = [];
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
+            foreach ($member->getTimeLogs() as $mtl) {
+                $timeLogDeleteForms[$mtl->getId()] = $this->createTimeLogDeleteForm($member, $mtl)->createView();
+            }
+        }
 
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
         $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
@@ -180,9 +186,9 @@ class MembershipController extends Controller
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
-            'note_form' => $note_form->createView(),
-            'notes_form' => $notes_form,
-            'notes_delete_form' => $notes_delete_form,
+            'note_form' => $noteNewForm->createView(),
+            'notes_form' => $noteEditForms,
+            'note_delete_forms' => $noteDeleteForms,
             'new_notes_form' => $new_notes_form,
             'new_registration_form' => $registrationForm->createView(),
             'new_beneficiary_form' => $beneficiaryForm->createView(),
@@ -195,6 +201,7 @@ class MembershipController extends Controller
             'open_form' => $openForm->createView(),
             'delete_form' => $deleteForm->createView(),
             'time_log_new_form' => $timeLogNewForm->createView(),
+            'time_log_delete_forms' => $timeLogDeleteForms,
             'period_positions' => $period_positions,
             'in_progress_and_upcoming_shifts' => $in_progress_and_upcoming_shifts,
             'shifts_by_cycle' => $shifts_by_cycle,
@@ -990,12 +997,12 @@ class MembershipController extends Controller
         }
 
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
-        $notes_form = array();
-        $notes_delete_form = array();
+        $noteEditForms = array();
+        $noteDeleteForms = array();
         $new_notes_form = array();
         foreach ($notes as $n) {
-            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
-            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+            $noteEditForms[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $noteDeleteForms[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
             $response_note->setParent($n);
@@ -1007,8 +1014,8 @@ class MembershipController extends Controller
 
         return $this->render('default/tools/office_tools.html.twig', array(
             'note_form' => $note_form->createView(),
-            'notes_form' => $notes_form,
-            'notes_delete_form' => $notes_delete_form,
+            'notes_form' => $noteEditForms,
+            'note_delete_forms' => $noteDeleteForms,
             'new_notes_form' => $new_notes_form,
             'notes' => $notes
         ));
@@ -1162,6 +1169,22 @@ class MembershipController extends Controller
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to delete a time log.
+     *
+     * @param Membership $member
+     * @param TimeLog $timeLog the time_log entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
+     */
+    private function createTimeLogDeleteForm(Membership $member, TimeLog $timeLog)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_timelog_delete', array('id' => $member->getId(), 'timelog_id' => $timeLog->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }

@@ -1,4 +1,5 @@
 {% set from_admin = from_admin ?? false %}
+{% set time_log_delete_forms = time_log_delete_forms ?? [] %}
 
 <table>
     <thead>
@@ -62,9 +63,14 @@
                         <td>{{ timeLog.requestRoute }}</td>
                     {% endif %}
                     {% if from_admin and is_granted("ROLE_SUPER_ADMIN") %}
-                        <td title="Supprimer">
-                            <a href="{{ path('member_timelog_delete', { "id": member.id, "timelog_id": timeLog.id }) }}" class="red-text">X</a>
-                        </td>
+                    <td>
+                        {{ form_start(time_log_delete_forms[timeLog.id], {'attr': {'id': 'form_time_log_delete_'~timeLog.id }}) }}
+                        {{ form_widget(time_log_delete_forms[timeLog.id]) }}
+                        <button type="submit" class="btn-floating red" title="Supprimer" onclick="return confirm('Etes-vous sûr de vouloir supprimer ce time log ?!');">
+                            <i class="material-icons left">delete</i>
+                        </button>
+                        {{ form_end(time_log_delete_forms[timeLog.id]) }}
+                    </td>
                     {% endif %}
                 </tr>
             {% endfor %}
