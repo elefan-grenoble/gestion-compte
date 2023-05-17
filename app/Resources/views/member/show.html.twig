@@ -33,6 +33,7 @@
         {% endif %}
     </h4>
 
+    <!-- Détails sur le(s) bénéficiaire(s) -->
     {% if member.beneficiaries | length %}
         <div class="row">
             {% for beneficiary in member.beneficiariesWithMainInFirstPosition %}
@@ -41,6 +42,7 @@
         </div>
     {% endif %}
 
+    <!-- Note(s) -->
     {% if member.notes | length %}
         <h5>Note{% if member.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
         <div class="row">
@@ -54,11 +56,12 @@
         </div>
     {% endif %}
 
+    <!-- Ajouter un bénéficiaire -->
     {% if is_granted("beneficiary_add", member) and member.beneficiaries | length < maximum_nb_of_beneficiaries_in_membership %}
         <ul class="collapsible">
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
-                <div class="collapsible-body new_registration_form">
+                <div class="collapsible-body white new_registration_form">
                     {{ form_start(new_beneficiary_form) }}
                     {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: new_beneficiary_form } %}
                     <div class="col s3">
@@ -71,6 +74,7 @@
     {% endif %}
 
     <ul class="collapsible collapsible-expandable">
+        <!-- Adhésion(s) -->
         <li id="registration" class="{% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
             <div class="collapsible-header">
                 <i class="material-icons">card_membership</i>Adhésions
@@ -126,6 +130,8 @@
                 {% endif %}
             </div>
         </li>
+
+        <!-- Ajouter une note -->
         {% if is_granted("create", note) %}
             <li id="note">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
@@ -142,15 +148,17 @@
             </li>
         {% endif %}
 
+        <!-- Compteur de temps -->
         <li id="time_log">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.time_log_open is defined and frontend_cookie.user_show.time_log_open %}active{% endif %}">
                 <i class="material-icons">access_time</i>Compteur de temps
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/time_logs.html.twig" with { member: member, from_admin: true, time_log_form: time_log_form } %}
+                {% include "member/_partial/time_logs.html.twig" with { member: member, from_admin: true, time_log_new_form: time_log_new_form, time_log_delete_forms: time_log_delete_forms } %}
             </div>
         </li>
 
+        <!-- Créneaux -->
         <li id="shifts">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
@@ -160,6 +168,7 @@
             </div>
         </li>
 
+        <!-- Badges -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="badges">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.badges_open is defined and frontend_cookie.user_show.badges_open %}active{% endif %}">
@@ -219,6 +228,7 @@
             </li>
         {% endif %}
 
+        <!-- Geler/Dégeler le compte -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="freeze">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
@@ -305,6 +315,7 @@
             </li>
         {% endif %}
 
+        <!-- Fermer le compte -->
         {% if is_granted("ROLE_USER_MANAGER") and is_granted("close",member) %}
             <li id="close">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
@@ -370,6 +381,7 @@
             </li>
         {% endif %}
 
+        <!-- Rôles -->
         {% if is_granted("ROLE_ADMIN") %}
             <li id="super">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.admin_open is defined and frontend_cookie.user_show.admin_open %}active{% endif %}">
@@ -381,6 +393,7 @@
             </li>
         {% endif %}
 
+        <!-- Actions super admin (supprimer le membre ; adhésions enregistrées) -->
         {% if is_granted("ROLE_SUPER_ADMIN") %}
             <li id="super">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_admin_open is defined and frontend_cookie.user_show.super_admin_open %}active{% endif %}">

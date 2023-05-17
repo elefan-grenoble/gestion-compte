@@ -68,7 +68,7 @@ class TimeLogController extends Controller
     /**
      * Delete time log
      *
-     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"GET"})
+     * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Membership $member
      * @param $timelog_id

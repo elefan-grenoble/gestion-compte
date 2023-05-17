@@ -20,13 +20,13 @@
             </div>
         </div>
         {% if note.children | length %}
-        <div class="row">
-            <div class="col s12">
-                {% for child in note.children %}
-                    {% include "user/_partial/note.html.twig" with { note: child } %}
-                {% endfor %}
+            <div class="row">
+                <div class="col s12">
+                    {% for child in note.children %}
+                        {% include "user/_partial/note.html.twig" with { note: child } %}
+                    {% endfor %}
+                </div>
             </div>
-        </div>
         {% endif %}
     </div>
 
@@ -62,9 +62,9 @@
             </p>
         {% endif %}
     </div>
-    {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
-        {{ form_widget(notes_delete_form[note.id]) }}
-    {{ form_end(notes_delete_form[note.id]) }}
+    {{ form_start(note_delete_forms[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
+    {{ form_widget(note_delete_forms[note.id]) }}
+    {{ form_end(note_delete_forms[note.id]) }}
     <div class="modal-footer">
         <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
         {% if is_granted("delete",note) %}
