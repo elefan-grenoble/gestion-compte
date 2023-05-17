@@ -402,7 +402,27 @@
                 <div class="collapsible-body white">
                     {{ form_start(delete_form) }}
                     {{ form_widget(delete_form) }}
-                    <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
+                    <a href="#delete-member-confirmation-modal" class="modal-trigger btn red">
+                        <i class="material-icons left">delete</i>Supprimer le compte
+                    </a>
+                    <div id="delete-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">delete</i>Suppression du compte membre
+                            </h5>
+                            <p>Attention, vous êtes sur le point de <strong>supprimer</strong> le compte du membre.</p>
+                            <p>Cette action est <strong>irréversible</strong>.</p>
+                            {% if not member.withdrawn %}
+                                <p>Le compte de ce membre n'est pas fermé. Ne voulez-vous pas plutôt "Fermer le compte" ?</p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                        </div>
+                    </div>
                     {{ form_end(delete_form) }}
 
                     {% include "member/_partial/recorded_registrations.html.twig" %}
