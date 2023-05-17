@@ -159,7 +159,7 @@ class MembershipController extends Controller
         }
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
 
-        $timeLogForm = $this->createNewTimeLogForm($member);
+        $timeLogNewForm = $this->createNewTimeLogForm($member);
 
         $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
         $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
@@ -194,7 +194,7 @@ class MembershipController extends Controller
             'close_form' => $closeForm->createView(),
             'open_form' => $openForm->createView(),
             'delete_form' => $deleteForm->createView(),
-            'time_log_form' => $timeLogForm->createView(),
+            'time_log_new_form' => $timeLogNewForm->createView(),
             'period_positions' => $period_positions,
             'in_progress_and_upcoming_shifts' => $in_progress_and_upcoming_shifts,
             'shifts_by_cycle' => $shifts_by_cycle,
