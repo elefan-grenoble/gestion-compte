@@ -95,11 +95,11 @@ class Period
     }
 
     /**
-     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30"
+     * Example: "Epicerie/Livraison - Lundi - 9h30 à 12h30"
      */
     public function __toString()
     {
-        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('H:i') . ' à ' . $this->getEnd()->format('H:i');
+        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 
     /**
