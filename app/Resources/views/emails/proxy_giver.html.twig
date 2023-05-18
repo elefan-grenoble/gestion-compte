@@ -1,5 +1,6 @@
 Bonjour {{ giverMainBeneficiary.firstname }},<br/>
-Ta procuration pour <b>{{ proxy.event.title }}</b> le {{ proxy.event.date | date('d/m/y à H:i') }} sera portée par <b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b>.<br/>
+Ta procuration pour <b>{{ proxy.event.title }}</b> le {{ proxy.event.date | date_fr_full_with_time }}
+sera portée par <b>{{ proxy.owner.firstname }} {{ proxy.owner.lastname }}</b>.<br/>
 Merci pour ton soutien.<br/>
 <br/>
 NB : Pour contacter celui ou celle qui portera ta voix, répond simplement à cet email.
