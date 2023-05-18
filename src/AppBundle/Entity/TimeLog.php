@@ -240,9 +240,9 @@ class TimeLog
     }
 
     /**
-     * Set created_at
+     * Set createdAt
      *
-     * @param \DateTime $created_at
+     * @param \DateTime $createdAt
      *
      * @return TimeLog
      */

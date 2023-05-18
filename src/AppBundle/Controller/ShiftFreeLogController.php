@@ -137,12 +137,54 @@ class ShiftFreeLogController extends Controller
             ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
             ->setMaxResults($limitPerPage); // set the limit
 
+        $shiftFreeLogDeleteForms = [];
+        foreach ($paginator as $shiftFreeLog) {
+            $shiftFreeLogDeleteForms[$shiftFreeLog->getId()] = $this->getDeleteForm($shiftFreeLog)->createView();
+        }
+
         return $this->render('admin/shiftfreelog/index.html.twig', array(
             'shiftFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
+            'shift_free_log_delete_forms_' => $shiftFreeLogDeleteForms,
         ));
+    }
+
+    /**
+     * Delete ShiftFreeLog
+     *
+     * @Route("/{id}", name="admin_shiftfreelog_delete", methods={"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function deleteAction(Request $request, ShiftFreeLog $shiftFreeLog)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->getDeleteForm($shiftFreeLog);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->remove($shiftFreeLog);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le log d\'annulation de créneau a bien été supprimé !');
+        }
+
+        return $this->redirectToRoute('admin_shiftfreelog_index');
+    }
+
+    /**
+     * @param ShiftFreeLog $shiftFreeLog
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    protected function getDeleteForm(ShiftFreeLog $shiftFreeLog)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_log_delete_forms_' . $shiftFreeLog->getId())
+            ->setAction($this->generateUrl('admin_shiftfreelog_delete', array('id' => $shiftFreeLog->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 }
