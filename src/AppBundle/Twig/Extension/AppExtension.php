@@ -159,6 +159,8 @@ class AppExtension extends AbstractExtension
 
     /**
      * Example: "mercredi 29 juin à 9h30"
+     * 
+     * Note: not used
      */
     public function date_fr_long_with_time(\DateTime $date)
     {

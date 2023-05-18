@@ -81,6 +81,7 @@
                 {% endif %}
                 {% set date = (registration.date | date('d F Y')) %}
                 {% set datekey = (registration.date | date('Y-m-d')) %}
+
                 <h5>{{ registration.date | date_fr_long }}</h5>
                 <ul class="collapsible">
             {% endif %}
@@ -100,17 +101,17 @@
                         Bénéficiaire rattaché
                     {% endif %}
                     {% if registration.registrar %}
-                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: registration.registrar, target_blank: true } %}
+                        par&nbsp;{% include "admin/member/_partial/member_or_user_link.html.twig" with { user: registration.registrar, target_blank: true } %}
                         &nbsp;&agrave;&nbsp;
-                        {{ registration.date | date('H:i') }}
+                        {{ registration.date | date('G\\hi') }}
                     {% endif %}
                     {% if registration.membership %}
-                        pour <a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership.memberNumberWithBeneficiaryListString }}</a>&nbsp;
+                        pour&nbsp;<a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership.memberNumberWithBeneficiaryListString }}</a>&nbsp;
                         {% if (registration.membership.registrations | length) > 1 %}
-                            (Ré-adhésion) effective le {{ registration.startDate | date('d F Y') }}
+                            (Ré-adhésion) effective le {{ registration.startDate | date_fr }}
                         {% endif %}
                     {% else %}
-                        pour {{ registration.beneficiary }}
+                        pour&nbsp;{{ registration.beneficiary }}
                     {% endif %}
                 </div>
 

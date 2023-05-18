@@ -1,7 +1,7 @@
 <footer class="page-footer" style="background-color: {{ main_color }}">
     <div class="footer-copyright">
         <div class="container">
-            © {{ "now" | date('Y') }} Copyright {{ project_name }}
+            © {{ 'now' | date('Y') }} Copyright {{ project_name }}
             {% for socialNetwork in socialNetworks %}
                 <a class="grey-text text-lighten-4 right" href="{{ socialNetwork.url }}">
                     &nbsp;|&nbsp;{{ socialNetwork.name }}
