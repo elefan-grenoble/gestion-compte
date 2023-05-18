@@ -22,6 +22,11 @@ class PeriodPositionFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
+    public function generatePeriodPositionString(PeriodPosition $periodPosition)
+    {
+        return (string) $periodPosition;
+    }
+
     public function initPeriodPositionFreeLog(PeriodPosition $periodPosition, Beneficiary $beneficiary, $bookedTime = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
@@ -29,7 +34,7 @@ class PeriodPositionFreeLogService
 
         $log = new PeriodPositionFreeLog;
         $log->setPeriodPosition($periodPosition);
-        $log->setPeriodPositionString($periodPosition);
+        $log->setPeriodPositionString($this->generatePeriodPositionString($periodPosition));
         $log->setBeneficiary($beneficiary);
         if ($bookedTime) {
             $log->setBookedTime($bookedTime);

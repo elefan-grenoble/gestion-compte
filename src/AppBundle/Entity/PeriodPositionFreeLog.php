@@ -24,7 +24,7 @@ class PeriodPositionFreeLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="PeriodPosition")
+     * @ORM\ManyToOne(targetEntity="PeriodPosition", inversedBy="freeLogs")
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $periodPosition;

@@ -66,6 +66,11 @@ class PeriodPosition
     private $shifts;
 
     /**
+     * @ORM\OneToMany(targetEntity="PeriodPositionFreeLog", mappedBy="periodPosition")
+     */
+    private $freeLogs;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -90,11 +95,9 @@ class PeriodPosition
      */
     public function __toString()
     {
-        $name = $this->getPeriod() . ' (Semaine ' . $this->getWeekCycle() . ')';
+        $name = $this->getPeriod() . ' - Semaine ' . $this->getWeekCycle();
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
-        } else {
-            $name .= ' (sans formation)';
         }
         return $name;
     }

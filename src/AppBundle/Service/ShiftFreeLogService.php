@@ -22,6 +22,11 @@ class ShiftFreeLogService
         $this->tokenStorage = $tokenStorage;
     }
 
+    public function generateShiftString(Shift $shift)
+    {
+        return $shift->getJob()->getName() . ' - ' . $shift->getDisplayDateSeperateTime();
+    }
+
     public function initShiftFreeLog(Shift $shift, Beneficiary $beneficiary, $fixe = false, $reason = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
@@ -29,6 +34,7 @@ class ShiftFreeLogService
 
         $log = new ShiftFreeLog;
         $log->setShift($shift);
+        $log->setShiftString($this->generateShiftString($shift));
         $log->setBeneficiary($beneficiary);
         $log->setFixe($fixe);
         if ($reason) {

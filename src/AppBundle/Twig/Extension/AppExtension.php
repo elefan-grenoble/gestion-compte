@@ -182,7 +182,7 @@ class AppExtension extends AbstractExtension
     /**
      * Example: "29/06/22"
      */
-    public function date_short(\DateTime $date)
+    public function date_short($date)  # \DateTime or \DateTimeImmutable
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%d/%m/%Y", $date->getTimestamp());

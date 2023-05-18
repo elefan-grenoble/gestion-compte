@@ -24,10 +24,17 @@ class ShiftFreeLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="shiftFreeLogs", cascade={"remove"}, fetch="EAGER")
-     * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="freeLogs")
+     * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $shift;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="shift_string", type="text")
+     */
+    private $shiftString;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
@@ -90,6 +97,18 @@ class ShiftFreeLog
     public function setShift(?Shift $shift): self
     {
         $this->shift = $shift;
+
+        return $this;
+    }
+
+    public function getShiftString(): string
+    {
+        return $this->shiftString;
+    }
+
+    public function setShiftString(?string $shiftString): self
+    {
+        $this->shiftString = $shiftString;
 
         return $this;
     }
