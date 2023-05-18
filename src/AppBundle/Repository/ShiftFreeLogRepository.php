@@ -38,13 +38,26 @@ class ShiftFreeLogRepository extends \Doctrine\ORM\EntityRepository
             ->getSingleScalarResult();
     }
 
-    public function getMemberShiftFreed(Membership $member)
+    public function getMemberShiftFreed(Membership $member, \DateTime $start_after = null, \DateTime $end_before = null, $less_than_min_time_in_advance_days = null)
     {
         $qb = $this->createQueryBuilder('sfl')
             ->leftJoin('sfl.shift', 's')
             ->addSelect('s')
             ->where('sfl.beneficiary IN (:beneficiaries)')
             ->setParameter('beneficiaries', $member->getBeneficiaries());
+
+        if ($start_after) {
+            $qb->andwhere('s.start > :start_after')
+                ->setParameter('start_after', $start_after);
+        }
+        if ($end_before) {
+            $qb->andwhere('s.end < :end_before')
+                ->setParameter('end_before', $end_before);
+        }
+        if ($less_than_min_time_in_advance_days) {
+            $qb = $qb->andwhere("s.start < DATE_ADD(sfl.createdAt, :min_time_in_advance_days, 'day')")
+                ->setParameter('min_time_in_advance_days', $less_than_min_time_in_advance_days);
+        }
 
         $qb->orderBy('sfl.createdAt', 'DESC');
 

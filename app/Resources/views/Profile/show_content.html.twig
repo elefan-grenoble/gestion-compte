@@ -35,7 +35,7 @@
                 <i class="material-icons">delete_sweep</i>Historique des créneaux annulés
             </div>
             <div class="collapsible-body">
-                {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member) } %}
+                {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member), custom_styles: "max-height:500px;overflow:scroll;" } %}
             </div>
         </li>
 
