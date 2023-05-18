@@ -53,7 +53,7 @@
                     <td>{{ timeLog.typeDisplay }}</td>
                     <td>
                         {% if timeLog.shift %}
-                            {{ timeLog.shift.job.name }} du {{ timeLog.shift.displayDateWithTime }}
+                            {{ timeLog.shift.job.name }} - {{ timeLog.shift.displayDateSeperateTime }}
                             {% if timeLog.shift.shifter %}
                                 ({{ timeLog.shift.shifter }})
                             {% endif %}

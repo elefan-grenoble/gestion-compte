@@ -629,12 +629,12 @@ class Shift
     }
 
     /**
-     * Example: "vendredi 22 juillet de 9h30 à 12h30"
+     * Example: "22/07/2022 - 9h30 à 12h30"
      */
-    public function getDisplayDateLongWithTime()
+    public function getDisplayDateSeperateTime()
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return $this->getStart()->format('d/m/Y') . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 
     /**
@@ -644,5 +644,23 @@ class Shift
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
         return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "vendredi 22 juillet de 9h30 à 12h30"
+     */
+    public function getDisplayDateLongWithTime()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "vendredi 22 juillet 2022 de 9h30 à 12h30"
+     */
+    public function getDisplayDateFullWithTime()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B %Y", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 }

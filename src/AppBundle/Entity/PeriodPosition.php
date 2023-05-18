@@ -95,11 +95,9 @@ class PeriodPosition
      */
     public function __toString()
     {
-        $name = $this->getPeriod() . ' (Semaine ' . $this->getWeekCycle() . ')';
+        $name = $this->getPeriod() . ' - Semaine ' . $this->getWeekCycle();
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
-        } else {
-            $name .= ' (sans formation)';
         }
         return $name;
     }

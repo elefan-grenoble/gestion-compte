@@ -24,7 +24,7 @@ class ShiftFreeLog
     private $id;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="shiftFreeLogs", fetch="EAGER")
+     * @ORM\ManyToOne(targetEntity="Shift", inversedBy="freeLogs")
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $shift;
