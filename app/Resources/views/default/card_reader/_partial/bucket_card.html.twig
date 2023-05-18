@@ -18,8 +18,7 @@
             </div>
         {% endif %}
         <div class="card-title activator">
-            <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> /
-            <b>{{ bucket.start | date('H:i') }} à {{ bucket.end | date('H:i') }}</b>
+            <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> / <b>{{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}</b>
         </div>
         <ul>
             {% for shift in bucket.sortedShifts %}

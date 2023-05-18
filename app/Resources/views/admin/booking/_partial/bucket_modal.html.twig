@@ -16,7 +16,7 @@ id = "modal-bucket"
     Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span>
 </h4>
 <h5>
-    {{ bucket.start | date_fr_long }} de {{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}
+    {{ bucket.displayDateLongWithTime }}
 </h5>
 <span>
     remplissage : {{ nbBookedShifts }}/{{ nbShifts }} ({{ ((nbBookedShifts / nbShifts)*100) | round }}%)

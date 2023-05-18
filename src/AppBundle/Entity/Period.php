@@ -95,7 +95,7 @@ class Period
     }
 
     /**
-     * Example: Epicerie/Livraison - Lundi - 09:30 à 12:30
+     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30"
      */
     public function __toString()
     {

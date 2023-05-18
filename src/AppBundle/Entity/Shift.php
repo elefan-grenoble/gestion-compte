@@ -131,10 +131,13 @@ class Shift
         $this->wasCarriedOut = false;
     }
 
+    /**
+     * Example: "vendredi 22 juillet de 09:30 à 12:30 [#0001 Prénom NOM]"
+     */
     public function __toString()
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%A %e %B de %R", $this->getStart()->getTimestamp()).' à '.strftime("%R", $this->getEnd()->getTimestamp()).' ['.$this->getShifter().']';
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('H:i') . ' à ' . $this->getEnd()->format('H:i') . ' [' . $this->getShifter() . ']';
     }
 
     /**
@@ -623,5 +626,23 @@ class Shift
     public function getTmpToken($key = '')
     {
         return md5($this->getId().$this->getStart()->format('d/m/Y').$this->getEnd()->format('d/m/Y').$key);
+    }
+
+    /**
+     * Example: "vendredi 22 juillet de 9h30 à 12h30"
+     */
+    public function getDisplayDateLongWithTime()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "22/07/2022 de 9h30 à 12h30"
+     */
+    public function getDisplayDateWithTime()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 }

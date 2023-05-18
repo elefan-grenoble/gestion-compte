@@ -1,4 +1,4 @@
-<span class="card-title">{{ shift.start | date_fr_long }} de {{ shift.start | date('H:i') }} à {{ shift.end | date('H:i') }}</span>
+<span class="card-title">{{ shift.displayDateLongWithTime }}</span>
 <p>
     <i class="material-icons">person</i>{{ shift.shifter.firstname }}
     <br />
