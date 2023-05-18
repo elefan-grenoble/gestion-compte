@@ -162,7 +162,7 @@
                 </td>
                 <td>
                     {% if member.lastregistration %}
-                        <strong>{{ member.lastregistration.date | date('d/m/Y') }}</strong>
+                        <strong>{{ member.lastregistration.date | date_short }}</strong>
                         <br />
                         {% set difference = member.lastregistration.date.diff(date('now')) %}
                         {% set m = difference.m %}
@@ -178,7 +178,7 @@
                 <td>
                     <blockquote class="truncate">
                         {% for note in member.notes %}
-                            <i>{{ note.createdAt | date('d/m/y H:i') }} :</i>
+                            <i>{{ note.createdAt | date_short_time }} :</i>
                             <span title="{{ note.text }}">{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}</span>
                             <br />
                         {% endfor %}

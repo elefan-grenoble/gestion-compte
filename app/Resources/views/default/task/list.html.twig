@@ -35,7 +35,7 @@
                                     {% if task.closed %}</del>{% endif %}
                                 </td>
                                 <td>
-                                    {{ task.createdAt | date('d/m/Y') }}
+                                    {{ task.createdAt | date_short }}
                                 </td>
                                 <td>
                                     {{ task.dueDate | date('m-Y') }}

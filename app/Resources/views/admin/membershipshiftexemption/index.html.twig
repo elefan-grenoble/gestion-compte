@@ -77,19 +77,19 @@
                 <td>{{ membershipShiftExemption.description }}</td>
                 <td>
                     {% if membershipShiftExemption.start %}
-                        {{ membershipShiftExemption.start | date('d/m/Y') }}
+                        {{ membershipShiftExemption.start | date_short }}
                     {% endif %}
                 </td>
                 <td>
                     {% if membershipShiftExemption.end %}
-                        {{ membershipShiftExemption.end | date('d/m/Y') }}
+                        {{ membershipShiftExemption.end | date_short }}
                     {% endif %}
                 </td>
                 <td>
                     {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: membershipShiftExemption.createdBy, target_blank: true } %}
                 </td>
-                <td title="{{ membershipShiftExemption.createdAt | date('d/m/Y H:i') }}">
-                    {{ membershipShiftExemption.createdAt | date('d/m/Y') }}
+                <td title="{{ membershipShiftExemption.createdAt | date_time }}">
+                    {{ membershipShiftExemption.createdAt | date_short }}
                 </td>
                 <td>
                     <a href="{{ path('admin_membershipshiftexemption_edit', { 'id': membershipShiftExemption.id }) }}">

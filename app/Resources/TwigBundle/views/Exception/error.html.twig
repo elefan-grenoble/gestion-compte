@@ -9,7 +9,7 @@
 
     {% endif %}
     <p>
-        N'hésite pas à envoyer un courriel à <a href="mailto:{{ support_email }}?subject=error_{{ status_code }} {{ 'now' | date('h:i-d/m/Y') }}">{{ support_email }}</a> pour expliquer les circonstances de ce bug... Merci !
+        N'hésite pas à envoyer un courriel à <a href="mailto:{{ support_email }}?subject=error_{{ status_code }} {{ 'now' | date_time }}">{{ support_email }}</a> pour expliquer les circonstances de ce bug... Merci !
     </p>
 {% endblock %}
 

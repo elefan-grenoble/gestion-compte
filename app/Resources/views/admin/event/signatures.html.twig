@@ -78,7 +78,7 @@
                 {% endif %}
             </td>
             <td class="center">#{{ beneficiary.membership.memberNumber }}</td>
-            <td class="center date">{{ beneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
+            <td class="center date">{{ beneficiary.membership.lastRegistration.date | date_short }}</td>
             {{ _self.sign_cells(beneficiary, event) }}
         </tr>
 
@@ -111,7 +111,7 @@
                         {% endif %}
                     </td>
                     <td class="center">#{{ proxy.giver.mainBeneficiary.memberNumber }}</td>
-                    <td class="center">{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date('d/m/Y') }}</td>
+                    <td class="center">{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date_short }}</td>
 
                 {% if (proxy.giver.mainBeneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
                     {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
