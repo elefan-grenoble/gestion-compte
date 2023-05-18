@@ -1,7 +1,7 @@
 Bonjour {{ shift.shifter.firstname | lower | capitalize }},<br />
 <br />
 Ceci est juste un petit message pour te rappeler que tu as réservé un créneau
-{{ shift.job.name }} le {{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br />
+{{ shift.job.name }} le {{ shift.displayDateLongWithTime }}.<br />
 
 {{ dynamicContent | markdown | raw }}
 

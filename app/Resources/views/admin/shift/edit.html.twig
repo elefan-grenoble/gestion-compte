@@ -9,7 +9,7 @@
 
 {% block content %}
     <h4> Editer créneaux / <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
-    <h5>{{ shift.start | date_fr_long }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}</h5>
+    <h5>{{ shift.displayDateLongWithTime }}</h5>
     {{ form_start(form) }}
     <div class="row">
         <div class="col s12">
@@ -36,7 +36,9 @@
         </div>
     </div>
     <div>
-        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+        <button type="submit" class="btn waves-effect waves-light">
+            <i class="material-icons left">save</i>Enregistrer
+        </button>
     </div>
     {{ form_row(form._token) }}
     {{ form_end(form, {'render_rest': false}) }}

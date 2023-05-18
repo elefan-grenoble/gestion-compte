@@ -94,7 +94,7 @@
                     </a>
                 </td>
                 <td>
-                    {{ shiftFreeLog.shift.job }} - {{ shiftFreeLog.shift.start | date('d/m/Y') }} de {{ shiftFreeLog.shift.start | date('H:i') }} à {{ shiftFreeLog.shift.end | date('H:i') }}
+                    {{ shiftFreeLog.shift.job.name }} du {{ shiftFreeLog.shift.displayDateWithTime }}
                 </td>
                 {% if use_fly_and_fixed %}
                     <td>{{ shiftFreeLog.fixe }}</td>

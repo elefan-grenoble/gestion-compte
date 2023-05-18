@@ -86,7 +86,7 @@ class PeriodPosition
     }
 
     /**
-     * Example: Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)
+     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)"
      */
     public function __toString()
     {

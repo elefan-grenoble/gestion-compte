@@ -240,4 +240,13 @@ class ShiftBucket
             };
         }
     }
+
+    /**
+     * Example: "vendredi 22 juillet de 09:30 à 12:30"
+     */
+    public function getDisplayDateLongWithTime()
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('H:i') . ' à ' . $this->getEnd()->format('H:i');
+    }
 }

@@ -53,7 +53,7 @@
                     <td>{{ timeLog.typeDisplay }}</td>
                     <td>
                         {% if timeLog.shift %}
-                            {{ timeLog.shift.job.name }} du {{ timeLog.shift.start | date('d/m/Y') }} de {{ timeLog.shift.start | date('H:i') }} à {{ timeLog.shift.end | date('H:i') }}
+                            {{ timeLog.shift.job.name }} du {{ timeLog.shift.displayDateWithTime }}
                             {% if timeLog.shift.shifter %}
                                 ({{ timeLog.shift.shifter }})
                             {% endif %}

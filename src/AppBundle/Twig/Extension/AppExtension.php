@@ -120,7 +120,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "29 juin 2022"
+     * Exemple: "29 juin 2022"
      */
     public function date_fr(\DateTime $date)
     {
@@ -129,7 +129,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "mercredi 29 juin"
+     * Example: "mercredi 29 juin"
      */
     public function date_fr_long(\DateTime $date)
     {
@@ -138,7 +138,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "06/29/22 11:30"
+     * Example: "06/29/22 11:30"
      */
     public function date_time(\DateTime $date)
     {
@@ -147,7 +147,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "mercredi 29 juin 2022"
+     * Example: "mercredi 29 juin 2022"
      */
     public function date_fr_full(\DateTime $date)
     {
@@ -156,7 +156,7 @@ class AppExtension extends AbstractExtension
     }
 
         /**
-     * exemple output: "29 juin 2022 à 11:31"
+     * Example: "29 juin 2022 à 11:31"
      */
     public function date_fr_with_time(\DateTime $date)
     {
@@ -165,7 +165,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "mercredi 29 juin 2022 à 11:31"
+     * Example: "mercredi 29 juin 2022 à 11:31"
      *
      * @param: \DateTime|\DateTimeImmutable $date
      */
@@ -176,7 +176,7 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * exemple output: "2022-06-29T11:32:18+02:00"
+     * Example: "2022-06-29T11:32:18+02:00"
      */
     public function date_w3c(\DateTime $date)
     {
