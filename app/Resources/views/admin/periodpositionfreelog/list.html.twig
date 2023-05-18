@@ -69,7 +69,7 @@
         {% for periodPositionFreeLog in periodPositionFreeLogs %}
             <tr>
                 <td title="{{ periodPositionFreeLog.createdAt | date_fr_full_with_time }}">
-                    {{ periodPositionFreeLog.createdAt | date('d/m/Y') }}
+                    {{ periodPositionFreeLog.createdAt | date_short }}
                 </td>
                 <td>
                     <a href="{{ path("member_show",{'member_number': periodPositionFreeLog.beneficiary.membership.memberNumber}) }}">
@@ -81,7 +81,7 @@
                 </td>
                 {% if periodPositionFreeLog.bookedTime %}
                     <td title="{{ periodPositionFreeLog.bookedTime | date_fr_full_with_time }}">
-                        {{ periodPositionFreeLog.bookedTime | date('d/m/Y') }}
+                        {{ periodPositionFreeLog.bookedTime | date_short }}
                     </td>
                 {% else %}
                     <td></td>

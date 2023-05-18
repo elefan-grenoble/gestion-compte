@@ -6,8 +6,8 @@
         <div class="row">
             <div class="col s12">
                 <div class="card-panel">
-                    <h5><i class="material-icons left">vpn_key</i>{{ codes|first.value }}</h5>
-                    entré à {{ codes|first.createdAt | date('H:m:i') }} le {{ codes|first.createdAt | date_fr_long }} par {{ codes|first.getRegistrar }}
+                    <h5><i class="material-icons left">vpn_key</i>{{ codes | first.value }}</h5>
+                    entré à {{ codes | first.createdAt | date('H:m:i') }} le {{ codes | first.createdAt | date_fr_long }} par {{ codes | first.getRegistrar }}
                 </div>
             </div>
         </div>

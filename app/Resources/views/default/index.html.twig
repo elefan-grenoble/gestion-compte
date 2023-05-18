@@ -78,7 +78,7 @@
                             {% if (member.registrations | length) %}{# existing member #}
                                 <p>
                                     <i class="material-icons">warning</i>
-                                    {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ "now" | date_modify((member | remainder | date('%R%a'))~" days")| date_fr_long }}.
+                                    {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ 'now' | date_modify((member | remainder | date('%R%a'))~" days")| date_fr_long }}.
                                 </p>
                                 <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
                                     <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne

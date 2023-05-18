@@ -2,7 +2,7 @@
     <div class="postit-container" id="postit{{ note.id }}">
         <div class="postit">
             <span class="info">
-                {{ note.author.firstname }} le {{ note.createdAt | date('d/m/Y à H:i') }}
+                {{ note.author.firstname }} le {{ note.createdAt | date_fr_with_time }}
             </span>
             <a href="#post-it_children{{ note.id }}" class="black-text modal-trigger replies"><i class="material-icons tiny">reply</i>{% if note.children | length %}({{ note.children | length }}){% endif %}</a>
             <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger settings"><i class="material-icons tiny">settings</i></a>
@@ -22,7 +22,7 @@
             {% for child in note.children %}
             <h6>
                 <i class="material-icons tiny">reply</i>
-                {{ child.author.firstname }} le {{ child.createdAt | date('d/m/Y à H:i') }}
+                {{ child.author.firstname }} le {{ child.createdAt | date_fr_with_time }}
                 {% if is_granted('delete',child) %}
                 <a href="#!" class="red-text right" onclick="document.getElementById('form_note_delete_{{ child.id }}').submit();">
                     <i class="material-icons">close</i>

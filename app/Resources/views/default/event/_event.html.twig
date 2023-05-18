@@ -73,11 +73,11 @@
                         {% set minDateOfLastRegistration = null %}
                     {% endif %}
                     {% if (minDateOfLastRegistration is not null and member.lastRegistration.date < minDateOfLastRegistration) %}
-                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date_short }}</b> peuvent voter à cet événement.
                         <br />
                         Pense à mettre à jour ton adhésion pour participer ! :)
                     {% elseif (member.getShiftTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
-                        <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à <b>{{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date('d M Y') }}</b> peuvent voter à cet événement.
+                        <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à <b>{{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date_short }}</b> peuvent voter à cet événement.
                         <br />
                         Pense à rattraper tes créneaux pour la prochaine fois ! :)
                     {% else %}

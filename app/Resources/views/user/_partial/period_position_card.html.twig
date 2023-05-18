@@ -1,7 +1,7 @@
 <div class="card center">
     <div class="card-content">
         <span class="card-title">
-            {{ period_position.period.dayOfWeekString }} de {{ period_position.period.start | date('H:i') }} à {{ period_position.period.end | date('H:i') }}
+            {{ period_position.period.dayOfWeekString }} de {{ period_position.period.start | date('G\\hi') }} à {{ period_position.period.end | date('G\\hi') }}
             <br />
             <small>(Semaine {{ period_position.weekCycle }})</small>
         </span>
@@ -19,6 +19,7 @@
         {% set period_position_shift_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, true, true) %}
         {% set period_position_shift_not_carried_out_count = shift_service.getBeneficiaryShiftCount(period_position.shifter, period_position, false, true) %}
         {% set period_position_shift_freed_count = shift_service.getBeneficiaryShiftFreedCount(period_position.shifter, period_position) %}
+
         <div class="card-action">
             <span class="chip green-text" title="{{ period_position_shift_carried_out_count }} créneau{% if period_position_shift_carried_out_count > 1 %}x{% endif %} effectué{% if period_position_shift_carried_out_count > 1 %}s{% endif %}">
                 <i class="material-icons tiny">check</i>

@@ -86,7 +86,7 @@
         {% for shiftFreeLog in shiftFreeLogs %}
             <tr>
                 <td title="{{ shiftFreeLog.createdAt | date_fr_full_with_time }}">
-                    {{ shiftFreeLog.createdAt | date('d/m/Y') }}
+                    {{ shiftFreeLog.createdAt | date_short }}
                 </td>
                 <td>
                     <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">

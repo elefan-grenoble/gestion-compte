@@ -273,11 +273,11 @@
                         {% for registration in member.registrations %}
                             {% if member.lastregistration %}
                                 {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                                {{ registration.date | date('d/m/Y') }}
+                                {{ registration.date | date_short }}
                                 {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
                                 <br/>
                             {% else %}
-                                {{ registration.date | date('d/m/Y') }}
+                                {{ registration.date | date_short }}
                                 /!\ need fix
                             {% endif %}
                         {% endfor %}

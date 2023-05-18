@@ -41,7 +41,9 @@ class AppExtension extends AbstractExtension
             new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
             new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
             new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
+            new TwigFilter('date_fr_long_with_time', array($this, 'date_fr_long_with_time')),
             new TwigFilter('date_fr_full_with_time', array($this, 'date_fr_full_with_time')),
+            new TwigFilter('date_short', array($this, 'date_short')),
             new TwigFilter('date_time', array($this, 'date_time')),
             new TwigFilter('date_w3c', array($this, 'date_w3c')),
             new TwigFilter('duration_from_minutes', array($this, 'duration_from_minutes')),
@@ -138,15 +140,6 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * Example: "06/29/22 11:30"
-     */
-    public function date_time(\DateTime $date)
-    {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%D %H:%M", $date->getTimestamp());
-    }
-
-    /**
      * Example: "mercredi 29 juin 2022"
      */
     public function date_fr_full(\DateTime $date)
@@ -155,28 +148,57 @@ class AppExtension extends AbstractExtension
         return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
-        /**
-     * Example: "29 juin 2022 à 11:31"
+    /**
+     * Example: "29 juin 2022 à 9h30"
      */
     public function date_fr_with_time(\DateTime $date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%e %B %Y à %H:%M", $date->getTimestamp());
+        return strftime("%e %B %Y à %kh%M", $date->getTimestamp());
     }
 
     /**
-     * Example: "mercredi 29 juin 2022 à 11:31"
+     * Example: "mercredi 29 juin à 9h30"
+     * 
+     * Note: not used
+     */
+    public function date_fr_long_with_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%A %e %B à %kh%M", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "mercredi 29 juin 2022 à 9h30"
      *
      * @param: \DateTime|\DateTimeImmutable $date
      */
     public function date_fr_full_with_time($date)
     {
         setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
+        return strftime("%A %e %B %Y à %kh%M", $date->getTimestamp());
     }
 
     /**
-     * Example: "2022-06-29T11:32:18+02:00"
+     * Example: "29/06/22"
+     */
+    public function date_short(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%d/%m/%Y", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "29/06/22 9h30"
+     */
+    public function date_time(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        return strftime("%d/%m/%Y %kh%M", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "2022-06-29T09:30:18+02:00"
      */
     public function date_w3c(\DateTime $date)
     {
