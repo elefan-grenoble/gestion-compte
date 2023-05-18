@@ -68,9 +68,9 @@
                                 </p>
                                 {{ form_start(positions_free_forms[position.id]) }}
                                 {{ form_widget(positions_free_forms[position.id]) }}
-                                <button type="submit" class="btn orange">
+                                <a href="#" class="btn waves-effect waves-light orange" onclick="var r = confirm('Etes-vous sûr de vouloir libérer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Libérer ce poste">
                                     <i class="material-icons left">lock_open</i>Libérer
-                                </button>
+                                </a>
                                 {{ form_end(positions_free_forms[position.id]) }}
                             </div>
                         </li>
@@ -99,7 +99,9 @@
                                         {{ form_widget(positions_book_forms[position.id].shifter) }}
                                     </div>
                                     <div class="col s3">
-                                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter</button>
+                                        <button type="submit" class="btn waves-effect waves-light">
+                                            <i class="material-icons left">add</i>Ajouter
+                                        </button>
                                     </div>
                                 </div>
                                 {{ form_end(positions_book_forms[position.id]) }}
@@ -107,7 +109,9 @@
                                     <div class="row">
                                         {{ form_start(positions_delete_forms[position.id]) }}
                                         {{ form_widget(positions_delete_forms[position.id]) }}
-                                        <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">Supprimer</a>
+                                        <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste">
+                                            <i class="material-icons left">delete</i>Supprimer
+                                        </a>
                                         {{ form_end(positions_delete_forms[position.id]) }}
                                     </div>
                                 {% endif %}
