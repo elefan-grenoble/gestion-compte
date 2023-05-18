@@ -66,6 +66,11 @@ class PeriodPosition
     private $shifts;
 
     /**
+     * @ORM\OneToMany(targetEntity="PeriodPositionFreeLog", mappedBy="periodPosition")
+     */
+    private $freeLogs;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")

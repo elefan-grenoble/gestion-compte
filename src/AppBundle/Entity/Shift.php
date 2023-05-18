@@ -97,7 +97,7 @@ class Shift
     /**
      * @ORM\OneToMany(targetEntity="ShiftFreeLog", mappedBy="shift")
      */
-    private $shiftFreeLogs;
+    private $freeLogs;
 
     /**
      * @var bool
