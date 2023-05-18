@@ -1,0 +1,35 @@
+
+<div style="max-height:500px;overflow:scroll;">
+    <table>
+        <thead>
+            <tr class="grey lighten-2">
+                <th>Date</th>
+                <th>Bénéficiaire</th>
+                <th>Créneau</th>
+                {% if use_fly_and_fixed %}
+                    <th>Fixe</th>
+                {% endif %}
+                <th>Raison</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shiftFreeLog in shiftFreeLogs %}
+                <tr>
+                    <td title="{{ shiftFreeLog.createdAt | date_fr_full_with_time }}">
+                        {{ shiftFreeLog.createdAt | date_short }}
+                    </td>
+                    <td>
+                        {{ shiftFreeLog.beneficiary }}
+                    </td>
+                    <td>
+                        {{ shiftFreeLog.shiftString }}
+                    </td>
+                    {% if use_fly_and_fixed %}
+                        <td>{{ shiftFreeLog.fixe }}</td>
+                    {% endif %}
+                    <td>{{ shiftFreeLog.reason }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

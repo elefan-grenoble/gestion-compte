@@ -32,6 +32,15 @@
 
         <li>
             <div class="collapsible-header">
+                <i class="material-icons">delete_sweep</i>Historique des créneaux annulés
+            </div>
+            <div class="collapsible-body">
+                {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member) } %}
+            </div>
+        </li>
+
+        <li>
+            <div class="collapsible-header">
                 <i class="material-icons">ac_unit</i>Gel du compte
             </div>
             <div class="collapsible-body">
