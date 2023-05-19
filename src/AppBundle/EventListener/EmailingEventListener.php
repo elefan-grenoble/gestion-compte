@@ -53,7 +53,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
@@ -88,7 +88,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
