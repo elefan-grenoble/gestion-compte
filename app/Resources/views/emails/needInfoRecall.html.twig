@@ -1,4 +1,6 @@
 Bonjour,<br>
 Ton inscription à {{ project_name }} enregistrée le {{ rdate | date_fr_full_with_time }} n'a pas été complétée <br>
 Tu peux toujours la finaliser en visitant <a href="{{ register_url }}">ce lien</a>.<br>
+{{ dynamicContent | markdown | raw }}
+
 Merci, à très bientôt
