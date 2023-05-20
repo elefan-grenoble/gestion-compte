@@ -112,5 +112,5 @@
         Réserver
     </a>
 
-    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} cycle actuel se termine le {{ end_current_cycle | date_fr_long }}</p>
+    <p>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} cycle actuel se termine le {{ end_current_cycle | date_fr_long }}</p>
 {% endif %}

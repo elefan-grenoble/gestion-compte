@@ -1,11 +1,11 @@
 {% if app.user.beneficiary.getSwipeCards | length %}
     <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
-        <i class="material-icons left">credit_card</i>{% if app.user.beneficiary.getSwipeCards | length > 1 %}Mes badges{% else %}Mon badge{% endif %}
+        <i class="material-icons left">credit_card</i>{% if app.user.beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
     </a>
     <br>
     <div id="all_swipecards" class="modal bottom-sheet">
         <div class="modal-content">
-            <h4>Tous mes badges</h4>
+            <h4>Tous vos badges</h4>
             {% include "swipeCard/_partial/list.html.twig" with { swipeCards: app.user.beneficiary.swipeCards | reverse , beneficiary_id: 0} %}
         </div>
         <div class="modal-footer">
@@ -44,7 +44,7 @@
     </div>
 {% else %}
     <a href="#swipe_add" class="btn waves-effect waves-light modal-trigger">
-        <i class="material-icons left">add</i>Associer un badge à mon compte
+        <i class="material-icons left">add</i>Associer un badge à ton compte
     </a>
     <div id="swipe_add" class="modal">
         <div class="modal-content">
