@@ -1,3 +1,5 @@
+{% set from_admin = from_admin ?? false %}
+
 <div class="card blue-grey darken-1 small">
     {% if event.img %}
         <div class="card-image">
@@ -22,16 +24,74 @@
         {{ event.description | markdown | raw }}
     </div>
     <div class="card-action">
-        {% if event.needProxy %}
-            <div class="left">
-                <a href="{{ path("event_proxies_list", {'id': event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
+        {% if from_admin %}
+            {% if event.needProxy %}
+                <div class="left">
+                    <a href="{{ path("event_proxies_list", {'id': event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
+                </div>
+                <div class="left">
+                    <a href="{{ path("event_signatures", {'id': event.id}) }}"><i class="material-icons left">print</i>Emargement</a>
+                </div>
+            {% endif %}
+            <div class="right">
+                <a href="{{ path("event_edit", {'id': event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
             </div>
-            <div class="left">
-                <a href="{{ path("event_signatures", {'id': event.id}) }}"><i class="material-icons left">print</i>Emargement</a>
-            </div>
+        {% else %}
+            {% if event.needProxy %}
+                {% if not app.user.beneficiary or not app.user.beneficiary.membership or not app.user.beneficiary.membership.lastRegistration %}
+                    <span>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</span>
+                {% else %}
+                    {% set member = app.user.beneficiary.membership %}
+                    {% set proxy_given = event | givenProxy %}
+                    {% set proxy_received = event | receivedProxies %}
+
+                    {% if (registration_duration is not null) %}
+                        {% set minDateOfLastRegistration = event.maxDateOfLastRegistration | date_modify('-' ~ registration_duration) %}
+                    {% else %}
+                        {% set minDateOfLastRegistration = null %}
+                    {% endif %}
+                    {% if (minDateOfLastRegistration is not null and member.lastRegistration.date < minDateOfLastRegistration) %}
+                        <b>Oups</b>, seuls les membres qui ont adhéré ou ré-adhéré <b>après le {{ minDateOfLastRegistration | date_short }}</b> peuvent voter à cet événement.
+                        <br />
+                        Pense à mettre à jour ton adhésion pour participer ! :)
+                    {% elseif (member.getShiftTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
+                        <b>Oups</b>, seuls les membres avec un compteur de créneaux supérieur à <b>{{ time_after_which_members_are_late_with_shifts }} à la date du {{ event.maxDateOfLastRegistration | date_short }}</b> peuvent voter à cet événement.
+                        <br />
+                        Pense à rattraper tes créneaux pour la prochaine fois ! :)
+                    {% else %}
+                        {% if proxy_given is not null %}
+                            {% if proxy_given.owner is null %}
+                                <span>Procuration donnée au premier membre volontaire</span>
+                            {% else %}
+                                <span>Procuration donnée à &nbsp;<b>{{ proxy_given.owner.membership.memberNumberWithBeneficiaryListString }}</b></span>
+                            {% endif %}
+                        {% endif %}
+                        {% for proxy_received_item in proxy_received %}
+                            {% if proxy_received_item.giver %}
+                                <div>Procuration portée par <b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.memberNumberWithBeneficiaryListString }}</b></div>
+                            {% else %}
+                                <div><b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></div>
+                            {% endif %}
+                        {% endfor %}
+                        {% if (proxy_given is null) and (proxy_received|length == 0) %}
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only" title="Je ne peux pas venir, je fais une procuration">
+                                Je ne peux pas venir, je fais une procuration
+                            </a>
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up" title="Je ne peux pas venir, je fais une procuration">
+                                Je ne peux pas venir, je fais une procuration
+                            </a>
+                            {% if event.anonymousProxy %}
+                                <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only" title="Je viens, j'accepte une procuration">
+                                    Je viens, j'accepte une procuration
+                                </a>
+                                <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light green-text hide-on-med-and-up" title="Je viens, j'accepte une procuration">
+                                    Je viens, j'accepte une procuration
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
         {% endif %}
-        <div class="right">
-            <a href="{{ path("event_edit", {'id': event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-        </div>
     </div>
 </div>

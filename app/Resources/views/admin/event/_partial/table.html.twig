@@ -1,3 +1,5 @@
+{% set from_admin = from_admin ?? false %}
+
 <table class="responsive-table">
     <thead>
         <tr>
@@ -5,9 +7,11 @@
             <th>Type</th>
             <th>Description</th>
             <th>Date</th>
-            <th>Procurations</th>
-            <th>Auteur</th>
-            <th>Actions</th>
+            {% if from_admin %}
+                <th>Procurations</th>
+                <th>Auteur</th>
+                <th>Actions</th>
+            {% endif %}
         </tr>
     </thead>
     <tbody>
@@ -26,17 +30,19 @@
                         <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
                     {% endif %}
                 </td>
-                <td>
-                    {% if event.needProxy %}
-                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
-                        <br />
-                        <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
-                    {% endif %}
-                </td>
-                <td title="{{ event.createdAt | date_fr_full_with_time }}">{{ event.createdBy }}</td>
-                <td>
-                    <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
-                </td>
+                {% if from_admin %}
+                    <td>
+                        {% if event.needProxy %}
+                            <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
+                            <br />
+                            <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+                        {% endif %}
+                    </td>
+                    <td title="{{ event.createdAt | date_fr_full_with_time }}">{{ event.createdBy }}</td>
+                    <td>
+                        <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                    </td>
+                {% endif %}
             </tr>
         {% endfor %}
     </tbody>

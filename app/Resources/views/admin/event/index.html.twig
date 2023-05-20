@@ -14,14 +14,14 @@
 <div class="row">
     {% for event in eventsFuture %}
         <div class="col s12 m6">
-            {% include "admin/event/_partial/card.html.twig" with { event: event } %}
+            {% include "admin/event/_partial/card.html.twig" with { event: event, from_admin: true } %}
         </div>
     {% endfor %}
 </div>
 
 <h4>Événements passés (10 plus récents)</h4>
 
-{% include "admin/event/_partial/table.html.twig" with { events: eventsPast } %}
+{% include "admin/event/_partial/table.html.twig" with { events: eventsPast, from_admin: true } %}
 
 {% if is_granted("ROLE_ADMIN") %}
     <br />
