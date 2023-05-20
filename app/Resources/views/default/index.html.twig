@@ -12,8 +12,8 @@
 {% endblock %}
 
 {% block content %}
-<div id="home-announcements" class="center">
-    {{ dynamicContent | markdown | raw }}
+<div id="home-annoucemements-top" class="center">
+    {{ dynamicContentTop | markdown | raw }}
 </div>
 
 <div id="home-welcome" class="row center">
@@ -199,6 +199,10 @@
         </div>
     {% endif %}
 {% endif %}
+
+<div id="home-annoucemements-bottom" class="center">
+    {{ dynamicContentBottom | markdown | raw }}
+</div>
 {% endblock %}
 
 {% block stylesheets %}

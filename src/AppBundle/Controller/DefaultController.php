@@ -101,11 +101,13 @@ class DefaultController extends Controller
         }
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
-        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME")->getContent();
+        $dynamicContentTop = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME_TOP")->getContent();
+        $dynamicContentBottom = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME_BOTTOM")->getContent();
 
         return $this->render('default/index.html.twig', [
             'events' => $eventsFuture,
-            'dynamicContent' => $dynamicContent
+            'dynamicContentTop' => $dynamicContentTop,
+            'dynamicContentBottom' => $dynamicContentBottom,
         ]);
     }
 
