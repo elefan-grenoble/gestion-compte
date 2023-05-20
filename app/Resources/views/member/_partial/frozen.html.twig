@@ -43,21 +43,21 @@
     {% endif %}
 {% else %}
     {% if member.frozenChange %}
-        Mon compte sera dégelé à la fin de mon cycle courant.
+        Ton compte sera dégelé à la fin de mon cycle courant.
         <br />
         <strong>Soit le {{ end_current_cycle | date_fr_long }}</strong>.
         <br />
         {{ form_start(freeze_change_form) }}
         <button type="submit" class="waves-effect waves-light btn orange">
-            <i class="material-icons left">cancel</i>Annuler la demande de degel de mon compte
+            <i class="material-icons left">cancel</i>Annuler la demande de degel de ton compte
         </button>
         {{ form_end(freeze_change_form) }}
     {% else %}
-        Mon compte est gelé
+        Ton compte est gelé
         <br />
         {{ form_start(freeze_change_form) }}
         <button type="submit" class="waves-effect waves-light btn green">
-            <i class="material-icons left">play_circle_filled</i>Demander le dégèle de mon compte
+            <i class="material-icons left">play_circle_filled</i>Demander le dégèle de ton compte
         </button>
         {{ form_end(freeze_change_form) }}
     {% endif %}
