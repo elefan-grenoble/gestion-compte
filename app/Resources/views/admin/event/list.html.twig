@@ -34,7 +34,7 @@
     </li>
 </ul>
 
-{% include "admin/event/_partial/table.html.twig" with { events: events } %}
+{% include "admin/event/_partial/table.html.twig" with { events: events, from_admin: true } %}
 
 <ul class="pagination">
     <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
