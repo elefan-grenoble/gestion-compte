@@ -77,23 +77,28 @@ class Beneficiary
     /**
      * @var Membership
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id",onDelete="CASCADE")
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter", cascade={"remove"})
      * @OrderBy({"start" = "DESC"})
      */
     private $shifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter", cascade={"remove"})
      */
     private $reservedShifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="PeriodPosition", mappedBy="shifter", cascade={"persist"})
+     */
+    private $periodPositions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary", cascade={"remove"})
      * @OrderBy({"number" = "DESC"})
      */
     private $swipe_cards;

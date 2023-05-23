@@ -42,7 +42,7 @@ class PeriodPosition
     private $weekCycle;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="periodPositions")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
     private $shifter;

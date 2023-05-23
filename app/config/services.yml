@@ -256,6 +256,8 @@ services:
     search_user_form_helper:
             class: AppBundle\Service\SearchUserFormHelper
             public: true
+            arguments:
+                - "%use_fly_and_fixed%"
 
     logger.user_processor:
             class: AppBundle\Monolog\MonologUserProcessor

@@ -21,10 +21,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SearchUserFormHelper {
 
     private $container;
+    private $use_fly_and_fixed;
 
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, bool $use_fly_and_fixed = false)
     {
         $this->container = $container;
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
     }
 
     public function getSearchForm($formBuilder, $type = null, $disabledFields = []) {
@@ -189,7 +191,25 @@ class SearchUserFormHelper {
                     'Non renseigné' => 1,
                 ]
             ])
-            ->add('formations', EntityType::class, [
+            ->add('flying', ChoiceType::class, [
+                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                'required' => false,
+                'choices' => [
+                    'Oui' => 2,
+                    'Non (fixe)' => 1,
+                ],
+            ]);
+            if ($this->use_fly_and_fixed) {
+                $formBuilder->add('has_period_position', ChoiceType::class, [
+                    'label' => 'créneau fixe',
+                    'required' => false,
+                    'choices' => [
+                        'créneau fixe' => 2,
+                        'Pas de créneau fixe' => 1,
+                    ]
+                ]);
+            }
+            $formBuilder->add('formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
                 'choice_label' => 'name',
                 'multiple' => true,
@@ -224,14 +244,6 @@ class SearchUserFormHelper {
                 'multiple' => true,
                 'required' => false,
                 'label'=>'Hors de la/les commissions(s)'
-            ])
-            ->add('flying', ChoiceType::class, [
-                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
-                'required' => false,
-                'choices' => [
-                    'Oui' => 2,
-                    'Non (fixe)' => 1,
-                ],
             ]);
         }
         $formBuilder->add('action', HiddenType::class, [
@@ -344,11 +356,11 @@ class SearchUserFormHelper {
     public function processSearchFormAmbassadorData($form, &$qb) {
         if ($form->get('withdrawn')->getData() > 0) {
             $qb = $qb->andWhere('o.withdrawn = :withdrawn')
-                     ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+                ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0) {
             $qb = $qb->andWhere('o.frozen = :frozen')
-                     ->setParameter('frozen', $form->get('frozen')->getData()-1);
+                ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
         if (!is_null($form->get('compteurlt')->getData())) {
             $compteurlt = $form->get('compteurlt')->getData();
@@ -370,12 +382,12 @@ class SearchUserFormHelper {
         if ($form->get('lastregistrationdategt')->getData()) {
             $date = $form->get('lastregistrationdategt')->getData();
             $qb = $qb->andWhere('r.date > :lastregistrationdategt')
-                     ->setParameter('lastregistrationdategt', $date);
+                ->setParameter('lastregistrationdategt', $date);
         }
         if ($form->get('lastregistrationdatelt')->getData()) {
             $date = $form->get('lastregistrationdatelt')->getData();
             $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                     ->setParameter('lastregistrationdatelt', $date);
+                ->setParameter('lastregistrationdatelt', $date);
         }
         if ($form->get('membernumber')->getData()) {
             $qb = $qb->andWhere('o.member_number = :membernumber')
@@ -432,10 +444,10 @@ class SearchUserFormHelper {
         if ($form->get('exempted')->getData() > 0) {
             if ($form->get('exempted')->getData() == 2) {
                 $qb = $qb->andWhere('mse.start <= :date AND mse.end >= :date')
-                         ->setParameter('date', $now);
+                    ->setParameter('date', $now);
             } else if ($form->get('exempted')->getData() == 1) {
                 $qb = $qb->andWhere('mse.start IS NULL OR mse.start > :date OR mse.end < :date')
-                         ->setParameter('date', $now);
+                    ->setParameter('date', $now);
             }
         }
         if ($form->get('beneficiary_count')->getData() > 0) {
@@ -554,6 +566,15 @@ class SearchUserFormHelper {
                 $qb = $qb->andWhere('b.phone < 100000000');
             } else {
                 $qb = $qb->andWhere('b.phone > 100000000');
+            }
+        }
+
+        if ($form->get('has_period_position')->getData() > 0) {
+            $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+            if ($form->get('has_period_position')->getData() == 2) {
+                $qb = $qb->andWhere('pp.id IS NOT NULL');
+            } else if ($form->get('has_period_position')->getData() == 1) {
+                $qb = $qb->andWhere('pp.id IS NULL');
             }
         }
 
