@@ -23,7 +23,7 @@ class SearchUserFormHelper {
     private $container;
     private $use_fly_and_fixed;
 
-    public function __construct(ContainerInterface $container, bool $use_fly_and_fixed = false)
+    public function __construct(ContainerInterface $container, $use_fly_and_fixed)
     {
         $this->container = $container;
         $this->use_fly_and_fixed = $use_fly_and_fixed;
