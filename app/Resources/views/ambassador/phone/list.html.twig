@@ -178,7 +178,7 @@
                 <td>
                     <blockquote class="truncate">
                         {% for note in member.notes %}
-                            <i>{{ note.createdAt | date_short_time }} :</i>
+                            <i>{{ note.createdAt | date_short }} :</i>
                             <span title="{{ note.text }}">{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}</span>
                             <br />
                         {% endfor %}
