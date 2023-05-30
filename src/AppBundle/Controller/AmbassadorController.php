@@ -57,8 +57,8 @@ class AmbassadorController extends Controller
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+        $qb = $qb->leftJoin("m.timeLogs", "c")->addSelect("c")
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id) AS HIDDEN time");
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formHelper->processSearchFormAmbassadorData($form, $qb);
@@ -69,7 +69,7 @@ class AmbassadorController extends Controller
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
             $currentPage = 1;
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $defaults['withdrawn']-1);
             $qb = $qb->andWhere('r.date IS NULL');
         }
@@ -126,10 +126,10 @@ class AmbassadorController extends Controller
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+        $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
             ->where('lr.id IS NULL') // registration is the last one registered
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+            ->leftJoin("m.timeLogs", "c")->addSelect("c")
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id) AS HIDDEN time");
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formHelper->processSearchFormAmbassadorData($form, $qb);
@@ -140,7 +140,7 @@ class AmbassadorController extends Controller
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
             $currentPage = 1;
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $defaults['withdrawn']-1);
             $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
                 ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
@@ -192,11 +192,11 @@ class AmbassadorController extends Controller
         $form->handleRequest($request);
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+        $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
             ->where('lr.id IS NULL') // registration is the last one registered
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time")
-            ->leftJoin("o.timeLogs", "tl")->addSelect("tl")
-            ->leftJoin("o.notes", "n")->addSelect("n");
+            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id) AS HIDDEN time")
+            ->leftJoin("m.timeLogs", "tl")->addSelect("tl")
+            ->leftJoin("m.notes", "n")->addSelect("n");
 
         if ($form->isSubmitted() && $form->isValid()) {
             $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
@@ -207,9 +207,9 @@ class AmbassadorController extends Controller
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
             $currentPage = 1;
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $defaults['withdrawn']-1);
-            $qb = $qb->andWhere('o.frozen = :frozen')
+            $qb = $qb->andWhere('m.frozen = :frozen')
                 ->setParameter('frozen', $defaults['frozen']-1);
             $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
                 ->setParameter('compteurlt', $defaults['compteurlt']);

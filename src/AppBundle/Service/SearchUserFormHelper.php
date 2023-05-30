@@ -18,8 +18,8 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class SearchUserFormHelper {
-
+class SearchUserFormHelper
+{
     private $container;
     private $use_fly_and_fixed;
 
@@ -184,11 +184,11 @@ class SearchUserFormHelper {
         ]);
         if (!$type) {
             $formBuilder->add('phone', ChoiceType::class, [
-                'label' => 'Téléphone renseigné ?',
+                'label' => 'téléphone renseigné',
                 'required' => false,
                 'choices' => [
-                    'Renseigné' => 2,
-                    'Non renseigné' => 1,
+                    'Oui' => 2,
+                    'Non (pas renseigné)' => 1,
                 ]
             ])
             ->add('flying', ChoiceType::class, [
@@ -204,11 +204,19 @@ class SearchUserFormHelper {
                     'label' => 'créneau fixe',
                     'required' => false,
                     'choices' => [
-                        'créneau fixe' => 2,
-                        'Pas de créneau fixe' => 1,
+                        'Oui' => 2,
+                        'Non (pas de créneau fixe)' => 1,
                     ]
                 ]);
             }
+            $formBuilder->add('has_first_shift_date', ChoiceType::class, [
+                'label' => 'créneau inscrit',
+                'required' => false,
+                'choices' => [
+                    'Oui' => 2,
+                    'Non (jamais inscrit à un créneau)' => 1,
+                ]
+            ]);
             $formBuilder->add('formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
                 'choice_label' => 'name',
@@ -333,18 +341,18 @@ class SearchUserFormHelper {
      * @return QueryBuilder
      */
     public function initSearchQuery($doctrineManager, $type = null) {
-        $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->leftJoin("o.beneficiaries", "b")->addSelect("b")
+        $qb = $doctrineManager->getRepository("AppBundle:Membership")->createQueryBuilder('m');
+        $qb = $qb->leftJoin("m.beneficiaries", "b")->addSelect("b")
             ->leftJoin("b.user", "u")->addSelect("u")
-            ->leftJoin("o.registrations", "r")->addSelect("r")
+            ->leftJoin("m.registrations", "r")->addSelect("r")
             ->leftJoin("r.helloassoPayment", "rhp")->addSelect("rhp")
-            ->leftJoin("o.membershipShiftExemptions", "mse")->addSelect("mse");
+            ->leftJoin("m.membershipShiftExemptions", "mse")->addSelect("mse");
         if ($type == 'search') {
             $qb->leftJoin("b.commissions", "c")->addSelect("c");
             $qb->leftJoin("b.formations", "f")->addSelect("f");
         }
         // do not include admin user
-        $qb = $qb->andWhere('o.member_number > 0');
+        $qb = $qb->andWhere('m.member_number > 0');
         return $qb;
     }
 
@@ -355,11 +363,11 @@ class SearchUserFormHelper {
      */
     public function processSearchFormAmbassadorData($form, &$qb) {
         if ($form->get('withdrawn')->getData() > 0) {
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0) {
-            $qb = $qb->andWhere('o.frozen = :frozen')
+            $qb = $qb->andWhere('m.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
         if (!is_null($form->get('compteurlt')->getData())) {
@@ -390,15 +398,15 @@ class SearchUserFormHelper {
                 ->setParameter('lastregistrationdatelt', $date);
         }
         if ($form->get('membernumber')->getData()) {
-            $qb = $qb->andWhere('o.member_number = :membernumber')
+            $qb = $qb->andWhere('m.member_number = :membernumber')
                      ->setParameter('membernumber', $form->get('membernumber')->getData());
         }
         if ($form->get('membernumbergt')->getData()) {
-            $qb = $qb->andWhere('o.member_number > :membernumbergt')
+            $qb = $qb->andWhere('m.member_number > :membernumbergt')
                      ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
         }
         if ($form->get('membernumberlt')->getData()) {
-            $qb = $qb->andWhere('o.member_number < :membernumberlt')
+            $qb = $qb->andWhere('m.member_number < :membernumberlt')
                 ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
         }
         if ($form->get('firstname')->getData()) {
@@ -430,7 +438,7 @@ class SearchUserFormHelper {
     public function processSearchFormData($form,&$qb) {
         $now = new \DateTime('now');
         if ($form->get('withdrawn')->getData() > 0) {
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
         }
         if ($form->get('enabled')->getData() > 0) {
@@ -438,7 +446,7 @@ class SearchUserFormHelper {
                 ->setParameter('enabled', $form->get('enabled')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0) {
-            $qb = $qb->andWhere('o.frozen = :frozen')
+            $qb = $qb->andWhere('m.frozen = :frozen')
                 ->setParameter('frozen', $form->get('frozen')->getData()-1);
         }
         if ($form->get('exempted')->getData() > 0) {
@@ -451,7 +459,7 @@ class SearchUserFormHelper {
             }
         }
         if ($form->get('beneficiary_count')->getData() > 0) {
-            $qb = $qb->andWhere('SIZE(o.beneficiaries) = :beneficiary_count')
+            $qb = $qb->andWhere('SIZE(m.beneficiaries) = :beneficiary_count')
                 ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
         }
 
@@ -477,7 +485,7 @@ class SearchUserFormHelper {
 
         if ($form->get('lastregistrationdate')->getData() || $form->get('lastregistrationdategt')->getData() || $form->get('lastregistrationdatelt')->getData()) {
             $qb = $qb
-                ->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+                ->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->andWhere('lr.id IS NULL');
             if ($form->get('lastregistrationdate')->getData()) {
                 $qb = $qb
@@ -508,28 +516,28 @@ class SearchUserFormHelper {
         if ($form->get('membernumber')->getData()) {
             $list  = explode(', ', $form->get('membernumber')->getData());
             if (count($list)>1) {
-                $qb = $qb->andWhere('o.member_number IN (:membernumber)')
+                $qb = $qb->andWhere('m.member_number IN (:membernumber)')
                     ->setParameter('membernumber', $list);
             } else {
-                $qb = $qb->andWhere('o.member_number = :membernumber')
+                $qb = $qb->andWhere('m.member_number = :membernumber')
                     ->setParameter('membernumber', $form->get('membernumber')->getData());
             }
         }
         if ($form->get('membernumbergt')->getData()) {
-            $qb = $qb->andWhere('o.member_number > :membernumbergt')
+            $qb = $qb->andWhere('m.member_number > :membernumbergt')
                 ->setParameter('membernumbergt', $form->get('membernumbergt')->getData());
         }
         if ($form->get('membernumberlt')->getData()) {
-            $qb = $qb->andWhere('o.member_number < :membernumberlt')
+            $qb = $qb->andWhere('m.member_number < :membernumberlt')
                 ->setParameter('membernumberlt', $form->get('membernumberlt')->getData());
         }
         if ($form->get('membernumberdiff')->getData()) {
             $list  = explode(', ', $form->get('membernumberdiff')->getData());
             if (count($list)>1) {
-                $qb = $qb->andWhere('o.member_number NOT IN (:membernumberdiff)')
+                $qb = $qb->andWhere('m.member_number NOT IN (:membernumberdiff)')
                     ->setParameter('membernumberdiff', $list);
             } else {
-                $qb = $qb->andWhere('o.member_number != :membernumberdiff')
+                $qb = $qb->andWhere('m.member_number != :membernumberdiff')
                     ->setParameter('membernumberdiff', $form->get('membernumberdiff')->getData());
             }
         }
@@ -578,6 +586,14 @@ class SearchUserFormHelper {
             }
         }
 
+        if ($form->get('has_first_shift_date')->getData() > 0) {
+            if ($form->get('has_first_shift_date')->getData() == 2) {
+                $qb = $qb->andWhere('m.first_shift_date IS NOT NULL');
+            } else if ($form->get('has_first_shift_date')->getData() == 1) {
+                $qb = $qb->andWhere('m.first_shift_date IS NULL');
+            }
+        }
+
         $join_formations = false;
         if ($form->get('formations')->getData() && count($form->get('formations')->getData())) {
             if (($form->get('or_and_exp_formations')->getData() > 0) && (count($form->get('formations')->getData()) > 1)) { // AND not OR
@@ -587,7 +603,7 @@ class SearchUserFormHelper {
                     $tmp_qb = clone $qb;
                     $tmp_qb = $tmp_qb->andWhere('f.id IN (:fid)')
                         ->setParameter('fid', $formation);
-                    $ids_groups[] = $tmp_qb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+                    $ids_groups[] = $tmp_qb->select('DISTINCT m.id')->getQuery()->getArrayResult();
                 }
                 $ids = $ids_groups[0];
                 for( $i= 1; $i < count($ids_groups); $i++) {
@@ -598,7 +614,7 @@ class SearchUserFormHelper {
                     }
                     $ids = $ids_groups[$i];
                 }
-                $qb = $qb->andWhere('o.id IN (:all_formations)')
+                $qb = $qb->andWhere('m.id IN (:all_formations)')
                     ->setParameter('all_formations', $ids);
             } else {
                 $qb = $qb->andWhere('f.id IN (:fids)')
@@ -618,10 +634,10 @@ class SearchUserFormHelper {
                 $nrqb = $nrqb->andWhere('f.id IN (:fids)');
             }
             $nrqb->setParameter('fids', $form->get('not_formations')->getData() );
-            $subQuery = $nrqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+            $subQuery = $nrqb->select('DISTINCT m.id')->getQuery()->getArrayResult();
 
             if (count($subQuery)) {
-                $qb = $qb->andWhere('o.id NOT IN (:subQueryformations)')
+                $qb = $qb->andWhere('m.id NOT IN (:subQueryformations)')
                     ->setParameter('subQueryformations', $subQuery);
             }
 
@@ -632,10 +648,10 @@ class SearchUserFormHelper {
                 $ncqb->andWhere('c.id IN (:cids)');
             }
             $ncqb->setParameter('cids', $form->get('not_commissions')->getData());
-            $subQuery = $ncqb->select('DISTINCT o.id')->getQuery()->getArrayResult();
+            $subQuery = $ncqb->select('DISTINCT m.id')->getQuery()->getArrayResult();
 
             if (count($subQuery)) {
-                $qb = $qb->andWhere('o.id NOT IN (:subQueryformations)')
+                $qb = $qb->andWhere('m.id NOT IN (:subQueryformations)')
                     ->setParameter('subQueryformations', $subQuery);
             }
         }
