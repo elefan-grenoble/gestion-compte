@@ -75,6 +75,14 @@ class SearchUserFormHelper
                     '2' => 3,
                 ]
             ]);
+            $formBuilder->add('has_first_shift_date', ChoiceType::class, [
+                'label' => 'créneau inscrit',
+                'required' => false,
+                'choices' => [
+                    'Oui' => 2,
+                    'Non (jamais inscrit à un créneau)' => 1,
+                ]
+            ]);
         }
         $formBuilder->add('membernumber', TextType::class, [
             'label' => '# =',
@@ -209,14 +217,6 @@ class SearchUserFormHelper
                     ]
                 ]);
             }
-            $formBuilder->add('has_first_shift_date', ChoiceType::class, [
-                'label' => 'créneau inscrit',
-                'required' => false,
-                'choices' => [
-                    'Oui' => 2,
-                    'Non (jamais inscrit à un créneau)' => 1,
-                ]
-            ]);
             $formBuilder->add('formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
                 'choice_label' => 'name',
@@ -462,6 +462,13 @@ class SearchUserFormHelper
             $qb = $qb->andWhere('SIZE(m.beneficiaries) = :beneficiary_count')
                 ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
         }
+        if ($form->get('has_first_shift_date')->getData() > 0) {
+            if ($form->get('has_first_shift_date')->getData() == 2) {
+                $qb = $qb->andWhere('m.firstShiftDate IS NOT NULL');
+            } else if ($form->get('has_first_shift_date')->getData() == 1) {
+                $qb = $qb->andWhere('m.firstShiftDate IS NULL');
+            }
+        }
 
         if ($form->get('registration')->getData()) {
             if ($form->get('registration')->getData() == 2) {
@@ -583,14 +590,6 @@ class SearchUserFormHelper
                 $qb = $qb->andWhere('pp.id IS NOT NULL');
             } else if ($form->get('has_period_position')->getData() == 1) {
                 $qb = $qb->andWhere('pp.id IS NULL');
-            }
-        }
-
-        if ($form->get('has_first_shift_date')->getData() > 0) {
-            if ($form->get('has_first_shift_date')->getData() == 2) {
-                $qb = $qb->andWhere('m.firstShiftDate IS NOT NULL');
-            } else if ($form->get('has_first_shift_date')->getData() == 1) {
-                $qb = $qb->andWhere('m.firstShiftDate IS NULL');
             }
         }
 
