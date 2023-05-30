@@ -588,9 +588,9 @@ class SearchUserFormHelper
 
         if ($form->get('has_first_shift_date')->getData() > 0) {
             if ($form->get('has_first_shift_date')->getData() == 2) {
-                $qb = $qb->andWhere('m.first_shift_date IS NOT NULL');
+                $qb = $qb->andWhere('m.firstShiftDate IS NOT NULL');
             } else if ($form->get('has_first_shift_date')->getData() == 1) {
-                $qb = $qb->andWhere('m.first_shift_date IS NULL');
+                $qb = $qb->andWhere('m.firstShiftDate IS NULL');
             }
         }
 
