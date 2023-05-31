@@ -43,16 +43,22 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col s6">
+                            <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.exempted) }}
                                     {{ form_label(form.exempted) }}
                                 </div>
                             </div>
-                            <div class="col s6">
+                            <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.beneficiary_count) }}
                                     {{ form_label(form.beneficiary_count) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.has_first_shift_date) }}
+                                    {{ form_label(form.has_first_shift_date) }}
                                 </div>
                             </div>
                         </div>
@@ -167,7 +173,6 @@
                             {{ form_widget(form.phone) }}
                             {{ form_label(form.phone) }}
                         </div>
-                        <h5>Equipe</h5>
                         <div class="input-field">
                             {{ form_widget(form.flying) }}
                             {{ form_label(form.flying) }}
@@ -222,7 +227,7 @@
         <thead>
             <tr>
                 <th class="hide-on-med-and-down">Etat</th>
-                <th data-col="o.member_number">#</th>
+                <th data-col="m.member_number">#</th>
                 <th data-col="u.username">username</th>
                 <th data-col="b.firstname">prénom</th>
                 <th data-col="b.lastname">nom</th>

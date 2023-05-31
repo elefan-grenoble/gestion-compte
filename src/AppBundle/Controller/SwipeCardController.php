@@ -6,7 +6,6 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\SwipeCard;
 use AppBundle\Entity\User;
 use AppBundle\Security\SwipeCardVoter;
-use AppBundle\Service\SearchUserFormHelper;
 use CodeItNow\BarcodeBundle\Utils\BarcodeGenerator;
 use CodeItNow\BarcodeBundle\Utils\QrCode;
 use Symfony\Component\HttpFoundation\RedirectResponse;

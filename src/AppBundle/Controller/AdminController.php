@@ -76,7 +76,7 @@ class AdminController extends Controller
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
-            'sort' => 'o.member_number',
+            'sort' => 'm.member_number',
             'dir' => 'ASC',
             'withdrawn' => 1,
         ];
@@ -96,7 +96,7 @@ class AdminController extends Controller
             $sort = $defaults['sort'];
             $order = $defaults['dir'];
             $currentPage = 1;
-            $qb = $qb->andWhere('o.withdrawn = :withdrawn')
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $defaults['withdrawn']-1);
         }
         $qb = $qb->orderBy($sort, $order);

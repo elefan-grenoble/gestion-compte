@@ -14,7 +14,6 @@ use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\RegistrationType;
-use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
