@@ -1,6 +1,8 @@
 <?php
 
 namespace AppBundle\Controller;
+
+use DateTime;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
@@ -787,15 +789,16 @@ class EventController extends Controller
                 'multiple' => false,
                 'required' => false
             ))
-            ->add('title', CheckboxType::class, array('label' => 'Afficher le titre du widget ?', 'data' => true, 'required' => false))
+            ->add('date_max', TextType::class, array('label' => "Jusqu'à la date (incluse) ?", 'required' => false, 'attr' => array('class' => 'datepicker')))
             ->add('limit', IntegerType::class, array('label' => "Nombre maximum d'événements à afficher ?", 'scale' => 0, 'required' => false))
+            ->add('title', CheckboxType::class, array('label' => 'Afficher le titre du widget ?', 'data' => true, 'required' => false))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&limit=' . ($data['limit'] ? $data['limit'] : '');
+            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0);
 
             return $this->render('admin/event/widget/generate.html.twig', array(
                 'query_string' => $widgetQueryString,
@@ -819,21 +822,28 @@ class EventController extends Controller
 
         $buckets = array();
         $eventKind = null;
+        $eventDateMax = null;
 
-        $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
-        $limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
+        $filter_date_max = $request->query->has('date_max') ? ($request->get('date_max') ? new DateTime($request->get('date_max')) : null) : null;
+        if ($filter_date_max) {
+            $eventDateMax = clone($filter_date_max);
+            $eventDateMax->modify('+1 day');  // also return events happening on max date
+        }
+        $filter_limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
+        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
 
-        $event_kind_id = $request->get('event_kind_id');
-        if ($event_kind_id) {
-            $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
+        $filter_event_kind_id = $request->get('event_kind_id');
+        if ($filter_event_kind_id) {
+            $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
         }
 
-        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, null, $limit);
+        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, $eventDateMax, $filter_limit);
 
         return $this->render('admin/event/widget/widget.html.twig', [
             'events' => $events,
             'eventKind' => $eventKind,
-            'title' => $title
+            'maxDate' => $filter_date_max,
+            'title' => $filter_title
         ]);
     }
 
