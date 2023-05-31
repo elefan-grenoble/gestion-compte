@@ -784,16 +784,16 @@ class EventController extends Controller
                 'class' => 'AppBundle:EventKind',
                 'choice_label' => 'name',
                 'multiple' => false,
-                'required' => true
+                'required' => false
             ))
-            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'))
+            ->add('title', CheckboxType::class, array('label' => 'Afficher le titre du widget ?', 'data' => true, 'required' => false))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'event_kind_id='.$data['kind']->getId().'&title='.($data['title'] ? 1 : 0);
+            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0);
 
             return $this->render('admin/event/widget/generate.html.twig', array(
                 'query_string' => $widgetQueryString,
@@ -813,19 +813,20 @@ class EventController extends Controller
      */
     public function widgetAction(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+
         $buckets = array();
         $eventKind = null;
 
         $event_kind_id = $request->get('event_kind_id');
         $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
 
+        $eventKind = null;
         if ($event_kind_id) {
-            $em = $this->getDoctrine()->getManager();
             $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
-            if ($eventKind) {
-                $events = $em->getRepository('AppBundle:Event')->findFutures(null, $eventKind);
-            }
         }
+
+        $events = $em->getRepository('AppBundle:Event')->findFutures(null, $eventKind);
 
         return $this->render('admin/event/widget/widget.html.twig', [
             'events' => $events,
