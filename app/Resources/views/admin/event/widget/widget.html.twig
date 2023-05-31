@@ -1,13 +1,19 @@
 {% extends 'layoutlight.html.twig' %}
 
 {% block content %}
-{% if title %}liste des prochains événements <strong>{{ eventKind.name }}</strong> :{% endif %}
+{% if title %}
+    liste des prochains événements
+    {% if eventKind %}<strong>{{ eventKind.name }}</strong>{% endif %}
+    {% if maxDate %}(jusqu'au {{ maxDate | date_short }}){% endif %}
+    :
+{% endif %}
 <ul>
     {% for event in events %}
         <li>
             - <strong>{{ event.title }}</strong>
             {{ event.date | date_fr_full_with_time }}
             {% if event.end %}<i>({{ event.duration }})</i>{% endif %}
+            {# {% if not eventKind %}[{{ event.kind }}] {% endif %} #}
         </li>
     {% endfor %}
 </ul>
