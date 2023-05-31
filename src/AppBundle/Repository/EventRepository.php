@@ -17,7 +17,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         return $this->findBy(array(), array('date' => 'DESC'));
     }
 
-    public function findFutures(\DateTime $max = null, EventKind $eventKind = null)
+    public function findFutures(EventKind $eventKind = null, \DateTime $max = null, int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.kind', 'ek')
@@ -25,16 +25,20 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->where('e.date > :now')
             ->setParameter('now', new \Datetime('now'));
 
+        if ($eventKind) {
+            $qb
+                ->andwhere('e.kind = :kind')
+                ->setParameter('kind', $eventKind);
+        }
+
         if ($max) {
             $qb
                 ->andWhere('e.date < :max')
                 ->setParameter('max', $max);
         }
 
-        if ($eventKind) {
-            $qb
-                ->andwhere('e.kind = :kind')
-                ->setParameter('kind', $eventKind);
+        if ($limit) {
+            $qb->setMaxResults($limit);
         }
 
         $qb->orderBy('e.date', 'ASC');
@@ -44,7 +48,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findPast(int $limit = null, EventKind $eventKind = null)
+    public function findPast(EventKind $eventKind = null, int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.kind', 'ek')
@@ -52,14 +56,14 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->where('e.date < :now')
             ->setParameter('now', new \Datetime('now'));
 
-        if ($limit) {
-            $qb->setMaxResults($limit);
-        }
-
         if ($eventKind) {
             $qb
                 ->andwhere('e.kind = :kind')
                 ->setParameter('kind', $eventKind);
+        }
+
+        if ($limit) {
+            $qb->setMaxResults($limit);
         }
 
         $qb->orderBy('e.date', 'DESC');

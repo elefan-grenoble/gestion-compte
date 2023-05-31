@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -101,7 +102,7 @@ class EventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
-        $eventsPast = $em->getRepository('AppBundle:Event')->findPast(10);  # only the 10 last
+        $eventsPast = $em->getRepository('AppBundle:Event')->findPast(null, 10);  # only the 10 last
 
         return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
@@ -787,13 +788,14 @@ class EventController extends Controller
                 'required' => false
             ))
             ->add('title', CheckboxType::class, array('label' => 'Afficher le titre du widget ?', 'data' => true, 'required' => false))
+            ->add('limit', IntegerType::class, array('label' => "Nombre maximum d'événements à afficher ?", 'scale' => 0, 'required' => false))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0);
+            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&limit=' . ($data['limit'] ? $data['limit'] : '');
 
             return $this->render('admin/event/widget/generate.html.twig', array(
                 'query_string' => $widgetQueryString,
@@ -818,15 +820,15 @@ class EventController extends Controller
         $buckets = array();
         $eventKind = null;
 
-        $event_kind_id = $request->get('event_kind_id');
         $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+        $limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
 
-        $eventKind = null;
+        $event_kind_id = $request->get('event_kind_id');
         if ($event_kind_id) {
             $eventKind = $em->getRepository('AppBundle:EventKind')->find($event_kind_id);
         }
 
-        $events = $em->getRepository('AppBundle:Event')->findFutures(null, $eventKind);
+        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, null, $limit);
 
         return $this->render('admin/event/widget/widget.html.twig', [
             'events' => $events,
