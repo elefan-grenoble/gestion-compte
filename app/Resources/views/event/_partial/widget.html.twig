@@ -7,7 +7,7 @@
     {% if maxDate %}(jusqu'au {{ maxDate | date_short }}){% endif %}
     :
 {% endif %}
-<ul>
+<ul style="margin:0;">
     {% for event in events %}
         <li>
             - <strong>{{ event.title }}</strong>
