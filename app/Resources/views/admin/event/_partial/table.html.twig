@@ -10,8 +10,8 @@
             {% if from_admin %}
                 <th>Procurations</th>
                 <th>Auteur</th>
-                <th>Actions</th>
             {% endif %}
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -41,10 +41,13 @@
                     <td title="{{ event.createdAt | date_fr_full_with_time }}">
                         {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: event.createdBy, target_blank: true } %}
                     </td>
-                    <td>
-                        <a href="{{ path('admin_event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
-                    </td>
                 {% endif %}
+                <td>
+                    <a href="{{ path('event_detail', { 'id': event.id }) }}" {% if from_admin %}target="_blank"{% endif %}><i class="material-icons">visibility</i>Voir</a>
+                    {% if from_admin %}
+                        <a href="{{ path('admin_event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </tbody>

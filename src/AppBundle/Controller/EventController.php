@@ -22,11 +22,47 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class EventController extends Controller
 {
     /**
-     * Event home page
+     * Event widget display
+     * 
+     * @Route("/widget", name="event_widget", methods={"GET"})
+     */
+    public function widgetAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $buckets = array();
+        $eventKind = null;
+        $eventDateMax = null;
+
+        $filter_date_max = $request->query->has('date_max') ? ($request->get('date_max') ? new DateTime($request->get('date_max')) : null) : null;
+        if ($filter_date_max) {
+            $eventDateMax = clone($filter_date_max);
+            $eventDateMax->modify('+1 day');  // also return events happening on max date
+        }
+        $filter_limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
+        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+
+        $filter_event_kind_id = $request->get('event_kind_id');
+        if ($filter_event_kind_id) {
+            $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
+        }
+
+        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, $eventDateMax, $filter_limit);
+
+        return $this->render('event/_partial/widget.html.twig', [
+            'events' => $events,
+            'eventKind' => $eventKind,
+            'maxDate' => $filter_date_max,
+            'title' => $filter_title
+        ]);
+    }
+
+    /**
+     * Event home
      *
      * @Route("/", name="event_index", methods={"GET"})
      */
-    public function publicListAction(Request $request)
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -36,6 +72,20 @@ class EventController extends Controller
         return $this->render('event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
             'eventsPast' => $eventsPast,
+        ));
+    }
+
+    /**
+     * Event detail
+     *
+     * @Route("/{id}", name="event_detail", methods={"GET"})
+     */
+    public function detailAction(Request $request, Event $event)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        return $this->render('event/detail.html.twig', array(
+            'event' => $event,
         ));
     }
 
@@ -376,42 +426,6 @@ class EventController extends Controller
             'event' => $event,
             'form' => $form->createView()
         ));
-    }
-
-    /**
-     * Event widget display
-     * 
-     * @Route("/widget", name="event_widget", methods={"GET"})
-     */
-    public function widgetAction(Request $request)
-    {
-        $em = $this->getDoctrine()->getManager();
-
-        $buckets = array();
-        $eventKind = null;
-        $eventDateMax = null;
-
-        $filter_date_max = $request->query->has('date_max') ? ($request->get('date_max') ? new DateTime($request->get('date_max')) : null) : null;
-        if ($filter_date_max) {
-            $eventDateMax = clone($filter_date_max);
-            $eventDateMax->modify('+1 day');  // also return events happening on max date
-        }
-        $filter_limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
-        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
-
-        $filter_event_kind_id = $request->get('event_kind_id');
-        if ($filter_event_kind_id) {
-            $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
-        }
-
-        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, $eventDateMax, $filter_limit);
-
-        return $this->render('event/_partial/widget.html.twig', [
-            'events' => $events,
-            'eventKind' => $eventKind,
-            'maxDate' => $filter_date_max,
-            'title' => $filter_title
-        ]);
     }
 
     public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer)

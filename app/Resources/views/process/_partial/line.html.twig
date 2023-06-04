@@ -24,7 +24,7 @@
         <div id="view_{{ processUpdate.id }}" class="modal">
             <div class="modal-content">
                 <h5>{{ processUpdate.title }}</h5>
-                {{ processUpdate.description | markdown | raw}}
+                {{ processUpdate.description | markdown | raw }}
             </div>
             <div class="modal-footer">
                 {% if processUpdate.link %}

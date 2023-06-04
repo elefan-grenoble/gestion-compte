@@ -75,7 +75,7 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Event home page
+     * Admin event home
      *
      * @Route("/", name="admin_event_index", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
@@ -94,7 +94,7 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Event list
+     * Admin event list
      *
      * @Route("/list", name="admin_event_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
