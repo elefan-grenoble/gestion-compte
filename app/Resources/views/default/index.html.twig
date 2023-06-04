@@ -164,7 +164,9 @@
                 <br />
                 <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
                     <i class="material-icons left" >event</i>Les événements à venir
-                    <span class="bubble_counter red white-text">{{ eventsFuture | length }}</span>
+                    {% if eventsFuture | length %}
+                        <span class="bubble_counter red white-text">{{ eventsFuture | length }}</span>
+                    {% endif %}
                 </a>
             </div>
             {% if app.user.beneficiary.ownedCommissions | length %}
