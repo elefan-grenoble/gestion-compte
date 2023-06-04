@@ -88,13 +88,7 @@
                 {% endif %}
                 </td>
                 <td>
-                    {% if periodPositionFreeLog.createdBy and periodPositionFreeLog.createdBy.beneficiary %}
-                        <a href="{{ path("member_show",{'member_number': periodPositionFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
-                            {{ periodPositionFreeLog.createdBy.beneficiary }}
-                        </a>
-                    {% else %}
-                        {{ periodPositionFreeLog.createdBy }}
-                    {% endif %}
+                    {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: periodPositionFreeLog.createdBy, target_blank: true } %}
                 </td>
                 {% if is_granted("ROLE_ADMIN") %}
                     <td>{{ periodPositionFreeLog.requestRoute }}</td>
