@@ -253,6 +253,8 @@ liip_imagine:
         data_root: '%kernel.project_dir%/web/'
   filter_sets:
     cache: ~
+    default:
+      quality: 75
     card:
       quality: 75
       filters:

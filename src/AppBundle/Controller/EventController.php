@@ -22,11 +22,11 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class EventController extends Controller
 {
     /**
-     * Event home page
+     * Event home
      *
      * @Route("/", name="event_index", methods={"GET"})
      */
-    public function publicListAction(Request $request)
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -36,6 +36,20 @@ class EventController extends Controller
         return $this->render('event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
             'eventsPast' => $eventsPast,
+        ));
+    }
+
+    /**
+     * Event detail
+     *
+     * @Route("/{id}", name="event_detail", methods={"GET"})
+     */
+    public function detailAction(Request $request, Event $event)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        return $this->render('event/detail.html.twig', array(
+            'event' => $event,
         ));
     }
 

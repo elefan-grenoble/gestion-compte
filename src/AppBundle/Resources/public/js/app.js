@@ -17,6 +17,7 @@ $(document).ready(function() {
     $('.collapsible.collapsible-expandable').collapsible({ accordion: false });
     $('.tooltipped').tooltip();
     $(".dropdown-trigger").dropdown();
+    $(".materialboxed").materialbox();
     // $('input.autocomplete').autocomplete();  // see specific files for initialization & configuration
 });
 

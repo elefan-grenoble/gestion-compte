@@ -1,0 +1,39 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Événement : {{ event.title }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">event</i>&nbsp;{{ event.title }}
+{% endblock %}
+
+{% block content %}
+<h4>{{ event.title }}</h4>
+
+<div class="row">
+    <div class="col m6">
+        <i class="material-icons tiny">event</i>
+        {{ event.date | date_fr_full_with_time }}
+        {% if event.end %}
+            <br />
+            <i class="material-icons tiny">timer</i>
+            <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
+        {% endif %}
+    </div>
+    <div class="col m6">
+        {% if event.kind %}
+            <span class="badge teal white-text">{{ event.kind }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card-panel blue lighten-5">
+    {{ event.description | markdown | raw }}
+</div>
+
+{% if event.img %}
+    {# <img src="{{ event.img }}" width="500" class="materialboxed" /> #}
+    <img src="{{ event|img('imgFile', 'default') }}" class="materialboxed" style="max-width:50%" />
+{% endif %}
+{% endblock %}
