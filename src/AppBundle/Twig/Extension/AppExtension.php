@@ -34,6 +34,7 @@ class AppExtension extends AbstractExtension
     {
         return array(
             new TwigFilter('markdown', array($this, 'markdown')),
+            new TwigFilter('ellipsis', array($this, 'ellipsis')),
             new TwigFilter('json_decode', array($this, 'jsonDecode')),
             new TwigFilter('email_encode', array($this, 'encodeText')),
             new TwigFilter('priority_to_color', array($this, 'priority_to_color')),
@@ -67,6 +68,13 @@ class AppExtension extends AbstractExtension
     {
         $html = Markdown::defaultTransform($markdown);
         return $html;
+    }
+
+    public function ellipsis($text, $maxLen = 50, $ellipsis = '…')
+    {
+        if (strlen($text) <= $maxLen)
+            return $text;
+        return substr($text, 0, $maxLen-strlen($ellipsis)).$ellipsis;
     }
 
     public function encodeText($text)

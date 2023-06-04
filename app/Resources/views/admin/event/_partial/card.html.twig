@@ -11,16 +11,20 @@
         {% if not event.img %}
             <span class="card-title">{{ event.title }}</span>
         {% endif %}
-        <i>
+        <p>
             <i class="material-icons tiny">event</i>
             {{ event.date | date_fr_full_with_time }}
-            {% if event.end %}
-                <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
+            {% if event.kind %}
+                <span class="badge teal white-text">{{ event.kind }}</span>
             {% endif %}
-        </i>
-        {% if event.kind %}
-            <span class="badge teal white-text">{{ event.kind }}</span>
+        </p>
+        {% if event.end %}
+            <p>
+                <i class="material-icons tiny">timer</i>
+                <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
+            </p>
         {% endif %}
+        <br />
         {{ event.description | markdown | raw }}
     </div>
     <div class="card-action">

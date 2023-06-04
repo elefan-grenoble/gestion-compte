@@ -13,7 +13,7 @@
 
 <div class="row">
     {% for event in eventsFuture %}
-        <div class="col s12 m6">
+        <div class="col m12 l6">
             {% include "admin/event/_partial/card.html.twig" with { event: event, from_admin: true } %}
         </div>
     {% endfor %}
