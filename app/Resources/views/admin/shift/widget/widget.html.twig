@@ -2,8 +2,8 @@
 
 {% block content %}
 {% if job %}
-    {% if title %}liste des prochains créneaux de <strong>{{ job.name }}</strong>{% endif %}
-    <ul>
+    {% if title %}liste des prochains créneaux de <strong>{{ job.name }}</strong> :{% endif %}
+    <ul style="margin:0;">
         {% for bucket in buckets %}
             {% if bucket.shifterCount > 0 or display_on_empty %}
                 <li>{{ bucket.start| date_fr_long }} {% if not display_end %}à{% else %}de{% endif %} {{ bucket.start|date('G\\hi') }}{% if display_end %} à {{ bucket.end|date('G\\hi') }}{% endif %}</li>
