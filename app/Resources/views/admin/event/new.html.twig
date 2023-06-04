@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
@@ -38,7 +38,7 @@
 <div class="row">
     {{ form_row(form.imgFile) }}
 </div>
-<a href="{{ path('event_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
+<a href="{{ path('admin_event_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
 <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Créer</button>
 {{ form_end(form) }}
 {% endblock %}

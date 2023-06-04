@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">list</i>&nbsp;Liste des événements
 {% endblock %}
 
@@ -38,7 +38,7 @@
 
 <ul class="pagination">
     <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
-        <a href="{% if(current_page==1) %}#!{% else %}{{ path("event_list", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
+        <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_event_list", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
             <i class="material-icons">chevron_left</i>
         </a>
     </li>
@@ -48,7 +48,7 @@
         </li>
     {% endfor %}
     <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
-        <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("event_list", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
+        <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("admin_event_list", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
             <i class="material-icons">chevron_right</i>
         </a>
     </li>
@@ -56,9 +56,9 @@
 
 {% if is_granted("ROLE_ADMIN") %}
     <br />
-    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
+    <a href="{{ path("admin_proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
     <br />
-    <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
+    <a href="{{ path('admin_event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
 {% endif %}
 {% endblock %}
 

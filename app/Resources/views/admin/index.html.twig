@@ -88,7 +88,7 @@
 
             {% if is_granted("ROLE_PROCESS_MANAGER") %}
                 <h6><i class="material-icons">content_paste</i>&nbsp;Contenus</h6>
-                <a href="{{ path("event_index") }}" class="waves-effect waves-light btn teal">
+                <a href="{{ path("admin_event_index") }}" class="waves-effect waves-light btn teal">
                     <i class="material-icons left">event</i>Événements
                 </a>
                 {% if is_granted("ROLE_ADMIN") %}

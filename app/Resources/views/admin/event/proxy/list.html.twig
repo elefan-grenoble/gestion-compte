@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
 {% if event %}
     <i class="material-icons">event</i>&nbsp;{{ event.title }}<i class="material-icons">chevron_right</i>
 {% endif %}
@@ -74,7 +74,7 @@
                     </td>
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         <td>
-                            <a href="{{ path("proxy_edit",{'id':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
+                            <a href="{{ path("admin_proxy_edit",{'id':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
                             {{ form_start(delete_forms[proxy.id]) }}
                             {{ form_widget(delete_forms[proxy.id]) }}
                             <div>

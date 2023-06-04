@@ -33,14 +33,14 @@
                 {% if from_admin %}
                     <td>
                         {% if event.needProxy %}
-                            <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
+                            <a href="{{ path("admin_event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
                             <br />
-                            <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+                            <a href="{{ path("admin_event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
                         {% endif %}
                     </td>
                     <td title="{{ event.createdAt | date_fr_full_with_time }}">{{ event.createdBy }}</td>
                     <td>
-                        <a href="{{ path('event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                        <a href="{{ path('admin_event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
                     </td>
                 {% endif %}
             </tr>
