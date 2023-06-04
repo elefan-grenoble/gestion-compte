@@ -33,7 +33,6 @@
 </div>
 
 {% if event.img %}
-    {# <img src="{{ event.img }}" width="500" class="materialboxed" /> #}
     <img src="{{ event|img('imgFile', 'default') }}" class="materialboxed" style="max-width:50%" />
 {% endif %}
 {% endblock %}
