@@ -22,7 +22,7 @@ class ShiftExemptionController extends Controller
      * @Route("/", name="admin_shiftexemption_index", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 

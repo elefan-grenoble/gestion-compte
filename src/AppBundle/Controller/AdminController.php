@@ -60,7 +60,7 @@ class AdminController extends Controller
      * @Route("/", name="admin", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN_PANEL')")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         return $this->render('admin/index.html.twig');
     }

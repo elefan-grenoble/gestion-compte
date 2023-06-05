@@ -25,9 +25,12 @@ class FormationController extends Controller
      * @Route("/", name="formation_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
-        $formations = $this->getDoctrine()->getManager()->getRepository('AppBundle:Formation')->findAll();
+        $em = $this->getDoctrine()->getManager();
+
+        $formations = $em->getRepository('AppBundle:Formation')->findAll();
+
         return $this->render('admin/formation/list.html.twig',array('formations'=>$formations));
     }
 
