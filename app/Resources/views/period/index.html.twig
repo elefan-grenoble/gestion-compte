@@ -60,7 +60,7 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
                             {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
                         </div>
                         <div class="row">
-                            {{ form_widget(filter_form.filter, { 'attr': {'class': 'btn col m3'} }) }}
+                            {{ form_widget(filter_form.submit, { 'attr': {'class': 'btn col m3'} }) }}
                             {{ form_end(filter_form) }}
                         </div>
                         {% if use_fly_and_fixed %}
