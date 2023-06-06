@@ -140,7 +140,7 @@ class AdminEventController extends Controller
      * Event new
      *
      * @Route("/new", name="admin_event_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -170,7 +170,7 @@ class AdminEventController extends Controller
      * Event edit
      *
      * @Route("/{id}/edit", name="admin_event_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, Event $event)
     {
