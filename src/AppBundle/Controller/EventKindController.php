@@ -22,7 +22,7 @@ class EventKindController extends Controller
      * Lists all event kinds
      *
      * @Route("/", name="admin_event_kind_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function listAction()
     {
@@ -39,7 +39,7 @@ class EventKindController extends Controller
      * Add new event kind
      *
      * @Route("/new", name="admin_event_kind_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -67,7 +67,7 @@ class EventKindController extends Controller
      * Edit event kind
      *
      * @Route("/{id}/edit", name="admin_event_kind_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, EventKind $eventKind)
     {
@@ -96,7 +96,7 @@ class EventKindController extends Controller
      * Delete event kind
      *
      * @Route("/{id}", name="admin_event_kind_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, EventKind $eventKind)
     {

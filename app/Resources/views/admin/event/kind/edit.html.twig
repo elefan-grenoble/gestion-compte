@@ -25,7 +25,7 @@
 </div>
 {{ form_end(form) }}
 
-{% if is_granted("ROLE_SUPER_ADMIN") %}
+{% if is_granted("ROLE_ADMIN") %}
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
     <div>
