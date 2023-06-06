@@ -90,7 +90,7 @@
                         <div class="row">
                             {{ _self.form_input(filter_form.beneficiary, not use_fly_and_fixed) }}
                         </div>
-                        {{ form_widget(filter_form.filter) }}
+                        {{ form_widget(filter_form.submit) }}
                         {{ form_end(filter_form) }}
                     </div>
                 </li>
@@ -101,7 +101,7 @@
                     </div>
                     <div class="collapsible-body">
                         <div class="row">
-                            <a href="{{ path("period_new") }}"
+                            <a href="{{ path("admin_period_new") }}"
                                class="btn col m4 waves-effect waves-light tooltipped"
                                data-position="bottom"
                                data-tooltip="Créer un groupe de créneaux type à une heure et un jour donné">
@@ -111,7 +111,7 @@
 
                         {% if is_granted("ROLE_ADMIN") %}
                             <div class="row">
-                                <a href="{{ path("period_copy") }}"
+                                <a href="{{ path("admin_period_copy") }}"
                                    class="btn col m4 waves-effect waves-light tooltipped"
                                    data-position="bottom"
                                    data-tooltip="Dupliquer des créneaux types d'un jour vers un autre">
@@ -119,7 +119,7 @@
                                 </a>
                             </div>
                             <div class="row">
-                                <a href="{{ path("shifts_generation") }}"
+                                <a href="{{ path("admin_shifts_generation") }}"
                                    class="btn col m4 waves-effect waves-light tooltipped"
                                    data-position="bottom"
                                    data-tooltip="Générer automatiquement des créneaux à partir de la semaine type">
