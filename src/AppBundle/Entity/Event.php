@@ -34,6 +34,12 @@ class Event
     private $title;
 
     /**
+     * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events", fetch="EAGER")
+     * @ORM\JoinColumn(name="event_kind_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $kind;
+
+    /**
      * @var string
      *
      * @Assert\NotBlank()
@@ -46,6 +52,30 @@ class Event
      * @ORM\Column(name="description", type="text")
      */
     private $description;
+
+    /**
+     * @var \DateTime
+     *
+     * @Assert\DateTime()
+     * @Assert\NotNull()
+     * @ORM\Column(name="date", type="datetime")
+     */
+    private $date;
+
+    /**
+     * @var \DateTime
+     *
+     * @Assert\DateTime()
+     * @ORM\Column(name="end", type="datetime", nullable=true)
+     */
+    private $end;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="location", type="string", length=255, nullable=true)
+     */
+    private $location;
 
     /**
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
@@ -69,36 +99,6 @@ class Event
      * @var integer
      */
     private $imgSize;
-
-    /**
-     * @var \DateTime
-     *
-     * @Assert\DateTime()
-     * @Assert\NotNull()
-     * @ORM\Column(name="date", type="datetime")
-     */
-    private $date;
-
-    /**
-     * @var \DateTime
-     *
-     * @Assert\DateTime()
-     * @ORM\Column(name="end", type="datetime", nullable=true)
-     */
-    private $end;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events", fetch="EAGER")
-     * @ORM\JoinColumn(name="event_kind_id", referencedColumnName="id", onDelete="SET NULL")
-     */
-    private $kind;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="location", type="string", length=255, nullable=true)
-     */
-    private $location;
 
     /**
      * @var \DateTime
@@ -188,31 +188,6 @@ class Event
     }
 
     /**
-     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
-     * of 'UploadedFile' is injected into this setter to trigger the  update. If this
-     * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
-     * must be able to accept an instance of 'File' as the bundle will inject one here
-     * during Doctrine hydration.
-     *
-     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
-     */
-    public function setImgFile($image = null)
-    {
-        $this->imgFile = $image;
-
-        if (null !== $image) {
-            // It is required that at least one field changes if you are using doctrine
-            // otherwise the event listeners won't be called and the file is lost
-            $this->updatedAt = new \DateTimeImmutable();
-        }
-    }
-
-    public function getImgFile()
-    {
-        return $this->imgFile;
-    }
-
-    /**
      * Set title
      *
      * @param string $title
@@ -234,6 +209,30 @@ class Event
     public function getTitle()
     {
         return $this->title;
+    }
+
+    /**
+     * Set kind
+     *
+     * @param \AppBundle\Entity\EventKind $eventKind
+     *
+     * @return Event
+     */
+    public function setKind(\AppBundle\Entity\EventKind $eventKind = null)
+    {
+        $this->kind = $eventKind;
+
+        return $this;
+    }
+
+    /**
+     * Get kind
+     *
+     * @return EventKind
+     */
+    public function getKind()
+    {
+        return $this->kind;
     }
 
     /**
@@ -306,30 +305,6 @@ class Event
     }
 
     /**
-     * Set kind
-     *
-     * @param \AppBundle\Entity\EventKind $eventKind
-     *
-     * @return Event
-     */
-    public function setKind(\AppBundle\Entity\EventKind $eventKind = null)
-    {
-        $this->kind = $eventKind;
-
-        return $this;
-    }
-
-    /**
-     * Get kind
-     *
-     * @return EventKind
-     */
-    public function getKind()
-    {
-        return $this->kind;
-    }
-
-    /**
      * Set description
      *
      * @param string $description
@@ -375,6 +350,31 @@ class Event
     public function getLocation()
     {
         return $this->location;
+    }
+
+    /**
+     * If manually uploading a file (i.e. not using Symfony Form) ensure an instance
+     * of 'UploadedFile' is injected into this setter to trigger the  update. If this
+     * bundle's configuration parameter 'inject_on_load' is set to 'true' this setter
+     * must be able to accept an instance of 'File' as the bundle will inject one here
+     * during Doctrine hydration.
+     *
+     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     */
+    public function setImgFile($image = null)
+    {
+        $this->imgFile = $image;
+
+        if (null !== $image) {
+            // It is required that at least one field changes if you are using doctrine
+            // otherwise the event listeners won't be called and the file is lost
+            $this->updatedAt = new \DateTimeImmutable();
+        }
+    }
+
+    public function getImgFile()
+    {
+        return $this->imgFile;
     }
 
     /**
