@@ -48,6 +48,17 @@ class EventType extends AbstractType
             $userData = $event->getData();
 
             $form->add('title', TextType::class, array('label' => 'Titre'))
+                ->add('kind', EntityType::class, array(
+                    'label' => 'Type d\'événement',
+                    'class' => 'AppBundle:EventKind',
+                    'choice_label' => 'name',
+                    'multiple' => false,
+                    'required' => false,
+                    'query_builder' => function (EventKindRepository $repository) {
+                        return $repository->createQueryBuilder('ek')
+                            ->orderBy('ek.name', 'ASC');
+                    },
+                ))
                 ->add('date', DateTimeType::class, array(
                     'required' => true,
                     'input'  => 'datetime',
@@ -68,22 +79,12 @@ class EventType extends AbstractType
                         'class' => 'datepicker'
                     )
                 ))
+                ->add('location', TextType::class, array('label' => 'Lieu', 'required' => false))
                 ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false))
                 ->add('imgFile', VichImageType::class, array(
                     'required' => false,
                     'allow_delete' => true,
                     'download_link' => true,
-                ))
-                ->add('kind', EntityType::class, array(
-                    'label' => 'Type d\'événement',
-                    'class' => 'AppBundle:EventKind',
-                    'choice_label' => 'name',
-                    'multiple' => false,
-                    'required' => false,
-                    'query_builder' => function (EventKindRepository $repository) {
-                        return $repository->createQueryBuilder('ek')
-                            ->orderBy('ek.name', 'ASC');
-                    },
                 ));
 
             if ($userData && $userData->getId()) {

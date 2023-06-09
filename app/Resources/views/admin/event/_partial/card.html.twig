@@ -24,24 +24,25 @@
                 <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
             </p>
         {% endif %}
+        {% if event.location %}
+            <p>
+                <i class="material-icons tiny">location_on</i>
+                {{ event.location }}
+            </p>
+        {% endif %}
         <br />
         {{ event.description | markdown | raw }}
     </div>
     <div class="card-action">
-        {% if from_admin %}
-            {% if event.needProxy %}
+        {% if event.needProxy %}
+            {% if from_admin %}
                 <div class="left">
                     <a href="{{ path("admin_event_proxies_list", {'id': event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
                 </div>
                 <div class="left">
                     <a href="{{ path("admin_event_signatures", {'id': event.id}) }}"><i class="material-icons left">print</i>Emargement</a>
                 </div>
-            {% endif %}
-            <div class="right">
-                <a href="{{ path("admin_event_edit", {'id': event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-            </div>
-        {% else %}
-            {% if event.needProxy %}
+            {% else %}
                 {% if not app.user.beneficiary or not app.user.beneficiary.membership or not app.user.beneficiary.membership.lastRegistration %}
                     <span>Oups, nous n'avons enregistré aucune adhésion pour ton compte. Tu ne pourras pas voter pour cet événement.</span>
                 {% else %}
@@ -96,9 +97,15 @@
                     {% endif %}
                 {% endif %}
             {% endif %}
+            <br />
+        {% endif %}
+        {% if from_admin %}
+            <div class="right">
+                <a href="{{ path("admin_event_edit", {'id': event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
+            </div>
         {% endif %}
         <div class="right">
-            <a href="{{ path("event_detail", {'id': event.id}) }}" class="{% if not from_admin %}btn blue{% endif %}"><i class="material-icons left">visibility</i>Voir</a>
+            <a href="{{ path("event_detail", {'id': event.id}) }}" class="{% if not from_admin %}btn blue{% endif %}" {% if from_admin %}target="_blank"{% endif %}><i class="material-icons left">visibility</i>Voir</a>
         </div>
     </div>
 </div>

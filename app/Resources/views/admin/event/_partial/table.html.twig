@@ -5,8 +5,9 @@
         <tr>
             <th>Événement</th>
             <th>Type</th>
-            <th>Description</th>
             <th>Date</th>
+            <th>Lieu</th>
+            <th>Description</th>
             {% if from_admin %}
                 <th>Procurations</th>
                 <th>Auteur</th>
@@ -19,23 +20,24 @@
             <tr>
                 <td>{{ event.title }}</td>
                 <td>{{ event.kind }}</td>
-                <td class="center-align">
-                    {% if event.description is not empty %}
-                        <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
-                    {% endif %}
-                </td>
                 <td>
                     {{ event.date | date_fr_full_with_time }}
                     {% if event.end %}
                         <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">({{ event.duration }})</span>
                     {% endif %}
                 </td>
+                <td>{{ event.location }}</td>
+                <td class="center-align">
+                    {% if event.description is not empty %}
+                        <i class="material-icons" title="{{ event.description }}">playlist_add_check</i>
+                    {% endif %}
+                </td>
                 {% if from_admin %}
                     <td>
                         {% if event.needProxy %}
-                            <a href="{{ path("admin_event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
+                            <a href="{{ path("admin_event_proxies_list",{'id':event.id}) }}" style="white-space:nowrap;"><i class="material-icons tiny">list</i>&nbsp;Procurations</a>
                             <br />
-                            <a href="{{ path("admin_event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
+                            <a href="{{ path("admin_event_signatures",{'id':event.id}) }}" style="white-space:nowrap;"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
                         {% endif %}
                     </td>
                     <td title="{{ event.createdAt | date_fr_full_with_time }}">
@@ -43,9 +45,9 @@
                     </td>
                 {% endif %}
                 <td>
-                    <a href="{{ path('event_detail', { 'id': event.id }) }}" {% if from_admin %}target="_blank"{% endif %}><i class="material-icons">visibility</i>Voir</a>
+                    <a href="{{ path('event_detail', { 'id': event.id }) }}" {% if from_admin %}target="_blank"{% endif %} style="white-space:nowrap;"><i class="material-icons">visibility</i>&nbsp;Voir</a>
                     {% if from_admin %}
-                        <a href="{{ path('admin_event_edit', { 'id': event.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                        <a href="{{ path('admin_event_edit', { 'id': event.id }) }}" style="white-space:nowrap;"><i class="material-icons">edit</i>&nbsp;Editer</a>
                     {% endif %}
                 </td>
             </tr>
