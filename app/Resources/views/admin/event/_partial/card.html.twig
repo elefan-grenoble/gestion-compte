@@ -24,6 +24,12 @@
                 <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
             </p>
         {% endif %}
+        {% if event.location %}
+            <p>
+                <i class="material-icons tiny">location_on</i>
+                {{ event.location }}
+            </p>
+        {% endif %}
         <br />
         {{ event.description | markdown | raw }}
     </div>
@@ -98,7 +104,7 @@
             {% endif %}
         {% endif %}
         <div class="right">
-            <a href="{{ path("event_detail", {'id': event.id}) }}" class="{% if not from_admin %}btn blue{% endif %}"><i class="material-icons left">visibility</i>Voir</a>
+            <a href="{{ path("event_detail", {'id': event.id}) }}" class="{% if not from_admin %}btn blue{% endif %}" {% if from_admin %}target="_blank"{% endif %}><i class="material-icons left">visibility</i>Voir</a>
         </div>
     </div>
 </div>
