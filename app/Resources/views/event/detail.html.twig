@@ -37,9 +37,13 @@
     </div>
 </div>
 
-<div class="card-panel blue lighten-5">
-    {{ event.description | markdown | raw }}
-</div>
+{% if event.description %}
+    <div class="card-panel blue lighten-5">
+        {{ event.description | markdown | raw }}
+    </div>
+{% else %}
+    <i>pas de description</i>
+{% endif %}
 
 {% if event.img %}
     <img src="{{ event|img('imgFile', 'default') }}" class="materialboxed" style="max-width:50%" />

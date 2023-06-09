@@ -42,14 +42,7 @@ class Event
     /**
      * @var string
      *
-     * @Assert\NotBlank()
-     * @Assert\Length(
-     *      min = 1,
-     *      max = 1000,
-     *      minMessage = "La description doit avoir au minimum {{ limit }} caractères",
-     *      maxMessage = "La description ne doit pas dépasser {{ limit }} caractères"
-     * )
-     * @ORM\Column(name="description", type="text")
+     * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
