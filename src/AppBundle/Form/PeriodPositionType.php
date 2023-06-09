@@ -43,7 +43,7 @@ class PeriodPositionType extends AbstractType
                 'empty_data' => [self::WEEKA, self::WEEKB, self::WEEKC, self::WEEKD]
             ))
             ->add('formation', EntityType::class, array(
-                'label'=>'Rôle necessaire',
+                'label'=>'Formation necessaire',
                 'choice_label' => 'name',
                 'class' => Formation::class,
                 'multiple' => false,

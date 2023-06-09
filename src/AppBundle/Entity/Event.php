@@ -94,6 +94,13 @@ class Event
     private $kind;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="location", type="string", length=255, nullable=true)
+     */
+    private $location;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="max_date_of_last_registration", type="datetime", nullable=true)
@@ -323,6 +330,54 @@ class Event
     }
 
     /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Event
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set location
+     *
+     * @param string $location
+     *
+     * @return Event
+     */
+    public function setLocation($location)
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
+    /**
+     * Get location
+     *
+     * @return string
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
      * Add proxy
      *
      * @param \AppBundle\Entity\Proxy $proxy
@@ -375,30 +430,6 @@ class Event
     public function getProxies()
     {
         return $this->proxies;
-    }
-
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return Event
-     */
-    public function setDescription($description)
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
-    /**
-     * Get description
-     *
-     * @return string
-     */
-    public function getDescription()
-    {
-        return $this->description;
     }
 
     /**
