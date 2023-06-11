@@ -255,6 +255,9 @@ services:
     event_service:
         class: AppBundle\Service\EventService
         public: true
+    opening_hour_service:
+        class: AppBundle\Service\OpeningHourService
+        public: true
 
     search_user_form_helper:
             class: AppBundle\Service\SearchUserFormHelper
