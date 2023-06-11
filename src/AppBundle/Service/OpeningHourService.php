@@ -15,6 +15,16 @@ class OpeningHourService
         $this->em = $em;
     }
 
+    public function isEmpty()
+    {
+        $openingHours = $this->em->getRepository('AppBundle:OpeningHour')->findAll();
+        if (count($openingHours) > 0) {
+            return False;
+        }
+
+        return True;
+    }
+
     public function isOpen(\DateTime $date = null)
     {
         if (!$date) {

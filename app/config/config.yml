@@ -123,6 +123,7 @@ twig:
     shift_service: "@shift_service"
     period_service: "@period_service"
     time_log_service: "@time_log_service"
+    opening_hour_service: "@opening_hour_service"
 
 # Doctrine Configuration
 doctrine:

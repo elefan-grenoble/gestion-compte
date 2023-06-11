@@ -1,0 +1,7 @@
+{% if not opening_hour_service.isEmpty %}
+    {% if opening_hour_service.isOpen %}
+        <span class="badge green white-text">Ouvert</span>
+    {% else %}
+        <span class="badge red white-text">Fermé</span>
+    {% endif %}
+{% endif %}
