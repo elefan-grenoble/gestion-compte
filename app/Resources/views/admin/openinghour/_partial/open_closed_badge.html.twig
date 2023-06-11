@@ -1,7 +1,9 @@
+{% set float_unset = float_unset ?? null %}
+
 {% if not opening_hour_service.isEmpty %}
     {% if opening_hour_service.isOpen %}
-        <span class="badge green white-text">Ouvert</span>
+        <span class="badge green white-text" style="{% if float_unset %}float:unset;{% endif %}">Ouvert</span>
     {% else %}
-        <span class="badge red white-text">Fermé</span>
+        <span class="badge red white-text" style="{% if float_unset %}float:unset;{% endif %}">Fermé</span>
     {% endif %}
 {% endif %}
