@@ -38,11 +38,11 @@
     {% for openingHour in openingHours %}
         <tr>
             <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
-            <td>{{ openingHour.start | date('G\\hi') }}</td>
-            <td>{{ openingHour.end | date('G\\hi') }}</td>
+            <td>{{ openingHour.start | time_short }}</td>
+            <td>{{ openingHour.end | time_short }}</td>
             <td>
                 <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">
-                    <i class="material-icons">edit</i>Editer
+                    <i class="material-icons">edit</i>&nbsp;Editer
                 </a>
             </td>
         </tr>

@@ -4,14 +4,14 @@
             {% set dayOfWeek = -1 %}
             {% for openingHour in openingHours %}
                 {% if openingHour.dayOfWeek == dayOfWeek %}
-                    & {{ openingHour.start | date('G\\hi') }}-{{ openingHour.end | date('G\\hi') }}
+                    & {{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
                 {% else %}
                     {# close previous day #}
                     {% if loop.index > 0 %}</td></tr>{% endif %}
                     {# open new day #}
                     <tr>
                         <td class="no-padding" style="text-align:right">{{ openingHour.dayOfWeekString | capitalize }} : </td>
-                        <td class="no-padding">{{ openingHour.start | date('G\\hi') }}-{{ openingHour.end | date('G\\hi') }}
+                        <td class="no-padding">{{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
                 {% endif %}
                 {% set dayOfWeek = openingHour.dayOfWeek %}
             {% endfor %}

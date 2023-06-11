@@ -47,6 +47,7 @@ class AppExtension extends AbstractExtension
             new TwigFilter('date_short', array($this, 'date_short')),
             new TwigFilter('date_time', array($this, 'date_time')),
             new TwigFilter('date_w3c', array($this, 'date_w3c')),
+            new TwigFilter('time_short', array($this, 'time_short')),
             new TwigFilter('duration_from_minutes', array($this, 'duration_from_minutes')),
             new TwigFilter('qr', array($this, 'qr')),
             new TwigFilter('barcode', array($this, 'barcode')),
@@ -210,7 +211,20 @@ class AppExtension extends AbstractExtension
      */
     public function date_w3c(\DateTime $date)
     {
-        return $date->format( \DateTimeInterface::W3C);
+        return $date->format(\DateTimeInterface::W3C);
+    }
+
+    /**
+     * Example: "9h30" ; "10h"
+     */
+    public function time_short(\DateTime $date)
+    {
+        setlocale(LC_TIME, 'fr_FR.UTF8');
+        $time_minutes = $date->format('i');
+        if ($time_minutes == "00") {
+            return strftime("%kh", $date->getTimestamp());
+        }
+        return strftime("%kh%M", $date->getTimestamp());
     }
 
     public function payment_mode_devise(int $value)

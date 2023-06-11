@@ -64,9 +64,7 @@
         </div>
 {% endif %}
 
-
 <div id="post-it_edit{{ note.id }}" class="modal modal-fixed-footer post-it_edit">
-
     <div class="modal-content">
         <h4>Editer ce post-it</h4>
         {{ form_start(notes_form[note.id], {'attr': {'id': 'form_note_edit_'~note.id,'class': 'edit-post-it' }}) }}
@@ -86,5 +84,4 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-red btn red" onclick="document.getElementById('form_note_delete_{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
         {% endif %}
     </div>
-
 </div>
