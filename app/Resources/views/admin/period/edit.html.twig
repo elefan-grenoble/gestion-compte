@@ -205,7 +205,7 @@
                     {% if use_fly_and_fixed and not period.isEmpty %}
                         <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les postes doivent être libérés avant de pouvoir supprimer le créneau type">info</i>
                     {% endif %}
-                    {{ form_start(period_delete_form) }}
+                    {{ form_start(admin_period_delete_form) }}
                     <div id="remove-period-confirmation-modal" class="modal">
                         <div class="modal-content">
                             <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
@@ -220,7 +220,7 @@
                             </button>
                         </div>
                     </div>
-                    {{ form_end(period_delete_form) }}
+                    {{ form_end(admin_period_delete_form) }}
                 {% endif %}
             </div>
         </li>
