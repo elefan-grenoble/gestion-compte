@@ -4,17 +4,13 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Entity\OpeningHour;
-use AppBundle\Entity\Task;
 use AppBundle\Form\OpeningHourType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 
 /**
