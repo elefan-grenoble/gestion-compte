@@ -1,0 +1,43 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Fermetures exceptionnelles - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">block</i>&nbsp;Fermetures exceptionnelles
+{% endblock %}
+
+{% block content %}
+<h4>Liste des fermetures exceptionnelles ({{ closingExceptions | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Jour de fermeture</th>
+            <th>Auteur</th>
+            <th>Date de création</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for closingException in closingExceptions %}
+        <tr>
+            <td>{{ closingException.date | date_short }}</td>
+            <td>
+                {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: closingException.createdBy, target_blank: true } %}
+            </td>
+            <td title="{{ closingException.createdAt | date_time }}">
+                {{ closingException.createdAt | date_short }}
+            </td>
+            <td></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<br />
+<a href="{{ path('admin_closingexception_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter une fermeture exceptionnelle
+</a>
+{% endblock %}
