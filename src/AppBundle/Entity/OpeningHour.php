@@ -165,7 +165,7 @@ class OpeningHour
      *
      * @param \DateTime $createdAt
      *
-     * @return SocialNetwork
+     * @return OpeningHour
      */
     public function setCreatedAt($createdAt)
     {

@@ -46,6 +46,7 @@ class ClosingExceptionController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $closingException = new ClosingException();
 
@@ -53,6 +54,8 @@ class ClosingExceptionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $closingException->setCreatedBy($current_user);
+
             $em->persist($closingException);
             $em->flush();
 

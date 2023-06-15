@@ -62,11 +62,35 @@ class ClosingException
     }
 
     /**
+     * Set date
+     *
+     * @param \DateTime $date
+     *
+     * @return OpeningHour
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get date
+     *
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
      * Set createdAt
      *
      * @param \DateTime $createdAt
      *
-     * @return SocialNetwork
+     * @return OpeningHour
      */
     public function setCreatedAt($createdAt)
     {
