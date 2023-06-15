@@ -31,19 +31,6 @@ class MembershipShiftExemption
     private $id;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
-     */
-    private $createdBy;
-
-    /**
      * @ORM\ManyToOne(targetEntity="ShiftExemption", inversedBy="membershipShiftExemptions", fetch="EAGER")
      * @ORM\JoinColumn(name="shift_exemption_id", referencedColumnName="id")
      */
@@ -77,6 +64,19 @@ class MembershipShiftExemption
      * @Assert\GreaterThan(propertyPath="start")
      */
     private $end;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
 
 
     /**
