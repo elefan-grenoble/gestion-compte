@@ -63,67 +63,71 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             $count_existing_period = 0;
             $output->writeln('<fg=cyan;>'.$date->format('D d M Y').'</>');
 
-            $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+            $closingException = $em->getRepository('AppBundle:ClosingException')->findBy(['date' => $date]);
+            if ($closingException) {
+                $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau sera généré</>');
+            } else {
+                $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+                $periods = $em->getRepository('AppBundle:Period')->createQueryBuilder('p')
+                    ->where('p.dayOfWeek = :dow')
+                    ->setParameter('dow', $dayOfWeek)
+                    ->orderBy('p.start')
+                    ->getQuery()
+                    ->getResult();
 
-            $periods = $em->getRepository('AppBundle:Period')->createQueryBuilder('p')
-                ->where('p.dayOfWeek = :dow')
-                ->setParameter('dow', $dayOfWeek)
-                ->orderBy('p.start')
-                ->getQuery()
-                ->getResult();
+                foreach ($periods as $period) {
+                    $shift = new Shift();
+                    $start = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getStart()->format('H:i'));
+                    $shift->setStart($start);
+                    $end = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i'));
+                    $shift->setEnd($end);
 
-            foreach ($periods as $period) {
-                $shift = new Shift();
-                $start = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getStart()->format('H:i'));
-                $shift->setStart($start);
-                $end = date_create_from_format('Y-m-d H:i', $date->format('Y-m-d') . ' ' . $period->getEnd()->format('H:i'));
-                $shift->setEnd($end);
-
-                foreach ($period->getPositions() as $position) {
-                    // Semaine #A-B-C-D
-                    // Ignorer les periodes en dehors du cycle semaine
-                    $weekCycleIndex = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51
-                    if ($weekCycle[$weekCycleIndex] != $position->getWeekCycle()) {
-                        continue;
-                    }
-
-                    $already_generated = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
-                    if (!$already_generated) {
-                        $lastStart = $this->lastCycleDate($start);
-                        $lastEnd = $this->lastCycleDate($end);
-                        $last_cycle_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
-                        $current_shift = clone $shift;
-                        $current_shift->setJob($period->getJob());
-                        $current_shift->setFormation($position->getFormation());
-                        $current_shift->setPosition($position);
-                        // si c'est un créneau fixe
-                        if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {
-                            $current_shift->setFixe(True);
-                            $current_shift->setShifter($position->getShifter());
-                            $current_shift->setBookedTime(new \DateTime('now'));
-                            $current_shift->setBooker($admin);
-                        } else if ($last_cycle_shift && $last_cycle_shift->getShifter() && $reserve_new_shift_to_prior_shifter) {
-                            $current_shift->setLastShifter($last_cycle_shift->getShifter());
-                            $reservedShifts[$count_new_all] = $current_shift;
-                            $formerShifts[$count_new_all] = $last_cycle_shift;
-                        } else {
-                            $current_shift->setShifter(null);
-                            $current_shift->setBookedTime(null);
-                            $current_shift->setBooker(null);
+                    foreach ($period->getPositions() as $position) {
+                        // Semaine #A-B-C-D
+                        // Ignorer les periodes en dehors du cycle semaine
+                        $weekCycleIndex = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51
+                        if ($weekCycle[$weekCycleIndex] != $position->getWeekCycle()) {
+                            continue;
                         }
 
-                        $em->persist($current_shift);
-                        $count_new_period++;
-                        $count_new_all++;
-                    } else {
-                        $count_existing_period++;
-                        $count_existing_all++;
+                        $already_generated = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
+                        if (!$already_generated) {
+                            $lastStart = $this->lastCycleDate($start);
+                            $lastEnd = $this->lastCycleDate($end);
+                            $last_cycle_shift = $em->getRepository('AppBundle:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
+                            $current_shift = clone $shift;
+                            $current_shift->setJob($period->getJob());
+                            $current_shift->setFormation($position->getFormation());
+                            $current_shift->setPosition($position);
+                            // si c'est un créneau fixe
+                            if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {
+                                $current_shift->setFixe(True);
+                                $current_shift->setShifter($position->getShifter());
+                                $current_shift->setBookedTime(new \DateTime('now'));
+                                $current_shift->setBooker($admin);
+                            } else if ($last_cycle_shift && $last_cycle_shift->getShifter() && $reserve_new_shift_to_prior_shifter) {
+                                $current_shift->setLastShifter($last_cycle_shift->getShifter());
+                                $reservedShifts[$count_new_all] = $current_shift;
+                                $formerShifts[$count_new_all] = $last_cycle_shift;
+                            } else {
+                                $current_shift->setShifter(null);
+                                $current_shift->setBookedTime(null);
+                                $current_shift->setBooker(null);
+                            }
+
+                            $em->persist($current_shift);
+                            $count_new_period++;
+                            $count_new_all++;
+                        } else {
+                            $count_existing_period++;
+                            $count_existing_all++;
+                        }
                     }
                 }
-            }
-            $em->flush();
+                $em->flush();
 
-            $this->printRecapMessage($output, $count_new_period, $count_existing_period);
+                $this->printRecapMessage($output, $count_new_period, $count_existing_period);
+            }
         }
 
         $shiftEmail = $this->getContainer()->getParameter('emails.shift');
