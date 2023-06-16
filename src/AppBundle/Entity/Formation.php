@@ -36,6 +36,13 @@ class Formation extends Group
     private $description;
 
     /**
+     * @var string
+     * 
+     * @ORM\Column(name="url", type="string", length=255, nullable=true)
+     */
+    private $url;
+
+    /**
      * Many Formations have Many Beneficiaries.
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="formations")
      */
@@ -129,6 +136,30 @@ class Formation extends Group
     {
         $this->description = $description;
         return $this;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     *
+     * @return Formation
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     /**

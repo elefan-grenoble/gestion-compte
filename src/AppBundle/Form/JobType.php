@@ -20,9 +20,9 @@ class JobType extends AbstractType
         $builder
             ->add('name', TextType::class, array('label' => 'Nom du poste de bénévolat'))
             ->add('min_shifter_alert', IntegerType::class, array('label' => 'Nombre minimum de bénévoles inscrits sur le créneau pour ne pas envoyer d\'alerte', 'required' => true, 'data' => 2, 'empty_data' => 2))
-            ->add('color', TextType::class, array('label'=>'Couleur des créneaux dans le planning'))
+            ->add('color', TextType::class, array('label' => 'Couleur des créneaux dans le planning'))
             ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
-            ->add('url', TextType::class, array('label'=>'Lien vers une documentation', 'required' => false))
+            ->add('url', TextType::class, array('label' => 'Lien vers une documentation', 'required' => false))
             ->add('enabled', CheckboxType::class, array('required' => false, 'label' => 'Poste activé', 'attr' => array('class' => 'filled-in')));
     }
 

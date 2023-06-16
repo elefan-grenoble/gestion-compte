@@ -17,7 +17,8 @@ class FormationType extends AbstractType
     {
         $builder
             ->add('name', TextType::class, array('label' => 'Nom de la formation'))
-            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''));
+            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
+            ->add('url', TextType::class, array('label' => 'Lien vers une documentation', 'required' => false));
     }
 
     /**
