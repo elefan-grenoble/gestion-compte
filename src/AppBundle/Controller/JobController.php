@@ -70,12 +70,14 @@ class JobController extends Controller
 
         $filter = $this->filterFormFactory($request);
         $findByFilter = array();
+        $sort = 'name';
+        $order = 'ASC';
 
         if($filter["enabled"] > 0) {
             $findByFilter["enabled"] = $filter["enabled"]-1;
         }
 
-        $jobs = $em->getRepository(Job::class)->findBy($findByFilter);
+        $jobs = $em->getRepository(Job::class)->findBy($findByFilter, array($sort => $order));
 
         return $this->render('admin/job/list.html.twig', array(
             'jobs' => $jobs,
