@@ -10,4 +10,8 @@ namespace AppBundle\Repository;
  */
 class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll()
+    {
+        return $this->findBy(array(), array('date' => 'DESC'));
+    }
 }
