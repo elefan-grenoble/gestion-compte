@@ -11,6 +11,14 @@
 {% block content %}
     <h4>Liste des rôles ({{ roles | length }})</h4>
 
+    <div class="card-panel blue lighten-3">
+        <i class="material-icons left">info</i>
+        Cette page liste seulement les rôles donnés <strong>directement</strong> aux utilisateurs.
+        <br />
+        Mais les rôles peuvent aussi être donnés <strong>indirectement</strong> aux utilisateurs
+        via leur association à des <strong>formations</strong> (recommandé !).
+    </div>
+
     <table class="responsive-table">
         <thead>
             <tr>
