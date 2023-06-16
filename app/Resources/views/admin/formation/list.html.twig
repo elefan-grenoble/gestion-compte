@@ -36,7 +36,11 @@
                             <div class="chip purple-text">{{ role }}</div>
                         {% endfor %}
                     </td>
-                    <td><a href="{{ path("formation_edit", { 'id': formation.id }) }}"><i class="material-icons">edit</i>editer</a></td>
+                    <td>
+                        <a href="{{ path("formation_edit", { 'id': formation.id }) }}">
+                            <i class="material-icons">edit</i>Editer
+                        </a>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
