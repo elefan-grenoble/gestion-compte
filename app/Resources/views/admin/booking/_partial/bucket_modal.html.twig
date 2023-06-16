@@ -209,11 +209,11 @@ id = "modal-bucket"
 {% if is_granted("ROLE_ADMIN") %}
     <!-- bucket delete is allowed only if all shifts are free -->
     {{ form_start(bucket_delete_form, {'attr': { 'style': 'display:inline;' }}) }}
-    <button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste" {% if nbBookedShifts > 0 %}disabled{% endif %}>
+    <button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste" {% if not use_time_log_saving and (nbBookedShifts > 0) %}disabled{% endif %}>
         <i class="material-icons left">delete</i>Supprimer
     </button>
     {{ form_end(bucket_delete_form) }}
-    {% if nbBookedShifts > 0 %}
+    {% if not use_time_log_saving and (nbBookedShifts > 0) %}
         <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les créneaux doivent être libérés avant de pouvoir les supprimer">info</i>
     {% endif %}
 {% endif %}
@@ -254,7 +254,7 @@ id = "modal-bucket"
         }
         event.preventDefault();
     }
-    $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ces créneaux ?!"}, makeAjaxCall);
+    $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ces créneaux ?!{% if use_time_log_saving %} Ils ne seront pas libérés au préalable (et n'utiliseront donc pas le compteur épargne du membre).{% endif %}"}, makeAjaxCall);
     $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ce poste ?!"}, makeAjaxCall);
     $('form[name^="shift_free_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir libérer ce poste ?!"}, makeAjaxCall);
     $('form[name="bucket_shift_add_form"]').on('submit', {}, makeAjaxCall);
