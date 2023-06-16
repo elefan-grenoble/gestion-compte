@@ -195,7 +195,7 @@ class AdminController extends Controller
 
         foreach ($roles_list as $role_code) {
             $role = array();
-            $role_icon_key = strtolower($role_code) . "_icon";
+            $role_icon_key = strtolower($role_code) . "_material_icon";
             $role_name_key = strtolower($role_code) . "_name";
             $role["code"] = $role_code;
             $role["icon"] = $this->get("twig")->getGlobals()[strtolower($role_icon_key)] ?? "";
