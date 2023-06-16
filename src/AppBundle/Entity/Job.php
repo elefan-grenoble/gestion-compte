@@ -85,6 +85,12 @@ class Job
     private $createdAt;
 
     /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -330,5 +336,29 @@ class Job
     public function getCreatedAt()
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return Job
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
     }
 }

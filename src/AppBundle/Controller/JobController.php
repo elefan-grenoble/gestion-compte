@@ -66,15 +66,18 @@ class JobController extends Controller
      */
     public function listAction(Request $request)
     {
+        $em = $this->getDoctrine()->getManager();
+
         $filter = $this->filterFormFactory($request);
         $findByFilter = array();
+        $sort = 'name';
+        $order = 'ASC';
 
         if($filter["enabled"] > 0) {
             $findByFilter["enabled"] = $filter["enabled"]-1;
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $jobs = $em->getRepository(Job::class)->findBy($findByFilter);
+        $jobs = $em->getRepository(Job::class)->findBy($findByFilter, array($sort => $order));
 
         return $this->render('admin/job/list.html.twig', array(
             'jobs' => $jobs,
@@ -91,16 +94,18 @@ class JobController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $job = new Job();
         $job->setEnabled(true);
-
-        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(JobType::class, $job);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $job->setCreatedBy($current_user);
+
             $em->persist($job);
             $em->flush();
 

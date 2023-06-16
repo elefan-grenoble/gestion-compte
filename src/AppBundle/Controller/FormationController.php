@@ -43,6 +43,8 @@ class FormationController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $formation = new Formation();
 
@@ -50,7 +52,8 @@ class FormationController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
+            $formation->setCreatedBy($current_user);
+
             $em->persist($formation);
             $em->flush();
 

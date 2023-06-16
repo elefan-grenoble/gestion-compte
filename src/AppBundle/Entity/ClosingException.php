@@ -73,7 +73,7 @@ class ClosingException
      *
      * @param \DateTime $date
      *
-     * @return OpeningHour
+     * @return ClosingException
      */
     public function setDate($date)
     {
@@ -109,7 +109,7 @@ class ClosingException
      *
      * @param \DateTime $createdAt
      *
-     * @return OpeningHour
+     * @return ClosingException
      */
     public function setCreatedAt($createdAt)
     {
