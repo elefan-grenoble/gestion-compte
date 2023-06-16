@@ -19,7 +19,7 @@ class ClosingExceptionType extends AbstractType
     {
         $builder
             ->add('date', DateType::class, ['html5' => false, 'widget' => 'single_text', 'label' => 'Date de la fermeture exceptionnelle', 'attr' => ['class' => 'datepicker']])
-            ->add('reason', TextareaType::class, array('required' => false));
+            ->add('reason', TextareaType::class, ['label' => 'Raison', 'required' => false, 'attr' => ['class' => 'materialize-textarea']]);
     }
 
     /**

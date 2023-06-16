@@ -14,7 +14,8 @@
 <table class="responsive-table">
     <thead>
         <tr>
-            <th>Jour de fermeture</th>
+            <th>Date de la fermeture</th>
+            <th>Raison</th>
             <th>Auteur</th>
             <th>Date de création</th>
             <th>Actions</th>
@@ -23,7 +24,8 @@
     <tbody>
     {% for closingException in closingExceptions %}
         <tr>
-            <td>{{ closingException.date | date_short }}</td>
+            <td>{{ closingException.date | date_fr_full }}</td>
+            <td>{{ closingException.reason }}</td>
             <td>
                 {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: closingException.createdBy, target_blank: true } %}
             </td>
