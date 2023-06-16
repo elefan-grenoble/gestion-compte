@@ -376,7 +376,7 @@ class MembershipController extends Controller
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                ->add('email', HiddenType::class, array('label' => 'email'))
+                ->add('email', HiddenType::class, array('label' => 'email'))  # hidden
                 ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
         } else {  # higher privileges
@@ -391,7 +391,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $member_number = $form->get('member_number')->getData();
             $username = $form->get('username')->getData();
             $email = $form->get('email')->getData();
