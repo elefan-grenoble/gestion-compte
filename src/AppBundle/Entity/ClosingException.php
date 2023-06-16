@@ -31,6 +31,13 @@ class ClosingException
     private $date;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $reason;
+
+    /**
      * @var \DateTime
      * 
      * @ORM\Column(name="created_at", type="datetime")
@@ -83,6 +90,18 @@ class ClosingException
     public function getDate()
     {
         return $this->date;
+    }
+
+    public function setReason(?string $reason): self
+    {
+        $this->reason = $reason;
+
+        return $this;
+    }
+
+    public function getReason(): ?string
+    {
+        return $this->reason;
     }
 
     /**
