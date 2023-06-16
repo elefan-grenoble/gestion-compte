@@ -61,7 +61,7 @@
                     </td>
                     <td>{{ job.periods | length }}</td>
                     <td>
-                        <a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>editer</a>
+                        <a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>Editer</a>
                     </td>
                 </tr>
             {% endfor %}
@@ -69,10 +69,11 @@
     </table>
 
     <br />
-    <a href="{{ path('job_new') }}" class="btn">
-        <i class="material-icons left">add</i>Ajouter un poste
-    </a>
     <a href="{{ path("job_widget_generator") }}" class="btn">
         <i class="material-icons left">tune</i>Générer un widget (créneaux d'un poste)
+    </a>
+    <br />
+    <a href="{{ path('job_new') }}" class="btn">
+        <i class="material-icons left">add</i>Ajouter un poste
     </a>
 {% endblock %}
