@@ -584,12 +584,14 @@ class SearchUserFormHelper
             }
         }
 
-        if ($form->get('has_period_position')->getData() > 0) {
-            $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
-            if ($form->get('has_period_position')->getData() == 2) {
-                $qb = $qb->andWhere('pp.id IS NOT NULL');
-            } else if ($form->get('has_period_position')->getData() == 1) {
-                $qb = $qb->andWhere('pp.id IS NULL');
+        if ($form->has('has_period_position')) {
+            if ($form->get('has_period_position')->getData() > 0) {
+                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                if ($form->get('has_period_position')->getData() == 2) {
+                    $qb = $qb->andWhere('pp.id IS NOT NULL');
+                } else if ($form->get('has_period_position')->getData() == 1) {
+                    $qb = $qb->andWhere('pp.id IS NULL');
+                }
             }
         }
 
