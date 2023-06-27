@@ -146,7 +146,7 @@ class CodeController extends Controller
             $granted = $granted || $this->isGranted('view',$code);
         }
         if (!$granted){
-            return $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
+            throw $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
         }
 
         $logger = $this->get('logger');

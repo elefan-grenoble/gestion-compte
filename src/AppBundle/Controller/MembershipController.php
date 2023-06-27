@@ -847,7 +847,7 @@ class MembershipController extends Controller
         }
 
         if (!$a_beneficiary) {
-            $this->createAccessDeniedException('Tu cherches ?');
+            throw $this->createAccessDeniedException('Tu cherches ?');
         }
         if (!$a_beneficiary->getJoinTo()){
             $session->getFlashBag()->add('error','destination non trouvé');
