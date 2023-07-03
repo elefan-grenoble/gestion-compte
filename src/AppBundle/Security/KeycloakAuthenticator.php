@@ -235,8 +235,8 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 }
             }
         }
-        
-        
+
+
         // commissions
         $commissions_claim = $this->container->getParameter('oidc_commissions_claim');
         $commissions_from_keycloak = (isset($keycloakUser->toArray()[$commissions_claim])) ? $keycloakUser->toArray()[$commissions_claim] : [];
