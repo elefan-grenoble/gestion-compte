@@ -316,3 +316,15 @@ services:
             tags:
                 - { name: doctrine.fixtures.purger_factory, alias: default }
 
+
+#    keycloak_authenticator:
+#            class: AppBundle\Security\KeycloakAuthenticator
+#            arguments:
+#              $clientRegistry: "@oauth2.registry"
+#              $entityManager: "@doctrine.orm.entity_manager"
+#              $router: "@router"
+    knpu.oauth2.registry:
+            class: KnpU\OAuth2ClientBundle\Client\ClientRegistry
+            arguments:
+              $container: "@service_container"
+              $serviceMap: []
