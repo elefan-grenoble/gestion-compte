@@ -170,3 +170,31 @@ parameters:
     display_freeze_account: true
     display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
     display_keys_shop: true
+
+    # Open id client
+    oidc_enable: false
+    oidc_issuer: "http://localhost:8080/auth/realms/master"
+    oidc_client_id: "elefan"
+    oidc_client_secret_file: "/var/run/secrets/oidc_client"
+    oidc_logout: "http://localhost:8080/auth/realms/master/protocol/openid-connect/logout?
+                  post_logout_redirect_uri=https://localhost:8000"
+    oidc_roles_claim: "groups"
+    oidc_roles_map:
+        - USER: "/coopérateur"
+        - ADMIN_PANEL: "/infrastructure/informatique/elefan/admin"
+        - USER_VIEWER: "/infrastructure/informatique/elefan/admin"
+        - USER_MANAGER: "/infrastructure/informatique/elefan/admin"
+        - SHIFT_MANAGER: "/infrastructure/informatique/elefan/admin"
+        - FINANCE_MANAGER: "/infrastructure/informatique/elefan/admin"
+        - PROCESS_MANAGER: "/infrastructure/informatique/elefan/admin"
+        - ADMIN: "/infrastructure/informatique/elefan/admin"
+        - SUPER_ADMIN: "/infrastructure/informatique/elefan/super_admin"
+        - OAUTH_LOGIN: ""
+    oidc_formations_claim: "groups"
+    oidc_formations_map:
+        - "Accueil magasin": "/infrastructure/informatique/elefan/formations/accueil_magasin"
+        - "Caisse": "/infrastructure/informatique/elefan/formations/caisse"
+    oidc_commissions_claim: "groups"
+    oidc_commissions_map:
+        - "foo": "/grouvernance/foo"
+        - "bar": "/grouvernance/bar"
