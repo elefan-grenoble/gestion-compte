@@ -29,6 +29,11 @@ security:
         switch_user:
             role: ROLE_ADMIN
             parameter: _login_as
+        guard:
+          authenticators:
+#            - keycloak_authenticator
+            - AppBundle\Security\KeycloakAuthenticator
+
       oauth_token:
         pattern:    ^/oauth/v2/token
         security:   false
