@@ -123,7 +123,18 @@ twig:
     shift_service: "@shift_service"
     period_service: "@period_service"
     time_log_service: "@time_log_service"
-
+    #open id
+    oidc_enable: '%oidc_enable%'
+    oidc_issuer: '%oidc_issuer%'
+    oidc_client_id: "%oidc_client_id%"
+    oidc_client_secret_file: "%oidc_client_secret_file%"
+    oidc_logout: "%oidc_logout%"
+    oidc_roles_claim: "%oidc_roles_claim%"
+    oidc_roles_map: "%oidc_roles_map%"
+    oidc_formations_claim: "%oidc_formations_claim%"
+    oidc_formations_map: "%oidc_formations_map%"
+    oidc_commissions_claim: "%oidc_commissions_claim%"
+    oidc_commissions_map: "%oidc_commissions_map%"
 # Doctrine Configuration
 doctrine:
   dbal:

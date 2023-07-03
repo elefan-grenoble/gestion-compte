@@ -21,7 +21,7 @@ services:
     build:
       context: .
     command: >
-      bash -c "./wait-for -t 60 database:3306 -- composer install -n
+      bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
       && php bin/console doctrine:migration:migrate
       && php bin/console server:run *:8000"
     ports:

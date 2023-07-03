@@ -296,3 +296,14 @@ services:
                 - { name: doctrine.event_listener, event: prePersist }
                 - { name: kernel.event_listener, event: kernel.request, method: forcePasswordChange }
                 - { name: kernel.event_listener, event: fos_user.user.password_changed, method: onPasswordChanged }
+#    keycloak_authenticator:
+#            class: AppBundle\Security\KeycloakAuthenticator
+#            arguments:
+#              $clientRegistry: "@oauth2.registry"
+#              $entityManager: "@doctrine.orm.entity_manager"
+#              $router: "@router"
+    knpu.oauth2.registry:
+            class: KnpU\OAuth2ClientBundle\Client\ClientRegistry
+            arguments:
+              $container: "@service_container"
+              $serviceMap: []
