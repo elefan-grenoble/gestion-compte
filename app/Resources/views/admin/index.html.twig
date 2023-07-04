@@ -149,6 +149,9 @@
                 <a href="{{ path("admin_users_list") }}" class="waves-effect waves-light btn deep-purple">
                     <i class="material-icons left">list</i>Liste des utilisateurs admin
                 </a>
+                <a href="{{ path("non_member_users_list") }}" class="waves-effect waves-light btn deep-purple">
+                    <i class="material-icons left">list</i>Liste des utilisateurs non-membres
+                </a>
             {% endif %}
 
             {% if is_granted("ROLE_SUPER_ADMIN") %}
