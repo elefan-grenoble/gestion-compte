@@ -152,13 +152,12 @@ class AdminController extends Controller
     /**
      * Lists all users with ROLE_ADMIN.
      *
-     * @param Request $request , SearchUserFormHelper $formHelper
-     * @param SearchUserFormHelper $formHelper
+     * @param Request $request
      * @return Response
-     * @Route("/admin_users", name="admins_list", methods={"GET","POST"})
+     * @Route("/admin_users", name="admin_users_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function adminUsersAction(Request $request, SearchUserFormHelper $formHelper)
+    public function adminUsersAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 

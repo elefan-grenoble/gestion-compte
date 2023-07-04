@@ -305,7 +305,7 @@ class UserController extends Controller
     /**
      * Deletes a user entity
      *
-     * @Route("/delete/{id}", name="user_delete", methods={"DELETE"})
+     * @Route("/{id}/delete", name="user_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param User $user
@@ -313,12 +313,13 @@ class UserController extends Controller
      */
     public function deleteAction(Request $request, User $user)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $form = $this->createDeleteForm($user);
         $form->handleRequest($request);
 
-        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($user);
             $em->flush();
 
