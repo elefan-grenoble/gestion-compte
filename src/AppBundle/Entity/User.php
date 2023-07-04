@@ -356,4 +356,12 @@ class User extends BaseUser
     {
         return $this->processUpdates;
     }
+
+    /**
+     * @return DateTime
+     */
+    public function getLastLogin()
+    {
+        return $this->lastLogin;
+    }
 }

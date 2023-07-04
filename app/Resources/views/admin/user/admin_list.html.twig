@@ -15,9 +15,10 @@
         <thead>
         <tr>
             <th>Etat</th>
-            <th data-col="m.member_number">#</th>
-            <th data-col="m.username">Username</th>
-            <th data-col="m.email">Email</th>
+            <th>#</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Dernière connexion</th>
             <th>Actions</th>
         </tr>
         </thead>
@@ -38,6 +39,11 @@
                 </td>
                 <td>{{ admin.username }}</td>
                 <td>{{ admin.email }}</td>
+                {% if admin.lastLogin %}
+                    <td title="{{ admin.lastLogin | date_fr_full_with_time }}">{{ admin.lastLogin | date_short }}</td>
+                {% else %}
+                    <td></td>
+                {% endif %}
                 <td>
                     {{ form_start(delete_forms[admin.id]) }}
                     {{ form_widget(delete_forms[admin.id]) }}
