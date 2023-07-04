@@ -218,6 +218,8 @@ class BeneficiaryController extends Controller
     public function findMemberNumberAction(Request $request): Response
     {
         $securityContext = $this->container->get('security.authorization_checker');
+        $em = $this->getDoctrine()->getManager();
+
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $form = $this->createFormBuilder()
                 ->add('firstname', TextType::class, array('label' => 'Le prénom', 'attr' => array(
@@ -236,15 +238,8 @@ class BeneficiaryController extends Controller
 
         if ($form->handleRequest($request)->isValid()) {
             $firstname = $form->get('firstname')->getData();
-            $em = $this->getDoctrine()->getManager();
-            $qb = $em->createQueryBuilder();
-            $beneficiaries = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
-                ->join('b.membership', 'm')
-                ->where($qb->expr()->like('b.firstname', $qb->expr()->literal('%' . $firstname . '%')))
-                ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL")
-                ->orderBy("m.member_number", 'ASC')
-                ->getQuery()
-                ->getResult();
+            $beneficiaries = $em->getRepository(Beneficiary::class)->findActiveFromFirstname($firstname);
+
             return $this->render('beneficiary/find_member_number.html.twig', array(
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
@@ -253,6 +248,7 @@ class BeneficiaryController extends Controller
                 'params' => array()
             ));
         }
+
         return $this->render('beneficiary/find_member_number.html.twig', array(
             'form' => $form->createView(),
             'beneficiaries' => ''

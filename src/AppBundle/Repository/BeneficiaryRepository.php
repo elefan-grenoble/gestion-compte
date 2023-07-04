@@ -81,6 +81,20 @@ class BeneficiaryRepository extends \Doctrine\ORM\EntityRepository
         return $qb
             ->getQuery()
             ->getResult();
+    }
 
+    public function findActiveFromFirstname($firstname)
+    {
+        $qb = $this->createQueryBuilder('b');
+
+        $qb
+            ->join('b.membership', 'm')
+            ->where($qb->expr()->like('b.firstname', $qb->expr()->literal('%' . $firstname . '%')))
+            ->andWhere("m.withdrawn != 1 or m.withdrawn is NULL")
+            ->orderBy("m.member_number", 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 }

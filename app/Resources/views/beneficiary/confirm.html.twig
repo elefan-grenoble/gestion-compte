@@ -24,9 +24,11 @@
                 {% else %}
                     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent <b>{{ beneficiary.publicDisplayNameWithMemberNumber }}</b> est déjà actif.
+                            Le compte de l'adhérent <strong>{{ beneficiary.publicDisplayNameWithMemberNumber }}</strong> est déjà actif.
                             <br>
-                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
+                            Il est lié à l'adresse courriel <strong>{{ user.anonymousEmail }}</strong>
+                            <br>
+                            <br>
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
                                 <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
@@ -34,9 +36,7 @@
                             </form>
                             <form action="{{ path('member_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
-                                <div>
-                                    <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
-                                </div>
+                                <a href="#" onclick="$(this).closest('form').submit()" class="btn"><i class="material-icons left">edit</i>Editer la fiche</a>
                             </form>
                         {% else %}
                             C'est <b>{{ beneficiary.publicDisplayName }}</b> !
@@ -75,9 +75,9 @@
                         {% endif %}
                     {% else %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent <b>{{ beneficiary.publicDisplayNameWithMemberNumber }}</b> est déjà actif.
+                            Le compte de l'adhérent <strong>{{ beneficiary.publicDisplayNameWithMemberNumber }}</strong> est déjà actif.
                             <br>
-                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}
+                            Il est lié à l'adresse courriel <strong>{{ user.anonymousEmail }}</strong>
                             <br>
                             <div class="row">
                                 <div class="col m6 center">
@@ -126,7 +126,7 @@
             </div>
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                     <div class="row center">
-                        <p class=" col s12 light">Ce n'est pas celui que tu cherchais ? <a href="{{ path('find_member_number') }}">Chercher un autre numéro d'adhérent</a></p>
+                        <p class=" col s12 light">Ce n'est pas l'adhérent que tu cherchais ? <a href="{{ path('find_member_number') }}">Chercher un autre numéro d'adhérent</a></p>
                     </div>
                 {% else %}
                     <div class="row center">
@@ -144,9 +144,4 @@
             {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}
