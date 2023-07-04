@@ -210,7 +210,7 @@ class MailController extends Controller
 
     private function getNonMemberEmails() {
         $em = $this->getDoctrine()->getManager();
-        $non_members = $em->getRepository("AppBundle:User")->findActiveNonMembers();
+        $non_members = $em->getRepository("AppBundle:User")->findNonMembers(true);
         $list = [];
         foreach ($non_members as $non_member){
             $list[$non_member->getEmail()] = '';

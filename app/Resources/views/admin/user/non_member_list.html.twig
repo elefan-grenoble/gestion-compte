@@ -1,0 +1,42 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des utilisateurs non-membres - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des utilisateurs non-membres
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des utilisateurs non-membres ({{ non_members | length }})</h4>
+
+    <table class="striped">
+        <thead>
+            <tr>
+                <th>Etat</th>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Dernière connexion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for non_member in non_members %}
+                <tr>
+                    <td>
+                        {% if not non_member.enabled %}
+                            <i class="material-icons" title="Utilisateur désactivé">{{ member_withdrawn_material_icon }}</i>
+                        {% endif %}
+                    </td>
+                    <td>{{ non_member.username }}</td>
+                    <td>{{ non_member.email }}</td>
+                    {% if non_member.lastLogin %}
+                        <td title="{{ non_member.lastLogin | date_fr_full_with_time }}">{{ non_member.lastLogin | date_short }}</td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -29,6 +29,8 @@
                     <td>
                         {% if admin.beneficiary and admin.beneficiary.membership.withdrawn %}
                             <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
+                        {% elseif not admin.enabled %}
+                            <i class="material-icons" title="Utilisateur désactivé">{{ member_withdrawn_material_icon }}</i>
                         {% endif %}
                     </td>
                     <td>
@@ -60,10 +62,4 @@
             {% endfor %}
         </tbody>
     </table>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-
-{% block javascripts %}
 {% endblock %}

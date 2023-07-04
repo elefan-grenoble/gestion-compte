@@ -62,6 +62,9 @@ class User extends BaseUser
      */
     private $processUpdates;
 
+    // other fields
+    // username, email, enabled, last_login, roles
+
     public function __toString()
     {
         if (!$this->getBeneficiary())

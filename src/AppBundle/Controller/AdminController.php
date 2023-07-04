@@ -150,6 +150,25 @@ class AdminController extends Controller
     }
 
     /**
+     * Lists all non-member users.
+     *
+     * @param Request $request
+     * @return Response
+     * @Route("/non_member_users", name="non_member_users_list", methods={"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function nonMemberUsersAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $non_members = $em->getRepository("AppBundle:User")->findNonMembers();
+
+        return $this->render('admin/user/non_member_list.html.twig', array(
+            'non_members' => $non_members,
+        ));
+    }
+
+    /**
      * Lists all users with ROLE_ADMIN.
      *
      * @param Request $request
