@@ -60,7 +60,7 @@
                     <td>
                         {% if timeLog.shift %}
                             {{ timeLog.shift.job.name }} - {{ timeLog.shift.displayDateSeperateTime }}
-                            {% if timeLog.shift.shifter and timeLog.type != 21 %}
+                            {% if timeLog.shift.shifter and timeLog.type not in [20, 21] %}
                                 ({{ timeLog.shift.shifter }})
                             {% endif %}
                         {% endif %}
