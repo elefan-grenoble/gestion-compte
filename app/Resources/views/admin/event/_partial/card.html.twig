@@ -4,13 +4,10 @@
     {% if event.img %}
         <div class="card-image">
             <img src="{{ event|img('imgFile', 'card') }}" />
-            <span class="card-title">{{ event.title }}</span>
         </div>
     {% endif %}
     <div class="card-content {% if from_admin %}white-text{% endif %}">
-        {% if not event.img %}
-            <span class="card-title">{{ event.title }}</span>
-        {% endif %}
+        <span class="card-title">{{ event.title }}</span>
         <p>
             <i class="material-icons tiny">event</i>
             {{ event.date | date_fr_full_with_time }}
