@@ -302,6 +302,8 @@ class TimeLogEventListener
         $this->em->persist($log);
         $this->em->flush();
 
+        $this->em->refresh($member);  // added to prevent from returning cached (old) data
+
         $member_counter_date = $member->getShiftTimeCount($date);
         $extra_counter_time = $member_counter_date - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
@@ -315,7 +317,6 @@ class TimeLogEventListener
             }
         } elseif ($extra_counter_time < 0) {
             if ($this->use_time_log_saving) {
-                $this->em->refresh($member);  // added to prevent from returning cached (old) data
                 // retrieve member's savings
                 $member_saving_now = $member->getSavingTimeCount();
                 if ($member_saving_now > 0) {
