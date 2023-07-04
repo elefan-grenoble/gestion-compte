@@ -95,7 +95,7 @@ class BeneficiaryController extends Controller
     /**
      * Detaches a beneficiary entity.
      *
-     * @Route("/{id}/detach", name="beneficiary_detach", methods={"GET", "POST"})
+     * @Route("/{id}/detach", name="beneficiary_detach", methods={"POST"})
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return RedirectResponse
@@ -161,7 +161,7 @@ class BeneficiaryController extends Controller
     /**
      * Deletes a beneficiary entity.
      *
-     * @Route("/{id}", name="beneficiary_delete", methods={"GET", "POST"})
+     * @Route("/{id}", name="beneficiary_delete", methods={"DELETE"})
      * @param Request $request
      * @param Beneficiary $beneficiary
      * @return RedirectResponse
