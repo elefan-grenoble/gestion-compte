@@ -154,7 +154,7 @@ class AdminController extends Controller
      *
      * @param Request $request
      * @return Response
-     * @Route("/admin_users", name="admin_users_list", methods={"GET","POST"})
+     * @Route("/admin_users", name="admin_users_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function adminUsersAction(Request $request)
