@@ -199,4 +199,9 @@ class MembershipService
             $member->isCurrentlyExemptedFromShifts() ||
             !$this->isUptodate($member);
     }
+
+    public function getShiftFreeLogs(Membership $member)
+    {
+        return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreed($member);
+    }
 }

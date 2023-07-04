@@ -120,6 +120,7 @@ parameters:
     # Profile configuration
     profile_display_task_list: true
     profile_display_time_log: true
+    profile_display_shift_free_log: true
 
     # User configuration
     user_account_not_enabled_material_icon: 'phonelink_off'

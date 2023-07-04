@@ -65,57 +65,7 @@
         </li>
     </ul>
 
-    <table class="responsive-table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Bénéficiaire</th>
-                <th>Créneau</th>
-                {% if use_fly_and_fixed %}
-                    <th>Fixe</th>
-                {% endif %}
-                <th>Auteur</th>
-                {% if is_granted("ROLE_ADMIN") %}
-                    <th>Route</th>
-                {% endif %}
-                <th>Raison</th>
-            </tr>
-        </thead>
-
-        <tbody>
-        {% for shiftFreeLog in shiftFreeLogs %}
-            <tr>
-                <td title="{{ shiftFreeLog.createdAt | date_fr_full_with_time }}">
-                    {{ shiftFreeLog.createdAt | date_short }}
-                </td>
-                <td>
-                    <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">
-                        {{ shiftFreeLog.beneficiary }}
-                    </a>
-                </td>
-                <td>
-                    {{ shiftFreeLog.shiftString }}
-                </td>
-                {% if use_fly_and_fixed %}
-                    <td>{{ shiftFreeLog.fixe }}</td>
-                {% endif %}
-                <td>
-                    {% if shiftFreeLog.createdBy and shiftFreeLog.createdBy.beneficiary %}
-                        <a href="{{ path("member_show",{'member_number': shiftFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
-                            {{ shiftFreeLog.createdBy.beneficiary }}
-                        </a>
-                    {% else %}
-                        {{ shiftFreeLog.createdBy }}
-                    {% endif %}
-                </td>
-                {% if is_granted("ROLE_ADMIN") %}
-                    <td>{{ shiftFreeLog.requestRoute }}</td>
-                {% endif %}
-                <td>{{ shiftFreeLog.reason }}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: shiftFreeLogs, from_admin: true } %}
 
     <ul class="pagination">
         <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
