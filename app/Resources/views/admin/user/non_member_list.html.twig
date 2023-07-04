@@ -13,24 +13,30 @@
 
     <table class="striped">
         <thead>
-        <tr>
-            <th>Etat</th>
-            <th>Username</th>
-            <th>Email</th>
-        </tr>
+            <tr>
+                <th>Etat</th>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Dernière connexion</th>
+            </tr>
         </thead>
         <tbody>
-        {% for non_member in non_members %}
-            <tr>
-                <td>
-                    {% if not non_member.enabled %}
-                        <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
+            {% for non_member in non_members %}
+                <tr>
+                    <td>
+                        {% if not non_member.enabled %}
+                            <i class="material-icons" title="Utilisateur désactivé">{{ member_withdrawn_material_icon }}</i>
+                        {% endif %}
+                    </td>
+                    <td>{{ non_member.username }}</td>
+                    <td>{{ non_member.email }}</td>
+                    {% if non_member.lastLogin %}
+                        <td title="{{ non_member.lastLogin | date_fr_full_with_time }}">{{ non_member.lastLogin | date_short }}</td>
+                    {% else %}
+                        <td></td>
                     {% endif %}
-                </td>
-                <td>{{ non_member.username }}</td>
-                <td>{{ non_member.email }}</td>
-            </tr>
-        {% endfor %}
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
 {% endblock %}
