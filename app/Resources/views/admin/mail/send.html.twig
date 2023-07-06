@@ -53,8 +53,11 @@
                     data: [],
                     autocompleteOptions: {
                         data: {{ non_members | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
-                        limit: Infinity,
-                        minLength: 1
+                        minLength: 1,  // default
+                        limit: 5,
+                        dropdownOptions: {
+                            constrainWidth: false
+                        }
                     },
                     onChipAdd: updateNonMembers,
                     onChipDelete: updateNonMembers

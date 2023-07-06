@@ -81,7 +81,11 @@
                     {% else %}
                     data: [],
                     {% endif %}
-                    limit: 6,
+                    minLength: 1,  // default
+                    limit: 5,
+                    dropdownOptions: {
+                        constrainWidth: false
+                    }
                 },
                 onChipAdd: updateInput{{ id }}Forms,
                 onChipDelete: updateInput{{ id }}Forms,
