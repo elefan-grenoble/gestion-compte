@@ -48,7 +48,7 @@
     </a>
     <div id="swipe_add" class="modal">
         <div class="modal-content">
-            <h3>Entrez votre numéro de badge</h3>
+            <h4>Entrez votre numéro de badge</h4>
             <div class="swiftcard_exemple">
                 {{ ("421234567890" | barcode | raw) }}
                 <canvas id="badge_canvas" class="focus" width="300" height="60"></canvas>
@@ -75,16 +75,16 @@
                 context.strokeStyle = 'red';
                 context.stroke();
             </script>
+            <br />
             <form action="{{ path('active_swipe')}}" method="post">
                 <div class="row">
-                    <div class="input-field col s6">
-                        <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
+                    <div class="input-field col s12 m6">
                         <label for="code">Code du badge à 13 chiffres</label>
+                        <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
                     </div>
-                    <div class="col s6">
-                        <br>
-                        <button type="submit" class="waves-effect waves-light btn-flat green white-text"><i class="material-icons left">check</i>Associer mon badge</button>
-                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn green"><i class="material-icons left">check</i>Associer mon badge</button>
                 </div>
             </form>
         </div>
