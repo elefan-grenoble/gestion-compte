@@ -19,18 +19,21 @@ services:
   php:
     container_name: php
     build:
-      context: .
+      context: .docker
     command: >
       bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
       && php bin/console doctrine:migration:migrate
       && php bin/console server:run *:8000"
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
-      - .:/app
+      - .:/var/www/site
     depends_on:
       - database
       - mailcatcher
+    env_file: .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   mailcatcher:
     container_name: mailcatcher
