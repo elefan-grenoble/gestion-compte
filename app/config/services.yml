@@ -187,6 +187,14 @@ services:
         tags:
             - { name: kernel.event_listener, event: shift.alerts.mattermost, method: onShiftAlerts }
 
+    kernel.listener.oidc_firewall_listener:
+            class: AppBundle\EventListener\OidcFirewallListener
+            arguments:
+              $container: "@service_container"
+            tags:
+              - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+    oidc_logout_handler:
+            class: AppBundle\EventListener\OidcLogoutHandler
     # subscribers
     beneficiary_initialization_subscriber:
         class: AppBundle\EventListener\BeneficiaryInitializationSubscriber

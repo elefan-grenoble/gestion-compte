@@ -31,12 +31,6 @@ class User extends BaseUser
     protected $id;
 
     /**
-     * @ORM\Column(name="openid", type="string", length=255)
-     * @var string $openid
-     */
-    protected $openid;
-
-    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="registrar",cascade={"persist"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -122,23 +116,6 @@ class User extends BaseUser
             return $beneficiary->getLastname();
         else
             return '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getOpenId() {
-        return $this->openid;
-    }
-
-    /**
-     * @param string $id
-     * @return $this
-     */
-    public function setOpenId(string $id) : User
-    {
-        $this->openid = $id;
-        return $this;
     }
 
     public function getTmpToken($key = '')

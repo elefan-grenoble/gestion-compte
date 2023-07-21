@@ -50,7 +50,7 @@ class SetFirstPasswordListener{
         }
         $user = $entity->getUser();
 
-        if (!$user->getId()){
+        if (!$user->getId()&&(!$user->getBeneficiary()||$user->getBeneficiary()->getOpenId())){
             $user->addRole(self::ROLE_PASSWORD_TO_SET);
         }
     }

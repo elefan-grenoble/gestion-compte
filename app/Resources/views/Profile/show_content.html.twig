@@ -17,7 +17,11 @@
             </div>
             <div class="collapsible-body">
                 {% include "beneficiary/_partial/info.html.twig" with { beneficiary: beneficiary } %}
+                {% if not oidc_enable %}
                 <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
+                {% else %}
+                    {{ oidc_profile_custom_message | raw }}
+                {% endif %}
             </div>
         </li>
 
