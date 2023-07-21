@@ -176,9 +176,9 @@ parameters:
     oidc_enable: false
     oidc_profile_custom_message : 'vos informations personnelles sont éditables <a href="http://localhost:8080/"> ici </a>'
     oidc_issuer: "http://localhost:8080/auth"
-    oidc_realm: 'master'
+    oidc_realm: "master"
     oidc_client_id: "elefan"
-    oidc_client_secret_file: "/var/run/secrets/oidc_client"
+    oidc_client_secret: secret
     oidc_user_attributes_map:
         firstname: "firstname"
         lastname: "lastName"
