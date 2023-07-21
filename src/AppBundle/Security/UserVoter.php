@@ -58,6 +58,11 @@ class UserVoter extends Voter
             return false;
         }
 
+        if ($this->container->getParameter("oidc_enable"))
+        {
+            return false;
+        }
+
         // ROLE_SUPER_ADMIN can do anything! The power!
         if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
             return true;

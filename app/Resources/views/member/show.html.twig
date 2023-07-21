@@ -284,7 +284,7 @@
         {% endif %}
 
         <!-- Actions super admin (supprimer le membre ; adhésions enregistrées) -->
-        {% if is_granted("ROLE_SUPER_ADMIN") %}
+        {% if is_granted("ROLE_SUPER_ADMIN") and not oidc_enable %}
             <li id="super">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_admin_open is defined and frontend_cookie.user_show.super_admin_open %}active{% endif %}">
                     <i class="material-icons">build</i>Actions super admin

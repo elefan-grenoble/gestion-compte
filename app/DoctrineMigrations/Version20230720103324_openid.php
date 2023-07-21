@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20230628070255_openid extends AbstractMigration
+final class Version20230720103324Openid extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -22,7 +22,8 @@ final class Version20230628070255_openid extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE fos_user ADD openid VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE beneficiary ADD openid VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE beneficiary ADD openid_member_number INT NOT NULL');
 
     }
 
@@ -31,7 +32,8 @@ final class Version20230628070255_openid extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE fos_user DROP openid');
+        $this->addSql('ALTER TABLE beneficiary DROP openid');
+        $this->addSql('ALTER TABLE beneficiary DROP openid_member_number');
 
     }
 }

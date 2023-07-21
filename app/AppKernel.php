@@ -23,6 +23,7 @@ class AppKernel extends Kernel
             new Vich\UploaderBundle\VichUploaderBundle(),
             new Liip\ImagineBundle\LiipImagineBundle(),
             new AppBundle\AppBundle(),
+            new KnpU\OAuth2ClientBundle\KnpUOAuth2ClientBundle()
         ];
 
         if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {

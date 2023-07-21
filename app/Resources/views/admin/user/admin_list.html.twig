@@ -42,7 +42,7 @@
                     {% else %}
                         <td></td>
                     {% endif %}
-                    {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    {% if is_granted("ROLE_SUPER_ADMIN") and not oidc_enable %}
                         <td>
                             {{ form_start(delete_forms[admin.id]) }}
                             {{ form_widget(delete_forms[admin.id]) }}
@@ -57,6 +57,8 @@
                             {% endif %}
                             {{ form_end(delete_forms[admin.id]) }}
                         </td>
+                    {% elseif is_granted("ROLE_SUPER_ADMIN") %}
+                        <td></td>
                     {% endif %}
                 </tr>
             {% endfor %}

@@ -71,17 +71,20 @@ class MembershipVoter extends Voter
             return false;
         }
 
-        // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_USER_MANAGER can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
-            return true;
+        if (!$this->container->getParameter("oidc_enable"))
+        {
+            // ROLE_SUPER_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_USER_MANAGER can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+                return true;
+            }
         }
 
         // you know $subject is a Post object, thanks to supports
@@ -125,6 +128,10 @@ class MembershipVoter extends Voter
 
     private function canEdit(Membership $subject, TokenInterface $token)
     {
+        if ($this->container->getParameter("oidc_enable")){
+            return false;
+        }
+
         $user = $token->getUser();
 
         if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership
