@@ -33,7 +33,6 @@
                 </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
-                <br />
                 {% if not oidc_enable %}
                 <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">call_merge</i>Joindre deux comptes

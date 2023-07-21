@@ -59,7 +59,7 @@ RUN echo "; Note:" >> /usr/local/etc/php/conf.d/zz-app-local.ini \
 
 COPY nginx-docker.conf /etc/nginx/sites-enabled/website.conf
 COPY php.ini usr/local/etc/php/php.ini
-COPY entrypoint.sh /etc/entrypoint.sh
+COPY --chown=root:root entrypoint.sh /etc/entrypoint.sh
 
 WORKDIR /var/www/site/
 

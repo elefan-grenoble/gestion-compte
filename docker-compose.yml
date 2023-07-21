@@ -23,7 +23,7 @@ services:
         limits:
           memory: 512M
     build:
-      context: .
+      context: .docker
     command: >
       bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
       && php bin/console doctrine:migration:migrate
@@ -31,7 +31,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - .:/var/www/site
     restart: always
     depends_on:
       - database
