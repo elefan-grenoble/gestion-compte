@@ -90,6 +90,7 @@ class MembershipController extends Controller
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
         $freezeChangeForm = $this->createFreezeChangeForm($member);
+        $flyingForm = $this->createFlyingForm($member);
         $withdrawnForm = $this->createWithdrawnForm($member);
         $deleteForm = $this->createDeleteForm($member);
 
@@ -196,6 +197,7 @@ class MembershipController extends Controller
             'freeze_form' => $freezeForm->createView(),
             'unfreeze_form' => $unfreezeForm->createView(),
             'freeze_change_form' => $freezeChangeForm->createView(),
+            'flying_form' => $flyingForm->createView(),
             'withdrawn_form' => $withdrawnForm->createView(),
             'delete_form' => $deleteForm->createView(),
             'time_log_new_form' => $timeLogNewForm->createView(),
@@ -550,6 +552,51 @@ class MembershipController extends Controller
     }
 
     /**
+     * Change flying status member
+     *
+     * @Route("/{id}/flying", name="member_flying", methods={"POST"})
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function flyingAction(Request $request, Membership $member)
+    {
+        $this->denyAccessUnlessGranted('flying', $member);
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
+
+        $form = $this->createFlyingForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $flying = $form->get("flying")->getData();
+            if ($flying) {
+                if ($member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà volant');
+                    return $this->redirectToShow($member);
+                }
+            } else {
+                if (!$member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fixe');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setFlying($flying);
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($member);
+            $em->flush();
+
+            if ($flying) {
+                $session->getFlashBag()->add('success', 'Le compte est volant !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte est fixe !');
+            }
+        }
+
+        return $this->redirectToShow($member);
+    }
+
+    /**
      * freeze member
      *
      * @Route("/{id}/freeze", name="member_freeze", methods={"POST"})
@@ -718,7 +765,6 @@ class MembershipController extends Controller
             $user->setEmail($a_beneficiary->getEmail());
             $beneficiary = new Beneficiary();
             $beneficiary->setUser($user);
-            $beneficiary->setFlying(false);
             $member->setMainBeneficiary($beneficiary);
         }
 
@@ -864,7 +910,6 @@ class MembershipController extends Controller
 
         $beneficiary = new Beneficiary();
         $beneficiary->setUser(new User());
-        $beneficiary->setFlying(false);
         $beneficiary->setEmail($a_beneficiary->getEmail());
 
         $form->get('beneficiary')->setData($beneficiary);
@@ -1112,6 +1157,21 @@ class MembershipController extends Controller
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('member_withdrawn', array('id' => $member->getId())))
             ->add('withdrawn', HiddenType::class, ['data' => $member->isWithdrawn() ? 0 : 1])
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to set flying for a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFlyingForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_flying', array('id' => $member->getId())))
+            ->add('flying', HiddenType::class, ['data' => $member->isFlying() ? 0 : 1])
             ->setMethod('POST')
             ->getForm();
     }

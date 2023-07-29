@@ -194,10 +194,16 @@ class MembershipService
      */
     public function hasWarningStatus(Membership $member): bool
     {
-        return $member->getWithdrawn() ||
+        $hasWarningStatus = $member->getWithdrawn() ||
             $member->getFrozen() ||
             $member->isCurrentlyExemptedFromShifts() ||
             !$this->isUptodate($member);
+
+        if ($this->container->getParameter('use_fly_and_fixed')) {
+            $hasWarningStatus = $hasWarningStatus || $member->isFlying();
+        }
+
+        return $hasWarningStatus;
     }
 
     public function getShiftFreeLogs(Membership $member)

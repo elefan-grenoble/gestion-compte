@@ -46,6 +46,16 @@
                     {% endif %}
                 </a>
             {% endif %}
+            <!-- Passer fixe ou volant -->
+            {% if not member.withdrawn and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+                <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small teal">
+                    {% if not member.flying %}
+                        <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
+                    {% else %}
+                        <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> fixe
+                    {% endif %}
+                </a>
+            {% endif %}
         </div>
         <div class="col s12">
             {% if member.withdrawn and member.withdrawnDate  %}
@@ -53,6 +63,8 @@
                 {% if member.withdrawnBy %}
                     par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
                 {% endif %}
+            {% elseif use_fly_and_fixed and not member.withdrawn %}
+                Compte {% if member.flying %}volant{% else %}fixe{% endif %}
             {% endif %}
         </div>
     </div>
@@ -411,6 +423,28 @@
                 <i class="material-icons left">check</i>Je sais ce que je fais !
             </button>
             {{ form_end(withdrawn_form) }}
+        </div>
+    </div>
+
+    <div id="flying-member-confirmation-modal" class="modal">
+        <div class="modal-content">
+            <h5>
+                <i class="material-icons left small">remove_circle_outline</i>Passage du compte en {% if member.flying %}fixe{% else %}volant{% endif %}
+            </h5>
+            <p>Attention, vous êtes sur le point de passer le compte du membre en {% if member.flying %}fixe{% else %}volant{% endif %}.</p>
+            {% if not member.flying %}
+            <ul>
+                <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+            </ul>
+            {% endif %}
+        </div>
+        <div class="modal-footer">
+            {{ form_start(flying_form) }}
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+            <button type="submit" class="btn waves-effect waves-light orange">
+                <i class="material-icons left">check</i>OK
+            </button>
+            {{ form_end(flying_form) }}
         </div>
     </div>
 {% endblock %}
