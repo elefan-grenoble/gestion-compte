@@ -53,7 +53,6 @@ class PeriodController extends Controller
         }
 
         return $this->render('period/index.html.twig', array(
-            'days_of_week' => Period::DAYS_OF_WEEK,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $form->createView(),
             'week_filter' => $week_filter,

@@ -232,14 +232,14 @@
             <table>
                 <thead>
                     <tr>
-                        {% for key,day in days_of_week %}
+                        {% for key,day in period_service.getDaysOfWeekArray() %}
                             <th>{{ day }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        {% for key,day in days_of_week %}
+                        {% for key,day in period_service.getDaysOfWeekArray() %}
                             <td>
                                 {% for period in periods_by_day[key] %}
                                     {% if ((filling_filter == null) and (beneficiary_filter == null))
