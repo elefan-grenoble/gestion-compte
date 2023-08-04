@@ -14,7 +14,7 @@ services:
         # if you need to do this, you can override this setting on individual services
         public: false
         bind:
-            $localCurrency: '%local_currency_name%'
+            $local_currency_name: '%local_currency_name%'
             $use_fly_and_fixed: '%use_fly_and_fixed%'
 
     # makes classes in src/AppBundle available to be used as services

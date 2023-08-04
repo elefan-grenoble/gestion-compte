@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Formation;
+use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
 use AppBundle\Entity\Role;
@@ -20,27 +21,19 @@ use Symfony\Component\Form\FormEvents;
 
 class PeriodPositionType extends AbstractType
 {
-    const WEEKA = 'A';
-    const WEEKB = 'B';
-    const WEEKC = 'C';
-    const WEEKD = 'D';
-
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('week_cycle', ChoiceType::class, array(
                 'label' => 'Cycle', 'choices' => array(
-                    "Semaine A" => self::WEEKA,
-                    "Semaine B" => self::WEEKB,
-                    "Semaine C" => self::WEEKC,
-                    "Semaine D" => self::WEEKD,
+                    "Semaine A" => Period::WEEK_A,
+                    "Semaine B" => Period::WEEK_B,
+                    "Semaine C" => Period::WEEK_C,
+                    "Semaine D" => Period::WEEK_D,
                 ),
-                'expanded'  => false,
-                'multiple'  => true,
-                'empty_data' => [self::WEEKA, self::WEEKB, self::WEEKC, self::WEEKD]
+                'expanded' => false,
+                'multiple' => true,
+                'empty_data' => Period::WEEK_CYCLE
             ))
             ->add('formation', EntityType::class, array(
                 'label'=>'Formation necessaire',
@@ -55,7 +48,6 @@ class PeriodPositionType extends AbstractType
             $form = $event->getForm();
 
             // checks if the PeriodPosition object is "new"
-            // If no data is passed to the form, the data is "null".
            if (!$period_position || null === $period_position->getId()) {
                 $form->add('nb_of_shifter', IntegerType::class, [
                     'label' => 'Nombre de postes disponibles',
@@ -87,6 +79,4 @@ class PeriodPositionType extends AbstractType
     {
         return 'appbundle_period_position';
     }
-
-
 }
