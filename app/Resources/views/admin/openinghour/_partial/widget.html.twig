@@ -1,25 +1,8 @@
-{% set openingHourJoinString = "&" %}
+{% extends 'layoutlight.html.twig' %}
 
-<div class="card-panel">
-    <table style=" width: max-content; margin-left: auto; margin-right: auto; border-collapse: separate; border-spacing: 10px 0px" class="no-padding">
-        <tbody>
-            {% set dayOfWeek = -1 %}
-            {% for openingHour in openingHours %}
-                {% if openingHour.dayOfWeek != dayOfWeek %}
-                    {# close previous day #}
-                    {% if loop.index > 0 %}</td></tr>{% endif %}
-                    {# open new day #}
-                    <tr>
-                        <td class="no-padding" style="text-align:right">{{ openingHour.dayOfWeekString | capitalize }} :</td>
-                        <td class="no-padding">{{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
-                {% else %}
-                    {# continue existing day #}
-                    {{ openingHourJoinString | raw }} {{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
-                {% endif %}
-                {% set dayOfWeek = openingHour.dayOfWeek %}
-            {% endfor %}
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+{% block content %}
+{% if title %}
+    Horaires d'ouverture :
+{% endif %}
+{% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHours } %}
+{% endblock %}

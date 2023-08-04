@@ -23,6 +23,25 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class OpeningHourController extends Controller
 {
     /**
+     * Opening hours widget display
+     * 
+     * @Route("/widget", name="admin_openinghour_widget", methods={"GET"})
+     */
+    public function widgetAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+
+        $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll();
+
+        return $this->render('admin/openinghour/_partial/widget.html.twig', [
+            'openingHours' => $openingHours,
+            'title' => $filter_title
+        ]);
+    }
+
+    /**
      * List all opening hours
      *
      * @Route("/", name="admin_openinghour_index", methods={"GET"})
@@ -31,6 +50,7 @@ class OpeningHourController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+
         $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll();
 
         return $this->render('admin/openinghour/index.html.twig', array(
@@ -136,7 +156,7 @@ class OpeningHourController extends Controller
     }
 
     /**
-     * Opening hour widget generator
+     * Opening hours widget generator
      *
      * @Route("/widget_generator", name="admin_openinghour_widget_generator", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
