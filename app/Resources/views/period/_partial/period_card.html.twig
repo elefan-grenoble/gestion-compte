@@ -40,7 +40,9 @@
             {# if display by job/training #}
             <div id="training" style="margin-top:1em;">
                 {% for week, positions in period.groupedpositionsperweekcycle(week_filter) %}
-                    <h6>Semaine {{ week }}</h6>
+                    {% if cycle_type == 'abcd' %}
+                        <h6>Semaine {{ week }}</h6>
+                    {% endif %}
                     {% for training, nb_shifters in positions %}
                         <i class="material-icons">person</i>{{ nb_shifters }} x {{ training }}
                         <br/>
@@ -53,7 +55,9 @@
                 <div id="shifter" style="margin-top:1em;">
                     {% for week, positions in period.positionsperweekcycle %}
                         {% if (week in week_filter) or not week_filter %}
-                            <h6>Semaine {{ week }}</h6>
+                            {% if cycle_type == 'abcd' %}
+                                <h6>Semaine {{ week }}</h6>
+                            {% endif %}
                             {% for position in positions %}
                                 {% include 'period/_partial/position_shifter_display.html.twig' with { 'position': position, 'anonymized': anonymized } %}
                             {% endfor %}
