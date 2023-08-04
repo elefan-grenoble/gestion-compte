@@ -2,7 +2,11 @@
 
 {% block content %}
 {% if title %}
-    Horaires d'ouverture :
+    <p {% if align != "left" %}style="text-align:center"{% endif %}>Horaires d'ouverture :</p>
 {% endif %}
-{% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHours } %}
+{% if align == "left" %}
+    {% include "/admin/openinghour/_partial/list.html.twig" with { openingHours: openingHours } %}
+{% else %}
+    {% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHours } %}
+{% endif %}
 {% endblock %}
