@@ -71,9 +71,11 @@
                 <a href="{{ path("admin_period_index") }}" class="waves-effect waves-light btn white black-text">
                     <i class="material-icons left orange-text">date_range</i>Gérer la semaine type
                 </a>
-                <a href="{{ path("admin_periodpositionfreelog_list") }}" class="waves-effect waves-light btn orange">
-                    <i class="material-icons left">delete_sweep</i>Annulations postes fixes
-                </a>
+                {% if use_fly_and_fixed %}
+                    <a href="{{ path("admin_periodpositionfreelog_list") }}" class="waves-effect waves-light btn orange">
+                        <i class="material-icons left">delete_sweep</i>Annulations postes fixes
+                    </a>
+                {% endif %}
             {% endif %}
 
             {% if is_granted("ROLE_ADMIN") %}
