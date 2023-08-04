@@ -54,14 +54,14 @@ class RegistrationType extends AbstractType
 
             if (!is_object($user) || !$user->hasRole('ROLE_SUPER_ADMIN')) {
                 if ($registration){
-                    if (!$registration->getAmount()){
+                    if (!$registration->getAmount()) {
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),
                             'constraints' => [ new GreaterThan(0) ]));
-                    }else{
+                    } else {
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('disabled'=>'true')));
                     }
                     $form->add('registrar', EntityType::class, array(
-                        'label' => 'Enregistré par',
+                        'label' => 'Enregistrée par',
                         'class' => 'AppBundle:User',
                         'query_builder' => function (EntityRepository $er) {
                             return $er->createQueryBuilder('u')
@@ -89,8 +89,8 @@ class RegistrationType extends AbstractType
                 }
             } else {
                 $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
-                $form->add('registrar',EntityType::class,array(
-                    'label' => 'Enregistré par',
+                $form->add('registrar', EntityType::class, array(
+                    'label' => 'Enregistrée par',
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
@@ -104,7 +104,7 @@ class RegistrationType extends AbstractType
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
                     $this->localCurrency => Registration::TYPE_LOCAL,
-//                    'CB' => Registration::TYPE_CREDIT_CARD,
+                    // 'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
             }
 

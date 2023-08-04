@@ -319,7 +319,7 @@ class MembershipController extends Controller
         if (0 !== count($violations)) {
             // there are errors, now you can show them
             foreach ($violations as $violation) {
-                $session->getFlashBag()->add('error',$violation->getMessage());
+                $session->getFlashBag()->add('error', $violation->getMessage());
             }
             $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
 
@@ -331,9 +331,10 @@ class MembershipController extends Controller
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
             $beneficiary = $beneficiaryForm->getData();
+            $dispatcher = $this->get('event_dispatcher');
 
             $event = new FormEvent($beneficiaryForm->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             if (count($member->getBeneficiaries()) <= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
                 $beneficiary->setMembership($member);
@@ -342,9 +343,7 @@ class MembershipController extends Controller
                 $em->persist($beneficiary);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
-
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
@@ -357,7 +356,6 @@ class MembershipController extends Controller
         }
 
         return $this->redirectToShow($member);
-
     }
 
     /**
@@ -703,10 +701,12 @@ class MembershipController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
-
-        $code = $request->query->get('code');
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $a_beneficiary = null;
+        $code = $request->query->get('code');
+
         if ($code) {
             $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
             if ($email) {
@@ -736,6 +736,7 @@ class MembershipController extends Controller
             $member->setMainBeneficiary($beneficiary);
         }
 
+        // init member_number
         $m = $em->getRepository('AppBundle:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
         $mm = 1;
         if ($m)
@@ -753,7 +754,7 @@ class MembershipController extends Controller
             }
         } else {
             $registration->setDate(new DateTime('now'));
-            $registration->setRegistrar($this->getUser());
+            $registration->setRegistrar($current_user);
         }
         $registration->setMembership($member);
 
@@ -766,8 +767,9 @@ class MembershipController extends Controller
             $dispatcher = $this->get('event_dispatcher');
 
             if (!$a_beneficiary) {
-                if (!$member->getLastRegistration()->getRegistrar())
-                    $member->getLastRegistration()->setRegistrar($this->getUser());
+                if (!$member->getLastRegistration()->getRegistrar()) {
+                    $member->getLastRegistration()->setRegistrar($current_user);
+                }
             } else if ($a_beneficiary->getMode() === Registration::TYPE_HELLOASSO) {
                 $member->removeRegistration($registration); //no registration yet
             }
@@ -777,18 +779,19 @@ class MembershipController extends Controller
             $member->setFrozenChange(false);
 
             $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($member);
             if ($a_beneficiary) {
                 $beneficiaries_emails = $a_beneficiary->getBeneficiariesEmailsAsArray();
-                foreach ($beneficiaries_emails as $email){
+                foreach ($beneficiaries_emails as $email) {
                     $new_anonymous_beneficiary = new AnonymousBeneficiary();
                     $new_anonymous_beneficiary->setCreatedAtValue(new \DateTime());
                     $new_anonymous_beneficiary->setEmail($email);
                     $new_anonymous_beneficiary->setJoinTo($member->getMainBeneficiary());
                     $new_anonymous_beneficiary->setRegistrar($a_beneficiary->getRegistrar());
                     $em->persist($new_anonymous_beneficiary);
+
                     //dispatch to send mail
                     $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($new_anonymous_beneficiary));
                 }
@@ -888,15 +891,15 @@ class MembershipController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $form->get('beneficiary')->getData();
             $beneficiary->setMembership($member);
+            $dispatcher = $this->get('event_dispatcher');
 
             $event = new FormEvent($form->get('beneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($beneficiary);
             $em->remove($a_beneficiary);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
 
             $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');

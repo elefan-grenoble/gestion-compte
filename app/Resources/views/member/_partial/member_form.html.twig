@@ -24,16 +24,14 @@
 {% if form.lastRegistration is defined %}
     <h4>Première adhésion</h4>
     <div class="row">
-        <div class="amount col s2">
+        <div class="amount col s3">
             {{ form_row(form.lastRegistration.amount) }}
         </div>
         <div class="type col s3">
             {{ form_row(form.lastRegistration.mode) }}
         </div>
         <div class="date col s3">
-            <div class="row">
-                <div class="col s4">{{ form_row(form.lastRegistration.date) }}</div>
-            </div>
+            {{ form_row(form.lastRegistration.date) }}
         </div>
         <div class="col s3">
             {{ form_row(form.lastRegistration.registrar) }}
