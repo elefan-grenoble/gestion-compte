@@ -21,6 +21,7 @@ class Period
     const WEEK_C = "C";
     const WEEK_D = "D";
     const WEEK_CYCLE = [Period::WEEK_A, Period::WEEK_B, Period::WEEK_C, Period::WEEK_D];
+    const WEEK_CYCLE_CHOICE_LIST = ["Semaine A" => Period::WEEK_A, "Semaine B" => Period::WEEK_B, "Semaine C" => Period::WEEK_C, "Semaine D" => Period::WEEK_D];
 
     /**
      * @var int

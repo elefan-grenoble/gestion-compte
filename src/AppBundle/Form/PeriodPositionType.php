@@ -21,19 +21,22 @@ use Symfony\Component\Form\FormEvents;
 
 class PeriodPositionType extends AbstractType
 {
+    private $cycle_type;
+
+    public function __construct($cycle_type)
+    {
+        $this->cycle_type = $cycle_type;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('week_cycle', ChoiceType::class, array(
-                'label' => 'Cycle', 'choices' => array(
-                    "Semaine A" => Period::WEEK_A,
-                    "Semaine B" => Period::WEEK_B,
-                    "Semaine C" => Period::WEEK_C,
-                    "Semaine D" => Period::WEEK_D,
-                ),
+                'label' => 'Cycle',
+                'choices' => ($this->cycle_type == 'abcd') ? Period::WEEK_CYCLE_CHOICE_LIST : [],
                 'expanded' => false,
                 'multiple' => true,
-                'empty_data' => Period::WEEK_CYCLE
+                // 'data' => ($this->cycle_type == 'abcd') ? null : [Period::WEEK_A]
             ))
             ->add('formation', EntityType::class, array(
                 'label'=>'Formation necessaire',
