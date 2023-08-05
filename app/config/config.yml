@@ -52,6 +52,7 @@ twig:
     due_duration_by_cycle: '%due_duration_by_cycle%'
     cycle_type: '%cycle_type%'
     registration_duration: '%registration_duration%'
+    registration_manual_enabled: '%registration_manual_enabled%'
     support_email: '%transactional_mailer_user%'
     images_tmp_dir: '%images_tmp_dir%'
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
