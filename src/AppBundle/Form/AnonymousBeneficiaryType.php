@@ -17,12 +17,12 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class AnonymousBeneficiaryType extends AbstractType
 {
-    private $localCurrency;
+    private $local_currency_name;
     private $tokenStorage;
 
-    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
+    public function __construct(string $local_currency_name, TokenStorageInterface $tokenStorage)
     {
-        $this->localCurrency = $localCurrency;
+        $this->local_currency_name = $local_currency_name;
         $this->tokenStorage = $tokenStorage;
     }
 
@@ -60,7 +60,7 @@ class AnonymousBeneficiaryType extends AbstractType
                 'choices' => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
-                    $this->localCurrency => Registration::TYPE_LOCAL,
+                    $this->local_currency_name => Registration::TYPE_LOCAL,
                     'Helloasso' => Registration::TYPE_HELLOASSO,
                 )
             ));

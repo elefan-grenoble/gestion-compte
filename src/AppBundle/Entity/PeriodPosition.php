@@ -178,6 +178,7 @@ class PeriodPosition
     public function setWeekCycle($weekCycle)
     {
         $this->weekCycle = $weekCycle;
+
         return $this;
     }
 

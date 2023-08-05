@@ -16,6 +16,12 @@ class Period
 {
     const DAYS_OF_WEEK = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
     const DAYS_OF_WEEK_LIST_WITH_INT = ["Lundi" => 0, "Mardi" => 1, "Mercredi" => 2, "Jeudi" => 3, "Vendredi" => 4, "Samedi" => 5, "Dimanche" => 6];
+    const WEEK_A = "A";
+    const WEEK_B = "B";
+    const WEEK_C = "C";
+    const WEEK_D = "D";
+    const WEEK_CYCLE = [Period::WEEK_A, Period::WEEK_B, Period::WEEK_C, Period::WEEK_D];
+    const WEEK_CYCLE_CHOICE_LIST = ["Semaine A" => Period::WEEK_A, "Semaine B" => Period::WEEK_B, "Semaine C" => Period::WEEK_C, "Semaine D" => Period::WEEK_D];
 
     /**
      * @var int
