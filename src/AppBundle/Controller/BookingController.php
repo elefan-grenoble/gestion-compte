@@ -212,7 +212,7 @@ class BookingController extends Controller
                 'required' => false,
                 'choices' => array_combine($years, $years),
                 'label' => 'Année',
-                'data' =>  $defaultYear,
+                'data' => $defaultYear,
                 'placeholder' => false,
             ))
             ->add('week', IntegerType::class, array(

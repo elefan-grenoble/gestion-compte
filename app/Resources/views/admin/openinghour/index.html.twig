@@ -14,7 +14,7 @@
 {% if openingHours %}
     <div class="row">
         <div class="col m6">
-            {% include "/admin/openinghour/_partial/widget.html.twig" with { openingHours: openingHours } %}
+            {% include "/admin/openinghour/_partial/card.html.twig" with { openingHours: openingHours } %}
         </div>
     </div>
 {% else %}
@@ -53,5 +53,8 @@
 <br />
 <a href="{{ path('admin_openinghour_new') }}" class="btn">
     <i class="material-icons left">add</i>Ajouter une horaire d'ouverture
+</a>
+<a href="{{ path('admin_openinghour_widget_generator') }}" class="btn">
+    <i class="material-icons left">tune</i>Générer un widget
 </a>
 {% endblock %}
