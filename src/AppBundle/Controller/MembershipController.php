@@ -90,8 +90,8 @@ class MembershipController extends Controller
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
         $freezeChangeForm = $this->createFreezeChangeForm($member);
-        $closeForm = $this->createCloseForm($member);
-        $openForm = $this->createOpenForm($member);
+        $flyingForm = $this->createFlyingForm($member);
+        $withdrawnForm = $this->createWithdrawnForm($member);
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
@@ -197,8 +197,8 @@ class MembershipController extends Controller
             'freeze_form' => $freezeForm->createView(),
             'unfreeze_form' => $unfreezeForm->createView(),
             'freeze_change_form' => $freezeChangeForm->createView(),
-            'close_form' => $closeForm->createView(),
-            'open_form' => $openForm->createView(),
+            'flying_form' => $flyingForm->createView(),
+            'withdrawn_form' => $withdrawnForm->createView(),
             'delete_form' => $deleteForm->createView(),
             'time_log_new_form' => $timeLogNewForm->createView(),
             'time_log_delete_forms' => $timeLogDeleteForms,
@@ -501,61 +501,94 @@ class MembershipController extends Controller
 
 
     /**
-     * Close member
+     * Close/Reopen member
      *
-     * @Route("/{id}/close", name="member_close", methods={"POST"})
+     * @Route("/{id}/withdrawn", name="member_withdrawn", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function closeAction(Request $request, Membership $member)
+    public function withdrawnAction(Request $request, Membership $member)
     {
-        $this->denyAccessUnlessGranted('close', $member);
 
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
         $session = new Session();
 
-        $form = $this->createCloseForm($member);
+        $form = $this->createWithdrawnForm($member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $withdrawn = $form->get("withdrawn")->getData();
+            if ($withdrawn) {
+                $this->denyAccessUnlessGranted('close', $member);
+                if ($member->isWithdrawn()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fermé');
+                    return $this->redirectToShow($member);
+                }
+                $member->setWithdrawnDate(new \DateTime('now'));
+                $member->setWithdrawnBy($current_user);
+            } else {
+                $this->denyAccessUnlessGranted('open', $member);
+                if (!$member->isWithdrawn()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà ouvert');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setWithdrawn($withdrawn);
             $em = $this->getDoctrine()->getManager();
-            $member->setWithdrawn(true);
-            $member->setWithdrawnDate(new \DateTime('now'));
-            $member->setWithdrawnBy($current_user);
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte fermé !');
+            if ($withdrawn) {
+                $session->getFlashBag()->add('success', 'Compte fermé !');
+            } else {
+                $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
+            }
         }
 
         return $this->redirectToShow($member);
     }
 
     /**
-     * Open member
+     * Change flying status member
      *
-     * @Route("/{id}/open", name="member_open", methods={"POST"})
+     * @Route("/{id}/flying", name="member_flying", methods={"POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function openAction(Request $request, Membership $member)
+    public function flyingAction(Request $request, Membership $member)
     {
-        $this->denyAccessUnlessGranted('open', $member);
+        $this->denyAccessUnlessGranted('flying', $member);
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+        $session = new Session();
 
-        $form = $this->createOpenForm($member);
+        $form = $this->createFlyingForm($member);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
+            $flying = $form->get("flying")->getData();
+            if ($flying) {
+                if ($member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà volant');
+                    return $this->redirectToShow($member);
+                }
+            } else {
+                if (!$member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fixe');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setFlying($flying);
             $em = $this->getDoctrine()->getManager();
-
-            $member->setWithdrawn(false);
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
+            if ($flying) {
+                $session->getFlashBag()->add('success', 'Le compte est volant !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte est fixe !');
+            }
         }
 
         return $this->redirectToShow($member);
@@ -732,7 +765,6 @@ class MembershipController extends Controller
             $user->setEmail($a_beneficiary->getEmail());
             $beneficiary = new Beneficiary();
             $beneficiary->setUser($user);
-            $beneficiary->setFlying(false);
             $member->setMainBeneficiary($beneficiary);
         }
 
@@ -880,7 +912,6 @@ class MembershipController extends Controller
 
         $beneficiary = new Beneficiary();
         $beneficiary->setUser(new User());
-        $beneficiary->setFlying(false);
         $beneficiary->setEmail($a_beneficiary->getEmail());
 
         $form->get('beneficiary')->setData($beneficiary);
@@ -1118,29 +1149,31 @@ class MembershipController extends Controller
     }
 
     /**
-     * Creates a form to close a member entity.
+     * Creates a form to close or open a member entity.
      *
      * @param Membership $member
      * @return \Symfony\Component\Form\FormInterface
      */
-    private function createCloseForm(Membership $member)
+    private function createWithdrawnForm(Membership $member)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('member_close', array('id' => $member->getId())))
+            ->setAction($this->generateUrl('member_withdrawn', array('id' => $member->getId())))
+            ->add('withdrawn', HiddenType::class, ['data' => $member->isWithdrawn() ? 0 : 1])
             ->setMethod('POST')
             ->getForm();
     }
 
     /**
-     * Creates a form to open a member entity.
+     * Creates a form to set flying for a member entity.
      *
      * @param Membership $member
      * @return \Symfony\Component\Form\FormInterface
      */
-    private function createOpenForm(Membership $member)
+    private function createFlyingForm(Membership $member)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('member_open', array('id' => $member->getId())))
+            ->setAction($this->generateUrl('member_flying', array('id' => $member->getId())))
+            ->add('flying', HiddenType::class, ['data' => $member->isFlying() ? 0 : 1])
             ->setMethod('POST')
             ->getForm();
     }

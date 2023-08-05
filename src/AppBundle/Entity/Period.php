@@ -414,7 +414,7 @@ class Period
         return $positionsPerWeekCycle;
     }
 
-        /**
+    /**
      * Get periodPositions grouped per week cycle
      *
      * @param String|null $weekCycle a string of the week to keep or null if no filter
@@ -475,7 +475,7 @@ class Period
         foreach ($this->positions as $position) {
             if($shifter = $position->getShifter()){
                 if((($weekCycle && $position->getWeekCycle()==$weekCycle) or !$weekCycle)
-                    and ($shifter->isFlying()
+                    and ($shifter->getMembership()->isFlying()
                     or $shifter->getMembership()->isFrozen()
                     or $shifter->getMembership()->isWithdrawn())){
                     return true;

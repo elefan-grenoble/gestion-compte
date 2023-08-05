@@ -635,7 +635,7 @@ class SearchUserFormHelper
 
         if ($this->use_fly_and_fixed) {
             if ($form->get('flying')->getData() > 0) {
-                $qb = $qb->andWhere('b.flying = :flying')
+                $qb = $qb->andWhere('m.flying = :flying')
                     ->setParameter('flying', $form->get('flying')->getData()-1);
             }
             if ($form->has('has_period_position')) {
@@ -711,7 +711,6 @@ class SearchUserFormHelper
                     ->setParameter('subQueryformations', $subQuery);
             }
         }
-
         return $qb;
     }
 }

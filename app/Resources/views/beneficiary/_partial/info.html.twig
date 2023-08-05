@@ -61,16 +61,6 @@
             {% endif %})
         {% endif %}
     </div>
-    {% if use_fly_and_fixed %}
-        <div class="col s12">
-            <i class="material-icons tiny">accessibility</i>
-            {% if beneficiary.flying %}
-                <div class="chip green-text">Equipe volante</div>
-            {% else %}
-                <div class="chip green-text">Equipe fixe</div>
-            {% endif %}
-        </div>
-    {% endif %}
     {% if beneficiary.formations | length %}
         <div class="col s12">
             <i class="material-icons tiny">assignment_ind</i>
