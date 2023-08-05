@@ -41,7 +41,9 @@
             Aucun poste n'existe pour ce créneau
         {% endif %}
         {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{ week }}</h6>
+            {% if cycle_type == 'abcd' %}
+                <h6>Semaine {{ week }}</h6>
+            {% endif %}
             <ul class="collapsible">
                 {% for position in positions %}
                     {% if position.shifter %}
@@ -158,10 +160,12 @@
                         {{ form_label(position_add_form.nb_of_shifter) }}
                         {{ form_widget(position_add_form.nb_of_shifter) }}
                     </div>
-                    <div class="col s3">
-                        {{ form_label(position_add_form.week_cycle) }}
-                        {{ form_widget(position_add_form.week_cycle) }}
-                    </div>
+                    {% if cycle_type == 'abcd' %}
+                        <div class="col s3">
+                            {{ form_label(position_add_form.week_cycle) }}
+                            {{ form_widget(position_add_form.week_cycle) }}
+                        </div>
+                    {% endif %}
                     <div class="col s6">
                         {{ form_label(position_add_form.formation) }}
                         {{ form_widget(position_add_form.formation) }}
@@ -170,7 +174,8 @@
                         <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
                     </div>
                 </div>
-                {{ form_end(position_add_form) }}
+                {{ form_row(position_add_form._token) }}
+                {{ form_end(position_add_form, {'render_rest': false}) }}
             </div>
         </li>
         <li>

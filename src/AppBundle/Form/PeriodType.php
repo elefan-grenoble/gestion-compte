@@ -13,7 +13,6 @@ use AppBundle\Repository\JobRepository;
 
 class PeriodType extends AbstractType
 {
-
     /**
      * {@inheritdoc}
      */
@@ -27,7 +26,7 @@ class PeriodType extends AbstractType
                 'label' => 'Poste',
                 'class' => 'AppBundle:Job',
                 'choice_label'=> 'name',
-                'multiple'     => false,
+                'multiple' => false,
                 'required' => true,
                 'query_builder' => function(JobRepository $repository) {
                     $qb = $repository->createQueryBuilder('j');
@@ -56,6 +55,4 @@ class PeriodType extends AbstractType
     {
         return 'appbundle_period';
     }
-
-
 }
