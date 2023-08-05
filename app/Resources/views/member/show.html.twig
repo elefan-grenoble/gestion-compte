@@ -47,7 +47,7 @@
                 </a>
             {% endif %}
             <!-- Passer fixe ou volant -->
-            {% if not member.withdrawn and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+            {% if use_fly_and_fixed and not member.withdrawn and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
                 <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small teal">
                     {% if not member.flying %}
                         <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
