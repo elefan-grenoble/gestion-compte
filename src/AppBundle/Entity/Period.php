@@ -398,7 +398,7 @@ class Period
         foreach ($this->positions as $position) {
             if($shifter = $position->getShifter()){
                 if((($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter)
-                    and ($shifter->isFlying()
+                    and ($shifter->getMembership()->isFlying()
                     or $shifter->getMembership()->isFrozen()
                     or $shifter->getMembership()->isWithdrawn())){
                     return true;
