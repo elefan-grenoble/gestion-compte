@@ -72,7 +72,10 @@
                 <i class="material-icons">event_busy</i> et après ?
             </div>
             <div class="collapsible-body">
-                Seuls les 27 prochains jours sont ouverts à la réservation, si tu veux voir plus loin, reviens un peu plus tard :)
+                {% set now = date('now') %}
+                {% set lastDay = (bucketsByDay|last|first|first).start %}
+                {% set difference = date(lastDay).diff(now) %}
+                Seuls les {{ difference.days }} prochains jours sont ouverts à la réservation, si tu veux voir plus loin, reviens un peu plus tard :)
             </div>
         </li>
     {% endif %}

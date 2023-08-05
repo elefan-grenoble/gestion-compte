@@ -15,19 +15,13 @@ use \Datetime;
 
 class MembershipService
 {
+    private $container;
     protected $em;
-    protected $registration_duration;
-    protected $registration_every_civil_year;
-    protected $cycle_type;
-    protected $use_fly_and_fixed;
 
     public function __construct(ContainerInterface $container, EntityManagerInterface $em)
     {
+        $this->container = $container;
         $this->em = $em;
-        $this->registration_duration = $container->getParameter('registration_duration');
-        $this->registration_every_civil_year = $container->getParameter('registration_every_civil_year');
-        $this->cycle_type = $container->getParameter('cycle_type');
-        $this->use_fly_and_fixed = $container->getParameter('use_fly_and_fixed');
     }
 
      /**
@@ -76,7 +70,8 @@ class MembershipService
      */
     public function getExpire($membership): ?\DateTime
     {
-        if ($this->registration_every_civil_year) {
+        $registration_every_civil_year = $this->container->getParameter('registration_every_civil_year');
+        if ($registration_every_civil_year) {
             if ($membership->getLastRegistration()) {
                 $expire = $membership->getLastRegistration()->getDate();
             } else {
@@ -86,7 +81,8 @@ class MembershipService
         } else {
             if ($membership->getLastRegistration()) {
                 $expire = clone $membership->getLastRegistration()->getDate();
-                $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
+                $registration_duration = $this->container->getParameter('registration_duration');
+                $expire = $expire->add(\DateInterval::createFromDateString($registration_duration));
                 $expire->modify('-1 day');
             } else {
                 $expire = new \DateTime('-1 day');
@@ -117,10 +113,13 @@ class MembershipService
      */
     public function getStartOfCycle(Membership $member, $cycleOffset = 0)
     {
-        // init
-        $now = new DateTime('now');
-        $date = clone($now);
-        if ($this->cycle_type == "abcd") {
+        $cycle_type = $this->container->getParameter('cycle_type');
+        if ($cycle_type == "abcd") {
+            $date = new DateTime('now');
+            // 0 (for Monday) through 6 (for Sunday)
+            $day = $date->format("N") - 1;
+            // 0 (for week A) through 3 (for week D)
+            $week = ($date->format("W") - 1) % 4;
             // Set date to last monday
             // format "N": 0 (for Monday) through 6 (for Sunday))
             $day = $date->format("N") - 1;
@@ -200,7 +199,7 @@ class MembershipService
             $member->isCurrentlyExemptedFromShifts() ||
             !$this->isUptodate($member);
 
-        if ($this->use_fly_and_fixed) {
+        if ($this->container->getParameter('use_fly_and_fixed')) {
             $hasWarningStatus = $hasWarningStatus || $member->isFlying();
         }
 
@@ -210,5 +209,18 @@ class MembershipService
     public function getShiftFreeLogs(Membership $member)
     {
         return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreed($member);
+    }
+
+    public function getMaximumBookingLeadTime(Membership $member)
+    {
+        if ($this->container->getParameter('use_fly_and_fixed')) {
+            if ($member->isFlying()) {
+                $nb_days = $this->container->getParameter('max_booking_lead_time_flying');
+            } else {
+                $nb_days = $this->container->getParameter('max_booking_lead_time_fixe');
+            }
+            return $nb_days;
+        }
+        return null;
     }
 }
