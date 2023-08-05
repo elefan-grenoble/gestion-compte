@@ -14,8 +14,9 @@ services:
         # if you need to do this, you can override this setting on individual services
         public: false
         bind:
-            $localCurrency: '%local_currency_name%'
+            $local_currency_name: '%local_currency_name%'
             $use_fly_and_fixed: '%use_fly_and_fixed%'
+            $cycle_type: '%cycle_type%'
 
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -197,33 +198,35 @@ services:
 
     # services
     shift_service:
-            class: AppBundle\Service\ShiftService
-            public: true
-            arguments:
-                - "@doctrine.orm.entity_manager"
-                - '@beneficiary_service'
-                - '@membership_service'
-                - "%due_duration_by_cycle%"
-                - "%min_shift_duration%"
-                - "%new_users_start_as_beginner%"
-                - "%allow_extra_shifts%"
-                - "%max_time_in_advance_to_book_extra_shifts%"
-                - "%forbid_shift_overlap_time%"
-                - "%use_fly_and_fixed%"
-                - "%fly_and_fixed_allow_fixed_shift_free%"
-                - "%use_time_log_saving%"
-                - "%time_log_saving_shift_free_min_time_in_advance_days%"
+        class: AppBundle\Service\ShiftService
+        public: true
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - '@beneficiary_service'
+            - '@membership_service'
+            - "%due_duration_by_cycle%"
+            - "%min_shift_duration%"
+            - "%new_users_start_as_beginner%"
+            - "%allow_extra_shifts%"
+            - "%max_time_in_advance_to_book_extra_shifts%"
+            - "%forbid_shift_overlap_time%"
+            - "%use_fly_and_fixed%"
+            - "%fly_and_fixed_allow_fixed_shift_free%"
+            - "%use_time_log_saving%"
+            - "%time_log_saving_shift_free_min_time_in_advance_days%"
     shift_free_log_service:
-            class: AppBundle\Service\ShiftFreeLogService
-            public: true
-            arguments:
-                $tokenStorage: '@security.token_storage'
+        class: AppBundle\Service\ShiftFreeLogService
+        public: true
+        arguments:
+            $tokenStorage: '@security.token_storage'
+    period_service:
+        class: AppBundle\Service\PeriodService
+        public: true
     period_position_free_log_service:
-            class: AppBundle\Service\PeriodPositionFreeLogService
-            public: true
-            arguments:
-                $tokenStorage: '@security.token_storage'
-
+        class: AppBundle\Service\PeriodPositionFreeLogService
+        public: true
+        arguments:
+            $tokenStorage: '@security.token_storage'
     time_log_service:
         class: AppBundle\Service\TimeLogService
         public: true
@@ -231,28 +234,27 @@ services:
             $em: "@doctrine.orm.entity_manager"
             $membershipService: '@membership_service'
             $due_duration_by_cycle: "%due_duration_by_cycle%"
-
     beneficiary_service:
-            class: AppBundle\Service\BeneficiaryService
-            public: true
+        class: AppBundle\Service\BeneficiaryService
+        public: true
     mailer_service:
-            class: AppBundle\Service\MailerService
-            public: true
-            arguments:
-                $mailer: "@mailer"
-                $baseDomain: '%emails.base_domain%'
-                $memberEmail: "%emails.member%"
-                $project_name: "%project_name%"
-                $sendableEmails: '%emails.sendable%'
-                $entity_manager: "@doctrine.orm.entity_manager"
-                $router: "@router"
-                $templating: "@templating"
+        class: AppBundle\Service\MailerService
+        public: true
+        arguments:
+            $mailer: "@mailer"
+            $baseDomain: '%emails.base_domain%'
+            $memberEmail: "%emails.member%"
+            $project_name: "%project_name%"
+            $sendableEmails: '%emails.sendable%'
+            $entity_manager: "@doctrine.orm.entity_manager"
+            $router: "@router"
+            $templating: "@templating"
     membership_service:
-            class: AppBundle\Service\MembershipService
-            public: true
+        class: AppBundle\Service\MembershipService
+        public: true
     event_service:
-            class: AppBundle\Service\EventService
-            public: true
+        class: AppBundle\Service\EventService
+        public: true
 
     search_user_form_helper:
             class: AppBundle\Service\SearchUserFormHelper

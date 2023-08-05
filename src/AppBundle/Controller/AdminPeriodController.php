@@ -31,6 +31,13 @@ use Symfony\Component\HttpKernel\KernelInterface;
  */
 class AdminPeriodController extends Controller
 {
+    private $cycle_type;
+
+    public function __construct($cycle_type)
+    {
+        $this->cycle_type = $cycle_type;
+    }
+
     /**
      * Display all the periods in a schedule (available and reserved)
      *
@@ -68,7 +75,6 @@ class AdminPeriodController extends Controller
         }
 
         return $this->render('admin/period/index.html.twig', array(
-            'days_of_week' => Period::DAYS_OF_WEEK,
             'periods_by_day' => $periodsByDay,
             'filter_form' => $form->createView(),
             'week_filter' => $week_filter,
@@ -199,7 +205,8 @@ class AdminPeriodController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $count = $form["nb_of_shifter"]->getData();
-            foreach ($form["week_cycle"]->getData() as $week_cycle) {
+            $week_cycles = ($this->cycle_type == "abcd") ? $form["week_cycle"]->getData() : [Period::WEEK_A];
+            foreach ($week_cycles as $week_cycle) {
                 $position->setWeekCycle($week_cycle);
                 $position->setCreatedBy($current_user);
                 foreach (range(0, $count-1) as $iteration) {
@@ -208,6 +215,7 @@ class AdminPeriodController extends Controller
                     $em->persist($p);
                 }
             }
+
             $em->persist($period);
             $em->flush();
 

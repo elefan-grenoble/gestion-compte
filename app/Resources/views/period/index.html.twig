@@ -7,18 +7,6 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
 
 {% extends 'layout.html.twig' %}
 
-{# generate a form input, used for the filters #}
-{% macro form_input(input_obj, hidden=false) %}
-    <div class="input-field col m3">
-        {% if hidden %}
-            {{ form_widget(input_obj, { 'attr': {'class': 'hide'} }) }}
-        {% else %}
-            {{ form_widget(input_obj) }}
-            {{ form_label(input_obj) }}
-        {% endif %}
-    </div>
-{% endmacro %}
-
 {% block title %}Semaine type - {{ site_name }}{% endblock %}
 
 {% block stylesheets %}
@@ -55,15 +43,36 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
                     <div class="collapsible-body">
                         {{ form_start(filter_form) }}
                         <div class="row">
-                            {{ _self.form_input(filter_form.job) }}
-                            {{ _self.form_input(filter_form.week) }}
-                            {{ _self.form_input(filter_form.filling, not use_fly_and_fixed) }}
+                            <div class="col s4 input-field">
+                                {{ form_widget(filter_form.job) }}
+                                {{ form_label(filter_form.job) }}
+                            </div>
+                            {% if cycle_type == 'abcd' %}
+                                <div class="col s4 input-field">
+                                    {{ form_widget(filter_form.week) }}
+                                    {{ form_label(filter_form.week) }}
+                                </div>
+                            {% endif %}
+                            {% if use_fly_and_fixed %}
+                                <div class="col s4 input-field">
+                                    {{ form_widget(filter_form.filling) }}
+                                    {{ form_label(filter_form.filling) }}
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="row">
                             {{ form_widget(filter_form.submit, { 'attr': {'class': 'btn col m3'} }) }}
-                            {{ form_end(filter_form) }}
+                            {{ form_row(filter_form._token) }}
+                            {{ form_end(filter_form, {'render_rest': false}) }}
                         </div>
-                        {% if use_fly_and_fixed %}
+                    </div>
+                </li>
+                {% if use_fly_and_fixed %}
+                    <li>
+                        <div class="collapsible-header">
+                            <i class="material-icons">build</i>Actions
+                        </div>
+                        <div class="collapsible-body">
                             <div class="row">
                                 <a id="shifter" style="display: None;" onClick="showShifters()"
                                 class="btn col m3 waves-effect waves-light purple tooltipped"
@@ -78,9 +87,9 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
                                     <i class="material-icons left">accessibility</i>Afficher les formations
                                 </a>
                             </div>
-                        {% endif %}
-                    </div>
-                </li>
+                        </div>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -91,14 +100,14 @@ It display a page with all the avaible periods (a.k.a the "Semaine type")
             <table>
                 <thead>
                 <tr>
-                    {% for key,day in days_of_week %}
+                    {% for key,day in period_service.getDaysOfWeekArray() %}
                         <th>{{ day }}</th>
                     {% endfor %}
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    {% for key,day in days_of_week %}
+                    {% for key,day in period_service.getDaysOfWeekArray() %}
                         <td>
                             {% for period in periods_by_day[key] %}
                                 {% if (filling_filter == null)

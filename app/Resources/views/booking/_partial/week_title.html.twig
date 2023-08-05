@@ -1,0 +1,6 @@
+<h5>
+    Semaine #{{ first_shift.start | date('W') }}
+    {% if cycle_type == 'abcd' %}
+        ({{ period_service.getWeekCycleArray()[(first_shift.start | date('W') - 1) % 4] }})
+    {% endif %}
+</h5>
