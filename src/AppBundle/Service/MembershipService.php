@@ -20,6 +20,7 @@ class MembershipService
     protected $registration_duration;
     protected $registration_every_civil_year;
     protected $cycle_type;
+    protected $use_fly_and_fixed;
 
     public function __construct(ContainerInterface $container, EntityManagerInterface $em)
     {
@@ -27,6 +28,7 @@ class MembershipService
         $this->registration_duration = $container->getParameter('registration_duration');
         $this->registration_every_civil_year = $container->getParameter('registration_every_civil_year');
         $this->cycle_type = $container->getParameter('cycle_type');
+        $this->use_fly_and_fixed = $container->getParameter('use_fly_and_fixed');
     }
 
      /**
@@ -199,7 +201,7 @@ class MembershipService
             $member->isCurrentlyExemptedFromShifts() ||
             !$this->isUptodate($member);
 
-        if ($this->container->getParameter('use_fly_and_fixed')) {
+        if ($this->use_fly_and_fixed) {
             $hasWarningStatus = $hasWarningStatus || $member->isFlying();
         }
 
