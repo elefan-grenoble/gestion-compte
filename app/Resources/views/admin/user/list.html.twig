@@ -296,7 +296,7 @@
                     <td class="hide-on-med-and-down">
                         {% for beneficiary in member.beneficiaries %}
                             {% for formation in beneficiary.formations %}
-                                <div class="chip truncate">
+                                <div class="chip">
                                     {{ formation.name }}
                                 </div>
                             {% endfor %}
@@ -305,7 +305,7 @@
                     <td class="hide-on-med-and-down">
                         {% for beneficiary in member.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
-                                <div class="chip truncate">
+                                <div class="chip">
                                     {{ commission.name }}
                                 </div>
                             {% endfor %}

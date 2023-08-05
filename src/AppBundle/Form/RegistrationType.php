@@ -1,5 +1,4 @@
 <?php
-// src/AppBundle/Form/RegistrationType.php
 
 namespace AppBundle\Form;
 
@@ -18,12 +17,12 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class RegistrationType extends AbstractType
 {
-    private $localCurrency;
+    private $local_currency_name;
     private $tokenStorage;
 
-    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
+    public function __construct(string $local_currency_name, TokenStorageInterface $tokenStorage)
     {
-        $this->localCurrency = $localCurrency;
+        $this->local_currency_name = $local_currency_name;
         $this->tokenStorage = $tokenStorage;
     }
 
@@ -54,14 +53,14 @@ class RegistrationType extends AbstractType
 
             if (!is_object($user) || !$user->hasRole('ROLE_SUPER_ADMIN')) {
                 if ($registration){
-                    if (!$registration->getAmount()){
+                    if (!$registration->getAmount()) {
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),
                             'constraints' => [ new GreaterThan(0) ]));
-                    }else{
+                    } else {
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('disabled'=>'true')));
                     }
                     $form->add('registrar', EntityType::class, array(
-                        'label' => 'Enregistré par',
+                        'label' => 'Enregistrée par',
                         'class' => 'AppBundle:User',
                         'query_builder' => function (EntityRepository $er) {
                             return $er->createQueryBuilder('u')
@@ -78,7 +77,7 @@ class RegistrationType extends AbstractType
                         'choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
-                            $this->localCurrency => Registration::TYPE_LOCAL,
+                            $this->local_currency_name => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
                         ),
                         'label' => 'Mode de réglement',
@@ -89,8 +88,8 @@ class RegistrationType extends AbstractType
                 }
             } else {
                 $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
-                $form->add('registrar',EntityType::class,array(
-                    'label' => 'Enregistré par',
+                $form->add('registrar', EntityType::class, array(
+                    'label' => 'Enregistrée par',
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
@@ -103,8 +102,8 @@ class RegistrationType extends AbstractType
                 $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
-                    $this->localCurrency => Registration::TYPE_LOCAL,
-//                    'CB' => Registration::TYPE_CREDIT_CARD,
+                    $this->local_currency_name => Registration::TYPE_LOCAL,
+                    // 'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
             }
 

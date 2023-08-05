@@ -32,6 +32,8 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $admin = $em->getRepository('AppBundle:User')->findSuperAdminAccount();
         $use_fly_and_fixed = $this->getContainer()->getParameter('use_fly_and_fixed');
         $reserve_new_shift_to_prior_shifter = $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter');
+        $cycle_type = $this->getContainer()->getParameter('cycle_type');
+        $week_cycle_array = $this->getContainer()->get('period_service')->getWeekCycleArray();
 
         $from_given = $input->getArgument('date');
         $to_given = $input->getOption('to');
@@ -56,7 +58,6 @@ class ShiftGenerateCommand extends ContainerAwareCommand
         $count_existing_all = 0;
         $reservedShifts = array();
         $formerShifts = array();
-        $weekCycle = array("A", "B", "C", "D");
 
         foreach ($period as $date) {
             $count_new_period = 0;
@@ -67,7 +68,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             if ($closingException) {
                 $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau sera généré</>');
             } else {
-                $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6=7-1 (for Sunday)
+                $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6 = 7-1 (for Sunday)
                 $periods = $em->getRepository('AppBundle:Period')->createQueryBuilder('p')
                     ->where('p.dayOfWeek = :dow')
                     ->setParameter('dow', $dayOfWeek)
@@ -83,11 +84,12 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                     $shift->setEnd($end);
 
                     foreach ($period->getPositions() as $position) {
-                        // Semaine #A-B-C-D
-                        // Ignorer les periodes en dehors du cycle semaine
-                        $weekCycleIndex = ($date->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51
-                        if ($weekCycle[$weekCycleIndex] != $position->getWeekCycle()) {
-                            continue;
+                        if ($cycle_type == 'abcd') {
+                            // Semaine ABCD : ignorer les positions qui ne correspondent pas à la date
+                            $weekCycleIndex = ($date->format('W') - 1) % 4; // 0 = (1-1) % 4 (first week) through 2 = (51-1) % 4 (last week)
+                            if ($week_cycle_array[$weekCycleIndex] != $position->getWeekCycle()) {
+                                continue;
+                            }
                         }
 
                         $already_generated = $em->getRepository('AppBundle:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));

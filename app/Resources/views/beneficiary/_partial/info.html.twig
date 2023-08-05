@@ -22,17 +22,17 @@
 </div>
 
 <div class="row">
-    <div class="col s12 truncate">
+    <div class="col s12">
         <i class="material-icons tiny">phone</i>
         <span>{{ beneficiary.phone }}</span>
     </div>
     {% if phone_only is not defined %}
-        <div class="col s12 truncate">
+        <div class="col s12">
             <i class="material-icons tiny">mail</i>
             <span>{{ beneficiary.email }}</span>
         </div>
         {% if beneficiary.address %}
-            <div class="col s12 truncate">
+            <div class="col s12">
                 <i class="material-icons tiny">location_on</i>
                 {{ beneficiary.address.street1 }}
                 {% if beneficiary.address.street2 %}
@@ -43,7 +43,7 @@
             </div>
         {% endif %}
     {% endif %}
-    <div class="col s12 truncate">
+    <div class="col s12">
         <i class="material-icons tiny">person</i>&nbsp;{{ beneficiary.user.username }}
         {% if is_granted("ROLE_ADMIN") %}
             (<i class="material-icons tiny" title="dernière connexion">exit_to_app</i>
@@ -55,7 +55,7 @@
         {% endif %}
     </div>
     {% if beneficiary.formations | length %}
-        <div class="col s12 truncate">
+        <div class="col s12">
             <i class="material-icons tiny">assignment_ind</i>
             {% for formation in beneficiary.formations %}
                 <div class="chip red-text">{{ formation.name }}</div>
@@ -63,7 +63,7 @@
         </div>
     {% endif %}
     {% if beneficiary.commissions | length %}
-        <div class="col s12 truncate">
+        <div class="col s12">
             <i class="material-icons tiny">group</i>
             {% for commission in beneficiary.commissions %}
                 <div class="chip blue-text">{{ commission.name }}</div>
@@ -71,7 +71,7 @@
         </div>
     {% endif %}
     {% if beneficiary.user and beneficiary.user.roles | length %}
-        <div class="col s12 truncate">
+        <div class="col s12">
             <i class="material-icons tiny">settings</i>
             {% for role in beneficiary.user.roles %}
                 <div class="chip purple-text">{{ role }}</div>
@@ -79,7 +79,7 @@
         </div>
     {% endif %}
     {% if beneficiary.membership.lastRegistration %}
-        <div class="col s12 truncate">
+        <div class="col s12">
             <i class="material-icons tiny">perm_contact_calendar</i>
             <span>Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}</span>
         </div>

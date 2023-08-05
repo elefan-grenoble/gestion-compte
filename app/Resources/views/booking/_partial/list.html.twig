@@ -5,7 +5,6 @@
     {% set beneficiary = null %}
 {% endif %}
 {% set previousWeekIndex = -1 %}
-{% set weekCycle = ["A", "B", "C", "D"] %}
 {% set current_cycle = 0 %}
 
 </div> <!-- end div.section -->
@@ -16,10 +15,7 @@
 
         {% if previousWeekIndex != weekIndex %}
             {% if previousWeekIndex != -1 %}</ul>{% endif %}
-            <h5>
-                Semaine {{ weekCycle[((bucketsByjob|first|first).start | date('W') - 1) % 4] }}
-                <small title="Numéro de semaine">(#{{ (bucketsByjob|first|first).start | date('W') }})</small>
-            </h5>
+            {% include "booking/_partial/week_title.html.twig" with { first_shift: bucketsByjob|first|first } %}
             {% set previousWeekIndex = weekIndex %}
             <ul class="collapsible collapsible-expandable">
         {% endif %}
