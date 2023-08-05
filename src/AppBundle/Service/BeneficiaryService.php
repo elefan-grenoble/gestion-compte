@@ -65,20 +65,6 @@ class BeneficiaryService
     }
 
     /**
-     * Return true if the beneficiary is in a "warning" status
-     */
-    public function hasWarningStatus(Beneficiary $beneficiary): bool
-    {
-        $hasWarningStatus = $this->membershipService->hasWarningStatus($beneficiary->getMembership());
-
-        if ($this->container->getParameter('use_fly_and_fixed')) {
-            $hasWarningStatus = $hasWarningStatus || $beneficiary->isFlying();
-        }
-        
-        return $hasWarningStatus;
-    }
-
-    /**
      * Return a string with emoji between brackets depending on the
      * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
      * or an empty string if none of those
@@ -96,7 +82,7 @@ class BeneficiaryService
         if ($beneficiary->getMembership()->getFrozen()) {
             $symbols[] = $this->container->getParameter('member_frozen_icon');
         }
-        if ($beneficiary->isFlying()) {
+        if ($beneficiary->getMembership()->isFlying()) {
             $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
         }
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {

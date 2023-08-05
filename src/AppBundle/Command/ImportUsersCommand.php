@@ -168,7 +168,6 @@ class ImportUsersCommand extends CsvCommand
                         $dispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
 
                         $beneficiary->setEmail($email);
-                        $beneficiary->setFlying(false);
 
                         $em->persist($beneficiary);
                     }
