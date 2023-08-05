@@ -1,5 +1,4 @@
 <?php
-// src/AppBundle/Form/RegistrationType.php
 
 namespace AppBundle\Form;
 
@@ -18,12 +17,12 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class RegistrationType extends AbstractType
 {
-    private $localCurrency;
+    private $local_currency_name;
     private $tokenStorage;
 
-    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
+    public function __construct(string $local_currency_name, TokenStorageInterface $tokenStorage)
     {
-        $this->localCurrency = $localCurrency;
+        $this->local_currency_name = $local_currency_name;
         $this->tokenStorage = $tokenStorage;
     }
 
@@ -78,7 +77,7 @@ class RegistrationType extends AbstractType
                         'choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
-                            $this->localCurrency => Registration::TYPE_LOCAL,
+                            $this->local_currency_name => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
                         ),
                         'label' => 'Mode de réglement',
@@ -103,7 +102,7 @@ class RegistrationType extends AbstractType
                 $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
-                    $this->localCurrency => Registration::TYPE_LOCAL,
+                    $this->local_currency_name => Registration::TYPE_LOCAL,
                     // 'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
             }

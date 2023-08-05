@@ -1,5 +1,4 @@
 {% set previousWeekIndex = -1 %}
-{% set weekCycle = ["A", "B", "C", "D"] %}
 
 {% for bucketsByjob in bucketsByDay %}
     {% set date = false %}
@@ -9,10 +8,7 @@
 
         {# New week --------- #}
         {% if not date and previousWeekIndex != weekIndex %}
-            <h5>
-                Semaine {{ weekCycle[((buckets|first).start | date('W') - 1) % 4] }}
-                <small title="Numéro de semaine">(#{{ (buckets|first).start | date('W') }})</small>
-            </h5>
+        {% include "booking/_partial/week_title.html.twig" with { first_shift: buckets|first } %}
             {% set previousWeekIndex = weekIndex %}
         {% endif %}
 

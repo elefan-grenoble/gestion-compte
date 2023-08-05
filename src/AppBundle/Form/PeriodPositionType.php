@@ -3,6 +3,7 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Formation;
+use AppBundle\Entity\Period;
 use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\PeriodRoom;
 use AppBundle\Entity\Role;
@@ -20,27 +21,22 @@ use Symfony\Component\Form\FormEvents;
 
 class PeriodPositionType extends AbstractType
 {
-    const WEEKA = 'A';
-    const WEEKB = 'B';
-    const WEEKC = 'C';
-    const WEEKD = 'D';
+    private $cycle_type;
 
-    /**
-     * {@inheritdoc}
-     */
+    public function __construct($cycle_type)
+    {
+        $this->cycle_type = $cycle_type;
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
             ->add('week_cycle', ChoiceType::class, array(
-                'label' => 'Cycle', 'choices' => array(
-                    "Semaine A" => self::WEEKA,
-                    "Semaine B" => self::WEEKB,
-                    "Semaine C" => self::WEEKC,
-                    "Semaine D" => self::WEEKD,
-                ),
-                'expanded'  => false,
-                'multiple'  => true,
-                'empty_data' => [self::WEEKA, self::WEEKB, self::WEEKC, self::WEEKD]
+                'label' => 'Cycle',
+                'choices' => ($this->cycle_type == 'abcd') ? Period::WEEK_CYCLE_CHOICE_LIST : [],
+                'expanded' => false,
+                'multiple' => true,
+                // 'data' => ($this->cycle_type == 'abcd') ? null : [Period::WEEK_A]
             ))
             ->add('formation', EntityType::class, array(
                 'label'=>'Formation necessaire',
@@ -55,7 +51,6 @@ class PeriodPositionType extends AbstractType
             $form = $event->getForm();
 
             // checks if the PeriodPosition object is "new"
-            // If no data is passed to the form, the data is "null".
            if (!$period_position || null === $period_position->getId()) {
                 $form->add('nb_of_shifter', IntegerType::class, [
                     'label' => 'Nombre de postes disponibles',
@@ -87,6 +82,4 @@ class PeriodPositionType extends AbstractType
     {
         return 'appbundle_period_position';
     }
-
-
 }

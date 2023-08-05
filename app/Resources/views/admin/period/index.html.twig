@@ -71,43 +71,34 @@
                     <div class="collapsible-body">
                         {{ form_start(filter_form) }}
                         <div class="row">
-                            <div class="col s4">
-                                <div class="input-field">
-                                    {{ form_widget(filter_form.job) }}
-                                    {{ form_label(filter_form.job) }}
-                                </div>
+                            <div class="col s4 input-field">
+                                {{ form_widget(filter_form.job) }}
+                                {{ form_label(filter_form.job) }}
                             </div>
-                            <div class="col s4">
-                                <div class="input-field">
+                            {% if cycle_type == 'abcd' %}
+                                <div class="col s4 input-field">
                                     {{ form_widget(filter_form.week) }}
                                     {{ form_label(filter_form.week) }}
                                 </div>
-                            </div>
-                            <div class="col s4">
-                                <div class="input-field">
-                                    {% if use_fly_and_fixed %}
-                                        {{ form_widget(filter_form.filling) }}
-                                        {{ form_label(filter_form.filling) }}
-                                    {% else %}
-                                        {% do filter_form.filling.setRendered() %} <!-- hidden -->
-                                    {% endif %}
+                            {% endif %}
+                            {% if use_fly_and_fixed %}
+                                <div class="col s4 input-field">
+                                    {{ form_widget(filter_form.filling) }}
+                                    {{ form_label(filter_form.filling) }}
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
                         {% if use_fly_and_fixed %}
                             <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(filter_form.beneficiary) }}
-                                        {{ form_label(filter_form.beneficiary) }}
-                                    </div>
+                                <div class="col s4 input-field">
+                                    {{ form_widget(filter_form.beneficiary) }}
+                                    {{ form_label(filter_form.beneficiary) }}
                                 </div>
                             </div>
-                        {% else %}
-                            {% do filter_form.beneficiary.setRendered() %} <!-- hidden -->
                         {% endif %}
                         {{ form_widget(filter_form.submit) }}
-                        {{ form_end(filter_form) }}
+                        {{ form_row(filter_form._token) }}
+                        {{ form_end(filter_form, {'render_rest': false}) }}
                     </div>
                 </li>
                 {# Actions ----------------------------------- #}
@@ -232,14 +223,14 @@
             <table>
                 <thead>
                     <tr>
-                        {% for key,day in days_of_week %}
+                        {% for key,day in period_service.getDaysOfWeekArray() %}
                             <th>{{ day }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        {% for key,day in days_of_week %}
+                        {% for key,day in period_service.getDaysOfWeekArray() %}
                             <td>
                                 {% for period in periods_by_day[key] %}
                                     {% if ((filling_filter == null) and (beneficiary_filter == null))

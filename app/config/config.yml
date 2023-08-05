@@ -50,6 +50,7 @@ twig:
     project_url_display: "%project_url_display%"
     helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
     due_duration_by_cycle: '%due_duration_by_cycle%'
+    cycle_type: '%cycle_type%'
     registration_duration: '%registration_duration%'
     registration_manual_enabled: '%registration_manual_enabled%'
     support_email: '%transactional_mailer_user%'
@@ -120,6 +121,7 @@ twig:
     beneficiary_service: "@beneficiary_service"
     membership_service: "@membership_service"
     shift_service: "@shift_service"
+    period_service: "@period_service"
     time_log_service: "@time_log_service"
 
 # Doctrine Configuration

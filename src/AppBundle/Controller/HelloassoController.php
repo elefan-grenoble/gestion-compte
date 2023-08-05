@@ -4,7 +4,6 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\RegistrationType;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
