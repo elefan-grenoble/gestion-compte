@@ -27,11 +27,17 @@ class OAuthController extends Controller
      */
     public function logout(ClientRegistry $clientRegistry): RedirectResponse
     {
-        /** @var KeycloakClient $client */
-        $client = $clientRegistry->getClient('keycloak');
-        $url = $this->generateUrl('homepage',[],UrlGeneratorInterface::ABSOLUTE_URL);
-        $logout_url = $client->getOAuth2Provider()->getLogoutUrl(['redirect_uri'=>$url]);
-        return $this->redirect($logout_url);
+        $oidc_enable = $this->container->getParameter('oidc_enable');
+        if ($oidc_enable) {
+            /** @var KeycloakClient $client */
+            $client = $clientRegistry->getClient('keycloak');
+            $url = $this->generateUrl('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
+            $logout_url = $client->getOAuth2Provider()->getLogoutUrl(['redirect_uri' => $url]);
+            return $this->redirect($logout_url);
+        }else{
+            $url = $this->generateUrl('logout');
+            return $this->redirect($url);
+        }
     }
 
     /**
