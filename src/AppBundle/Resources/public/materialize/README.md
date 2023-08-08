@@ -4,10 +4,10 @@
   </a>
 </p>
 
-<h3 align="center">MaterializeCSS</h3>
+<h3 align="center">Materialize</h3>
 
 <p align="center">
-  Materialize, a CSS Framework based on material design.
+  Materialize, a CSS Framework based on Material Design.
   <br>
   <a href="https://materializecss.github.io/materialize/"><strong>-- Browse the docs --</strong></a>
   <br>
@@ -24,19 +24,12 @@
   <a href="https://gitter.im/materializecss/materialize">
     <img src="https://badges.gitter.im/Join%20Chat.svg" alt="Gitter badge">
   </a>
+  <a href="https://opencollective.com/materialize">
+    <img alt="Open Collective backers and sponsors" src="https://img.shields.io/opencollective/all/materialize">
+  </a>
 </p>
 
-## Table of Contents
-- [Quickstart](#quickstart)
-- [Documentation](#documentation)
-- [Build](#build)
-- [Supported Browsers](#supported-browsers)
-- [Changelog](#changelog)
-- [Testing](#testing)
-- [Contributing](#contributing)
-- [Copyright and license](#copyright-and-license)
-
-## Quickstart:
+## Quickstart
 Read the [getting started guide](https://materializecss.github.io/materialize/getting-started.html) for more information on how to use materialize.
 
 - [Download the latest release](https://github.com/materializecss/materialize/releases/latest) of materialize directly from GitHub. ([Beta](https://github.com/materializecss/materialize/releases/))
@@ -76,7 +69,6 @@ Materialize is compatible with:
 - Safari 9+
 - Opera
 - Edge
-- IE 11+
 
 ## Changelog
 For changelogs, check out [the Releases section of materialize](https://github.com/materializecss/materialize/releases) or the [CHANGELOG.md](CHANGELOG.md).
@@ -87,5 +79,25 @@ We use Jasmine as our testing framework and we're trying to write a robust test 
 ## Contributing
 Check out the [CONTRIBUTING document](CONTRIBUTING.md) in the root of the repository to learn how you can contribute. You can also browse the [help-wanted](https://github.com/materializecss/materialize/labels/help-wanted) tag in our issue tracker to find things to do.
 
+## Sponsors
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/materialize#sponsor)]
+
+[![OC sponsor 0](https://opencollective.com/materialize/sponsor/0/avatar.svg)](https://opencollective.com/materialize/sponsor/0/website)
+[![OC sponsor 1](https://opencollective.com/materialize/sponsor/1/avatar.svg)](https://opencollective.com/materialize/sponsor/1/website)
+[![OC sponsor 2](https://opencollective.com/materialize/sponsor/2/avatar.svg)](https://opencollective.com/materialize/sponsor/2/website)
+[![OC sponsor 3](https://opencollective.com/materialize/sponsor/3/avatar.svg)](https://opencollective.com/materialize/sponsor/3/website)
+[![OC sponsor 4](https://opencollective.com/materialize/sponsor/4/avatar.svg)](https://opencollective.com/materialize/sponsor/4/website)
+[![OC sponsor 5](https://opencollective.com/materialize/sponsor/5/avatar.svg)](https://opencollective.com/materialize/sponsor/5/website)
+[![OC sponsor 6](https://opencollective.com/materialize/sponsor/6/avatar.svg)](https://opencollective.com/materialize/sponsor/6/website)
+[![OC sponsor 7](https://opencollective.com/materialize/sponsor/7/avatar.svg)](https://opencollective.com/materialize/sponsor/7/website)
+[![OC sponsor 8](https://opencollective.com/materialize/sponsor/8/avatar.svg)](https://opencollective.com/materialize/sponsor/8/website)
+[![OC sponsor 9](https://opencollective.com/materialize/sponsor/9/avatar.svg)](https://opencollective.com/materialize/sponsor/9/website)
+
+
+## Backers
+Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/materialize#backer)]
+
+[![Backers](https://opencollective.com/materialize/backers.svg?width=890)](https://opencollective.com/materialize#backers)
+
 ## Copyright and license
-Code Copyright 2022 Materialize. Code released under the MIT license.
+Code Copyright 2023 Materialize. Code released under the MIT license.
