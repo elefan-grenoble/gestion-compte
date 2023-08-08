@@ -16,7 +16,7 @@ jQuery.extend(jQuery.fn.datepicker.defaults, {
     labelYearSelect: 'Sélectionner une année'
 });
 
-// https://materializecss.com/pickers.html
+// https://materializeweb.com/pickers.html
 datepickerSettings = {
     format: 'yyyy-mm-dd',
     showClearBtn: true,

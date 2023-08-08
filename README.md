@@ -32,7 +32,7 @@ _cliquez pour voir l'image en grand_
   * PHP 7.4
   * Symfony 3.4
   * jQuery 3.6
-  * Materialize 1.2.1
+  * Materialize 1.2.2
   * MySQL/MariaDB
 
 [Guide du développeur](doc/dev.md)
