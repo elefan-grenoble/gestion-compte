@@ -29,7 +29,7 @@ Si la dernière commande ne marche pas, vérifiez que vous avez le dossier des g
 
 ## Materialize
 
-* [official doc](https://materializecss.com/)
+* [official doc](https://materializeweb.com/)
 
 ## Docker
 

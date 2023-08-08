@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    // initialize Materialize behavior - https://materializecss.com/
+    // initialize Materialize behavior - https://materializeweb.com/
     $('select').formSelect();
     // $('datepicker').datepicker();  // see datepicker.js
     $('.sidenav').sidenav({
