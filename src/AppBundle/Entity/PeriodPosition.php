@@ -37,7 +37,7 @@ class PeriodPosition
 
     /**
      * @var string
-     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=false)
+     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=true)
      */
     private $weekCycle;
 
@@ -95,7 +95,10 @@ class PeriodPosition
      */
     public function __toString()
     {
-        $name = $this->getPeriod() . ' - Semaine ' . $this->getWeekCycle();
+        $name = (string) $this->getPeriod();
+        if ($this->getWeekCycle()) {
+            $name .= ' - Semaine ' . $this->getWeekCycle();
+        }
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
         }

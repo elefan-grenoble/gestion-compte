@@ -3,7 +3,9 @@
         <span class="card-title">
             {{ period_position.period.dayOfWeekString }} de {{ period_position.period.start | date('G\\hi') }} à {{ period_position.period.end | date('G\\hi') }}
             <br />
-            <small>(Semaine {{ period_position.weekCycle }})</small>
+            {% if cycle_type == 'abcd' %}
+                <small>(Semaine {{ period_position.weekCycle }})</small>
+            {% endif %}
         </span>
         <p>
             <i class="material-icons">person</i>{{ period_position.shifter.firstname }}
