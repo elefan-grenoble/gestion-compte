@@ -131,7 +131,9 @@
         {% endfor %}
     {% else %}
         {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{ week }}</h6>
+            {% if cycle_type == 'abcd' %}
+                <h6>Semaine {{ week }}</h6>
+            {% endif %}
             <ul>
             {% for position in positions %}
                 <li>
