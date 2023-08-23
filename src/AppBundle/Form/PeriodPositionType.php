@@ -33,7 +33,7 @@ class PeriodPositionType extends AbstractType
         $builder
             ->add('week_cycle', ChoiceType::class, array(
                 'label' => 'Cycle',
-                'choices' => ($this->cycle_type == 'abcd') ? Period::WEEK_CYCLE_CHOICE_LIST : [],
+                'choices' => ($this->cycle_type == "abcd") ? Period::WEEK_CYCLE_CHOICE_LIST : [],
                 'expanded' => false,
                 'multiple' => true,
                 // 'data' => ($this->cycle_type == 'abcd') ? null : [Period::WEEK_A]

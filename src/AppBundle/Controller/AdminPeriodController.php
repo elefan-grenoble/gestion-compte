@@ -205,9 +205,20 @@ class AdminPeriodController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $count = $form["nb_of_shifter"]->getData();
-            $week_cycles = ($this->cycle_type == "abcd") ? $form["week_cycle"]->getData() : [Period::WEEK_A];
-            foreach ($week_cycles as $week_cycle) {
-                $position->setWeekCycle($week_cycle);
+
+            if ($this->cycle_type == "abcd") {
+                $week_cycles = $form["week_cycle"]->getData();
+                foreach ($week_cycles as $week_cycle) {
+                    $position->setWeekCycle($week_cycle);
+                    $position->setCreatedBy($current_user);
+                    foreach (range(0, $count-1) as $iteration) {
+                        $p = clone($position);
+                        $period->addPosition($p);
+                        $em->persist($p);
+                    }
+                }
+            } else {
+                $position->setWeekCycle(null);
                 $position->setCreatedBy($current_user);
                 foreach (range(0, $count-1) as $iteration) {
                     $p = clone($position);
@@ -219,10 +230,10 @@ class AdminPeriodController extends Controller
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', $count . ' poste' . (($count>1) ? 's':'') . ' ajouté ' . (($count>1) ? 's':'') . ' (pour chaque cycle sélectionné) !');
+            $session->getFlashBag()->add('success', $count . ' poste' . (($count>1) ? 's':'') . ' ajouté ' . (($count>1) ? 's':'') . (($this->cycle_type == "abcd") ? ' (pour chaque cycle sélectionné) !':' !'));
         }
 
-        return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
+        return $this->redirectToRoute('admin_period_edit', array('id' => $period->getId()));
     }
 
     /**
@@ -244,7 +255,7 @@ class AdminPeriodController extends Controller
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été supprimé !');
         }
 
-        return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
+        return $this->redirectToRoute('admin_period_edit', array('id' => $period->getId()));
     }
 
     /**
