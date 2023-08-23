@@ -1,0 +1,82 @@
+
+<li id="position{{ position.id }}">
+    <div class="collapsible-header">
+        <div class="row" style="margin-bottom: 0; width: 100%;">
+            <div class="col s12">
+                {% if use_fly_and_fixed %}
+                    {% if position.shifter %}
+                        {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
+                        {{ position.shifter.displayNameWithMemberNumber }}
+                        {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
+                        {% if not position.formation and position.shifter.formations | length > 0 %}
+                            &nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>
+                        {% endif %}
+                        {% if position.shifter.isNew %}
+                            &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                        {% endif %}
+                    {% else %}
+                        <strong style="font-style:italic">libre</strong>
+                        {% if position.formation %}
+                            &nbsp;({{ position.formation.name }})
+                        {% else %}
+                            &nbsp;(sans formation particulière)
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    {{ position }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="collapsible-body">
+        {% if use_fly_and_fixed %}
+            {% if position.shifter %}
+                <p>
+                    Créneau fixe réservé
+                    pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}" target="_blank">{{ position.shifter }}</a>
+                    le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
+                    par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.booker, target_blank: true } %}.
+                </p>
+                {{ form_start(position_free_form) }}
+                {{ form_widget(position_free_form) }}
+                <a href="#" class="btn waves-effect waves-light orange" onclick="var r = confirm('Etes-vous sûr de vouloir libérer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Libérer ce poste">
+                    <i class="material-icons left">lock_open</i>Libérer
+                </a>
+                {{ form_end(position_free_form) }}
+            {% else %}
+                {{ form_start(position_book_form) }}
+                <div class="row">
+                    <div class="col s7 input-field">
+                        {{ form_label(position_book_form.shifter) }}
+                        {{ form_errors(position_book_form.shifter) }}
+                        {{ form_widget(position_book_form.shifter) }}
+                    </div>
+                    <div class="col s3">
+                        <button type="submit" class="btn waves-effect waves-light">
+                            <i class="material-icons left">add</i>Ajouter
+                        </button>
+                    </div>
+                </div>
+                {{ form_end(position_book_form) }}
+            {% endif %}
+        {% endif %}
+        {% if not position.shifter %}
+            {% if is_granted("ROLE_ADMIN") %}
+                <div class="row">
+                    {{ form_start(position_delete_form) }}
+                    {{ form_widget(position_delete_form) }}
+                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste">
+                        <i class="material-icons left">delete</i>Supprimer
+                    </a>
+                    {{ form_end(position_delete_form) }}
+                </div>
+            {% endif %}
+        {% endif %}
+        {% if position.createdBy %}
+            <p>
+                Poste type créé le <i>{{ position.createdAt | date_fr_full_with_time }}</i>
+                par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.createdBy, target_blank: true } %}.
+            </p>
+        {% endif %}
+    </div>
+</li>

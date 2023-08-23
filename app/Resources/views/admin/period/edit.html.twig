@@ -36,116 +36,19 @@
 
     <h5>Postes disponibles</h5>
 
-    {% if use_fly_and_fixed %}
-        {% if (period.positionsperweekcycle | length == 0) %}
-            Aucun poste n'existe pour ce créneau
-        {% endif %}
-        {% for week, positions in period.positionsperweekcycle %}
-            {% if cycle_type == 'abcd' %}
-                <h6>Semaine {{ week }}</h6>
-            {% endif %}
-            <ul class="collapsible">
-                {% for position in positions %}
-                    {% if position.shifter %}
-                        <li id="position{{ position.id }}">
-                            <div class="collapsible-header">
-                                <div class="col s12">
-                                    {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
-                                    {{ position.shifter.displayNameWithMemberNumber }}
-                                    {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
-                                    {% if not position.formation and position.shifter.formations | length > 0 %}
-                                        &nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>
-                                    {% endif %}
-                                    {% if position.shifter.isNew %}
-                                        &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            <div class="collapsible-body">
-                                <p>
-                                    Créneau fixe réservé
-                                    pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}" target="_blank">{{ position.shifter }}</a>
-                                    le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
-                                    par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.booker, target_blank: true } %}.
-                                </p>
-                                {{ form_start(positions_free_forms[position.id]) }}
-                                {{ form_widget(positions_free_forms[position.id]) }}
-                                <a href="#" class="btn waves-effect waves-light orange" onclick="var r = confirm('Etes-vous sûr de vouloir libérer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Libérer ce poste">
-                                    <i class="material-icons left">lock_open</i>Libérer
-                                </a>
-                                {{ form_end(positions_free_forms[position.id]) }}
-                            </div>
-                        </li>
-                    {% else %}
-                        <li id="position{{ position.id }}">
-                            <div class="collapsible-header">
-                                <div class="row" style="margin-bottom: 0; width: 100%;">
-                                    <div class="col s12">
-                                        <b>
-                                            <span style="font-style: italic">libre</span>
-                                        </b>
-                                        {% if position.formation %}
-                                            &nbsp;({{ position.formation.name }})
-                                        {% else %}
-                                            &nbsp;(sans formation particulière)
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="collapsible-body">
-                                {{ form_start(positions_book_forms[position.id]) }}
-                                <div class="row">
-                                    <div class="col s7 input-field">
-                                        {{ form_label(positions_book_forms[position.id].shifter) }}
-                                        {{ form_errors(positions_book_forms[position.id].shifter) }}
-                                        {{ form_widget(positions_book_forms[position.id].shifter) }}
-                                    </div>
-                                    <div class="col s3">
-                                        <button type="submit" class="btn waves-effect waves-light">
-                                            <i class="material-icons left">add</i>Ajouter
-                                        </button>
-                                    </div>
-                                </div>
-                                {{ form_end(positions_book_forms[position.id]) }}
-                                {% if is_granted("ROLE_ADMIN") %}
-                                    <div class="row">
-                                        {{ form_start(positions_delete_forms[position.id]) }}
-                                        {{ form_widget(positions_delete_forms[position.id]) }}
-                                        <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste">
-                                            <i class="material-icons left">delete</i>Supprimer
-                                        </a>
-                                        {{ form_end(positions_delete_forms[position.id]) }}
-                                    </div>
-                                {% endif %}
-                                {% if position.createdBy %}
-                                    <p>
-                                        Poste type créé le <i>{{ position.createdAt | date_fr_full_with_time }}</i>
-                                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.createdBy, target_blank: true } %}.
-                                    </p>
-                                {% endif %}
-                            </div>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-           </ul>
-        {% endfor %}
-    {% else %}
-        {% for week, positions in period.positionsperweekcycle %}
-            {% if cycle_type == 'abcd' %}
-                <h6>Semaine {{ week }}</h6>
-            {% endif %}
-            <ul>
-            {% for position in positions %}
-                <li>
-                    {{ form_start(positions_delete_forms[position.id]) }}
-                    {{ form_widget(positions_delete_forms[position.id]) }}
-                    {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
-                    {{ form_end(positions_delete_forms[position.id]) }}
-                </li>
-            {% endfor %}
-            </ul>
-        {% endfor %}
+    {% if (period.positionsperweekcycle | length == 0) %}
+        Aucun poste n'existe pour ce créneau
     {% endif %}
+    {% for week, positions in period.positionsperweekcycle %}
+        {% if cycle_type == 'abcd' %}
+            <h6>Semaine {{ week }}</h6>
+        {% endif %}
+        <ul class="collapsible">
+            {% for position in positions %}
+                {% include "admin/periodposition/_partial/edit_collapsible.html.twig" with { position: position, position_free_form: positions_free_forms[position.id] ?? null, position_book_form: positions_book_forms[position.id] ?? null, position_delete_form: positions_delete_forms[position.id] ?? null } %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
 
     <br />
     <h5>Actions supplémentaires</h5>
