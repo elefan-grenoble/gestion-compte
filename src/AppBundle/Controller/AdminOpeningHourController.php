@@ -144,7 +144,11 @@ class AdminOpeningHourController extends Controller
     public function widgetGeneratorAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'))
+            ->add('title', CheckboxType::class, array(
+                'required' => false,
+                'data' => true,
+                'label' => 'Afficher le titre du widget ?'
+            ))
             ->add('align', ChoiceType::class, array(
                 'label' => 'Alignement',
                 'choices'  => array('centré' => 'center', 'gauche' => 'left'),
@@ -156,7 +160,7 @@ class AdminOpeningHourController extends Controller
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'title='.($data['title'] ? 1 : 0) . '&align=' . $data['align'];
+            $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
 
             return $this->render('admin/openinghour/widget_generator.html.twig', array(
                 'query_string' => $widgetQueryString,
