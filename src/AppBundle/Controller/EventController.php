@@ -34,8 +34,8 @@ class EventController extends Controller
         $eventKind = null;
         $eventDateMax = null;
 
-        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
-        $filter_links = $request->query->has('links') ? ($request->get('links') == 1) : true;
+        $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : false;
+        $filter_links = $request->query->has('links') ? ($request->get('links') == 1) : false;
         $filter_date_max = $request->query->has('date_max') ? ($request->get('date_max') ? new DateTime($request->get('date_max')) : null) : null;
         if ($filter_date_max) {
             $eventDateMax = clone($filter_date_max);
