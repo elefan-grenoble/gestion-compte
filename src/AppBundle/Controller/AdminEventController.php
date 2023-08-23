@@ -430,16 +430,33 @@ class AdminEventController extends Controller
                 'multiple' => false,
                 'required' => false
             ))
-            ->add('date_max', TextType::class, array('label' => "Jusqu'à la date (incluse) ?", 'required' => false, 'attr' => array('class' => 'datepicker')))
-            ->add('limit', IntegerType::class, array('label' => "Nombre maximum d'événements à afficher ?", 'scale' => 0, 'required' => false))
-            ->add('title', CheckboxType::class, array('label' => 'Afficher le titre du widget ?', 'data' => true, 'required' => false))
+            ->add('date_max', TextType::class, array(
+                'label' => "Jusqu'à la date (incluse) ?",
+                'required' => false,
+                'attr' => array('class' => 'datepicker')
+            ))
+            ->add('limit', IntegerType::class, array(
+                'label' => "Nombre maximum d'événements à afficher ?",
+                'scale' => 0,
+                'required' => false
+            ))
+            ->add('title', CheckboxType::class, array(
+                'label' => 'Afficher le titre du widget ?',
+                'data' => false,
+                'required' => false
+            ))
+            ->add('links', CheckboxType::class, array(
+                'label' => 'Afficher un lien vers l\'événement ?',
+                'data' => false,
+                'required' => false
+            ))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0);
+            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);
 
             return $this->render('admin/event/widget/generate.html.twig', array(
                 'query_string' => $widgetQueryString,
