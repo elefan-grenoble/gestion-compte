@@ -12,11 +12,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 
 /**
- * EventKind controller.
+ * AdminEventKind controller
  *
  * @Route("admin/event/kinds")
  */
-class EventKindController extends Controller
+class AdminEventKindController extends Controller
 {
     /**
      * Lists all event kinds

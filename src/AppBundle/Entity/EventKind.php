@@ -44,8 +44,6 @@ class EventKind
     private $createdAt;
 
     /**
-     * Define toString.
-     *
      * @return string
      */
     public function __toString()
@@ -62,7 +60,7 @@ class EventKind
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -72,7 +70,7 @@ class EventKind
     }
 
     /**
-     * Set name.
+     * Set name
      *
      * @param string $name
      *
@@ -86,7 +84,7 @@ class EventKind
     }
 
     /**
-     * Get name.
+     * Get name
      *
      * @return string
      */
@@ -96,7 +94,7 @@ class EventKind
     }
 
     /**
-     * Get events.
+     * Get events
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -106,7 +104,7 @@ class EventKind
     }
 
     /**
-     * Get createdAt.
+     * Get createdAt
      *
      * @return \DateTime
      */
