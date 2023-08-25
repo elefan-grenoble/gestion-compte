@@ -26,6 +26,7 @@ class OpeningHourController extends Controller
         $openingHourKind = null;
 
         $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
+        $filter_kind_title = $request->query->has('kind_title') ? ($request->get('kind_title') == 1) : true;
         $filter_align = $request->query->has('align') ? $request->get('align') : 'center';
 
         $filter_opening_hour_kind_id = $request->get('opening_hour_kind_id');
@@ -39,6 +40,7 @@ class OpeningHourController extends Controller
             'openingHours' => $openingHours,
             'openingHourKind' => $openingHourKind,
             'title' => $filter_title,
+            'kind_title' => $filter_kind_title,
             'align' => $filter_align,
         ]);
     }

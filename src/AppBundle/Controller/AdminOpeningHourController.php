@@ -151,13 +151,18 @@ class AdminOpeningHourController extends Controller
                 'label' => "Quel type d'horaire d'ouverture ?",
                 'class' => 'AppBundle:OpeningHourKind',
                 'choice_label' => 'name',
-                'multiple' => false,
-                'required' => false
+                'multiple' => false
             ))
             ->add('title', CheckboxType::class, array(
                 'required' => false,
                 'data' => true,
                 'label' => 'Afficher le titre du widget ?',
+                'attr' => array('class' => 'filled-in')
+            ))
+            ->add('kind_title', CheckboxType::class, array(
+                'required' => false,
+                'data' => true,
+                'label' => 'Afficher les détails du type d\'horaire d\'ouverture ?',
                 'attr' => array('class' => 'filled-in')
             ))
             ->add('align', ChoiceType::class, array(
@@ -171,7 +176,7 @@ class AdminOpeningHourController extends Controller
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
+            $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&kind_title=' . ($data['kind_title'] ? 1 : 0) . '&align=' . $data['align'];
 
             return $this->render('admin/openinghour/widget_generator.html.twig', array(
                 'query_string' => $widgetQueryString,

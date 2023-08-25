@@ -30,6 +30,13 @@
     </label>
 </div>
 <div class="row">
+    {{ form_errors(form.kind_title) }}
+    <label>
+        {{ form_widget(form.kind_title) }}
+        <span>{{ form.kind_title.vars.label }}</span>
+    </label>
+</div>
+<div class="row">
     <div class="col m6">
         {{ form_label(form.align) }}
         {{ form_widget(form.align) }}
