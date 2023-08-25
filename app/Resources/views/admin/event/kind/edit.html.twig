@@ -13,13 +13,7 @@
 <h4>Editer un type d'événement</h4>
 
 {{ form_start(form) }}
-<div class="errors">
-    {{ form_errors(form) }}
-</div>
-<div class="row">
-    {{ form_row(form.name) }}
-</div>
-<br />
+{% include "/admin/event/kind/_partial/form.html.twig" with { form: form } %}
 <div>
     <button type="submit" class="btn waves-effect waves-light">
         <i class="material-icons left">save</i>Enregistrer

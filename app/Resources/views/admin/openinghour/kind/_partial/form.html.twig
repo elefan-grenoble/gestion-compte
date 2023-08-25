@@ -1,0 +1,19 @@
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+{{ form_row(form.name) }}
+<div class="row">
+    <div class="col m6">
+        {{ form_row(form.start_date) }}
+    </div>
+    <div class="col m6">
+        {{ form_row(form.end_date) }}
+    </div>
+</div>
+<div class="row">
+    {{ form_errors(form.enabled) }}
+    <label>
+        {{ form_widget(form.enabled) }}
+        <span>{{ form.enabled.vars.label }}</span>
+    </label>
+</div>

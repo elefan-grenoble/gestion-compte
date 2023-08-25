@@ -14,7 +14,9 @@
 <table class="responsive-table">
     <thead>
         <tr>
+            <th>Etat</th>
             <th>Type d'horaire d'ouverture</th>
+            <th>Période</th>
             <th>Nombre d'horaires d'ouverture</th>
             <th>Actions</th>
         </tr>
@@ -22,8 +24,14 @@
     <tbody>
         {% for openingHourKind in openingHourKinds %}
             <tr>
+                <td>{{ openingHourKind.enabled }}</td>
                 <td class="{{ openingHourKind.name }}">{{ openingHourKind.name }}</td>
-                <td>{{ openingHourKind.openingHours | length }}</td>
+                <td>
+                    {% if openingHourKind.startDate and openingHourKind.endDate %}
+                        {{ openingHourKind.startDate | date_fr_full }} - {{ openingHourKind.endDate | date_fr_full }}
+                    {% endif %}
+                </td>
+                <td></td>{# <td>{{ openingHourKind.openingHours | length }}</td> #}
                 <td>
                     <a href="{{ path('admin_openinghour_kind_edit', { 'id': openingHourKind.id }) }}">
                         <i class="material-icons">edit</i>Editer

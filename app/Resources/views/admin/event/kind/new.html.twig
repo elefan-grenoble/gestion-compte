@@ -10,13 +10,12 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Nouveau type d'événement</h4>
+<h4>Nouveau type d'événement</h4>
 
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <br />
-    <div>
-        <button type="submit" class="btn waves-effect waves-light">Créer</button>
-    </div>
-    {{ form_end(form) }}
+{{ form_start(form) }}
+{% include "/admin/event/kind/_partial/form.html.twig" with { form: form } %}
+<div>
+    <button type="submit" class="btn waves-effect waves-light">Créer</button>
+</div>
+{{ form_end(form) }}
 {% endblock %}

@@ -192,6 +192,26 @@ class OpeningHourKind
     }
 
     /**
+     * Get enabled
+     *
+     * @return bool
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set enabled
+     *
+     * @param bool $enabled
+     */
+    public function setEnabled(bool $enabled)
+    {
+        $this->enabled = $enabled;
+    }
+
+    /**
      * Get openingHours
      *
      * @return \Doctrine\Common\Collections\Collection
