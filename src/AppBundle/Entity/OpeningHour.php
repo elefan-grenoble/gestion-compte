@@ -60,7 +60,7 @@ class OpeningHour
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -161,7 +161,7 @@ class OpeningHour
     }
 
     /**
-     * Set createdAt.
+     * Set createdAt
      *
      * @param \DateTime $createdAt
      *
@@ -175,7 +175,7 @@ class OpeningHour
     }
 
     /**
-     * Get createdAt.
+     * Get createdAt
      *
      * @return \DateTime
      */
