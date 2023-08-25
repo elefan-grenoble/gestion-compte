@@ -13,35 +13,11 @@
 <h4>Nouvel événement</h4>
 
 {{ form_start(form) }}
-<div class="errors">
-    {{ form_errors(form) }}
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_row(form.title) }}
-    </div>
-    <div class="col m6">
-        {{ form_row(form.kind) }}
-    </div>
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_row(form.date) }}
-    </div>
-    <div class="col m6">
-        {{ form_row(form.end) }}
-    </div>
-</div>
-<div class="row">
-    {{ form_row(form.location) }}
-</div>
-<div class="row">
-    {{ form_row(form.description) }}
-</div>
-<div class="row">
-    {{ form_row(form.imgFile) }}
-</div>
-<a href="{{ path('admin_event_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
-<button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Créer</button>
+{% include "/admin/event/_partial/form.html.twig" with { form: form } %}
+<button type="submit" class="btn waves-effect waves-light" title="Créer">
+    <i class="material-icons left">save</i>Créer
+</button>
 {{ form_end(form) }}
+
+<a href="{{ path('admin_event_index') }}" class="btn waves-effect waves-light red" title="Annuler">Annuler</a>
 {% endblock %}

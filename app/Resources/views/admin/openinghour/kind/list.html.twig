@@ -23,15 +23,21 @@
     </thead>
     <tbody>
         {% for openingHourKind in openingHourKinds %}
-            <tr>
-                <td>{{ openingHourKind.enabled }}</td>
+            <tr class="{% if not openingHourKind.enabled %}grey lighten-2{% endif %}">
+                <td>
+                    {% if not openingHourKind.enabled %}
+                        <i class="material-icons" title="Inactif">close</i>
+                    {% else %}
+                        <i class="material-icons" title="Actif">check</i>
+                    {% endif %}
+                </td>
                 <td class="{{ openingHourKind.name }}">{{ openingHourKind.name }}</td>
                 <td>
                     {% if openingHourKind.startDate and openingHourKind.endDate %}
                         {{ openingHourKind.startDate | date_fr_full }} - {{ openingHourKind.endDate | date_fr_full }}
                     {% endif %}
                 </td>
-                <td></td>{# <td>{{ openingHourKind.openingHours | length }}</td> #}
+                <td>{{ openingHourKind.openingHours | length }}</td>
                 <td>
                     <a href="{{ path('admin_openinghour_kind_edit', { 'id': openingHourKind.id }) }}">
                         <i class="material-icons">edit</i>Editer

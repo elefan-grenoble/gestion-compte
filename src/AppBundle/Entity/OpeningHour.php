@@ -45,6 +45,12 @@ class OpeningHour
     private $end;
 
     /**
+     * @ORM\ManyToOne(targetEntity="OpeningHourKind", inversedBy="openingHours", fetch="EAGER")
+     * @ORM\JoinColumn(name="opening_hour_kind_id", referencedColumnName="id", onDelete="SET NULL")
+     */
+    private $kind;
+
+    /**
      * @var \DateTime
      * 
      * @ORM\Column(name="created_at", type="datetime")
@@ -158,6 +164,30 @@ class OpeningHour
     public function isStartBeforeEnd()
     {
         return $this->start < $this->end;
+    }
+
+    /**
+     * Set kind
+     *
+     * @param \AppBundle\Entity\OpeningHourKind $openingHourKind
+     *
+     * @return Event
+     */
+    public function setKind(\AppBundle\Entity\OpeningHourKind $openingHourKind = null)
+    {
+        $this->kind = $openingHourKind;
+
+        return $this;
+    }
+
+    /**
+     * Get kind
+     *
+     * @return OpeningHourKind
+     */
+    public function getKind()
+    {
+        return $this->kind;
     }
 
     /**

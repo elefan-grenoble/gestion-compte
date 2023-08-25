@@ -4,6 +4,8 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\OpeningHour;
 use AppBundle\Entity\Period;
+use AppBundle\Repository\OpeningHourKindRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -20,7 +22,18 @@ class OpeningHourType extends AbstractType
         $builder
             ->add('dayOfWeek', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')));
+            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
+            ->add('kind', EntityType::class, array(
+                'label' => 'Type d\'horaire d\'ouverture',
+                'class' => 'AppBundle:OpeningHourKind',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'query_builder' => function (OpeningHourKindRepository $repository) {
+                    return $repository->createQueryBuilder('ohk')
+                        ->orderBy('ohk.name', 'ASC');
+                },
+            ));
     }
 
     /**
