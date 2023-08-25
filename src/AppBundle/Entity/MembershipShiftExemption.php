@@ -59,9 +59,9 @@ class MembershipShiftExemption
 
     /**
      * @Assert\Date
+     * @Assert\GreaterThan(propertyPath="start")
      *
      * @ORM\Column(name="end", type="date")
-     * @Assert\GreaterThan(propertyPath="start")
      */
     private $end;
 

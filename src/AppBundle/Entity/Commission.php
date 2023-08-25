@@ -60,12 +60,14 @@ class Commission
 
     /**
      * Many Commissions have Many Beneficiaries.
+     * 
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
      */
     private $beneficiaries;
 
     /**
      * Many Commissions have Many Tasks.
+     * 
      * @ORM\ManyToMany(targetEntity="Task", mappedBy="commissions")
      * @OrderBy({"closed" = "ASC","dueDate" = "ASC"})
      */
@@ -73,6 +75,7 @@ class Commission
 
     /**
      * One Commission has Many Owners (Beneficiary).
+     * 
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="own",cascade={"persist"})
      */
     private $owners;

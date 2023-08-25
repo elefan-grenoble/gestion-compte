@@ -133,9 +133,9 @@ class Event
     private $createdBy;
 
     /**
-     * @ORM\Column(type="datetime")
-     *
      * @var \DateTime
+     * 
+     * @ORM\Column(type="datetime")
      */
     private $updatedAt;
 
