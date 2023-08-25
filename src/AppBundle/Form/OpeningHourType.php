@@ -28,10 +28,9 @@ class OpeningHourType extends AbstractType
                 'class' => 'AppBundle:OpeningHourKind',
                 'choice_label' => 'name',
                 'multiple' => false,
-                'required' => false,
                 'query_builder' => function (OpeningHourKindRepository $repository) {
                     return $repository->createQueryBuilder('ohk')
-                        ->orderBy('ohk.name', 'ASC');
+                        ->orderBy('ohk.id', 'ASC');
                 },
             ));
     }

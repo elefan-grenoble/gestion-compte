@@ -13,9 +13,11 @@
 
 {% if openingHours %}
     <div class="row">
-        <div class="col m6">
-            {% include "/admin/openinghour/_partial/card.html.twig" with { openingHours: openingHours } %}
-        </div>
+        {% for openingHourKind in openingHourKinds %}
+            <div class="col m6">
+                {% include "/admin/openinghour/kind/_partial/card.html.twig" with { openingHourKind: openingHourKind } %}
+            </div>
+        {% endfor %}
     </div>
 {% else %}
     <div class="card-panel yellow lighten-3">

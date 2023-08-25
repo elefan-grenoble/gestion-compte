@@ -12,6 +12,6 @@ class OpeningHourKindRepository extends \Doctrine\ORM\EntityRepository
 {
     public function findAll()
     {
-        return $this->findBy(array(), array('name' => 'ASC'));
+        return $this->findBy(array(), array('id' => 'ASC'));
     }
 }

@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\OpeningHour;
 use AppBundle\Form\OpeningHourType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -32,9 +33,11 @@ class AdminOpeningHourController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll();
+        $openingHourKinds = $em->getRepository('AppBundle:OpeningHourKind')->findAll();
 
         return $this->render('admin/openinghour/index.html.twig', array(
-            'openingHours' => $openingHours
+            'openingHours' => $openingHours,
+            'openingHourKinds' => $openingHourKinds,
         ));
     }
 
@@ -144,10 +147,18 @@ class AdminOpeningHourController extends Controller
     public function widgetGeneratorAction(Request $request)
     {
         $form = $this->createFormBuilder()
+            ->add('kind', EntityType::class, array(
+                'label' => "Quel type d'horaire d'ouverture ?",
+                'class' => 'AppBundle:OpeningHourKind',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false
+            ))
             ->add('title', CheckboxType::class, array(
                 'required' => false,
                 'data' => true,
-                'label' => 'Afficher le titre du widget ?'
+                'label' => 'Afficher le titre du widget ?',
+                'attr' => array('class' => 'filled-in')
             ))
             ->add('align', ChoiceType::class, array(
                 'label' => 'Alignement',
@@ -160,7 +171,7 @@ class AdminOpeningHourController extends Controller
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
+            $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
 
             return $this->render('admin/openinghour/widget_generator.html.twig', array(
                 'query_string' => $widgetQueryString,

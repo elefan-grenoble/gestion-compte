@@ -2,6 +2,8 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\OpeningHourKind;
+
 /**
  * OpeningHourRepository
  *
@@ -10,8 +12,25 @@ namespace AppBundle\Repository;
  */
 class OpeningHourRepository extends \Doctrine\ORM\EntityRepository
 {
-    public function findAll()
+    public function findAll(OpeningHourKind $openingHourKind = null)
     {
-        return $this->findBy(array(), array('dayOfWeek' => 'ASC', 'start' => 'ASC'));
+        $qb = $this->createQueryBuilder('oh')
+            ->leftJoin('oh.kind', 'ohk')
+            ->addSelect('ohk');
+
+        if ($openingHourKind) {
+            $qb
+                ->andwhere('oh.kind = :kind')
+                ->setParameter('kind', $openingHourKind);
+        }
+
+        $qb
+            ->addOrderBy('ohk.id', 'ASC')
+            ->addOrderBy('oh.dayOfWeek', 'ASC')
+            ->addOrderBy('oh.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
     }
 }

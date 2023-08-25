@@ -23,13 +23,21 @@ class OpeningHourController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
+        $openingHourKind = null;
+
         $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
         $filter_align = $request->query->has('align') ? $request->get('align') : 'center';
 
-        $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll();
+        $filter_opening_hour_kind_id = $request->get('opening_hour_kind_id');
+        if ($filter_opening_hour_kind_id) {
+            $openingHourKind = $em->getRepository('AppBundle:OpeningHourKind')->find($filter_opening_hour_kind_id);
+        }
+
+        $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll($openingHourKind);
 
         return $this->render('admin/openinghour/_partial/widget.html.twig', [
             'openingHours' => $openingHours,
+            'openingHourKind' => $openingHourKind,
             'title' => $filter_title,
             'align' => $filter_align,
         ]);

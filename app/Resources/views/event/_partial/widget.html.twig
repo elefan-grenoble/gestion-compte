@@ -2,10 +2,12 @@
 
 {% block content %}
 {% if title %}
-    liste des prochains événements
-    {% if eventKind %}<strong>{{ eventKind.name }}</strong>{% endif %}
-    {% if maxDate %}(jusqu'au {{ maxDate | date_short }}){% endif %}
-    :
+    <p style="margin-top:0;">
+        liste des prochains événements
+        {% if eventKind %}<strong>{{ eventKind.name }}</strong>{% endif %}
+        {% if maxDate %}(jusqu'au {{ maxDate | date_short }}){% endif %}
+        :
+    </p>
 {% endif %}
 <ul style="margin:0;">
     {% for event in events %}
