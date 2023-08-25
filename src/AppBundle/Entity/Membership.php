@@ -31,8 +31,8 @@ class Membership
     protected $id;
 
     /**
-     * @ORM\Column(type="bigint")
      * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent")
+     * @ORM\Column(type="bigint")
      */
     protected $member_number;
 
@@ -83,10 +83,12 @@ class Membership
 
     /**
      * @var Beneficiary
+     * 
      * One Membership has One Main Beneficiary.
+     * 
+     * @Assert\Valid
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
-     * @Assert\Valid
      */
     private $mainBeneficiary;
 

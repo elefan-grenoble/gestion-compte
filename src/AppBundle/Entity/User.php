@@ -38,6 +38,7 @@ class User extends BaseUser
 
     /**
      * Beneficiary's user.
+     * 
      * @Assert\Valid()
      * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user", fetch="EAGER")
      */
@@ -45,6 +46,7 @@ class User extends BaseUser
 
     /**
      * Many Users have Many clients.
+     * 
      * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
      * @ORM\JoinTable(name="users_clients")
      */
