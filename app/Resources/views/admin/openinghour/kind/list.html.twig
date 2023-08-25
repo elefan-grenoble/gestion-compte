@@ -1,0 +1,41 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des types d'horaires d'ouverture - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des types d'horaires d'ouverture
+{% endblock %}
+
+{% block content %}
+<h4>Liste des types d'horaires d'ouverture ({{ openingHourKinds | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Type d'horaire d'ouverture</th>
+            <th>Nombre d'horaires d'ouverture</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for openingHourKind in openingHourKinds %}
+            <tr>
+                <td class="{{ openingHourKind.name }}">{{ openingHourKind.name }}</td>
+                <td>{{ openingHourKind.openingHours | length }}</td>
+                <td>
+                    <a href="{{ path('admin_openinghour_kind_edit', { 'id': openingHourKind.id }) }}">
+                        <i class="material-icons">edit</i>Editer
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br />
+<a href="{{ path('admin_openinghour_kind_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter un type d'horaire d'ouverture
+</a>
+{% endblock %}

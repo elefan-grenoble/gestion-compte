@@ -1,16 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Ajouter un type d'événement - {{ site_name }}{% endblock %}
+{% block title %}Ajouter un type d'horaire d'ouverture - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('admin_event_kind_list') }}"><i class="material-icons">list</i>&nbsp;Liste des types d'événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_openinghour_kind_list') }}"><i class="material-icons">list</i>&nbsp;Liste des types d'horaire d'ouvertures</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
 {% block content %}
-    <h4>Nouveau type d'événement</h4>
+    <h4>Nouveau type d'horaire d'ouverture</h4>
 
     {{ form_start(form) }}
     {{ form_widget(form) }}
