@@ -190,7 +190,7 @@ class AdminPeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/add", name="admin_period_position_new", methods={"POST"})
+     * @Route("/{id}/position/add", name="admin_periodposition_new", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function newPeriodPositionAction(Request $request, Period $period)
@@ -237,7 +237,7 @@ class AdminPeriodController extends Controller
     }
 
     /**
-     * @Route("/{id}/position/{position}", name="admin_period_position_delete", methods={"DELETE"})
+     * @Route("/{id}/position/{position}", name="admin_periodposition_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
@@ -261,7 +261,7 @@ class AdminPeriodController extends Controller
     /**
      * Book a period.
      *
-     * @Route("/{id}/position/{position}/book", name="admin_period_position_book", methods={"POST"})
+     * @Route("/{id}/position/{position}/book", name="admin_periodposition_book", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
@@ -305,7 +305,7 @@ class AdminPeriodController extends Controller
     /**
      * Free a position.
      *
-     * @Route("/{id}/position/{position}/free", name="admin_period_position_free", methods={"POST"})
+     * @Route("/{id}/position/{position}/free", name="admin_periodposition_free", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
@@ -477,7 +477,7 @@ class AdminPeriodController extends Controller
             new PeriodPosition(),
             array(
                 'action' => $this->generateUrl(
-                    'admin_period_position_new',
+                    'admin_periodposition_new',
                     array('id' => $period->getId())
                 )
             ));
@@ -494,7 +494,7 @@ class AdminPeriodController extends Controller
     private function createPeriodPositionBookForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_book_forms_' . $position->getId())
-            ->setAction($this->generateUrl('admin_period_position_book', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setAction($this->generateUrl('admin_periodposition_book', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('POST')
             ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
             ->getForm();
@@ -511,7 +511,7 @@ class AdminPeriodController extends Controller
     private function createPeriodPositionFreeForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_free_forms_' . $position->getId())
-            ->setAction($this->generateUrl('admin_period_position_free', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setAction($this->generateUrl('admin_periodposition_free', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('POST')
             ->getForm();
     }
@@ -527,7 +527,7 @@ class AdminPeriodController extends Controller
     private function createPeriodPositionDeleteForm(Period $period, PeriodPosition $position)
     {
         return $this->get('form.factory')->createNamedBuilder('positions_delete_forms_' . $position->getId())
-            ->setAction($this->generateUrl('admin_period_position_delete', array('id' => $period->getId(), 'position' => $position->getId())))
+            ->setAction($this->generateUrl('admin_periodposition_delete', array('id' => $period->getId(), 'position' => $position->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }

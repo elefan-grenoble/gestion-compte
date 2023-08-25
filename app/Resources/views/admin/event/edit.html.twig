@@ -13,79 +13,10 @@
 <h4>Editer un événement</h4>
 
 {{ form_start(form) }}
-<div class="errors">
-    {{ form_errors(form) }}
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_row(form.title) }}
-    </div>
-    <div class="col m6">
-        {{ form_row(form.kind) }}
-    </div>
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_row(form.date) }}
-    </div>
-    <div class="col m6">
-        {{ form_row(form.end) }}
-    </div>
-</div>
-<div class="row">
-    {{ form_row(form.location) }}
-</div>
-<div class="row">
-    {{ form_row(form.description) }}
-</div>
-<div class="row">
-    <div class="col s12">
-        <div class="errors">
-            {{ form_errors(form.imgFile) }}
-        </div>
-        <div class="">
-            {{ form_widget(form.imgFile) }}
-            {{ form_label(form.imgFile) }}
-        </div>
-    </div>
-</div>
-<h5>Nécessite un vote ?</h5>
-<div class="row">
-    <div class="col m6">
-        {{ form_errors(form.need_proxy) }}
-        <label>
-            {{ form_widget(form.need_proxy) }}
-            <span>{{ form.need_proxy.vars.label }}</span>
-        </label>
-    </div>
-    <div class="col m6">
-        {{ form_errors(form.anonymous_proxy) }}
-        <label>
-            {{ form_widget(form.anonymous_proxy) }}
-            <span>{{ form.anonymous_proxy.vars.label }}</span>
-        </label>
-    </div>
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_row(form.max_date_of_last_registration) }}
-    </div>
-</div>
-{% if event.createdBy or event.updatedBy %}
-    <div class="card-panel">
-        {% if event.createdBy %}
-            <i>Création le {{ event.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: event.createdBy, target_blank: true } %}</i>
-            <br />
-        {% endif %}
-        {% if event.updatedBy %}
-            <i>Dernière modification le {{ event.updatedAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: event.updatedBy, target_blank: true } %}</i>
-        {% endif %}
-    </div>
-{% endif %}
-<br />
-<div>
-    <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
-</div>
+{% include "/admin/event/_partial/form.html.twig" with { form: form, edit: true, event: event } %}
+<button type="submit" class="btn waves-effect waves-light" title="Enregistrer">
+    <i class="material-icons left">save</i>Enregistrer
+</button>
 {{ form_end(form) }}
 
 {% if is_granted("ROLE_ADMIN") %}
@@ -102,9 +33,9 @@
 
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-    </div>
+    <button type="submit" class="btn waves-effect waves-light red" onclick="return confirm('Etes-vous sûr ?!');">
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
     {{ form_end(delete_form) }}
 {% endif %}
 {% endblock %}

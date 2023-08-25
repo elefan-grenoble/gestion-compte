@@ -25,7 +25,9 @@
                 <td class="{{ eventKind.name }}">{{ eventKind.name }}</td>
                 <td>{{ eventKind.events | length }}</td>
                 <td>
-                    <a href="{{ path('admin_event_kind_edit', { 'id': eventKind.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                    <a href="{{ path('admin_event_kind_edit', { 'id': eventKind.id }) }}">
+                        <i class="material-icons">edit</i>Editer
+                    </a>
                 </td>
             </tr>
         {% endfor %}
@@ -33,5 +35,7 @@
 </table>
 
 <br />
-<a href="{{ path('admin_event_kind_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un type d'événement</a>
+<a href="{{ path('admin_event_kind_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter un type d'événement
+</a>
 {% endblock %}

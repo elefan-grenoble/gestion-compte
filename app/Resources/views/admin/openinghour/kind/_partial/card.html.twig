@@ -1,0 +1,6 @@
+{% set openingHourJoinString = "&" %}
+
+<div class="card-panel">
+    <p style="margin-top:0;text-align:center;">{{ openingHourKind.name }}</p>
+    {% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHourKind.openingHours } %}
+</div>

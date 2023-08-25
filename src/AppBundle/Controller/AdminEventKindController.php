@@ -14,7 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * AdminEventKind controller
  *
- * @Route("admin/event/kinds")
+ * @Route("admin/events/kinds")
  */
 class AdminEventKindController extends Controller
 {

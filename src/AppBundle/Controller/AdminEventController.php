@@ -417,7 +417,7 @@ class AdminEventController extends Controller
     /**
      * Event widget generator
      *
-     * @Route("/widget_generator", name="event_widget_generator", methods={"GET","POST"})
+     * @Route("/widget_generator", name="admin_event_widget_generator", methods={"GET","POST"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
      */
     public function widgetGeneratorAction(Request $request)
@@ -443,12 +443,14 @@ class AdminEventController extends Controller
             ->add('title', CheckboxType::class, array(
                 'label' => 'Afficher le titre du widget ?',
                 'data' => false,
-                'required' => false
+                'required' => false,
+                'attr' => array('class' => 'filled-in')
             ))
             ->add('links', CheckboxType::class, array(
                 'label' => 'Afficher un lien vers l\'événement ?',
                 'data' => false,
-                'required' => false
+                'required' => false,
+                'attr' => array('class' => 'filled-in')
             ))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
@@ -458,13 +460,13 @@ class AdminEventController extends Controller
 
             $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);
 
-            return $this->render('admin/event/widget/generate.html.twig', array(
+            return $this->render('admin/event/widget_generator.html.twig', array(
                 'query_string' => $widgetQueryString,
                 'form' => $form->createView(),
             ));
         }
 
-        return $this->render('admin/event/widget/generate.html.twig', array(
+        return $this->render('admin/event/widget_generator.html.twig', array(
             'form' => $form->createView(),
         ));
     }

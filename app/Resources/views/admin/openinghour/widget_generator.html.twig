@@ -18,16 +18,23 @@
 </div>
 <div class="row">
     <div class="col m6">
-        {{ form.title.vars.label }}
-        <div class="switch">
-            <label>
-                masquer le titre
-                {{ form_widget(form.title) }}
-                <span class="lever"></span>
-                afficher le titre
-            </label>
-        </div>
+        {{ form_label(form.kind) }}
+        {{ form_widget(form.kind) }}
     </div>
+</div>
+<div class="row">
+    {{ form_errors(form.title) }}
+    <label>
+        {{ form_widget(form.title) }}
+        <span>{{ form.title.vars.label }}</span>
+    </label>
+</div>
+<div class="row">
+    {{ form_errors(form.kind_title) }}
+    <label>
+        {{ form_widget(form.kind_title) }}
+        <span>{{ form.kind_title.vars.label }}</span>
+    </label>
 </div>
 <div class="row">
     <div class="col m6">

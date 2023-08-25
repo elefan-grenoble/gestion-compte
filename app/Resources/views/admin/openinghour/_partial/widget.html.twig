@@ -2,7 +2,15 @@
 
 {% block content %}
 {% if title %}
-    <p {% if align != "left" %}style="text-align:center"{% endif %}>Horaires d'ouverture :</p>
+    <p style="margin-top:0;{% if align != "left" %}text-align:center;"{% endif %}>Horaires d'ouverture</p>
+{% endif %}
+{% if kind_title %}
+    <p style="margin-top:0;{% if align != "left" %}text-align:center;"{% endif %}>
+        {{ openingHourKind.name }}
+        {% if openingHourKind.startDate and openingHourKind.endDate %}
+            (du {{ openingHourKind.startDate | date_fr_long }} au {{ openingHourKind.endDate | date_fr_long }})
+        {% endif %}
+    </p>
 {% endif %}
 {% if align == "left" %}
     {% include "/admin/openinghour/_partial/list.html.twig" with { openingHours: openingHours } %}

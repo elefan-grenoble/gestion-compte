@@ -23,7 +23,7 @@ class JobType extends AbstractType
             ->add('color', TextType::class, array('label' => 'Couleur des créneaux dans le planning'))
             ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
             ->add('url', TextType::class, array('label' => 'Lien vers une documentation', 'required' => false))
-            ->add('enabled', CheckboxType::class, array('required' => false, 'label' => 'Poste activé', 'attr' => array('class' => 'filled-in')));
+            ->add('enabled', CheckboxType::class, array('label' => 'Poste activé', 'required' => false, 'attr' => array('class' => 'filled-in')));
     }
 
     /**

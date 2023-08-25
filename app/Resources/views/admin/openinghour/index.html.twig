@@ -13,9 +13,11 @@
 
 {% if openingHours %}
     <div class="row">
-        <div class="col m6">
-            {% include "/admin/openinghour/_partial/card.html.twig" with { openingHours: openingHours } %}
-        </div>
+        {% for openingHourKind in openingHourKinds %}
+            <div class="col m6">
+                {% include "/admin/openinghour/kind/_partial/card.html.twig" with { openingHourKind: openingHourKind } %}
+            </div>
+        {% endfor %}
     </div>
 {% else %}
     <div class="card-panel yellow lighten-3">
@@ -31,6 +33,7 @@
             <th>Jour d'ouverture</th>
             <th>Heure de début</th>
             <th>Heure de fin</th>
+            <th>Type</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -40,6 +43,7 @@
             <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
             <td>{{ openingHour.start | time_short }}</td>
             <td>{{ openingHour.end | time_short }}</td>
+            <td>{{ openingHour.kind }}</td>
             <td>
                 <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">
                     <i class="material-icons">edit</i>&nbsp;Editer
