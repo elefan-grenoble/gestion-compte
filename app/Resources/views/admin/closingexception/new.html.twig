@@ -14,8 +14,9 @@
 
 {{ form_start(form) }}
 {% include "/admin/closingexception/_partial/form.html.twig" with { form: form } %}
-<div>
-    <button type="submit" class="btn waves-effect waves-light">Créer</button>
-</div>
+<button type="submit" class="btn waves-effect waves-light" title="Créer">
+    <i class="material-icons left">save</i>Créer</button>
 {{ form_end(form) }}
+
+<a href="{{ path('admin_closingexception_index') }}" class="btn waves-effect waves-light red" title="Annuler">Annuler</a>
 {% endblock %}

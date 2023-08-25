@@ -1,21 +1,4 @@
 
-jQuery.extend(jQuery.fn.datepicker.defaults, {
-    monthsFull: [ 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre' ],
-    monthsShort: [ 'Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec' ],
-    weekdaysFull: [ 'Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi' ],
-    weekdaysShort: [ 'Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam' ],
-    today: 'Aujourd\'hui',
-    clear: 'Effacer',
-    close: 'Fermer',
-    firstDay: 1,
-    format: 'yyyy-mm-dd',
-    formatSubmit: 'yyyy-mm-dd',
-    labelMonthNext: 'Mois suivant',
-    labelMonthPrev: 'Mois précédent',
-    labelMonthSelect: 'Sélectionner un mois',
-    labelYearSelect: 'Sélectionner une année'
-});
-
 // https://materializeweb.com/pickers.html
 datepickerSettings = {
     format: 'yyyy-mm-dd',
@@ -24,6 +7,10 @@ datepickerSettings = {
         done: 'OK', // text for done-button
         clear: 'Effacer', // text for clear-button
         cancel: 'Annuler', // Text for cancel-button
+        months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+        monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+        weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+        weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
     },
     autoClose: true // Close upon selecting a date
 }
