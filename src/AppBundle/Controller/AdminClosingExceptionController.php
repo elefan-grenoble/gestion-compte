@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("admin/closingexceptions")
  */
-class ClosingExceptionController extends Controller
+class AdminClosingExceptionController extends Controller
 {
     /**
      * List all closing exceptions
