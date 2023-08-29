@@ -1,0 +1,35 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Générer un widget (fermetures exceptionnelles) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_closingexception_index') }}"><i class="material-icons">block</i>&nbsp;Fermetures exceptionnelles</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">tune</i>&nbsp;Générer un widget
+{% endblock %}
+
+{% block content %}
+<h4>Générer un widget (fermetures exceptionnelles)</h4>
+
+{{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    {{ form_errors(form.title) }}
+    <label>
+        {{ form_widget(form.title) }}
+        <span>{{ form.title.vars.label }}</span>
+    </label>
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_label(form.align) }}
+        {{ form_widget(form.align) }}
+    </div>
+</div>
+<br />
+{{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+{{ form_end(form) }}
+{% endblock %}

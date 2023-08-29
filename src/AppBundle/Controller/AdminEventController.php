@@ -461,8 +461,8 @@ class AdminEventController extends Controller
             $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);
 
             return $this->render('admin/event/widget_generator.html.twig', array(
-                'query_string' => $widgetQueryString,
                 'form' => $form->createView(),
+                'query_string' => $widgetQueryString
             ));
         }
 

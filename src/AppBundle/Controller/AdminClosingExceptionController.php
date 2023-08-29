@@ -8,6 +8,9 @@ use AppBundle\Form\ClosingExceptionType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -65,6 +68,45 @@ class AdminClosingExceptionController extends Controller
 
         return $this->render('admin/closingexception/new.html.twig', array(
             'form' => $form->createView()
+        ));
+    }
+
+    /**
+     * Closing exception widget generator
+     *
+     * @Route("/widget_generator", name="admin_closingexception_widget_generator", methods={"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function widgetGeneratorAction(Request $request)
+    {
+        $form = $this->createFormBuilder()
+            ->add('title', CheckboxType::class, array(
+                'required' => false,
+                'data' => true,
+                'label' => 'Afficher le titre du widget ?',
+                'attr' => array('class' => 'filled-in')
+            ))
+            ->add('align', ChoiceType::class, array(
+                'label' => 'Alignement',
+                'choices'  => array('centré' => 'center', 'gauche' => 'left'),
+                'data' => 'center'
+            ))
+            ->add('generate', SubmitType::class, array('label' => 'Générer'))
+            ->getForm();
+
+        if ($form->handleRequest($request)->isValid()) {
+            $data = $form->getData();
+
+            $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
+
+            return $this->render('admin/closingexception/widget_generator.html.twig', array(
+                'form' => $form->createView(),
+                'query_string' => $widgetQueryString
+            ));
+        }
+
+        return $this->render('admin/closingexception/widget_generator.html.twig', array(
+            'form' => $form->createView(),
         ));
     }
 }

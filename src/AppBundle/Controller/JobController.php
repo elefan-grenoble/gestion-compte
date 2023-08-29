@@ -199,13 +199,13 @@ class JobController extends Controller
 
             $widgetQueryString = 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0);
 
-            return $this->render('admin/job/widget/generate.html.twig', array(
-                'query_string' => $widgetQueryString,
+            return $this->render('admin/job/widget_generator.html.twig', array(
                 'form' => $form->createView(),
+                'query_string' => $widgetQueryString
             ));
         }
 
-        return $this->render('admin/job/widget/generate.html.twig', array(
+        return $this->render('admin/job/widget_generator.html.twig', array(
             'form' => $form->createView(),
         ));
     }

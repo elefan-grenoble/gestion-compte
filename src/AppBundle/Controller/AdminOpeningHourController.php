@@ -179,8 +179,8 @@ class AdminOpeningHourController extends Controller
             $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&kind_title=' . ($data['kind_title'] ? 1 : 0) . '&align=' . $data['align'];
 
             return $this->render('admin/openinghour/widget_generator.html.twig', array(
-                'query_string' => $widgetQueryString,
                 'form' => $form->createView(),
+                'query_string' => $widgetQueryString
             ));
         }
 
