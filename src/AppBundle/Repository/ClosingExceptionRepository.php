@@ -14,4 +14,17 @@ class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
     {
         return $this->findBy(array(), array('date' => 'DESC'));
     }
+
+    public function findFutures()
+    {
+        $qb = $this->createQueryBuilder('ce')
+            ->where('ce.date > :now')
+            ->setParameter('now', new \Datetime('now'));
+
+        $qb->orderBy('ce.date', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

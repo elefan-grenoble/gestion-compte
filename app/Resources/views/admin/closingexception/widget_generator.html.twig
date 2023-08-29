@@ -1,26 +1,20 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Générer un widget (horaires d'ouverture) - {{ site_name }}{% endblock %}
+{% block title %}Générer un widget (fermetures exceptionnelles) - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('admin_openinghour_index') }}"><i class="material-icons">schedule</i>&nbsp;Horaires d'ouverture</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_closingexception_index') }}"><i class="material-icons">block</i>&nbsp;Fermetures exceptionnelles</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">tune</i>&nbsp;Générer un widget
 {% endblock %}
 
 {% block content %}
-<h4>Générer un widget (horaires d'ouverture)</h4>
+<h4>Générer un widget (fermetures exceptionnelles)</h4>
 
 {{ form_start(form) }}
 <div class="errors">
     {{ form_errors(form) }}
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_label(form.kind) }}
-        {{ form_widget(form.kind) }}
-    </div>
 </div>
 <div class="row">
     {{ form_errors(form.title) }}
@@ -28,19 +22,6 @@
         {{ form_widget(form.title) }}
         <span>{{ form.title.vars.label }}</span>
     </label>
-</div>
-<div class="row">
-    {{ form_errors(form.kind_title) }}
-    <label>
-        {{ form_widget(form.kind_title) }}
-        <span>{{ form.kind_title.vars.label }}</span>
-    </label>
-</div>
-<div class="row">
-    <div class="col m6">
-        {{ form_label(form.align) }}
-        {{ form_widget(form.align) }}
-    </div>
 </div>
 {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
 {{ form_end(form) }}
@@ -50,12 +31,12 @@
     <h4>Résultat</h4>
     <div class="row">
         <div class="col m4">
-            <iframe src="{{ path('openinghour_widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+            <iframe src="{{ path('closingexception_widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
         </div>
         <div class="col m8">
             texte à copier-coller 👇
             <div class="card-panel" style="overflow:scroll;">
-                <pre>&lt;iframe src="{{ absolute_url(path('openinghour_widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
+                <pre>&lt;iframe src="{{ absolute_url(path('closingexception_widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
             </div>
         </div>
     </div>

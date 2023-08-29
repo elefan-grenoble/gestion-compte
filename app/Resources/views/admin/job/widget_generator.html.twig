@@ -6,7 +6,7 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('job_list') }}"><i class="material-icons">list</i>&nbsp;Liste des postes de bénévolat</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">tune</i>&nbsp;Générer un widget (créneaux d'un poste)
+<i class="material-icons">tune</i>&nbsp;Générer un widget
 {% endblock %}
 
 {% block content %}
@@ -61,7 +61,6 @@
         </div>
     </div>
 </div>
-<br />
 {{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
 {{ form_end(form) }}
 
