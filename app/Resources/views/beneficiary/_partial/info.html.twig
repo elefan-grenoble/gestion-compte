@@ -1,13 +1,20 @@
 <div class="card-title">
+    <!-- user icon -->
     <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img" />
+    <!-- user name -->
     {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
+    <!-- badges -->
     {% if beneficiary.isMain and maximum_nb_of_beneficiaries_in_membership > 1 %}
-        <span class="badge teal white-text">{{ beneficiary_main_icon }} principal</span>
+        <span class="badge main-color white-text">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
     {% if beneficiary.membership.withdrawn %}
         <span class="badge red white-text">{{ member_withdrawn_icon }} fermé</span>
-    {% elseif beneficiary.isNew %}
+    {% endif %}
+    {% if beneficiary.isNew %}
         <span class="badge red white-text">{{ beneficiary_new_icon }} nouveau</span>
+    {% endif %}
+    {% if member.isCurrentlyExemptedFromShifts() %}
+        <span class="badge teal white-text">{{ member_exempted_icon }} exempté</span>
     {% endif %}
     {% if beneficiary.membership.frozenChange %}
         {% if beneficiary.membership.frozen %}
