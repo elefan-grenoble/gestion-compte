@@ -14,14 +14,14 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 
 /**
- * ClosingException controller.
+ * Admin ClosingException controller ("fermetures exceptionnelles" coté admin)
  *
  * @Route("admin/closingexceptions")
  */
 class ClosingExceptionController extends Controller
 {
     /**
-     * List all closing exceptions.
+     * List all closing exceptions
      *
      * @Route("/", name="admin_closingexception_index", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
@@ -37,7 +37,7 @@ class ClosingExceptionController extends Controller
     }
 
     /**
-     * Add new closing exception.
+     * Add new closing exception
      *
      * @Route("/new", name="admin_closingexception_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")

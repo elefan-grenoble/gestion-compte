@@ -84,6 +84,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Create a period
+     *
      * @Route("/new", name="admin_period_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
@@ -124,6 +126,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Edit a period
+     *
      * @Route("/{id}/edit", name="admin_period_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
@@ -190,6 +194,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Create a position
+     *
      * @Route("/{id}/position/add", name="admin_periodposition_new", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
@@ -237,6 +243,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Delete a position
+     *
      * @Route("/{id}/position/{position}", name="admin_periodposition_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
      */
@@ -259,7 +267,7 @@ class AdminPeriodController extends Controller
     }
 
     /**
-     * Book a period.
+     * Book a position
      *
      * @Route("/{id}/position/{position}/book", name="admin_periodposition_book", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
@@ -303,7 +311,7 @@ class AdminPeriodController extends Controller
     }
 
     /**
-     * Free a position.
+     * Free a position
      *
      * @Route("/{id}/position/{position}/free", name="admin_periodposition_free", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
@@ -338,7 +346,7 @@ class AdminPeriodController extends Controller
     }
 
     /**
-     * Deletes a period entity.
+     * Delete a period
      *
      * @Route("/{id}", name="admin_period_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_ADMIN')")
@@ -362,6 +370,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Duplicate a period
+     *
      * @Route("/copyPeriod/", name="admin_period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
@@ -406,6 +416,8 @@ class AdminPeriodController extends Controller
     }
 
     /**
+     * Generate shifts for a given date
+     *
      * @Route("/generateShifts/", name="admin_shifts_generation", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */

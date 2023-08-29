@@ -24,14 +24,14 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 
 
 /**
- * Admin Event controller.
+ * Admin Event controller
  *
  * @Route("admin/events")
  */
 class AdminEventController extends Controller
 {
     /**
-     * Filter form.
+     * Filter form
      */
     private function filterFormFactory(Request $request): array
     {
@@ -246,7 +246,7 @@ class AdminEventController extends Controller
     }
 
     /**
-     * Lists all proxy for one event.
+     * Lists all proxy for one event
      *
      * @Route("/{id}/proxies", name="admin_event_proxies_list", methods={"GET"})
      * @Security("has_role('ROLE_PROCESS_MANAGER')")
