@@ -10,7 +10,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -32,6 +31,7 @@ class AdminClosingExceptionController extends Controller
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
+
         $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findAll();
 
         return $this->render('admin/closingexception/index.html.twig', array(
@@ -86,18 +86,13 @@ class AdminClosingExceptionController extends Controller
                 'label' => 'Afficher le titre du widget ?',
                 'attr' => array('class' => 'filled-in')
             ))
-            ->add('align', ChoiceType::class, array(
-                'label' => 'Alignement',
-                'choices'  => array('centré' => 'center', 'gauche' => 'left'),
-                'data' => 'center'
-            ))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0) . '&align=' . $data['align'];
+            $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0);
 
             return $this->render('admin/closingexception/widget_generator.html.twig', array(
                 'form' => $form->createView(),

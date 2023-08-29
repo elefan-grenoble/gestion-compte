@@ -1,0 +1,18 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% block content %}
+{% if title %}
+    <p style="margin-top:0;">
+        liste des prochaines fermetures exceptionnelles
+    </p>
+{% endif %}
+<ul style="margin:0;">
+    {% for closingException in closingExceptions %}
+        <li>
+            <span>-</span>
+            <strong>{{ closingException.date | date_fr_full }}</strong>
+            {% if closingException.reason %}<i>({{ closingException.reason }})</i>{% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -36,7 +36,7 @@ class OpeningHourController extends Controller
 
         $openingHours = $em->getRepository('AppBundle:OpeningHour')->findAll($openingHourKind);
 
-        return $this->render('admin/openinghour/_partial/widget.html.twig', [
+        return $this->render('openinghour/_partial/widget.html.twig', [
             'openingHours' => $openingHours,
             'openingHourKind' => $openingHourKind,
             'title' => $filter_title,

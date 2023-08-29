@@ -13,8 +13,8 @@
     </p>
 {% endif %}
 {% if align == "left" %}
-    {% include "/admin/openinghour/_partial/list.html.twig" with { openingHours: openingHours } %}
+    {% include "admin/openinghour/_partial/list.html.twig" with { openingHours: openingHours } %}
 {% else %}
-    {% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHours } %}
+    {% include "admin/openinghour/_partial/table.html.twig" with { openingHours: openingHours } %}
 {% endif %}
 {% endblock %}
