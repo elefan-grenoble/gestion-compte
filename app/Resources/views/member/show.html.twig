@@ -387,7 +387,7 @@
                     <i class="material-icons">verified_user</i>Rôles
                 </div>
                 <div class="collapsible-body white">
-                    {% include "member/_partial/roles.html.twig" %}
+                    {% include "member/_partial/roles.html.twig" with { member: member } %}
                 </div>
             </li>
         {% endif %}
@@ -425,6 +425,18 @@
                     {{ form_end(delete_form) }}
 
                     {% include "member/_partial/recorded_registrations.html.twig" %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Informations sur le membre -->
+        {% if is_granted("ROLE_USER_MANAGER") %}
+            <li id="super">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.admin_open is defined and frontend_cookie.user_show.info_open %}active{% endif %}">
+                    <i class="material-icons">info_outline</i>Informations diverses
+                </div>
+                <div class="collapsible-body white">
+                    {% include "member/_partial/info_misc.html.twig" with { member: member } %}
                 </div>
             </li>
         {% endif %}
