@@ -80,7 +80,7 @@
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/registrations.html.twig" with { member: member, new_registration_form: new_registration_form } %}
+                {% include "member/_partial/registrations.html.twig" with { member: member, from_admin: true, new_registration_form: new_registration_form } %}
             </div>
         </li>
 
