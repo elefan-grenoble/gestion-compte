@@ -1,5 +1,3 @@
-{% set firstShiftDate = member.firstShiftDate %}
-
 {% if member.isCurrentlyExemptedFromShifts() %}
     {% include "member/_partial/exempted.html.twig" with { member: member, from_admin: true } %}
 {% endif %}
@@ -42,5 +40,3 @@
         {% endif %}
     </div>
 {% endfor %}
-
-<p>Date du tout premier créneau : {% if firstShiftDate %}{{ firstShiftDate | date_fr_full }}{% else %}Néant{% endif %}</p>
