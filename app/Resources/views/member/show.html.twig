@@ -80,6 +80,9 @@
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
+                {% if member.lastRegistration %}
+                    <p style="margin-top:0">Adhésion du {{ member.lastRegistration.date | date_fr_full }} au {{ member | expire | date_fr_full }}</p>
+                {% endif %}
                 <ul class="collapsible">
                     {% for registration in member.registrations %}
                         <li>
