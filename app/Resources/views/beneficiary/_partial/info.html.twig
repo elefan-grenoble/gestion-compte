@@ -95,10 +95,4 @@
             {% endfor %}
         </div>
     {% endif %}
-    {% if beneficiary.membership.lastRegistration %}
-        <div class="col s12">
-            <i class="material-icons tiny">perm_contact_calendar</i>
-            <span>Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}</span>
-        </div>
-    {% endif %}
 </div>

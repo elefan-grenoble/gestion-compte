@@ -19,6 +19,15 @@
             </div>
         </li>
 
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">card_membership</i>Adhésions
+            </div>
+            <div class="collapsible-body">
+                {% include "member/_partial/registrations.html.twig" with { member: beneficiary.membership } %}
+            </div>
+        </li>
+
         {% if profile_display_time_log %}
             <li>
                 <div class="collapsible-header">
