@@ -80,57 +80,7 @@
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
-                {% if member.lastRegistration %}
-                    <p style="margin-top:0">Adhésion du {{ member.lastRegistration.date | date_fr_full }} au {{ member | expire | date_fr_full }}</p>
-                {% endif %}
-                <ul class="collapsible">
-                    {% for registration in member.registrations %}
-                        <li>
-                            <div class="collapsible-header" style="cursor: default;">
-                                {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
-                                    <i class="material-icons tiny">credit_card</i>
-                                {% else %}
-                                    <i class="material-icons tiny">attach_money</i>
-                                {% endif %}
-                                {{ registration.date | date_fr }}
-                                {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}
-                                    <span class="badge right">Helloasso</span>
-                                {% endif %}
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-                {% if member.mainBeneficiary and (member.mainBeneficiary.user != app.user) %}
-                    {% if member | can_register %}
-                        <ul class="collapsible">
-                            <li>
-                                {% if not member.lastRegistration %}
-                                    <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
-                                {% else %}
-                                    <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
-                                {% endif %}
-                                <div class="collapsible-body new_registration_form">
-                                    {{ form_start(new_registration_form) }}
-                                    {% include "user/_partial/registration_form.html.twig" with { form: new_registration_form } %}
-                                    {{ form_end(new_registration_form) }}
-                                </div>
-                            </li>
-                        </ul>
-                    {% else %}
-                        <ul class="collapsible">
-                            <li>
-                                {% if not member.lastRegistration %}
-                                    <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
-                                {% else %}
-                                    <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
-                                {% endif %}
-                                <div class="collapsible-body new_registration_form">
-                                    Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ member | remainder | date('%a') }} jours.
-                                </div>
-                            </li>
-                        </ul>
-                    {% endif %}
-                {% endif %}
+                {% include "member/_partial/registrations.html.twig" with { member: member, new_registration_form: new_registration_form } %}
             </div>
         </li>
 
