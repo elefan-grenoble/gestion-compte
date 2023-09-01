@@ -97,6 +97,9 @@
         <li id="shifts">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
+                {% if not member.firstShiftDate %}
+                    <span style="margin-left:14px;">⚠️</span>
+                {% endif %}
             </div>
             <div class="collapsible-body white">
                 {% include "member/_partial/shifts.html.twig" %}
