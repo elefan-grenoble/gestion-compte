@@ -42,20 +42,6 @@
         </div>
     {% endif %}
 
-    <!-- Note(s) -->
-    {% if member.notes | length %}
-        <h5>Note{% if member.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
-        <div class="row">
-            {% for note in member.notes %}
-                {% if not note.parent %}
-                    <div class="col s12 m6 offset-m2 l6">
-                        {% include "user/_partial/note.html.twig" with { note: note } %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-    {% endif %}
-
     <!-- Ajouter un bénéficiaire -->
     {% if is_granted("beneficiary_add", member) and member.beneficiaries | length < maximum_nb_of_beneficiaries_in_membership %}
         <ul class="collapsible">
@@ -75,8 +61,8 @@
 
     <ul class="collapsible collapsible-expandable">
         <!-- Adhésion(s) -->
-        <li id="registration" class="{% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
-            <div class="collapsible-header">
+        <li id="registration">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
                 <i class="material-icons">card_membership</i>Adhésions
             </div>
             <div class="collapsible-body white">
@@ -84,22 +70,18 @@
             </div>
         </li>
 
-        <!-- Ajouter une note -->
-        {% if is_granted("create", note) %}
-            <li id="note">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
-                    <i class="material-icons">add</i>Ajouter une note
-                </div>
-                <div class="collapsible-body white">
-                    {{ form_start(note_form) }}
-                    {{ form_row(note_form.text) }}
-                    <div>
-                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
-                    </div>
-                    {{ form_end(note_form) }}
-                </div>
-            </li>
-        {% endif %}
+        <!-- Notes -->
+        <li id="note">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
+                <i class="material-icons">chat_bubble_outline</i>Notes
+                {% if member.notes | length > 0 %}
+                    <span class="badge teal white-text" style="margin-left:14px;">{{ member.notes | length }}</span>
+                {% endif %}
+            </div>
+            <div class="collapsible-body white">
+                {% include "member/_partial/notes.html.twig"  with { member: member, note: note, note_form: note_form, notes_form: notes_form, note_delete_forms: note_delete_forms, new_notes_form: new_notes_form } %}
+            </div>
+        </li>
 
         <!-- Compteur de temps -->
         <li id="time_log">
