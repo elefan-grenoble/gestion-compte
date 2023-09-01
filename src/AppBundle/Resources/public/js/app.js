@@ -9,7 +9,7 @@ $(document).ready(function() {
         draggable: true, // Choose whether you can drag to open on touch screens
     });
     $('.modal').modal({
-        ready: function (modal) {
+        onOpenStart: function (modal) {
             $(modal).find('.simplemde-container').trigger('modalOpen'); // tell markdown editor to refresh
         },
     });

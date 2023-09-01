@@ -124,7 +124,7 @@
 
 {% block simplemde_editor_widget %}
     <div class="simplemde-container row" data-for="{{ id }}">
-    {{ block('textarea_widget') }}
+        {{ block('textarea_widget') }}
     </div>
     <script type="text/javascript">
         onceSimpleMDEReady(function () {
@@ -132,8 +132,10 @@
             var config = {{ form.vars.editor_config|raw}};
             var simplemde_{{ id }} = new SimpleMDE(Object.assign(config, {'element': element}));
             var required = $("#{{ id }}").attr('required') === "required";
-            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () { //refresh
-                simplemde_{{ id }}.codemirror.refresh();
+            // refresh display
+            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () {
+                // https://github.com/sparksuite/simplemde-markdown-editor/issues/313
+                setTimeout(function() { simplemde_{{ id }}.codemirror.refresh(); }, 0);
             });
             if (required){
                 $("#{{ id }}").removeAttr('required');
