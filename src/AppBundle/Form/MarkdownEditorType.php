@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: gnat
- * Date: 01/11/16
- * Time: 2:18 PM
- */
 
 namespace AppBundle\Form;
 
@@ -14,13 +8,10 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
+
+// https://github.com/NobletSolutions/SimpleMDEBundle/blob/master/src/Form/Types/MarkdownEditorType.php
 class MarkdownEditorType extends AbstractType
 {
-    /**
-     * Configures the options for this type.
-     *
-     * @param OptionsResolver $resolver The resolver for the options
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefined([
@@ -48,9 +39,6 @@ class MarkdownEditorType extends AbstractType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $editor_config = [];
@@ -71,18 +59,19 @@ class MarkdownEditorType extends AbstractType
             $editor_config['tabSize'] = $options['tabSize'];
         }
 
-        foreach (['indentWithTabs', 'lineWrapping', 'styleSelectedText'] as $defaultTrueOption) {
+        foreach (['indentWithTabs', 'lineWrapping', 'styleSelectedText'] as $defaultTrueOption) { // removed 'spellChecker'
             if (isset($options[$defaultTrueOption]) && $options[$defaultTrueOption] === false) {
                 $editor_config[$defaultTrueOption] = false;
             }
         }
 
-        foreach (['autofocus', 'promptURLs','spellChecker','forceSync'] as $defaultFalseOption) {
+        foreach (['autofocus', 'forceSync', 'promptURLs', 'spellChecker'] as $defaultFalseOption) { // added 'spellChecker'
             if (isset($options[$defaultFalseOption]) && $options[$defaultFalseOption] === true) {
                 $editor_config[$defaultFalseOption] = true;
             }
         }
 
+        // added
         if (!isset($options['spellChecker']) || $options['spellChecker'] === false)
             $editor_config['spellChecker'] = false;
         if (!isset($options['forceSync']))
