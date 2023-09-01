@@ -7,7 +7,7 @@
         <h6>Créneau{% if period_positions | length > 1 %}x{% endif %} fixe</h6>
         {% if period_positions %}
             {% for period_position in period_positions %}
-                <div class="col s12 m6 l4">
+                <div class="col s12 m6 xl4">
                     {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position, show_actions: true } %}
                 </div>
             {% endfor %}
