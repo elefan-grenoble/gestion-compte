@@ -77,24 +77,7 @@
                 <span class="badge teal white-text" style="margin-left:14px;">{{ member.notes | length }}</span>
             </div>
             <div class="collapsible-body white">
-                <div class="row">
-                    {% for note in member.notes %}
-                        {% if not note.parent %}
-                            <div class="col s12 m6 offset-m2 l6">
-                                {% include "user/_partial/note.html.twig" with { note: note } %}
-                            </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-                <h6>Ajouter une note</h6>
-                {% if is_granted("create", note) %}
-                    {{ form_start(note_form) }}
-                    {{ form_row(note_form.text) }}
-                    <div>
-                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
-                    </div>
-                    {{ form_end(note_form) }}
-                {% endif %}
+                {% include "member/_partial/notes.html.twig"  with { member: member, note: note, note_form: note_form, notes_form: notes_form, note_delete_forms: note_delete_forms, new_notes_form: new_notes_form } %}
             </div>
         </li>
 
