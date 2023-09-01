@@ -74,7 +74,9 @@
         <li id="note">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
                 <i class="material-icons">chat_bubble_outline</i>Notes
-                <span class="badge teal white-text" style="margin-left:14px;">{{ member.notes | length }}</span>
+                {% if member.notes | length > 0 %}
+                    <span class="badge teal white-text" style="margin-left:14px;">{{ member.notes | length }}</span>
+                {% endif %}
             </div>
             <div class="collapsible-body white">
                 {% include "member/_partial/notes.html.twig"  with { member: member, note: note, note_form: note_form, notes_form: notes_form, note_delete_forms: note_delete_forms, new_notes_form: new_notes_form } %}

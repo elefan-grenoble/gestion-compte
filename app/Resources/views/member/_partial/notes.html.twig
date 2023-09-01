@@ -1,12 +1,14 @@
-<div class="row">
-    {% for note in member.notes %}
-        {% if not note.parent %}
-            <div class="col s12 m6 offset-m2 l6">
-                {% include "user/_partial/note.html.twig" with { note: note } %}
-            </div>
-        {% endif %}
-    {% endfor %}
-</div>
+{% if member.notes | length > 0 %}
+    <div class="row">
+        {% for note in member.notes %}
+            {% if not note.parent %}
+                <div class="col s12 m6 offset-m2 l6">
+                    {% include "user/_partial/note.html.twig" with { note: note } %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
 
 {% if is_granted("create", note) %}
     <button class="btn waves-effect waves-light modal-trigger" href="#modal-note"><i class="material-icons left">add</i>Ajouter une note</button>
