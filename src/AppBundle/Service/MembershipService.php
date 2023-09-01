@@ -109,43 +109,42 @@ class MembershipService
 
     /**
      * Get start date of current cycle
-     * @param Membership $membership
+     * @param Membership $member
      * @param int $cycleOffset
      * @return DateTime|null
      */
-    public function getStartOfCycle(Membership $membership, $cycleOffset = 0)
+    public function getStartOfCycle(Membership $member, $cycleOffset = 0)
     {
+        // init
+        $now = new DateTime('now');
+        $date = clone($now);
         if ($this->cycle_type == "abcd") {
-            $date = new DateTime('now');
-            // 0 (for Monday) through 6 (for Sunday)
-            $day = $date->format("N") - 1;
-            // 0 (for week A) through 3 (for week D)
-            $week = ($date->format("W") - 1) % 4;
             // Set date to last monday
+            // format "N": 0 (for Monday) through 6 (for Sunday))
+            $day = $date->format("N") - 1;
             $date->modify('-' . $day . ' days');
             // Set date to monday of week A
+            // format "W": 0 (for week A) through 3 (for week D))
+            $week = ($date->format("W") - 1) % 4;
             $date->modify('-'. (7 * $week) . ' days');
         } else {
-            $firstDate = $membership->getFirstShiftDate();
-            if ($firstDate) {
-                $now = new DateTime('now');
-                $date = clone($firstDate);
-                if ($firstDate < $now) {
-                    // Compute the number of elapsed cycles until today
-                    $diff = $firstDate->diff($now)->format("%a");
-                    $currentCycleCount = intval($diff / 28);
-                    $date->modify("+" . (28 * $currentCycleCount) . " days");
-                }
-            } else {
-                $date = new DateTime('now');
+            // firstShiftDate = start of cycle
+            $firstShiftDate = $member->getFirstShiftDate();
+            if ($firstShiftDate) {
+                $date = clone($firstShiftDate);
+                // Compute the number of elapsed cycles until today
+                $diff = $firstShiftDate->diff($now)->format("%r%a");
+                $currentCycleCount = floor($diff / 28);
+                $date->modify((($currentCycleCount > 0) ? "+" : "") . (28 * $currentCycleCount) . " days");
             }
         }
         // Set time to 0h:0m:0s
         $date->setTime(0, 0, 0);
-        if ($cycleOffset != 0 ){
+        // offset
+        if ($cycleOffset != 0) {
             // Set date cycleOffset
             // TODO should use cycle_duration instead of hardcoded 28
-            $date->modify((($cycleOffset>0) ? "+" : "") . (28 * $cycleOffset) . ' days');
+            $date->modify((($cycleOffset > 0) ? "+" : "") . (28 * $cycleOffset) . ' days');
         }
         return $date;
     }
