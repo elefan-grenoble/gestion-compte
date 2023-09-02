@@ -12,5 +12,5 @@
 {% block content %}
 <h4>Liste des fermetures exceptionnelles ({{ closingExceptions | length }})</h4>
 
-{% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptions } %}
+{% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptions, delete_forms: delete_forms } %}
 {% endblock %}

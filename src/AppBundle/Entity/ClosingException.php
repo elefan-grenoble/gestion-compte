@@ -151,4 +151,18 @@ class ClosingException
     {
         return $this->createdBy;
     }
+
+    /**
+     * Return if the closingException is past for a given date
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function getIsPast(\Datetime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $date > $this->date;
+    }
 }

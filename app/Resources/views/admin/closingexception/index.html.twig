@@ -11,13 +11,15 @@
 {% block content %}
 <div class="card-panel blue lighten-3">
     <i class="material-icons left">info</i>
-    Aucun créneau ne sera généré le jour de la fermeture exceptionnelle.
+    Aucun créneau ne sera généré pour le jour de la fermeture exceptionnelle.
+    <br />
+    ⚠️ Les créneaux étant générés à l'avance, il faut définir le jour de fermeture d'avantage en amont ⚠️
 </div>
 
 <h4>Fermetures exceptionnelles à venir ({{ closingExceptionsFuture | length }})</h4>
 
 {% if closingExceptionsFuture | length %}
-    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsFuture } %}
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsFuture, delete_forms: delete_forms } %}
 {% endif %}
 
 <br />
