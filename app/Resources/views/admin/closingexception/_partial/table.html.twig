@@ -1,3 +1,5 @@
+{% set delete_forms = delete_forms ?? [] %}
+
 <table class="responsive-table">
     <thead>
         <tr>
@@ -19,7 +21,15 @@
                 <td title="{{ closingException.createdAt | date_time }}">
                     {{ closingException.createdAt | date_short }}
                 </td>
-                <td></td>
+                <td>
+                    {% if delete_forms and delete_forms[closingException.id] is defined %}
+                        {{ form_start(delete_forms[closingException.id]) }}
+                        <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cette fermeture exceptionnelle ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer la fermeture exceptionnelle ⚠️">
+                            <i class="material-icons left">delete</i>
+                        </a>
+                        {{ form_end(delete_forms[closingException.id]) }}
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
     </tbody>
