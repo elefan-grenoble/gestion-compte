@@ -158,7 +158,7 @@ class ClosingException
      * @param \DateTime $date
      * @return boolean
      */
-    public function isPast(\Datetime $date = null)
+    public function getIsPast(\Datetime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');

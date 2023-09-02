@@ -59,8 +59,16 @@ class AdminClosingExceptionController extends Controller
 
         $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findAll();
 
+        $delete_forms = array();
+        foreach ($closingExceptions as $closingException) {
+            if (!$closingException->getIsPast()) {
+                $delete_forms[$closingException->getId()] = $this->getDeleteForm($closingException)->createView();
+            }
+        }
+
         return $this->render('admin/closingexception/list.html.twig', array(
-            'closingExceptions' => $closingExceptions
+            'closingExceptions' => $closingExceptions,
+            'delete_forms' => $delete_forms
         ));
     }
 
