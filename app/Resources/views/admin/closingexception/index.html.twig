@@ -9,6 +9,11 @@
 {% endblock %}
 
 {% block content %}
+<div class="card-panel blue lighten-3">
+    <i class="material-icons left">info</i>
+    Aucun créneau ne sera généré le jour de la fermeture exceptionnelle.
+</div>
+
 <h4>Fermetures exceptionnelles à venir ({{ closingExceptionsFuture | length }})</h4>
 
 {% if closingExceptionsFuture | length %}
