@@ -11,32 +11,7 @@
 {% block content %}
 <h4>Liste des fermetures exceptionnelles ({{ closingExceptions | length }})</h4>
 
-<table class="responsive-table">
-    <thead>
-        <tr>
-            <th>Date de la fermeture</th>
-            <th>Raison</th>
-            <th>Auteur</th>
-            <th>Date de création</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for closingException in closingExceptions %}
-        <tr>
-            <td>{{ closingException.date | date_fr_full }}</td>
-            <td>{{ closingException.reason }}</td>
-            <td>
-                {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: closingException.createdBy, target_blank: true } %}
-            </td>
-            <td title="{{ closingException.createdAt | date_time }}">
-                {{ closingException.createdAt | date_short }}
-            </td>
-            <td></td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+{% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptions } %}
 
 <br />
 <a href="{{ path('admin_closingexception_new') }}" class="btn">
