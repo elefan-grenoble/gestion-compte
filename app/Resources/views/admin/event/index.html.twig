@@ -21,7 +21,9 @@
 
 <h4>Événements passés (10 plus récents)</h4>
 
-{% include "admin/event/_partial/table.html.twig" with { events: eventsPast, from_admin: true } %}
+{% if eventsPast | length %}
+    {% include "admin/event/_partial/table.html.twig" with { events: eventsPast, from_admin: true } %}
+{% endif %}
 
 {% if is_granted("ROLE_ADMIN") %}
     <br />

@@ -9,10 +9,23 @@
 {% endblock %}
 
 {% block content %}
-<h4>Liste des fermetures exceptionnelles ({{ closingExceptions | length }})</h4>
+<h4>Fermetures exceptionnelles à venir ({{ closingExceptionsFuture | length }})</h4>
 
-{% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptions } %}
+{% if closingExceptionsFuture | length %}
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsFuture } %}
+{% endif %}
 
+<br />
+<h4>Fermetures exceptionnelles passées (10 plus récentes)</h4>
+
+{% if closingExceptionsPast | length %}
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsPast } %}
+{% endif %}
+
+<br />
+<a href="{{ path("admin_closingexception_list") }}" class="btn">
+    <i class="material-icons left">list</i>Toutes les fermetures exceptionnelles
+</a>
 <br />
 <a href="{{ path('admin_closingexception_new') }}" class="btn">
     <i class="material-icons left">add</i>Ajouter une fermeture exceptionnelle

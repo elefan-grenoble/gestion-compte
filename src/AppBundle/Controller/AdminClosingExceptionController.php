@@ -23,7 +23,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 class AdminClosingExceptionController extends Controller
 {
     /**
-     * List all closing exceptions
+     * Admin closing exception home
      *
      * @Route("/", name="admin_closingexception_index", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
@@ -32,9 +32,28 @@ class AdminClosingExceptionController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findAll();
+        $closingExceptionsFuture = $em->getRepository('AppBundle:ClosingException')->findFutures();
+        $closingExceptionsPast = $em->getRepository('AppBundle:ClosingException')->findPast(10);  # only the 10 last
 
         return $this->render('admin/closingexception/index.html.twig', array(
+            'closingExceptionsFuture' => $closingExceptionsFuture,
+            'closingExceptionsPast' => $closingExceptionsPast
+        ));
+    }
+
+    /**
+     * Admin closing exception list
+     *
+     * @Route("/list", name="admin_closingexception_list", methods={"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function listAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findAll();
+
+        return $this->render('admin/closingexception/list.html.twig', array(
             'closingExceptions' => $closingExceptions
         ));
     }
