@@ -27,4 +27,21 @@ class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findPast(int $limit = null)
+    {
+        $qb = $this->createQueryBuilder('ce')
+            ->where('ce.date < :now')
+            ->setParameter('now', new \Datetime('now'));
+
+        if ($limit) {
+            $qb->setMaxResults($limit);
+        }
+
+        $qb->orderBy('ce.date', 'DESC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

@@ -54,14 +54,6 @@
     </li>
 </ul>
 
-{% if is_granted("ROLE_ADMIN") %}
-    <br />
-    <a href="{{ path("admin_proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
-    <br />
-    <a href="{{ path('admin_event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
-{% endif %}
-{% endblock %}
-
 {% block javascripts %}
 <script>
     jQuery(function() {
