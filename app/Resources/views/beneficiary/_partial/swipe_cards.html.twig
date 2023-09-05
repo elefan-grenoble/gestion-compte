@@ -1,20 +1,20 @@
-{% if app.user.beneficiary.getSwipeCards | length %}
+{% if beneficiary.getSwipeCards | length %}
     <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
-        <i class="material-icons left">credit_card</i>{% if app.user.beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
+        <i class="material-icons left">credit_card</i>{% if beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
     </a>
     <br>
     <div id="all_swipecards" class="modal bottom-sheet">
         <div class="modal-content">
             <h4>Tous vos badges</h4>
-            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: app.user.beneficiary.swipeCards | reverse , beneficiary_id: 0} %}
+            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse , beneficiary_id: 0} %}
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
         </div>
     </div>
 {% endif %}
-{% if app.user.beneficiary.getEnabledSwipeCards | length %}
-    {% set card = app.user.beneficiary.getEnabledSwipeCards.first %}
+{% if beneficiary.getEnabledSwipeCards | length %}
+    {% set card = beneficiary.getEnabledSwipeCards.first %}
     {% if (show_badge_image ?? false) %}
         <div class="badge_card">
             <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">

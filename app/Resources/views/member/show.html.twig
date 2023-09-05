@@ -127,8 +127,8 @@
                                                 <div class="row">
                                                     <div class="col s12 m6 input-field">
                                                         <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
-                                                        <label for="code">Code du badge à 13 chiffres</label>
                                                         <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
+                                                        <span class="supporting-text" data-error="wrong" data-success="right">Code du badge à 13 chiffres</span>
                                                     </div>
                                                 </div>
                                                 <div>
