@@ -1,27 +1,27 @@
 {% if swipeCards | length %}
     <div class="hide-on-med-and-up">
-    {% for swipeCard in swipeCards %}
-        <div>
-            <hr />
-            <h5>Badge n°{{ swipeCard.number }}</h5>
-            <img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}" alt="barecode">
-            <p>
-                <b>associé :</b> {{ swipeCard.createdAt | date_time }}<br>
-                {% if swipeCard.disabledAt %}<b>désactivé :</b> {{ swipeCard.disabledAt | date_time }}{% endif %}
-            </p>
-            <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
-                <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
-                <div class="switch">
-                    <label>
-                        Désactivé
-                        <input type="checkbox" {% if swipeCard.enable %}checked="checked"{% endif %}>
-                        <span class="lever"></span>
-                        Actif
-                    </label>
-                </div>
-            </form>
-        </div>
-    {% endfor %}
+        {% for swipeCard in swipeCards %}
+            <div>
+                <hr />
+                <h5>Badge n°{{ swipeCard.number }}</h5>
+                {% include "swipeCard/_partial/image.html.twig" with { card: swipeCard } %}
+                <p>
+                    <b>associé :</b> {{ swipeCard.createdAt | date_time }}<br>
+                    {% if swipeCard.disabledAt %}<b>désactivé :</b> {{ swipeCard.disabledAt | date_time }}{% endif %}
+                </p>
+                <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
+                    <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
+                    <div class="switch">
+                        <label>
+                            Désactivé
+                            <input type="checkbox" {% if swipeCard.enable %}checked="checked"{% endif %}>
+                            <span class="lever"></span>
+                            Actif
+                        </label>
+                    </div>
+                </form>
+            </div>
+        {% endfor %}
     </div>
     <table class="hide-on-small-only">
         <thead>
@@ -38,7 +38,9 @@
         {% for swipeCard in swipeCards %}
             <tr>
                 <td>{{ swipeCard.number }}</td>
-                <td><img src="{{ absolute_url(path('swipe_br',{"code": swipeCard.code | vigenere_encode | url_encode})) }}" alt="barecode"></td>
+                <td>
+                    {% include "swipeCard/_partial/image.html.twig" with { card: swipeCard } %}
+                </td>
                 <td>{{ swipeCard.createdAt | date_fr_full_with_time }}</td>
                 <td>{% if swipeCard.disabledAt %}{{ swipeCard.disabledAt | date_fr_full_with_time }}{% endif %}</td>
                 <td>

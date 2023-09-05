@@ -1,0 +1,5 @@
+{% set with_badge_card = with_badge_card ?? false %}
+
+<div {% if with_badge_card %}class="badge_card"{% endif %}>
+    <img src="{{ absolute_url(path('swipe_br', {"code": card.code | vigenere_encode | url_encode})) }}" alt="barcode">
+</div>

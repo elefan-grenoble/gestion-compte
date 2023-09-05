@@ -7,9 +7,7 @@
                 <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
                 {% include "swipeCard/_partial/add_modal.html.twig" with { beneficiary: beneficiary, from_admin: true } %}
             {% else %}
-                <div class="badge">
-                    <img src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}" alt="barecode" />
-                </div>
+                {% include "swipeCard/_partial/image.html.twig" with { card: beneficiary.getEnabledSwipeCards.first, with_badge_card: true } %}
                 <br>
             {% endif %}
             {% if beneficiary.getSwipeCards | length %}

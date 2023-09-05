@@ -1,24 +1,7 @@
-{% if beneficiary.getSwipeCards | length %}
-    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
-        <i class="material-icons left">credit_card</i>{% if beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
-    </a>
-    <br>
-    <div id="all_swipecards" class="modal bottom-sheet">
-        <div class="modal-content">
-            <h4>Tous vos badges</h4>
-            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse , beneficiary_id: 0} %}
-        </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
-        </div>
-    </div>
-{% endif %}
 {% if beneficiary.getEnabledSwipeCards | length %}
     {% set card = beneficiary.getEnabledSwipeCards.first %}
     {% if (show_badge_image ?? false) %}
-        <div class="badge_card">
-            <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">
-        </div>
+        {% include "swipeCard/_partial/image.html.twig" with { card: card, with_badge_card: true } %}
         <br>
     {% endif %}
     <a href="#swipe_disable_{{ card.id }}" class="red-text modal-trigger">Badge perdu ?</a>
@@ -27,11 +10,9 @@
     <div id="swipe_disable_{{ card.id }}" class="modal">
         <div class="modal-content">
             <h4>Badge n°{{ card.number }}</h4>
-            <div class="badge">
-                <img src="{{ absolute_url(path('swipe_br',{"code": card.code | vigenere_encode | url_encode})) }}" alt="barecode">
-            </div>
+            {% include "swipeCard/_partial/image.html.twig" with { card: card } %}
             <p>
-                Alors comme ça tu ne retrouves plus ton badge ? Désactive le ici.
+                Alors comme ça tu ne retrouves plus ton badge ? Désactive-le ici.
             </p>
             <form action="{{ path('disable_swipe')}}" method="post">
                 <input type="hidden" name="code" value="{{ card.code | vigenere_encode }}"/>
@@ -47,4 +28,20 @@
         <i class="material-icons left">add</i>Associer un badge à ton compte
     </a>
     {% include "swipeCard/_partial/add_modal.html.twig" with { beneficiary: beneficiary } %}
+{% endif %}
+
+{% if beneficiary.getSwipeCards | length %}
+    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
+        <i class="material-icons left">credit_card</i>{% if beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
+    </a>
+    <br>
+    <div id="all_swipecards" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Tous vos badges</h4>
+            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse , beneficiary_id: 0 } %}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
+        </div>
+    </div>
 {% endif %}
