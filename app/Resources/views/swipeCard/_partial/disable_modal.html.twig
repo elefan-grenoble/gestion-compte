@@ -1,0 +1,18 @@
+<div id="swipe_disable_{{ card.id }}" class="modal">
+    <form action="{{ path('disable_swipe')}}" method="POST">
+        <div class="modal-content">
+            <h4>Badge n°{{ card.number }}</h4>
+            {% include "swipeCard/_partial/image.html.twig" with { card: card, with_badge_card: true } %}
+            <p>
+                Alors comme ça tu ne retrouves plus ton badge ? Désactive-le ici.
+            </p>
+            <input type="hidden" name="code" value="{{ card.code | vigenere_encode }}"/>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect red-text btn-flat">Annuler</a>
+            <button type="submit" class="waves-effect waves-light btn-flat red white-text">
+                <i class="material-icons left">close</i>Désactiver<span class="hide-on-small-only"> ce badge</span>
+            </button>
+        </div>
+    </form>
+</div>

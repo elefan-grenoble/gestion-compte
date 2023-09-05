@@ -1,0 +1,30 @@
+{% if beneficiary.getEnabledSwipeCards | length %}
+    {% if (show_badge_image ?? false) %}
+        {% include "swipeCard/_partial/image.html.twig" with { card: beneficiary.getEnabledSwipeCards.first, with_badge_card: true } %}
+    {% endif %}
+    <a href="#swipe_disable_{{ beneficiary.getEnabledSwipeCards.first.id }}" class="red-text modal-trigger">Badge perdu ?</a>
+    {% include "swipeCard/_partial/disable_modal.html.twig" with { card: beneficiary.getEnabledSwipeCards.first } %}
+{% else %}
+    <p><b class="red-text">Aucun badge actif</b></p>
+    <a href="#swipe_add" class="btn waves-effect waves-light modal-trigger">
+        <i class="material-icons left">add</i>Associer un badge à ton compte
+    </a>
+    {% include "swipeCard/_partial/add_modal.html.twig" with { beneficiary: beneficiary } %}
+{% endif %}
+
+{% if beneficiary.getSwipeCards | length %}
+    <br />
+    <br />
+    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards">
+        <i class="material-icons left">credit_card</i>{% if beneficiary.getSwipeCards | length > 1 %}Vos badges{% else %}Ton badge{% endif %}
+    </a>
+    <div id="all_swipecards" class="modal bottom-sheet">
+        <div class="modal-content">
+            <h4>Tous vos badges</h4>
+            {% include "swipeCard/_partial/list.html.twig" with { beneficiairy: beneficiary } %}
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
+        </div>
+    </div>
+{% endif %}

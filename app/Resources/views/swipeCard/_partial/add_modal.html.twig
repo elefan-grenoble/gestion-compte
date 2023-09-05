@@ -1,0 +1,51 @@
+{% set from_admin = from_admin ?? false %}
+
+<div id="swipe_add{% if from_admin %}_b{{ beneficiary.id }}{% endif %}" class="modal">
+    <form action="{{ path('activate_swipe')}}" method="POST">
+        <div class="modal-content">
+            <h4>Entrez {% if from_admin %}le{% else %}votre{% endif %} numéro de badge</h4>
+            <div class="row">
+                <div class="col s12 m6 input-field">
+                    <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                    <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
+                    <span class="helper-text" data-error="wrong" data-success="right">Code du badge à 13 chiffres</span>
+                </div>
+                <div class="col s12 m6">
+                    <div class="swiftcard_exemple">
+                        {{ ("421234567890" | barcode | raw) }}
+                        <canvas id="badge_canvas" class="focus" width="300" height="60"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect red-text btn-flat">Annuler</a>
+            <button type="submit" class="btn green">
+                <i class="material-icons left">check</i>Associer
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    var canvas = document.getElementById('badge_canvas');
+    var context = canvas.getContext('2d');
+    var centerX = 0;
+    var centerY = 0;
+    var radius = 25;
+    // save state
+    context.save();
+    // translate context
+    context.translate(canvas.width / 2, canvas.height / 2);
+    // scale context horizontally
+    context.scale(4, 1);
+    // draw circle which will be stretched into an oval
+    context.beginPath();
+    context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    // restore to original state
+    context.restore();
+    // apply styling
+    context.lineWidth = 3;
+    context.strokeStyle = 'red';
+    context.stroke();
+</script>
