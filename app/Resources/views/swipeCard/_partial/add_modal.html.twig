@@ -1,7 +1,7 @@
 {% set from_admin = from_admin ?? false %}
 
 <div id="swipe_add{% if from_admin %}_b{{ beneficiary.id }}{% endif %}" class="modal">
-    <form action="{{ path('active_swipe')}}" method="post">
+    <form action="{{ path('activate_swipe')}}" method="POST">
         <div class="modal-content">
             <h4>Entrez {% if from_admin %}le{% else %}votre{% endif %} numéro de badge</h4>
             <div class="row">

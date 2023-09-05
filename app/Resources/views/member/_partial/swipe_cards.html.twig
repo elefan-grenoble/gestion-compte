@@ -2,20 +2,26 @@
     {% for beneficiary in member.beneficiaries %}
         <div class="col s12 m6">
             <h4>{{ beneficiary.firstname }}</h4>
-            {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
-                <p><b class="red-text">Aucun badge actif</b></p>
-                <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
-                {% include "swipeCard/_partial/add_modal.html.twig" with { beneficiary: beneficiary, from_admin: true } %}
-            {% else %}
+            {% if beneficiary.getEnabledSwipeCards | length %}
                 {% include "swipeCard/_partial/image.html.twig" with { card: beneficiary.getEnabledSwipeCards.first, with_badge_card: true } %}
-                <br>
+            {% else %}
+                <p><b class="red-text">Aucun badge actif</b></p>
+                <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger">
+                    <i class="material-icons left">add</i>Associer un badge à ce compte
+                </a>
+                {% include "swipeCard/_partial/add_modal.html.twig" with { beneficiary: beneficiary, from_admin: true } %}
             {% endif %}
+
             {% if beneficiary.getSwipeCards | length %}
-                <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
+                <br />
+                <br />
+                <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}">
+                    <i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}
+                </a>
                 <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
                     <div class="modal-content">
                         <h4>Tous les badges {{ beneficiary.firstname }}</h4>
-                        {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
+                        {% include "swipeCard/_partial/list.html.twig" with { beneficiary: beneficiary, from_admin: true } %}
                     </div>
                     <div class="modal-footer">
                         <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>

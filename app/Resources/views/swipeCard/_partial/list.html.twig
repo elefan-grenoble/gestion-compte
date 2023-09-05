@@ -1,3 +1,6 @@
+{% set from_admin = from_admin ?? false %}
+{% set swipeCards = beneficiary.swipeCards | reverse %}
+
 {% if swipeCards | length %}
     <div class="hide-on-med-and-up">
         {% for swipeCard in swipeCards %}
@@ -10,6 +13,7 @@
                     {% if swipeCard.disabledAt %}<b>désactivé :</b> {{ swipeCard.disabledAt | date_time }}{% endif %}
                 </p>
                 <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
+                    <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
                     <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
                     <div class="switch">
                         <label>
@@ -44,36 +48,25 @@
                 <td>{{ swipeCard.createdAt | date_fr_full_with_time }}</td>
                 <td>{% if swipeCard.disabledAt %}{{ swipeCard.disabledAt | date_fr_full_with_time }}{% endif %}</td>
                 <td>
-                    {% if beneficiary_id > 0 %}
-                        <form action="{% if swipeCard.enable %}{{ path('disable_swipe_for_beneficiary',{id : beneficiary_id})}}{% else %}{{ path('enable_swipe_for_beneficiary',{id : beneficiary_id})}}{% endif %}" method="post" class="swipe-card-status-switcher">
+                    <form action="{% if swipeCard.enable %}{{ path('disable_swipe') }}{% else %}{{ path('enable_swipe') }}{% endif %}" method="POST" class="swipe-card-status-switcher">
+                        <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                        <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
+                        <div class="switch">
+                            <label>
+                                Désactivé
+                                <input type="checkbox" {% if swipeCard.enable %}checked="checked"{% endif %}>
+                                <span class="lever"></span>
+                                Actif
+                            </label>
+                        </div>
+                    </form>
+                    {% if from_admin and is_granted("delete", swipeCard) %}
+                        <br />
+                        <form action="{{ path('delete_swipe')}}" method="POST">
                             <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
-                            <div class="switch">
-                                <label>
-                                    Désactivé
-                                    <input type="checkbox" {% if swipeCard.enable %}checked="checked"{% endif %}>
-                                    <span class="lever"></span>
-                                    Actif
-                                </label>
-                            </div>
-                        </form>
-                    {% else %}
-                        <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
-                            <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
-                            <div class="switch">
-                                <label>
-                                    Désactivé
-                                    <input type="checkbox" {% if swipeCard.enable %}checked="checked"{% endif %}>
-                                    <span class="lever"></span>
-                                    Actif
-                                </label>
-                            </div>
-                        </form>
-                    {% endif %}
-                    {% if is_granted("delete", swipeCard) %}
-                        <br>
-                        <form action="{{ path('delete_swipe')}}" method="post">
-                            <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
-                            <button type="submit" class="btn btn-small red btn-flat" ><i class="material-icons left">close</i>supprimer</button>
+                            <button type="submit" class="btn btn-small red btn-flat">
+                                <i class="material-icons left">close</i>supprimer
+                            </button>
                         </form>
                     {% endif %}
                 </td>

@@ -69,10 +69,10 @@ class SwipeCardController extends Controller
     /**
      * activate (pair) Swipe Card
      *
-     * @Route("/activate", name="active_swipe", methods={"POST"})
+     * @Route("/activate", name="activate_swipe", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function activeSwipeCardAction(Request $request)
+    public function activateSwipeCardAction(Request $request)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -120,7 +120,7 @@ class SwipeCardController extends Controller
             return new RedirectResponse($referer);
         }
 
-        $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($current_user->getBeneficiary());
+        $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($beneficiary);
         $card = new SwipeCard();
         $card->setBeneficiary($beneficiary);
         $card->setCode($code);
@@ -136,126 +136,119 @@ class SwipeCardController extends Controller
     /**
      * enable existing Swipe Card
      *
-     * @param Request $request
-     * @param Beneficiary $beneficiary
-     * @return Response
-     * @Route("/enable/", name="enable_swipe")
-     * @Route("/enable/{id}", name="enable_swipe_for_beneficiary", methods={"POST"})
+     * @Route("/enable", name="enable_swipe", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function enableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+    public function enableSwipeCardAction(Request $request)
+    {
         $session = new Session();
-        $referer = $request->headers->get('referer');
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        $referer = $request->headers->get('referer');
         $code = $request->get("code");
         $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $beneficiaryId = $request->get("beneficiary");
 
-        $em = $this->getDoctrine()->getManager();
-        if (!$beneficiary){
-            $beneficiary = $this->getUser()->getBeneficiary();
-        }
-        $cards = $beneficiary->getEnabledSwipeCards();
-        if ($cards->count()) {
+        // get beneficiary
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
+        // beneficiary should have 0 enabled cards
+        $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
+        if ($beneficiaryCards->count()) {
             $session->getFlashBag()->add('error', 'Tu as déjà un badge actif');
             return new RedirectResponse($referer);
         }
 
-        /** @var SwipeCard $card */
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
-
         if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
-            if ($card->getBeneficiary() != $beneficiary) {
-                if ($beneficiary === $this->getUser()->getBeneficiary())
+            if ($beneficiary != $card->getBeneficiary()) {
+                if ($current_user === $beneficiary->getUser())
                     $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
                 else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
+                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au bénéficiaire');
             } else {
                 $card->setEnable(true);
                 $card->setDisabledAt(null);
                 $em->persist($card);
                 $em->flush();
-                $session->getFlashBag()->add('success', 'Le badge #' . $card->getNumber() . ' a bien été ré-activé');
+                $session->getFlashBag()->add('success', 'Le badge #' . $card->getNumber() . ' a bien été réactivé');
             }
         } else {
             $session->getFlashBag()->add('error', 'Aucun badge ne correspond à ce code');
         }
+
         return new RedirectResponse($referer);
     }
 
     /**
      * disable Swipe Card
      *
-     * @param Request $request
-     * @param Beneficiary $beneficiary
-     * @return Response
-     * @Route("/disable/", name="disable_swipe")
-     * @Route("/disable/{id}", name="disable_swipe_for_beneficiary", methods={"POST"})
+     * @Route("/disable", name="disable_swipe", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function disableSwipeCardAction(Request $request,Beneficiary $beneficiary = null){
+    public function disableSwipeCardAction(Request $request)
+    {
         $session = new Session();
-        $referer = $request->headers->get('referer');
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        $referer = $request->headers->get('referer');
         $code = $request->get("code");
         $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
+        $beneficiaryId = $request->get("beneficiary");
 
-        $em = $this->getDoctrine()->getManager();
-        /** @var SwipeCard $card */
+        // get beneficiary
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
-        if (!$beneficiary){
-            $beneficiary = $this->getUser()->getBeneficiary();
-        }
-
-        if ($card){
+        if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::DISABLE, $card);
-            if ($card->getBeneficiary() != $beneficiary) {
-                if ($beneficiary === $this->getUser()->getBeneficiary())
+            if ($beneficiary != $card->getBeneficiary()) {
+                if ($current_user === $beneficiary->getUser())
                     $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
                 else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au beneficiaire');
+                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au bénéficiaire');
             } else {
                 $card->setEnable(false);
                 $em->persist($card);
                 $em->flush();
                 $session->getFlashBag()->add('success','Ce badge est maintenant désactivé');
             }
-        }else{
+        } else {
             $session->getFlashBag()->add('error','Aucune badge trouvé');
         }
+
         return new RedirectResponse($referer);
     }
 
     /**
      * remove Swipe Card
      *
-     * @param Request $request
-     * @return Response
-     * @Route("/delete/", name="delete_swipe", methods={"POST"})
+     * @Route("/delete", name="delete_swipe", methods={"POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function deleteAction(Request $request){
+    public function deleteAction(Request $request)
+    {
         $session = new Session();
-        $referer = $request->headers->get('referer');
+        $em = $this->getDoctrine()->getManager();
 
+        $referer = $request->headers->get('referer');
         $code = $request->get("code");
         $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
 
-        $em = $this->getDoctrine()->getManager();
-        /** @var SwipeCard $card */
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code'=>$code));
 
-        if ($card){
-            if (!$this->get('security.authorization_checker')->isGranted(SwipeCardVoter::DELETE, $card)) {
-                $session->getFlashBag()->add('error','Tu ne peux pas supprimer ce badge');
-                return new RedirectResponse($referer);
-            }
+        if ($card) {
+            $this->denyAccessUnlessGranted(SwipeCardVoter::DELETE, $card);
             $em->remove($card);
             $em->flush();
-            $session->getFlashBag()->add('success','Le badge '.$code.' a bien été supprimé');
-        }else{
+            $session->getFlashBag()->add('success','Le badge a bien été supprimé');
+        } else {
             $session->getFlashBag()->add('error','Aucune badge trouvé');
         }
+
         return new RedirectResponse($referer);
     }
 
