@@ -113,54 +113,7 @@
                     <i class="material-icons">credit_card</i>Badges
                 </div>
                 <div class="collapsible-body white">
-                    <div class="row">
-                        {% for beneficiary in member.beneficiaries %}
-                            <div class="col s12 m6">
-                                <h4>{{ beneficiary.firstname }}</h4>
-                                {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
-                                    <p><b class="red-text">Aucun badge actif</b></p>
-                                    <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
-                                    <div id="swipe_add_b{{ beneficiary.id }}" class="modal">
-                                        <div class="modal-content">
-                                            <h4>Associer un badge</h4>
-                                            <form action="{{ path('active_swipe_for_beneficiary',{id:beneficiary.id})}}" method="post">
-                                                <div class="row">
-                                                    <div class="col s12 m6 input-field">
-                                                        <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
-                                                        <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
-                                                        <span class="supporting-text" data-error="wrong" data-success="right">Code du badge à 13 chiffres</span>
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <button type="submit" class="btn green"><i class="material-icons left">check</i>Associer le badge</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <a href="#!" class="modal-close waves-effect red-text btn-flat">Fermer</a>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <div class="badge">
-                                        <img src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}" alt="barecode" />
-                                    </div>
-                                    <br>
-                                {% endif %}
-                                {% if beneficiary.getSwipeCards | length %}
-                                    <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
-                                    <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
-                                        <div class="modal-content">
-                                            <h4>Tous les badges {{ beneficiary.firstname }}</h4>
-                                            {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
-                                        </div>
-                                        <div class="modal-footer">
-                                            <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
+                    {% include "member/_partial/swipe_cards.html.twig" with { member: member } %}
                 </div>
             </li>
         {% endif %}
