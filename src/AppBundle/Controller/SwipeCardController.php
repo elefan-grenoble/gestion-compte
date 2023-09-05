@@ -37,92 +37,100 @@ class SwipeCardController extends Controller
      * @return Response
      * @Route("/in/{code}", name="swipe_in", methods={"GET"})
      */
-    public function swipeInAction(Request $request, $code){
+    public function swipeInAction(Request $request, $code)
+    {
         $session = new Session();
-        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
+
+        $code = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
         $card = $em->getRepository('AppBundle:SwipeCard')->findLastEnable($code);
-        if (!$card){
+
+        if (!$card) {
             $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
             $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
                 $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
-        }else{
+        } else {
             $user = $card->getBeneficiary()->getUser();
             $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
             $this->get("security.token_storage")->setToken($token);
             $event = new InteractiveLoginEvent($request, $token);
             $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
         }
+
         return $this->redirectToRoute('homepage');
     }
 
-    public function homepageAction(){
+    public function homepageAction()
+    {
         return $this->render('user/swipe_card/homepage.html.twig');
     }
 
     /**
-     * activate / pair Swipe Card
+     * activate (pair) Swipe Card
      *
-     * @param Request $request
-     * @param Beneficiary $beneficiary
-     * @return Response
-     * @Route("/active/", name="active_swipe", methods={"GET","POST"})
-     * @Route("/active/{id}", name="active_swipe_for_beneficiary", methods={"POST"})
+     * @Route("/activate", name="active_swipe", methods={"POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function activeSwipeCardAction(Request $request,Beneficiary $beneficiary = null)
+    public function activeSwipeCardAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCard());
-        $referer = $request->headers->get('referer');
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        $referer = $request->headers->get('referer');
         $code = $request->get("code");
-        //verify code :
+        $beneficiaryId = $request->get("beneficiary");
+
+        // verify code
         if (!SwipeCard::checkEAN13($code)) {
             $session->getFlashBag()->add('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
             return new RedirectResponse($referer);
         }
-        $code = substr($code, 0, -1); //remove controle
-        if ($code === '421234567890'){
-            $session->getFlashBag()->add('warning', 'Hihi, ceci est le numéro d&rsquo;exemple 😁 Utilise un badge physique 🍌');
+        // remove controle
+        $code = substr($code, 0, -1);
+        if ($code === '421234567890') {
+            $session->getFlashBag()->add('warning', 'Hihi, ceci est le numéro d\'exemple 😁 Utilise un badge physique 🍌');
             return new RedirectResponse($referer);
         }
 
-        $em = $this->getDoctrine()->getManager();
-        if (!$beneficiary){
-            $beneficiary = $this->getUser()->getBeneficiary();
-        }
-        $cards = $beneficiary->getEnabledSwipeCards();
-        if ($cards->count()) {
-            if ($beneficiary->getUser() === $this->getUser())
+        // get beneficiary
+        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
+
+        // beneficiary should have 0 enabled cards
+        $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
+        if ($beneficiaryCards->count()) {
+            if ($current_user === $beneficiary->getUser()) {
                 $session->getFlashBag()->add('error', 'Ton compte possède déjà un badge actif');
-            else
-                $session->getFlashBag()->add('error', 'Il existe déjà un badge actif associé à ce compte');
-            return new RedirectResponse($referer);
-        }
-
-        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
-
-        if ($card) {
-            if ($card->getBeneficiary() != $this->getUser()->getBeneficiary()) {
-                $session->getFlashBag()->add('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
             } else {
-                $session->getFlashBag()->add('error', 'Oups ! Ce badge est déjà associé mais il est inactif. Reactive le !');
+                $session->getFlashBag()->add('error', 'Il existe déjà un badge actif associé à ce compte');
             }
             return new RedirectResponse($referer);
-        } else {
-            $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($this->getUser()->getBeneficiary());
-            $card = new SwipeCard();
-            $card->setBeneficiary($beneficiary);
-            $card->setCode($code);
-            $card->setNumber($lastCard ? max($lastCard->getNumber(),$beneficiary->getSwipeCards()->count()) + 1 : 1);
-            $card->setEnable(1);
-            $em->persist($card);
-            $em->flush();
-            $session->getFlashBag()->add('success', 'Le badge ' . $card->getcode() . ' a bien été associé à ton compte.');
+        }
+
+        // card should not be already in use
+        $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code));
+        if ($card) {
+            if ($beneficiary != $card->getBeneficiary()) {
+                $session->getFlashBag()->add('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
+            } else {
+                $session->getFlashBag()->add('error', 'Oups ! Ce badge est déjà associé mais il est inactif. Réactive-le !');
+            }
             return new RedirectResponse($referer);
         }
+
+        $lastCard = $em->getRepository('AppBundle:SwipeCard')->findLast($current_user->getBeneficiary());
+        $card = new SwipeCard();
+        $card->setBeneficiary($beneficiary);
+        $card->setCode($code);
+        $card->setNumber($lastCard ? max($lastCard->getNumber(),$beneficiary->getSwipeCards()->count()) + 1 : 1);
+        $card->setEnable(1);
+        $em->persist($card);
+        $em->flush();
+
+        $session->getFlashBag()->add('success', 'Le badge ' . $card->getcode() . ' a bien été associé à ton compte.');
+        return new RedirectResponse($referer);
     }
 
     /**
