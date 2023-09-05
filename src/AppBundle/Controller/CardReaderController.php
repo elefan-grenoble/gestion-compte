@@ -23,13 +23,10 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 class CardReaderController extends Controller
 {
-    /**
-     * @var boolean
-     */
     private $swipeCardLogging;
     private $swipeCardLoggingAnonymous;
 
-    public function __construct(string $swipeCardLogging, string $swipeCardLoggingAnonymous)
+    public function __construct(bool $swipeCardLogging, bool $swipeCardLoggingAnonymous)
     {
         $this->swipeCardLogging = $swipeCardLogging;
         $this->swipeCardLoggingAnonymous = $swipeCardLoggingAnonymous;
@@ -45,48 +42,49 @@ class CardReaderController extends Controller
 
         $code = $request->get('swipe_code');
 
+        // verify code
         if (!$code) {
             return $this->redirectToRoute('cardReader');
         }
         if (!SwipeCard::checkEAN13($code)) {
             return $this->redirectToRoute('cardReader');
         }
-
-        $code = substr($code, 0, -1); //remove controle
+        $code = substr($code, 0, -1);  // remove controle
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
-
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
-        } else {
-            // find corresponding beneficiary
-            $beneficiary = $card->getBeneficiary();
-            $membership = $beneficiary->getMembership();
-            $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
-            $counter = $membership->getShiftTimeCount($cycle_end);
-            if ($this->swipeCardLogging) {
-                $dispatcher = $this->get('event_dispatcher');
-                if ($this->swipeCardLoggingAnonymous) {
-                    $card = null;
-                }
-                $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
-            }
-            // validate beneficiary ongoing shift(s)
-            $shifts = $em->getRepository('AppBundle:Shift')->getOnGoingShifts($beneficiary);
-            $dispatcher = $this->get('event_dispatcher');
-            foreach ($shifts as $shift) {
-                if ($shift->getWasCarriedOut() == 0) {
-                    $shift->validateShiftParticipation();
-                    $em->persist($shift);
-                    $em->flush();
-                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
-                }
-            }
-            return $this->render('user/check.html.twig', [
-                'beneficiary' => $beneficiary,
-                'counter' => $counter
-            ]);
+            return $this->redirectToRoute('cardReader');
         }
 
-        return $this->redirectToRoute('cardReader');
+        // find corresponding beneficiary
+        $beneficiary = $card->getBeneficiary();
+        $membership = $beneficiary->getMembership();
+        $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
+        $counter = $membership->getShiftTimeCount($cycle_end);
+        if ($this->swipeCardLogging) {
+            if ($this->swipeCardLoggingAnonymous) {
+                $card = null;
+            }
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
+        }
+
+        // validate beneficiary ongoing shift(s)
+        $ongoingShifts = $em->getRepository('AppBundle:Shift')->getOngoingShifts($beneficiary);
+        foreach ($ongoingShifts as $shift) {
+            if ($shift->getWasCarriedOut() == 0) {
+                $shift->validateShiftParticipation();
+                $em->persist($shift);
+                $em->flush();
+
+                $dispatcher = $this->get('event_dispatcher');
+                $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+            }
+        }
+
+        return $this->render('user/check.html.twig', [
+            'beneficiary' => $beneficiary,
+            'counter' => $counter
+        ]);
     }
 }

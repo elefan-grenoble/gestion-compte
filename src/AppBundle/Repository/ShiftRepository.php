@@ -265,15 +265,15 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function getOnGoingShifts($beneficiary)
+    public function getOngoingShifts($beneficiary)
     {
         $qb = $this->createQueryBuilder('s')
-                    ->where('s.end > :now')
-                    ->andwhere('s.start < :now_plus_ten')
-                    ->andwhere('s.shifter = :sid')
-                    ->setParameter('now', new \Datetime('now'))
-                    ->setParameter('now_plus_ten', new \Datetime('now +10 minutes'))
-                    ->setParameter('sid', $beneficiary->getId());
+            ->where('s.end > :now')
+            ->andwhere('s.start < :now_plus_ten')
+            ->andwhere('s.shifter = :sid')
+            ->setParameter('now', new \Datetime('now'))
+            ->setParameter('now_plus_ten', new \Datetime('now +10 minutes'))
+            ->setParameter('sid', $beneficiary->getId());
 
         return $qb
             ->getQuery()
@@ -283,9 +283,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     public function getYears()
     {
         $qb = $this->createQueryBuilder('s')
-                   ->select('YEAR(s.start) as year')
-                   ->distinct()
-                   ->getQuery();
+            ->select('YEAR(s.start) as year')
+            ->distinct()
+            ->getQuery();
 
         $result = $qb
             ->getScalarResult();
