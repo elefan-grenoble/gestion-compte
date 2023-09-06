@@ -88,8 +88,7 @@ class SwipeCardController extends Controller
             $session->getFlashBag()->add('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
             return new RedirectResponse($referer);
         }
-        // remove controle
-        $code = substr($code, 0, -1);
+        $code = substr($code, 0, -1);  // remove controle
         if ($code === '421234567890') {
             $session->getFlashBag()->add('warning', 'Hihi, ceci est le numéro d\'exemple 😁 Utilise un badge physique 🍌');
             return new RedirectResponse($referer);

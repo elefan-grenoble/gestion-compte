@@ -151,30 +151,6 @@ class DefaultController extends Controller
 
 
     /**
-     * @Route("/cardReader", name="cardReader")
-     */
-    public function cardReaderAction(Request $request)
-    {
-        $this->denyAccessUnlessGranted('card_reader', $this->getUser());
-        $em = $this->getDoctrine()->getManager();
-
-        // in progress shifts
-        $shifts_in_progress = $em->getRepository('AppBundle:Shift')->findInProgress();
-        $buckets_in_progress = $this->get('shift_service')->generateShiftBuckets($shifts_in_progress);
-        // upcoming shifts
-        $shifts_upcoming = $em->getRepository('AppBundle:Shift')->findUpcomingToday();
-        $buckets_upcoming = $this->get('shift_service')->generateShiftBuckets($shifts_upcoming);
-
-        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
-
-        return $this->render('default/card_reader/index.html.twig', [
-            "buckets_in_progress" => $buckets_in_progress,
-            "buckets_upcoming" => $buckets_upcoming,
-            "dynamicContent" => $dynamicContent
-        ]);
-    }
-
-    /**
      * @Route("/helloassoNotify", name="helloasso_notify", methods={"POST"})
      * inspiré de
      * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
