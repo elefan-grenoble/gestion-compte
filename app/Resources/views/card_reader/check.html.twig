@@ -11,6 +11,17 @@
 <div class="container">
     <h3 class="header center-align">{{ random(helloList) }} {{ beneficiary.firstname }} !</h3>
 
+    {# Ongoing shift(s) #}
+    {% if ongoingShifts | length %}
+        <div class="card-panel green lighten-5">
+            {% if ongoingShifts | length == 1 %}
+                ✅ Ton créneau en cours <strong>{{ (ongoingShifts | first).job }}</strong> a été validé !
+            {% else %}
+                ✅ Tes créneaux en cours ont été validés !
+            {% endif %}
+        </div>
+    {% endif %}
+
     {# Compteur temps & épargne #}
     {% if can_access and not member.isCurrentlyExemptedFromShifts() %}
         <p class="center-align">
@@ -123,17 +134,6 @@
             </p>
         {% endif %}
     {% endif %}
-
-    {# Ongoing shift(s) #}
-    {% if ongoingShifts | length %}
-        <div class="card-panel green lighten-5">
-            {% if ongoingShifts | length == 1 %}
-                ✅ Ton créneau en cours <strong>{{ (ongoingShifts | first).job }}</strong> a été validé !
-            {% else %}
-                ✅ Tes créneaux en cours ont été validés !
-            {% endif %}
-        </div>
-    {% endif %}
 </div>
 
 <a id="close" href="{{ path('card_reader_index') }}" class="black-text">
@@ -146,7 +146,7 @@
     // page stays open for 10 seconds, then goes back to card_reader index
     window.setTimeout(function(){
         window.location.href = "{{ path('card_reader_index') }}";
-    }, 100 * 1000);
+    }, 10 * 1000);
 
     // can scan another barcode
     var barcode_submit_url = "{{ path('card_reader_check') }}";

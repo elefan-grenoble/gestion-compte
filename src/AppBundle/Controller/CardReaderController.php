@@ -83,15 +83,6 @@ class CardReaderController extends Controller
         // find corresponding beneficiary
         $beneficiary = $card->getBeneficiary();
         $membership = $beneficiary->getMembership();
-        $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
-        $counter = $membership->getShiftTimeCount($cycle_end);
-        if ($this->swipeCardLogging) {
-            if ($this->swipeCardLoggingAnonymous) {
-                $card = null;
-            }
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
-        }
 
         // validate beneficiary ongoing shift(s)
         $ongoingShifts = $em->getRepository('AppBundle:Shift')->getOngoingShifts($beneficiary);
@@ -104,6 +95,16 @@ class CardReaderController extends Controller
                 $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
             }
+        }
+
+        $cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 0);
+        $counter = $membership->getShiftTimeCount($cycle_end);
+        if ($this->swipeCardLogging) {
+            if ($this->swipeCardLoggingAnonymous) {
+                $card = null;
+            }
+            $dispatcher = $this->get('event_dispatcher');
+            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
         }
 
         return $this->render('card_reader/check.html.twig', [
