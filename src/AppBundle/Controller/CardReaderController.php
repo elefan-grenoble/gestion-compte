@@ -49,7 +49,7 @@ class CardReaderController extends Controller
 
         $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 
-        return $this->render('default/card_reader/index.html.twig', [
+        return $this->render('card_reader/index.html.twig', [
             "buckets_in_progress" => $buckets_in_progress,
             "buckets_upcoming" => $buckets_upcoming,
             "dynamicContent" => $dynamicContent
@@ -106,7 +106,7 @@ class CardReaderController extends Controller
             }
         }
 
-        return $this->render('user/check.html.twig', [
+        return $this->render('card_reader/check.html.twig', [
             'beneficiary' => $beneficiary,
             'counter' => $counter
         ]);
