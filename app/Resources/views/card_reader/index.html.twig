@@ -34,17 +34,13 @@
 
 {% block javascripts %}
     <script>
-        jQuery(function () {
-            $(".collapsible .modal-trigger").on('click', function (e) {
-                e.preventDefault();
-            });
-        })
+        // page reloads every 60 seconds
+        window.setTimeout(function() {
+            window.location.reload();
+        }, 60 * 1000);
+
+        // can scan barcode
         var barcode_submit_url = "{{ path('card_reader_check') }}";
     </script>
     <script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
-    <script type="text/javascript">
-        setTimeout(function() {
-            location.reload();
-        }, 60 * 1000);  // page reload every 60 seconds
-    </script>
 {% endblock %}

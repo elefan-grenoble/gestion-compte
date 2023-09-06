@@ -8,7 +8,7 @@
     {% endif %}
 {% endfor %}
 
-<div class="card sticky-action">
+<div class="card">
     <div class="card-content {{ bucket.job.color }} lighten-4">
         {% if (shiftercount == 0) %}
             <div class="red-text" style="height: 30px">
@@ -17,7 +17,7 @@
                 <i class="material-icons tiny">warning</i>
             </div>
         {% endif %}
-        <div class="card-title activator">
+        <div class="card-title">
             <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> / <b>{{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}</b>
         </div>
         <ul style="margin-bottom:0">
