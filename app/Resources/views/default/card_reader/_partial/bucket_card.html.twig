@@ -20,9 +20,9 @@
         <div class="card-title activator">
             <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> / <b>{{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}</b>
         </div>
-        <ul>
+        <ul style="margin-bottom:0">
             {% for shift in bucket.sortedShifts %}
-                <li style="height: 30px">
+                <li>
                     <div>
                         {% if use_card_reader_to_validate_shifts %}
                             <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">

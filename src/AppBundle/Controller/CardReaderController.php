@@ -33,6 +33,30 @@ class CardReaderController extends Controller
     }
 
     /**
+     * @Route("/", name="card_reader_index")
+     */
+    public function indexAction(Request $request)
+    {
+        $this->denyAccessUnlessGranted('card_reader', $this->getUser());
+        $em = $this->getDoctrine()->getManager();
+
+        // in progress shifts
+        $shifts_in_progress = $em->getRepository('AppBundle:Shift')->findInProgress();
+        $buckets_in_progress = $this->get('shift_service')->generateShiftBuckets($shifts_in_progress);
+        // upcoming shifts
+        $shifts_upcoming = $em->getRepository('AppBundle:Shift')->findUpcomingToday();
+        $buckets_upcoming = $this->get('shift_service')->generateShiftBuckets($shifts_upcoming);
+
+        $dynamicContent = $em->getRepository('AppBundle:DynamicContent')->findOneByCode('CARD_READER')->getContent();
+
+        return $this->render('default/card_reader/index.html.twig', [
+            "buckets_in_progress" => $buckets_in_progress,
+            "buckets_upcoming" => $buckets_upcoming,
+            "dynamicContent" => $dynamicContent
+        ]);
+    }
+
+    /**
      * @Route("/check", name="card_reader_check", methods={"POST"})
      */
     public function checkAction(Request $request)
@@ -44,16 +68,16 @@ class CardReaderController extends Controller
 
         // verify code
         if (!$code) {
-            return $this->redirectToRoute('cardReader');
+            return $this->redirectToRoute('card_reader_index');
         }
         if (!SwipeCard::checkEAN13($code)) {
-            return $this->redirectToRoute('cardReader');
+            return $this->redirectToRoute('card_reader_index');
         }
         $code = substr($code, 0, -1);  // remove controle
         $card = $em->getRepository('AppBundle:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
         if (!$card) {
             $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
-            return $this->redirectToRoute('cardReader');
+            return $this->redirectToRoute('card_reader_index');
         }
 
         // find corresponding beneficiary

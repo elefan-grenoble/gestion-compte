@@ -106,14 +106,14 @@
             </style>
         {% endif %}
     </div>
-    <a id="close" href="{{ path('cardReader') }}" class="black-text"><i class="material-icons large">close</i></a>
+    <a id="close" href="{{ path('card_reader_index') }}" class="black-text"><i class="material-icons large">close</i></a>
 
 {% endblock %}
 
 {% block javascripts %}
     <script>
         window.setTimeout(function(){
-            window.location.href = "{{ path('cardReader') }}";
+            window.location.href = "{{ path('card_reader_index') }}";
         }, 10000);//10sec
 
         //can scan another barcode
