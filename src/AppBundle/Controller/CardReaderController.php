@@ -86,14 +86,18 @@ class CardReaderController extends Controller
 
         // validate beneficiary ongoing shift(s)
         $ongoingShifts = $em->getRepository('AppBundle:Shift')->getOngoingShifts($beneficiary);
+        $ongoingShiftsValidated = 0;
         foreach ($ongoingShifts as $shift) {
             if ($shift->getWasCarriedOut() == 0) {
                 $shift->validateShiftParticipation();
+
                 $em->persist($shift);
                 $em->flush();
 
                 $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+
+                $ongoingShiftsValidated += 1;
             }
         }
 
@@ -110,7 +114,8 @@ class CardReaderController extends Controller
         return $this->render('card_reader/check.html.twig', [
             'beneficiary' => $beneficiary,
             'counter' => $counter,
-            'ongoingShifts' => $ongoingShifts
+            'ongoingShifts' => $ongoingShifts,
+            'ongoingShiftsValidated' => $ongoingShiftsValidated
         ]);
     }
 }
