@@ -64,12 +64,12 @@
     {% elseif can_access %}
         {% if counter > due_duration_by_cycle %}
             <p class="center-align">
-                Wha ! c'est trop d'amour ! merci !! 😍
+                Wha ! c'est trop d'amour, merci ! 😍
             </p>
         {% endif %}
         {% if counter == due_duration_by_cycle %}
             <p class="center-align">
-                Tout roule, passe un bon moment à {{ project_name }} ! 🙂
+                Tout roule, passe un bon moment à {{ project_name }} 🙂
             </p>
         {% endif %}
         {% if counter < due_duration_by_cycle and counter >=0 %}
@@ -93,7 +93,7 @@
                 <i class="material-icons" title="Compte gelé">{{ member_frozen_material_icon }}</i>
                 <strong>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est gelé !</strong> 
                 <br />
-                Tu ne peux pas faire tes courses aujourd'hui ! ☹️
+                Tu ne peux pas faire tes courses aujourd'hui ☹️
             </p>
             {% if member.frozenChange %}
                 <p class="center-align">Le degel est programmé, il sera effectif le {{ membership_service.endOfCycle(member) | date_fr_long }}</p>
@@ -112,7 +112,7 @@
         {% elseif not beneficiary.user.enabled %}
             <p class="center-align">
                 <i class="material-icons" title="Compte pas encore activé">{{ user_account_not_enabled_material_icon }}</i>
-                <strong>Ton compte n'est pas actif !</strong> 🤔
+                <strong>Ton compte n'est pas actif</strong> 🤔
             </p>
         {% elseif not member | uptodate %}
             <p class="center-align">
@@ -122,6 +122,17 @@
                 Rendez-vous au bureau de membres régulariser tout ça !
             </p>
         {% endif %}
+    {% endif %}
+
+    {# Ongoing shift(s) #}
+    {% if ongoingShifts | length %}
+        <div class="card-panel green lighten-5">
+            {% if ongoingShifts | length == 1 %}
+                ✅ Ton créneau en cours <strong>{{ (ongoingShifts | first).job }}</strong> a été validé !
+            {% else %}
+                ✅ Tes créneaux en cours ont été validés !
+            {% endif %}
+        </div>
     {% endif %}
 </div>
 
@@ -135,7 +146,7 @@
     // page stays open for 10 seconds, then goes back to card_reader index
     window.setTimeout(function(){
         window.location.href = "{{ path('card_reader_index') }}";
-    }, 10 * 1000);
+    }, 100 * 1000);
 
     // can scan another barcode
     var barcode_submit_url = "{{ path('card_reader_check') }}";
@@ -145,13 +156,10 @@
 
 {% block stylesheets %}
 <style>
-    p{
+    p, .card-panel {
         font-size: 25px;
     }
-    .emoticon{
-        max-width: 50px;
-    }
-    #close{
+    #close {
         position: fixed;
         top: 1em;
         right: 1em;

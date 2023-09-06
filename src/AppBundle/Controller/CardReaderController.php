@@ -108,7 +108,8 @@ class CardReaderController extends Controller
 
         return $this->render('card_reader/check.html.twig', [
             'beneficiary' => $beneficiary,
-            'counter' => $counter
+            'counter' => $counter,
+            'ongoingShifts' => $ongoingShifts
         ]);
     }
 }
