@@ -45,6 +45,13 @@ class OpeningHour
     private $end;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="closed", type="boolean", options={"default" : 0})
+     */
+    private $closed;
+
+    /**
      * @ORM\ManyToOne(targetEntity="OpeningHourKind", inversedBy="openingHours", fetch="EAGER")
      * @ORM\JoinColumn(name="opening_hour_kind_id", referencedColumnName="id", onDelete="SET NULL")
      */
@@ -164,6 +171,30 @@ class OpeningHour
     public function isStartBeforeEnd()
     {
         return $this->start < $this->end;
+    }
+
+    /**
+     * Set closed
+     *
+     * @param boolean $closed
+     *
+     * @return OpeningHour
+     */
+    public function setClosed($closed)
+    {
+        $this->closed = $closed;
+
+        return $this;
+    }
+
+    /**
+     * Get closed
+     *
+     * @return bool
+     */
+    public function getClosed()
+    {
+        return $this->closed;
     }
 
     /**

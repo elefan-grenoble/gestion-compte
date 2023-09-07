@@ -245,6 +245,16 @@ class Shift
     }
 
     /**
+     * Get wasCarriedOut
+     *
+     * @return bool
+     */
+    public function getWasCarriedOut()
+    {
+        return $this->wasCarriedOut;
+    }
+
+    /**
      * Validate shift participation
      *
      * @return BookedShift
@@ -266,16 +276,6 @@ class Shift
         $this->setWasCarriedOut(false);
 
         return $this;
-    }
-
-    /**
-     * Get wasCarriedOut
-     *
-     * @return bool
-     */
-    public function getWasCarriedOut()
-    {
-        return $this->wasCarriedOut;
     }
 
     /**

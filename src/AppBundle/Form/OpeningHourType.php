@@ -20,9 +20,18 @@ class OpeningHourType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('dayOfWeek', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
-            ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
+            ->add('dayOfWeek', ChoiceType::class, array(
+                'label' => 'Jour de la semaine',
+                'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT
+            ))
+            ->add('start', TextType::class, array(
+                'label' => 'Heure de début',
+                'attr' => array('class' => 'timepicker')
+            ))
+            ->add('end', TextType::class, array(
+                'label' => 'Heure de fin',
+                'attr' => array('class' => 'timepicker')
+            ))
             ->add('kind', EntityType::class, array(
                 'label' => 'Type d\'horaire d\'ouverture',
                 'class' => 'AppBundle:OpeningHourKind',
