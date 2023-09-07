@@ -1,6 +1,12 @@
 {% set openingHourJoinString = "&" %}
 
 <div class="card-panel">
-    <p style="margin-top:0;text-align:center;">{{ openingHourKind.name }}</p>
+    <p style="margin-top:0;text-align:center;">
+        {{ openingHourKind.name }}
+        {% if openingHourKind.startDate and openingHourKind.endDate %}
+            <br />
+            <i>du {{ openingHourKind.startDate | date_fr_long }} au {{ openingHourKind.endDate | date_fr_long }}</i>
+        {% endif %}
+    </p>
     {% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHourKind.openingHours } %}
 </div>

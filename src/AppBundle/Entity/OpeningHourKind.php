@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -55,6 +56,7 @@ class OpeningHourKind
 
     /**
      * @ORM\OneToMany(targetEntity="OpeningHour", mappedBy="kind", cascade={"persist"})
+     * @OrderBy({"dayOfWeek" = "ASC", "start" = "ASC"})
      */
     private $openingHours;
 

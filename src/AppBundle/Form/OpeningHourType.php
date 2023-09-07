@@ -37,7 +37,6 @@ class OpeningHourType extends AbstractType
             ))
             ->add('closed', CheckboxType::class, array(
                 'required' => false,
-                'data' => false,
                 'label' => 'Fermé ?',
                 'attr' => array('class' => 'filled-in')
             ))
