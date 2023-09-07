@@ -41,8 +41,12 @@
     {% for openingHour in openingHours %}
         <tr>
             <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
-            <td>{{ openingHour.start | time_short }}</td>
-            <td>{{ openingHour.end | time_short }}</td>
+            {% if openingHour.closed %}
+                <td colspan="2">Fermé</td>
+            {% else %}
+                <td>{{ openingHour.start | time_short }}</td>
+                <td>{{ openingHour.end | time_short }}</td>
+            {% endif %}
             <td>{{ openingHour.kind }}</td>
             <td>
                 <a href="{{ path("admin_openinghour_edit", { 'id': openingHour.id }) }}">

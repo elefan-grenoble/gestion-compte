@@ -3,15 +3,16 @@
 <ul>
     {% set dayOfWeek = -1 %}
     {% for openingHour in openingHours %}
+        {% set openingHourTimeString = openingHour.closed ? "Fermé" : openingHour.start | time_short ~ "-" ~ openingHour.end | time_short %}
         {% if openingHour.dayOfWeek != dayOfWeek %}
             {# close previous day #}
             {% if loop.index > 0 %}</li>{% endif %}
             {# open new day #}
             <li>{{ openingHour.dayOfWeekString | capitalize }} :
-            {{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
+            {{ openingHourTimeString }}
         {% else %}
             {# continue existing day #}
-            {{ openingHourJoinString | raw }} {{ openingHour.start | time_short }}-{{ openingHour.end | time_short }}
+            {{ openingHourJoinString | raw }} {{ openingHourTimeString }}
         {% endif %}
         {% set dayOfWeek = openingHour.dayOfWeek %}
     {% endfor %}

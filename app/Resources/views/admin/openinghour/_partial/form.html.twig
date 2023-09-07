@@ -11,6 +11,8 @@
             {{ form_label(form.dayOfWeek) }}
         </div>
     </div>
+</div>
+<div class="row">
     <div class="col m4">
         <div class="errors">
             {{ form_errors(form.start) }}
@@ -28,6 +30,15 @@
             {{ form_widget(form.end) }}
             {{ form_label(form.end) }}
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col m4">
+        {{ form_errors(form.closed) }}
+        <label>
+            {{ form_widget(form.closed) }}
+            <span>{{ form.closed.vars.label }}</span>
+        </label>
     </div>
 </div>
 <div class="row">
