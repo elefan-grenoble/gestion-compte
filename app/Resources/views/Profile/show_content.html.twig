@@ -23,15 +23,6 @@
             </div>
         </li>
 
-        <li>
-            <div class="collapsible-header">
-                <i class="material-icons">card_membership</i>Adhésions
-            </div>
-            <div class="collapsible-body">
-                {% include "member/_partial/registrations.html.twig" with { member: beneficiary.membership } %}
-            </div>
-        </li>
-
         {% if profile_display_time_log %}
             <li>
                 <div class="collapsible-header">
@@ -76,7 +67,7 @@
                     <i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1 %}s{% endif %}
                 </div>
                 <div class="collapsible-body">
-                    {% include "beneficiary/_partial/swipe_cards.html.twig" with { beneficiary: beneficiary, show_badge_image: true } %}
+                    {% include "member/_partial/swipe_card.html.twig" with { member: member, show_badge_image: true } %}
                 </div>
             </li>
         {% endif %}
