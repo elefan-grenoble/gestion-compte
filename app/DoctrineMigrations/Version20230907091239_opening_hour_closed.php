@@ -23,6 +23,7 @@ final class Version20230907091239 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE opening_hour ADD closed TINYINT(1) DEFAULT \'0\' NOT NULL');
+        $this->addSql('ALTER TABLE opening_hour CHANGE start start TIME DEFAULT NULL, CHANGE end end TIME DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -31,5 +32,6 @@ final class Version20230907091239 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE opening_hour DROP closed');
+        $this->addSql('ALTER TABLE opening_hour CHANGE start start TIME NOT NULL, CHANGE end end TIME NOT NULL');
     }
 }

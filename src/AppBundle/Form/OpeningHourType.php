@@ -7,6 +7,7 @@ use AppBundle\Entity\Period;
 use AppBundle\Repository\OpeningHourKindRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,11 +27,19 @@ class OpeningHourType extends AbstractType
             ))
             ->add('start', TextType::class, array(
                 'label' => 'Heure de début',
+                'required' => false,
                 'attr' => array('class' => 'timepicker')
             ))
             ->add('end', TextType::class, array(
                 'label' => 'Heure de fin',
+                'required' => false,
                 'attr' => array('class' => 'timepicker')
+            ))
+            ->add('closed', CheckboxType::class, array(
+                'required' => false,
+                'data' => false,
+                'label' => 'Fermé ?',
+                'attr' => array('class' => 'filled-in')
             ))
             ->add('kind', EntityType::class, array(
                 'label' => 'Type d\'horaire d\'ouverture',

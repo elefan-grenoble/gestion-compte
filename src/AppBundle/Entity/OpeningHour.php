@@ -33,14 +33,14 @@ class OpeningHour
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="start", type="time")
+     * @ORM\Column(name="start", type="time", nullable=true)
      */
     private $start;
 
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="end", type="time")
+     * @ORM\Column(name="end", type="time", nullable=true)
      */
     private $end;
 
@@ -170,7 +170,10 @@ class OpeningHour
      */
     public function isStartBeforeEnd()
     {
-        return $this->start < $this->end;
+        if (!$this->closed) {
+            return $this->start < $this->end;
+        }
+        return true;
     }
 
     /**
