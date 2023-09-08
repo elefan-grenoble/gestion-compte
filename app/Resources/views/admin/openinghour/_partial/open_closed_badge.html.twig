@@ -1,9 +1,7 @@
-{% set float_unset = float_unset ?? null %}
-
 {% if not opening_hour_service.isEmpty %}
     {% if opening_hour_service.isOpen %}
-        <span class="badge green white-text" style="font-family:'Raleway',sans-serif;{% if float_unset %}float:unset;{% endif %}">Ouvert</span>
+        <span class="badge green white-text" style="font-family:'Raleway',sans-serif;float:unset;">Ouvert</span>
     {% else %}
-        <span class="badge red white-text" style="font-family:'Raleway',sans-serif;{% if float_unset %}float:unset;{% endif %}">Fermé</span>
+        <span class="badge red white-text" style="font-family:'Raleway',sans-serif;float:unset;">Fermé</span>
     {% endif %}
 {% endif %}

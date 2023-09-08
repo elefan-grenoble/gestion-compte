@@ -51,6 +51,6 @@ class OpeningHourService
 
     public function isClosed(\DateTime $date = null)
     {
-        return !$self->isOpen($date);
+        return !$this->isOpen($date);
     }
 }
