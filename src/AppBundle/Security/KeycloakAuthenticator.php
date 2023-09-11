@@ -163,7 +163,6 @@ class KeycloakAuthenticator extends SocialAuthenticator
 
         $this->em->persist($membership);
 
-        $this->em->persist($beneficiary);
         $this->em->flush();
         return $beneficiary->getUser();
     }
@@ -175,11 +174,25 @@ class KeycloakAuthenticator extends SocialAuthenticator
      */
     private function updateBeneficiary(KeycloakResourceOwner $keycloakUser,Beneficiary $beneficiary) : Void
     {
-        $beneficiary->setFirstname($this->getKeycloakUserAttribute($keycloakUser,'firstname')); //firstName
-        $beneficiary->setLastname($this->getKeycloakUserAttribute($keycloakUser,'lastname')); //lastName
-        $beneficiary->setPhone($this->getKeycloakUserAttribute($keycloakUser,'phone')); //phone
-        $beneficiary->setFlying($this->getKeycloakUserAttribute($keycloakUser,'flying',false)); //flying
-        $beneficiary->setOpenIdMemberNumber($this->getKeycloakUserAttribute($keycloakUser,'member_number')); //co_member_number
+
+        $mandatory = ['firstname','lastname','member_number'];
+        $default = ['flying' => false];
+        foreach ([
+             'firstname'=>'setFirstname',
+             'lastname'=>'setLastname',
+             'phone'=>'setPhone',
+             'member_number'=>'setOpenIdMemberNumber',
+             'flying'=>'setFlying'] as $key => $action){
+            $value = $this->getKeycloakUserAttribute($keycloakUser,$key);
+            if (!$value && in_array($key,$mandatory)) {
+                throw new Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
+                    'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
+            }elseif (!$value && isset($default[$key]))
+            {
+                $value = $default[$key];
+            }
+            $beneficiary->$action($value);
+        }
 
         $s1 = $this->getKeycloakUserAttribute($keycloakUser,'address_street1');
         $s2 = $this->getKeycloakUserAttribute($keycloakUser,'address_street2');
@@ -200,7 +213,13 @@ class KeycloakAuthenticator extends SocialAuthenticator
         if (!$beneficiary->getId())
             $this->eventDispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
 
-
+        //email once user exist
+        $value = $this->getKeycloakUserAttribute($keycloakUser,'email');
+        if (!$value) {
+            throw new Exception('no email found, is `'.$this->getKeycloakUserAttributeKeyMap('email').'` a good mapping key ? '.
+                'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
+        }
+        $beneficiary->setEmail($value);
 
         // roles
         $roles_claim = $this->container->getParameter('oidc_roles_claim');
@@ -270,6 +289,16 @@ class KeycloakAuthenticator extends SocialAuthenticator
         }
         return $defaultValue;
 
+    }
+
+    private function getKeycloakUserAttributeKeyMap($attributeKey)
+    {
+        $map = $this->container->getParameter('oidc_user_attributes_map');
+        return $map[$attributeKey];
+    }
+
+    private function getKeycloakUserAvailableKeys($keycloakUser) {
+        return array_keys($keycloakUser->toArray()) ;
     }
 
     public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception)
