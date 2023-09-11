@@ -9,6 +9,8 @@ services:
       MARIADB_DATABASE: symfony
       MARIADB_USER: symfony
       MARIADB_PASSWORD: symfony
+    ports:
+      - "3306:3306"
     volumes:
       - ./mysql:/var/lib/mysql
     healthcheck:

@@ -89,7 +89,7 @@ class Beneficiary
 
     /**
      * @ORM\Column(name="openid_member_number", type="integer")
-     * @var integer $openid_member_number
+     * @var string $openid_member_number
      */
     protected $openid_member_number;
 
@@ -322,18 +322,18 @@ class Beneficiary
         return $this;
     }
     /**
-     * @return int
+     * @return string
      */
-    public function getOpenIdMemberNumber() : int
+    public function getOpenIdMemberNumber() : string
     {
         return $this->openid_member_number;
     }
 
     /**
-     * @param int $number
+     * @param string $number
      * @return $this
      */
-    public function setOpenIdMemberNumber(int $number) : Beneficiary
+    public function setOpenIdMemberNumber(string $number) : Beneficiary
     {
         $this->openid_member_number = $number;
         return $this;
