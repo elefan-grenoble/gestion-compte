@@ -33,4 +33,57 @@ class OpeningHourRepository extends \Doctrine\ORM\EntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findOngoing(OpeningHourKind $openingHourKind = null)
+    {
+        $qb = $this->createQueryBuilder('oh')
+            ->leftJoin('oh.kind', 'ohk')
+            ->addSelect('ohk')
+            ->andwhere('ohk.enabled = 1');
+
+        if ($openingHourKind) {
+            $qb
+                ->andwhere('oh.kind = :kind')
+                ->setParameter('kind', $openingHourKind);
+        }
+
+        $qb
+            ->addOrderBy('ohk.id', 'ASC')
+            ->addOrderBy('oh.dayOfWeek', 'ASC')
+            ->addOrderBy('oh.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findByDay(\DateTime $date, OpeningHourKind $openingHourKind = null, bool $openingHourKindEnabled = null)
+    {
+        $qb = $this->createQueryBuilder('oh')
+            ->leftJoin('oh.kind', 'ohk')
+            ->addSelect('ohk')
+            ->where('oh.dayOfWeek = :dayOfWeek')
+            ->setParameter('dayOfWeek', $date->format('N') - 1);
+
+        if ($openingHourKind) {
+            $qb
+                ->andwhere('oh.kind = :kind')
+                ->setParameter('kind', $openingHourKind);
+        }
+
+        if ($openingHourKindEnabled != null) {
+            $qb
+                ->andwhere('ohk.enabled = :enabled')
+                ->setParameter('enabled', $openingHourKindEnabled);
+        }
+
+        $qb
+            ->addOrderBy('ohk.id', 'ASC')
+            ->addOrderBy('oh.dayOfWeek', 'ASC')
+            ->addOrderBy('oh.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
