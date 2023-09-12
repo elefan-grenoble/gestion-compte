@@ -92,6 +92,15 @@ class ClosingException
         return $this->date;
     }
 
+    /**
+     * @return boolean
+     */
+    public function getIsOngoing()
+    {
+        $now = new \DateTime('now');
+        return ($this->date->format('Y-m-d') == $now->format('Y-m-d'));
+    }
+
     public function setReason(?string $reason): self
     {
         $this->reason = $reason;

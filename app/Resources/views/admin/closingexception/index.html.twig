@@ -16,6 +16,12 @@
     ⚠️ Les créneaux étant générés à l'avance, il faut définir le jour de fermeture d'avantage en amont ⚠️
 </div>
 
+{% if closingExceptionsOngoing %}
+    <h4>Fermeture exceptionnelle en cours</h4>
+
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: [closingExceptionsOngoing] } %}
+{% endif %}
+
 <h4>Fermetures exceptionnelles à venir ({{ closingExceptionsFuture | length }})</h4>
 
 {% if closingExceptionsFuture | length %}

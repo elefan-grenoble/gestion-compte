@@ -12,6 +12,9 @@
             <span>-</span>
             <strong>{{ closingException.date | date_fr_full }}</strong>
             {% if closingException.reason %}<i>({{ closingException.reason }})</i>{% endif %}
+            {% if closingException.isOngoing %}
+                <span>[en cours]</span>
+            {% endif %}
         </li>
     {% endfor %}
 </ul>

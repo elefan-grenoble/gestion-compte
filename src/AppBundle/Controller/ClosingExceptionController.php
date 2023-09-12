@@ -25,7 +25,7 @@ class ClosingExceptionController extends Controller
 
         $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : true;
 
-        $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findFutures();
+        $closingExceptions = $em->getRepository('AppBundle:ClosingException')->findFuturesOrOngoing();
 
         return $this->render('closingexception/_partial/widget.html.twig', [
             'closingExceptions' => $closingExceptions,
