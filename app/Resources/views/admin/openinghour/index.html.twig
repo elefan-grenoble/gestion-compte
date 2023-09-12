@@ -13,11 +13,17 @@
 
 {% if openingHours %}
     <div class="row">
-        {% for openingHourKind in openingHourKinds %}
-            <div class="col m6">
-                {% include "/admin/openinghour/kind/_partial/card.html.twig" with { openingHourKind: openingHourKind } %}
+        {% if openingHourKinds | length %}
+            {% for openingHourKind in openingHourKinds %}
+                <div class="col m6">
+                    {% include "/admin/openinghour/kind/_partial/card.html.twig" with { openingHourKind: openingHourKind } %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="card-panel yellow lighten-3">
+                Il faut aussi créer un type d'horaire d'ouverture, et y rattacher les horaires correspondantes :)
             </div>
-        {% endfor %}
+        {% endif %}
     </div>
 {% else %}
     <div class="card-panel yellow lighten-3">
