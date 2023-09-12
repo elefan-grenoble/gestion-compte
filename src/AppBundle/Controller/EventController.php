@@ -48,7 +48,7 @@ class EventController extends Controller
             $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
         }
 
-        $events = $em->getRepository('AppBundle:Event')->findFutures($eventKind, $eventDateMax, $filter_limit);
+        $events = $em->getRepository('AppBundle:Event')->findFutureOrOngoing($eventKind, $eventDateMax, $filter_limit);
 
         return $this->render('event/_partial/widget.html.twig', [
             'events' => $events,
@@ -69,10 +69,12 @@ class EventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
+        $eventsOngoing = $em->getRepository('AppBundle:Event')->findOngoing();
         $eventsPast = $em->getRepository('AppBundle:Event')->findPast();
 
         return $this->render('event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
+            'eventsOngoing' => $eventsOngoing,
             'eventsPast' => $eventsPast,
         ));
     }

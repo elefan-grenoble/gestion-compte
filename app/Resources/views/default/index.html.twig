@@ -164,8 +164,8 @@
                 <br />
                 <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
                     <i class="material-icons left" >event</i>Les événements à venir
-                    {% if eventsFuture | length %}
-                        <span class="bubble_counter red white-text">{{ eventsFuture | length }}</span>
+                    {% if eventsFutureOrOngoing | length %}
+                        <span class="bubble_counter red white-text">{{ eventsFutureOrOngoing | length }}</span>
                     {% endif %}
                 </a>
             </div>

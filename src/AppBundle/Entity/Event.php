@@ -298,6 +298,15 @@ class Event
     }
 
     /**
+     * @return boolean
+     */
+    public function getIsOngoing()
+    {
+        $now = new \DateTime('now');
+        return ($this->date < $now) && $this->end && ($this->end > $now);
+    }
+
+    /**
      * Set description
      *
      * @param string $description

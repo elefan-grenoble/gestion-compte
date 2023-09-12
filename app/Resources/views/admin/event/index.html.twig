@@ -9,6 +9,18 @@
 {% endblock %}
 
 {% block content %}
+{% if eventsOngoing | length %}
+    <h4>Événements en cours ({{ eventsOngoing | length }})</h4>
+
+    <div class="row">
+        {% for event in eventsOngoing %}
+            <div class="col m12 l6">
+                {% include "admin/event/_partial/card.html.twig" with { event: event, from_admin: true } %}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
 <h4>Événements à venir ({{ eventsFuture | length }})</h4>
 
 <div class="row">
