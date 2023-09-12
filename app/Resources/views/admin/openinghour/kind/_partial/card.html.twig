@@ -3,10 +3,14 @@
 <div class="card-panel">
     <p style="margin-top:0;text-align:center;">
         {{ openingHourKind.name }}
-        {% if openingHourKind.startDate and openingHourKind.endDate %}
-            <br />
-            <i>du {{ openingHourKind.startDate | date_fr_long }} au {{ openingHourKind.endDate | date_fr_long }}</i>
+        {% if openingHourKind.enabled %}
+            <span class="badge deep-purple white-text">Actif</span>
         {% endif %}
     </p>
+    {% if openingHourKind.startDate and openingHourKind.endDate %}
+        <p style="text-align:center;">
+            <i>du {{ openingHourKind.startDate | date_fr_long }} au {{ openingHourKind.endDate | date_fr_long }}</i>
+        </p>
+    {% endif %}
     {% include "/admin/openinghour/_partial/table.html.twig" with { openingHours: openingHourKind.openingHours } %}
 </div>
