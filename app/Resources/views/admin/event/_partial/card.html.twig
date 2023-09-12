@@ -1,3 +1,4 @@
+{% set ongoing = ongoing ?? false %}
 {% set from_admin = from_admin ?? false %}
 
 <div class="card small {% if from_admin %}blue-grey darken-1{% endif %}">
@@ -13,6 +14,9 @@
             {{ event.date | date_fr_full_with_time }}
             {% if event.kind %}
                 <span class="badge teal white-text">{{ event.kind }}</span>
+            {% endif %}
+            {% if ongoing %}
+                <span class="badge deep-purple white-text">En cours</span>
             {% endif %}
         </p>
         {% if event.end %}

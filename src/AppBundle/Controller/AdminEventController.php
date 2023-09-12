@@ -85,10 +85,12 @@ class AdminEventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $eventsFuture = $em->getRepository('AppBundle:Event')->findFutures();
+        $eventsOngoing = $em->getRepository('AppBundle:Event')->findOngoing();
         $eventsPast = $em->getRepository('AppBundle:Event')->findPast(null, 10);  # only the 10 last
 
         return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
+            'eventsOngoing' => $eventsOngoing,
             'eventsPast' => $eventsPast,
         ));
     }

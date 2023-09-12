@@ -48,6 +48,29 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findOngoing(EventKind $eventKind = null)
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->leftJoin('e.kind', 'ek')
+            ->addSelect('ek')
+            ->where('e.date < :now')
+            ->andWhere('e.end IS NOT NULL')
+            ->andWhere('e.end > :now')
+            ->setParameter('now', new \Datetime('now'));
+
+        if ($eventKind) {
+                $qb
+                    ->andwhere('e.kind = :kind')
+                    ->setParameter('kind', $eventKind);
+            }
+
+            $qb->orderBy('e.date', 'ASC');
+
+            return $qb
+                ->getQuery()
+                ->getResult();
+    }
+
     public function findPast(EventKind $eventKind = null, int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
