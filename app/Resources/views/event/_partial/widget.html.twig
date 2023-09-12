@@ -14,7 +14,12 @@
             <span>-</span>
             <strong>{% if links %}<a href="{{ path('event_detail', { 'id': event.id }) }}" target="_blank">{% endif %}{{ event.title }}{% if links %}</a>{% endif %}</strong>
             {{ event.date | date_fr_full_with_time }}
-            {% if event.end %}<i>({{ event.duration }})</i>{% endif %}
+            {% if event.end %}
+                <i>({{ event.duration }})</i>
+                {% if event.isOngoing %}
+                    <span>[en cours]</span>
+                {% endif %}
+            {% endif %}
             {# {% if not eventKind %}[{{ event.kind }}] {% endif %} #}
         </li>
     {% endfor %}

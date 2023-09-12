@@ -14,7 +14,7 @@
     <div class="row">
         {% for event in eventsOngoing %}
             <div class="col m12 l6">
-                {% include "admin/event/_partial/card.html.twig" with { event: event, ongoing: true } %}
+                {% include "admin/event/_partial/card.html.twig" with { event: event } %}
             </div>
         {% endfor %}
     </div>
