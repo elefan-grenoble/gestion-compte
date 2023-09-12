@@ -28,6 +28,21 @@ class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findOngoing(\DateTime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+
+        $qb = $this->createQueryBuilder('ce')
+        ->where("DATE_FORMAT(ce.date, '%Y-%m-%d') = :date")
+        ->setParameter('date', $date->format('Y-m-d'));
+
+        return $qb
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
     public function findPast(int $limit = null)
     {
         $qb = $this->createQueryBuilder('ce')

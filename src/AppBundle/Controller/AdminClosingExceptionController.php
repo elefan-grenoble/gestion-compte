@@ -33,6 +33,7 @@ class AdminClosingExceptionController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $closingExceptionsFuture = $em->getRepository('AppBundle:ClosingException')->findFutures();
+        $closingExceptionsOngoing = $em->getRepository('AppBundle:ClosingException')->findOngoing();
         $closingExceptionsPast = $em->getRepository('AppBundle:ClosingException')->findPast(10);  # only the 10 last
 
         $delete_forms = array();
@@ -42,6 +43,7 @@ class AdminClosingExceptionController extends Controller
 
         return $this->render('admin/closingexception/index.html.twig', array(
             'closingExceptionsFuture' => $closingExceptionsFuture,
+            'closingExceptionsOngoing' => $closingExceptionsOngoing,
             'closingExceptionsPast' => $closingExceptionsPast,
             'delete_forms' => $delete_forms
         ));
