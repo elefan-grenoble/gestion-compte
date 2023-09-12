@@ -34,7 +34,7 @@ class AdminClosingExceptionController extends Controller
 
         $closingExceptionsFuture = $em->getRepository('AppBundle:ClosingException')->findFutures();
         $closingExceptionsOngoing = $em->getRepository('AppBundle:ClosingException')->findOngoing();
-        $closingExceptionsPast = $em->getRepository('AppBundle:ClosingException')->findPast(10);  # only the 10 last
+        $closingExceptionsPast = $em->getRepository('AppBundle:ClosingException')->findPast(null, 10);  # only the 10 last
 
         $delete_forms = array();
         foreach ($closingExceptionsFuture as $closingException) {

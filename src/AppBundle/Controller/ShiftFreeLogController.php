@@ -109,13 +109,13 @@ class ShiftFreeLogController extends Controller
             ->orderBy('sfl.' . $sort, $order);
 
         if ($filter["created_at"]) {
-            $qb = $qb->andWhere("DATE_FORMAT(sfl.createdAt, '%Y-%m-%d') = :created_at")
-                ->setParameter('created_at', $filter['created_at']->format('Y-m-d'));
+            $qb = $qb->andWhere("DATE_FORMAT(sfl.createdAt, '%Y-%m-%d') = :created_at_formatted")
+                ->setParameter('created_at_formatted', $filter['created_at']->format('Y-m-d'));
         }
         if ($filter["shift_start_date"]) {
             $qb = $qb->leftJoin('sfl.shift', 's')
-                ->andWhere("DATE_FORMAT(s.start, '%Y-%m-%d') = :shift_start_date")
-                ->setParameter('shift_start_date', $filter['shift_start_date']->format('Y-m-d'));
+                ->andWhere("DATE_FORMAT(s.start, '%Y-%m-%d') = :shift_start_date_formatted")
+                ->setParameter('shift_start_date_formatted', $filter['shift_start_date']->format('Y-m-d'));
         }
         if ($filter["beneficiary"]) {
             $qb = $qb->andWhere('sfl.beneficiary = :beneficiary')

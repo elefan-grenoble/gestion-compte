@@ -88,8 +88,8 @@ class PeriodPositionFreeLogController extends Controller
             ->orderBy('ppfl.' . $sort, $order);
 
         if ($filter["created_at"]) {
-            $qb = $qb->andWhere("DATE_FORMAT(ppfl.createdAt, '%Y-%m-%d') = :created_at")
-                ->setParameter('created_at', $filter['created_at']->format('Y-m-d'));
+            $qb = $qb->andWhere("DATE_FORMAT(ppfl.createdAt, '%Y-%m-%d') = :created_at_formatted")
+                ->setParameter('created_at_formatted', $filter['created_at']->format('Y-m-d'));
         }
         if ($filter["beneficiary"]) {
             $qb = $qb->andWhere('ppfl.beneficiary = :beneficiary')
