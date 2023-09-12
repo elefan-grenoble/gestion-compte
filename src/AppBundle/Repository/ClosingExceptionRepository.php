@@ -41,7 +41,9 @@ class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
 
         $qb = $this->createQueryBuilder('ce')
             ->where('ce.date > :date')
-            ->setParameter('date', $date);
+            ->andWhere("DATE_FORMAT(ce.date, '%Y-%m-%d') != :date_formatted")
+            ->setParameter('date', $date)
+            ->setParameter('date_formatted', $date->format('Y-m-d'));
 
         $qb->orderBy('ce.date', 'ASC');
 
@@ -73,7 +75,9 @@ class ClosingExceptionRepository extends \Doctrine\ORM\EntityRepository
 
         $qb = $this->createQueryBuilder('ce')
             ->where('ce.date < :date')
-            ->setParameter('date', $date);
+            ->andWhere("DATE_FORMAT(ce.date, '%Y-%m-%d') != :date_formatted")
+            ->setParameter('date', $date)
+            ->setParameter('date_formatted', $date->format('Y-m-d'));
 
         if ($limit) {
             $qb->setMaxResults($limit);
