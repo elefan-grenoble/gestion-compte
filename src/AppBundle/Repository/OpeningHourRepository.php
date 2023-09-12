@@ -57,7 +57,7 @@ class OpeningHourRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findByDay(\DateTime $date, OpeningHourKind $openingHourKind = null, bool $openingHourKindEnabled = null)
+    public function findByDay(\DateTime $date, OpeningHourKind $openingHourKind = null, bool $onlyOpeningHourKindEnabled = false, bool $excludeClosed = false)
     {
         $qb = $this->createQueryBuilder('oh')
             ->leftJoin('oh.kind', 'ohk')
@@ -71,10 +71,14 @@ class OpeningHourRepository extends \Doctrine\ORM\EntityRepository
                 ->setParameter('kind', $openingHourKind);
         }
 
-        if ($openingHourKindEnabled != null) {
+        if ($onlyOpeningHourKindEnabled) {
             $qb
-                ->andwhere('ohk.enabled = :enabled')
-                ->setParameter('enabled', $openingHourKindEnabled);
+                ->andwhere('ohk.enabled = 1');
+        }
+
+        if ($excludeClosed) {
+            $qb
+                ->andwhere('oh.closed = 0');
         }
 
         $qb

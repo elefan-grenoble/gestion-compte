@@ -1,4 +1,4 @@
-{% if not opening_hour_service.isEmpty %}
+{% if opening_hour_kind_service.hasEnabled %}
     {% if opening_hour_service.isOpen %}
         <span class="badge green white-text" style="font-family:'Raleway',sans-serif;float:unset;">Ouvert</span>
     {% else %}

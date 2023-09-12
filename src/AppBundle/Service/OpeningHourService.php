@@ -15,16 +15,6 @@ class OpeningHourService
         $this->em = $em;
     }
 
-    public function isEmpty()
-    {
-        $openingHours = $this->em->getRepository('AppBundle:OpeningHour')->findAll();
-        if (count($openingHours) > 0) {
-            return False;
-        }
-
-        return True;
-    }
-
     public function isOpen(\DateTime $date = null)
     {
         if (!$date) {
@@ -32,7 +22,7 @@ class OpeningHourService
         }
 
         // filter on day
-        $openingHoursEnabledDay = $this->em->getRepository('AppBundle:OpeningHour')->findByDay($date, null, true);
+        $openingHoursEnabledDay = $this->em->getRepository('AppBundle:OpeningHour')->findByDay($date, null, true, true);
 
         // filter on time
         if (count($openingHoursEnabledDay) > 0) {

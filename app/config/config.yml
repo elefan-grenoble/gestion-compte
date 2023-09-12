@@ -124,6 +124,7 @@ twig:
     period_service: "@period_service"
     time_log_service: "@time_log_service"
     opening_hour_service: "@opening_hour_service"
+    opening_hour_kind_service: "@opening_hour_kind_service"
 
 # Doctrine Configuration
 doctrine:
