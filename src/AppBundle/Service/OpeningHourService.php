@@ -30,19 +30,24 @@ class OpeningHourService
         if (!$date) {
             $date = new \DateTime('now');
         }
-        $openingHours = $this->em->getRepository('AppBundle:OpeningHour')->findAll();
 
-        $openingHoursDay = array_filter($openingHours, function($openingHour) use ($date) {
-            return $openingHour->getDayOfWeek() == ($date->format('N') - 1);
-        });
-        if (count($openingHoursDay) > 0) {
-            $openingHoursDayTime = array_filter($openingHoursDay, function($openingHour) use ($date) {
+        // filter on day
+        $openingHoursEnabledDay = $this->em->getRepository('AppBundle:OpeningHour')->findByDay($date, null, true);
+
+        // filter on time
+        if (count($openingHoursEnabledDay) > 0) {
+            $openingHoursEnabledDayTime = array_filter($openingHoursEnabledDay, function($openingHour) use ($date) {
                 $openingHourStart = $openingHour->getStart()->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
                 $openingHourEnd = $openingHour->getEnd()->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
                 return ($openingHourStart <= $date) && ($openingHourEnd >= $date);
             });
-            if (count($openingHoursDayTime) > 0) {
-                return True;
+
+            // final check on closing exceptions
+            if (count($openingHoursEnabledDayTime) > 0) {
+                $closingExceptions = $this->em->getRepository('AppBundle:ClosingException')->findOngoing($date);
+                if (!$closingExceptions) {
+                    return True;
+                }
             }
         }
 
