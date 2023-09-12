@@ -1,0 +1,11 @@
+{% if not opening_hour_service.isEmpty %}
+    <div class="wrapper center-align {% if opening_hour_service.isOpen %}green{% else %}red{% endif %}">
+        <div class="col s12">
+            {% if opening_hour_service.isOpen %}
+                <span class="white-text">Ouvert</span>
+            {% else %}
+                <span class="white-text">Fermé</span>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

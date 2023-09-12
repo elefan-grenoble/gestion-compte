@@ -23,11 +23,9 @@
         <div class="nav-wrapper container">
             <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">
                 {{ site_name }}
-                {% include "admin/openinghour/_partial/open_closed_badge.html.twig" %}
             </a>
             <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">
                 {{ project_name }}
-                {% include "admin/openinghour/_partial/open_closed_badge.html.twig" %}
             </a>
             <ul id="nav-desktop" class="right hide-on-med-and-down">
                 {% if is_granted("ROLE_ADMIN_PANEL") %}
@@ -123,4 +121,5 @@
             </ul>
         </div>
     </nav>
+    {% include "admin/openinghour/_partial/open_closed_subheader.html.twig" %}
 </header>
