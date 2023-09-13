@@ -100,6 +100,8 @@ twig:
     fly_and_fixed_allow_fixed_shift_free: '%fly_and_fixed_allow_fixed_shift_free%'
     # time log saving
     time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
+    # opening hours
+    display_opening_hour_open_closed_header: '%display_opening_hour_open_closed_header%'
     # role names & icons
     role_user_name: Utilisateur
     role_user_material_icon: person
@@ -123,6 +125,8 @@ twig:
     shift_service: "@shift_service"
     period_service: "@period_service"
     time_log_service: "@time_log_service"
+    opening_hour_service: "@opening_hour_service"
+    opening_hour_kind_service: "@opening_hour_kind_service"
 
 # Doctrine Configuration
 doctrine:

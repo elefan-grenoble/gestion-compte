@@ -2,10 +2,11 @@
 
 {% block beforecontainer %}
     <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
-        <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
-        <div class="nav-wrapper" style="margin-right: 20px; font-size: 16px; font-weight: 600">
-            <ul class="right">
+        <div class="nav-wrapper">
+            <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
+            <ul class="right" style="margin-right:10px;">
                 <li>{{ date('now') | date_fr_full_with_time }}</li>
+                <li>{% include "admin/openinghour/_partial/open_closed_badge.html.twig" %}</li>
             </ul>
         </div>
     </nav>

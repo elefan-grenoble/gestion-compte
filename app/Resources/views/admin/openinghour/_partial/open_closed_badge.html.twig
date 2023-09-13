@@ -1,0 +1,7 @@
+{% if opening_hour_kind_service.hasEnabled %}
+    {% if opening_hour_service.isOpen %}
+        <span class="badge green white-text" style="font-family:'Raleway',sans-serif;float:unset;">Ouvert</span>
+    {% else %}
+        <span class="badge red white-text" style="font-family:'Raleway',sans-serif;float:unset;">Fermé</span>
+    {% endif %}
+{% endif %}

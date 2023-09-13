@@ -19,10 +19,15 @@
             </nav>
         </div>
     {% endif %}
+    {% include "admin/openinghour/_partial/open_closed_surheader.html.twig" %}
     <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
         <div class="nav-wrapper container">
-            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">{{ site_name }}</a>
-            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">{{ project_name }}</a>
+            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">
+                {{ site_name }}
+            </a>
+            <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-large-only">
+                {{ project_name }}
+            </a>
             <ul id="nav-desktop" class="right hide-on-med-and-down">
                 {% if is_granted("ROLE_ADMIN_PANEL") %}
                     <li class="highlight">
@@ -44,7 +49,7 @@
                     {% endif %}
                     <li>
                         <a href="{{ path('fos_user_security_logout') }}">
-                            <i class="material-icons small right">exit_to_app</i>
+                            <i class="material-icons small">exit_to_app</i>
                         </a>
                     </li>
                 {% else %}

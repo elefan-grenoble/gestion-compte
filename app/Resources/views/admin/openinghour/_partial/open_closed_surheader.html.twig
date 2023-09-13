@@ -1,0 +1,13 @@
+{% if display_opening_hour_open_closed_header %}
+    {% if opening_hour_kind_service.hasEnabled %}
+        <div class="wrapper center-align {% if opening_hour_service.isOpen %}green{% else %}red{% endif %}">
+            <div class="col s12">
+                {% if opening_hour_service.isOpen %}
+                    <span class="white-text">Ouvert</span>
+                {% else %}
+                    <span class="white-text">Fermé</span>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
