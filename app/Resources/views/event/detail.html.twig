@@ -34,6 +34,9 @@
         {% if event.kind %}
             <span class="badge teal white-text">{{ event.kind }}</span>
         {% endif %}
+        {% if event.end and event.isOngoing %}
+            <span class="badge deep-purple white-text">En cours</span>
+        {% endif %}
     </div>
 </div>
 
