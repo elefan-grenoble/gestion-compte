@@ -238,8 +238,6 @@ class TimeLogEventListener
      */
     private function createShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
     {
-        $member = $shift->getShifter()->getMembership();
-
         $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
@@ -249,7 +247,9 @@ class TimeLogEventListener
         // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
         // - there is extra time
         if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
-            $this->em->refresh($member);  // added to prevent from returning cached (old) data
+            $this->em->refresh($shift);  // added to prevent from returning cached (old) data
+            $member = $shift->getShifter()->getMembership();
+
             $member_counter_now = $member->getShiftTimeCount();
             $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
@@ -307,8 +307,8 @@ class TimeLogEventListener
 
         $this->em->refresh($member);  // added to prevent from returning cached (old) data
 
-        $member_counter_date = $member->getShiftTimeCount($date);
-        $extra_counter_time = $member_counter_date - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
+        $member_counter_now = $member->getShiftTimeCount();
+        $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
         if ($extra_counter_time > 0) {
             $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
@@ -332,7 +332,7 @@ class TimeLogEventListener
                     // - the member has no missed shifts in the previous cycle
                     // - the member has no freed shifts within the min_time_in_advance 
                     if ($previous_cycle_missed_shifts_count == 0 && $previous_cycle_freed_shifts_less_than_min_time_in_advance_count == 0) {
-                        $missing_due_time = ($member_counter_date > 0) ? $this->due_duration_by_cycle - $member_counter_date : $this->due_duration_by_cycle;
+                        $missing_due_time = ($member_counter_now > 0) ? $this->due_duration_by_cycle - $member_counter_now : $this->due_duration_by_cycle;
                         $withdraw_from_saving = min($member_saving_now, $missing_due_time);
                         // first decrement the savingTimeCount
                         $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
