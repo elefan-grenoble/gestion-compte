@@ -274,7 +274,7 @@ class EmailingEventListener
         $beneficiary = $event->getBeneficiary();
 
         if ($beneficiary) { // warn beneficiary
-            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau libéré'))
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Créneau libéré'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
@@ -303,7 +303,7 @@ class EmailingEventListener
         $beneficiary = $event->getBeneficiary();
 
         if ($beneficiary) { // warn beneficiary
-            $warn = (new \Swift_Message('[ESPACE MEMBRES] Crénéau supprimé'))
+            $warn = (new \Swift_Message('[ESPACE MEMBRES] Créneau supprimé'))
                 ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
