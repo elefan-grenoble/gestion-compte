@@ -53,7 +53,6 @@
                 <th>Actions</th>
             </tr>
         </thead>
-
         <tbody>
         {% for membershipShiftExemption in membershipShiftExemptions %}
             <tr class="{% if membershipShiftExemption.isPast() %}grey lighten-2{% elseif membershipShiftExemption.isCurrent() %}exempted{% endif %}">
@@ -62,7 +61,7 @@
                         <i class="material-icons" title="Passé">close</i>
                     {% endif %}
                     {% if membershipShiftExemption.isCurrent() %}
-                        <i class="material-icons" title="En cours">beach_access</i>
+                        <i class="material-icons" title="En cours">{{ member_exempted_material_icon }}</i>
                     {% endif %}
                     {% if membershipShiftExemption.isUpcoming() %}
                         <i class="material-icons" title="À venir">schedule</i>

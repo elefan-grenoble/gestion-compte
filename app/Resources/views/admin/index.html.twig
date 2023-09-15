@@ -30,7 +30,7 @@
                     <i class="material-icons left">phone</i>Relances créneaux
                 </a>
                 <a href="{{ path("admin_membershipshiftexemption_index") }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">beach_access</i>Gérer les exemptions de bénévolat
+                    <i class="material-icons left">{{ member_exempted_material_icon }}</i>Gérer les exemptions de bénévolat
                 </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
@@ -59,7 +59,7 @@
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
                 <a href="{{ path("admin_shiftexemption_index") }}" class="waves-effect waves-light btn orange">
-                    <i class="material-icons left">beach_access</i>les motif d'exemptions
+                    <i class="material-icons left">{{ member_exempted_material_icon }}</i>Les motif d'exemptions
                 </a>
                 <a href="{{ path("job_list") }}" class="waves-effect waves-light btn orange">
                     <i class="material-icons left">person</i>les postes de bénévolat
