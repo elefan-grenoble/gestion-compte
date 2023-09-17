@@ -11,9 +11,16 @@ Cet outil est utilisé par plus d'une dizaine d'autres coopératives en France.
 
 _cliquez pour voir l'image en grand_
 
-|Page d'accueil (anonyme)|Page d'accueil (membre)|Page d'administration|
-|---|---|---|
-|![home_anon](doc/images/20121105_homepage_anon.png)|![home](doc/images/20121105_homepage_raphael.png)|![admin](doc/images/20121105_homepage_admin.png)|
+|Page|Image|
+|---|---|
+|Page d'accueil (anonyme)|![home_anon](doc/images/20221105_homepage_anon.png)|
+|Page d'accueil (membre)|![home](doc/images/20221105_homepage_raphael.png)|
+|Membre : s'inscrire à un créneau|![shifts](doc/images/20230917_shifts.png)|
+|Membre : gérer son compte|![account](doc/images/20230917_account.png)|
+|Page d'administration|![admin](doc/images/20230917_homepage_admin.png)|
+|Administration : gestion de la semaine type|![admin_shifts](doc/images/20230917_admin_shifts.png)|
+|Administration : gestion des créneaux|![admin_period](doc/images/20230917_admin_period.png)|
+|Administration : gestion des membres|![admin_member](doc/images/20230917_admin_member.png)|
 
 ## Projet
 
