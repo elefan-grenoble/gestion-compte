@@ -155,25 +155,23 @@ class UserController extends Controller
      */
     public function quickNewAction(Request $request, \Swift_Mailer $mailer)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $ab = new AnonymousBeneficiary();
 
         $form = $this->createForm(AnonymousBeneficiaryType::class, $ab);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $ab->setRegistrar($this->getCurrentAppUser());
-
-            $em = $this->getDoctrine()->getManager();
             $em->persist($ab);
             $em->flush();
 
             $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
 
-            $session = new Session();
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
-
             return $this->redirectToRoute('user_quick_new');
         }
 
