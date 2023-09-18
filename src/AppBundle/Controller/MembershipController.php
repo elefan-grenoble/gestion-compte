@@ -439,7 +439,7 @@ class MembershipController extends Controller
             $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été enregistré');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problématique');
+            $request->getSession()->getFlashBag()->add('warning', "Oups, le format de l'email entré semble problématique");
         }
         return $this->render('beneficiary/confirm.html.twig', array(
             'beneficiary' => $beneficiary,
