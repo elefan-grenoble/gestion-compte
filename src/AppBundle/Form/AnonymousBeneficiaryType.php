@@ -40,18 +40,29 @@ class AnonymousBeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email',EmailType::class,array('label'=>'Courriel du nouveau membre'))
-            ->add('join_to',AutocompleteBeneficiaryType::class,array('label'=>'Email ou nom du compte parent','required'=>false))
-            ->add('beneficiaries_emails',CollectionType::class,array('label'=>'Email beneficiaire',
-                'required'=>false,
+            ->add('email', EmailType::class, array(
+                'label' => 'Email du nouveau membre'
+            ))
+            ->add('join_to', AutocompleteBeneficiaryType::class, array(
+                'label' => 'Email ou nom du compte parent',
+                'required' => false
+            ))
+            ->add('beneficiaries_emails',CollectionType::class, array(
+                'label' => false, // 'Email bénéficiaire',
+                'required' => false,
                 'entry_type' => EmailType::class,
-                'entry_options'  => array('label'=>'Email beneficiaire','attr'=>array('placehoder'=>'email@domain.fr'),'required'=>false,'constraints' => [new UniqueEmail()]),
+                'entry_options' => array(
+                    'label' => 'Email bénéficiaire',
+                    'attr' => array('placehoder'=>'email@domain.fr'),
+                    'required' => false,
+                    'constraints' => [new UniqueEmail()]
+                ),
                 'allow_add'=>true
             ))
             ->add('amount', TextType::class, array(
                 'label' => 'Montant',
                 'attr'=> array('placeholder' => '15'),
-                'required'=>false
+                'required' => false
             ))
             ->add('mode', ChoiceType::class, array(  // todo, make it dynamic
                 'label' => 'Mode de réglement',

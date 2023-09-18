@@ -16,11 +16,8 @@
 {{ form_start(form) }}
 {% include "user/_partial/user_quick_form.html.twig" with { form: form } %}
 <div>
-    <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">check</i>Valider</button>
-    <a href="{{ path("user_office_tools") }}" class="btn white blue-grey-text"><i class="material-icons left">arrow_back</i>Retour</a>
-</div>
-<div class="" style="display: none">
-    {{ form_widget(form) }}
+    <a href="{{ path("user_office_tools") }}" class="btn white red-text" title="Annuler">Annuler</a>
+    <button type="submit" class="btn teal"><i class="material-icons left">check</i>Valider</button>
 </div>
 {{ form_end(form) }}
 {% endblock %}

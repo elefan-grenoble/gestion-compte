@@ -9,5 +9,5 @@ use Symfony\Component\Validator\Constraint;
  */
 class UniqueEmail extends Constraint
 {
-    public $message = 'Ce courriel est déjà utilisé.';
+    public $message = 'Cet email est déjà utilisé.';
 }
