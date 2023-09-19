@@ -35,7 +35,7 @@ class OAuthController extends Controller
             $logout_url = $client->getOAuth2Provider()->getLogoutUrl(['redirect_uri' => $url]);
             return $this->redirect($logout_url);
         }else{
-            $url = $this->generateUrl('logout');
+            $url = $this->generateUrl('homepage');
             return $this->redirect($url);
         }
     }
