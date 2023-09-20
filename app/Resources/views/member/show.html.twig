@@ -138,13 +138,13 @@
     <ul class="collapsible collapsible-expandable">
         
         <!-- Passer fixe ou volant -->
-        {% if use_fly_and_fixed and not member.withdrawn and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+        {% if use_fly_and_fixed and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
             <li id="flying">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.flying_open is defined and frontend_cookie.user_show.flying_open %}active{% endif %}">
                     <i class="material-icons">{{ member_flying_material_icon }}</i>Passer en {% if member.flying %}fixe{% else %}volant{% endif %}
                 </div>
                 <div class="collapsible-body white">
-                    <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small teal">
+                    <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small teal" {% if member.withdrawn %}disabled{% endif %}>
                         {% if not member.flying %}
                             <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
                         {% else %}
