@@ -806,6 +806,7 @@ class MembershipController extends Controller
                 $member->removeRegistration($registration); //no registration yet
             }
 
+            $member->setFlying(false);
             $member->setWithdrawn(false);
             $member->setFrozen(false);
             $member->setFrozenChange(false);
