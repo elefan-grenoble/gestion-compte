@@ -87,7 +87,7 @@ class SearchUserFormHelper
             }
             if ($this->use_fly_and_fixed) {
                 $formBuilder->add('flying', ChoiceType::class, [
-                    'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                    'label' => $this->container->getParameter('member_flying_icon') . ' volant',
                     'required' => false,
                     'choices' => [
                         'Oui' => 2,

@@ -83,7 +83,7 @@ class BeneficiaryService
             $symbols[] = $this->container->getParameter('member_frozen_icon');
         }
         if ($beneficiary->getMembership()->isFlying()) {
-            $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
+            $symbols[] = $this->container->getParameter('member_flying_icon');;
         }
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
             $symbols[] = $this->container->getParameter('member_exempted_icon');

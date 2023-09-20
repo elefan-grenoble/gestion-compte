@@ -83,13 +83,14 @@ twig:
     member_exempted_icon: '%member_exempted_icon%'
     member_exempted_material_icon: '%member_exempted_material_icon%'
     member_exempted_background_color: '%member_exempted_background_color%'
+    member_flying_icon: '%member_flying_icon%'
+    member_flying_material_icon: '%member_flying_material_icon%'
     member_registration_missing_icon: '%member_registration_missing_icon%'
     member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
     member_registration_missing_background_color: '%member_registration_missing_background_color%'
     # beneficiary
     beneficiary_main_icon: '%beneficiary_main_icon%'
     beneficiary_new_icon: '%beneficiary_new_icon%'
-    beneficiary_flying_icon: '%beneficiary_flying_icon%'
     # admin: member
     admin_member_display_shift_free_log: '%admin_member_display_shift_free_log%'
     admin_member_display_period_position_free_log: '%admin_member_display_period_position_free_log%'

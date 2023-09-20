@@ -146,6 +146,8 @@ parameters:
     member_exempted_icon: '☂'
     member_exempted_material_icon: 'beach_access'
     member_exempted_background_color: rgb(0, 150, 136, 0.1)
+    member_flying_icon: '✈'
+    member_flying_material_icon: 'flightsmode'
     member_registration_missing_icon: '$'
     member_registration_missing_material_icon: 'attach_money'
     member_registration_missing_background_color: rgb(0, 150, 136, 0.1)
@@ -153,7 +155,6 @@ parameters:
     # Beneficiary configuration
     beneficiary_main_icon: '⚐'
     beneficiary_new_icon: '★'
-    beneficiary_flying_icon: '✈'
 
     # Admin: member
     admin_member_display_shift_free_log: true
