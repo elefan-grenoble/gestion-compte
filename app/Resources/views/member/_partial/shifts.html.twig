@@ -12,15 +12,21 @@
                 </div>
             {% endfor %}
             {% if member.flying %}
-                <div class="card-panel red white-text">
-                    Ce compte-membre est volant alors qu'il a 1 ou plusieurs créneaux fixe.
+                <div class="col s12">
+                    <div class="card-panel red white-text">
+                        Ce membre est <strong>volant</strong> alors qu'il a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
+                    </div>
                 </div>
             {% endif %}
         {% else %}
             {% if not member.flying %}
-                <div class="card-panel red white-text">
-                    Ce compte-membre est fixe alors qu'il n'a aucun créneaux fixe.
+                <div class="col s12">
+                    <div class="card-panel red white-text">
+                        Ce membre est <strong>fixe</strong> alors qu'il n'a aucun créneaux fixe.
+                    </div>
                 </div>
+            {% else %}
+                <span>Aucun créneau fixe</span>
             {% endif %}
         {% endif %}
     </div>
@@ -30,7 +36,7 @@
     <div class="row">
         <h6>Créneaux</h6>
         <div class="card-panel red white-text">
-            Ce compte-membre n'est pas encore inscrit à son premier créneau.
+            Ce membre n'est pas encore inscrit à son premier créneau.
         </div>
     </div>
 {% else %}
