@@ -46,6 +46,7 @@
         </ul>
     {% endif %}
 
+    <!-- Collapsible "informations" -->
     <ul class="collapsible collapsible-expandable">
         <!-- Adhésion(s) -->
         <li id="registration">
@@ -128,6 +129,49 @@
                 </div>
                 <div class="collapsible-body white">
                     {% include "member/_partial/swipe_cards.html.twig" with { member: member } %}
+                </div>
+            </li>
+        {% endif %}
+    </ul>
+
+    <!-- Collapsible "actions" -->
+    <ul class="collapsible collapsible-expandable">
+        
+        <!-- Passer fixe ou volant -->
+        {% if use_fly_and_fixed and not member.withdrawn and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+            <li id="flying">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.flying_open is defined and frontend_cookie.user_show.flying_open %}active{% endif %}">
+                    <i class="material-icons">{{ member_flying_material_icon }}</i>Passer en {% if member.flying %}fixe{% else %}volant{% endif %}
+                </div>
+                <div class="collapsible-body white">
+                    <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small teal">
+                        {% if not member.flying %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
+                        {% else %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> fixe
+                        {% endif %}
+                    </a>
+                    <div id="flying-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">remove_circle_outline</i>Passage du compte en {% if member.flying %}fixe{% else %}volant{% endif %}
+                            </h5>
+                            <p>Attention, vous êtes sur le point de passer le compte du membre en {% if member.flying %}fixe{% else %}volant{% endif %}.</p>
+                            {% if not member.flying %}
+                            <ul>
+                                <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_start(flying_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>OK
+                            </button>
+                            {{ form_end(flying_form) }}
+                        </div>
+                    </div>
                 </div>
             </li>
         {% endif %}
@@ -219,6 +263,55 @@
             </li>
         {% endif %}
 
+        <!-- Fermer le compte -->
+        {% if is_granted("ROLE_USER_MANAGER") and ((member.withdrawn and is_granted("open",member)) or (not member.withdrawn and is_granted("close",member))) %}
+        <li id="close">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
+                <i class="material-icons">{{ member_withdrawn_material_icon }}</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
+            </div>
+            <div class="collapsible-body white">
+                {% if not member.withdrawn %}
+                    <a href="#withdrawn-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn btn-small {% if not member.withdrawn %}red{% else %}teal{% endif %}">
+                        {% if not member.withdrawn %}
+                            <i class="material-icons left">{{ member_withdrawn_material_icon }}</i>Fermer <span class="hide-on-med-and-down">le compte</span>
+                        {% else %}
+                            <i class="material-icons left">check</i>Ré-ouvrir <span class="hide-on-med-and-down">le compte</span>
+                        {% endif %}
+                    </a>
+                    <div id="withdrawn-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">remove_circle_outline</i>{% if member.withdrawn %}Ré-ouverture{% else %}Fermeture{% endif %} du compte membre
+                            </h5>
+                            <p>Attention, vous êtes sur le point de {% if member.withdrawn %}ré-ouvrir{% else %}fermer{% endif %} le compte du membre.</p>
+                            {% if not member.withdrawn %}
+                            <ul>
+                                {% if use_fly_and_fixed %}
+                                    <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                                {% endif %}
+                                <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
+                            </ul>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_start(withdrawn_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                            {{ form_end(withdrawn_form) }}
+                        </div>
+                    </div>
+                {% elseif member.withdrawnDate %}
+                    Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
+                    {% if member.withdrawnBy %}
+                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
+                    {% endif %}
+                {% endif %}
+            </div>
+        </li>
+        {% endif %}
+
         <!-- Rôles -->
         {% if is_granted("ROLE_ADMIN") %}
             <li id="super">
@@ -279,54 +372,7 @@
                 </div>
             </li>
         {% endif %}
-    </ul>
-
-    <div id="withdrawn-member-confirmation-modal" class="modal">
-        <div class="modal-content">
-            <h5>
-                <i class="material-icons left small">remove_circle_outline</i>{% if member.withdrawn %}Ré-ouverture{% else %}Fermeture{% endif %} du compte membre
-            </h5>
-            <p>Attention, vous êtes sur le point de {% if member.withdrawn %}ré-ouvrir{% else %}fermer{% endif %} le compte du membre.</p>
-            {% if not member.withdrawn %}
-            <ul>
-                {% if use_fly_and_fixed %}
-                    <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
-                {% endif %}
-                <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
-            </ul>
-            {% endif %}
-        </div>
-        <div class="modal-footer">
-            {{ form_start(withdrawn_form) }}
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-            <button type="submit" class="btn waves-effect waves-light orange">
-                <i class="material-icons left">check</i>Je sais ce que je fais !
-            </button>
-            {{ form_end(withdrawn_form) }}
-        </div>
-    </div>
-
-    <div id="flying-member-confirmation-modal" class="modal">
-        <div class="modal-content">
-            <h5>
-                <i class="material-icons left small">remove_circle_outline</i>Passage du compte en {% if member.flying %}fixe{% else %}volant{% endif %}
-            </h5>
-            <p>Attention, vous êtes sur le point de passer le compte du membre en {% if member.flying %}fixe{% else %}volant{% endif %}.</p>
-            {% if not member.flying %}
-            <ul>
-                <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
-            </ul>
-            {% endif %}
-        </div>
-        <div class="modal-footer">
-            {{ form_start(flying_form) }}
-            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-            <button type="submit" class="btn waves-effect waves-light orange">
-                <i class="material-icons left">check</i>OK
-            </button>
-            {{ form_end(flying_form) }}
-        </div>
-    </div>
+    </ul> 
 {% endblock %}
 
 {% block javascripts %}
