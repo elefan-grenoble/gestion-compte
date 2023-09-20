@@ -212,6 +212,11 @@ class MembershipService
         return $hasWarningStatus;
     }
 
+    public function getPeriodPositions(Membership $member)
+    {
+        return $this->em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
+    }
+
     public function getShiftFreeLogs(Membership $member)
     {
         return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreed($member);

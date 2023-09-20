@@ -93,7 +93,7 @@
                 {% endif %}
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/shifts.html.twig" %}
+                {% include "member/_partial/shifts.html.twig" with { member: member, period_positions: period_positions, shifts_by_cycle: shifts_by_cycle } %}
             </div>
         </li>
 

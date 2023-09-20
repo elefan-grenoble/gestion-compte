@@ -5,14 +5,23 @@
 {% if use_fly_and_fixed %}
     <div class="row">
         <h6>Créneau{% if period_positions | length > 1 %}x{% endif %} fixe</h6>
-        {% if period_positions %}
+        {% if period_positions | length > 0 %}
             {% for period_position in period_positions %}
                 <div class="col s12 m6 xl4">
                     {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position, show_actions: true } %}
                 </div>
             {% endfor %}
+            {% if member.flying %}
+                <div class="card-panel red white-text">
+                    Ce compte-membre est volant alors qu'il a 1 ou plusieurs créneaux fixe.
+                </div>
+            {% endif %}
         {% else %}
-            Pas de créneau fixe
+            {% if not member.flying %}
+                <div class="card-panel red white-text">
+                    Ce compte-membre est fixe alors qu'il n'a aucun créneaux fixe.
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 {% endif %}
