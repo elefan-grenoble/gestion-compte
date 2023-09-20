@@ -67,6 +67,14 @@ class SearchUserFormHelper
                     'Non exempté' => 1,
                 ]
             ]);
+            $formBuilder->add('has_first_shift_date', ChoiceType::class, [
+                'label' => 'créneau inscrit',
+                'required' => false,
+                'choices' => [
+                    'Oui' => 2,
+                    'Non (jamais inscrit à un créneau)' => 1,
+                ]
+            ]);
             if ($this->maximum_nb_of_beneficiaries_in_membership > 1) {
                 $formBuilder->add('beneficiary_count', ChoiceType::class, [
                     'label' => 'nb de bénéficiaires',
@@ -77,14 +85,25 @@ class SearchUserFormHelper
                     ]
                 ]);
             }
-            $formBuilder->add('has_first_shift_date', ChoiceType::class, [
-                'label' => 'créneau inscrit',
-                'required' => false,
-                'choices' => [
-                    'Oui' => 2,
-                    'Non (jamais inscrit à un créneau)' => 1,
-                ]
-            ]);
+            if ($this->use_fly_and_fixed) {
+                $formBuilder->add('flying', ChoiceType::class, [
+                    'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                    'required' => false,
+                    'choices' => [
+                        'Oui' => 2,
+                        'Non (fixe)' => 1,
+                    ],
+                ])
+                ->add('has_period_position', ChoiceType::class, [
+                    'label' => 'créneau fixe',
+                    'required' => false,
+                    'disabled' => in_array('has_period_position', $disabledFields) ? true : false,
+                    'choices' => [
+                        'Oui' => 2,
+                        'Non (pas de créneau fixe)' => 1,
+                    ]
+                ]);
+            }
         }
         $formBuilder->add('membernumber', TextType::class, [
             'label' => '# =',
@@ -199,26 +218,6 @@ class SearchUserFormHelper
                 'choices' => [
                     'Oui' => 2,
                     'Non (pas renseigné)' => 1,
-                ]
-            ]);
-        }
-        if ($this->use_fly_and_fixed) {
-            $formBuilder->add('flying', ChoiceType::class, [
-                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
-                'required' => false,
-                'disabled' => in_array('flying', $disabledFields) ? true : false,
-                'choices' => [
-                    'Oui' => 2,
-                    'Non (fixe)' => 1,
-                ],
-            ])
-            ->add('has_period_position', ChoiceType::class, [
-                'label' => 'créneau fixe',
-                'required' => false,
-                'disabled' => in_array('has_period_position', $disabledFields) ? true : false,
-                'choices' => [
-                    'Oui' => 2,
-                    'Non (pas de créneau fixe)' => 1,
                 ]
             ]);
         }
@@ -711,6 +710,7 @@ class SearchUserFormHelper
                     ->setParameter('subQueryformations', $subQuery);
             }
         }
+
         return $qb;
     }
 }

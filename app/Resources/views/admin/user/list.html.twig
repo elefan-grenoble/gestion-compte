@@ -23,32 +23,32 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.withdrawn) }}
                                     {{ form_label(form.withdrawn) }}
                                 </div>
                             </div>
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.enabled) }}
                                     {{ form_label(form.enabled) }}
                                 </div>
                             </div>
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.frozen) }}
                                     {{ form_label(form.frozen) }}
                                 </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col s4">
+                            <div class="col s3">
                                 <div class="input-field">
                                     {{ form_widget(form.exempted) }}
                                     {{ form_label(form.exempted) }}
                                 </div>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col s4">
                                 <div class="input-field">
                                     {{ form_widget(form.has_first_shift_date) }}
@@ -60,6 +60,14 @@
                                     <div class="input-field">
                                         {{ form_widget(form.beneficiary_count) }}
                                         {{ form_label(form.beneficiary_count) }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                            {% if use_fly_and_fixed %}
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.flying) }}
+                                        {{ form_label(form.flying) }}
                                     </div>
                                 </div>
                             {% endif %}

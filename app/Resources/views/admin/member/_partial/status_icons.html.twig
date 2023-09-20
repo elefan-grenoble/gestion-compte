@@ -12,3 +12,6 @@
 {% if member.mainBeneficiary and not member.mainBeneficiary.user.isEnabled %}
     <i class="material-icons" title="Compte pas encore activé">{{ user_account_not_enabled_material_icon }}</i>
 {% endif %}
+{% if use_fly_and_fixed and member.flying %}
+    <i class="material-icons" title="Compte volant">{{ beneficiary_flying_material_icon }}</i>
+{% endif %}
