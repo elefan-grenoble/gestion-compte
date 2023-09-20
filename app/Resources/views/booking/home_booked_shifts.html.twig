@@ -21,16 +21,16 @@
                             {% endfor %}
                             {% if member.flying %}
                                 <div class="col s12">
-                                    <div class="card-panel red white-text">
-                                        Votre compte est <strong>volant</strong> alors que vous avez {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
+                                    <div class="card-panel teal warning white-text">
+                                        {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est <strong>volant</strong> alors que {% if member.beneficiaries | length > 1 %}vous avez{% else %}tu as{% endif %} {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
                                     </div>
                                 </div>
                             {% endif %}
                         {% else %}
                             {% if not member.flying %}
                                 <div class="col s12">
-                                    <div class="card-panel red white-text">
-                                        Votre compte est <strong>fixe</strong> alors que vous n'avez pas de créneaux fixe.
+                                    <div class="card-panel teal warning white-text">
+                                        {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est <strong>fixe</strong> alors que {% if member.beneficiaries | length > 1 %}vous n'avez{% else %}tu n'as{% endif %} pas de créneaux fixe.
                                     </div>
                                 </div>
                             {% else %}
