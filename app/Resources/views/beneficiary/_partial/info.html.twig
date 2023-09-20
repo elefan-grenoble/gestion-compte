@@ -7,6 +7,13 @@
     {% if beneficiary.isMain and maximum_nb_of_beneficiaries_in_membership > 1 %}
         <span class="badge main-color white-text">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
+    {% if use_fly_and_fixed %}
+        {% if beneficiary.membership.flying %}
+            <span class="badge teal white-text">{{ member_flying_icon }} Compte volant</span>
+        {% else %}
+            <span class="badge main-color white-text">Compte fixe</span>
+        {% endif %}
+    {% endif %}
     {% if beneficiary.membership.withdrawn %}
         <span class="badge red white-text">{{ member_withdrawn_icon }} fermé</span>
     {% endif %}
