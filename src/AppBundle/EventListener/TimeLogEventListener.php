@@ -250,15 +250,16 @@ class TimeLogEventListener
             $this->em->refresh($shift);  // added to prevent from returning cached (old) data
             $member = $shift->getShifter()->getMembership();
 
-            $member_counter_now = $member->getShiftTimeCount();
-            $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
+            $date_plus_one_minute = clone($date)->modify("+1 minute");
+            $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+            $member_extra_counter_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
-            if ($extra_counter_time > 0) {
+            if ($member_extra_counter_time > 0) {
                 // first decrement the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
+                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_extra_counter_time);
                 $this->em->persist($log);
                 // then increment the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $extra_counter_time, $shift);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_extra_counter_time, $shift);
                 $this->em->persist($log);
                 $this->em->flush();
             }
@@ -302,31 +303,32 @@ class TimeLogEventListener
     private function createCycleBeginningLog(Membership $member, \DateTime $date)
     {
         // decrease member shiftTime by due_duration_by_cycle
-        $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member);
+        $log = $this->container->get('time_log_service')->initCycleBeginningTimeLog($member, $date);
         $this->em->persist($log);
         $this->em->flush();
 
         $this->em->refresh($member);  // added to prevent from returning cached (old) data
 
-        $member_counter_now = $member->getShiftTimeCount();
-        $extra_counter_time = $member_counter_now - $this->max_time_at_end_of_shift;
+        $date_plus_one_minute = clone($date)->modify("+1 minute");
+        $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+        $member_extra_counter_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
 
         // member did extra work
-        if ($member_counter_now > 0 && $extra_counter_time > 0) {
+        if ($member_counter_time > 0 && $member_extra_counter_time > 0) {
             // remove the extra_time from the shiftTime
-            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
+            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_extra_counter_time);
             $this->em->persist($log);
             if ($this->use_time_log_saving) {
                 // add the extra_time to the savingTime
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $extra_counter_time);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_extra_counter_time);
                 $this->em->persist($log);
             }
         // member has a negative shiftTimeCount...
-        } elseif ($member_counter_now < 0) {
+        } elseif ($member_counter_time < 0) {
             // we can *maybe* use the member's savingTime to bring his shiftTime back to 0
             if ($this->use_time_log_saving) {
-                $member_saving_now = $member->getSavingTimeCount();
-                if ($member_saving_now > 0) {
+                $member_saving_time = $member->getSavingTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+                if ($member_saving_time > 0) {
                     $date_minus_one_day = clone($date)->modify("-1 days");
                     // count missed shifts in the previous cycle
                     $previous_cycle_missed_shifts_count = $this->container->get('membership_service')->getCycleShiftMissedCount($member, $date_minus_one_day);
@@ -336,8 +338,8 @@ class TimeLogEventListener
                     // - the member has no missed shifts in the previous cycle
                     // - the member has no freed shifts within the min_time_in_advance 
                     if ($previous_cycle_missed_shifts_count == 0 && $previous_cycle_freed_shifts_less_than_min_time_in_advance_count == 0) {
-                        $missing_due_time = -1 * $member_counter_now;
-                        $withdraw_from_saving = min($member_saving_now, $missing_due_time);
+                        $missing_due_time = -1 * $member_counter_time;
+                        $withdraw_from_saving = min($member_saving_time, $missing_due_time);
                         // first decrement the savingTime
                         $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
                         $this->em->persist($log);
@@ -347,7 +349,7 @@ class TimeLogEventListener
                     } else {
                         // not allowed to use member's saving
                         // give explanation
-                        $description = "(compteur épargne (" . $member_saving_now . " minutes) non utilisé car ";
+                        $description = "(compteur épargne (" . $member_saving_time . " minutes) non utilisé car ";
                         if ($previous_cycle_missed_shifts_count) {
                             $description = $description . $previous_cycle_missed_shifts_count . " créneau" . (($previous_cycle_missed_shifts_count > 1) ? 'x' : '') . " raté" . (($previous_cycle_missed_shifts_count > 1) ? 's' : '');
                         }
