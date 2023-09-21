@@ -144,34 +144,32 @@ class TimeLogEventListener
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
             // shift time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
-
-            // but the shift time can be "validated" and taken from the member's saving account
-            // if and only if:
-            // - there is a min time in advance rule
-            // - the shifter has enough time on its time log saving account
-            if ($this->use_time_log_saving) {
-                $member_saving_now = $member->getSavingTimeCount();
-                if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
-                    // do nothing!
-                    // too late to use the member's saving account
-                } elseif ($shift->getDuration() > $member_saving_now) {
-                    // do nothing!
-                    // the member's saving account does not have enough time
-                } else {
-                    // decrement the savingTimeCount
-                    $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
-                    $this->em->persist($log);
-                    // increment the shiftTimeCount
-                    $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
-                    $this->em->persist($log);
-                    $this->em->flush();
-                }
-            }
         } else {
             $this->deleteShiftLogs($shift, $member);
+        }
 
-            // what if use_time_log_saving?
-            // will be managed at the end of the member's cycle (see onMemberCycleEnd)
+        // but the shift time can be "validated" and taken from the member's saving account
+        // if and only if:
+        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
+        // - there is a min time in advance rule
+        // - the shifter has enough time on its time log saving account
+        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
+            $member_saving_now = $member->getSavingTimeCount();
+            if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                // do nothing!
+                // too late to use the member's saving account
+            } elseif ($shift->getDuration() > $member_saving_now) {
+                // do nothing!
+                // the member's saving account does not have enough time
+            } else {
+                // decrement the savingTimeCount
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
+                $this->em->persist($log);
+                // increment the shiftTimeCount
+                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
+                $this->em->persist($log);
+                $this->em->flush();
+            }
         }
     }
 
@@ -246,12 +244,15 @@ class TimeLogEventListener
         $this->em->persist($log);
         $this->em->flush();
 
-        if ($this->use_time_log_saving) {
+        // extra time will go in the member's saving account
+        // if and only if:
+        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
+        // - there is extra time
+        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
             $this->em->refresh($member);  // added to prevent from returning cached (old) data
             $member_counter_now = $member->getShiftTimeCount();
             $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
-            // the extra time will go in the member's saving account
             if ($extra_counter_time > 0) {
                 // first decrement the shiftTimeCount
                 $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
