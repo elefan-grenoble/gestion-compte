@@ -75,7 +75,7 @@ class TimeLogEventListener
 
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
-            // time log will be created in onShiftValidated
+            // shift time log will be created in onShiftValidated
         } else {
             $this->createShiftValidatedTimeLog($shift, $shift->getStart());
         }
@@ -99,7 +99,7 @@ class TimeLogEventListener
             $this->createShiftValidatedTimeLog($shift, $now);
         } else {
             // do nothing!
-            // time log already created in onShiftBooked
+            // shift time log already created in onShiftBooked
         }
     }
 
@@ -115,6 +115,7 @@ class TimeLogEventListener
         $member = $event->getMember();
 
         if ($this->use_card_reader_to_validate_shifts) {
+            // the shift should have happened in the past
             // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
             // if true, create an inverse timelog
             $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) use ($member) {
@@ -122,8 +123,6 @@ class TimeLogEventListener
             });
             if ($shiftValidatedTimeLog->count() > 0) {
                 $this->createShiftInvalidatedTimeLog($shift);
-            } else {
-                // do nothing!
             }
         } else {
             // do nothing! shouldn't happen
@@ -144,16 +143,17 @@ class TimeLogEventListener
 
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
-            // time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+            // shift time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
         } else {
             $this->deleteShiftLogs($shift, $member);
         }
 
-        // the shift time will be "validated" and taken from the member's saving account
+        // but the shift time can be "validated" and taken from the member's saving account
         // if and only if:
+        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
         // - there is a min time in advance rule
         // - the shifter has enough time on its time log saving account
-        if ($this->use_time_log_saving) {
+        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
             $member_saving_now = $member->getSavingTimeCount();
             if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
                 // do nothing!
@@ -244,12 +244,15 @@ class TimeLogEventListener
         $this->em->persist($log);
         $this->em->flush();
 
-        if ($this->use_time_log_saving) {
+        // extra time will go in the member's saving account
+        // if and only if:
+        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
+        // - there is extra time
+        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
             $this->em->refresh($member);  // added to prevent from returning cached (old) data
             $member_counter_now = $member->getShiftTimeCount();
             $extra_counter_time = $member_counter_now - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
-            // the extra time will go in the member's saving account
             if ($extra_counter_time > 0) {
                 // first decrement the shiftTimeCount
                 $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $extra_counter_time);
