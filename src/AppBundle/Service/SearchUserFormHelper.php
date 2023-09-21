@@ -657,7 +657,7 @@ class SearchUserFormHelper
             }
         }
         if ($form->get('flying')->getData() > 0) {
-            $qb = $qb->andWhere('b.flying = :flying')
+            $qb = $qb->andWhere('m.flying = :flying')
                      ->setParameter('flying', $form->get('flying')->getData()-1);
         }
         return $qb;

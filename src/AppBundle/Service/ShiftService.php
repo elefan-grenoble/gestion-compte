@@ -249,6 +249,14 @@ class ShiftService
             if ($shift->getStart() > $cycle_end && !$member->getFrozenChange())
                 return false;
         }
+        // restrict max booking lead time for flying or fixe
+        $max_booking_lead_time = $this->membershipService->getMaximumBookingLeadTime($member);
+        if ($max_booking_lead_time) {
+            $max_booking_lead_time = (new \Datetime())->modify('+' . $max_booking_lead_time)->setTime(0, 0, 0);
+            if ($shift->getEnd() > $max_booking_lead_time) {
+                return false;
+            }
+        }
 
         // TODO refactor code to remove shift_cycle
         // canBookDuration method should not use TimeLog but request shifts

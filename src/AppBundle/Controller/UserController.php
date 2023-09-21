@@ -14,7 +14,6 @@ use AppBundle\Entity\User;
 use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Form\AnonymousBeneficiaryType;
-use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use AppBundle\Form\UserAdminType;
 use FOS\UserBundle\Event\UserEvent;

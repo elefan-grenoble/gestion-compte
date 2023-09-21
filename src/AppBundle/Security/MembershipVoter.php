@@ -20,6 +20,7 @@ class MembershipVoter extends Voter
     const CLOSE = 'close';
     const FREEZE = 'freeze';
     const FREEZE_CHANGE = 'freeze_change';
+    const FLYING = "flying";
     const ROLE_REMOVE = 'role_remove';
     const ROLE_ADD = 'role_add';
     const ANNOTATE = 'annotate';
@@ -46,6 +47,7 @@ class MembershipVoter extends Voter
                 self::ROLE_ADD,
                 self::FREEZE,
                 self::FREEZE_CHANGE,
+                self::FLYING,
                 self::CREATE,
                 self::ANNOTATE,
                 self::ACCESS_TOOLS,
@@ -103,6 +105,7 @@ class MembershipVoter extends Voter
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
             case self::EDIT:
+            case self::FLYING:
                 return $this->canEdit($subject, $token);
         }
 

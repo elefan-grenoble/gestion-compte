@@ -96,6 +96,9 @@ parameters:
     min_shift_duration: 90
     cycle_duration: '28 days'
     cycle_type: 'abcd'
+    use_fly_and_fixed: false
+    max_booking_lead_time_flying:
+    max_booking_lead_time_fixe:
     maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
     allow_extra_shifts: true
@@ -111,7 +114,6 @@ parameters:
     forbid_own_timelog_new_admin: false
     display_name_shifters: false
     max_nb_of_past_cycles_to_display: 3
-    use_fly_and_fixed: false
     use_card_reader_to_validate_shifts: false
     use_time_log_saving: false
 

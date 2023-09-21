@@ -17,6 +17,8 @@ services:
             $local_currency_name: '%local_currency_name%'
             $use_fly_and_fixed: '%use_fly_and_fixed%'
             $cycle_type: '%cycle_type%'
+            $max_booking_lead_time_flying: '%max_booking_lead_time_flying%'
+            $max_booking_lead_time_fixe: '%max_booking_lead_time_fixe%'
 
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
