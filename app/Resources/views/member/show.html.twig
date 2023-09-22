@@ -64,6 +64,9 @@
         <li id="registration">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
                 <i class="material-icons">card_membership</i>Adhésions
+                {% if member.registrations | length == 0 %}
+                    <span style="margin-left:14px;">⚠️</span>
+                {% endif %}
             </div>
             <div class="collapsible-body white">
                 {% include "member/_partial/registrations.html.twig" with { member: member, from_admin: true, new_registration_form: new_registration_form } %}
