@@ -252,14 +252,14 @@ class TimeLogEventListener
 
             $date_plus_one_minute = clone($date)->modify("+1 minute");
             $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
-            $member_extra_counter_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
+            $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
-            if ($member_extra_counter_time > 0) {
+            if ($member_counter_extra_time > 0) {
                 // first decrement the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_extra_counter_time);
+                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time);
                 $this->em->persist($log);
                 // then increment the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_extra_counter_time, $shift);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $shift);
                 $this->em->persist($log);
                 $this->em->flush();
             }
@@ -311,16 +311,16 @@ class TimeLogEventListener
 
         $date_plus_one_minute = clone($date)->modify("+1 minute");
         $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
-        $member_extra_counter_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
+        $member_counter_extra_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
 
         // member did extra work
-        if ($member_counter_time > 0 && $member_extra_counter_time > 0) {
+        if ($member_counter_time > 0 && $member_counter_extra_time > 0) {
             // remove the extra_time from the shiftTime
-            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_extra_counter_time);
+            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time);
             $this->em->persist($log);
             if ($this->use_time_log_saving) {
                 // add the extra_time to the savingTime
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_extra_counter_time);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_counter_extra_time);
                 $this->em->persist($log);
             }
         // member has a negative shiftTimeCount...
