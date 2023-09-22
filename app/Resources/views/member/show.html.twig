@@ -122,7 +122,7 @@
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="freeze">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
-                    <i class="material-icons">ac_unit</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
+                    <i class="material-icons">{{ member_frozen_material_icon }}</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
                 </div>
                 <div class="collapsible-body white">
                     {% if is_granted("freeze_change", member) %}

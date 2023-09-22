@@ -32,7 +32,7 @@
                     <div class="row">
                         <div class="col s12">
                             <div class="card-panel" style="background-color: rgba(0, 138, 255, 0.1);margin-bottom:0;">
-                                <strong class="orange"><i class="material-icons left">ac_unit</i>Adhésion en pause</strong>
+                                <strong class="orange"><i class="material-icons left">{{ member_frozen_material_icon }}</i>Adhésion en pause</strong>
                                 <br />
                                 {% if not app.user.beneficiary.membership.frozenChange %}
                                     Pour dégeler ton compte, visite <a href="{{ path('fos_user_profile_show') }}">ton profil <i class="material-icons tiny">settings</i></a>

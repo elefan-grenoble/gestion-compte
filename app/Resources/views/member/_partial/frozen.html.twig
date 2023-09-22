@@ -12,13 +12,13 @@
         {{ form_end(freeze_change_form) }}
     {% else %}
         <a class="waves-effect waves-light btn modal-trigger blue" href="#freeze-confirmation-modal">
-            <i class="material-icons left">ac_unit</i>Geler mon compte
+            <i class="material-icons left">{{ member_frozen_material_icon }}</i>Geler mon compte
         </a>
         {{ form_start(freeze_change_form) }}
         <div class="modal" id="freeze-confirmation-modal">
             <div class="modal-content">
                 <h5>
-                    <i class="material-icons small">ac_unit</i>&nbsp;Gel de compte
+                    <i class="material-icons small">{{ member_frozen_material_icon }}</i>&nbsp;Gel de compte
                 </h5>
                 <p>
                     Besoin de faire une pause ? demande le gel de ton compte !
