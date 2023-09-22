@@ -28,6 +28,7 @@
             Ce membre n'a pas encore d'adhésion.
         </div>
     {% else %}
+        <!-- actually, if the member does not have any registration, then he cannot access his profile yet -->
         <div class="card-panel teal warning white-text">
             {% if member.beneficiaries | length > 1 %}Vous n'avez{% else %}Tu n'as{% endif %} pas encore d'adhésion.
         </div>
