@@ -3,9 +3,9 @@
         <div class="wrapper center-align {% if opening_hour_service.isOpen %}green{% else %}red{% endif %}">
             <div class="col s12">
                 {% if opening_hour_service.isOpen %}
-                    <span class="white-text">{{ opening_hour_open_message }}</span>
+                    <span class="white-text">{{ opening_hour_open_closed_header_open_message }}</span>
                 {% else %}
-                    <span class="white-text">{{ opening_hour_closed_message }}</span>
+                    <span class="white-text">{{ opening_hour_open_closed_header_closed_message }}</span>
                 {% endif %}
             </div>
         </div>

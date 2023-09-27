@@ -162,8 +162,8 @@ parameters:
 
     # Opening hours
     display_opening_hour_open_closed_header: true
-    opening_hour_open_message: "Ouvert"
-    opening_hour_closed_message: "Fermé"
+    opening_hour_open_closed_header_open_message: "Ouvert"
+    opening_hour_open_closed_header_closed_message: "Fermé"
 
     # Code generation
     code_generation_enabled: true
