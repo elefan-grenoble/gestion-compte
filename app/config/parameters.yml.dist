@@ -122,6 +122,8 @@ parameters:
     profile_display_task_list: true
     profile_display_time_log: true
     profile_display_shift_free_log: true
+    display_freeze_account: true
+    display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
 
     # User configuration
     user_account_not_enabled_material_icon: 'phonelink_off'
@@ -158,17 +160,20 @@ parameters:
     # Time log saving
     time_log_saving_shift_free_min_time_in_advance_days: null
 
+    # Opening hours
+    display_opening_hour_open_closed_header: true
+    opening_hour_open_message: "Ouvert"
+    opening_hour_closed_message: "Fermé"
+
+    # Code generation
+    code_generation_enabled: true
+    display_keys_shop: true
+
+    # Logging
     logging.mattermost.enabled: false
     logging.mattermost.level: 'critical'
     logging.mattermost.url: 'http://mattermost.yourcoop.local'
     logging.mattermost.channel: ~
-
     logging.swiftmailer.enabled: false
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
-
-    code_generation_enabled: true
-    display_freeze_account: true
-    display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
-    display_keys_shop: true
-    display_opening_hour_open_closed_header: true
