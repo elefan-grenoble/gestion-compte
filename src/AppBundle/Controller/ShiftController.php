@@ -505,7 +505,7 @@ class ShiftController extends Controller
 
                 $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
             } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délai de reservation est écoulé.");
             }
         } else {
             $session->getFlashBag()->add('error', "Créneau pas trouvé");
@@ -538,7 +538,7 @@ class ShiftController extends Controller
                 $session->getFlashBag()->add('success', "Créneau libéré");
                 $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
             } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
+                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délai de reservation est écoulé.");
             }
         } else {
             $session->getFlashBag()->add('error', "Créneau pas trouvé");
