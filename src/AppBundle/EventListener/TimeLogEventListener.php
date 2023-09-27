@@ -222,11 +222,12 @@ class TimeLogEventListener
             $this->em->persist($member);
         }
 
-        $dispatcher = $this->container->get('event_dispatcher');
         if (!$member->getFrozen()) {
             $current_cycle_start = $this->container->get('membership_service')->getStartOfCycle($member, 0);
             $current_cycle_end = $this->container->get('membership_service')->getEndOfCycle($member, 0);
             $currentCycleShifts = $this->em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
+
+            $dispatcher = $this->container->get('event_dispatcher');
             $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date, $currentCycleShifts));
         }
     }
@@ -250,7 +251,7 @@ class TimeLogEventListener
             $this->em->refresh($shift);  // added to prevent from returning cached (old) data
             $member = $shift->getShifter()->getMembership();
 
-            $date_plus_one_minute = clone($date)->modify("+1 minute");
+            $date_plus_one_minute = (clone $date)->modify("+1 minute");
             $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
             $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
@@ -309,7 +310,7 @@ class TimeLogEventListener
 
         $this->em->refresh($member);  // added to prevent from returning cached (old) data
 
-        $date_plus_one_minute = clone($date)->modify("+1 minute");
+        $date_plus_one_minute = (clone $date)->modify("+1 minute");
         $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
         $member_counter_extra_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
 
@@ -329,7 +330,7 @@ class TimeLogEventListener
             if ($this->use_time_log_saving) {
                 $member_saving_time = $member->getSavingTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
                 if ($member_saving_time > 0) {
-                    $date_minus_one_day = clone($date)->modify("-1 days");
+                    $date_minus_one_day = (clone $date)->modify("-1 days");
                     // count missed shifts in the previous cycle
                     $previous_cycle_missed_shifts_count = $this->container->get('membership_service')->getCycleShiftMissedCount($member, $date_minus_one_day);
                     // count freed shifts within the min_time_in_advance in the previous cycle
