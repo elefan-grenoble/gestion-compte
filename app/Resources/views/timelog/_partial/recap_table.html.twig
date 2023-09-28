@@ -1,0 +1,25 @@
+<table>
+    <thead>
+        <tr>
+            <th>
+                TOTAL
+                {% if use_time_log_saving %}
+                    <span>TEMPS</span>
+                {% endif %}
+            </th>
+            <th>TOTAL CYCLE EN COURS</th>
+            {% if use_time_log_saving %}
+                <th>TOTAL EPARGNE</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ member.shiftTimeCount | duration_from_minutes }}</td>
+            <td>{{ member.shiftTimeCount(membership_service.endOfCycle(member)) | duration_from_minutes }}</td>
+            {% if use_time_log_saving %}
+                <td>{{ member.savingTimeCount | duration_from_minutes }}</td>
+            {% endif %}
+        </tr>
+    </tbody>
+</table>
