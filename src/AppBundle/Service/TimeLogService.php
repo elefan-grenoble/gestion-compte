@@ -101,9 +101,9 @@ class TimeLogService
      * @param \DateTime $date
      * @return TimeLog
      */
-    public function initShiftFreedSavingTimeLog(Membership $member, $time, $shift)
+    public function initShiftFreedSavingTimeLog(Membership $member, $time, \DateTime $date = null, $shift)
     {
-        $log = $this->initTimeLog($member);
+        $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_SHIFT_FREED_SAVING);
         $log->setShift($shift);
         $log->setTime($time);  // $shift->getDuration()
@@ -148,9 +148,9 @@ class TimeLogService
      * @param \DateTime $date
      * @return TimeLog
      */
-    public function initCycleEndSavingTimeLog(Membership $member, $time, $description = null)
+    public function initCycleEndSavingTimeLog(Membership $member, $time, \DateTime $date = null, $description = null)
     {
-        $log = $this->initTimeLog($member, null, $description);
+        $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_CYCLE_END_SAVING);
         $log->setTime($time);
 
@@ -158,15 +158,15 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "regulation optjonal shifts" log with the member data
+     * Initialize a "regulation optional shifts" log with the member data
      * 
      * @param Membership $member
      * @param int $time
      * @return TimeLog
      */
-    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time)
+    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time, \DateTime $date = null)
     {
-        $log = $this->initTimeLog($member);
+        $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_REGULATE_OPTIONAL_SHIFTS);
         $log->setTime($time);
 
@@ -180,9 +180,9 @@ class TimeLogService
      * @param int $time
      * @return TimeLog
      */
-    public function initSavingTimeLog(Membership $member, $time, $shift = null)
+    public function initSavingTimeLog(Membership $member, $time, \DateTime $date = null, $shift = null)
     {
-        $log = $this->initTimeLog($member);
+        $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_SAVING);
         $log->setTime($time);
         if ($shift) {

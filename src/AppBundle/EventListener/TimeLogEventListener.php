@@ -163,10 +163,10 @@ class TimeLogEventListener
                 // the member's saving account does not have enough time
             } else {
                 // decrement the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), $shift);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), null, $shift);
                 $this->em->persist($log);
                 // increment the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), $shift);
+                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), null, $shift);
                 $this->em->persist($log);
                 $this->em->flush();
             }
@@ -257,10 +257,10 @@ class TimeLogEventListener
 
             if ($member_counter_extra_time > 0) {
                 // first decrement the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time);
+                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time, $date_plus_one_second);
                 $this->em->persist($log);
                 // then increment the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $shift);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $date_plus_one_second, $shift);
                 $this->em->persist($log);
                 $this->em->flush();
             }
@@ -317,11 +317,11 @@ class TimeLogEventListener
         // member did extra work
         if ($member_counter_time > 0 && $member_counter_extra_time > 0) {
             // remove the extra_time from the shiftTime
-            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time);
+            $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time, $date_plus_one_second);
             $this->em->persist($log);
             if ($this->use_time_log_saving) {
                 // add the extra_time to the savingTime
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_counter_extra_time);
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_counter_extra_time, $date_plus_one_second);
                 $this->em->persist($log);
             }
         // member has a negative shiftTimeCount...
@@ -342,10 +342,10 @@ class TimeLogEventListener
                         $missing_due_time = -1 * $member_counter_time;
                         $withdraw_from_saving = min($member_saving_time, $missing_due_time);
                         // first decrement the savingTime
-                        $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving);
+                        $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $withdraw_from_saving, $date_plus_one_second);
                         $this->em->persist($log);
                         // then increment the shiftTime
-                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 1 * $withdraw_from_saving);
+                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 1 * $withdraw_from_saving, $date_plus_one_second);
                         $this->em->persist($log);
                     } else {
                         // not allowed to use member's saving
@@ -357,7 +357,7 @@ class TimeLogEventListener
                         if ($previous_cycle_freed_shifts_less_than_min_time_in_advance_count) {
                             $description = $description . (($previous_cycle_missed_shifts_count > 0) ? ' & ' : '') . $previous_cycle_freed_shifts_less_than_min_time_in_advance_count . " créneau" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 'x' : '') . " annulé" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 's' : '') . " sous les " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours)";
                         }
-                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 0, $description);
+                        $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 0, $date_plus_one_second, $description);
                         $this->em->persist($log);
                     }
                 }
