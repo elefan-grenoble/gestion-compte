@@ -23,6 +23,7 @@
             <tr id="{{ timeLog.id }}" class="{% if timeLog.type == 20 %}blue{% elseif timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
                 <td title="{{ timeLog.createdAt | date_fr_full_with_time }}">
                     {{ timeLog.createdAt | date_short }}
+                    {% if timeLog.createdAt > date() %}<span>(futur)</span>{% endif %}
                 </td>
                 <td>
                     {% if from_admin %}
