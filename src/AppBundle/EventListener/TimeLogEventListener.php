@@ -251,8 +251,8 @@ class TimeLogEventListener
             $this->em->refresh($shift);  // added to prevent from returning cached (old) data
             $member = $shift->getShifter()->getMembership();
 
-            $date_plus_one_minute = (clone $date)->modify("+1 minute");
-            $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+            $date_plus_one_second = (clone $date)->modify("+1 second");
+            $member_counter_time = $member->getShiftTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
             $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
             if ($member_counter_extra_time > 0) {
@@ -310,8 +310,8 @@ class TimeLogEventListener
 
         $this->em->refresh($member);  // added to prevent from returning cached (old) data
 
-        $date_plus_one_minute = (clone $date)->modify("+1 minute");
-        $member_counter_time = $member->getShiftTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+        $date_plus_one_second = (clone $date)->modify("+1 second");
+        $member_counter_time = $member->getShiftTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
         $member_counter_extra_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
 
         // member did extra work
@@ -328,7 +328,7 @@ class TimeLogEventListener
         } elseif ($member_counter_time < 0) {
             // we can *maybe* use the member's savingTime to bring his shiftTime back to 0
             if ($this->use_time_log_saving) {
-                $member_saving_time = $member->getSavingTimeCount($date_plus_one_minute);  // $date_plus_one_minute? to be sure we take the above log into account
+                $member_saving_time = $member->getSavingTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
                 if ($member_saving_time > 0) {
                     $date_minus_one_day = (clone $date)->modify("-1 days");
                     // count missed shifts in the previous cycle
