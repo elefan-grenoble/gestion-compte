@@ -1,0 +1,60 @@
+{% set from_admin = from_admin ?? false %}
+{% set time_log_delete_forms = time_log_delete_forms ?? [] %}
+
+
+<table>
+    <thead>
+        <tr class="grey lighten-2">
+            <th>Date du log</th>
+            <th>Auteur</th>
+            <th>Temps</th>
+            <th>Motif</th>
+            <th>Créneau</th>
+            {% if from_admin and is_granted("ROLE_ADMIN") %}
+                <th>Route</th>
+            {% endif %}
+            {% if from_admin and is_granted("ROLE_SUPER_ADMIN") %}
+                <th>Actions</th>
+            {% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for timeLog in timeLogs %}
+            <tr id="{{ timeLog.id }}" class="{% if timeLog.type == 20 %}blue{% elseif timeLog.time > 0 %}green{% elseif timeLog.time < 0 %}red{% else %}grey{% endif %} lighten-5">
+                <td title="{{ timeLog.createdAt | date_fr_full_with_time }}">
+                    {{ timeLog.createdAt | date_short }}
+                </td>
+                <td>
+                    {% if from_admin %}
+                        {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: timeLog.createdBy, target_blank: true } %}
+                    {% else %}
+                        {{ timeLog.createdBy }}
+                    {% endif %}
+                </td>
+                <td>{{ timeLog.time | duration_from_minutes }}</td>
+                <td>{{ timeLog.typeDisplay }}</td>
+                <td>
+                    {% if timeLog.shift %}
+                        {{ timeLog.shift.job.name }} - {{ timeLog.shift.displayDateSeperateTime }}
+                        {% if timeLog.shift.shifter and timeLog.type not in [20, 21] %}
+                            ({{ timeLog.shift.shifter }})
+                        {% endif %}
+                    {% endif %}
+                </td>
+                {% if from_admin and is_granted("ROLE_ADMIN") %}
+                    <td>{{ timeLog.requestRoute }}</td>
+                {% endif %}
+                {% if from_admin and is_granted("ROLE_SUPER_ADMIN") %}
+                <td>
+                    {{ form_start(time_log_delete_forms[timeLog.id], {'attr': {'id': 'form_time_log_delete_'~timeLog.id }}) }}
+                    {{ form_widget(time_log_delete_forms[timeLog.id]) }}
+                    <button type="submit" class="btn-floating red" title="Supprimer" onclick="return confirm('Etes-vous sûr de vouloir supprimer ce time log ?!');">
+                        <i class="material-icons left">delete</i>
+                    </button>
+                    {{ form_end(time_log_delete_forms[timeLog.id]) }}
+                </td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
