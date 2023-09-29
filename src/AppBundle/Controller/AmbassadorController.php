@@ -186,7 +186,7 @@ class AmbassadorController extends Controller
             'compteurlt' => 0,
             'registration' => 2,
         ];
-        $disabledFields = ['withdrawn', 'compteurlt', 'registration'];
+        $disabledFields = ['withdrawn', 'registration'];
 
         $form = $formHelper->createMemberShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
