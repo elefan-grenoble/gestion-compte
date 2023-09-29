@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Proxy
  *
  * @ORM\Table(name="proxy")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ProxyRepository")
  */
 class Proxy
@@ -20,13 +21,6 @@ class Proxy
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="Event", inversedBy="proxies")
@@ -46,6 +40,22 @@ class Proxy
      */
     private $giver;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
 
     /**
      * Get id
@@ -55,30 +65,6 @@ class Proxy
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Proxy
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
     }
 
     /**
@@ -151,5 +137,29 @@ class Proxy
     public function getGiver()
     {
         return $this->giver;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Proxy
+     */
+    public function setCreatedAt($createdAt)
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }
