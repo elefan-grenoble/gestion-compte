@@ -147,7 +147,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all members with negative shift time logs.
+     * List all members with negative shift time count.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
