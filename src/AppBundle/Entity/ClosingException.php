@@ -55,7 +55,9 @@ class ClosingException
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -116,13 +118,13 @@ class ClosingException
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return ClosingException
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }

@@ -165,10 +165,9 @@ class EventController extends Controller
         // anonymousProxy ?
         if ($form->isSubmitted() && $form->isValid()) {
             $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event, "giver"=>null));
-            if (!$proxy){
+            if (!$proxy) {
                 $proxy = new Proxy();
                 $proxy->setEvent($event);
-                $proxy->setCreatedAt(new \DateTime());
             }
 
             $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
@@ -214,7 +213,6 @@ class EventController extends Controller
                 // create proxy
                 $proxy = new Proxy();
                 $proxy->setEvent($event);
-                $proxy->setCreatedAt(new \DateTime());
                 $proxy->setOwner($beneficiary);
                 $proxy->setGiver($current_app_user->getBeneficiary()->getMembership());
 
@@ -397,10 +395,9 @@ class EventController extends Controller
         }
 
         $proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event" => $event, "owner" => null));
-        if (!$proxy){
+        if (!$proxy) {
             $proxy = new Proxy();
             $proxy->setEvent($event);
-            $proxy->setCreatedAt(new \DateTime());
         }
         $form = $this->createForm(ProxyType::class, $proxy);
         $form->handleRequest($request);

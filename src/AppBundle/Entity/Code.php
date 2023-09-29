@@ -61,7 +61,9 @@ class Code
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -96,30 +98,6 @@ class Code
     public function getValue()
     {
         return $this->value;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Code
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
     }
 
     /**
@@ -168,5 +146,29 @@ class Code
     public function getClosed()
     {
         return $this->closed;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return Code
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

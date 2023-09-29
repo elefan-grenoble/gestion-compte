@@ -69,7 +69,9 @@ class OpeningHour
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -227,13 +229,13 @@ class OpeningHour
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return OpeningHour
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }

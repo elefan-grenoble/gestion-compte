@@ -786,7 +786,6 @@ class MembershipController extends Controller
                 $beneficiaries_emails = $a_beneficiary->getBeneficiariesEmailsAsArray();
                 foreach ($beneficiaries_emails as $email) {
                     $new_anonymous_beneficiary = new AnonymousBeneficiary();
-                    $new_anonymous_beneficiary->setCreatedAtValue(new \DateTime());
                     $new_anonymous_beneficiary->setEmail($email);
                     $new_anonymous_beneficiary->setJoinTo($member->getMainBeneficiary());
                     $new_anonymous_beneficiary->setRegistrar($a_beneficiary->getRegistrar());

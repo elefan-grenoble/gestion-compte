@@ -62,11 +62,13 @@ class SocialNetwork
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -76,7 +78,7 @@ class SocialNetwork
     }
 
     /**
-     * Set name.
+     * Set name
      *
      * @param string $name
      *
@@ -90,7 +92,7 @@ class SocialNetwork
     }
 
     /**
-     * Get name.
+     * Get name
      *
      * @return string
      */
@@ -124,7 +126,7 @@ class SocialNetwork
     }
 
     /**
-     * Set url.
+     * Set url
      *
      * @param string $url
      *
@@ -138,7 +140,7 @@ class SocialNetwork
     }
 
     /**
-     * Get url.
+     * Get url
      *
      * @return string
      */
@@ -148,7 +150,7 @@ class SocialNetwork
     }
 
     /**
-     * Set displayedFooter.
+     * Set displayedFooter
      *
      * @param bool|null $displayedFooter
      *
@@ -162,7 +164,7 @@ class SocialNetwork
     }
 
     /**
-     * Get displayedFooter.
+     * Get displayedFooter
      *
      * @return bool|null
      */
@@ -172,21 +174,21 @@ class SocialNetwork
     }
 
     /**
-     * Set createdAt.
+     * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return SocialNetwork
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }
 
     /**
-     * Get createdAt.
+     * Get createdAt
      *
      * @return \DateTime
      */

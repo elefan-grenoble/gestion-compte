@@ -38,14 +38,6 @@ class Registration
     private $date;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     * @Assert\DateTime()
-     */
-    private $createdAt;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
@@ -81,11 +73,21 @@ class Registration
     private $is_new;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     * @Assert\DateTime()
+     */
+    private $createdAt;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -212,30 +214,6 @@ class Registration
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Registration
-     */
-    public function setCreatedAt($date)
-    {
-        $this->createdAt = $date;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
      * Set helloassoPayment.
      *
      * @param \AppBundle\Entity\HelloassoPayment|null $helloassoPayment
@@ -273,5 +251,29 @@ class Registration
     public function setMembership($membership)
     {
         $this->membership = $membership;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Registration
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }
