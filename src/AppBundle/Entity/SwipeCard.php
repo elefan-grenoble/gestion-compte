@@ -75,12 +75,14 @@ class SwipeCard
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
         $this->disabled_at = null;
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -90,7 +92,7 @@ class SwipeCard
     }
 
     /**
-     * Set number.
+     * Set number
      *
      * @param int $number
      *
@@ -104,7 +106,7 @@ class SwipeCard
     }
 
     /**
-     * Get number.
+     * Get number
      *
      * @return int
      */
@@ -114,7 +116,7 @@ class SwipeCard
     }
 
     /**
-     * Set code.
+     * Set code
      *
      * @param string $code
      *
@@ -128,7 +130,7 @@ class SwipeCard
     }
 
     /**
-     * Get code.
+     * Get code
      *
      * @return string
      */
@@ -138,7 +140,7 @@ class SwipeCard
     }
 
     /**
-     * Set enable.
+     * Set enable
      *
      * @param bool|null $enable
      *
@@ -158,7 +160,7 @@ class SwipeCard
     }
 
     /**
-     * Get enable.
+     * Get enable
      *
      * @return bool|null
      */
@@ -170,7 +172,7 @@ class SwipeCard
     }
 
     /**
-     * Set beneficiary.
+     * Set beneficiary
      *
      * @param \AppBundle\Entity\Beneficiary|null $beneficiary
      *
@@ -184,7 +186,7 @@ class SwipeCard
     }
 
     /**
-     * Get beneficiary.
+     * Get beneficiary
      *
      * @return \AppBundle\Entity\Beneficiary|null
      */
@@ -195,7 +197,7 @@ class SwipeCard
 
 
     /**
-     * Set createdAt.
+     * Set createdAt
      *
      * @param \DateTime $createdAt
      *
@@ -209,7 +211,7 @@ class SwipeCard
     }
 
     /**
-     * Get createdAt.
+     * Get createdAt
      *
      * @return \DateTime
      */
@@ -219,7 +221,7 @@ class SwipeCard
     }
 
     /**
-     * Set disabledAt.
+     * Set disabledAt
      *
      * @param \DateTime? $disabledAt
      *
@@ -233,7 +235,7 @@ class SwipeCard
     }
 
     /**
-     * Get disabledAt.
+     * Get disabledAt
      *
      * @return \DateTime
      */

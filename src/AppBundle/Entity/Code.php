@@ -61,7 +61,9 @@ class Code
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**

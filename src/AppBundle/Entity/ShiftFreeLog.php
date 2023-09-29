@@ -86,7 +86,9 @@ class ShiftFreeLog
      */
     public function setCreatedAtValue()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTimeImmutable();
+        }
     }
 
     public function getShift(): ?Shift
