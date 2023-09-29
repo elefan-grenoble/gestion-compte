@@ -180,7 +180,7 @@ class AmbassadorController extends Controller
     {
         $defaults = [
             'sort' => 'time',
-            'dir' => 'DESC',
+            'dir' => 'ASC',
             'withdrawn' => 1,
             'frozen' => 1,
             'compteurlt' => 0,
