@@ -95,7 +95,7 @@
 
         <!-- Créneaux -->
         <li id="shifts">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.shifts_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
                 {% if not member.firstShiftDate %}
                     <span style="margin-left:14px;">⚠️</span>
@@ -105,6 +105,18 @@
                 {% include "member/_partial/shifts.html.twig" %}
             </div>
         </li>
+
+        <!-- Créneaux annulés -->
+        {% if admin_member_display_shift_free_log %}
+            <li id="shiftfreelogs">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.shiftfreelogs_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shiftfreelogs_open %}active{% endif %}">
+                    <i class="material-icons">delete_sweep</i>Historique des créneaux annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member), custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
 
         <!-- Badges -->
         {% if is_granted("ROLE_USER_MANAGER") %}

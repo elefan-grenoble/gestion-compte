@@ -149,6 +149,9 @@ parameters:
     beneficiary_new_icon: '★'
     beneficiary_flying_icon: '✈'
 
+    # Admin: member
+    admin_member_display_shift_free_log: true
+
     # Swipe card configuration
     swipe_card_logging: true
     swipe_card_logging_anonymous: true

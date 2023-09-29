@@ -89,6 +89,8 @@ twig:
     beneficiary_main_icon: '%beneficiary_main_icon%'
     beneficiary_new_icon: '%beneficiary_new_icon%'
     beneficiary_flying_icon: '%beneficiary_flying_icon%'
+    # admin: member
+    admin_member_display_shift_free_log: '%admin_member_display_shift_free_log%'
     # swipe card
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
