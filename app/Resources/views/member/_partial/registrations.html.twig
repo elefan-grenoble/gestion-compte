@@ -4,23 +4,36 @@
     <p style="margin-top:0">Adhésion du {{ member.lastRegistration.date | date_fr_full }} au {{ member | expire | date_fr_full }}</p>
 {% endif %}
 
-<ul class="collapsible">
-    {% for registration in member.registrations %}
-        <li>
-            <div class="collapsible-header" style="cursor: default;">
-                {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
-                    <i class="material-icons tiny">credit_card</i>
-                {% else %}
-                    <i class="material-icons tiny">attach_money</i>
-                {% endif %}
-                {{ registration.date | date_fr }}
-                {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}
-                    <span class="badge right">Helloasso</span>
-                {% endif %}
-            </div>
-        </li>
-    {% endfor %}
-</ul>
+{% if member.registrations | length > 0 %}
+    <ul class="collapsible">
+        {% for registration in member.registrations %}
+            <li>
+                <div class="collapsible-header" style="cursor: default;">
+                    {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
+                        <i class="material-icons tiny">credit_card</i>
+                    {% else %}
+                        <i class="material-icons tiny">attach_money</i>
+                    {% endif %}
+                    {{ registration.date | date_fr }}
+                    {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}
+                        <span class="badge right">Helloasso</span>
+                    {% endif %}
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    {% if from_admin %}
+        <div class="card-panel red white-text">
+            Ce membre n'a pas encore d'adhésion.
+        </div>
+    {% else %}
+        <!-- actually, if the member does not have any registration, then he cannot access his profile yet -->
+        <div class="card-panel teal warning white-text">
+            {% if member.beneficiaries | length > 1 %}Vous n'avez{% else %}Tu n'as{% endif %} pas encore d'adhésion.
+        </div>
+    {% endif %}
+{% endif %}
 
 {% if from_admin %}
     {% if member.mainBeneficiary and (member.mainBeneficiary.user != app.user) %}
