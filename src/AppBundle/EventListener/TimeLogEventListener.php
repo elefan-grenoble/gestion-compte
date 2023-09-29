@@ -260,7 +260,8 @@ class TimeLogEventListener
                 $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time, $date_plus_one_second);
                 $this->em->persist($log);
                 // then increment the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $date_plus_one_second, $shift);
+                // we don't pass de $shift info because the extra time may not correspond to the shift time
+                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $date_plus_one_second);  # $shift
                 $this->em->persist($log);
                 $this->em->flush();
             }
