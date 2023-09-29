@@ -89,10 +89,10 @@ class TaskController extends Controller
     public function editAction(Request $request, Task $task)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $this->denyAccessUnlessGranted('edit',$task);
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
         $form->get('created_at')->setData($task->getCreatedAt()->format('Y-m-d'));
@@ -100,13 +100,13 @@ class TaskController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $date = $form->get('due_date')->getData();
-            $new_date = new \DateTime($date);
-            $task->setDueDate($new_date);
+            $due_date = $form->get('due_date')->getData();
+            $due_date = new \DateTime($due_date);
+            $task->setDueDate($due_date);
 
-            $date = $form->get('created_at')->getData();
-            $new_date = new \DateTime($date);
-            $task->setCreatedAt($new_date);
+            $created_at = $form->get('created_at')->getData();
+            $created_at = new \DateTime($created_at);
+            $task->setCreatedAt($created_at);
 
             $em->persist($task);
             $em->flush();
