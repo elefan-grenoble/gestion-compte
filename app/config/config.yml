@@ -102,6 +102,8 @@ twig:
     time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
     # opening hours
     display_opening_hour_open_closed_header: '%display_opening_hour_open_closed_header%'
+    opening_hour_open_closed_header_open_message: '%opening_hour_open_closed_header_open_message%'
+    opening_hour_open_closed_header_closed_message: '%opening_hour_open_closed_header_closed_message%'
     # role names & icons
     role_user_name: Utilisateur
     role_user_material_icon: person
