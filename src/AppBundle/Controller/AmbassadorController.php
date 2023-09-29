@@ -56,23 +56,13 @@ class AmbassadorController extends Controller
         $form = $formHelper->createMemberNoRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("m.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id) AS HIDDEN time");
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'noregistration');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+        $qb = $qb->andWhere('r.date IS NULL');
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formHelper->processSearchFormAmbassadorData($form, $qb);
-            $sort = $form->get('sort')->getData();
-            $order = $form->get('dir')->getData();
-            $currentPage = $form->get('page')->getData();
-        } else {
-            $sort = $defaults['sort'];
-            $order = $defaults['dir'];
-            $currentPage = 1;
-            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
-                ->setParameter('withdrawn', $defaults['withdrawn']-1);
-            $qb = $qb->andWhere('r.date IS NULL');
-        }
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
 
         $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
@@ -125,26 +115,14 @@ class AmbassadorController extends Controller
         $form = $formHelper->createMemberLateRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') // registration is the last one registered
-            ->leftJoin("m.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id) AS HIDDEN time");
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'lateregistration');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+        $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
+            ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $formHelper->processSearchFormAmbassadorData($form, $qb);
-            $sort = $form->get('sort')->getData();
-            $order = $form->get('dir')->getData();
-            $currentPage = $form->get('page')->getData();
-        } else {
-            $sort = $defaults['sort'];
-            $order = $defaults['dir'];
-            $currentPage = 1;
-            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
-                ->setParameter('withdrawn', $defaults['withdrawn']-1);
-            $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
-        }
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
 
         $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
@@ -169,7 +147,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all members with shift time logs older than 9 hours.
+     * List all members with negative shift time count.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")

@@ -351,10 +351,11 @@ class SearchUserFormHelper
         if ($type == 'search') {
             $qb->leftJoin("b.commissions", "c")->addSelect("c");
             $qb->leftJoin("b.formations", "f")->addSelect("f");
-        } else if ($type == 'shifttimelog') {
-            $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+        }
+        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog'])) {
+            $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->where('lr.id IS NULL') // registration is the last one registered
-                ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id and ti.type != 20) AS HIDDEN time")
+                ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.type != 20 AND ti.membership = m.id) AS HIDDEN time")
                 ->leftJoin("m.timeLogs", "tl")->addSelect("tl")
                 ->leftJoin("m.notes", "n")->addSelect("n");
         }
