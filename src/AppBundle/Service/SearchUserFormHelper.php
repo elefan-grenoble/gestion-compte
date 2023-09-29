@@ -352,7 +352,7 @@ class SearchUserFormHelper
             $qb->leftJoin("b.commissions", "c")->addSelect("c");
             $qb->leftJoin("b.formations", "f")->addSelect("f");
         }
-        if (in_array($type, ['lateregistration', 'shifttimelog'])) {
+        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog'])) {
             $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->where('lr.id IS NULL') // registration is the last one registered
                 ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = m.id and ti.type != 20) AS HIDDEN time")
