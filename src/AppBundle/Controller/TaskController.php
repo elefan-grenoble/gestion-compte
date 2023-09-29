@@ -125,7 +125,6 @@ class TaskController extends Controller
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($task)->createView()
         ));
-
     }
 
 

@@ -229,13 +229,13 @@ class OpeningHour
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return OpeningHour
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }

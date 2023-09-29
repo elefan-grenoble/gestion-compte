@@ -23,13 +23,6 @@ class HelloassoPayment
     private $id;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
      * @var int
      *
      * @ORM\Column(name="payment_id", type="integer", unique=true)
@@ -92,6 +85,13 @@ class HelloassoPayment
     private $registration;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
      * @return string
      */
     public function __toString()
@@ -110,7 +110,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -120,31 +120,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return HelloassoPayment
-     */
-    public function setCreatedAt($date)
-    {
-        $this->createdAt = $date;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * Set date.
+     * Set date
      *
      * @param \DateTime $date
      *
@@ -158,7 +134,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get date.
+     * Get date
      *
      * @return \DateTime
      */
@@ -168,7 +144,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set amount.
+     * Set amount
      *
      * @param float $amount
      *
@@ -182,7 +158,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get amount.
+     * Get amount
      *
      * @return float
      */
@@ -192,7 +168,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set payerFirstName.
+     * Set payerFirstName
      *
      * @param string $payerFirstName
      *
@@ -206,7 +182,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get payerFirstName.
+     * Get payerFirstName
      *
      * @return string
      */
@@ -216,7 +192,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set payerLastName.
+     * Set payerLastName
      *
      * @param string $payerLastName
      *
@@ -230,7 +206,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get payerLastName.
+     * Get payerLastName
      *
      * @return string
      */
@@ -240,7 +216,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set registration.
+     * Set registration
      *
      * @param \AppBundle\Entity\Registration|null $registration
      *
@@ -254,7 +230,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get registration.
+     * Get registration
      *
      * @return \AppBundle\Entity\Registration|null
      */
@@ -264,7 +240,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set paymentId.
+     * Set paymentId
      *
      * @param int $paymentId
      *
@@ -278,7 +254,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get paymentId.
+     * Get paymentId
      *
      * @return int
      */
@@ -336,7 +312,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set campaignId.
+     * Set campaignId
      *
      * @param int $campaignId
      *
@@ -350,7 +326,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get campaignId.
+     * Get campaignId
      *
      * @return int
      */
@@ -360,7 +336,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set status.
+     * Set status
      *
      * @param string $status
      *
@@ -374,7 +350,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get status.
+     * Get status
      *
      * @return string
      */
@@ -384,7 +360,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set email.
+     * Set email
      *
      * @param string $email
      *
@@ -398,12 +374,36 @@ class HelloassoPayment
     }
 
     /**
-     * Get email.
+     * Get email
      *
      * @return string
      */
     public function getEmail()
     {
         return $this->email;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return HelloassoPayment
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

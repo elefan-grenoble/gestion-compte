@@ -176,13 +176,13 @@ class SocialNetwork
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return SocialNetwork
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }

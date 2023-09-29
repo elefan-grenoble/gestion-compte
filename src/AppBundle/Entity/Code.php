@@ -101,30 +101,6 @@ class Code
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Code
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
      * Set registrar
      *
      * @param \AppBundle\Entity\User $registrar
@@ -170,5 +146,29 @@ class Code
     public function getClosed()
     {
         return $this->closed;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return Code
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

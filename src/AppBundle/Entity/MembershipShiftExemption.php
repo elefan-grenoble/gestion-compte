@@ -78,9 +78,18 @@ class MembershipShiftExemption
      */
     private $createdBy;
 
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -90,48 +99,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * @ORM\PrePersist
-     */
-    public function setCreatedAt()
-    {
-        $this->createdAt = new \DateTime();
-    }
-
-    /**
-     * Get createdAt.
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * Set createdBy.
-     *
-     * @param \AppBundle\Entity\User $createBy
-     *
-     * @return MembershipShiftExemption
-     */
-    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
-    {
-        $this->createdBy = $createdBy;
-        return $this;
-    }
-
-    /**
-     * Get createdBy.
-     *
-     * @return \AppBundle\Entity\User
-     */
-    public function getCreatedBy()
-    {
-        return $this->createdBy;
-    }
-
-    /**
-     * Set shiftExemption.
+     * Set shiftExemption
      *
      * @param \AppBundle\Entity\ShiftExemption $shiftExemption
      *
@@ -145,7 +113,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get shiftExemption.
+     * Get shiftExemption
      *
      * @return ShiftExemption
      */
@@ -155,7 +123,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set description.
+     * Set description
      *
      * @param string $description
      *
@@ -169,7 +137,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get description.
+     * Get description
      *
      * @return string
      */
@@ -179,7 +147,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get membership.
+     * Get membership
      *
      * @return Membership
      */
@@ -189,7 +157,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set membership.
+     * Set membership
      *
      * @param \AppBundle\Entity\Membership $membership
      */
@@ -199,7 +167,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set start.
+     * Set start
      *
      * @param \DateTime $start
      *
@@ -213,7 +181,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get start.
+     * Get start
      *
      * @return \DateTime
      */
@@ -223,7 +191,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set end.
+     * Set end
      *
      * @param \DateTime $end
      *
@@ -237,13 +205,60 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get end.
+     * Get end
      *
      * @return \DateTime
      */
     public function getEnd()
     {
         return $this->end;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return MembershipShiftExemption
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return MembershipShiftExemption
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
     }
 
     /**

@@ -339,13 +339,13 @@ class Task
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return Task
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }
