@@ -4,6 +4,7 @@ namespace AppBundle\Service;
 
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\MembershipShiftExemption;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
@@ -202,5 +203,13 @@ class MembershipService
     public function getShiftFreeLogs(Membership $member)
     {
         return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreed($member);
+    }
+
+    public function memberHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
+    {
+        $shifts = $this->em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
+        return $shifts->exists(function($key, $value) use ($membershipShiftExemption) {
+            return $membershipShiftExemption->isCurrent($value->getStart());
+        });
     }
 }

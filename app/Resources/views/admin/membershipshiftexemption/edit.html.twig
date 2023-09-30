@@ -12,45 +12,45 @@
 {% block content %}
     <h4>Editer une exemption de bénévolat</h4>
 
-    {{ form_start(edit_form) }}
+    {{ form_start(form) }}
     <div class="errors">
-        {{ form_errors(edit_form) }}
+        {{ form_errors(form) }}
     </div>
     <div class="row">
         <div class="col s6">
-            <label for="beneficiaries">Bénéficiaires</label>
-            <input id='beneficiaries' type="text" value="{{ membershipShiftExemption.membership.beneficiaries | join(', ') }}" disabled>
+            <label for="membership">Membre</label>
+            <input id='membership' type="text" value="{{ membershipShiftExemption.membership.memberNumberWithBeneficiaryListString }}" disabled>
         </div>
         <div class="col s6">
-            {{ form_label(edit_form.shiftExemption) }}
-            {{ form_errors(edit_form.shiftExemption) }}
-            {{ form_widget(edit_form.shiftExemption) }}
+            {{ form_label(form.shiftExemption) }}
+            {{ form_errors(form.shiftExemption) }}
+            {{ form_widget(form.shiftExemption) }}
         </div>
         <div class="col s12 input-field">
-            {{ form_label(edit_form.description) }}
-            {{ form_errors(edit_form.description) }}
-            {{ form_widget(edit_form.description) }}
+            {{ form_label(form.description) }}
+            {{ form_errors(form.description) }}
+            {{ form_widget(form.description) }}
         </div>
         <div class="col s6 input-field">
-            {{ form_label(edit_form.start) }}
-            {{ form_errors(edit_form.start) }}
-            {{ form_widget(edit_form.start) }}
+            {{ form_label(form.start) }}
+            {{ form_errors(form.start) }}
+            {{ form_widget(form.start) }}
         </div>
         <div class="col s6 input-field">
-            {{ form_label(edit_form.end) }}
-            {{ form_errors(edit_form.end) }}
-            {{ form_widget(edit_form.end) }}
+            {{ form_label(form.end) }}
+            {{ form_errors(form.end) }}
+            {{ form_widget(form.end) }}
         </div>
     </div>
     <a href="{{ path('admin_membershipshiftexemption_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
     <button type="submit" class="btn waves-effect waves-light">
         <i class="material-icons left">save</i>Enregistrer
     </button>
-    {{ form_end(edit_form) }}
+    {{ form_end(form) }}
 
     {% if ((membershipShiftExemption.start | date('Y-m-d')) > ('now' | date('Y-m-d'))) or is_granted("ROLE_SUPER_ADMIN") %}
         {{ form_start(delete_form) }}
-        <button type="submit" class="btn waves-effect waves-light red">
+        <button type="submit" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cette exemption ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();">
             <i class="material-icons left">delete</i>Supprimer
         </button>
         {{ form_end(delete_form) }}

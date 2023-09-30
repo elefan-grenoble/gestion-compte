@@ -5,7 +5,7 @@
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<a href="{{ path('admin_membershipshiftexemption_index') }}"><i class="material-icons">list</i>&nbsp;Liste des membres exempté.e.s de bénévolat</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_membershipshiftexemption_index') }}"><i class="material-icons">list</i>&nbsp;Liste des membres exemptés de bénévolat</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
@@ -18,9 +18,9 @@
     </div>
     <div class="row">
         <div class="col s6 input-field">
-            {{ form_label(form.beneficiary) }}
-            {{ form_errors(form.beneficiary) }}
-            {{ form_widget(form.beneficiary) }}
+            {{ form_label(form.membership) }}
+            {{ form_errors(form.membership) }}
+            {{ form_widget(form.membership) }}
         </div>
         <div class="col s6">
             {{ form_label(form.shiftExemption) }}
@@ -49,5 +49,5 @@
 {% endblock %}
 
 {% block javascripts %}
-{% include "/admin/membershipshiftexemption/_form_js.html.twig" %}
+{% include "admin/membershipshiftexemption/_form_js.html.twig" %}
 {% endblock %}
