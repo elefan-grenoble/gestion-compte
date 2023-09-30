@@ -42,12 +42,13 @@ class ShiftExemptionController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $shiftExemption = new Shiftexemption();
         $form = $this->createForm('AppBundle\Form\ShiftExemptionType', $shiftExemption);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->persist($shiftExemption);
             $em->flush();
 
@@ -70,12 +71,13 @@ class ShiftExemptionController extends Controller
     public function editAction(Request $request, ShiftExemption $shiftExemption)
     {
         $session = new Session();
-        $deleteForm = $this->createDeleteForm($shiftExemption);
-        $editForm = $this->createForm('AppBundle\Form\ShiftExemptionType', $shiftExemption);
-        $editForm->handleRequest($request);
+        $em = $this->getDoctrine()->getManager();
 
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+        $form = $this->createForm('AppBundle\Form\ShiftExemptionType', $shiftExemption);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->flush();
 
             $session->getFlashBag()->add('success', 'Le motif d\'exemption a bien été édité !');
             return $this->redirectToRoute('admin_shiftexemption_index');
@@ -83,8 +85,8 @@ class ShiftExemptionController extends Controller
 
         return $this->render('admin/shiftexemption/edit.html.twig', array(
             'shiftExemption' => $shiftExemption,
-            'form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
+            'form' => $form->createView(),
+            'delete_form' => $this->getDeleteForm($shiftExemption)->createView(),
         ));
     }
 
@@ -97,11 +99,12 @@ class ShiftExemptionController extends Controller
     public function deleteAction(Request $request, ShiftExemption $shiftExemption)
     {
         $session = new Session();
-        $form = $this->createDeleteForm($shiftExemption);
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->getDeleteForm($shiftExemption);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($shiftExemption);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le motif d\'exemption bien été supprimé !');
@@ -117,12 +120,11 @@ class ShiftExemptionController extends Controller
      *
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createDeleteForm(ShiftExemption $shiftExemption)
+    private function getDeleteForm(ShiftExemption $shiftExemption)
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_shiftexemption_delete', array('id' => $shiftExemption->getId())))
             ->setMethod('DELETE')
-            ->getForm()
-        ;
+            ->getForm();
     }
 }
