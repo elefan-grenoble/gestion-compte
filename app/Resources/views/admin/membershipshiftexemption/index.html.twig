@@ -1,15 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des membres exempté.e.s de bénévolat - {{ site_name }}{% endblock %}
+{% block title %}Liste des membres exemptés de bénévolat - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">list</i>&nbsp;Liste des membres exempté.e.s de bénévolat
+<i class="material-icons">list</i>&nbsp;Liste des membres exemptés de bénévolat
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des membres exempté.e.s de bénévolat ({{ result_count }})</h4>
+    <h4>Liste des membres exemptés de bénévolat ({{ result_count }})</h4>
 
     {# Filter form  --------- #}
     <ul class="collapsible">
@@ -69,7 +69,7 @@
                 </td>
                 <td>
                     <a href="{{ path("member_show", { 'member_number': membershipShiftExemption.membership.memberNumber }) }}">
-                        {{ membershipShiftExemption.membership.beneficiaries | join('<br/>') | raw }}
+                        {{ membershipShiftExemption.membership.memberNumberWithBeneficiaryListString }}
                     </a>
                 </td>
                 <td>{{ membershipShiftExemption.shiftExemption }}</td>

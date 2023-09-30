@@ -18,8 +18,8 @@
     </div>
     <div class="row">
         <div class="col s6">
-            <label for="beneficiaries">Bénéficiaires</label>
-            <input id='beneficiaries' type="text" value="{{ membershipShiftExemption.membership.beneficiaries | join(', ') }}" disabled>
+            <label for="membership">Membre</label>
+            <input id='membership' type="text" value="{{ membershipShiftExemption.membership.memberNumberWithBeneficiaryListString }}" disabled>
         </div>
         <div class="col s6">
             {{ form_label(edit_form.shiftExemption) }}

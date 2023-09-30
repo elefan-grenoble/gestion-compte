@@ -2,7 +2,7 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Form\AutocompleteBeneficiaryType;
+use AppBundle\Form\AutocompleteMembershipType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -15,7 +15,6 @@ use \Datetime;
 
 class MembershipShiftExemptionType extends AbstractType
 {
-
     /**
      * {@inheritdoc}
      */
@@ -29,9 +28,9 @@ class MembershipShiftExemptionType extends AbstractType
 
                     // checks if the MembershipShiftExamption object is "new"
                     if (!$membershipShiftExemption || null === $membershipShiftExemption->getId()) {
-                        $form->add('beneficiary', AutocompleteBeneficiaryType::class, [
+                        $form->add('membership', AutocompleteMembershipType::class, [
                             'mapped' => false,
-                            'label' => "Bénéficiaire",
+                            'label' => "Membre",
                         ]);
                     }
                     $now = new DateTime();
@@ -76,6 +75,4 @@ class MembershipShiftExemptionType extends AbstractType
     {
         return 'appbundle_membershipshiftexemption';
     }
-
-
 }

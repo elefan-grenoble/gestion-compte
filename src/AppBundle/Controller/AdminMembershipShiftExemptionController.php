@@ -2,7 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\MembershipShiftExemption;
 use AppBundle\Form\AutocompleteMembershipType;
 use AppBundle\Repository\ShiftExemptionRepository;
@@ -132,7 +131,7 @@ class AdminMembershipShiftExemptionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $membership = $form->get("beneficiary")->getData()->getMembership();
+            $membership = $form->get("membership")->getData();
             $membershipShiftExemption->setMembership($membership);
 
             if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
