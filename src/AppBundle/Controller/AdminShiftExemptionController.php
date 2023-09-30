@@ -105,6 +105,7 @@ class AdminShiftExemptionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // TODO: error 500 if shiftExemption is used in membershipShiftExemption
             $em->remove($shiftExemption);
             $em->flush();
             $session->getFlashBag()->add('success', 'Le motif d\'exemption bien été supprimé !');
