@@ -10,11 +10,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
- * Shiftexemption controller.
+ * Admin Shiftexemption controller.
  *
  * @Route("admin/shifts/exemptions")
  */
-class ShiftExemptionController extends Controller
+class AdminShiftExemptionController extends Controller
 {
     /**
      * Lists all shiftExemption entities.

@@ -17,7 +17,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use \Datetime;
 
 /**
- * MembershipShiftExemption controller.
+ * Admin MembershipShiftExemption controller.
  *
  * @Route("admin/membershipshiftexemption")
  */
