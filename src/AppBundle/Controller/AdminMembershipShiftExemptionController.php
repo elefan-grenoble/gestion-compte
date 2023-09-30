@@ -22,7 +22,7 @@ use \Datetime;
  *
  * @Route("admin/membershipshiftexemption")
  */
-class MembershipShiftExemptionController extends Controller
+class AdminMembershipShiftExemptionController extends Controller
 {
     /**
      * Filter form.
