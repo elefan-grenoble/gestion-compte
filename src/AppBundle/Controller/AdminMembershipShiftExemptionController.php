@@ -135,8 +135,8 @@ class AdminMembershipShiftExemptionController extends Controller
             $membership = $form->get("beneficiary")->getData()->getMembership();
             $membershipShiftExemption->setMembership($membership);
 
-            if ($this->isMembershipHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
-                $session->getFlashBag()->add("error", "Désolé, les bénéficiaires ont déjà des créneaux planifiés sur la plage d'exemption.");
+            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+                $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
                 return $this->redirectToRoute('admin_membershipshiftexemption_new');
             }
 
@@ -169,8 +169,8 @@ class AdminMembershipShiftExemptionController extends Controller
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            if ($this->isMembershipHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
-                $session->getFlashBag()->add("error", "Désolé, les bénéficiaires ont déjà des créneaux planifiés sur la plage d'exemption.");
+            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+                $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $session->getFlashBag()->add('success', 'L\'exemption de créneau a bien été éditée !');
                 $this->getDoctrine()->getManager()->flush();
@@ -233,12 +233,5 @@ class AdminMembershipShiftExemptionController extends Controller
         ;
     }
 
-    private function isMembershipHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
-    {
-        $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
-        return $shifts->exists(function($key, $value) use ($membershipShiftExemption) {
-            return $membershipShiftExemption->isCurrent($value->getStart());
-        });
-    }
+    
 }
