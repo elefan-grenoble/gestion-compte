@@ -58,9 +58,9 @@ class ShiftController extends Controller
     public function newAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $em = $this->getDoctrine()->getManager();
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
@@ -130,12 +130,13 @@ class ShiftController extends Controller
     public function bookShiftAction(Request $request, Shift $shift): Response
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $content = json_decode($request->getContent());
         $beneficiaryId = $content->beneficiaryId;
         $isFixe = $content->typeService;
 
-        $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
 
         // Check if the shift is bookable by the given beneficiary
@@ -149,7 +150,6 @@ class ShiftController extends Controller
         }
 
         if (!$shift->getBooker()) {
-            $current_user = $this->get('security.token_storage')->getToken()->getUser();
             $shift->setBooker($current_user);
             $shift->setBookedTime(new DateTime('now'));
         }
@@ -184,6 +184,7 @@ class ShiftController extends Controller
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $form = $this->createShiftBookAdminForm($shift);
@@ -214,7 +215,6 @@ class ShiftController extends Controller
                 $shift->setLastShifter(null);
                 $shift->setFixe($fixe);
 
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
 
                 $member = $beneficiary->getMembership();
@@ -267,6 +267,7 @@ class ShiftController extends Controller
     public function freeShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
@@ -291,7 +292,6 @@ class ShiftController extends Controller
             // free shift
             $shift->free($reason);
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($shift);
             $em->flush();
 
@@ -317,6 +317,7 @@ class ShiftController extends Controller
     public function freeShiftAdminAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
@@ -352,7 +353,6 @@ class ShiftController extends Controller
                 // free shift
                 $shift->free($reason);
 
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
@@ -402,6 +402,7 @@ class ShiftController extends Controller
     public function validateShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
@@ -430,7 +431,6 @@ class ShiftController extends Controller
                     $shift->invalidateShiftParticipation();
                 }
 
-                $em = $this->getDoctrine()->getManager();
                 $em->persist($shift);
                 $em->flush();
 
@@ -481,36 +481,36 @@ class ShiftController extends Controller
     public function acceptReservedShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        if (!$shift->getId() || !$this->isGranted('accept', $shift)) {
+        if (!$shift->getId()) {
+            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+            return $this->redirectToRoute("homepage");
+        }
+        if (!$this->isGranted('accept', $shift)) {
             $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
             return $this->redirectToRoute("homepage");
         }
-
-        if ($shift->getId()) {
-            if ($shift->getLastShifter()) {
-                $current_user = $this->get('security.token_storage')->getToken()->getUser();
-                $shift->setBooker($current_user);
-                $beneficiary = $shift->getLastShifter();
-                $shift->setShifter($beneficiary);
-                $shift->setBookedTime(new DateTime('now'));
-                $shift->setLastShifter(null);
-                $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-
-                $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
-            } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délai de reservation est écoulé.");
-            }
-        } else {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+        if (!$shift->getLastShifter()) {
+            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
+            return $this->redirectToRoute("homepage");
         }
 
+        $shift->setBooker($current_user);
+        $beneficiary = $shift->getLastShifter();
+        $shift->setShifter($beneficiary);
+        $shift->setBookedTime(new DateTime('now'));
+        $shift->setLastShifter(null);
+        $shift->setFixe(false);
+
+        $em->persist($shift);
+        $em->flush();
+
+        $dispatcher = $this->get('event_dispatcher');
+        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+
+        $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
         return $this->redirectToRoute('homepage');
     }
 
@@ -522,28 +522,30 @@ class ShiftController extends Controller
     public function rejectReservedShiftAction(Request $request, Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
+        if (!$shift->getId()) {
+            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+            return $this->redirectToRoute("homepage");
+        }
         if (!$this->isGranted('reject', $shift)) {
             $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
             return $this->redirectToRoute("homepage");
         }
-
-        if ($shift->getId()) {
-            if ($shift->getLastShifter()) {
-                $shift->setLastShifter(null);
-                $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($shift);
-                $em->flush();
-                $session->getFlashBag()->add('success', "Créneau libéré");
-                $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
-            } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délai de reservation est écoulé.");
-            }
-        } else {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+        if (!$shift->getLastShifter()) {
+            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
+            return $this->redirectToRoute("homepage");
         }
 
+        $shift->setLastShifter(null);
+        $shift->setFixe(false);
+
+        $em->persist($shift);
+        $em->flush();
+
+        $session->getFlashBag()->add('success', "Créneau libéré !");
+        $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat :)");
         return $this->redirectToRoute('homepage');
     }
 
@@ -555,11 +557,13 @@ class ShiftController extends Controller
      */
     public function deleteShiftAction(Request $request, Shift $shift)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $form = $this->createShiftDeleteForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $beneficiary = $shift->getShifter();
             $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
@@ -595,7 +599,6 @@ class ShiftController extends Controller
                 return new JsonResponse(array('message'=>$message), 400);
             }
         } else {
-            $session = new Session();
             $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }

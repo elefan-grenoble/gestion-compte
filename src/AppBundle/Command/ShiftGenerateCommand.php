@@ -101,13 +101,14 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());
                             $current_shift->setPosition($position);
-                            // si c'est un créneau fixe
+                            // si c'est un créneau fixe + membre non exempté
                             if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {
                                 $current_shift->setFixe(True);
                                 $current_shift->setShifter($position->getShifter());
                                 $current_shift->setBookedTime(new \DateTime('now'));
                                 $current_shift->setBooker($admin);
-                            } else if ($last_cycle_shift && $last_cycle_shift->getShifter() && $reserve_new_shift_to_prior_shifter) {
+                            // créneau pré-reservé
+                            } else if ($reserve_new_shift_to_prior_shifter && $last_cycle_shift && $last_cycle_shift->getShifter()) {
                                 $current_shift->setLastShifter($last_cycle_shift->getShifter());
                                 $reservedShifts[$count_new_all] = $current_shift;
                                 $formerShifts[$count_new_all] = $last_cycle_shift;
