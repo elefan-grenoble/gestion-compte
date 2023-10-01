@@ -18,7 +18,10 @@
     <tbody>
         {% for event in events %}
             <tr>
-                <td>{{ event.title }}</td>
+                <td>
+                    {{ event.title }}
+                    {% if event.displayedHome %}⭐️{% endif %}
+                </td>
                 <td>{{ event.kind }}</td>
                 <td>
                     {{ event.date | date_fr_full_with_time }}

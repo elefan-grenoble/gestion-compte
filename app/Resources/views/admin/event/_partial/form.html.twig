@@ -28,6 +28,14 @@
 <div class="row">
     {{ form_row(form.imgFile) }}
 </div>
+<div class="row">
+    {{ form_errors(form.displayed_home) }}
+    <label>
+        {{ form_widget(form.displayed_home) }}
+        <span>{{ form.displayed_home.vars.label }}</span>
+        <div class="helper-text" data-error="wrong" data-success="right">L'événement sera affiché sur la page d'accueil de chaque membre</div>
+    </label>
+</div>
 
 {% if edit %}
     <h5>Nécessite un vote ?</h5>

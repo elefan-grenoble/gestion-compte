@@ -103,21 +103,28 @@ class Event
     /**
      * @var bool
      *
-     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
+     * @ORM\Column(name="need_proxy", type="boolean", unique=false, options={"default" : 0}, nullable=true)
      */
     private $need_proxy;
 
     /**
      * @var bool
      *
-     * @ORM\Column(name="anonymous_proxy", type="boolean", unique=false, options={"default" : 0},nullable=true)
+     * @ORM\Column(name="anonymous_proxy", type="boolean", unique=false, options={"default" : 0}, nullable=true)
      */
     private $anonymous_proxy;
 
     /**
-     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="event",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="Proxy", mappedBy="event", cascade={"persist", "remove"})
      */
     private $proxies;
+
+    /**
+     * @var bool
+     * 
+     * @ORM\Column(name="displayed_home", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $displayedHome;
 
     /**
      * @var \DateTime
@@ -557,6 +564,30 @@ class Event
     public function getImgSize()
     {
         return $this->imgSize;
+    }
+
+    /**
+     * Set displayedHome
+     *
+     * @param bool|null $displayedHome
+     *
+     * @return Event
+     */
+    public function setDisplayedHome($displayedHome = false)
+    {
+        $this->displayedHome = $displayedHome;
+
+        return $this;
+    }
+
+    /**
+     * Get displayedHome
+     *
+     * @return bool
+     */
+    public function getDisplayedHome()
+    {
+        return $this->displayedHome;
     }
 
     /**

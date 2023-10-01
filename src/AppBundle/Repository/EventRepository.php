@@ -17,7 +17,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         return $this->findBy(array(), array('date' => 'DESC'));
     }
 
-    public function findFutureOrOngoing(EventKind $eventKind = null, \DateTime $max = null, int $limit = null)
+    public function findFutureOrOngoing(EventKind $eventKind = null, bool $dislayedHome = false, \DateTime $max = null, int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.kind', 'ek')
@@ -29,6 +29,10 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             $qb
                 ->andwhere('e.kind = :kind')
                 ->setParameter('kind', $eventKind);
+        }
+
+        if ($dislayedHome) {
+            $qb->andwhere('e.displayedHome = 1');
         }
 
         if ($max) {
@@ -121,6 +125,16 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         }
 
         $qb->orderBy('e.date', 'DESC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findAllDisplayedHome()
+    {
+        $qb = $this->createQueryBuilder('e')
+            ->where('e.displayedHome = 1');
 
         return $qb
             ->getQuery()

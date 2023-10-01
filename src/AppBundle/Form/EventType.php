@@ -85,6 +85,11 @@ class EventType extends AbstractType
                     'required' => false,
                     'allow_delete' => true,
                     'download_link' => true,
+                ))
+                ->add('displayed_home', CheckboxType::class, array(
+                    'required' => false,
+                    'label' => 'Mettre en avant',
+                    'attr' => array('class' => 'filled-in')
                 ));
 
             if ($userData && $userData->getId()) {
