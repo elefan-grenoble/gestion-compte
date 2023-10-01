@@ -7,7 +7,7 @@
             <img src="{{ event|img('imgFile', 'card') }}" />
         </div>
     {% endif %}
-    <div class="card-content {% if from_admin %}white-text{% endif %}">
+    <div class="card-content {% if from_admin %}white-text{% endif %} left-align">
         <span class="card-title">
             {{ event.title }}
             {% if event.displayedHome and not from_home %}⭐️{% endif %}
@@ -83,11 +83,11 @@
                             {% endif %}
                         {% endfor %}
                         {% if (proxy_given is null) and (proxy_received|length == 0) %}
-                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only" title="Je ne peux pas venir, je fais une procuration">
-                                Je ne peux pas venir, je fais une procuration
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only" title="Je ne peux pas venir ? je fais une procuration">
+                                Je ne peux pas venir ? je fais une procuration
                             </a>
-                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up" title="Je ne peux pas venir, je fais une procuration">
-                                Je ne peux pas venir, je fais une procuration
+                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up" title="Je ne peux pas venir ? je fais une procuration">
+                                Je ne peux pas venir ? je fais une procuration
                             </a>
                             {% if event.anonymousProxy %}
                                 <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only" title="Je viens, j'accepte une procuration">
