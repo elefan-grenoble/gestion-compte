@@ -7,7 +7,10 @@
         </div>
     {% endif %}
     <div class="card-content {% if from_admin %}white-text{% endif %}">
-        <span class="card-title">{{ event.title }}</span>
+        <span class="card-title">
+            {{ event.title }}
+            {% if event.displayedHome %}⭐️{% endif %}
+        </span>
         <p>
             <i class="material-icons tiny">event</i>
             {{ event.date | date_fr_full_with_time }}
