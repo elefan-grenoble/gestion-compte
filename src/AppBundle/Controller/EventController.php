@@ -48,7 +48,7 @@ class EventController extends Controller
             $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
         }
 
-        $events = $em->getRepository('AppBundle:Event')->findFutureOrOngoing($eventKind, $eventDateMax, $filter_limit);
+        $events = $em->getRepository('AppBundle:Event')->findFutureOrOngoing($eventKind, false, $eventDateMax, $filter_limit);
 
         return $this->render('event/_partial/widget.html.twig', [
             'events' => $events,
