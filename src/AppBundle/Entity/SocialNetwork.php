@@ -156,7 +156,7 @@ class SocialNetwork
      *
      * @return SocialNetwork
      */
-    public function setDisplayedFooter($displayedFooter = null)
+    public function setDisplayedFooter($displayedFooter = false)
     {
         $this->displayedFooter = $displayedFooter;
 
@@ -166,7 +166,7 @@ class SocialNetwork
     /**
      * Get displayedFooter
      *
-     * @return bool|null
+     * @return bool
      */
     public function getDisplayedFooter()
     {
