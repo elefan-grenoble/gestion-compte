@@ -163,12 +163,6 @@
 
             <div class="homebox">
                 <h5><span class="white">Événements</span></h5>
-                <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
-                    <i class="material-icons left" >event</i>Les événements à venir
-                    {% if eventsFutureOrOngoing | length %}
-                        <span class="bubble_counter red white-text">{{ eventsFutureOrOngoing | length }}</span>
-                    {% endif %}
-                </a>
                 {% if eventsFutureOrOngoingDisplayedHome | length %}
                     <div class="row">
                         {% for eventDisplayedHome in eventsFutureOrOngoingDisplayedHome %}
@@ -178,6 +172,12 @@
                         {% endfor %}
                     </div>
                 {% endif %}
+                <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
+                    <i class="material-icons left" >event</i>Les événements à venir
+                    {% if eventsFutureOrOngoing | length %}
+                        <span class="bubble_counter red white-text">{{ eventsFutureOrOngoing | length }}</span>
+                    {% endif %}
+                </a>
             </div>
 
             {% if app.user.beneficiary.ownedCommissions | length %}
