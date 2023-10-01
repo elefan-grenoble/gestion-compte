@@ -159,16 +159,27 @@
                         });
                     });
                 </script>
+            </div>
 
-                <br />
-                <br />
+            <div class="homebox">
+                <h5><span class="white">Événements</span></h5>
                 <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
                     <i class="material-icons left" >event</i>Les événements à venir
                     {% if eventsFutureOrOngoing | length %}
                         <span class="bubble_counter red white-text">{{ eventsFutureOrOngoing | length }}</span>
                     {% endif %}
                 </a>
+                {% if eventsFutureOrOngoingDisplayedHome | length %}
+                    <div class="row">
+                        {% for eventDisplayedHome in eventsFutureOrOngoingDisplayedHome %}
+                            <div class="col s12">
+                                {% include "admin/event/_partial/card.html.twig" with { event: eventDisplayedHome, from_home: true } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
+
             {% if app.user.beneficiary.ownedCommissions | length %}
                 <div class="homebox">
                     <h5><span class="white">Mes commissions</span></h5>
@@ -179,6 +190,7 @@
                     {% endfor %}
                 </div>
             {% endif %}
+
             {% if (member | uptodate) and display_keys_shop %}
                 <div class="homebox">
                     <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>

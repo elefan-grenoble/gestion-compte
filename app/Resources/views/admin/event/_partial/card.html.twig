@@ -1,3 +1,4 @@
+{% set from_home = from_home ?? false %}
 {% set from_admin = from_admin ?? false %}
 
 <div class="card small {% if from_admin %}blue-grey darken-1{% endif %}">
@@ -9,7 +10,7 @@
     <div class="card-content {% if from_admin %}white-text{% endif %}">
         <span class="card-title">
             {{ event.title }}
-            {% if event.displayedHome %}⭐️{% endif %}
+            {% if event.displayedHome and not from_home %}⭐️{% endif %}
         </span>
         <p>
             <i class="material-icons tiny">event</i>

@@ -101,11 +101,13 @@ class DefaultController extends Controller
         }
 
         $eventsFutureOrOngoing = $em->getRepository('AppBundle:Event')->findFutureOrOngoing();
+        $eventsFutureOrOngoingDisplayedHome = $em->getRepository('AppBundle:Event')->findFutureOrOngoing(null, true);
         $dynamicContentTop = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME_TOP")->getContent();
         $dynamicContentBottom = $em->getRepository('AppBundle:DynamicContent')->findOneByCode("HOME_BOTTOM")->getContent();
 
         return $this->render('default/index.html.twig', [
             'eventsFutureOrOngoing' => $eventsFutureOrOngoing,
+            'eventsFutureOrOngoingDisplayedHome' => $eventsFutureOrOngoingDisplayedHome,
             'dynamicContentTop' => $dynamicContentTop,
             'dynamicContentBottom' => $dynamicContentBottom,
         ]);
