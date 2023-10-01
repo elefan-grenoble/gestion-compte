@@ -11,6 +11,7 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\ShiftReservedEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
@@ -221,6 +222,41 @@ class EmailingEventListener
             die($e->getMessage());
         }
         $this->mailer->send($oups);
+    }
+
+    /**
+     * @param ShiftReservedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftReserved(ShiftReservedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftReserved");
+
+        $shift = $event->getShift();
+        $formerShift = $event->getFormerShift();
+        $beneficiary = $shift->getLastShifter();
+
+        $router = $this->container->get('router');
+
+        $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
+
+        $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShift->getStart()->format("d F") .' dans '.$d.' jours'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setTo($beneficiary->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/shift_reserved.html.twig',
+                    array(
+                        'shift' => $shift,
+                        'oldshift' => $formerShift,
+                        'days' => $d,
+                        'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($beneficiary->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($beneficiary->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($mail);
     }
 
     /**

@@ -165,6 +165,7 @@ services:
                 $wikiKeysUrl: "%wiki_keys_url%"
             tags:
                 - { name: kernel.event_listener, event: code.new, method: onCodeNew }
+                - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
                 - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
                 - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
                 - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }

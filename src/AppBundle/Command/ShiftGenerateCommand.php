@@ -4,12 +4,12 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ClosingException;
+use AppBundle\Event\ShiftReservedEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ShiftGenerateCommand extends ContainerAwareCommand
 {
@@ -133,26 +133,9 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             }
         }
 
-        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($reservedShifts as $i => $shift) {
-            $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
-            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                ->setTo($shift->getLastShifter()->getEmail())
-                ->setBody(
-                    $this->getContainer()->get('twig')->render(
-                        'emails/shift_reserved.html.twig',
-                        array(
-                            'shift' => $shift,
-                            'oldshift' => $formerShifts[$i],
-                            'days' => $d,
-                            'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                            'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                        )
-                    ),
-                    'text/html'
-                );
-            $mailer->send($mail);
+            $dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[i]));
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');
