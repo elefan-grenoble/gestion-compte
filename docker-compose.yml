@@ -28,10 +28,9 @@ services:
       context: .docker
     command: >
       bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
-      && php bin/console doctrine:migration:migrate
-      && php bin/console server:run *:8000"
+      && php bin/console doctrine:migration:migrate"
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
       - .:/var/www/site
     restart: always
