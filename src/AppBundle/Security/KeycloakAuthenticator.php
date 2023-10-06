@@ -185,7 +185,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
              'flying'=>'setFlying'] as $key => $action){
             $value = $this->getKeycloakUserAttribute($keycloakUser,$key);
             if (!$value && in_array($key,$mandatory)) {
-                throw new Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
+                throw new \Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
                     'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
             }elseif (!$value && isset($default[$key]))
             {
