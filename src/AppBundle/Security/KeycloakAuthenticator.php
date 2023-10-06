@@ -207,6 +207,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
             $address->setStreet1($s1);
             $address->setStreet2($s2);
             $address->setZipcode($zip);
+
+            $this->em->persist($address);
+
             $beneficiary->setAddress($address);
         }
 
