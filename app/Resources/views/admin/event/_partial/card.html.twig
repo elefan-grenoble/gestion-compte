@@ -86,14 +86,8 @@
                             <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light btn purple hide-on-small-only" title="Je ne peux pas venir ? je fais une procuration">
                                 Je ne peux pas venir ? je fais une procuration
                             </a>
-                            <a href="{{ path("event_proxy_give",{'id':event.id}) }}" class="waves-effect waves-light purple-text hide-on-med-and-up" title="Je ne peux pas venir ? je fais une procuration">
-                                Je ne peux pas venir ? je fais une procuration
-                            </a>
                             {% if event.anonymousProxy %}
                                 <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light btn green hide-on-small-only" title="Je viens, j'accepte une procuration">
-                                    Je viens, j'accepte une procuration
-                                </a>
-                                <a href="{{ path("event_proxy_take",{'id':event.id}) }}" class="waves-effect waves-light green-text hide-on-med-and-up" title="Je viens, j'accepte une procuration">
                                     Je viens, j'accepte une procuration
                                 </a>
                             {% endif %}
