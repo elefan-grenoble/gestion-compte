@@ -7,6 +7,7 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
 use AppBundle\Form\ProxyType;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
@@ -97,6 +98,7 @@ class EventController extends Controller
      * Proxy new
      *
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function giveProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
     {
@@ -266,11 +268,14 @@ class EventController extends Controller
      *
      * Goes with the Twig template views/beneficiary/find_member_number.html.twig
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary", methods={"POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function findBeneficiaryAction(Event $event, Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $membership = $current_app_user->getBeneficiary()->getMembership();
 
         $minLastRegistration = clone $event->getMaxDateOfLastRegistration();
@@ -285,7 +290,6 @@ class EventController extends Controller
 
         if ($search_form->handleRequest($request)->isValid()) {
             $firstname = $search_form->get('firstname')->getData();
-            $em = $this->getDoctrine()->getManager();
             $qb = $em->createQueryBuilder();
             $beneficiaries_request = $qb->select('b')->from('AppBundle\Entity\Beneficiary', 'b')
                 ->join('b.user', 'u')
@@ -335,9 +339,10 @@ class EventController extends Controller
     }
 
     /**
-     * Proxy take
+     * Proxy remove
      *
      * @Route("/{event}/proxy/remove/{proxy}", name="event_proxy_lite_remove", methods={"GET"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function removeProxyLiteAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -359,6 +364,7 @@ class EventController extends Controller
      * Proxy take
      *
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function acceptProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
     {
