@@ -1,68 +1,76 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Procuration - {{ site_name }}{% endblock %}
+{% block title %}Événement : donner une procuration{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_detail', { 'id': event.id }) }}"><i class="material-icons">event</i>&nbsp;{{ event.title }}</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">add</i>Procuration
 {% endblock %}
 
 {% block content %}
-    <h4>Donner une procuration</h4>
-    <h5>{{ event.title }}&nbsp;<i>{{ event.date | date_fr_full_with_time }}</i></h5>
+<h4>Donner une procuration</h4>
 
-    {% if search_form is defined %}
-        {{ form_start(search_form) }}
-        <h6>Donner ma procuration à une personne que je connais</h6>
-        <div class="row">
-            <div class="col s6">
-                <div class="errors">
-                    {{ form_errors(search_form.firstname) }}
-                </div>
-                <div class="input-field">
-                    {{ form_widget(search_form.firstname) }}
-                    {{ form_label(search_form.firstname) }}
-                </div>
+{% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
+
+<br />
+
+{% if search_form is defined %}
+    {{ form_start(search_form) }}
+    <h6>Donner ma procuration à une personne que je connais</h6>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(search_form.firstname) }}
             </div>
-            <div class="col s6">
-                <button type="submit" class="btn-large waves-effect waves-light purple" id="find_beneficiary"><i class="material-icons left">search</i>Chercher ce bénéficiaire</button>
+            <div class="input-field">
+                {{ form_widget(search_form.firstname) }}
+                {{ form_label(search_form.firstname) }}
             </div>
         </div>
-        {{ form_end(search_form) }}
-    {% endif %}
+    </div>
+    <div>
+        <button type="submit" class="btn purple">
+            <i class="material-icons left">search</i>Chercher ce bénéficiaire
+        </button>
+    </div>
+    {{ form_end(search_form) }}
+{% endif %}
 
-    {% if confirm_form is defined %}
-        {{ form_start(confirm_form) }}
-        <h6>Donner ma procuration à une personne que je connais</h6>
-        <div class="row">
-            <div class="col s6">
-                <div class="errors">
-                    {{ form_errors(confirm_form.owner) }}
-                </div>
-                <div class="input-field">
-                    {{ form_widget(confirm_form.owner) }}
-                    {{ form_label(confirm_form.owner) }}
-                </div>
+{% if confirm_form is defined %}
+    {{ form_start(confirm_form) }}
+    <h6>Donner ma procuration à une personne que je connais</h6>
+    <div class="row">
+        <div class="col s6">
+            <div class="errors">
+                {{ form_errors(confirm_form.owner) }}
             </div>
-            <div class="col s6">
-                <button type="submit" class="btn-large waves-effect waves-light purple" id="find_beneficiary"><i class="material-icons left">check</i>Valider</button>
+            <div class="input-field">
+                {{ form_widget(confirm_form.owner) }}
+                {{ form_label(confirm_form.owner) }}
             </div>
         </div>
-        {{ form_end(confirm_form) }}
-
-        <a href="{{ path("event_proxy_give", { 'id': event.id }) }}" class="btn waves-effect waves-light">
+    </div>
+    <div>
+        <a href="{{ path("event_proxy_give", { 'id': event.id }) }}" class="btn white red-text">
             <i class="material-icons left">keyboard_return</i>Retourner à la recherche
         </a>
-    {% endif %}
+        <button type="submit" class="btn purple">
+            <i class="material-icons left">check</i>Valider
+        </button>
+    </div>
+    {{ form_end(confirm_form) }}
+{% endif %}
 
-    {% if event.anonymousProxy %}
-        {% if confirm_form is not defined %}
-            {{ form_start(form) }}
-            <div>
-                <h6>Donner ma procuration à une personne qui se propose</h6>
-                <button type="submit" class="btn-large waves-effect waves-light green" id="submit">Oui, Merci à elle !</button>
-            </div>
-            {{ form_end(form) }}
-        {% endif %}
+{% if event.anonymousProxy %}
+    {% if confirm_form is not defined %}
+        {{ form_start(form) }}
+        <h6>Donner ma procuration à une personne qui se propose</h6>
+        <div>
+            <button type="submit" class="btn green">Oui, Merci à elle !</button>
+        </div>
+        {{ form_end(form) }}
     {% endif %}
+{% endif %}
 {% endblock %}

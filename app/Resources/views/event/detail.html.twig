@@ -9,36 +9,7 @@
 {% endblock %}
 
 {% block content %}
-<h4>{{ event.title }}</h4>
-
-<div class="row">
-    <div class="col m6">
-        <p style="margin:0">
-            <i class="material-icons tiny">event</i>
-            {{ event.date | date_fr_full_with_time }}
-        </p>
-        {% if event.end %}
-            <p style="margin:0">
-                <i class="material-icons tiny">timer</i>
-                <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
-            </p>
-        {% endif %}
-        {% if event.location %}
-            <p style="margin:0">
-                <i class="material-icons tiny">location_on</i>
-                {{ event.location }}
-            </p>
-        {% endif %}
-    </div>
-    <div class="col m6">
-        {% if event.kind %}
-            <span class="badge teal white-text">{{ event.kind }}</span>
-        {% endif %}
-        {% if event.end and event.isOngoing %}
-            <span class="badge deep-purple white-text">En cours</span>
-        {% endif %}
-    </div>
-</div>
+{% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
 
 {% if event.description %}
     <div class="card-panel blue lighten-5">
@@ -46,6 +17,10 @@
     </div>
 {% else %}
     <i>pas de description</i>
+{% endif %}
+
+{% if event.needProxy %}
+    {% include "admin/event/_partial/card.html.twig" with { event: event, only_action: true } %}
 {% endif %}
 
 {% if event.img %}

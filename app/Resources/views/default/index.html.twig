@@ -167,7 +167,7 @@
                     <div class="row">
                         {% for eventDisplayedHome in eventsFutureOrOngoingDisplayedHome %}
                             <div class="col s12">
-                                {% include "admin/event/_partial/card.html.twig" with { event: eventDisplayedHome, from_home: true } %}
+                                {% include "admin/event/_partial/card.html.twig" with { event: eventDisplayedHome } %}
                             </div>
                         {% endfor %}
                     </div>

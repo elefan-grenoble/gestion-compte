@@ -1,23 +1,30 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Événement : accepter une procuration{% endblock %}
+
 {% block breadcrumbs %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>procuration
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('event_detail', { 'id': event.id }) }}"><i class="material-icons">event</i>&nbsp;{{ event.title }}</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>procuration
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Accepter une procuration</h4>
-    <h5 class="">{{ event.title }}&nbsp;<i>{{ event.date | date_fr_full_with_time }}</i></h5>
+<h4>Accepter une procuration</h4>
 
-    {{ form_start(form) }}
-    <div class="row">
-        <div class="col s6">
-            {{ form_label(form.owner) }}
-            {{ form_widget(form.owner) }}
-        </div>
+{% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
+
+<br />
+
+{{ form_start(form) }}
+<div class="row">
+    <div class="col s6">
+        {{ form_label(form.owner) }}
+        {{ form_widget(form.owner) }}
     </div>
-    <div>
-        <button type="submit" class="btn-large waves-effect waves-light green">J'accepte une procuration</button>
-    </div>
-    {{ form_end(form) }}
+</div>
+<div>
+    <button type="submit" class="btn-large waves-effect waves-light green">J'accepte une procuration</button>
+</div>
+{{ form_end(form) }}
 {% endblock %}
