@@ -19,6 +19,10 @@
     <i>pas de description</i>
 {% endif %}
 
+{% if event.needProxy %}
+    {% include "admin/event/_partial/card.html.twig" with { event: event, only_action: true } %}
+{% endif %}
+
 {% if event.img %}
     <img src="{{ event|img('imgFile', 'default') }}" class="materialboxed" style="max-width:50%" />
 {% endif %}
