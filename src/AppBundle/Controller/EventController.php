@@ -334,7 +334,7 @@ class EventController extends Controller
             ));
         }
 
-        $session->getFlashBag()->add('error', "oups, quelque chose c'est mal passé");
+        $session->getFlashBag()->add('error', "oups, quelque chose s'est mal passé");
         return $this->redirectToRoute("event_proxy_give", array('id'=>$event->getId()));
     }
 

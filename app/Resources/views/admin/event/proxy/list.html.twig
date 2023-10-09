@@ -15,6 +15,10 @@
 {% block content %}
     <h4>Liste des procurations <small>({{ proxies | length }})</small></h4>
 
+    {% if event %}
+        {% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
+    {% endif %}
+
     {% if max_event_proxy_per_member > 0 %}
         <blockquote class="red-text">
             chaque membre peut porter au maximum <strong>{{ max_event_proxy_per_member }} procuration{% if max_event_proxy_per_member > 1 %}s{% endif %}</strong>
@@ -24,10 +28,6 @@
         <blockquote class="red-text">
             si un membre a <strong>plusieurs</strong> bénéficiaires, c'est n'importe lequel des bénéficiaires qui peut porter la procuration
         </blockquote>
-    {% endif %}
-
-    {% if event %}
-        <h5>{{ event.title }} <small>{{ event.date | date_fr_full_with_time }}</small></h5>
     {% endif %}
 
     <table class="responsive-table striped">
