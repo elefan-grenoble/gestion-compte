@@ -12,7 +12,7 @@
     {% if not only_action %}
         {% include "admin/event/_partial/card_content.html.twig" with { event: event, only_header: only_header, from_admin: from_admin } %}
     {% endif %}
-    
+
     {% if not only_header %}
         {% include "admin/event/_partial/card_action.html.twig" with { event: event, only_action: only_action, from_admin: from_admin } %}
     {% endif %}
