@@ -2,7 +2,9 @@
 {% set from_admin = from_admin ?? false %}
 
 <div class="card-action">
-    {% if event.needProxy %}
+    {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <span>Connexion requise</span>
+    {% elseif event.needProxy %}
         {% if from_admin %}
             <div class="left">
                 <a href="{{ path("admin_event_proxies_list", {'id': event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
@@ -59,7 +61,6 @@
                 {% endif %}
             {% endif %}
         {% endif %}
-        <br />
     {% endif %}
     {% if from_admin %}
         <div class="right">

@@ -64,6 +64,7 @@ class EventController extends Controller
      * Event home
      *
      * @Route("/", name="event_index", methods={"GET"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
