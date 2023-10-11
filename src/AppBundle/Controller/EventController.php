@@ -158,6 +158,12 @@ class EventController extends Controller
             return $this->redirectToRoute('homepage');
         }
 
+        // check if event is past
+        if ($event->getIsPast()) {
+            $session->getFlashBag()->add('error', 'Événement passé');
+            return $this->redirectToRoute('homepage');
+        }
+
         // default proxy form
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('event_proxy_give', array('id' => $event->getId())))

@@ -316,6 +316,15 @@ class Event
     }
 
     /**
+     * @return boolean
+     */
+    public function getIsPast()
+    {
+        $now = new \DateTime('now');
+        return ($this->date < $now && !$this->end) || ($this->date < $now && $this->end < $now);
+    }
+
+    /**
      * Set description
      *
      * @param string $description
