@@ -6,11 +6,15 @@
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">event</i>&nbsp;{{ event.title }}<i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_proxies_list', {'id': event.id}) }}"><i class="material-icons">list</i>&nbsp;Liste des procurations</a><i class="material-icons">chevron_right</i>
 <i class="material-icons">edit</i>&nbsp;Editer une procuration
 {% endblock %}
 
 {% block content %}
     <h4>Editer une procuration</h4>
+
+    {% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
 
     {{ form_start(form) }}
     {{ form_widget(form) }}

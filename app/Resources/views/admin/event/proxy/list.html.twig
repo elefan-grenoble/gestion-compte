@@ -74,7 +74,7 @@
                     </td>
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         <td>
-                            <a href="{{ path("admin_proxy_edit",{'id':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
+                            <a href="{{ path("admin_event_proxy_edit",{'id':proxy.event.id, 'proxy':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
                         </td>
                     {% endif %}
                 </tr>

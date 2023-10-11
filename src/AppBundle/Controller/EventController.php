@@ -348,7 +348,7 @@ class EventController extends Controller
     /**
      * Proxy remove
      *
-     * @Route("/{event}/proxy/{proxy}/remove", name="event_proxy_lite_delete", methods={"GET"})
+     * @Route("/{id}/proxy/{proxy}/remove", name="event_proxy_lite_delete", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function deleteProxyLiteAction(Event $event, Proxy $proxy, Request $request)

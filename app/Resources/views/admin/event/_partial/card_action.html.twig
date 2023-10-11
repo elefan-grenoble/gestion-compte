@@ -65,7 +65,7 @@
                     {% else %}
                         <div>
                             <b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> accepte une procuration.
-                            <a href="{{ path("event_proxy_lite_delete",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text" onclick="return confirm('Etes-vous sûr ?!');">X</a>
+                            <a href="{{ path("event_proxy_lite_delete",{'id':event.id,'proxy':proxy_received_item.id}) }}" class="red-text" onclick="return confirm('Etes-vous sûr ?!');">X</a>
                         </div>
                     {% endif %}
                 {% endfor %}
