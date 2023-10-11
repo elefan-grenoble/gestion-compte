@@ -63,7 +63,10 @@
                     {% if proxy_received_item.giver %}
                         <div>Procuration portée par <b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> de la part de&nbsp;<b>{{ proxy_received_item.giver.memberNumberWithBeneficiaryListString }}</b></div>
                     {% else %}
-                        <div><b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> accepte une procuration. <a href="{{ path("event_proxy_lite_remove",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text">X</a></div>
+                        <div>
+                            <b>{{ proxy_received_item.owner.membership.memberNumberWithBeneficiaryListString }}</b> accepte une procuration.
+                            <a href="{{ path("event_proxy_lite_delete",{'event':event.id,'proxy':proxy_received_item.id}) }}" class="red-text" onclick="return confirm('Etes-vous sûr ?!');">X</a>
+                        </div>
                     {% endif %}
                 {% endfor %}
                 {% if (proxy_given is null) and (proxy_received|length == 0) %}

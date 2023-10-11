@@ -75,12 +75,6 @@
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         <td>
                             <a href="{{ path("admin_proxy_edit",{'id':proxy.id}) }}"><i class="material-icons">edit</i>Editer</a>
-                            {{ form_start(delete_forms[proxy.id]) }}
-                            {{ form_widget(delete_forms[proxy.id]) }}
-                            <div>
-                                <button type="submit" class="btn btn-small waves-effect waves-light red">Supprimer</button>
-                            </div>
-                            {{ form_end(delete_forms[proxy.id]) }}
                         </td>
                     {% endif %}
                 </tr>

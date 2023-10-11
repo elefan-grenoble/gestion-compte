@@ -235,14 +235,9 @@ class AdminEventController extends Controller
 
         $proxies = $em->getRepository('AppBundle:Proxy')->findAll();
 
-        $delete_forms = array();
-        foreach ($proxies as $proxy){
-            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
-        }
 
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
-            'delete_forms' => $delete_forms,
             'event' => null,
         ));
     }
@@ -257,40 +252,10 @@ class AdminEventController extends Controller
     {
         $proxies = $event->getProxies();
 
-        $delete_forms = array();
-        foreach ($proxies as $proxy) {
-            $delete_forms[$proxy->getId()] = $this->getProxyDeleteForm($proxy)->createView();
-        }
-
         return $this->render('admin/event/proxy/list.html.twig', array(
             'proxies' => $proxies,
-            'delete_forms' => $delete_forms,
             'event' => $event,
         ));
-    }
-
-    /**
-     * Proxy delete
-     *
-     * @Route("/proxies/{id}", name="admin_proxy_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
-     */
-    public function deleteProxyAction(Request $request, Proxy $proxy)
-    {
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-
-        $form = $this->getProxyDeleteForm($proxy);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->remove($proxy);
-            $em->flush();
-
-            $session->getFlashBag()->add('success', 'La procuration a bien été supprimée !');
-        }
-
-        return $this->redirectToRoute('event_proxies_list', array('id'=>$proxy->getEvent()->getId()));
     }
 
     /**
@@ -373,6 +338,30 @@ class AdminEventController extends Controller
             'form' => $form->createView(),
             'delete_form' => $this->getProxyDeleteForm($proxy)->createView(),
         ));
+    }
+
+    /**
+     * Proxy delete
+     *
+     * @Route("/proxies/{id}", name="admin_proxy_delete", methods={"DELETE"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function deleteProxyAction(Request $request, Proxy $proxy)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
+        $form = $this->getProxyDeleteForm($proxy);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em->remove($proxy);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'La procuration a bien été supprimée !');
+        }
+
+        return $this->redirectToRoute('event_proxies_list', array('id'=>$proxy->getEvent()->getId()));
     }
 
 
