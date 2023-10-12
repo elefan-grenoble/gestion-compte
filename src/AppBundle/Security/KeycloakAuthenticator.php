@@ -13,6 +13,7 @@ use AppBundle\Event\BeneficiaryCreatedEvent;
 use AppBundle\EventListener\SetFirstPasswordListener;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
+use KnpU\OAuth2ClientBundle\Client\OAuth2Client;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
 use PHPUnit\Util\Type;
@@ -287,8 +288,20 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $map = $this->container->getParameter('oidc_user_attributes_map');
         $array = $keycloakUser->toArray();
         if (isset($map[$attributeKey])){
-            if (isset($array[$map[$attributeKey]]))
-                return $array[$map[$attributeKey]];
+            $key = $map[$attributeKey];
+            $keys = explode('.',$key);
+            if (count($keys) === 1 && isset($array[$keys[0]]))
+                return $array[$keys[0]];
+            else if (count($keys) > 1){
+                $t = $array;
+                $i = 0;
+                do {
+                    $exist = isset($t[$keys[$i]]);
+                    $t = ($exist) ? $t[$keys[$i]] : [];
+                }while($exist&&++$i<count($keys));
+                if ($exist)
+                    return $t;
+            }
         }
         return $defaultValue;
 
@@ -319,9 +332,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
     }
 
     /**
-     * @return \KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient
+     * @return \KnpU\OAuth2ClientBundle\Client\OAuth2Client
      */
-    private function getKeycloakClient() : KeycloakClient
+    private function getKeycloakClient() : OAuth2Client
     {
         return $this->clientRegistry->getClient('keycloak');
     }
