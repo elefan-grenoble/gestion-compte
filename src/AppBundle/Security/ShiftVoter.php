@@ -114,20 +114,20 @@ class ShiftVoter extends Voter
         return false;
     }
 
+    /**
+     * Accept / Reject reserved shifts
+     * We check if the user corresponds to the shift's last shifter
+     */
     private function canReject(Shift $shift, User $user = null)
     {
-        if ($user instanceof User) {  // the user is logged in
+        // user is logged in: we don't check the token
+        if ($user instanceof User) {
             return $user->getBeneficiary() === $shift->getLastShifter();
-        } // the user is not logged in
+        }
+        // the user is not logged in: we check the token
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
-        if ($shift->getId()) {
-            if ($shift->getLastShifter()) {
-                if ($token == $shift->getTmpToken($shift->getLastShifter()->getId())) {
-                    return true;
-                }
-            } else {
-                return false;
-            }
+        if ($shift->getId() && $shift->getLastShifter() && $token) {
+            return $token == $shift->getTmpToken($shift->getLastShifter()->getId());
         }
         return false;
     }

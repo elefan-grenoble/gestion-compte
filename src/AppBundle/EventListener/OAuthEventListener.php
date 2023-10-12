@@ -7,11 +7,11 @@ use FOS\OAuthServerBundle\Event\OAuthEvent;
 
 class OAuthEventListener
 {
-    protected $_em;
+    protected $em;
 
     public function __construct(EntityManager $entityManager)
     {
-        $this->_em = $entityManager;
+        $this->em = $entityManager;
     }
 
     public function onPreAuthorizationProcess(OAuthEvent $event)
@@ -29,14 +29,14 @@ class OAuthEventListener
             if (null !== $client = $event->getClient()) {
                 $user = $this->getUser($event);
                 $user->addClient($client);
-                $this->_em->persist($user);
-                $this->_em->flush();
+                $this->em->persist($user);
+                $this->em->flush();
             }
         }
     }
 
     protected function getUser(OAuthEvent $event)
     {
-        return $this->_em->getRepository('AppBundle:User')->findOneBy(array('username'=>$event->getUser()->getUsername()));
+        return $this->em->getRepository('AppBundle:User')->findOneBy(array('username'=>$event->getUser()->getUsername()));
     }
 }

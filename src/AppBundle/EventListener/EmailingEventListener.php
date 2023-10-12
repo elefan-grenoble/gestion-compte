@@ -11,6 +11,7 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\ShiftReservedEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftDeletedEvent;
@@ -22,25 +23,25 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class EmailingEventListener
 {
-    protected $mailer;
+    protected $em;
     protected $logger;
     protected $container;
+    protected $mailer;
     protected $due_duration_by_cycle;
     private $memberEmail;
     private $shiftEmail;
     private $wikiKeysUrl;
-    private $entity_manager;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, EntityManagerInterface $entity_manager, $memberEmail, $shiftEmail, $wikiKeysUrl)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer, $memberEmail, $shiftEmail, $wikiKeysUrl)
     {
-        $this->mailer = $mailer;
+        $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
+        $this->mailer = $mailer;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->memberEmail = $memberEmail;
         $this->shiftEmail = $shiftEmail;
         $this->wikiKeysUrl = $wikiKeysUrl;
-        $this->entity_manager = $entity_manager;
     }
 
     /**
@@ -53,7 +54,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
@@ -88,7 +89,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
@@ -221,6 +222,41 @@ class EmailingEventListener
             die($e->getMessage());
         }
         $this->mailer->send($oups);
+    }
+
+    /**
+     * @param ShiftReservedEvent $event
+     * @throws \Exception
+     */
+    public function onShiftReserved(ShiftReservedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftReserved");
+
+        $shift = $event->getShift();
+        $formerShift = $event->getFormerShift();
+        $beneficiary = $shift->getLastShifter();
+
+        $router = $this->container->get('router');
+
+        $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
+
+        $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShift->getStart()->format("d F") .' dans '.$d.' jours'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setTo($beneficiary->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'emails/shift_reserved.html.twig',
+                    array(
+                        'shift' => $shift,
+                        'oldshift' => $formerShift,
+                        'days' => $d,
+                        'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
+                        'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
+                    )
+                ),
+                'text/html'
+            );
+        $this->mailer->send($mail);
     }
 
     /**

@@ -4,12 +4,12 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ClosingException;
+use AppBundle\Event\ShiftReservedEvent;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class ShiftGenerateCommand extends ContainerAwareCommand
 {
@@ -101,13 +101,14 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());
                             $current_shift->setPosition($position);
-                            // si c'est un créneau fixe
+                            // si c'est un créneau fixe + membre non exempté
                             if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {
                                 $current_shift->setFixe(True);
                                 $current_shift->setShifter($position->getShifter());
                                 $current_shift->setBookedTime(new \DateTime('now'));
                                 $current_shift->setBooker($admin);
-                            } else if ($last_cycle_shift && $last_cycle_shift->getShifter() && $reserve_new_shift_to_prior_shifter) {
+                            // créneau pré-reservé
+                            } else if ($reserve_new_shift_to_prior_shifter && $last_cycle_shift && $last_cycle_shift->getShifter()) {
                                 $current_shift->setLastShifter($last_cycle_shift->getShifter());
                                 $reservedShifts[$count_new_all] = $current_shift;
                                 $formerShifts[$count_new_all] = $last_cycle_shift;
@@ -132,26 +133,9 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             }
         }
 
-        $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+        $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($reservedShifts as $i => $shift) {
-            $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
-            $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShifts[$i]->getStart()->format("d F") .' dans '.$d.' jours'))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                ->setTo($shift->getLastShifter()->getEmail())
-                ->setBody(
-                    $this->getContainer()->get('twig')->render(
-                        'emails/shift_reserved.html.twig',
-                        array(
-                            'shift' => $shift,
-                            'oldshift' => $formerShifts[$i],
-                            'days' => $d,
-                            'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                            'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($shift->getlastShifter()->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                        )
-                    ),
-                    'text/html'
-                );
-            $mailer->send($mail);
+            $dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[i]));
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');

@@ -26,5 +26,4 @@ class ShiftBookedEvent extends Event
     {
         return $this->fromAdmin;
     }
-
 }
