@@ -28,10 +28,12 @@ class CodeController extends Controller
     public function homepageDashboardAction()
     {
         $em = $this->getDoctrine()->getManager();
+
         $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
         if (!$codes) {
             $codes[] = new Code();
         }
+
         return $this->render('default/code/home_dashboard.html.twig', array('codes' => $codes));
     }
 
@@ -44,11 +46,10 @@ class CodeController extends Controller
     public function listAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $logger = $this->get('logger');
         $logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
-
-        $em = $this->getDoctrine()->getManager();
 
         if ($this->getUser()->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
@@ -134,9 +135,8 @@ class CodeController extends Controller
     public function generateAction(Request $request)
     {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
         $em = $this->getDoctrine()->getManager();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
@@ -207,13 +207,12 @@ class CodeController extends Controller
     public function toggleAction(Request $request, Code $code)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         if ($code->getClosed())
             $this->denyAccessUnlessGranted('open',$code);
         else
             $this->denyAccessUnlessGranted('close',$code);
-
-        $em = $this->getDoctrine()->getManager();
 
         $code->setClosed(!$code->getClosed());
 
@@ -233,9 +232,9 @@ class CodeController extends Controller
     public function closeAllButMineAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $securityContext = $this->container->get('security.authorization_checker');
 
-        $em = $this->getDoctrine()->getManager();
         $logged_out = false;
         $previousToken = null;
 
