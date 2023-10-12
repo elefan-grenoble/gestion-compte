@@ -296,7 +296,7 @@ class ShiftService
 
             // Time log saving:
             // - check if there is a min time in advance rule
-            // - check if the shifter has enough time on its time log saving account
+            // - check if the shifter has enough time on its savingTime
             if ($this->use_time_log_saving) {
                 $member = $shift->getShifter()->getMembership();
                 $member_saving_now = $member->getSavingTimeCount();

@@ -75,7 +75,7 @@ class TimeLogEventListener
 
         if ($this->use_card_reader_to_validate_shifts) {
             // do nothing!
-            // shift time log will be created in onShiftValidated
+            // shiftTime log will be created in onShiftValidated
         } else {
             $this->createShiftValidatedTimeLog($shift, $shift->getStart());
         }
@@ -97,9 +97,36 @@ class TimeLogEventListener
             // why $now? to avoid edge cases
             // example: if the shift is validated manually later, we might need to take it into account in the next cycle
             $this->createShiftValidatedTimeLog($shift, $now);
+
+            // Saving account mode
+            // extra time will go in the member's savingTime
+            // if and only if:
+            // - there is extra time
+            if ($this->use_time_log_saving) {
+                $this->em->refresh($shift);  // added to prevent from returning cached (old) data
+                $member = $shift->getShifter()->getMembership();
+
+                $now_plus_one_second = (clone $now)->modify("+1 second");
+                $member_counter_time = $member->getShiftTimeCount($now_plus_one_second);  // $now_plus_one_second? to be sure we take the above log into account
+                $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
+
+                if ($member_counter_extra_time > 0) {
+                    // first decrement the shiftTimeCount
+                    $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time, $now_plus_one_second);
+                    $this->em->persist($log);
+                    // then increment the savingTimeCount
+                    // we don't pass de $shift info because the extra time may not correspond to the shift time
+                    $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $now_plus_one_second);  # $shift
+                    $this->em->persist($log);
+                    $this->em->flush();
+                }
+            }
         } else {
-            // do nothing!
-            // shift time log already created in onShiftBooked
+            // do nothing! shouldn't happen (only onShiftBooked should be called)
+            // shiftTime log already created in onShiftBooked
+
+            // what about saving account mode?
+            // see onMemberCycleEnd (createCycleBeginningLog)
         }
     }
 
@@ -125,8 +152,7 @@ class TimeLogEventListener
                 $this->createShiftInvalidatedTimeLog($shift);
             }
         } else {
-            // do nothing! shouldn't happen
-            // for coops without card_reader, only onShiftFreed should be called
+            // do nothing! shouldn't happen (only onShiftFreed should be called)
         }
     }
 
@@ -142,34 +168,37 @@ class TimeLogEventListener
         $member = $event->getMember();
 
         if ($this->use_card_reader_to_validate_shifts) {
-            // do nothing!
-            // shift time logs are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+            // shiftTime logs?
+            // no, they are created in onShiftValidated & onShiftInvalidated (should already be managed there)
+
+            // Saving account mode
+            // the shift's time can be "validated" and taken from the member's savingTime
+            // if and only if:
+            // - there is a min time in advance rule
+            // - the shifter has enough time in its savingTime
+            if ($this->use_time_log_saving) {
+                $member_saving_now = $member->getSavingTimeCount();
+                if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
+                    // do nothing!
+                    // too late to use the member's savingTime
+                } elseif ($shift->getDuration() > $member_saving_now) {
+                    // do nothing!
+                    // the member's savingTime does not have enough time
+                } else {
+                    // decrement the savingTimeCount
+                    $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), null, $shift);
+                    $this->em->persist($log);
+                    // increment the shiftTimeCount
+                    $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), null, $shift);
+                    $this->em->persist($log);
+                    $this->em->flush();
+                }
+            }
         } else {
             $this->deleteShiftLogs($shift, $member);
-        }
 
-        // but the shift time can be "validated" and taken from the member's saving account
-        // if and only if:
-        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
-        // - there is a min time in advance rule
-        // - the shifter has enough time on its time log saving account
-        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
-            $member_saving_now = $member->getSavingTimeCount();
-            if ($this->time_log_saving_shift_free_min_time_in_advance_days && $shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
-                // do nothing!
-                // too late to use the member's saving account
-            } elseif ($shift->getDuration() > $member_saving_now) {
-                // do nothing!
-                // the member's saving account does not have enough time
-            } else {
-                // decrement the savingTimeCount
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, -1 * $shift->getDuration(), null, $shift);
-                $this->em->persist($log);
-                // increment the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initShiftFreedSavingTimeLog($member, $shift->getDuration(), null, $shift);
-                $this->em->persist($log);
-                $this->em->flush();
-            }
+            // what about saving account mode?
+            // see onMemberCycleEnd (createCycleBeginningLog)
         }
     }
 
@@ -242,30 +271,6 @@ class TimeLogEventListener
         $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
-
-        // extra time will go in the member's saving account
-        // if and only if:
-        // - use_card_reader_to_validate_shifts (for the other coops, this will happen in onMemberCycleEnd)
-        // - there is extra time
-        if ($this->use_card_reader_to_validate_shifts && $this->use_time_log_saving) {
-            $this->em->refresh($shift);  // added to prevent from returning cached (old) data
-            $member = $shift->getShifter()->getMembership();
-
-            $date_plus_one_second = (clone $date)->modify("+1 second");
-            $member_counter_time = $member->getShiftTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
-            $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
-
-            if ($member_counter_extra_time > 0) {
-                // first decrement the shiftTimeCount
-                $log = $this->container->get('time_log_service')->initRegulateOptionalShiftsTimeLog($member, -1 * $member_counter_extra_time, $date_plus_one_second);
-                $this->em->persist($log);
-                // then increment the savingTimeCount
-                // we don't pass de $shift info because the extra time may not correspond to the shift time
-                $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $date_plus_one_second);  # $shift
-                $this->em->persist($log);
-                $this->em->flush();
-            }
-        }
     }
 
     /**
