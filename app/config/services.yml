@@ -94,89 +94,90 @@ services:
         tags:
             - { name: form.type, alias: app_user_registration }
     app.authentication_success_handler:
-            class: AppBundle\EventListener\AuthenticationSuccessHandler
-            tags:
-                - { name: kernel.event_listener, event: security.interactive_login, method: onSecurityInteractiveLogin }
+        class: AppBundle\EventListener\AuthenticationSuccessHandler
+        tags:
+            - { name: kernel.event_listener, event: security.interactive_login, method: onSecurityInteractiveLogin }
 
     # listeners
     oauth_event_listener:
-            class: AppBundle\EventListener\OAuthEventListener
-            arguments:
-                $entityManager: "@doctrine.orm.entity_manager"
-            tags:
-                - { name: kernel.event_listener, event: fos_oauth_server.pre_authorization_process, method: onPreAuthorizationProcess }
-                - { name: kernel.event_listener, event: fos_oauth_server.post_authorization_process, method: onPostAuthorizationProcess }
+        class: AppBundle\EventListener\OAuthEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+        tags:
+            - { name: kernel.event_listener, event: fos_oauth_server.pre_authorization_process, method: onPreAuthorizationProcess }
+            - { name: kernel.event_listener, event: fos_oauth_server.post_authorization_process, method: onPostAuthorizationProcess }
     helloasso_event_listener:
-            class: AppBundle\EventListener\HelloassoEventListener
-            arguments:
-                $mailer: "@mailer"
-                $entityManager: "@doctrine.orm.entity_manager"
-                $container: "@service_container"
-                $memberEmail: "%emails.member%"
-            tags:
-                - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
-                - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }
+        class: AppBundle\EventListener\HelloassoEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $container: "@service_container"
+            $mailer: "@mailer"
+            $memberEmail: "%emails.member%"
+        tags:
+            - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
+            - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }
     commission_leave_or_join_listener:
-            class: AppBundle\EventListener\CommissionEventListener
-            arguments:
-                $entityManager: "@doctrine.orm.entity_manager"
-                $logger: "@logger"
-                $container: "@service_container"
-            tags:
-                - { name: kernel.event_listener, event: commission.join, method: onJoin }
-                - { name: kernel.event_listener, event: commission.leave, method: onLeave }
+        class: AppBundle\EventListener\CommissionEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+        tags:
+            - { name: kernel.event_listener, event: commission.join, method: onJoin }
+            - { name: kernel.event_listener, event: commission.leave, method: onLeave }
     shift_free_log_event_listener:
-            class: AppBundle\EventListener\ShiftFreeLogEventListener
-            arguments:
-                $entityManager: "@doctrine.orm.entity_manager"
-                $logger: "@logger"
-                $container: "@service_container"
-            tags:
-                - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+        class: AppBundle\EventListener\ShiftFreeLogEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+        tags:
+            - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
     period_position_free_log_event_listener:
-            class: AppBundle\EventListener\PeriodPositionFreeLogEventListener
-            arguments:
-                $entityManager: "@doctrine.orm.entity_manager"
-                $logger: "@logger"
-                $container: "@service_container"
-            tags:
-                - { name: kernel.event_listener, event: period_position.freed, method: onPeriodPositionFreed }
+        class: AppBundle\EventListener\PeriodPositionFreeLogEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+        tags:
+            - { name: kernel.event_listener, event: period_position.freed, method: onPeriodPositionFreed }
     time_log_event_listener:
-            class: AppBundle\EventListener\TimeLogEventListener
-            arguments:
-                $entityManager: "@doctrine.orm.entity_manager"
-                $logger: "@logger"
-                $container: "@service_container"
-            tags:
-                - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
-                - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
-                - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
-                - { name: kernel.event_listener, event: shift.validated, method: onShiftValidated }
-                - { name: kernel.event_listener, event: shift.invalidated, method: onShiftInvalidated }
-                - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
+        class: AppBundle\EventListener\TimeLogEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+        tags:
+            - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+            - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+            - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+            - { name: kernel.event_listener, event: shift.validated, method: onShiftValidated }
+            - { name: kernel.event_listener, event: shift.invalidated, method: onShiftInvalidated }
+            - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
     emailing_event_listener:
-            class: AppBundle\EventListener\EmailingEventListener
-            arguments:
-                $mailer: "@mailer"
-                $logger: "@logger"
-                $container: "@service_container"
-                $memberEmail: "%emails.member%"
-                $shiftEmail: "%emails.shift%"
-                $wikiKeysUrl: "%wiki_keys_url%"
-            tags:
-                - { name: kernel.event_listener, event: code.new, method: onCodeNew }
-                - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
-                - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
-                - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
-                - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
-                - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
-                - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
-                - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
-                - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
-                - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
-                - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
-                - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
-                - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
+        class: AppBundle\EventListener\EmailingEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+            $mailer: "@mailer"
+            $memberEmail: "%emails.member%"
+            $shiftEmail: "%emails.shift%"
+            $wikiKeysUrl: "%wiki_keys_url%"
+        tags:
+            - { name: kernel.event_listener, event: code.new, method: onCodeNew }
+            - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
+            - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+            - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+            - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+            - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
+            - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
+            - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
+            - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
+            - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
+            - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
+            - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
+            - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
 
     # subscribers
     beneficiary_initialization_subscriber:
@@ -194,8 +195,8 @@ services:
     validator_anonymous_beneficiary_beneficiary_can_host:
         class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
         arguments:
-              $container: "@service_container"
-              $maximum_nb_of_beneficiaries_in_membership: "%maximum_nb_of_beneficiaries_in_membership%"
+            $container: "@service_container"
+            $maximum_nb_of_beneficiaries_in_membership: "%maximum_nb_of_beneficiaries_in_membership%"
 
     # services
     shift_service:

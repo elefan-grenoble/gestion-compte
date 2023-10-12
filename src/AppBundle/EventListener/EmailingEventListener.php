@@ -23,25 +23,25 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class EmailingEventListener
 {
-    protected $mailer;
+    protected $em;
     protected $logger;
     protected $container;
+    protected $mailer;
     protected $due_duration_by_cycle;
     private $memberEmail;
     private $shiftEmail;
     private $wikiKeysUrl;
-    private $entity_manager;
 
-    public function __construct(Swift_Mailer $mailer, Logger $logger, Container $container, EntityManagerInterface $entity_manager, $memberEmail, $shiftEmail, $wikiKeysUrl)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer, $memberEmail, $shiftEmail, $wikiKeysUrl)
     {
-        $this->mailer = $mailer;
+        $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
+        $this->mailer = $mailer;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
         $this->memberEmail = $memberEmail;
         $this->shiftEmail = $shiftEmail;
         $this->wikiKeysUrl = $wikiKeysUrl;
-        $this->entity_manager = $entity_manager;
     }
 
     /**
@@ -54,7 +54,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
@@ -89,7 +89,7 @@ class EmailingEventListener
 
         $email = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         if (!$event->getAnonymousBeneficiary()->getJoinTo()){
             $url = $this->container->get('router')->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);

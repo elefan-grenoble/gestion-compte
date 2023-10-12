@@ -14,14 +14,14 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class HelloassoEventListener
 {
-    protected $_em;
+    protected $em;
     protected $container;
     protected $mailer;
     private $memberEmail;
 
-    public function __construct(EntityManager $entityManager, Container $container,Swift_Mailer $mailer,$memberEmail)
+    public function __construct(EntityManager $entityManager, Container $container, Swift_Mailer $mailer, $memberEmail)
     {
-        $this->_em = $entityManager;
+        $this->em = $entityManager;
         $this->container = $container;
         $this->mailer = $mailer;
         $this->memberEmail = $memberEmail;
@@ -30,8 +30,7 @@ class HelloassoEventListener
     public function onPaymentAfterSave(HelloassoEvent $event)
     {
         $payment = $event->getPayment();
-        /** @var User $user */
-        $user = $this->_em->getRepository('AppBundle:User')->findOneBy(array('email' => strtolower($payment->getEmail())));
+        $user = $this->em->getRepository('AppBundle:User')->findOneBy(array('email' => strtolower($payment->getEmail())));
         if ($user){
             $this->linkPaymentToUser($user,$payment);
         } else {
@@ -120,7 +119,7 @@ class HelloassoEventListener
                 $registration->setMode(Registration::TYPE_HELLOASSO);
                 $registration->setMembership($membership);
 
-                $this->_em->persist($registration);
+                $this->em->persist($registration);
                 $payment->setRegistration($registration);
                 $membership->addRegistration($registration);
 
@@ -128,9 +127,9 @@ class HelloassoEventListener
                 if ($membership->isWithdrawn()) {
                     $membership->setWithdrawn(false);
                 }
-                $this->_em->persist($membership);
+                $this->em->persist($membership);
 
-                $this->_em->flush();
+                $this->em->flush();
 
                 $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::RE_REGISTRATION_SUCCESS,new HelloassoEvent($payment,$beneficiary->getUser()));
             }
