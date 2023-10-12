@@ -78,19 +78,20 @@ class EmailTemplateController extends Controller
      */
     public function editAction(Request $request, EmailTemplate $emailTemplate)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $this->denyAccessUnlessGranted('edit', $emailTemplate);
 
         $form = $this->createForm(EmailTemplateType::class, $emailTemplate);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
-            $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
             $em->flush();
+
             $session->getFlashBag()->add('success', "Modèle d'email édité");
             return $this->redirectToRoute('email_template_list');
-
         }
 
         return $this->render('admin/mail/template/edit.html.twig', array(

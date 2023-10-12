@@ -53,8 +53,10 @@ class ShiftVoter extends Voter
     {
         $user = $token->getUser();
 
-        if (!$user instanceof User) {  // the user must be logged in; if not, deny access
-            if (!in_array($attribute, array(self::REJECT, self::ACCEPT))) //accept and reject can be done without login
+        // in most cases, the user must be logged in
+        // exceptions for accept and reject: can be done without login
+        if (!$user instanceof User) {
+            if (!in_array($attribute, array(self::REJECT, self::ACCEPT)))
                 return false;
             else
                 $user = null;

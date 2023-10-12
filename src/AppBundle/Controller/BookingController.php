@@ -88,14 +88,12 @@ class BookingController extends Controller
 
     /**
      * @Route("/", name="booking", methods={"GET","POST"})
-     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @param Request $request
-     * @return RedirectResponse|Response
-     * @throws Exception
+     * @Security("has_role('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $mode = null;
         if ($this->getUser()->getBeneficiary() == null) {
@@ -132,8 +130,6 @@ class BookingController extends Controller
 
         //beneficiary selected, or only one beneficiary
         if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
-            $em = $this->getDoctrine()->getManager();
-
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
             } else {
@@ -363,6 +359,7 @@ class BookingController extends Controller
     public function editBucketAction(Request $request,Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ShiftType::class, $shift);
         // Keep a record of the shift before update
@@ -370,7 +367,6 @@ class BookingController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $shifts = $em->getRepository('AppBundle:Shift')->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
@@ -399,16 +395,19 @@ class BookingController extends Controller
      * on the bucket popup.
      *
      * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $form = $this->createBucketLockUnlockForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $lock = $form->get('lock')->getData() == 1;
             $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
             $current = $bucket->getFirst()->isLocked() == 1;
@@ -444,7 +443,6 @@ class BookingController extends Controller
                 return new JsonResponse(array('message'=>$message), 400);
             }
         } else {
-            $session = new Session();
             $session->getFlashBag()->add($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
@@ -460,11 +458,12 @@ class BookingController extends Controller
     public function deleteBucketAction(Request $request, Shift $bucket)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $form = $this->createBucketDeleteForm($bucket);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $shifts = $em->getRepository('AppBundle:Shift')->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
