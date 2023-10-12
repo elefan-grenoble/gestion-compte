@@ -102,6 +102,7 @@ twig:
     fly_and_fixed_allow_fixed_shift_free: '%fly_and_fixed_allow_fixed_shift_free%'
     # time log saving
     time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
+    time_log_saving_shift_free_allow_only_if_enough_saving: '%time_log_saving_shift_free_allow_only_if_enough_saving%'
     # opening hours
     display_opening_hour_open_closed_header: '%display_opening_hour_open_closed_header%'
     opening_hour_open_closed_header_open_message: '%opening_hour_open_closed_header_open_message%'
