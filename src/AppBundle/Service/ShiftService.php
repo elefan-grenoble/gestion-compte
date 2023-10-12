@@ -34,8 +34,8 @@ class ShiftService
 
     public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
         $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime,
-        $use_fly_and_fixed, $fly_and_fixed_allow_fixed_shift_free,
-        $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, $time_log_saving_shift_free_allow_only_if_enough_saving)
+        bool $use_fly_and_fixed, bool $fly_and_fixed_allow_fixed_shift_free,
+        bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, bool $time_log_saving_shift_free_allow_only_if_enough_saving)
     {
         $this->em = $em;
         $this->beneficiaryService = $beneficiaryService;

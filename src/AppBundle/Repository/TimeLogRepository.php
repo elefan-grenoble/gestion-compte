@@ -2,6 +2,9 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Membership;
+use AppBundle\Entity\Shift;
+
 /**
  * TimeLogRepository
  *
@@ -10,4 +13,34 @@ namespace AppBundle\Repository;
  */
 class TimeLogRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAll(Membership $member = null, Shift $shift = null, $type = null)
+    {
+        $qb = $this->createQueryBuilder('tl')
+            ->join('tl.membership', 'm')
+            ->addSelect('m')
+            ->join('tl.shift', 's')
+            ->addSelect('s');
+
+        if ($member) {
+            $qb
+                ->andWhere('tl.membership = :member')
+                ->setParameter('member', $member);
+        }
+
+        if ($shift) {
+            $qb
+                ->andWhere('tl.shift = :shift')
+                ->setParameter('shift', $shift);
+        }
+
+        if ($type) {
+            $qb
+                ->andWhere('tl.type = :type')
+                ->setParameter('type', $type);
+        }
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }
