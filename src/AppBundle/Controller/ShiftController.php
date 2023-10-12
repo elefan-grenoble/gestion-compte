@@ -6,6 +6,7 @@ use DateTime;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Entity\User;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
 use AppBundle\Event\ShiftValidatedEvent;
@@ -126,6 +127,7 @@ class ShiftController extends Controller
      * Book a shift.
      *
      * @Route("/{id}/book", name="shift_book", methods={"POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function bookShiftAction(Request $request, Shift $shift): Response
     {
@@ -263,6 +265,7 @@ class ShiftController extends Controller
      * Free a shift.
      *
      * @Route("/{id}/free", name="shift_free", methods={"POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function freeShiftAction(Request $request, Shift $shift)
     {
@@ -498,7 +501,7 @@ class ShiftController extends Controller
         }
 
         $beneficiary = $shift->getLastShifter();
-        $shift->setBooker(is_object($current_user) ? $current_user : $beneficiary->getUser());
+        $shift->setBooker(($current_user instanceof User) ? $current_user : $beneficiary->getUser());
         $shift->setShifter($beneficiary);
         $shift->setBookedTime(new DateTime('now'));
         $shift->setLastShifter(null);
