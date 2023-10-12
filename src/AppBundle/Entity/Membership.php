@@ -156,7 +156,7 @@ class Membership
 
     public function getTmpToken($key = '')
     {
-        return md5($this->getId().$this->getMemberNumber().$key.date('d'));
+        return md5($this->getId() . $this->getMemberNumber() . $key . date('d'));
     }
 
     /**

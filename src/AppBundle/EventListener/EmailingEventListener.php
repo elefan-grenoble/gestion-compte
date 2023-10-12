@@ -250,8 +250,8 @@ class EmailingEventListener
                         'shift' => $shift,
                         'oldshift' => $formerShift,
                         'days' => $d,
-                        'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($beneficiary->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
-                        'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(),'token'=> $shift->getTmpToken($beneficiary->getId())),UrlGeneratorInterface::ABSOLUTE_URL),
+                        'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
+                        'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
                     )
                 ),
                 'text/html'

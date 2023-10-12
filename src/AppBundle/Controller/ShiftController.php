@@ -488,17 +488,17 @@ class ShiftController extends Controller
             $session->getFlashBag()->add('error', "Créneau pas trouvé");
             return $this->redirectToRoute("homepage");
         }
-        if (!$this->isGranted('accept', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
-            return $this->redirectToRoute("homepage");
-        }
         if (!$shift->getLastShifter()) {
             $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
             return $this->redirectToRoute("homepage");
         }
+        if (!$this->isGranted('accept', $shift)) {
+            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
+            return $this->redirectToRoute("homepage");
+        }
 
-        $shift->setBooker($current_user);
         $beneficiary = $shift->getLastShifter();
+        $shift->setBooker(is_object($current_user) ? $current_user : $beneficiary->getUser());
         $shift->setShifter($beneficiary);
         $shift->setBookedTime(new DateTime('now'));
         $shift->setLastShifter(null);
@@ -529,12 +529,12 @@ class ShiftController extends Controller
             $session->getFlashBag()->add('error', "Créneau pas trouvé");
             return $this->redirectToRoute("homepage");
         }
-        if (!$this->isGranted('reject', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
-            return $this->redirectToRoute("homepage");
-        }
         if (!$shift->getLastShifter()) {
             $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
+            return $this->redirectToRoute("homepage");
+        }
+        if (!$this->isGranted('reject', $shift)) {
+            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
             return $this->redirectToRoute("homepage");
         }
 
