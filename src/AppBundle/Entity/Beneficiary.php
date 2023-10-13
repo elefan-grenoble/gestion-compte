@@ -76,7 +76,7 @@ class Beneficiary
 
     /**
      * @var Membership
-     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries", cascade={"persist"})
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
@@ -324,7 +324,7 @@ class Beneficiary
     /**
      * @return string
      */
-    public function getOpenIdMemberNumber() : string
+    public function getOpenIdMemberNumber() : ?string
     {
         return $this->openid_member_number;
     }
