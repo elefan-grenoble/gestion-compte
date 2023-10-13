@@ -7,6 +7,9 @@ use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\Formation;
 use AppBundle\Entity\Membership;
+use AppBundle\Entity\MembershipShiftExemption;
+use AppBundle\Entity\Note;
+use AppBundle\Entity\Proxy;
 use AppBundle\Entity\Registration;
 use AppBundle\Entity\User;
 use AppBundle\Event\BeneficiaryCreatedEvent;
@@ -98,8 +101,10 @@ class KeycloakAuthenticator extends SocialAuthenticator
             $this->updateBeneficiary($keycloakUser,$existingBeneficiary);
             $membership = $existingBeneficiary->getMembership();
             $membership->setMemberNumber($existingBeneficiary->getOpenIdMemberNumber());
-            $this->em->persist($membership);
-            $this->em->persist($existingBeneficiary);
+
+            // co_member
+            $this->updateCoMembership($keycloakUser,$existingBeneficiary);
+
             $this->em->flush();
             return $existingBeneficiary->getUser();
         }
@@ -114,17 +119,42 @@ class KeycloakAuthenticator extends SocialAuthenticator
         if($userInDatabase) {
             $userInDatabase->getBeneficiary()->setOpenId($keycloakUser->getId());
             $this->updateBeneficiary($keycloakUser,$userInDatabase->getBeneficiary());
-            $this->em->persist($userInDatabase->getBeneficiary());
+
+            $userInDatabase->getBeneficiary()->setOpenId($keycloakUser->getId());
+            $userInDatabase->getBeneficiary()->getUser()->setEnabled(true);
+
+            // co_member
+            $this->updateCoMembership($keycloakUser,$userInDatabase->getBeneficiary());
+
             $this->em->flush();
             return $userInDatabase;
         }
         //user not exist in database
         $beneficiary = new Beneficiary();
-        $membership = new Membership();
-        $registration = new Registration();
 
+        // co_member
+        $is_co_member = $this->updateCoMembership($keycloakUser,$beneficiary);
+        if (!$is_co_member){
+            $this->createMembership($beneficiary,$this->getKeycloakUserAttribute($keycloakUser,'member_number',1));
+        }
+
+        $this->updateBeneficiary($keycloakUser,$beneficiary);
+
+        $beneficiary->setOpenId($keycloakUser->getId());
+        $beneficiary->getUser()->setEnabled(true);
+
+        $this->em->flush();
+        return $beneficiary->getUser();
+    }
+
+    /**
+     * @param KeycloakResourceOwner $keycloakUser
+     * @param Beneficiary $beneficiary
+     * @return bool
+     */
+    private function updateCoMembership(KeycloakResourceOwner $keycloakUser,Beneficiary $beneficiary) : bool
+    {
         $is_co_member = false;
-
         $co_member = $this->getKeycloakUserAttribute($keycloakUser,'co_member_number'); //co_member_number
         if ($co_member){
             /** @var Beneficiary $existingCoBeneficiary */
@@ -135,43 +165,96 @@ class KeycloakAuthenticator extends SocialAuthenticator
             if ($existingCoBeneficiary) {
                 $is_co_member = true;
                 $membership = $existingCoBeneficiary->getMembership();
+                $oldMembership = $beneficiary->getMembership();
+                if ($oldMembership===$membership){
+                    return $is_co_member;
+                }
                 $membership->addBeneficiary($beneficiary);
                 $beneficiary->setMembership($membership);
-                $registration = $membership->getLastRegistration();
+                $this->em->persist($membership);
+                $this->em->persist($beneficiary);
+                $this->em->flush();
+                if ($oldMembership){
+                    $oldMembership->removeBeneficiary($beneficiary);
+                    $oldMembership->setMainBeneficiary(null);
+
+                    /** @var Proxy $givenProxy */
+                    foreach ($oldMembership->getGivenProxies() as $givenProxy){
+                        $oldMembership->removeGivenProxy($givenProxy);
+                        $givenProxy->setGiver($membership);
+                        $membership->addGivenProxy($givenProxy);
+                        $this->em->persist($givenProxy);
+                    }
+                    /** @var Note $note */
+                    foreach ($oldMembership->getNotes() as $note){
+                        $oldMembership->removeNote($note);
+                        $note->setSubject($membership);
+                        $membership->addNote($note);
+                        $this->em->persist($note);
+                    }
+                    /** @var MembershipShiftExemption $membershipShiftExemption */
+                    foreach ($oldMembership->getMembershipShiftExemptions() as $membershipShiftExemption){
+                        $membershipShiftExemption->setMembership($membership);
+                        $this->em->persist($membershipShiftExemption);
+                    }
+
+                    $this->em->persist($oldMembership);
+                    $this->em->flush();
+                    $this->em->remove($oldMembership);
+                    $this->em->flush();
+                }
+            }
+        }else if($beneficiary->getMembership()){ //no co user
+            /** @var Beneficiary $b */
+            foreach ($beneficiary->getMembership()->getBeneficiaries() as $b){
+                //if membership is shared
+                if ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() !== $b){ //should create a new membership for this beneficiary
+                    $beneficiary->getMembership()->removeBeneficiary($b);
+                    $this->createMembership($b);
+                }elseif ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() === $b) //should create a new membership for me (beneficiary)
+                {
+                    $beneficiary->getMembership()->removeBeneficiary($beneficiary);
+                    $this->createMembership($beneficiary);
+                }
             }
         }
-        if (!$is_co_member){
 
-            $membership->setMemberNumber($this->getKeycloakUserAttribute($keycloakUser,'member_number',1));
-            $membership->setWithdrawn(false);
-            $membership->setFrozen(false);
-            $membership->setFrozenChange(false);
-            $membership->setMainBeneficiary($beneficiary);
-            $beneficiary->setMembership($membership);
+        return $is_co_member;
+    }
 
-            $registration->setDate(new \DateTime('now'));
-            $registration->setMembership($membership);
-            $registration->setMode(Registration::TYPE_DEFAULT);
-            $registration->setAmount(0);
-            $this->em->persist($registration);
+    /**
+     * @param Beneficiary $beneficiary
+     * @return void
+     */
+    private function createMembership(Beneficiary $beneficiary,$member_number = null): void
+    {
+        if (!$member_number){
+            $member_number = $beneficiary->getOpenIdMemberNumber();
         }
+        if (!$member_number){
+            $member_number = rand(10000,100000);
+        }
+        $membership = new Membership();
+        $membership->setMemberNumber($member_number);
+        $membership->setWithdrawn(false);
+        $membership->setFrozen(false);
+        $membership->setFrozenChange(false);
+        $membership->setMainBeneficiary($beneficiary);
 
+        $registration = new Registration();
+        $registration->setDate(new \DateTime('now'));
+        $registration->setMembership($membership);
+        $registration->setMode(Registration::TYPE_DEFAULT);
+        $registration->setAmount(0);
 
-        $this->updateBeneficiary($keycloakUser,$beneficiary);
-        $this->em->persist($beneficiary);
-        $beneficiary->setOpenId($keycloakUser->getId());
-        $beneficiary->getUser()->setEnabled(true);
-
-        $this->em->persist($membership);
-
-        $this->em->flush();
-        return $beneficiary->getUser();
+        $this->em->persist($registration);
     }
 
     /**
      * @param KeycloakResourceOwner $keycloakUser
-     * @param User $userInDatabase
-     * @return void
+     * @param Beneficiary $beneficiary
+     * @return Void
+     * @throws \Exception
      */
     private function updateBeneficiary(KeycloakResourceOwner $keycloakUser,Beneficiary $beneficiary) : Void
     {
@@ -199,9 +282,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $s2 = $this->getKeycloakUserAttribute($keycloakUser,'address_street2');
         $city = $this->getKeycloakUserAttribute($keycloakUser,'address_city');
         $zip = $this->getKeycloakUserAttribute($keycloakUser,'address_zipcode');
-        if ($s1&&$city&&$zip){
+        if ($s1&&$city&&$zip) {
             $address = $beneficiary->getAddress();
-            if (!$address){
+            if (!$address) {
                 $address = new Address();
             }
             $address->setCity($city);
@@ -212,8 +295,12 @@ class KeycloakAuthenticator extends SocialAuthenticator
             $this->em->persist($address);
 
             $beneficiary->setAddress($address);
+        } else { // address must be fully fill or may not exist
+            $address = $beneficiary->getAddress();
+            if ($address){
+                $this->em->remove($address);
+            }
         }
-
         if (!$beneficiary->getId())
             $this->eventDispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
 
@@ -280,6 +367,8 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 }
             }
         }
+
+        $this->em->persist($beneficiary);
 
     }
 
