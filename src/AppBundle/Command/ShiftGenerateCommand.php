@@ -135,7 +135,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
         $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($reservedShifts as $i => $shift) {
-            $dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[i]));
+            $dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[$i]));
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');
