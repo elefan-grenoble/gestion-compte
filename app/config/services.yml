@@ -52,6 +52,7 @@ services:
             - "%use_fly_and_fixed%"
             - "%use_time_log_saving%"
             - "%time_log_saving_shift_free_min_time_in_advance_days%"
+            - "%time_log_saving_shift_free_allow_only_if_enough_saving%"
     AppBundle\Controller\TimeLogController:
         arguments:
             - "%forbid_own_timelog_new_admin%"
@@ -216,6 +217,7 @@ services:
             - "%fly_and_fixed_allow_fixed_shift_free%"
             - "%use_time_log_saving%"
             - "%time_log_saving_shift_free_min_time_in_advance_days%"
+            - "%time_log_saving_shift_free_allow_only_if_enough_saving%"
     shift_free_log_service:
         class: AppBundle\Service\ShiftFreeLogService
         public: true

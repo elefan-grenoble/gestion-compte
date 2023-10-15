@@ -6,6 +6,7 @@ use DateTime;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
@@ -41,8 +42,10 @@ class ShiftController extends Controller
     private $use_fly_and_fixed;
     private $use_time_log_saving;
     private $time_log_saving_shift_free_min_time_in_advance_days;
+    private $time_log_saving_shift_free_allow_only_if_enough_saving;
 
-    public function __construct(bool $forbid_own_shift_book_admin, bool $forbid_own_shift_free_admin, bool $forbid_own_shift_validate_admin, bool $use_fly_and_fixed, bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
+    public function __construct(bool $forbid_own_shift_book_admin, bool $forbid_own_shift_free_admin, bool $forbid_own_shift_validate_admin, bool $use_fly_and_fixed,
+        bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, bool $time_log_saving_shift_free_allow_only_if_enough_saving)
     {
         $this->forbid_own_shift_book_admin = $forbid_own_shift_book_admin;
         $this->forbid_own_shift_free_admin = $forbid_own_shift_free_admin;
@@ -50,6 +53,7 @@ class ShiftController extends Controller
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->use_time_log_saving = $use_time_log_saving;
         $this->time_log_saving_shift_free_min_time_in_advance_days = $time_log_saving_shift_free_min_time_in_advance_days;
+        $this->time_log_saving_shift_free_allow_only_if_enough_saving = $time_log_saving_shift_free_allow_only_if_enough_saving;
     }
 
     /**
@@ -289,6 +293,7 @@ class ShiftController extends Controller
 
             // store shift beneficiary & reason (before shift free())
             $beneficiary = $shift->getShifter();
+            $member = $beneficiary->getMembership();
             $fixe = $shift->isFixe();
             $reason = $form->get("reason")->getData();
 
@@ -300,14 +305,15 @@ class ShiftController extends Controller
 
             $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
-        } else {
-            return $this->redirectToRoute('homepage');
+
+            $session->getFlashBag()->add('success', "Le créneau a été annulé !");
+            if ($this->use_time_log_saving) {
+                if (count($em->getRepository('AppBundle:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                    $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
+                }
+            }
         }
 
-        $session->getFlashBag()->add('success', "Le créneau a été annulé !");
-        if ($this->use_time_log_saving) {
-            $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé.<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
-        }
         return $this->redirectToRoute('homepage');
     }
 
@@ -344,6 +350,7 @@ class ShiftController extends Controller
             else {
                 // store shift beneficiary & reason (before shift free())
                 $beneficiary = $shift->getShifter();
+                $member = $beneficiary->getMembership();
                 $fixe = $shift->isFixe();
                 $reason = $form->get("reason")->getData();
 
@@ -367,6 +374,12 @@ class ShiftController extends Controller
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
+
+                if ($this->use_time_log_saving) {
+                    if (count($em->getRepository('AppBundle:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                        $message += "Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).";
+                    }
+                }
             }
         } else {
             $success = false;

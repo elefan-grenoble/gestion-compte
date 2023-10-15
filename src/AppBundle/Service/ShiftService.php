@@ -30,11 +30,12 @@ class ShiftService
     private $fly_and_fixed_allow_fixed_shift_free;
     private $use_time_log_saving;
     private $time_log_saving_shift_free_min_time_in_advance_days;
+    private $time_log_saving_shift_free_allow_only_if_enough_saving;
 
     public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
         $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime,
-        $use_fly_and_fixed, $fly_and_fixed_allow_fixed_shift_free,
-        $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days)
+        bool $use_fly_and_fixed, bool $fly_and_fixed_allow_fixed_shift_free,
+        bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, bool $time_log_saving_shift_free_allow_only_if_enough_saving)
     {
         $this->em = $em;
         $this->beneficiaryService = $beneficiaryService;
@@ -49,6 +50,7 @@ class ShiftService
         $this->fly_and_fixed_allow_fixed_shift_free = $fly_and_fixed_allow_fixed_shift_free;
         $this->use_time_log_saving = $use_time_log_saving;
         $this->time_log_saving_shift_free_min_time_in_advance_days = $time_log_saving_shift_free_min_time_in_advance_days;
+        $this->time_log_saving_shift_free_allow_only_if_enough_saving = $time_log_saving_shift_free_allow_only_if_enough_saving;
     }
 
     /**
@@ -272,7 +274,7 @@ class ShiftService
             $result = false;
             $message = "Impossible de libérer le créneau car il n'est actuellement pas réservé.";
         }
-        // can only free your own shift
+        // can only free shift "owned" by beneficiary
         elseif ($shift->getShifter() != $beneficiary) {
             $result = false;
             $message = "Impossible de libérer le créneau car il n'est pas réservé par ce membre.";
@@ -286,7 +288,8 @@ class ShiftService
                 $message = "Impossible de libérer un créneau dans le passé.";
             }
 
-            // Fly & fixed: check if there is a rule allowing to free fixed shifts
+            // Fly & fixed:
+            // - check if there is a rule allowing to free fixed shifts
             if ($this->use_fly_and_fixed) {
                 if ($shift->isFixe() && !$this->fly_and_fixed_allow_fixed_shift_free) {
                     $result = false;
@@ -294,21 +297,23 @@ class ShiftService
                 }
             }
 
-            // Time log saving:
-            // - check if there is a min time in advance rule
-            // - check if the shifter has enough time on its time log saving account
+            // Saving account mode
+            // - check if there is a min time in advance rule & that it is respected
+            // - check if there is a min savingTime amount rule & shifter has enough time on its savingTime
             if ($this->use_time_log_saving) {
                 $member = $shift->getShifter()->getMembership();
-                $member_saving_now = $member->getSavingTimeCount();
                 if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
                     if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
                         $result = false;
                         $message = "Impossible de libérer un créneau si peu de temps en avance (minumum " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours).";
                     }
                 }
-                if ($shift->getDuration() > $member_saving_now) {
-                    $result = false;
-                    $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
+                if ($this->time_log_saving_shift_free_allow_only_if_enough_saving) {
+                    $member_saving_now = $member->getSavingTimeCount();
+                    if ($shift->getDuration() > $member_saving_now) {
+                        $result = false;
+                        $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
+                    }
                 }
             }
         }

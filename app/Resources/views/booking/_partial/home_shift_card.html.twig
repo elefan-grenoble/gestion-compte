@@ -34,12 +34,18 @@
                             {{ form_errors(shift_free_forms[shift.id].reason) }}
                             {{ form_widget(shift_free_forms[shift.id].reason) }}
                         </div>
-                        {% if use_time_log_saving %}
+                        {% if use_time_log_saving and use_card_reader_to_validate_shifts %}
                             <div class="card-panel blue lighten-3">
                                 <i class="material-icons left">info</i>
-                                Grâce au compteur épargne, ce créneau sera tout de même comptabilisé.
-                                <br />
-                                En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés de votre compteur épargne (<strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                                {% if not time_log_saving_shift_free_allow_only_if_enough_saving and shift.duration > member.savingTimeCount %}
+                                    Vous <strong>n'avez pas assez de temps sur votre compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                                    <br />
+                                    Ce créneau ne sera donc pas comptabilisé, et votre compteur épargne ne sera pas utilisé.
+                                {% else %}
+                                    Grâce au compteur épargne, ce créneau sera tout de même comptabilisé.
+                                    <br />
+                                    En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés de votre compteur épargne (<strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                                {% endif %}
                             </div>
                         {% endif %}
                     </div>
