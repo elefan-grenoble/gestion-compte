@@ -136,7 +136,6 @@ class Shift
      */
     public function __toString()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi') . ' [' . $this->getShifter() . ']';
     }
 
@@ -635,7 +634,6 @@ class Shift
      */
     public function getDisplayDateSeperateTime()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return $this->getStart()->format('d/m/Y') . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 
@@ -644,7 +642,6 @@ class Shift
      */
     public function getDisplayDateWithTime()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 
@@ -653,7 +650,6 @@ class Shift
      */
     public function getDisplayDateLongWithTime()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 
@@ -662,7 +658,6 @@ class Shift
      */
     public function getDisplayDateFullWithTime()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 }

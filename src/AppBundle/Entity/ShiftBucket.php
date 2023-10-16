@@ -246,7 +246,6 @@ class ShiftBucket
      */
     public function getDisplayDateLongWithTime()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 }
