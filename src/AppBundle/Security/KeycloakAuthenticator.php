@@ -177,6 +177,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 if ($oldMembership){
                     $oldMembership->removeBeneficiary($beneficiary);
                     $oldMembership->setMainBeneficiary(null);
+                    $oldMembership->setMemberNumber(10000+$oldMembership->getMemberNumber());
 
                     /** @var Proxy $givenProxy */
                     foreach ($oldMembership->getGivenProxies() as $givenProxy){
@@ -205,15 +206,22 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 }
             }
         }else if($beneficiary->getMembership()){ //no co user
+            $membership = $beneficiary->getMembership();
             /** @var Beneficiary $b */
-            foreach ($beneficiary->getMembership()->getBeneficiaries() as $b){
+            foreach ($membership->getBeneficiaries() as $b){
                 //if membership is shared
                 if ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() !== $b){ //should create a new membership for this beneficiary
-                    $beneficiary->getMembership()->removeBeneficiary($b);
+                    $membership->removeBeneficiary($b);
+                    $membership->setMemberNumber($beneficiary->getOpenIdMemberNumber());
+                    $this->em->persist($membership);
+                    $this->em->flush();
                     $this->createMembership($b);
                 }elseif ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() === $b) //should create a new membership for me (beneficiary)
                 {
-                    $beneficiary->getMembership()->removeBeneficiary($beneficiary);
+                    $membership->setMemberNumber($b->getOpenIdMemberNumber());
+                    $membership->removeBeneficiary($beneficiary);
+                    $this->em->persist($membership);
+                    $this->em->flush();
                     $this->createMembership($beneficiary);
                 }
             }
