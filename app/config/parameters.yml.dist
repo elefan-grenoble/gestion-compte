@@ -10,6 +10,10 @@ parameters:
     # You should uncomment this if you want to use pdo_sqlite
     #database_path: '%kernel.project_dir%/var/data/data.sqlite'
 
+    # A secret key that's used to generate certain security-related tokens
+    secret: ThisTokenIsNotSoSecretChangeIt
+
+    # SUPER_ADMIN user
     super_admin.username: admin
     super_admin.initial_password: password
 
@@ -23,7 +27,6 @@ parameters:
     # mail user used for transactional
     transactional_mailer_user: 'contact@yourcoop.local'
     transactional_mailer_user_name: 'espace membre'
-
 
     # The base domain used for mail addresses
     emails.base_domain: yourcoop.local
@@ -59,13 +62,15 @@ parameters:
 
     shift_mailer_user: ~
 
-    # A secret key that's used to generate certain security-related tokens
-    secret: ThisTokenIsNotSoSecretChangeIt
-
-    #router https://symfony.com/doc/3.4/console/request_context.html
+    # Router https://symfony.com/doc/3.4/console/request_context.html
     router.request_context.host: membres.yourcoop.local
     router.request_context.scheme: https
     router.request_context.base_url:
+
+    # Security: whether to enable IP check of the spot
+    enable_place_local_ip_address_check: true
+    # IP of the spot, comma separated if many
+    place_local_ip_address: '127.0.0.1,192.168.0.x'
 
     # Branding
     site_name: Espace membre @ MyLocalCoop
@@ -74,12 +79,6 @@ parameters:
     project_url_display: yourcoop.local
     main_color: #51CAE9
     local_currency_name: 'monnaie locale'
-    # Whether to enable IP check of the spot
-    enable_place_local_ip_address_check: true
-    #ip of the spot, comma separated if many
-    place_local_ip_address: '127.0.0.1,192.168.0.x'
-
-    wiki_keys_url: ~
 
     # Registration
     registration_duration: '1 year'
@@ -96,7 +95,6 @@ parameters:
     min_shift_duration: 90
     cycle_duration: '28 days'
     cycle_type: 'abcd'
-    maximum_nb_of_beneficiaries_in_membership: 2
     new_users_start_as_beginner: true
     allow_extra_shifts: true
     max_time_in_advance_to_book_extra_shifts: '3 days'
@@ -105,18 +103,23 @@ parameters:
     reserve_new_shift_to_prior_shifter: true
     forbid_shift_overlap_time: 30
     max_time_at_end_of_shift: 0
-    forbid_own_shift_book_admin: false
-    forbid_own_shift_free_admin: false
-    forbid_own_shift_validate_admin: false
-    forbid_own_timelog_new_admin: false
     display_name_shifters: false
     max_nb_of_past_cycles_to_display: 3
-    use_fly_and_fixed: false
-    use_card_reader_to_validate_shifts: false
-    use_time_log_saving: false
 
-    # Events
-    max_event_proxy_per_member: 1
+    # Shifting: fly & fixed
+    use_fly_and_fixed: false
+    fly_and_fixed_allow_fixed_shift_free: false
+
+    # Shifting: card reader
+    use_card_reader_to_validate_shifts: false
+    swipe_card_logging: true
+    swipe_card_logging_anonymous: true
+    display_swipe_cards_settings: true
+
+    # Shifting: time log saving
+    use_time_log_saving: false
+    time_log_saving_shift_free_min_time_in_advance_days: null
+    time_log_saving_shift_free_allow_only_if_enough_saving: false
 
     # Profile configuration
     profile_display_task_list: true
@@ -131,6 +134,7 @@ parameters:
     user_account_enabled_material_icon: 'devices'
 
     # Member configuration
+    maximum_nb_of_beneficiaries_in_membership: 2
     member_withdrawn_icon: '∅'
     member_withdrawn_material_icon: 'block'
     member_withdrawn_background_color: rgba(255, 50, 0, 0.2)
@@ -151,18 +155,13 @@ parameters:
 
     # Admin: member
     admin_member_display_shift_free_log: true
+    forbid_own_shift_book_admin: false
+    forbid_own_shift_free_admin: false
+    forbid_own_shift_validate_admin: false
+    forbid_own_timelog_new_admin: false
 
-    # Swipe card configuration
-    swipe_card_logging: true
-    swipe_card_logging_anonymous: true
-    display_swipe_cards_settings: true
-
-    # Fly and fixed
-    fly_and_fixed_allow_fixed_shift_free: false
-
-    # Time log saving
-    time_log_saving_shift_free_min_time_in_advance_days: null
-    time_log_saving_shift_free_allow_only_if_enough_saving: false
+    # Events
+    max_event_proxy_per_member: 1
 
     # Opening hours
     display_opening_hour_open_closed_header: true
@@ -172,6 +171,7 @@ parameters:
     # Code generation
     code_generation_enabled: true
     display_keys_shop: true
+    wiki_keys_url: ~
 
     # Logging
     logging.mattermost.enabled: false
