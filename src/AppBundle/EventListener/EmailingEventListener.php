@@ -241,8 +241,8 @@ class EmailingEventListener
         $router = $this->container->get('router');
         $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
 
-        $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShift->getStart()->format("d F") .' dans '.$d.' jours'))
-            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
+        $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. strftime("%e %B", $formerShift->getStart()->getTimestamp()) .' dans ' . $d . ' jours'))
+            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
             ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
