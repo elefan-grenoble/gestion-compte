@@ -28,20 +28,20 @@ class EmailingEventListener
     protected $container;
     protected $mailer;
     protected $due_duration_by_cycle;
-    private $memberEmail;
-    private $shiftEmail;
-    private $wikiKeysUrl;
+    protected $member_email;
+    protected $shift_email;
+    protected $wiki_keys_url;
 
-    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer, $memberEmail, $shiftEmail, $wikiKeysUrl)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
         $this->mailer = $mailer;
         $this->due_duration_by_cycle = $this->container->getParameter('due_duration_by_cycle');
-        $this->memberEmail = $memberEmail;
-        $this->shiftEmail = $shiftEmail;
-        $this->wikiKeysUrl = $wikiKeysUrl;
+        $this->member_email = $this->container->getParameter('emails.member');
+        $this->shift_email = $this->container->getParameter('emails.shift');
+        $this->wiki_keys_url = $this->container->getParameter('wiki_keys_url');
     }
 
     /**
@@ -63,7 +63,7 @@ class EmailingEventListener
         }
 
         $needInfo = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', tu te présentes ?'))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setFrom($this->member_email['address'], $this->member_email['from_name'])
             ->setTo($email)
             ->setBody(
                 $this->renderView(
@@ -98,7 +98,7 @@ class EmailingEventListener
         }
 
         $needInfoRecall = (new \Swift_Message('Bienvenue à '.$this->container->getParameter('project_name').', souhaites-tu te présenter ?'))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setFrom($this->member_email['address'], $this->member_email['from_name'])
             ->setTo($email)
             ->setBody(
                 $this->renderView(
@@ -125,7 +125,7 @@ class EmailingEventListener
 
         $owner = $beneficiary->getMembership()->getMainBeneficiary();
         $newBuddy = (new \Swift_Message($beneficiary->getFirstname().' a été ajouté à ton compte '.$this->container->getParameter('project_name')))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+            ->setFrom($this->member_email['address'], $this->member_email['from_name'])
             ->setTo($owner->getEmail())
             ->setBody(
                 $this->renderView(
@@ -163,7 +163,7 @@ class EmailingEventListener
 
         if ($user->getBeneficiary()->getMembership()->getRegistrations()->count()>1){
             $thanks = (new \Swift_Message('[ESPACE MEMBRES] Re-adhésion helloasso bien reçue !'))
-                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+                ->setFrom($this->member_email['address'], $this->member_email['from_name'])
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -205,7 +205,7 @@ class EmailingEventListener
 
         try {
             $oups = (new \Swift_Message('[ESPACE MEMBRES] Oups ! il et trop tôt pour ré-adhérer !'))
-                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+                ->setFrom($this->member_email['address'], $this->member_email['from_name'])
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -241,7 +241,7 @@ class EmailingEventListener
         $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
 
         $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShift->getStart()->format("d F") .' dans '.$d.' jours'))
-            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
             ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
@@ -272,7 +272,7 @@ class EmailingEventListener
 
         // send a "confirmation" e-mail to the beneficiary
         $confirmation = (new \Swift_Message('[ESPACE MEMBRES] Réservation de ton créneau confirmée'))
-            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
             ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
@@ -285,8 +285,8 @@ class EmailingEventListener
 
         // send an "archive" e-mail to the admin
         $archive = (new \Swift_Message('[ESPACE MEMBRES] BOOKING'))
-            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
-            ->setTo($this->shiftEmail['address'])
+            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
+            ->setTo($this->shift_email['address'])
             ->setReplyTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
@@ -311,7 +311,7 @@ class EmailingEventListener
 
         if ($beneficiary) { // warn beneficiary
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Créneau libéré'))
-                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -340,7 +340,7 @@ class EmailingEventListener
 
         if ($beneficiary) { // warn beneficiary
             $warn = (new \Swift_Message('[ESPACE MEMBRES] Créneau supprimé'))
-                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
                 ->setTo($beneficiary->getEmail())
                 ->setBody(
                     $this->renderView(
@@ -380,12 +380,15 @@ class EmailingEventListener
         if (!$membership->getFrozen() && $membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) {
             foreach ($membership->getBeneficiaries() as $beneficiary){
                 $mail = (new \Swift_Message('[ESPACE MEMBRES] Début de ton cycle, réserve tes créneaux'))
-                    ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                    ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
                     ->setTo($beneficiary->getEmail())
                     ->setBody(
                         $this->container->get('twig')->render(
                             'emails/cycle_start.html.twig',
-                            array('beneficiary' => $beneficiary, 'home_url' => $home_url)
+                            array(
+                                'beneficiary' => $beneficiary,
+                                'home_url' => $home_url
+                            )
                         ),
                         'text/html'
                     );
@@ -416,12 +419,15 @@ class EmailingEventListener
         }
         if ($membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) { //only if member still have to book
             $mail = (new \Swift_Message('[ESPACE MEMBRES] déjà la moitié de ton cycle, un tour sur ton espace membre ?'))
-                ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+                ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
                 ->setTo($membership->getMainBeneficiary()->getEmail())
                 ->setBody(
                     $this->renderView(
                         'emails/cycle_half.html.twig',
-                        array('membership' => $membership, 'home_url' => $home_url)
+                        array(
+                            'membership' => $membership,
+                            'home_url' => $home_url
+                        )
                     ),
                     'text/html'
                 );
@@ -443,7 +449,7 @@ class EmailingEventListener
         $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
 
         $notify = (new \Swift_Message('[ESPACE MEMBRES] Nouveau code boîtier clefs'))
-            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
             ->setTo($code->getRegistrar()->getEmail())
             ->setBody(
                 $this->renderView(
@@ -452,7 +458,7 @@ class EmailingEventListener
                         'code' => $code,
                         'codes' => $old_codes,
                         'changeCodeUrl' => $code_change_done_url,
-                        'wiki_keys_url' => $this->wikiKeysUrl
+                        'wiki_keys_url' => $this->wiki_keys_url
                     )
                 ),
                 'text/html'
