@@ -306,7 +306,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
         } else { // address must be fully fill or may not exist
             $address = $beneficiary->getAddress();
             if ($address){
+                $beneficiary->setAddress(null);
                 $this->em->remove($address);
+                $this->em->flush();
             }
         }
         if (!$beneficiary->getId())
