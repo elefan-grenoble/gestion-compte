@@ -16,6 +16,7 @@ class MembershipVoter extends Voter
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
+    const BOOK = 'book';
     const OPEN = 'open';
     const CLOSE = 'close';
     const FREEZE = 'freeze';
@@ -40,6 +41,7 @@ class MembershipVoter extends Voter
         if (!in_array($attribute, array(
                 self::VIEW,
                 self::EDIT,
+                self::BOOK,
                 self::OPEN,
                 self::CLOSE,
                 self::ROLE_REMOVE,
@@ -96,6 +98,7 @@ class MembershipVoter extends Voter
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
+            case self::BOOK:
             case self::FREEZE_CHANGE:
                 if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject) {
                     return true;

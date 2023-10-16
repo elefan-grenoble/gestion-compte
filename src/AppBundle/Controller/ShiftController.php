@@ -142,7 +142,7 @@ class ShiftController extends Controller
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
             || !$this->get('shift_service')->isShiftBookable($shift, $beneficiary)
-            || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
+            || !$this->isGranted(MembershipVoter::BOOK, $beneficiary->getMembership())
         ) {
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
             return new Response($this->generateUrl('booking'), 205);
