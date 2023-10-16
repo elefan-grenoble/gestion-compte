@@ -42,6 +42,7 @@ class EmailingEventListener
         $this->member_email = $this->container->getParameter('emails.member');
         $this->shift_email = $this->container->getParameter('emails.shift');
         $this->wiki_keys_url = $this->container->getParameter('wiki_keys_url');
+        $this->reserve_new_shift_to_prior_shifter_delay = $this->container->getParameter('reserve_new_shift_to_prior_shifter_delay');
     }
 
     /**
@@ -237,7 +238,6 @@ class EmailingEventListener
         $beneficiary = $shift->getLastShifter();
 
         $router = $this->container->get('router');
-
         $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
 
         $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. $formerShift->getStart()->format("d F") .' dans '.$d.' jours'))
@@ -250,6 +250,7 @@ class EmailingEventListener
                         'shift' => $shift,
                         'oldshift' => $formerShift,
                         'days' => $d,
+                        'reserve_new_shift_to_prior_shifter_delay' => $this->reserve_new_shift_to_prior_shifter_delay,
                         'accept_url' => $router->generate('shift_accept_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
                         'reject_url' => $router->generate('shift_reject_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL),
                     )

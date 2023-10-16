@@ -7,6 +7,10 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Useful for coops with 'reserve_new_shift_to_prior_shifter' true.
+ * Note: should be run 'reserve_new_shift_to_prior_shifter_delay' days after ShiftGenerateCommand.
+ */
 class FreeReservedShiftsCommand extends ContainerAwareCommand
 {
     protected function configure()
@@ -41,5 +45,4 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
         $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
         $output->writeln($message);
     }
-
 }
