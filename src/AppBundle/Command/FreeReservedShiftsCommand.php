@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Useful for coops with 'reserve_new_shift_to_prior_shifter' true.
+ * Works only for coops with 'reserve_new_shift_to_prior_shifter' true.
  * Note: should be run 'reserve_new_shift_to_prior_shifter_delay' days after ShiftGenerateCommand.
  */
 class FreeReservedShiftsCommand extends ContainerAwareCommand
@@ -25,6 +25,12 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $reserve_new_shift_to_prior_shifter = $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter');
+        if (!$reserve_new_shift_to_prior_shifter) {
+            $output->writeln('<fg=red;> reserve_new_shift_to_prior_shifter parameter must be true </>');
+            return;
+        }
+
         $date_given = $input->getArgument('date');
         $date = date_create_from_format('Y-m-d',$date_given);
         if (!$date || $date->format('Y-m-d') != $date_given){
@@ -33,6 +39,7 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
         }
         $date->setTime(0,0);
         $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
+
         $count = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $shifts = $em->getRepository('AppBundle:Shift')->findReservedAt($date);
@@ -42,6 +49,7 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
             $count++;
         }
         $em->flush();
+
         $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
         $output->writeln($message);
     }
