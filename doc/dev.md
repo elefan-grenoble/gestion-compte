@@ -34,9 +34,11 @@ N'oubliez pas de définir la variable d'environnement `DEV_MODE_ENABLED` dans le
 
 ## Nix
 
-Vous pouvez obtenir toutes les dépendances du projet en utilisant Nix. Une fois installé lancez nix develop --impure et tous les outils nécessaires sont dans votre PATH à la bonne version, comme déclaré dans flake.nix. Cela peut se faire automatiquement quand vous cd dans le répertoire si vous avez installé direnv.
+Vous pouvez obtenir toutes les dépendances du projet en utilisant [Nix](https://nixos.org/download.html). Une fois installé lancez `nix develop --impure` et tous les outils nécessaires sont dans votre `PATH` à la bonne version, comme déclaré dans [flake.nix](../flake.nix).
+Cela peut se faire automatiquement quand vous `cd` dans le répertoire si vous avez installé [direnv](https://direnv.net/).
 
-Pour lancer l'instance mariadb de test utilisez devenv up. Pour lancer l'application, utilisez php bin/console server:run '*:8000'
+Pour lancer l'instance mariadb de test utilisez `devenv up`.
+Pour lancer l'application, utilisez `php bin/console server:run '*:8000'`
 
 ## Tests
 
