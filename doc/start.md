@@ -30,4 +30,4 @@ Dans l'admin panel :
 - Quand tous les créneaux-types et postes d'une journée sont créés, il est possible de les *dupliquer* sur une autre journée avec la fonction idoine
 - Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
 
-La génération de créneaux peut être automatisée via une [tâche cron](install.md#crontab).
+La génération de créneaux peut être automatisée via une [tâche cron](install.serveur.md#crontab).
