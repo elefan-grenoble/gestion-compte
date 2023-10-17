@@ -29,7 +29,8 @@ _cliquez pour voir l'image en grand_
 
 ## Installation
 
-* [Guide d'installation](doc/install.md)
+* [Guide d'installation local](doc/install.local.md)
+* [Guide d'installation sur serveur](doc/install.serveur.md)
 * [Guide de mise à jour](doc/maj.md)
 * [Guide de mise en route](doc/start.md)
 
