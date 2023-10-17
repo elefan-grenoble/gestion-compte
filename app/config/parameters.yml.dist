@@ -98,13 +98,12 @@ parameters:
     new_users_start_as_beginner: true
     allow_extra_shifts: true
     max_time_in_advance_to_book_extra_shifts: '3 days'
-    display_gauge: true
     time_after_which_members_are_late_with_shifts: -9
     reserve_new_shift_to_prior_shifter: true
+    reserve_new_shift_to_prior_shifter_delay: 7
     forbid_shift_overlap_time: 30
     max_time_at_end_of_shift: 0
     display_name_shifters: false
-    max_nb_of_past_cycles_to_display: 3
 
     # Shifting: fly & fixed
     use_fly_and_fixed: false
@@ -122,11 +121,13 @@ parameters:
     time_log_saving_shift_free_allow_only_if_enough_saving: false
 
     # Profile configuration
+    display_gauge: true
     profile_display_task_list: true
     profile_display_time_log: true
     profile_display_shift_free_log: true
     display_freeze_account: true
     display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
+    max_nb_of_past_cycles_to_display: 3
 
     # User configuration
     user_account_not_enabled_material_icon: 'phonelink_off'
