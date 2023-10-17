@@ -31,6 +31,7 @@ class EmailingEventListener
     protected $member_email;
     protected $shift_email;
     protected $wiki_keys_url;
+    protected $reserve_new_shift_to_prior_shifter_delay;
 
     public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer)
     {
