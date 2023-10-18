@@ -1,15 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des membres en retard {{ reason }} - {{ site_name }}{% endblock %}
+{% block title %}Liste des membres {{ reason }} - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">list</i>&nbsp;Liste des membres en retard {{ reason }}
+<i class="material-icons">list</i>&nbsp;Liste des membres {{ reason }}
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des membres en retard {{ reason }} ({{ result_count }})</h4>
+    <h4>Liste des membres {{ reason }} ({{ result_count }})</h4>
 
     <ul class="collapsible">
         <li>
@@ -21,30 +21,43 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s6 input-field">
-                                {{ form_widget(form.withdrawn) }}
-                                {{ form_label(form.withdrawn) }}
-                                {{ form_errors(form.withdrawn) }}
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.withdrawn) }}
+                                    {{ form_label(form.withdrawn) }}
+                                </div>
                             </div>
-                            <div class="col s6 input-field">
-                                {{ form_widget(form.frozen) }}
-                                {{ form_label(form.frozen) }}
-                                {{ form_errors(form.frozen) }}
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.enabled) }}
+                                    {{ form_label(form.enabled) }}
+                                </div>
                             </div>
-                            <div class="col s4 input-field">
-                                {{ form_widget(form.membernumber) }}
-                                {{ form_label(form.membernumber) }}
-                                {{ form_errors(form.membernumber) }}
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.frozen) }}
+                                    {{ form_label(form.frozen) }}
+                                </div>
                             </div>
-                            <div class="col s4 input-field">
-                                {{ form_widget(form.membernumbergt) }}
-                                {{ form_label(form.membernumbergt) }}
-                                {{ form_errors(form.membernumbergt) }}
+                        </div>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumber) }}
+                                    {{ form_label(form.membernumber) }}
+                                </div>
                             </div>
-                            <div class="col s4 input-field">
-                                {{ form_widget(form.membernumberlt) }}
-                                {{ form_label(form.membernumberlt) }}
-                                {{ form_errors(form.membernumberlt) }}
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumbergt) }}
+                                    {{ form_label(form.membernumbergt) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberlt) }}
+                                    {{ form_label(form.membernumberlt) }}
+                                </div>
                             </div>
                         </div>
                         <h5>Compteur</h5>
@@ -67,23 +80,26 @@
                     <div class="col s12 m4">
                         <h5>Adhésion(s)</h5>
                         <div class="row">
-                            <div class="col s6 input-field">
-                                {{ form_widget(form.registration) }}
-                                {{ form_label(form.registration) }}
-                                {{ form_errors(form.registration) }}
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.registration) }}
+                                    {{ form_label(form.registration) }}
+                                </div>
                             </div>
                         </div>
                         <h5>Dernière Adhésion</h5>
                         <div class="row">
-                            <div class="col s6 input-field">
-                                {{ form_widget(form.lastregistrationdatelt) }}
-                                {{ form_label(form.lastregistrationdatelt) }}
-                                {{ form_errors(form.lastregistrationdatelt) }}
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdategt) }}
+                                    {{ form_label(form.lastregistrationdategt) }}
+                                </div>
                             </div>
-                            <div class="col s6 input-field">
-                                {{ form_widget(form.lastregistrationdategt) }}
-                                {{ form_label(form.lastregistrationdategt) }}
-                                {{ form_errors(form.lastregistrationdategt) }}
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdatelt) }}
+                                    {{ form_label(form.lastregistrationdatelt) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -92,18 +108,25 @@
                         <div class="input-field">
                             {{ form_widget(form.firstname) }}
                             {{ form_label(form.firstname) }}
-                            {{ form_errors(form.firstname) }}
                         </div>
                         <div class="input-field">
                             {{ form_widget(form.lastname) }}
                             {{ form_label(form.lastname) }}
-                            {{ form_errors(form.lastname) }}
                         </div>
                         <div class="input-field">
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
-                            {{ form_errors(form.email) }}
                         </div>
+                        {% if use_fly_and_fixed %}
+                            <div class="input-field">
+                                {{ form_widget(form.flying) }}
+                                {{ form_label(form.flying) }}
+                            </div>
+                            <div class="input-field">
+                                {{ form_widget(form.has_period_position) }}
+                                {{ form_label(form.has_period_position) }}
+                            </div>
+                        {% endif %}
                         <br />
                         <h5>Actions</h5>
                         {{ form_widget(form.submit) }}
@@ -152,12 +175,12 @@
                 </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.firstname }}
+                        {{ beneficiary.firstname }}<br />
                     {% endfor %}
                 </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.lastname }}
+                        {{ beneficiary.lastname }}<br />
                     {% endfor %}
                 </td>
                 <td>

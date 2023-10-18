@@ -75,9 +75,9 @@ class AdminController extends Controller
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
-            'sort' => 'm.member_number',
-            'dir' => 'ASC',
             'withdrawn' => 1,
+            'sort' => 'm.member_number',
+            'dir' => 'ASC'
         ];
         $form = $formHelper->createMemberFilterForm($this->createFormBuilder(), $defaults);
         $form->handleRequest($request);
