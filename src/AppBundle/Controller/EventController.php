@@ -6,6 +6,7 @@ use DateTime;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
+use AppBundle\Event\EventProxyCreatedEvent;
 use AppBundle\Form\ProxyType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -101,7 +102,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function giveProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
+    public function giveProxyAction(Event $event, Request $request)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -185,8 +186,9 @@ class EventController extends Controller
             $session = new Session();
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
-            if ($proxy->getGiver() && $proxy->getOwner()){
-                $this->sendProxyMail($proxy,$mailer);
+            if ($proxy->getGiver() && $proxy->getOwner()) {
+                $dispatcher = $this->getContainer()->get('event_dispatcher');
+                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
             }
 
             return $this->redirectToRoute('homepage');
@@ -236,7 +238,8 @@ class EventController extends Controller
                     $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()) {
-                        $this->sendProxyMail($proxy, $mailer);
+                        $dispatcher = $this->getContainer()->get('event_dispatcher');
+                        $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
                     }
 
                     return $this->redirectToRoute('homepage');
@@ -373,7 +376,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function acceptProxyAction(Event $event, Request $request, \Swift_Mailer $mailer)
+    public function acceptProxyAction(Event $event, Request $request)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -429,8 +432,9 @@ class EventController extends Controller
             $em->flush();
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
-            if ($proxy->getGiver() && $proxy->getOwner()){
-                $this->sendProxyMail($proxy,$mailer);
+            if ($proxy->getGiver() && $proxy->getOwner()) {
+                $dispatcher = $this->getContainer()->get('event_dispatcher');
+                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
             }
 
             return $this->redirectToRoute('homepage');
@@ -440,42 +444,5 @@ class EventController extends Controller
             'event' => $event,
             'form' => $form->createView()
         ));
-    }
-
-    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer)
-    {
-        $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
-
-        $memberEmail = $this->getParameter('emails.member');
-        $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
-            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
-            ->setTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
-            ->setReplyTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
-            ->setBody(
-                $this->renderView(
-                    'emails/proxy_owner.html.twig',
-                    array(
-                        'proxy' => $proxy,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
-                ),
-                'text/html'
-            );
-        $giver = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] ta procuration'))
-            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
-            ->setTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
-            ->setReplyTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
-            ->setBody(
-                $this->renderView(
-                    'emails/proxy_giver.html.twig',
-                    array(
-                        'proxy' => $proxy,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
-                ),
-                'text/html'
-            );
-        $mailer->send($owner);
-        $mailer->send($giver);
     }
 }

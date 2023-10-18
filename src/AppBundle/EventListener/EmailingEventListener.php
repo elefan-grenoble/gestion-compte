@@ -6,6 +6,7 @@ use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\AnonymousBeneficiaryRecallEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\CodeNewEvent;
+use AppBundle\Event\EventProxyCreatedEvent;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
@@ -491,6 +492,66 @@ class EmailingEventListener
 
             $this->mailer->send($email);
         }
+    }
+
+    /**
+     * @param EventProxyCreatedEvent $event
+     * @throws \Exception
+     */
+    public function onEventProxyCreated(EventProxyCreatedEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onEventProxyCreated");
+
+        $proxy = $event->getProxy();
+
+        $ownerBeneficiary = $proxy->getOwner();
+        $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
+
+        // send mail to owner (the one who will vote)
+        $emailObject = '[' . $proxy->getEvent()->getTitle() . '] procuration';
+        $emailTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];
+        $emailReplyTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
+
+        $email = (new \Swift_Message($emailObject))
+            ->setFrom($member_email['address'], $member_email['from_name'])
+            ->setTo($emailTo)
+            ->setReplyTo($emailReplyTo)
+            ->setBody(
+                $this->renderView(
+                    'emails/proxy_owner.html.twig',
+                    array(
+                        'proxy' => $proxy,
+                        'ownerBeneficiary' => $ownerBeneficiary,
+                        'giverMainBeneficiary' => $giverMainBeneficiary
+                    )
+                ),
+                'text/html'
+            );
+
+        $mailer->send($email);
+
+        // send mail to giver
+        $emailObject = '[' . $proxy->getEvent()->getTitle() . '] ta procuration';
+        $emailTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
+        $emailReplyTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];
+
+        $email = (new \Swift_Message($emailObject))
+            ->setFrom($member_email['address'], $member_email['from_name'])
+            ->setTo($emailTo)
+            ->setReplyTo($emailReplyTo)
+            ->setBody(
+                $this->renderView(
+                    'emails/proxy_giver.html.twig',
+                    array(
+                        'proxy' => $proxy,
+                        'ownerBeneficiary' => $ownerBeneficiary,
+                        'giverMainBeneficiary' => $giverMainBeneficiary
+                    )
+                ),
+                'text/html'
+            );
+
+        $mailer->send($email);
     }
 
     /**

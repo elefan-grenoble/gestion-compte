@@ -162,7 +162,6 @@ services:
             $container: "@service_container"
             $mailer: "@mailer"
         tags:
-            - { name: kernel.event_listener, event: code.new, method: onCodeNew }
             - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
             - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
             - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
@@ -173,8 +172,10 @@ services:
             - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
             - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
             - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
+            - { name: kernel.event_listener, event: event.proxy.created, method: onEventProxyCreated }
             - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
             - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
+            - { name: kernel.event_listener, event: code.new, method: onCodeNew }
 
     # subscribers
     beneficiary_initialization_subscriber:
