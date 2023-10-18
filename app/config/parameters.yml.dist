@@ -125,6 +125,7 @@ parameters:
     profile_display_task_list: true
     profile_display_time_log: true
     profile_display_shift_free_log: true
+    profile_display_period_position_free_log: true
     display_freeze_account: true
     display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
     max_nb_of_past_cycles_to_display: 3

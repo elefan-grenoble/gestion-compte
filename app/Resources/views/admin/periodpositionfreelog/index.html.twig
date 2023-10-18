@@ -51,7 +51,7 @@
         </li>
     </ul>
 
-    {% include "member/_partial/period_position_free_logs.html.twig" with { periodPositionFreeLogs: periodPositionFreeLogs } %}
+    {% include "member/_partial/period_position_free_logs.html.twig" with { periodPositionFreeLogs: periodPositionFreeLogs, from_admin: true } %}
 
     <ul class="pagination">
         <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
