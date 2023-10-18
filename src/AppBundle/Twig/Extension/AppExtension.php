@@ -135,7 +135,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%e %B %Y", $date->getTimestamp());
     }
 
@@ -144,7 +143,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr_long(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $date->getTimestamp());
     }
 
@@ -153,7 +151,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr_full(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
@@ -162,7 +159,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr_with_time(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%e %B %Y à %kh%M", $date->getTimestamp());
     }
 
@@ -173,7 +169,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr_long_with_time(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B à %kh%M", $date->getTimestamp());
     }
 
@@ -184,7 +179,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_fr_full_with_time($date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y à %kh%M", $date->getTimestamp());
     }
 
@@ -193,7 +187,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_short($date)  # \DateTime or \DateTimeImmutable
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%d/%m/%Y", $date->getTimestamp());
     }
 
@@ -202,7 +195,6 @@ class AppExtension extends AbstractExtension
      */
     public function date_time(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%d/%m/%Y %kh%M", $date->getTimestamp());
     }
 
@@ -219,7 +211,6 @@ class AppExtension extends AbstractExtension
      */
     public function time_short(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         $time_minutes = $date->format('i');
         if ($time_minutes == "00") {
             return strftime("%kh", $date->getTimestamp());

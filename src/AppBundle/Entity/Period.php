@@ -168,7 +168,6 @@ class Period
      */
     public function getDayOfWeekString()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A", strtotime("Monday + {$this->dayOfWeek} days"));
     }
 

@@ -89,7 +89,6 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         $mailer = $this->getContainer()->get('mailer');
         $recipients = $input->getOption('emails') ? explode(',', $input->getOption('emails')) : null;
         if ($recipients) {
-            setlocale(LC_TIME, 'fr_FR.UTF8');
             $dateFormatted = strftime("%A %e %B", $date->getTimestamp());
             $subject = '[ALERTE CRENEAUX] ' . $dateFormatted;
 
