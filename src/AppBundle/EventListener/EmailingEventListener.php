@@ -242,7 +242,7 @@ class EmailingEventListener
         $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
 
         $mail = (new \Swift_Message('[ESPACE MEMBRES] Reprends ton créneau du '. strftime("%e %B", $formerShift->getStart()->getTimestamp()) .' dans ' . $d . ' jours'))
-            ->setFrom($this->shiftEmail['address'], $this->shiftEmail['from_name'])
+            ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
             ->setTo($beneficiary->getEmail())
             ->setBody(
                 $this->renderView(
