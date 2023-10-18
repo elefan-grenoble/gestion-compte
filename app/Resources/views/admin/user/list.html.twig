@@ -173,11 +173,11 @@
                             {{ form_widget(form.phone) }}
                             {{ form_label(form.phone) }}
                         </div>
-                        <div class="input-field">
-                            {{ form_widget(form.flying) }}
-                            {{ form_label(form.flying) }}
-                        </div>
                         {% if use_fly_and_fixed %}
+                            <div class="input-field">
+                                {{ form_widget(form.flying) }}
+                                {{ form_label(form.flying) }}
+                            </div>
                             <div class="input-field">
                                 {{ form_widget(form.has_period_position) }}
                                 {{ form_label(form.has_period_position) }}
@@ -262,22 +262,22 @@
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.user.username }}<br/>
+                            {{ beneficiary.user.username }}<br />
                         {% endfor %}
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.firstname }}<br/>
+                            {{ beneficiary.firstname }}<br />
                         {% endfor %}
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.lastname }}<br/>
+                            {{ beneficiary.lastname }}<br />
                         {% endfor %}
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.email }}<br/>
+                            {{ beneficiary.email }}<br />
                         {% endfor %}
                     </td>
                     <td class="hide-on-small-and-down">
@@ -286,7 +286,7 @@
                                 {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
                                 {{ registration.date | date_short }}
                                 {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                                <br/>
+                                <br />
                             {% else %}
                                 {{ registration.date | date_short }}
                                 /!\ need fix

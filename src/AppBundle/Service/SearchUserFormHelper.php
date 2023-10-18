@@ -39,18 +39,16 @@ class SearchUserFormHelper
                 'ouvert' => 1,
             ],
             'data' => 1
-        ]);
-        if (!$type) {
-            $formBuilder->add('enabled', ChoiceType::class, [
-                'label' => $this->container->getParameter('user_account_enabled_icon') . ' activé',
-                'required' => false,
-                'choices' => [
-                    'activé' => 2,
-                    'Non activé' => 1,
-                ]
-            ]);
-        }
-        $formBuilder->add('frozen', ChoiceType::class, [
+        ])
+        ->add('enabled', ChoiceType::class, [
+            'label' => $this->container->getParameter('user_account_enabled_icon') . ' activé',
+            'required' => false,
+            'choices' => [
+                'activé' => 2,
+                'Non activé' => 1,
+            ]
+        ])
+        ->add('frozen', ChoiceType::class, [
             'label' => $this->container->getParameter('member_frozen_icon') . ' gelé',
             'required' => false,
             'choices' => [
@@ -198,25 +196,29 @@ class SearchUserFormHelper
                     'Oui' => 2,
                     'Non (pas renseigné)' => 1,
                 ]
-            ])
-            ->add('flying', ChoiceType::class, [
+            ]);
+        }
+        if ($this->use_fly_and_fixed) {
+            $formBuilder->add('flying', ChoiceType::class, [
                 'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
                 'required' => false,
+                'disabled' => in_array('flying', $disabledFields) ? true : false,
                 'choices' => [
                     'Oui' => 2,
                     'Non (fixe)' => 1,
                 ],
+            ])
+            ->add('has_period_position', ChoiceType::class, [
+                'label' => 'créneau fixe',
+                'required' => false,
+                'disabled' => in_array('has_period_position', $disabledFields) ? true : false,
+                'choices' => [
+                    'Oui' => 2,
+                    'Non (pas de créneau fixe)' => 1,
+                ]
             ]);
-            if ($this->use_fly_and_fixed) {
-                $formBuilder->add('has_period_position', ChoiceType::class, [
-                    'label' => 'créneau fixe',
-                    'required' => false,
-                    'choices' => [
-                        'Oui' => 2,
-                        'Non (pas de créneau fixe)' => 1,
-                    ]
-                ]);
-            }
+        }
+        if (!$type) {
             $formBuilder->add('formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
                 'choice_label' => 'name',
@@ -336,6 +338,14 @@ class SearchUserFormHelper
         return $form;
     }
 
+    public function createBeneficiaryFixeNoPeriodPositionForm($formBuilder, $defaults = [], $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, 'noperiodposition', $disabledFields);
+        foreach ($defaults as $k => $v) {
+            $form->get($k)->setData($v);
+        }
+        return $form;
+    }
+
     /**
      * @param EntityManager $doctrineManager
      * @return QueryBuilder
@@ -352,7 +362,7 @@ class SearchUserFormHelper
             $qb->leftJoin("b.commissions", "c")->addSelect("c");
             $qb->leftJoin("b.formations", "f")->addSelect("f");
         }
-        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog'])) {
+        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog', 'noperiodposition'])) {
             $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->where('lr.id IS NULL') // registration is the last one registered
                 ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.type != 20 AND ti.membership = m.id) AS HIDDEN time")
@@ -375,6 +385,10 @@ class SearchUserFormHelper
         if ($form->get('withdrawn')->getData() > 0) {
             $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
+        }
+        if ($form->get('enabled')->getData() > 0) {
+            $qb = $qb->andWhere('u.enabled = :enabled')
+                ->setParameter('enabled', $form->get('enabled')->getData()-1);
         }
         if ($form->get('frozen')->getData() > 0) {
             $qb = $qb->andWhere('m.frozen = :frozen')
@@ -437,6 +451,22 @@ class SearchUserFormHelper
                     ->setParameter('email', '%'.$form->get('email')->getData().'%');
             }
         }
+
+        if ($form->get('flying')->getData() > 0) {
+            $qb = $qb->andWhere('b.flying = :flying')
+                ->setParameter('flying', $form->get('flying')->getData()-1);
+        }
+        if ($form->has('has_period_position')) {
+            if ($form->get('has_period_position')->getData() > 0) {
+                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                if ($form->get('has_period_position')->getData() == 2) {
+                    $qb = $qb->andWhere('pp.id IS NOT NULL');
+                } else if ($form->get('has_period_position')->getData() == 1) {
+                    $qb = $qb->andWhere('pp.id IS NULL');
+                }
+            }
+        }
+
         return $qb;
     }
 
@@ -445,8 +475,9 @@ class SearchUserFormHelper
      * @param QueryBuilder $qb
      * @return QueryBuilder
      */
-    public function processSearchFormData($form,&$qb) {
+    public function processSearchFormData($form, &$qb) {
         $now = new \DateTime('now');
+
         if ($form->get('withdrawn')->getData() > 0) {
             $qb = $qb->andWhere('m.withdrawn = :withdrawn')
                 ->setParameter('withdrawn', $form->get('withdrawn')->getData()-1);
@@ -594,6 +625,10 @@ class SearchUserFormHelper
             }
         }
 
+        if ($form->get('flying')->getData() > 0) {
+            $qb = $qb->andWhere('b.flying = :flying')
+                ->setParameter('flying', $form->get('flying')->getData()-1);
+        }
         if ($form->has('has_period_position')) {
             if ($form->get('has_period_position')->getData() > 0) {
                 $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
@@ -666,11 +701,7 @@ class SearchUserFormHelper
                     ->setParameter('subQueryformations', $subQuery);
             }
         }
-        if ($form->get('flying')->getData() > 0) {
-            $qb = $qb->andWhere('b.flying = :flying')
-                     ->setParameter('flying', $form->get('flying')->getData()-1);
-        }
+
         return $qb;
     }
-
 }

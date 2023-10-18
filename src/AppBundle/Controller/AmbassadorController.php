@@ -46,10 +46,10 @@ class AmbassadorController extends Controller
     public function memberNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
-            'sort' => 'r.date',
-            'dir' => 'DESC',
             'withdrawn' => 1,
             'registration' => 1,
+            'sort' => 'r.date',
+            'dir' => 'DESC'
         ];
         $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt', 'lastregistrationdategt'];
 
@@ -104,13 +104,13 @@ class AmbassadorController extends Controller
         $endLastRegistration->setTime(0,0);
 
         $defaults = [
-            'sort' => 'r.date',
-            'dir' => 'DESC',
             'withdrawn' => 1,
-            'lastregistrationdatelt' => $endLastRegistration,
             'registration' => 2,
+            'lastregistrationdatelt' => $endLastRegistration,
+            'sort' => 'r.date',
+            'dir' => 'DESC'
         ];
-        $disabledFields = ['withdrawn', 'lastregistrationdatelt', 'registration'];
+        $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt'];
 
         $form = $formHelper->createMemberLateRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
@@ -157,12 +157,12 @@ class AmbassadorController extends Controller
     public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
-            'sort' => 'time',
-            'dir' => 'ASC',
             'withdrawn' => 1,
             'frozen' => 1,
-            'compteurlt' => 0,
             'registration' => 2,
+            'compteurlt' => 0,
+            'sort' => 'time',
+            'dir' => 'ASC'
         ];
         $disabledFields = ['withdrawn', 'registration'];
 
@@ -190,6 +190,59 @@ class AmbassadorController extends Controller
 
         return $this->render('ambassador/phone/list.html.twig', array(
             'reason' => "en retard de créneaux",
+            'members' => $paginator,
+            'form' => $form->createView(),
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
+        ));
+    }
+
+    /**
+     * List all beneficiaries "fixe" without periodposition
+     *
+     * @Route("/noperiodposition", name="ambassador_noperiodposition_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     */
+    public function beneficiaryFixeNoPeriodPosition(Request $request, SearchUserFormHelper $formHelper)
+    {
+        $defaults = [
+            'withdrawn' => 1,
+            'frozen' => 1,
+            'registration' => 2,
+            'flying' => 1,
+            'has_period_position' => 1,
+            'sort' => 'm.member_number',
+            'dir' => 'ASC'
+        ];
+        $disabledFields = ['withdrawn', 'registration', 'flying', 'has_period_position'];
+
+        $form = $formHelper->createBeneficiaryFixeNoPeriodPositionForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form->handleRequest($request);
+
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'noperiodposition');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
+
+        $limitPerPage = 25;
+        $qb = $qb->orderBy($sort, $order);
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "fixe sans poste fixe",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
