@@ -26,14 +26,12 @@
                 <a href="{{ path("user_index") }}" class="waves-effect waves-light btn white black-text">
                     <i class="material-icons left main-color-text">people</i>Gérer les membres
                 </a>
-                <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">phone</i>Relances créneaux
-                </a>
                 <a href="{{ path("admin_membershipshiftexemption_index") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">{{ member_exempted_material_icon }}</i>Gérer les exemptions de bénévolat
                 </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
+                <br />
                 <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">call_merge</i>Joindre deux comptes
                 </a>
@@ -43,6 +41,17 @@
                 <a href="{{ path("formation_list") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">tune</i>Gérer les formations
                 </a>
+            {% endif %}
+            {% if is_granted("ROLE_USER_MANAGER") %}
+                <br />
+                <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">phone</i>Relances créneaux
+                </a>
+                {% if use_fly_and_fixed %}
+                    <a href="{{ path('ambassador_shifttimelog_list') }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">phone</i>Relances postes fixes
+                    </a>
+                {% endif %}
             {% endif %}
 
             {% if is_granted("ROLE_SHIFT_MANAGER") %}

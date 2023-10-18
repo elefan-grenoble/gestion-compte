@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
- * Ambassador controller.
+ * Ambassador controller
  *
  * @Route("ambassador")
  */
@@ -36,7 +36,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all members without a registration.
+     * List all members without a registration
      *
      * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
@@ -77,7 +77,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "adhésion",
+            'reason' => "sans adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -87,7 +87,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all members with a registration date older than one year.
+     * List all members with a registration date older than one year
      *
      * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
@@ -137,7 +137,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "de ré-adhésion",
+            'reason' => "en retard de ré-adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -147,7 +147,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * List all members with negative shift time count.
+     * List all members with negative shift time count
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
@@ -189,7 +189,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "de créneaux",
+            'reason' => "en retard de créneaux",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -199,7 +199,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * display a member phones.
+     * Display a member phones
      *
      * @Route("/phone/{member_number}", name="ambassador_phone_show", methods={"GET"})
      * @param Membership $member
@@ -211,7 +211,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * Creates a form to delete a note entity.
+     * Creates a form to delete a note entity
      *
      * @param Note $note the note entity
      *
@@ -226,6 +226,7 @@ class AmbassadorController extends Controller
     }
 
     /**
+     * Create a note
      *
      * @Route("/note/{member_number}", name="ambassador_new_note", methods={"POST"})
      * @param Membership $member
