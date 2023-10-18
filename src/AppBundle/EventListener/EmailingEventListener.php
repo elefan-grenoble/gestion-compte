@@ -62,9 +62,9 @@ class EmailingEventListener
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new \Swift_Message($emailObject))
@@ -99,9 +99,9 @@ class EmailingEventListener
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)),UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new \Swift_Message($emailObject))
@@ -258,10 +258,10 @@ class EmailingEventListener
         $formerShift = $event->getFormerShift();
         $beneficiary = $shift->getLastShifter();
 
+        $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
+
         $emailObject = '[ESPACE MEMBRES] Reprends ton créneau du ' . strftime("%e %B", $formerShift->getStart()->getTimestamp()) . ' dans ' . $d . ' jours';
         $emailTo = $beneficiary->getEmail();
-
-        $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
 
         $router = $this->container->get('router');
         $accept_url = $router->generate('shift_accept_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
@@ -513,7 +513,7 @@ class EmailingEventListener
         $emailReplyTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
 
         $email = (new \Swift_Message($emailObject))
-            ->setFrom($member_email['address'], $member_email['from_name'])
+            ->setFrom($this->member_email['address'], $this->member_email['from_name'])
             ->setTo($emailTo)
             ->setReplyTo($emailReplyTo)
             ->setBody(
@@ -528,7 +528,7 @@ class EmailingEventListener
                 'text/html'
             );
 
-        $mailer->send($email);
+        $this->mailer->send($email);
 
         // send mail to giver (the one who cannot come to the event)
         $emailObject = '[' . $proxy->getEvent()->getTitle() . '] ta procuration';
@@ -536,7 +536,7 @@ class EmailingEventListener
         $emailReplyTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];
 
         $email = (new \Swift_Message($emailObject))
-            ->setFrom($member_email['address'], $member_email['from_name'])
+            ->setFrom($this->member_email['address'], $this->member_email['from_name'])
             ->setTo($emailTo)
             ->setReplyTo($emailReplyTo)
             ->setBody(
@@ -551,7 +551,7 @@ class EmailingEventListener
                 'text/html'
             );
 
-        $mailer->send($email);
+        $this->mailer->send($email);
     }
 
     /**

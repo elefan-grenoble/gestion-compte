@@ -1,6 +1,6 @@
 Bonjour {{ giverMainBeneficiary.firstname }},<br/>
 Ta procuration pour <b>{{ proxy.event.title }}</b> le {{ proxy.event.date | date_fr_full_with_time }}
-sera portée par <b>{{ ownerBeneficiary.firstname }} {{ ownerBeneficiary.lastname }}</b>.<br/>
+sera portée par <b>{{ ownerBeneficiary.membership.memberNumberWithBeneficiaryListString }}</b>.<br/>
 Merci pour ton soutien.<br/>
 <br/>
 NB : Pour contacter le membre qui portera ta voix, répond simplement à cet email.

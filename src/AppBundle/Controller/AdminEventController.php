@@ -297,7 +297,7 @@ class AdminEventController extends Controller
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->getContainer()->get('event_dispatcher');
+                    $dispatcher = $this->get('event_dispatcher');
                     $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
@@ -318,7 +318,7 @@ class AdminEventController extends Controller
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->getContainer()->get('event_dispatcher');
+                    $dispatcher = $this->get('event_dispatcher');
                     $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
@@ -335,7 +335,7 @@ class AdminEventController extends Controller
                 $em->persist($proxy);
                 $em->flush();
 
-                $dispatcher = $this->getContainer()->get('event_dispatcher');
+                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
 
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
