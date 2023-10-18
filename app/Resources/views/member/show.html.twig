@@ -121,6 +121,18 @@
             </li>
         {% endif %}
 
+        <!-- Postes fixes annulés -->
+        {% if use_fly_and_fixed %}
+            <li id="periodpositionfreelogs">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.periodpositionfreelogs_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.periodpositionfreelogs_open %}active{% endif %}">
+                    <i class="material-icons">delete_sweep</i>Historique des postes fixes annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/period_position_free_logs.html.twig" with { periodPositionFreeLogs: membership_service.getPeriodPositionFreeLogs(member), custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
+
         <!-- Badges -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="badges">
