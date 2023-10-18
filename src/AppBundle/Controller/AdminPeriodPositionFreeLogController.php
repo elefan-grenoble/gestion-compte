@@ -37,7 +37,7 @@ class AdminPeriodPositionFreeLogController extends Controller
 
         // filter creation ----------------------
         $res["form"] = $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_periodpositionfreelog_list'))
+            ->setAction($this->generateUrl('admin_periodpositionfreelog_index'))
             ->add('created_at', DateType::class, [
                 'widget' => 'single_text',
                 'html5' => false,
@@ -74,7 +74,7 @@ class AdminPeriodPositionFreeLogController extends Controller
     /**
      * Lists all PeriodPositionFreeLog entities.
      *
-     * @Route("/", name="admin_periodpositionfreelog_list", methods={"GET","POST"})
+     * @Route("/", name="admin_periodpositionfreelog_index", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function listAction(Request $request)
@@ -108,7 +108,7 @@ class AdminPeriodPositionFreeLogController extends Controller
             ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
             ->setMaxResults($limitPerPage); // set the limit
 
-        return $this->render('admin/periodpositionfreelog/list.html.twig', array(
+        return $this->render('admin/periodpositionfreelog/index.html.twig', array(
             'periodPositionFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,

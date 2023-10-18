@@ -1,0 +1,46 @@
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Date d'annulation</th>
+            <th>Bénéficiaire</th>
+            <th>Poste type</th>
+            <th>Réservé depuis le</th>
+            <th>Auteur</th>
+            {% if is_granted("ROLE_ADMIN") %}
+                <th>Route</th>
+            {% endif %}
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for periodPositionFreeLog in periodPositionFreeLogs %}
+        <tr>
+            <td title="{{ periodPositionFreeLog.createdAt | date_fr_full_with_time }}">
+                {{ periodPositionFreeLog.createdAt | date_short }}
+            </td>
+            <td>
+                <a href="{{ path("member_show",{'member_number': periodPositionFreeLog.beneficiary.membership.memberNumber}) }}">
+                    {{ periodPositionFreeLog.beneficiary }}
+                </a>
+            </td>
+            <td>
+                {{ periodPositionFreeLog.periodPositionString }}
+            </td>
+            {% if periodPositionFreeLog.bookedTime %}
+                <td title="{{ periodPositionFreeLog.bookedTime | date_fr_full_with_time }}">
+                    {{ periodPositionFreeLog.bookedTime | date_short }}
+                </td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            </td>
+            <td>
+                {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: periodPositionFreeLog.createdBy, target_blank: true } %}
+            </td>
+            {% if is_granted("ROLE_ADMIN") %}
+                <td>{{ periodPositionFreeLog.requestRoute }}</td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
