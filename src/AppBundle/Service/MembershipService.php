@@ -205,6 +205,11 @@ class MembershipService
         return $this->em->getRepository('AppBundle:ShiftFreeLog')->getMemberShiftFreed($member);
     }
 
+    public function getPeriodPositionFreeLogs(Membership $member)
+    {
+        return $this->em->getRepository('AppBundle:PeriodPositionFreeLog')->getMemberPeriodPositionFreed($member);
+    }
+
     public function memberHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
     {
         $shifts = $this->em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());

@@ -2,6 +2,7 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Membership;
 use AppBundle\Entity\PeriodPosition;
 
 /**
@@ -12,4 +13,18 @@ use AppBundle\Entity\PeriodPosition;
  */
 class PeriodPositionFreeLogRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getMemberPeriodPositionFreed(Membership $member)
+    {
+        $qb = $this->createQueryBuilder('ppfl')
+            ->leftJoin('ppfl.periodPosition', 'pp')
+            ->addSelect('pp')
+            ->where('pp.shifter IN (:beneficiaries)')
+            ->setParameter('beneficiaries', $member->getBeneficiaries());
+
+        $qb->orderBy('ppfl.createdAt', 'DESC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
 }

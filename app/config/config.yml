@@ -69,6 +69,7 @@ twig:
     profile_display_task_list: '%profile_display_task_list%'
     profile_display_time_log: '%profile_display_time_log%'
     profile_display_shift_free_log: '%profile_display_shift_free_log%'
+    profile_display_period_position_free_log: '%profile_display_period_position_free_log%'
     # user
     user_account_not_enabled_material_icon: '%user_account_not_enabled_material_icon%'
     user_account_enabled_material_icon: '%user_account_enabled_material_icon%'
