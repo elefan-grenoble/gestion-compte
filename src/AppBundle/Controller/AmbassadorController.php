@@ -242,7 +242,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "fixe sans poste fixe",
+            'reason' => "fixes sans poste fixe",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
