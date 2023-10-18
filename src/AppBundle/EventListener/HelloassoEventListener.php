@@ -17,14 +17,14 @@ class HelloassoEventListener
     protected $em;
     protected $container;
     protected $mailer;
-    private $memberEmail;
+    protected $member_email;
 
-    public function __construct(EntityManager $entityManager, Container $container, Swift_Mailer $mailer, $memberEmail)
+    public function __construct(EntityManager $entityManager, Container $container, Swift_Mailer $mailer)
     {
         $this->em = $entityManager;
         $this->container = $container;
         $this->mailer = $mailer;
-        $this->memberEmail = $memberEmail;
+        $this->member_email = $this->container->getParameter('emails.member');
     }
 
     public function onPaymentAfterSave(HelloassoEvent $event)
@@ -40,7 +40,7 @@ class HelloassoEventListener
                 ),UrlGeneratorInterface::ABSOLUTE_URL);
 
             $needInfo = (new \Swift_Message('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?'))
-                ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
+                ->setFrom($this->member_email['address'], $this->member_email['from_name'])
                 ->setTo($payment->getEmail())
                 ->setBody(
                     $this->renderView(

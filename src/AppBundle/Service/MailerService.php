@@ -71,13 +71,17 @@ class MailerService implements MailerInterface
      *
      * @param UserInterface $user
      */
-    public function sendConfirmationEmailMessage(UserInterface $user){
+    public function sendConfirmationEmailMessage(UserInterface $user)
+    {
+        $emailObject = 'Bienvenue à ' . $this->project_name;
+        $emailTo = $user->getEmail();
+
         $dynamicContent = $this->entity_manager->getRepository('AppBundle:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
 
         $login_url = $url = $this->router->generate('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
-        $welcome = (new \Swift_Message('Bienvenue à '.$this->project_name))
+        $welcome = (new \Swift_Message($emailObject))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-            ->setTo($user->getEmail())
+            ->setTo($emailTo)
             ->setBody(
                 $this->renderView(
                     'emails/welcome.html.twig',
@@ -97,12 +101,16 @@ class MailerService implements MailerInterface
      *
      * @param UserInterface $user
      */
-    public function sendResettingEmailMessage(UserInterface $user){
+    public function sendResettingEmailMessage(UserInterface $user)
+    {
+        $emailObject = 'Réinitialisation de ton mot de passe';
+        $emailTo = $user->getEmail();
+
         $confirmationUrl = $this->router->generate('fos_user_resetting_reset', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $forgot = (new \Swift_Message('Réinitialisation de ton mot de passe'))
+        $forgot = (new \Swift_Message($emailObject))
             ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-            ->setTo($user->getEmail())
+            ->setTo($emailTo)
             ->setBody(
                 $this->renderView(
                     'emails/forgot.html.twig',
@@ -115,7 +123,6 @@ class MailerService implements MailerInterface
             );
         $this->mailer->send($forgot);
     }
-
 
     /**
      * Returns a rendered view.

@@ -113,7 +113,6 @@ services:
             $entityManager: "@doctrine.orm.entity_manager"
             $container: "@service_container"
             $mailer: "@mailer"
-            $memberEmail: "%emails.member%"
         tags:
             - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
             - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }

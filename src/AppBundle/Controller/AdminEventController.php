@@ -487,8 +487,8 @@ class AdminEventController extends Controller
             ->getForm();
     }
 
-    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer){
-
+    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer)
+    {
         $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
 
         $memberEmail = $this->getParameter('emails.member');
