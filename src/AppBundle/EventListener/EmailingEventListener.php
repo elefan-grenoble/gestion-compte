@@ -530,7 +530,7 @@ class EmailingEventListener
 
         $mailer->send($email);
 
-        // send mail to giver
+        // send mail to giver (the one who cannot come to the event)
         $emailObject = '[' . $proxy->getEvent()->getTitle() . '] ta procuration';
         $emailTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
         $emailReplyTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];

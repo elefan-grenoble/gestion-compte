@@ -5,6 +5,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Event;
 use AppBundle\Entity\Proxy;
+use AppBundle\Event\EventProxyCreatedEvent;
 use AppBundle\Form\EventType;
 use AppBundle\Form\ProxyType;
 use AppBundle\Repository\EventKindRepository;
@@ -264,7 +265,7 @@ class AdminEventController extends Controller
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request, \Swift_Mailer $mailer)
+    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -274,60 +275,71 @@ class AdminEventController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($proxy->getOwner()){
+            if ($proxy->getOwner()) {
                 $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
-                if ($existing_proxy && $existing_proxy != $proxy){
+                if ($existing_proxy && $existing_proxy != $proxy) {
                     $session->getFlashBag()->add('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
-            if ($proxy->getGiver()){
+            if ($proxy->getGiver()) {
                 $existing_proxy = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
-                if ($existing_proxy && $existing_proxy != $proxy){
+                if ($existing_proxy && $existing_proxy != $proxy) {
                     $session->getFlashBag()->add('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
-            if (!$proxy->getOwner() && $proxy->getGiver()){
+            if (!$proxy->getOwner() && $proxy->getGiver()) {
                 $proxy_waiting = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"giver"=>null));
                 if ($proxy_waiting && $proxy_waiting != $proxy){
                     $proxy_waiting->setGiver($proxy->getGiver());
                     $em->persist($proxy_waiting);
                     $em->remove($proxy);
                     $em->flush();
+
+                    $dispatcher = $this->getContainer()->get('event_dispatcher');
+                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
                     $session->getFlashBag()->add('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
-                    $this->sendProxyMail($proxy_waiting,$mailer);
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
                 $em->persist($proxy);
                 $em->flush();
+
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
-            }elseif ($proxy->getOwner() && !$proxy->getGiver()){
+            } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
                 $proxy_waiting = $em->getRepository('AppBundle:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
-                if ($proxy_waiting && $proxy_waiting != $proxy){
+                if ($proxy_waiting && $proxy_waiting != $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
                     $em->remove($proxy);
                     $em->flush();
+
+                    $dispatcher = $this->getContainer()->get('event_dispatcher');
+                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
                     $session->getFlashBag()->add('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
-                    $this->sendProxyMail($proxy_waiting,$mailer);
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
                 $em->persist($proxy);
                 $em->flush();
+
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
-            }elseif ($proxy->getOwner() && $proxy->getGiver()){
+            } elseif ($proxy->getOwner() && $proxy->getGiver()) {
                 $em->persist($proxy);
                 $em->flush();
+
+                $dispatcher = $this->getContainer()->get('event_dispatcher');
+                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());
-                $this->sendProxyMail($proxy,$mailer);
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             }
 
@@ -485,42 +497,5 @@ class AdminEventController extends Controller
             ->setAction($this->generateUrl('admin_event_proxy_delete', array('id' => $proxy->getEvent()->getId(), 'proxy' => $proxy->getId())))
             ->setMethod('DELETE')
             ->getForm();
-    }
-
-    public function sendProxyMail(Proxy $proxy, \Swift_Mailer $mailer)
-    {
-        $giverMainBeneficiary = $proxy->getGiver()->getMainBeneficiary();
-
-        $memberEmail = $this->getParameter('emails.member');
-        $owner = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] procuration'))
-            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
-            ->setTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
-            ->setReplyTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
-            ->setBody(
-                $this->renderView(
-                    'emails/proxy_owner.html.twig',
-                    array(
-                        'proxy' => $proxy,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
-                ),
-                'text/html'
-            );
-        $giver = (new \Swift_Message('['.$proxy->getEvent()->getTitle().'] ta procuration'))
-            ->setFrom($memberEmail['address'], $memberEmail['from_name'])
-            ->setTo([$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()])
-            ->setReplyTo([$proxy->getOwner()->getEmail() => $proxy->getOwner()->getFirstname() . ' ' . $proxy->getOwner()->getLastname()])
-            ->setBody(
-                $this->renderView(
-                    'emails/proxy_giver.html.twig',
-                    array(
-                        'proxy' => $proxy,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
-                ),
-                'text/html'
-            );
-        $mailer->send($owner);
-        $mailer->send($giver);
     }
 }
