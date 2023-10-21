@@ -84,6 +84,19 @@ class PeriodPosition
     private $createdBy;
 
     /**
+     * @ORM\Column(type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -113,6 +126,15 @@ class PeriodPosition
         if (!$this->createdAt) {
             $this->createdAt = new \DateTime();
         }
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
     }
 
     /**
@@ -282,6 +304,20 @@ class PeriodPosition
     }
 
     /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return PeriodPosition
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
      * Get createdAt
      *
      * @return \DateTime
@@ -311,6 +347,40 @@ class PeriodPosition
     public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return PeriodPosition
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
 
         return $this;
     }
