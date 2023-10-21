@@ -251,12 +251,12 @@ class AdminPeriodController extends Controller
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createPeriodPositionDeleteForm($period, $position);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->remove($position);
             $em->flush();
 
@@ -276,6 +276,7 @@ class AdminPeriodController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $form = $this->createPeriodPositionBookForm($period, $position);
         $form->handleRequest($request);
@@ -288,19 +289,17 @@ class AdminPeriodController extends Controller
 
             $beneficiary = $form->get("shifter")->getData();
             if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
-                $session
-                    ->getFlashBag()
-                    ->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
+                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
                 return new Response($this->generateUrl('admin_period_edit',array('id'=>$period->getId())), 205);
             }
 
             if (!$position->getBooker()) {
-                $current_user = $this->get('security.token_storage')->getToken()->getUser();
                 $position->setBooker($current_user);
                 $position->setBookedTime(new \DateTime('now'));
             }
-
             $position->setShifter($beneficiary);
+            $position->setUpdatedBy($current_user);
+
             $em->persist($position);
             $em->flush();
 
@@ -320,6 +319,7 @@ class AdminPeriodController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $form = $this->createPeriodPositionFreeForm($period, $position);
         $form->handleRequest($request);
@@ -331,8 +331,8 @@ class AdminPeriodController extends Controller
 
             // free position
             $position->free();
+            $position->setUpdatedBy($current_user);
 
-            $em = $this->getDoctrine()->getManager();
             $em->persist($position);
             $em->flush();
 
@@ -372,15 +372,21 @@ class AdminPeriodController extends Controller
     /**
      * Duplicate a period
      *
-     * @Route("/copyPeriod/", name="admin_period_copy", methods={"GET","POST"})
+     * @Route("/copy", name="admin_period_copy", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function copyPeriodAction(Request $request)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $now = new \DateTime('now');
+
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_period_copy'))
             ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
+            ->setAction($this->generateUrl('admin_period_copy'))
             ->getForm();
 
         $form->handleRequest($request);
@@ -389,24 +395,30 @@ class AdminPeriodController extends Controller
             $from = $form->get('day_of_week_from')->getData();
             $to = $form->get('day_of_week_to')->getData();
 
-            $em = $this->getDoctrine()->getManager();
             $periods = $em->getRepository('AppBundle:Period')->findBy(array('dayOfWeek'=>$from));
 
             $count = 0;
-            foreach ($periods as $period){
+            foreach ($periods as $period) {
                 $p = clone $period;
                 $p->setDayOfWeek($to);
-                foreach ($period->getPositions() as $position){
-                    $p->addPosition($position);
+                $p->setCreatedAt($now);
+                $p->setCreatedBy($current_user);
+                $p->setUpdatedAtValue();
+                $p->setUpdatedBy(null);
+                foreach ($period->getPositions() as $position) {
+                    $pp = clone $position;
+                    $pp->setCreatedAt($now);
+                    $pp->setCreatedBy($current_user);
+                    $pp->setUpdatedAtValue();
+                    $pp->setUpdatedBy(null);
+                    $p->addPosition($pp);
                 }
                 $em->persist($p);
                 $count++;
             }
             $em->flush();
 
-            $session = new Session();
-            $session->getFlashBag()->add('success', $count . ' creneaux copiés de' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
-
+            $session->getFlashBag()->add('success', $count . ' créneaux copiés de ' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
             return $this->redirectToRoute('admin_period_index');
         }
 
@@ -423,16 +435,17 @@ class AdminPeriodController extends Controller
      */
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel)
     {
+        $session = new Session();
+
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_shifts_generation'))
             ->add('date_from',TextType::class,array('label'=>'du*','attr'=>array('class'=>'datepicker')))
-            ->add('date_to',TextType::class,array('label'=>'au' ,'attr'=>array('class'=>'datepicker','require' => false)))
+            ->add('date_to',TextType::class,array('label'=>'au', 'attr'=>array('class'=>'datepicker','require' => false)))
             ->getForm();
 
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $date_from = $form->get('date_from')->getData();
             $date_to = $form->get('date_to')->getData();
 
@@ -449,9 +462,7 @@ class AdminPeriodController extends Controller
             $application->run($input, $output);
             $content = $output->fetch();
 
-            $session = new Session();
             $session->getFlashBag()->add('success',$content);
-
             return $this->redirectToRoute('admin_period_index');
         }
 

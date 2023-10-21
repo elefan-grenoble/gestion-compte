@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% set periodPositionCount = period.positions | length %}
-{% set periodPositionBookedCount = period.positionsBooked | length %}
+{% set periodPositionBookedCount = period.positionsWithFilter(true, null) | length %}
 {% set periodPositionFreeCount = periodPositionCount - periodPositionBookedCount %}
 
 {% block content %}
