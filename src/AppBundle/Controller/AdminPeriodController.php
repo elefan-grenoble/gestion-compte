@@ -386,6 +386,7 @@ class AdminPeriodController extends Controller
         $form = $this->createFormBuilder()
             ->add('day_of_week_from', ChoiceType::class, array('label' => 'Jour de la semaine référence', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->add('day_of_week_to', ChoiceType::class, array('label' => 'Jour de la semaine destination', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
+            // TODO: if use_fly_and_fixed, give option to chose if shifter/booker is copied as well
             ->setAction($this->generateUrl('admin_period_copy'))
             ->getForm();
 
