@@ -287,6 +287,20 @@ class Period
     }
 
     /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return Period
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
      * Get createdAt
      *
      * @return \DateTime
@@ -355,6 +369,34 @@ class Period
     }
 
     /**
+     * Get all the positions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPositionsWithFilter($booked = null, $weekCycle = null)
+    {
+        $positions = $this->getPositions();
+
+        if ($booked === true) {
+            $positions = $positions->filter(function (\AppBundle\Entity\PeriodPosition $position) {
+                return $position->getShifter();
+            });
+        } elseif ($booked === false) {
+            $positions = $positions->filter(function (\AppBundle\Entity\PeriodPosition $position) {
+                return !$position->getShifter();
+            });
+        }
+
+        if ($weekCycle) {
+            $positions = $positions->filter(function (\AppBundle\Entity\PeriodPosition $position) use ($weekCycle) {
+                return $position->getWeekCycle() == $weekCycle;
+            });
+        }
+
+        return $positions;
+    }
+
+    /**
      * Get all the positions per week cycle
      *
      * @return array
@@ -372,134 +414,13 @@ class Period
         return $positionsPerWeekCycle;
     }
 
-    /**
-     * Get all the positions booked
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getPositionsBooked()
-    {
-        return $this->getPositions()->filter(function (\AppBundle\Entity\PeriodPosition $position) {
-            return $position->getShifter();
-        });
-    }
-
-    /**
-     * Return true if at least one shifter (a.k.a. beneficiary) registered for
-     * this period is "problematic", meaning with a withdrawn or frozen membership
-     * of if the shifter is member of the flying team.
-     *
-     * useful only if the use_fly_and_fixed is activated
-     *
-     * @param String|null $weekFilter a string of the week to keep or null if no filter
-     * @return bool
-     */
-    public function isProblematic(?String $weekFilter=null): bool
-    {
-        foreach ($this->positions as $position) {
-            if($shifter = $position->getShifter()){
-                if((($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter)
-                    and ($shifter->isFlying()
-                    or $shifter->getMembership()->isFrozen()
-                    or $shifter->getMembership()->isWithdrawn())){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Return true if no shifter (a.k.a. beneficiary) are registered for the period
-     *
-     * useful only if the use_fly_and_fixed is activated
-     *
-     * @param String|null $weekFilter a string of the week to keep or null if no filter
-     * @return bool
-     */
-    public function isEmpty(?String $weekFilter=null): bool
-    {
-        // false at the first position with a shifter
-        foreach ($this->positions as $position) {
-            if($position->getShifter()){
-                if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
-                    return false;
-                }
-            }
-        }
-        // is empty if there are actually some position
-        return count ($this->getGroupedPositionsPerWeekCycle($weekFilter)) != 0;
-    }
-
-    /**
-     * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
-     *
-     * useful only if the use_fly_and_fixed is activated
-     *
-     * @param String|null $weekFilter a string of the week to keep or null if no filter
-     * @return bool
-     */
-    public function isFull(?String $weekFilter=null): bool
-    {
-        // false at the first position without a shifter
-        foreach ($this->positions as $position) {
-            if(! $position->getShifter()){
-                if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
-                    return false;
-                }
-            }
-        }
-        // is empty if there are actually some position
-        return count ($this->getGroupedPositionsPerWeekCycle($weekFilter)) != 0;
-    }
-
-    /**
-     * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
-     *
-     * useful only if the use_fly_and_fixed is activated
-     *
-     * @param String|null $weekFilter a string of the week to keep or null if no filter
-     * @return bool
-     */
-    public function isPartial(?String $weekFilter=null): bool
-    {
-        // false at the first position with a shifter
-        $slotEmpty = false;
-        $slotTaken = false;
-
-        foreach ($this->positions as $position) {
-            if(($weekFilter && $position->getWeekCycle()==$weekFilter) or !$weekFilter){
-                if ($position->getShifter()) {
-                    $slotTaken = True;
-                } else {
-                    $slotEmpty = True;
-                }
-            }
-            if ($slotTaken and $slotEmpty){
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function hasShifter(Beneficiary $beneficiary = null)
-    {
-        if (!$beneficiary) {
-            return true;
-        }
-        return $this->getPositions()->filter(function (\AppBundle\Entity\PeriodPosition $position) use ($beneficiary) {
-            return ($position->getShifter() === $beneficiary);
-        });
-    }
-
-    /**
+        /**
      * Get periodPositions grouped per week cycle
      *
-     * @param String|null $weekFilter a string of the week to keep or null if no filter
+     * @param String|null $weekCycle a string of the week to keep or null if no filter
      * @return array
      */
-    public function getGroupedPositionsPerWeekCycle(?String $weekFilter=null): array
+    public function getGroupedPositionsPerWeekCycle(?String $weekCycle=null): array
     {
         $aggregatePerFormation = array();
         foreach ($this->positions as $position) {
@@ -520,9 +441,8 @@ class Period
         ksort($aggregatePerFormation);
         $aggregatePerWeekCycle = array();
 
-
         foreach ($aggregatePerFormation as $week => $position) {
-            if($weekFilter && $week==$weekFilter or !$weekFilter){
+            if($weekCycle && $week==$weekCycle or !$weekCycle){
                 //week_filter not null and in the filter list or week_filter null
                 $key = $week;
                 foreach ($aggregatePerWeekCycle as $w => $p) {
@@ -538,5 +458,83 @@ class Period
 
         ksort($aggregatePerWeekCycle);
         return $aggregatePerWeekCycle;
+    }
+
+    /**
+     * Return true if at least one shifter (a.k.a. beneficiary) registered for
+     * this period is "problematic", meaning with a withdrawn or frozen membership
+     * of if the shifter is member of the flying team.
+     *
+     * useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekCycle a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isProblematic(?String $weekCycle=null): bool
+    {
+        foreach ($this->positions as $position) {
+            if($shifter = $position->getShifter()){
+                if((($weekCycle && $position->getWeekCycle()==$weekCycle) or !$weekCycle)
+                    and ($shifter->isFlying()
+                    or $shifter->getMembership()->isFrozen()
+                    or $shifter->getMembership()->isWithdrawn())){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if 0 periods have been assigned to a shifter (a.k.a. beneficiary)
+     * Note: useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekCycle a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isEmpty(?String $weekCycle=null): bool
+    {
+        $bookedPositions = $this->getPositionsWithFilter(true, $weekCycle);
+
+        return count($bookedPositions) == 0;
+    }
+
+    /**
+     * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
+     * Note: useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekCycle a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isFull(?String $weekCycle=null): bool
+    {
+        $emptyPositions = $this->getPositionsWithFilter(false, $weekCycle);
+
+        return count($emptyPositions) == 0;
+    }
+
+    /**
+     * Return true if neither 0 nor all the periods have been assigned to a shifter (a.k.a. beneficiary)
+     * Note: useful only if the use_fly_and_fixed is activated
+     *
+     * @param String|null $weekCycle a string of the week to keep or null if no filter
+     * @return bool
+     */
+    public function isPartial(?String $weekCycle=null): bool
+    {
+        $bookedPositions = $this->getPositionsWithFilter(true, $weekCycle);
+        $emptyPositions = $this->getPositionsWithFilter(false, $weekCycle);
+
+        return (count($bookedPositions) > 0) && (count($emptyPositions) > 0);
+    }
+
+    public function hasShifter(Beneficiary $beneficiary = null)
+    {
+        if (!$beneficiary) {
+            return true;
+        }
+        return $this->getPositions()->filter(function (\AppBundle\Entity\PeriodPosition $position) use ($beneficiary) {
+            return ($position->getShifter() === $beneficiary);
+        });
     }
 }

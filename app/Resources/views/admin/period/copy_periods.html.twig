@@ -10,15 +10,12 @@
 {% endblock %}
 
 {% block content %}
-    <h4>Dupliquer les créneaux types d'un jour vers un autre</h4>
+<h4>Dupliquer les créneaux types d'un jour vers un autre</h4>
 
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light">Copier les créneaux type</button>
-    </div>
-    {{ form_end(form) }}
-{% endblock %}
-
-{% block javascripts %}
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<div>
+    <button type="submit" class="btn waves-effect waves-light">Dupliquer les créneaux type</button>
+</div>
+{{ form_end(form) }}
 {% endblock %}
