@@ -10,7 +10,6 @@ class JobFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
-
         $jobTitles = [
             "comptable",
             "informaticien",

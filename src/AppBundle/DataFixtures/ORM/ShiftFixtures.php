@@ -17,6 +17,7 @@ class ShiftFixtures extends Fixture implements DependentFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        return;
         for ($i = 1; $i <= 50; $i++) {
             $shift = new Shift();
 

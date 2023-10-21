@@ -13,8 +13,7 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface
 
     public function load(ObjectManager $manager)
     {
-
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= 3; $i++) {
             $membership = new Membership();
             $membership->setMemberNumber($i);
             $membership->setWithdrawn((bool)random_int(0, 1));
@@ -27,7 +26,13 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface
             $membership->setFrozen((bool)random_int(0, 1));
             $membership->setFrozenChange((bool)random_int(0, 1));
 
+            // set beneficiary
+            $beneficiary = $this->getReference('beneficiary_' . $i);
+            $membership->setMainBeneficiary($beneficiary);
+            $beneficiary->setMembership($membership);
+
             $manager->persist($membership);
+            $manager->persist($beneficiary);
         }
 
         echo "50 Memberships created\n";

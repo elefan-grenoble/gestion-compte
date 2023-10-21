@@ -2,11 +2,11 @@
 
 namespace AppBundle\DataFixtures\ORM;
 
+use AppBundle\DataFixtures\FixturesConstants;
+use AppBundle\Entity\Beneficiary;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
-use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use AppBundle\Entity\Beneficiary;
 
 class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface
 {
@@ -14,11 +14,19 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface
     public function load(ObjectManager $manager)
     {
 
-        for ($i = 1; $i <= 51; $i++) {
+        $firstnames = FixturesConstants::FIRSTNAMES;
+        $lastnames = FixturesConstants::LASTNAMES;
+
+        for ($i = 1; $i <= 4; $i++) {
             $beneficiary = new Beneficiary();
-            $beneficiary->setFirstname('Firstname' . $i);
-            $beneficiary->setLastname('Lastname' . $i);
-            $beneficiary->setPhone('123456789' . $i);
+            $beneficiary->setFirstname($firstnames[$i-1]);
+            $beneficiary->setLastname($lastnames[$i-1]);
+
+            $lastDigits = $i;
+            if ($lastDigits < 10) {
+                $lastDigits = '0' . $lastDigits;
+            }
+            $beneficiary->setPhone('06123456' . $lastDigits);
 
             // Set Flying
             $beneficiary->setFlying(rand(0, 1) > 0.5);  // Randomly set true or false
@@ -27,8 +35,10 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface
             $beneficiary->setCreatedAtValue();
 
             // Set User
-            if ($i == 51) {
-                $user = $this->getReference('admin');
+            if ($i == 56) {
+                $user = $this->getReference('superadmin');
+            } else if ($i > 50) {
+                $user = $this->getReference('admin_'.($i - 50));
             } else {
                 $user = $this->getReference('user_' . $i);
             }

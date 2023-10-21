@@ -304,3 +304,9 @@ services:
                 - { name: doctrine.event_listener, event: prePersist }
                 - { name: kernel.event_listener, event: kernel.request, method: forcePasswordChange }
                 - { name: kernel.event_listener, event: fos_user.user.password_changed, method: onPasswordChanged }
+
+    doctrine.fixtures.purger.orm_purger_factory:
+            class: AppBundle\DataFixtures\Purger\CustomPurgerFactory
+            tags:
+                - { name: doctrine.fixtures.purger_factory, alias: default }
+

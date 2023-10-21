@@ -17,6 +17,7 @@ class ClientFixtures extends Fixture implements FixtureInterface
 
     public function load(ObjectManager $manager)
     {
+        return;
         for ($i = 1; $i <= 10; $i++) {
             $client = new Client();
             $client->setRandomId('client_id_' . $i);
