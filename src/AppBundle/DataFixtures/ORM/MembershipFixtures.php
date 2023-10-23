@@ -20,9 +20,9 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface
     {
 
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
-        $adminsAmount = FixturesConstants::ADMINS_AMOUNT;
-        $userAmount = FixturesConstants::USERS_AMOUNT;
-        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_AMOUNT;
+        $adminsAmount = FixturesConstants::ADMINS_COUNT;
+        $userAmount = FixturesConstants::USERS_COUNT;
+        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
 
 
         for ($i = 1; $i <= ($userAmount + $adminsAmount + $superAdminsAmount); $i++) {

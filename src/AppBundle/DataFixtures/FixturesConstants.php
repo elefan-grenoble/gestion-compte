@@ -116,15 +116,17 @@ class FixturesConstants {
      ];
 
      public const FORMATION_NAMES = [
-         "Gestion de la caisse",
-         "Comptabilité",
          "Réception des livraisons",
+         "Comptabilité",
+         "Gestion de la caisse",
+         "Gestion des stocks",
      ];
 
     public const FORMATION_DESCRIPTIONS = [
-        "Apprendre à gérer la caisse de l'association",
-        "Apprendre à gérer la comptabilité de l'association",
         "Apprendre à réceptionner les livraisons de l'association",
+        "Apprendre à gérer la comptabilité de l'association",
+        "Apprendre à gérer la caisse de l'association",
+        "Apprendre à gérer les stocks"
     ];
 
     public const ROLE_GOES_TO_ID = [
@@ -143,15 +145,49 @@ class FixturesConstants {
         "IN_FOURTH_COMMISSION" => [28,29,30,31,32,33],
     ];
 
-    public const USERS_AMOUNT = 50;
-    public const ADMINS_AMOUNT = 5;
+    public const JOB_TITLES = [
+        "Reception des livraisons",
+        "Comptabilité",
+        "Caisse",
+        "Gestion des stocks",
+        "Old job"
+    ];
 
-    public const SUPER_ADMINS_AMOUNT = 1;
+    public const JOB_COLORS = [
+        "red",
+        "blue",
+        "green",
+        "yellow",
+        "orange",
+        "purple",
+        "pink",
+        "brown",
+        "grey",
+        "black"
+    ];
+
+    public const JOB_DESCRIPTIONS = [
+        "A générer",
+        "A générer",
+        "A générer",
+        "A générer",
+        "A générer",
+        "A générer",
+        "A générer",
+        "A générer",
+    ];
+
+    public const USERS_COUNT = 50;
+    public const ADMINS_COUNT = 5;
+
+    public const SUPER_ADMINS_COUNT = 1;
 
     public const REGISTRATION_AMOUNTS = [
         "MINIMUM" => 10,
         "MAXIMUM" => 50,
     ];
+
+    public const JOBS_COUNT = 4;
 
 }
 

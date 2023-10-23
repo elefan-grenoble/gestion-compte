@@ -15,8 +15,8 @@ class UserFixtures extends Fixture implements FixtureInterface
 
         $firstnames = FixturesConstants::FIRSTNAMES;
         $lastnames = FixturesConstants::LASTNAMES;
-        $adminsAmount = FixturesConstants::ADMINS_AMOUNT;
-        $userAmount = FixturesConstants::USERS_AMOUNT;
+        $adminsAmount = FixturesConstants::ADMINS_COUNT;
+        $userAmount = FixturesConstants::USERS_COUNT;
 
 
         // 50 users

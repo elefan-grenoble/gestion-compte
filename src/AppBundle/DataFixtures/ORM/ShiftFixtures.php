@@ -2,6 +2,7 @@
 
 namespace AppBundle\DataFixtures\ORM;
 
+use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Shift;
 use DateInterval;
 use DateTime;
@@ -17,38 +18,70 @@ class ShiftFixtures extends Fixture implements DependentFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        return;
-        for ($i = 1; $i <= 50; $i++) {
-            $shift = new Shift();
 
-            $startDate = new DateTime('+' . rand(0, 30) . ' days');
-            $endDate = (clone $startDate)->add(new DateInterval('PT' . rand(1, 8) . 'H'));
-            $shift->setStart($startDate);
-            $shift->setEnd($endDate);
+        $usersCount = FixturesConstants::USERS_COUNT;
+        $adminsCount = FixturesConstants::ADMINS_COUNT;
+        $enabled_jobs_count = FixturesConstants::JOBS_COUNT;
 
-            $bookedDate = new DateTime('-' . rand(0, 30) . ' days');
-            $shift->setBookedTime($bookedDate);
+        for ($i = 1; $i <= 20; $i++) {
 
-            $shift->setWasCarriedOut((bool)rand(0, 1));
-            $shift->setLocked((bool)rand(0, 1));
-            $shift->setFixe((bool)rand(0, 1));
+            $randJobId = rand(1, $enabled_jobs_count);
+            $job = $this->getReference('job_' . $randJobId);
 
-            $beneficiary = $this->getReference('beneficiary_' . $i);
-            $beneficiary->addShift($shift);
-            $shift->setShifter($beneficiary);
+            $randomTime = rand(9, 18);
+            $startDate = new DateTime('+' . $i . ' days');
+            $startDate->setTime($randomTime, 0, 0);
 
-            $job = $this->getReference('job_' . rand(1, 10));
-            $job->addShift($shift);
-            $shift->setJob($job);
+            $endDate = (clone $startDate)->add(new DateInterval('PT' . 2 . 'H'));
 
-            $manager->persist($shift);
-            $manager->persist($beneficiary);
+            $creator = $this->getReference('admin_' . rand(1, $adminsCount));
 
+            $formation = $this->getReference('formation_'.$randJobId);
+
+            // iterate on shifters
+            for ($j = 1; $j<= rand(1,5); $j++) {
+
+                $shift = new Shift();
+
+                $shift->setStart($startDate);
+                $shift->setEnd($endDate);
+
+                $job->addShift($shift);
+                $shift->setJob($job);
+
+                $shift->setCreatedBy($creator);
+
+                $isBooked = (bool)rand(0, 1);
+
+                $shift->setFormation($formation);
+
+                if ($isBooked) {
+                    $bookedDate = new DateTime('-' . rand(0, 30) . ' days');
+                    $shift->setBookedTime($bookedDate);
+
+                    $shift->setWasCarriedOut((bool)rand(0, 1));
+                    $shift->setLocked((bool)rand(0, 1));
+                    $shift->setFixe((bool)rand(0, 1));
+
+                    $shift->setBooker($this->getReference('admin_' . rand(1, $adminsCount)));
+
+                    $beneficiary = $this->getReference('beneficiary_' . rand(1, $usersCount));
+                    $beneficiary->addShift($shift);
+                    $shift->setShifter($beneficiary);
+
+                    $shift->setFixe(rand(0,1));
+
+                    $manager->persist($beneficiary);
+                }
+
+                $manager->persist($job);
+                $manager->persist($shift);
+            }
         }
 
         $manager->flush();
 
-        echo "50 Shifts created\n";
+        echo "20 Shifts for a random number of beneficiaries created\n";
     }
 
     public function getDependencies()

@@ -17,9 +17,9 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface
         $firstnames = FixturesConstants::FIRSTNAMES;
         $lastnames = FixturesConstants::LASTNAMES;
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
-        $usersAmount = FixturesConstants::USERS_AMOUNT;
-        $adminsAmount = FixturesConstants::ADMINS_AMOUNT;
-        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_AMOUNT;
+        $usersAmount = FixturesConstants::USERS_COUNT;
+        $adminsAmount = FixturesConstants::ADMINS_COUNT;
+        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
 
         for ($i = 1; $i <= ($usersAmount + $adminsAmount + $superAdminsAmount); $i++) {
             $beneficiary = new Beneficiary();

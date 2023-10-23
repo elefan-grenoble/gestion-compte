@@ -20,9 +20,9 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface
     {
 
         $registration_amounts = FixturesConstants::REGISTRATION_AMOUNTS;
-        $usersAmount = FixturesConstants::USERS_AMOUNT;
-        $adminsAmount = FixturesConstants::ADMINS_AMOUNT;
-        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_AMOUNT;
+        $usersAmount = FixturesConstants::USERS_COUNT;
+        $adminsAmount = FixturesConstants::ADMINS_COUNT;
+        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
 
 
@@ -61,7 +61,7 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface
 
         $manager->flush();
 
-        echo "50 registrations created\n";
+        echo "56 registrations created\n";
     }
 
     public function getDependencies(): array
