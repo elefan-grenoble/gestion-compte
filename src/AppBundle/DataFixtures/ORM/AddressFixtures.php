@@ -17,7 +17,7 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface
         $addresses = FixturesConstants::ADDRESSES;
 
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 50; $i++) {
 
             $address = new Address();
 

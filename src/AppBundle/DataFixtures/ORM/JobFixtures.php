@@ -56,7 +56,7 @@ class JobFixtures extends Fixture
             $job->setColor($jobColors[$i]);
             $job->setDescription($jobDescriptions[$i]);
             $job->setMinShifterAlert(rand(1, 5));
-            $job->setEnabled((bool)rand(0, 1));
+            $job->setEnabled((bool)rand(0, 1) < 0.2);
 
             $this->setReference('job_' . ($i+1), $job);
             $manager->persist($job);

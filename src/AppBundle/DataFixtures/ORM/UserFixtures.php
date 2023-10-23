@@ -15,9 +15,12 @@ class UserFixtures extends Fixture implements FixtureInterface
 
         $firstnames = FixturesConstants::FIRSTNAMES;
         $lastnames = FixturesConstants::LASTNAMES;
+        $adminsAmount = FixturesConstants::ADMINS_AMOUNT;
+        $userAmount = FixturesConstants::USERS_AMOUNT;
+
 
         // 50 users
-        for ($i = 1; $i <= 50; $i++) {
+        for ($i = 1; $i <= $userAmount; $i++) {
             $user = new User();
 
             $user->setEmail( $firstnames[$i-1] . $lastnames[$i-1] . '@email.com');
@@ -31,8 +34,8 @@ class UserFixtures extends Fixture implements FixtureInterface
             $manager->persist($user);
         }
 
-        // 5 admin
-        for ($i = 1; $i <= 5; $i++) {
+        // 5 admin ( ids = 51 to 55 )
+        for ($i = 1; $i <= $adminsAmount; $i++) {
 
             $user = new User();
             $user->setUsername('admin'.$i);
@@ -47,7 +50,7 @@ class UserFixtures extends Fixture implements FixtureInterface
         }
 
 
-        // 1 super admin
+        // 1 super admin ( id = 56 )
         $user = new User();
         $user->setUsername('admin');
         $user->setEmail('superadmin@email.com');

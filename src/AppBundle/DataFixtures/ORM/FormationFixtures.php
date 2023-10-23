@@ -1,6 +1,8 @@
 <?php
 
 
+namespace AppBundle\DataFixtures\ORM;
+
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Formation;
 use Doctrine\Bundle\FixturesBundle\Fixture;

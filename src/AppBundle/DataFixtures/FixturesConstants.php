@@ -10,6 +10,7 @@ class FixturesConstants {
         "Samuel", "Sebastian", "David", "Carter", "Wyatt", "Jayden", "John", "Owen", "Dylan", "Luke",
         "Gabriel", "Anthony", "Isaac", "Grayson", "Jack", "Julian", "Levi", "Christopher", "Joshua", "Andrew",
         "Lincoln", "Mateo", "Ryan", "Jaxon", "Nathan", "Aaron", "Isaiah", "Thomas", "Charles", "Caleb",
+        "Samuel", "Sebastian", "David", "Carter", "Wyatt", "Jayden", "John", "Owen", "Dylan", "Luke",
     ];
 
     public const LASTNAMES = [
@@ -18,6 +19,7 @@ class FixturesConstants {
         "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson",
         "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
         "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts",
+        "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez",
     ];
 
     public const COMMISSIONS = [
@@ -125,6 +127,31 @@ class FixturesConstants {
         "Apprendre à réceptionner les livraisons de l'association",
     ];
 
+    public const ROLE_GOES_TO_ID = [
+        "ROLE_SUPER_ADMIN" => 56,
+        "FROZEN" => 6,
+        "WITHDRAWN" => 5,
+        "FROZEN_AT_END_OF_CYCLE" => 7,
+        "ROLE_ADMIN" => [51, 52, 53, 54, 55],
+        "OWNER_OF_FIRST_COMMISSION" => 1,
+        "OWNER_OF_SECOND_COMMISSION" => 2,
+        "OWNER_OF_THIRD_COMMISSION" => 3,
+        "OWNER_OF_FOURTH_COMMISSION" => 4,
+        "IN_FIRST_COMMISSION" => [10,11,12,13,14,15],
+        "IN_SECOND_COMMISSION" => [16,17,18,19,20,21],
+        "IN_THIRD_COMMISSION" => [22,23,24,25,26,27],
+        "IN_FOURTH_COMMISSION" => [28,29,30,31,32,33],
+    ];
+
+    public const USERS_AMOUNT = 50;
+    public const ADMINS_AMOUNT = 5;
+
+    public const SUPER_ADMINS_AMOUNT = 1;
+
+    public const REGISTRATION_AMOUNTS = [
+        "MINIMUM" => 10,
+        "MAXIMUM" => 50,
+    ];
 
 }
 
