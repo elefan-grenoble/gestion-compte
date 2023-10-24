@@ -452,17 +452,19 @@ class SearchUserFormHelper
             }
         }
 
-        if ($form->get('flying')->getData() > 0) {
-            $qb = $qb->andWhere('b.flying = :flying')
-                ->setParameter('flying', $form->get('flying')->getData()-1);
-        }
-        if ($form->has('has_period_position')) {
-            if ($form->get('has_period_position')->getData() > 0) {
-                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
-                if ($form->get('has_period_position')->getData() == 2) {
-                    $qb = $qb->andWhere('pp.id IS NOT NULL');
-                } else if ($form->get('has_period_position')->getData() == 1) {
-                    $qb = $qb->andWhere('pp.id IS NULL');
+        if ($this->use_fly_and_fixed) {
+            if ($form->get('flying')->getData() > 0) {
+                $qb = $qb->andWhere('b.flying = :flying')
+                    ->setParameter('flying', $form->get('flying')->getData()-1);
+            }
+            if ($form->has('has_period_position')) {
+                if ($form->get('has_period_position')->getData() > 0) {
+                    $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                    if ($form->get('has_period_position')->getData() == 2) {
+                        $qb = $qb->andWhere('pp.id IS NOT NULL');
+                    } else if ($form->get('has_period_position')->getData() == 1) {
+                        $qb = $qb->andWhere('pp.id IS NULL');
+                    }
                 }
             }
         }
@@ -625,17 +627,19 @@ class SearchUserFormHelper
             }
         }
 
-        if ($form->get('flying')->getData() > 0) {
-            $qb = $qb->andWhere('b.flying = :flying')
-                ->setParameter('flying', $form->get('flying')->getData()-1);
-        }
-        if ($form->has('has_period_position')) {
-            if ($form->get('has_period_position')->getData() > 0) {
-                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
-                if ($form->get('has_period_position')->getData() == 2) {
-                    $qb = $qb->andWhere('pp.id IS NOT NULL');
-                } else if ($form->get('has_period_position')->getData() == 1) {
-                    $qb = $qb->andWhere('pp.id IS NULL');
+        if ($this->use_fly_and_fixed) {
+            if ($form->get('flying')->getData() > 0) {
+                $qb = $qb->andWhere('b.flying = :flying')
+                    ->setParameter('flying', $form->get('flying')->getData()-1);
+            }
+            if ($form->has('has_period_position')) {
+                if ($form->get('has_period_position')->getData() > 0) {
+                    $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                    if ($form->get('has_period_position')->getData() == 2) {
+                        $qb = $qb->andWhere('pp.id IS NOT NULL');
+                    } else if ($form->get('has_period_position')->getData() == 1) {
+                        $qb = $qb->andWhere('pp.id IS NULL');
+                    }
                 }
             }
         }
