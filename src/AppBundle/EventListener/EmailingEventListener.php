@@ -15,6 +15,7 @@ use AppBundle\Event\MemberCycleStartEvent;
 use AppBundle\Event\ShiftReservedEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
+use AppBundle\Event\ShiftReminderEvent;
 use AppBundle\Event\ShiftDeletedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
@@ -364,6 +365,44 @@ class EmailingEventListener
                         array(
                             'shift' => $shift,
                             'beneficiary' => $beneficiary
+                        )
+                    ),
+                    'text/html'
+                );
+
+            $this->mailer->send($email);
+        }
+    }
+
+    /**
+     * @param ShiftReminderEvent $event
+     * @throws \Exception
+     */
+    public function onShiftReminder(ShiftReminderEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftReminder");
+
+        $shift = $event->getShift();
+        $beneficiary = $shift->getShifter();
+
+        $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
+        $template = $this->container->get('twig')->createTemplate($dynamicContent);
+        $dynamicContent = $this->container->get('twig')->render($template, array('beneficiary' => $beneficiary));
+
+        // send a reminder e-mail to the beneficiary
+        if ($beneficiary) {
+            $emailObject = '[ESPACE MEMBRES] Ton créneau';
+            $emailTo = $beneficiary->getEmail();
+
+            $email = (new \Swift_Message($emailObject))
+                ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
+                ->setTo($emailTo)
+                ->setBody(
+                    $this->renderView(
+                        'emails/shift_reminder.html.twig',
+                        array(
+                            'shift' => $shift,
+                            'dynamicContent' => $dynamicContent
                         )
                     ),
                     'text/html'
