@@ -26,8 +26,6 @@ class ShiftGenerateCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $mailer = $this->getContainer()->get('mailer');
-        $router = $this->getContainer()->get('router');
 
         $admin = $em->getRepository('AppBundle:User')->findSuperAdminAccount();
         $use_fly_and_fixed = $this->getContainer()->getParameter('use_fly_and_fixed');
