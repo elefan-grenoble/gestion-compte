@@ -44,6 +44,7 @@
                     </div>
                 {% endif %}
             {% endif %}
+
             {% if app.request.hasPreviousSession %}
                 {% for type, messages in app.session.flashBag.all %}
                     {% for message in messages %}
@@ -57,15 +58,18 @@
                     {% endfor %}
                 {% endfor %}
             {% endif %}
+
             {% block container %}
-                {# overload block container only if it is nneded to have a larger page #}
+                {# overload block container only if it is needed to have a larger page #}
                 {% block beforecontainer %}{% endblock %}
+
                 <div class="container">
                     <div class="section">
                         {% block fos_user_content %}{% endblock fos_user_content %}
                         {% block content %}{% endblock %}
                     </div>
                 </div>
+
                 {% block aftercontainer %}{% endblock %}
             {% endblock %}
         </main>
