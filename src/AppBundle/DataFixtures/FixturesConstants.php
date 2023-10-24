@@ -167,14 +167,11 @@ class FixturesConstants {
     ];
 
     public const JOB_DESCRIPTIONS = [
-        "A générer",
-        "A générer",
-        "A générer",
-        "A générer",
-        "A générer",
-        "A générer",
-        "A générer",
-        "A générer",
+        "Réception des livraisons et des bons de commandes",
+        "Faire le point sur la comptabilité de l'association",
+        "Gestion de la caisse de l'association",
+        "Gestion des stocks de l'association",
+        "Old job description"
     ];
 
     public const USERS_COUNT = 50;
@@ -188,6 +185,10 @@ class FixturesConstants {
     ];
 
     public const JOBS_COUNT = 4;
+    public const OPENING_HOUR_KINDS_NAMES = ["normal", "toussaint", "été"];
+    public const OPENING_HOUR_KINDS_START_DATES = ["2023-09-01", "2018-10-23", "2018-07-01"];
+
+    public const OPENING_HOUR_KINDS_END_DATES = ["2023-06-30", "2018-11-03", "2018-08-31"];
 
 }
 

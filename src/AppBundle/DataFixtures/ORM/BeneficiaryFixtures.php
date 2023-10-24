@@ -82,7 +82,7 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface, 
             $beneficiary->setPhone('06123456' . $lastDigits);
 
             // Set Flying
-            $beneficiary->setFlying(rand(0, 1) > 0.7);  // Randomly set true or false
+            $beneficiary->setFlying((bool)rand(0, 1));  // Randomly set true or false
 
             // Set CreatedAt
             $beneficiary->setCreatedAtValue();
