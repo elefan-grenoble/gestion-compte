@@ -29,27 +29,26 @@ Vous pouvez vous connecter avec l'utilisateur super admin :
 
 ### Remplir la base de donnée avec des données fictives
 
-```bash
+```shell
 docker compose exec php php bin/console doctrine:fixtures:load -n
 ```
-Le groupe de fixtures "period" omet les données de la table **shift**, utile pour tester la génération des shifts à partir des périodes. 
 
-```bash
+Le groupe de fixtures "period" omet les données de la table **shift**, utile pour tester la génération des shifts à partir des périodes.
+
+```shell
 docker compose exec php php bin/console doctrine:fixtures:load -n --group=period
 ```
 
 ### Importer un dump de la base de données
 
-#### Supprimer la base de données existante et la recréer
-```shell
-docker compose exec database mariadb -uroot -psecret -e 'DROP DATABASE IF EXISTS symfony; CREATE DATABASE IF NOT EXISTS symfony;'
-```
+#### S
 
-#### Importer le dump
 ```shell
+# supprimer la base de données existante et la recréer
+docker compose exec database mariadb -uroot -psecret -e 'DROP DATABASE IF EXISTS symfony; CREATE DATABASE IF NOT EXISTS symfony;'
+
+# importer le dump
 docker compose exec database mariadb -uroot -psecret symfony < espace_membres.sql
 ```
 
 Vous pouvez aussi le faire directement sur phpmyadmin : [http://localhost:8080](http://localhost:8080)
-
-

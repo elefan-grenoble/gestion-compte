@@ -43,7 +43,7 @@ The documentation can be found at <https://materializecss.github.io/materialize>
 ### Running documentation locally
 Run these commands to set up the documentation:
 
-```bash
+```shell
 git clone https://github.com/materializecss/materialize
 cd materialize
 npm install
