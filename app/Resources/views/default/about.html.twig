@@ -1,0 +1,42 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}À propos - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">info</i>&nbsp;À propos
+{% endblock %}
+
+{% block content %}
+<h4>À propos de cette application</h4>
+<p>
+    <strong>Espace Membre</strong> est une application <i>open-source</i> développée originellement par des bénévoles de <a href="https://lelefan.org" target="_blank">l'éléfàn</a> à Grenoble.
+</p>
+
+<h6>Depuis 2018</h6>
+<p>
+    Le projet a débuté en 2018. Il est régulièrement enrichi de nouvelles fonctionnalités.
+</p>
+<p>
+    Il a aussi essaimé aux 4 coins de la France (et limitrophes) : aujourd'hui il est utilisé dans une vingtaine d'épiceries ou supermarchés coopératifs francophones.
+</p>
+
+<h6>Contribuer</h6>
+<p>
+    Le projet repose entièrement sur quelques développeurs bénévoles.
+</p>
+<p>
+    Vous avez trouvé un bug ? Ou une idée d'amélioration ? N'hésitez pas à créer une <i>issue</i> sur le <a href="https://github.com/elefan-grenoble/gestion-compte" target="_blank">dépot Github</a>.
+</p>
+<p>
+    Vous êtes développeur et souhaitez aider ? Le code est en PHP Symfony. Rendez-vous sur le dépôt Github (lien ci-dessus) pour en savoir plus 😇
+</p>
+{% endblock %}
+
+{% block aftercontainer %}
+<div class="center-align">
+    {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
+        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
+    {% endimage %}
+</div>
+{% endblock %}
