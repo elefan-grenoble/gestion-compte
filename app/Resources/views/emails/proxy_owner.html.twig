@@ -1,5 +1,5 @@
-Bonjour {{ proxy.owner.firstname }},<br/>
-Tu viens de recevoir la procuration de <b>{{ giverMainBeneficiary.firstname }} {{ giverMainBeneficiary.lastname }}</b>
+Bonjour {{ ownerBeneficiary.firstname }},<br/>
+Tu viens de recevoir la procuration de <b>{{ giverMainBeneficiary.membership.memberNumberWithBeneficiaryListString }}</b>
 pour <b>{{ proxy.event.title }}</b> le {{ proxy.event.date | date_fr_full_with_time }}.<br>
 Fais en bon usage, ce membre compte sur toi !<br/>
 <br/>
