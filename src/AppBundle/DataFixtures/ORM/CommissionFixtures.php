@@ -6,11 +6,12 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Commission;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class CommissionFixtures extends Fixture implements DependentFixtureInterface
+class CommissionFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
     /**
      * @throws Exception
@@ -102,5 +103,10 @@ class CommissionFixtures extends Fixture implements DependentFixtureInterface
         return [
             BeneficiaryFixtures::class,
         ];
+    }
+
+    public static function getGroups(): array
+    {
+        return ['period'];
     }
 }

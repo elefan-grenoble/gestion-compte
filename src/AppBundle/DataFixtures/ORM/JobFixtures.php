@@ -5,9 +5,10 @@ namespace AppBundle\DataFixtures\ORM;
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Job;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class JobFixtures extends Fixture
+class JobFixtures extends Fixture implements FixtureGroupInterface
 {
     public function load(ObjectManager $manager)
     {
@@ -38,5 +39,10 @@ class JobFixtures extends Fixture
         $manager->flush();
 
         echo "4 Jobs created\n";
+    }
+
+    public static function getGroups(): array
+    {
+        return ['period'];
     }
 }

@@ -6,11 +6,12 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Registration;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class RegistrationFixtures extends Fixture implements DependentFixtureInterface
+class RegistrationFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
 
     /**
@@ -69,5 +70,10 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface
         return [
             BeneficiaryFixtures::class,
         ];
+    }
+
+    public static function getGroups(): array
+    {
+        return ['period'];
     }
 }

@@ -5,10 +5,11 @@ namespace AppBundle\DataFixtures\ORM;
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Address;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class AddressFixtures extends Fixture implements DependentFixtureInterface
+class AddressFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
 
     public function load(ObjectManager $manager)
@@ -44,4 +45,10 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface
             BeneficiaryFixtures::class,
         ];
     }
+
+    public static function getGroups(): array
+    {
+        return ['period'];
+    }
+
 }

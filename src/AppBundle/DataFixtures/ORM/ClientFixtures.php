@@ -6,14 +6,13 @@ namespace AppBundle\DataFixtures\ORM;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Service;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\FixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 
-class ClientFixtures extends Fixture implements FixtureInterface
+class ClientFixtures extends Fixture implements FixtureInterface, FixtureGroupInterface
 {
-
-    private $clients = [];
 
     public function load(ObjectManager $manager)
     {
@@ -28,7 +27,6 @@ class ClientFixtures extends Fixture implements FixtureInterface
             // set reference for other fixtures
             $this->addReference('client_' . $i, $client);
 
-            $this->clients[] = $client;
             $manager->persist($client);
         }
 
@@ -38,9 +36,9 @@ class ClientFixtures extends Fixture implements FixtureInterface
 
     }
 
-    public function getClients()
+    public static function getGroups(): array
     {
-        return $this->clients;
+        return ['period'];
     }
 
 }

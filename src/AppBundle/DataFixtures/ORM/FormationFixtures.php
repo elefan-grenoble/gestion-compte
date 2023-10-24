@@ -6,10 +6,11 @@ namespace AppBundle\DataFixtures\ORM;
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Formation;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class FormationFixtures extends Fixture implements DependentFixtureInterface
+class FormationFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
 
     public function load(ObjectManager $manager)
@@ -49,7 +50,10 @@ class FormationFixtures extends Fixture implements DependentFixtureInterface
         ];
     }
 
-
+    public static function getGroups(): array
+    {
+        return ['period'];
+    }
 
 
 }
