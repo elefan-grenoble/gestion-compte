@@ -21,11 +21,12 @@ class ShiftFixtures extends Fixture implements DependentFixtureInterface
 
         $usersCount = FixturesConstants::USERS_COUNT;
         $adminsCount = FixturesConstants::ADMINS_COUNT;
-        $enabled_jobs_count = FixturesConstants::JOBS_COUNT;
+        $enabledJobsCount = FixturesConstants::ENABLED_JOBS_COUNT;
+        $shiftsCount = FixturesConstants::SHIFTS_COUNT;
 
-        for ($i = 1; $i <= 20; $i++) {
+        for ($i = 1; $i <= $shiftsCount; $i++) {
 
-            $randJobId = rand(1, $enabled_jobs_count);
+            $randJobId = rand(1, $enabledJobsCount);
             $job = $this->getReference('job_' . $randJobId);
 
             $randomTime = rand(9, 18);
@@ -81,7 +82,7 @@ class ShiftFixtures extends Fixture implements DependentFixtureInterface
 
         $manager->flush();
 
-        echo "20 Shifts for a random number of beneficiaries created\n";
+        echo $shiftsCount . " shifts for a random number of beneficiaries created\n";
     }
 
     public function getDependencies()

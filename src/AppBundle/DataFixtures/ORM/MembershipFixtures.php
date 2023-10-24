@@ -24,9 +24,9 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface, F
         $adminsAmount = FixturesConstants::ADMINS_COUNT;
         $userAmount = FixturesConstants::USERS_COUNT;
         $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
+        $membershipCount = $adminsAmount + $userAmount + $superAdminsAmount;
 
-
-        for ($i = 1; $i <= ($userAmount + $adminsAmount + $superAdminsAmount); $i++) {
+        for ($i = 1; $i <= $membershipCount; $i++) {
             $membership = new Membership();
             $membership->setMemberNumber($i);
 
@@ -75,7 +75,7 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface, F
             $manager->persist($beneficiary);
         }
 
-        echo "56 Memberships created\n";
+        echo $membershipCount." memberships created\n";
 
         $manager->flush();
     }

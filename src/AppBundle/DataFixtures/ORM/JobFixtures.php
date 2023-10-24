@@ -16,8 +16,9 @@ class JobFixtures extends Fixture implements FixtureGroupInterface
         $jobColors = FixturesConstants::JOB_COLORS;
         $jobDescriptions = FixturesConstants::JOB_DESCRIPTIONS;
         $adminsCount = FixturesConstants::ADMINS_COUNT;
+        $jobsCount = FixturesConstants::JOBS_COUNT;
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < $jobsCount; $i++) {
             $job = new Job();
             $job->setName($jobTitles[$i]);
             $job->setColor($jobColors[$i]);
@@ -38,7 +39,7 @@ class JobFixtures extends Fixture implements FixtureGroupInterface
 
         $manager->flush();
 
-        echo "4 Jobs created\n";
+        echo $jobsCount." jobs created\n";
     }
 
     public static function getGroups(): array

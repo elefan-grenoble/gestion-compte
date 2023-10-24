@@ -16,9 +16,9 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface, Fixt
     {
 
         $addresses = FixturesConstants::ADDRESSES;
+        $addresses_count = FixturesConstants::ADMINS_COUNT + FixturesConstants::USERS_COUNT + FixturesConstants::SUPER_ADMINS_COUNT;
 
-
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < $addresses_count; $i++) {
 
             $address = new Address();
 
@@ -26,9 +26,13 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface, Fixt
             $address->setStreet2('Apartment ' . ($i+1));
             $address->setZipcode(rand(10000, 99999));
             $address->setCity('Grenoble');
+
+            // set beneficiary
             $beneficiary = $this->getReference('beneficiary_' . ($i+1));
             $beneficiary->setAddress($address);
             $address->setBeneficiary($beneficiary);
+
+            $this->addReference('address_' . ($i+1), $address);
 
             $manager->persist($address);
 
@@ -36,7 +40,7 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface, Fixt
 
         $manager->flush();
 
-        echo "50 Addresses created\n";
+        echo $addresses_count . " addresses created\n";
     }
 
     public function getDependencies(): array

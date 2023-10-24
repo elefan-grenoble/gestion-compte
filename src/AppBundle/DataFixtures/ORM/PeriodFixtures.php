@@ -22,7 +22,7 @@ class PeriodFixtures extends Fixture implements DependentFixtureInterface, Fixtu
     public function load(ObjectManager $manager)
     {
 
-        $enabled_jobs_count = FixturesConstants::JOBS_COUNT;
+        $enabled_jobs_count = FixturesConstants::ENABLED_JOBS_COUNT;
         $adminsCount = FixturesConstants::ADMINS_COUNT;
 
         for ($i = 0; $i < 7; $i++) {

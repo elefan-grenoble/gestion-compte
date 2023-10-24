@@ -21,13 +21,13 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface,
     {
 
         $registration_amounts = FixturesConstants::REGISTRATION_AMOUNTS;
-        $usersAmount = FixturesConstants::USERS_COUNT;
-        $adminsAmount = FixturesConstants::ADMINS_COUNT;
-        $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
+        $usersCount = FixturesConstants::USERS_COUNT;
+        $adminsCount = FixturesConstants::ADMINS_COUNT;
+        $superAdminsCount = FixturesConstants::SUPER_ADMINS_COUNT;
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
+        $registrationCount = $usersCount + $adminsCount + $superAdminsCount;
 
-
-        for ($i = 1; $i <= ($usersAmount + $adminsAmount + $superAdminsAmount); $i++) {
+        for ($i = 1; $i <= $registrationCount; $i++) {
 
             $registration = new Registration();
 
@@ -47,7 +47,7 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface,
             if (in_array($i, (array)$roleGoesToId["ROLE_ADMIN"])) {
                 $registrar = $this->getReference('superadmin');
             } else {
-                $rand_admin_id = rand(1, $adminsAmount);
+                $rand_admin_id = rand(1, $adminsCount);
                 $registrar = $this->getReference('admin_'. $rand_admin_id);
             }
 
@@ -62,7 +62,7 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface,
 
         $manager->flush();
 
-        echo "56 registrations created\n";
+        echo $registrationCount . " registrations created\n";
     }
 
     public function getDependencies(): array

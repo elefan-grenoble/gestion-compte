@@ -22,9 +22,9 @@ class CommissionFixtures extends Fixture implements DependentFixtureInterface, F
         $descriptions = FixturesConstants::DESCRIPTIONS;
         $nextMeetingDescriptions = FixturesConstants::NEXTMEETINGDESCRIPTIONS;
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
+        $commissionsCount = FixturesConstants::COMMISSIONS_COUNT;
 
-
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < $commissionsCount; $i++) {
             $commission = new Commission();
             $commission->setName($commissions[$i]);
             $commission->setDescription($descriptions[$i]);
@@ -95,7 +95,7 @@ class CommissionFixtures extends Fixture implements DependentFixtureInterface, F
 
         $manager->flush();
 
-        echo "4 Commissions with owners and 6 members created \n";
+        echo $commissionsCount." commissions with owners and 6 members created \n";
     }
 
     public function getDependencies(): array

@@ -4,6 +4,7 @@ namespace AppBundle\DataFixtures\ORM;
 
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\User;
+use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\FixtureInterface;
@@ -16,12 +17,12 @@ class UserFixtures extends Fixture implements FixtureInterface, FixtureGroupInte
 
         $firstnames = FixturesConstants::FIRSTNAMES;
         $lastnames = FixturesConstants::LASTNAMES;
-        $adminsAmount = FixturesConstants::ADMINS_COUNT;
-        $userAmount = FixturesConstants::USERS_COUNT;
+        $adminsCount = FixturesConstants::ADMINS_COUNT;
+        $userCount = FixturesConstants::USERS_COUNT;
 
 
         // 50 users
-        for ($i = 1; $i <= $userAmount; $i++) {
+        for ($i = 1; $i <= $userCount; $i++) {
             $user = new User();
 
             $user->setEmail( $firstnames[$i-1] . $lastnames[$i-1] . '@email.com');
@@ -32,11 +33,13 @@ class UserFixtures extends Fixture implements FixtureInterface, FixtureGroupInte
 
             $this->addReference('user_' . $i, $user);
 
+            $user->setLastLogin(new DateTime('now'));
+
             $manager->persist($user);
         }
 
         // 5 admin ( ids = 51 to 55 )
-        for ($i = 1; $i <= $adminsAmount; $i++) {
+        for ($i = 1; $i <= $adminsCount; $i++) {
 
             $user = new User();
             $user->setUsername('admin'.$i);
@@ -44,6 +47,7 @@ class UserFixtures extends Fixture implements FixtureInterface, FixtureGroupInte
             $user->setPlainPassword('password');
             $user->setEnabled(true);
             $user->setRoles(array('ROLE_ADMIN'));
+            $user->setLastLogin(new DateTime('now'));
 
             $this->addReference('admin_'.$i, $user);
 
@@ -58,6 +62,7 @@ class UserFixtures extends Fixture implements FixtureInterface, FixtureGroupInte
         $user->setPlainPassword('password');
         $user->setEnabled(true);
         $user->setRoles(array('ROLE_SUPER_ADMIN', 'ROLE_ADMIN'));
+        $user->setLastLogin(new DateTime('now'));
 
         $this->addReference('superadmin', $user);
 
@@ -66,7 +71,7 @@ class UserFixtures extends Fixture implements FixtureInterface, FixtureGroupInte
         $manager->flush();
 
 
-        echo "50 users and 5 admin and 1 super admin created\n";
+        echo $userCount . " users and " . $adminsCount . " admin and 1 super admin created\n";
 
     }
 

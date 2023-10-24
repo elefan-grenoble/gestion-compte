@@ -18,8 +18,9 @@ class FormationFixtures extends Fixture implements DependentFixtureInterface, Fi
 
         $formation_names = FixturesConstants::FORMATION_NAMES;
         $formation_descriptions = FixturesConstants::FORMATION_DESCRIPTIONS;
+        $formations_count = FixturesConstants::FORMATIONS_COUNT;
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < $formations_count; $i++) {
 
             $formation = new Formation();
 
@@ -39,7 +40,7 @@ class FormationFixtures extends Fixture implements DependentFixtureInterface, Fi
 
         $manager->flush();
 
-        echo "4 formations created\n";
+        echo $formations_count." formations created\n";
 
     }
 

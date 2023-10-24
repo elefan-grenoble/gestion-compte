@@ -22,7 +22,9 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface, 
         $adminsAmount = FixturesConstants::ADMINS_COUNT;
         $superAdminsAmount = FixturesConstants::SUPER_ADMINS_COUNT;
 
-        for ($i = 1; $i <= ($usersAmount + $adminsAmount + $superAdminsAmount); $i++) {
+        $beneficiaryCount = $usersAmount + $adminsAmount + $superAdminsAmount;
+
+        for ($i = 1; $i <= $beneficiaryCount; $i++) {
             $beneficiary = new Beneficiary();
 
             // set names according to roles and parameters
@@ -108,7 +110,7 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface, 
 
         $manager->flush();
 
-        echo "50 Beneficiaries created\n";
+        echo $beneficiaryCount." beneficiaries created\n";
     }
 
     public function getDependencies(): array
