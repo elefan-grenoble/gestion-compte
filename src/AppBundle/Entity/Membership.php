@@ -137,6 +137,7 @@ class Membership
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
         $this->timeLogs = new ArrayCollection();
+        $this->membershipShiftExemptions = new ArrayCollection();
     }
 
     public function __toString()
