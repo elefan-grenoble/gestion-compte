@@ -26,10 +26,18 @@
     Le projet repose entièrement sur quelques développeurs bénévoles.
 </p>
 <p>
-    Vous avez trouvé un bug ? Ou une idée d'amélioration ? N'hésitez pas à créer une <i>issue</i> sur le <a href="https://github.com/elefan-grenoble/gestion-compte" target="_blank">dépot Github</a>.
+    Vous avez trouvé un bug ? Ou une idée d'amélioration ? N'hésitez pas à créer une <i>issue</i> sur le <a href="https://github.com/{{ github_repo_url }}" target="_blank">dépot Github</a>.
 </p>
 <p>
     Vous êtes développeur et souhaitez aider ? Le code est en PHP Symfony. Rendez-vous sur le dépôt Github (lien ci-dessus) pour en savoir plus 😇
+</p>
+
+<h6>Version</h6>
+<p>
+    Version actuelle de l'application : <a id="github-current-release" href="https://github.com/{{ github_repo_url }}/releases" target="_blank">{{ github_current_release }}</a>
+</p>
+<p>
+    Dernière version disponible de l'application : <a id="github-latest-release" href="https://github.com/{{ github_repo_url }}/releases" target="_blank">vX.Y.Z</a>
 </p>
 {% endblock %}
 
@@ -39,4 +47,18 @@
         <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
     {% endimage %}
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function getGithubLatestReleaseInfo() {
+    $.getJSON("https://api.github.com/repos/{{ github_repo_url }}/tags").done(function (json) {
+        var release = json[0];
+        $("#github-latest-release").html(release.name);  
+   });    
+}
+$(document).ready(function() {
+    getGithubLatestReleaseInfo();
+});
+</script>
 {% endblock %}
