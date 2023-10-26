@@ -139,7 +139,7 @@ class TimeLogEventListener
         $this->logger->info("Time Log Listener: onShiftInvalidated");
 
         $shift = $event->getShift();
-        $member = $event->getMember();
+        $member = $event->getBeneficiary()->getMembership();
 
         if ($this->use_card_reader_to_validate_shifts) {
             // the shift should have happened in the past
@@ -149,7 +149,7 @@ class TimeLogEventListener
                 return (($log->getType() == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
             });
             if ($shiftValidatedTimeLog->count() > 0) {
-                $this->createShiftInvalidatedTimeLog($shift);
+                $this->createShiftInvalidatedTimeLog($shift, $member);
             }
         } else {
             // do nothing! shouldn't happen (only onShiftFreed should be called)
@@ -278,9 +278,9 @@ class TimeLogEventListener
      * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function createShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    private function createShiftInvalidatedTimeLog(Shift $shift, Membership $member, \DateTime $date = null, $description = null)
     {
-        $log = $this->container->get('time_log_service')->initShiftInvalidatedTimeLog($shift, $date, $description);
+        $log = $this->container->get('time_log_service')->initShiftInvalidatedTimeLog($shift, $member, $date, $description);
         $this->em->persist($log);
         $this->em->flush();
     }

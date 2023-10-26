@@ -82,10 +82,8 @@ class TimeLogService
      * @param \DateTime $date
      * @return TimeLog
      */
-    public function initShiftInvalidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    public function initShiftInvalidatedTimeLog(Shift $shift, Membership $member, \DateTime $date = null, $description = null)
     {
-        $member = $shift->getShifter()->getMembership();
-
         $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT_INVALIDATED);
         $log->setShift($shift);
