@@ -9,11 +9,11 @@ use DateInterval;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class PeriodFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class PeriodFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     /**
@@ -74,17 +74,13 @@ class PeriodFixtures extends Fixture implements DependentFixtureInterface, Fixtu
         echo "7 periods per week with random number of positions created\n";
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            JobFixtures::class,
-            UserFixtures::class,
-            FormationFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 13;
     }
 }

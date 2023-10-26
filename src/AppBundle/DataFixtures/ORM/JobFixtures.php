@@ -6,9 +6,10 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Job;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class JobFixtures extends Fixture implements FixtureGroupInterface
+class JobFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
     public function load(ObjectManager $manager)
     {
@@ -31,9 +32,11 @@ class JobFixtures extends Fixture implements FixtureGroupInterface
                 $job->setEnabled(true);
             }
 
-            $job->setCreatedBy($this->getReference('admin_' . rand(1, $adminsCount)));
+            $admin = $this->getReference('admin_' . rand(1, $adminsCount));
+            $job->setCreatedBy($admin);
 
             $this->setReference('job_' . ($i+1), $job);
+
             $manager->persist($job);
         }
 
@@ -45,5 +48,10 @@ class JobFixtures extends Fixture implements FixtureGroupInterface
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 5;
     }
 }

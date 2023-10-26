@@ -7,10 +7,10 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Service;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-
-class ServiceFixtures extends Fixture implements FixtureGroupInterface
+class ServiceFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
 
     public function load(ObjectManager $manager)
@@ -46,6 +46,11 @@ class ServiceFixtures extends Fixture implements FixtureGroupInterface
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 4;
     }
 
 }

@@ -8,11 +8,11 @@ use AppBundle\Entity\EventKind;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class EventFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class EventFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     /**
@@ -71,16 +71,14 @@ class EventFixtures extends Fixture implements DependentFixtureInterface, Fixtur
         echo $eventCounts . " events created\n";
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            UserFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 9;
     }
 
 }

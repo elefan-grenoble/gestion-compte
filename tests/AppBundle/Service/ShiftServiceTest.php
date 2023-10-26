@@ -45,7 +45,7 @@ class ShiftServiceTest extends TestCase
     private $time_log_saving_shift_free_min_time_in_advance_days = 3;
     private $time_log_saving_shift_free_allow_only_if_enough_saving = false;
 
-    public function setUp()
+    public function setUp(): void
     {
 
         // Mock the ContainerInterface

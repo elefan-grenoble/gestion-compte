@@ -1,51 +1,78 @@
-name: Symfony 3.4 Tests
+name: Integration and Functional tests
 
-on: [push]
+on:
+  pull_request:
+    branches: [ master ]
 
 jobs:
   symfony:
-    name: Symfony 3.4 (PHP ${{ matrix.php-versions }})
+    name: main
     # https://hub.docker.com/_/ubuntu/
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       fail-fast: true
       matrix:
         php-versions: ['7.4']
     steps:
-      # https://github.com/actions/checkout (official)
-      - name: Checkout
-        uses: actions/checkout@v2
+#      # clean ( for local debug )
+#      - name: Remove all mysql containers
+#        run: docker rm -f $(docker ps -a -q --filter ancestor=mariadb:10.4.10)
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Start database service
+      - name: Set up MySQL
+        uses: getong/mariadb-action@v1.1
+        with:
+          host port: 3306 # Optional, default value is 3306. The port of host
+          container port: 3306 # Optional, default value is 3306. The port of container
+          character set server: 'utf8mb4' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
+          collation server: 'utf8mb4_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
+          mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MySQL
+          mysql database: 'symfony' # Optional, default value is "test". The specified database which will be created
+          mysql root password: 'secret' # Required if "mysql user" is empty, default is empty. The root superuser password
+          mysql user: 'user' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
+          mysql password: 'password' # Required if "mysql user" exists. The password for the "mysql user"
+
+      - name: Install MySQL Client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
 
       # https://github.com/shivammathur/setup-php (community)
       - name: Setup PHP, extensions and composer with shivammathur/setup-php
         uses: shivammathur/setup-php@verbose
         with:
           php-version: ${{ matrix.php-versions }}
-          tools: composer:2.2.17
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, iconv, json, mbstring, pdo
+          tools: composer:2.2
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
       # Composer
       - name: Get composer cache directory
         id: composer-cache
-        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_ENV
 
-        # https://help.github.com/en/actions/configuring-and-managing-workflows/caching-dependencies-to-speed-up-workflows
       - name: Cache composer dependencies
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         with:
-          path: ${{ steps.composer-cache.outputs.dir }}
+          path: |
+            ${{ env.dir }}
+            ./vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
-      # PHPStan finds bugs in your code without writing tests
+          # PHPStan finds bugs in your code without writing tests
       # https://github.com/phpstan/phpstan
       - name: Run PHPStan code scan
         run: vendor/bin/phpstan analyse src
 
+      # Create database
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+
       # Tests
       - name: Run unit and functional tests
         run: |
-          php ./vendor/bin/phpunit
+          php ./vendor/bin/phpunit --configuration phpunit.xml.dist
