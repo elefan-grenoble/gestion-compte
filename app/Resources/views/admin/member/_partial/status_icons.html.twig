@@ -1,0 +1,14 @@
+{% if member.withdrawn %}
+    <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
+{% elseif not member | uptodate %}
+    <i class="material-icons" title="Compte en attente d'adhésion">{{ member_registration_missing_material_icon }}</i>
+{% endif %}
+{% if member.frozen %}
+    <i class="material-icons" title="Compte gelé">{{ member_frozen_material_icon }}</i>
+{% endif %}
+{% if member.isCurrentlyExemptedFromShifts() %}
+    <i class="material-icons" title="Compte exempté">{{ member_exempted_material_icon }}</i>
+{% endif %}
+{% if member.mainBeneficiary and not member.mainBeneficiary.user.isEnabled %}
+    <i class="material-icons" title="Compte pas encore activé">{{ user_account_not_enabled_material_icon }}</i>
+{% endif %}
