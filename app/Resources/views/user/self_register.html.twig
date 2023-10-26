@@ -1,18 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-{% endblock %}
-
-{% block aftercontainer %}
-    <div class="center-align solo-logo">
-        <a href="https://www.helloasso.com" target="_blank">
-            {% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
-            <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
-            {% endimage %}
-        </a>
-    </div>
-{% endblock %}
-
 {% block content %}
     {% set re = (app.user.beneficiary.membership.registrations | length) > 0 %}
     <div class="section">
@@ -32,5 +19,15 @@
             Si tu as la moindre question, contacte-nous en amont !
             </p>
         </div>
+    </div>
+{% endblock %}
+
+{% block aftercontainer %}
+    <div class="center-align solo-logo">
+        <a href="https://www.helloasso.com" target="_blank">
+            {% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
+            <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
+            {% endimage %}
+        </a>
     </div>
 {% endblock %}

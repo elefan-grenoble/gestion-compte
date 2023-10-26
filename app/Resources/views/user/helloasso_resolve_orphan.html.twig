@@ -1,13 +1,5 @@
 {% extends 'layoutlight.html.twig' %}
 
-{% block aftercontainer %}
-    <div class="center-align solo-logo">
-        <a href="https://www.helloasso.com" target="_blank">{% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
-                <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
-            {% endimage %}</a>
-    </div>
-{% endblock %}
-
 {% block content %}
     <h4>Confirmer une ré-adhésion via helloasso</h4>
 
@@ -32,5 +24,12 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block aftercontainer %}
+    <div class="center-align solo-logo">
+        <a href="https://www.helloasso.com" target="_blank">{% image '@AppBundle/Resources/public/img/Helloasso-logo.png' %}
+                <img class="responsive-img" src="{{ asset_url }}" alt="helloasso.org" height="50px"/>
+            {% endimage %}</a>
+    </div>
 {% endblock %}

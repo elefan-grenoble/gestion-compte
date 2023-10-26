@@ -10,6 +10,8 @@ parameters:
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
+  github_repo_url: 'elefan-grenoble/gestion-compte'
+  github_current_release: 'v1.45.5'
 
 framework:
   translator: { fallbacks: ['%locale%'] }
@@ -48,6 +50,8 @@ twig:
     project_name: "%project_name%"
     project_url: "%project_url%"
     project_url_display: "%project_url_display%"
+    github_repo_url: "%github_repo_url%"
+    github_current_release: "%github_current_release%"
     helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
     due_duration_by_cycle: '%due_duration_by_cycle%'
     cycle_type: '%cycle_type%'

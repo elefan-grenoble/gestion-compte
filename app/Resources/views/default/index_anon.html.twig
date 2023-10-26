@@ -1,19 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-{% endblock %}
-
-{% block aftercontainer %}
-<div class="center-align">
-    {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
-    {% endimage %}
-</div>
-{% endblock %}
-
 {% block content %}
-<br />
-<br />
 <h3 class="header center orange-text">Mon compte à {{ project_name }}</h3>
 <div class="row center">
     <p class="col s12 light">Bienvenue sur l'espace membre</p>
@@ -31,7 +18,12 @@
 {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay, display_names: false } %}
 {% endblock %}
 
-{% block stylesheets %}
+{% block aftercontainer %}
+<div class="center-align">
+    {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
+        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
+    {% endimage %}
+</div>
 {% endblock %}
 
 {% block javascripts %}

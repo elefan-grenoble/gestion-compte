@@ -1,16 +1,5 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-{% endblock %}
-
-{% block aftercontainer %}
-<div class="center-align">
-    {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
-        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
-    {% endimage %}
-</div>
-{% endblock %}
-
 {% block content %}
 <div id="home-annoucemements-top" class="center">
     {{ dynamicContentTop | markdown | raw }}
@@ -217,8 +206,10 @@
 </div>
 {% endblock %}
 
-{% block stylesheets %}
-{% endblock %}
-
-{% block javascripts %}
+{% block aftercontainer %}
+<div class="center-align">
+    {% image '@AppBundle/Resources/public/img/cute-elefan.png' %}
+        <img class="responsive-img" src="{{ asset_url }}" alt="elefan" />
+    {% endimage %}
+</div>
 {% endblock %}
