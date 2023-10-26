@@ -10,23 +10,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
-/**
- * @Annotation
- */
 class BeneficiaryCanHostValidator extends ConstraintValidator
 {
-    private $maximum_nb_of_beneficiaries_in_membership;
     private $container;
-
-    /**
-     * @var MembershipService
-     */
+    private $maximum_nb_of_beneficiaries_in_membership;
     private $memberService;
 
     public function __construct(ContainerInterface $container, $maximum_nb_of_beneficiaries_in_membership)
     {
-        $this->maximum_nb_of_beneficiaries_in_membership = $maximum_nb_of_beneficiaries_in_membership;
         $this->container = $container;
+        $this->maximum_nb_of_beneficiaries_in_membership = $maximum_nb_of_beneficiaries_in_membership;
         $this->memberService = $container->get("membership_service");
     }
 

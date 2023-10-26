@@ -51,16 +51,18 @@
                             </div>
                             <div class="col s4">
                                 <div class="input-field">
-                                    {{ form_widget(form.beneficiary_count) }}
-                                    {{ form_label(form.beneficiary_count) }}
-                                </div>
-                            </div>
-                            <div class="col s4">
-                                <div class="input-field">
                                     {{ form_widget(form.has_first_shift_date) }}
                                     {{ form_label(form.has_first_shift_date) }}
                                 </div>
                             </div>
+                            {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                                <div class="col s4">
+                                    <div class="input-field">
+                                        {{ form_widget(form.beneficiary_count) }}
+                                        {{ form_label(form.beneficiary_count) }}
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                         <div class="row">
                             <div class="col s3">

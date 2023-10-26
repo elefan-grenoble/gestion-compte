@@ -21,12 +21,12 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SearchUserFormHelper
 {
     private $container;
-    private $use_fly_and_fixed;
 
-    public function __construct(ContainerInterface $container, $use_fly_and_fixed)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->use_fly_and_fixed = $this->container->getParameter('use_fly_and_fixed');
+        $this->maximum_nb_of_beneficiaries_in_membership = $this->container->getParameter('maximum_nb_of_beneficiaries_in_membership');
     }
 
     public function getSearchForm($formBuilder, $type = null, $disabledFields = []) {
@@ -65,14 +65,16 @@ class SearchUserFormHelper
                     'Non exempté' => 1,
                 ]
             ]);
-            $formBuilder->add('beneficiary_count', ChoiceType::class, [
-                'label' => 'nb de bénéficiaires',
-                'required' => false,
-                'choices' => [  // TODO: make dynamic depending on maximum_nb_of_beneficiaries_in_membership
-                    '1' => 2,
-                    '2' => 3,
-                ]
-            ]);
+            if ($this->maximum_nb_of_beneficiaries_in_membership > 1) {
+                $formBuilder->add('beneficiary_count', ChoiceType::class, [
+                    'label' => 'nb de bénéficiaires',
+                    'required' => false,
+                    'choices' => [  // TODO: make dynamic depending on maximum_nb_of_beneficiaries_in_membership
+                        '1' => 2,
+                        '2' => 3,
+                    ]
+                ]);
+            }
             $formBuilder->add('has_first_shift_date', ChoiceType::class, [
                 'label' => 'créneau inscrit',
                 'required' => false,
@@ -501,9 +503,11 @@ class SearchUserFormHelper
                     ->setParameter('date', $now);
             }
         }
-        if ($form->get('beneficiary_count')->getData() > 0) {
-            $qb = $qb->andWhere('SIZE(m.beneficiaries) = :beneficiary_count')
-                ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
+        if ($this->maximum_nb_of_beneficiaries_in_membership > 1) {
+            if ($form->get('beneficiary_count')->getData() > 0) {
+                $qb = $qb->andWhere('SIZE(m.beneficiaries) = :beneficiary_count')
+                    ->setParameter('beneficiary_count', $form->get('beneficiary_count')->getData()-1);
+            }
         }
         if ($form->get('has_first_shift_date')->getData() > 0) {
             if ($form->get('has_first_shift_date')->getData() == 2) {
