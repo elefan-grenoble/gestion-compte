@@ -13,19 +13,19 @@ use Symfony\Component\Validator\ConstraintValidator;
 class BeneficiaryCanHostValidator extends ConstraintValidator
 {
     private $container;
-    private $maximum_nb_of_beneficiaries_in_membership;
     private $memberService;
+    private $maximum_nb_of_beneficiaries_in_membership;
 
-    public function __construct(ContainerInterface $container, $maximum_nb_of_beneficiaries_in_membership)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->maximum_nb_of_beneficiaries_in_membership = $maximum_nb_of_beneficiaries_in_membership;
         $this->memberService = $container->get("membership_service");
+        $this->maximum_nb_of_beneficiaries_in_membership = $this->container->getParameter('maximum_nb_of_beneficiaries_in_membership');
     }
 
     public function validate($value, Constraint $constraint)
     {
-        if ($value === null){
+        if ($value === null) {
             return;
         }
         if (!$value->getMembership()) {

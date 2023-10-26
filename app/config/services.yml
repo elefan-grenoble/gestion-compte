@@ -195,7 +195,6 @@ services:
         class: AppBundle\Validator\Constraints\BeneficiaryCanHostValidator
         arguments:
             $container: "@service_container"
-            $maximum_nb_of_beneficiaries_in_membership: "%maximum_nb_of_beneficiaries_in_membership%"
 
     # services
     shift_service:

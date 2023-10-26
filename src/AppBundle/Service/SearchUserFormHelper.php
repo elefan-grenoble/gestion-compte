@@ -21,6 +21,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SearchUserFormHelper
 {
     private $container;
+    private $use_fly_and_fixed;
+    private $maximum_nb_of_beneficiaries_in_membership;
 
     public function __construct(ContainerInterface $container)
     {
