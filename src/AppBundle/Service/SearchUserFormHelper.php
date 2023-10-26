@@ -360,12 +360,10 @@ class SearchUserFormHelper
             ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("m.registrations", "r")->addSelect("r")
             ->leftJoin("r.helloassoPayment", "rhp")->addSelect("rhp")
-            ->leftJoin("m.membershipShiftExemptions", "mse")->addSelect("mse");
+            ->leftJoin("m.membershipShiftExemptions", "mse")->addSelect("mse")
+            ->leftJoin("b.commissions", "c")->addSelect("c")
+            ->leftJoin("b.formations", "f")->addSelect("f");
 
-        if ($type == 'search') {
-            $qb->leftJoin("b.commissions", "c")->addSelect("c");
-            $qb->leftJoin("b.formations", "f")->addSelect("f");
-        }
         if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog', 'noperiodposition'])) {
             $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->where('lr.id IS NULL') // registration is the last one registered
@@ -461,14 +459,12 @@ class SearchUserFormHelper
                 $qb = $qb->andWhere('b.flying = :flying')
                     ->setParameter('flying', $form->get('flying')->getData()-1);
             }
-            if ($form->has('has_period_position')) {
-                if ($form->get('has_period_position')->getData() > 0) {
-                    $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
-                    if ($form->get('has_period_position')->getData() == 2) {
-                        $qb = $qb->andWhere('pp.id IS NOT NULL');
-                    } else if ($form->get('has_period_position')->getData() == 1) {
-                        $qb = $qb->andWhere('pp.id IS NULL');
-                    }
+            if ($form->get('has_period_position')->getData() > 0) {
+                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                if ($form->get('has_period_position')->getData() == 2) {
+                    $qb = $qb->andWhere('pp.id IS NOT NULL');
+                } else if ($form->get('has_period_position')->getData() == 1) {
+                    $qb = $qb->andWhere('pp.id IS NULL');
                 }
             }
         }
@@ -638,14 +634,12 @@ class SearchUserFormHelper
                 $qb = $qb->andWhere('b.flying = :flying')
                     ->setParameter('flying', $form->get('flying')->getData()-1);
             }
-            if ($form->has('has_period_position')) {
-                if ($form->get('has_period_position')->getData() > 0) {
-                    $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
-                    if ($form->get('has_period_position')->getData() == 2) {
-                        $qb = $qb->andWhere('pp.id IS NOT NULL');
-                    } else if ($form->get('has_period_position')->getData() == 1) {
-                        $qb = $qb->andWhere('pp.id IS NULL');
-                    }
+            if ($form->get('has_period_position')->getData() > 0) {
+                $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
+                if ($form->get('has_period_position')->getData() == 2) {
+                    $qb = $qb->andWhere('pp.id IS NOT NULL');
+                } else if ($form->get('has_period_position')->getData() == 1) {
+                    $qb = $qb->andWhere('pp.id IS NULL');
                 }
             }
         }

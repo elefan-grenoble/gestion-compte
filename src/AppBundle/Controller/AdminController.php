@@ -84,7 +84,7 @@ class AdminController extends Controller
 
         $action = $form->get('action')->getData();
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'search');
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
 
         if ($form->isSubmitted() && $form->isValid()) {
             $formHelper->processSearchFormData($form, $qb);
