@@ -50,7 +50,7 @@
     <div {% if id is not empty %}id="{{ id }}_chips"{% endif %} class="chips">
     </div>
     <script>
-        defer(function(){
+        defer(function() {
             function updateInput{{ id }}Forms() {
                 var chipsData = M.Chips.getInstance($('#{{ id }}_chips')).chipsData;
                 var list = $('#{{ id }}');
@@ -66,7 +66,7 @@
                         list.children().last().remove();
                     }
                 }
-                chipsData.each(function (index, member) {
+                chipsData.forEach(function (member, index) {
                     $("input[name='{{ full_name }}[" + index + "]']").val(member['tag']);
                 });
             }
