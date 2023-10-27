@@ -4,21 +4,21 @@ namespace AppBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftAlertsEvent extends Event
+class ShiftAlertsMattermostEvent extends Event
 {
-    const NAME = 'shift.alerts';
+    const NAME = 'shift.alerts.mattermost';
 
     private $alerts;
     private $date;
     private $template;
-    private $recipients;
+    private $mattermost_hook_url;
 
-    public function __construct(array $alerts, \DateTime $date, $template = null, $recipients = null)
+    public function __construct(array $alerts, \DateTime $date, $template = null, $mattermost_hook_url = null)
     {
         $this->alerts = $alerts;
         $this->date = $date;
         $this->template = $template;
-        $this->recipients = $recipients;
+        $this->mattermost_hook_url = $mattermost_hook_url;
     }
 
     /**
@@ -46,10 +46,10 @@ class ShiftAlertsEvent extends Event
     }
 
     /**
-     * @return array|null
+     * @return string|null
      */
-    public function getRecipients()
+    public function getMattermostHookUrl()
     {
-        return $this->recipients;
+        return $this->mattermost_hook_url;
     }
 }

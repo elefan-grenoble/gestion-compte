@@ -167,6 +167,7 @@ services:
             - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
             - { name: kernel.event_listener, event: shift.reminder, method: onShiftReminder }
             - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+            - { name: kernel.event_listener, event: shift.alerts, method: onShiftAlerts }
             - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
             - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
             - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
@@ -185,7 +186,7 @@ services:
             $container: "@service_container"
             $mailer: "@mailer"
         tags:
-            - { name: kernel.event_listener, event: shift.alerts, method: onShiftAlerts }
+            - { name: kernel.event_listener, event: shift.alerts.mattermost, method: onShiftAlerts }
 
     # subscribers
     beneficiary_initialization_subscriber:

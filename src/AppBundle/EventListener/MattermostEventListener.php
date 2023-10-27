@@ -2,7 +2,7 @@
 
 namespace AppBundle\EventListener;
 
-use AppBundle\Event\ShiftAlertsEvent;
+use AppBundle\Event\ShiftAlertsMattermostEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Swift_Mailer;
@@ -25,19 +25,19 @@ class MattermostEventListener
     }
 
     /**
-     * @param ShiftAlertsEvent $event
+     * @param ShiftAlertsMattermostEvent $event
      * @throws \Exception
      */
-    public function onShiftAlerts(ShiftAlertsEvent $event)
+    public function onShiftAlerts(ShiftAlertsMattermostEvent $event)
     {
         $this->logger->info("Mattermost Listener: onShiftAlerts");
 
         $alerts = $event->getAlerts();
         $date = $event->getDate();
 
-        if ($event->getMattermostHookUrl()) {
+        if ($alerts && $event->getMattermostHookUrl()) {
             $template = null;
-            $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode($event->getEmailTemplate());
+            $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode($event->getTemplate());
             if ($dynamicContent) {
                 $template = $this->container->get('twig')->createTemplate($dynamicContent->getContent());
             } else {
