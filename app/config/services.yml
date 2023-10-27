@@ -167,6 +167,7 @@ services:
             - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
             - { name: kernel.event_listener, event: shift.reminder, method: onShiftReminder }
             - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+            - { name: kernel.event_listener, event: shift.alerts, method: onShiftAlerts }
             - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
             - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
             - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
@@ -177,6 +178,14 @@ services:
             - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
             - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
             - { name: kernel.event_listener, event: code.new, method: onCodeNew }
+    mattermost_event_listener:
+        class: AppBundle\EventListener\MattermostEventListener
+        arguments:
+            $entityManager: "@doctrine.orm.entity_manager"
+            $logger: "@logger"
+            $container: "@service_container"
+        tags:
+            - { name: kernel.event_listener, event: shift.alerts.mattermost, method: onShiftAlerts }
 
     # subscribers
     beneficiary_initialization_subscriber:

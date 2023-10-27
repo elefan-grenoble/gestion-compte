@@ -12,6 +12,7 @@ use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\Event\MemberCycleEndEvent;
 use AppBundle\Event\MemberCycleHalfEvent;
 use AppBundle\Event\MemberCycleStartEvent;
+use AppBundle\Event\ShiftAlertsEvent;
 use AppBundle\Event\ShiftReservedEvent;
 use AppBundle\Event\ShiftBookedEvent;
 use AppBundle\Event\ShiftFreedEvent;
@@ -438,6 +439,45 @@ class EmailingEventListener
                             'shift' => $shift,
                             'beneficiary' => $beneficiary
                         )
+                    ),
+                    'text/html'
+                );
+
+            $this->mailer->send($email);
+        }
+    }
+
+    /**
+     * @param ShiftAlertsEvent $event
+     * @throws \Exception
+     */
+    public function onShiftAlerts(ShiftAlertsEvent $event)
+    {
+        $this->logger->info("Emailing Listener: onShiftAlerts");
+
+        $alerts = $event->getAlerts();
+        $date = $event->getDate();
+        $recipients = $event->getRecipients();
+        
+        if ($alerts && $recipients) {
+            $emailObject = '[ALERTE CRENEAUX] ' . strftime("%A %e %B", $date->getTimestamp());
+            $emailTo = $recipients;
+
+            $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode($event->getTemplate());
+            $template = null;
+            if ($dynamicContent) {
+                $template = $this->container->get('twig')->createTemplate($dynamicContent->getContent());
+            } else {
+                $template = 'emails/shift_alerts_default.html.twig';
+            }
+
+            $email = (new \Swift_Message($emailObject))
+                ->setFrom($this->shift_email['address'], $this->shift_email['from_name'])
+                ->setTo($emailTo)
+                ->setBody(
+                    $this->container->get('twig')->render(
+                        $template,
+                        array('alerts' => $alerts, 'date' => $date)
                     ),
                     'text/html'
                 );
