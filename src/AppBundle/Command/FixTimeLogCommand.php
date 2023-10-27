@@ -22,9 +22,10 @@ class FixTimeLogCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $countShiftLogs = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $members = $em->getRepository('AppBundle:Membership')->findAll();
+
+        $countShiftLogs = 0;
 
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
