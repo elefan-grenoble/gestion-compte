@@ -11,7 +11,6 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
-use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;

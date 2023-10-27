@@ -7,6 +7,21 @@
     {% if beneficiary.isMain and maximum_nb_of_beneficiaries_in_membership > 1 %}
         <span class="badge main-color white-text">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
+    {% if use_fly_and_fixed %}
+        {% if fly_and_fixed_entity_flying == 'Membership' %}
+            {% if beneficiary.membership.flying %}
+                <span class="badge teal white-text">{{ member_flying_icon }} Compte volant</span>
+            {% else %}
+                <span class="badge main-color white-text">Compte fixe</span>
+            {% endif %}
+        {% else %}
+            {% if beneficiary.flying %}
+                <span class="badge teal white-text">{{ beneficiary_flying_icon }} Equipe volante</span>
+            {% else %}
+                <span class="badge main-color white-text">Equipe fixe</span>
+            {% endif %}
+        {% endif %}
+    {% endif %}
     {% if beneficiary.membership.withdrawn %}
         <span class="badge red white-text">{{ member_withdrawn_icon }} fermé</span>
     {% endif %}
@@ -61,16 +76,6 @@
             {% endif %})
         {% endif %}
     </div>
-    {% if use_fly_and_fixed %}
-        <div class="col s12">
-            <i class="material-icons tiny">accessibility</i>
-            {% if beneficiary.flying %}
-                <div class="chip green-text">Equipe volante</div>
-            {% else %}
-                <div class="chip green-text">Equipe fixe</div>
-            {% endif %}
-        </div>
-    {% endif %}
     {% if beneficiary.formations | length %}
         <div class="col s12">
             <i class="material-icons tiny">assignment_ind</i>

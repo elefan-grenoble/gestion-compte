@@ -16,14 +16,18 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class BeneficiaryService
 {
     private $container;
-    protected $em;
+    private $em;
     private $membershipService;
+    private $use_fly_and_fixed;
+    private $fly_and_fixed_entity_flying;
 
     public function __construct(ContainerInterface $container, EntityManagerInterface $em, MembershipService $membershipService)
     {
         $this->container = $container;
         $this->em = $em;
         $this->membershipService = $membershipService;
+        $this->use_fly_and_fixed = $this->container->getParameter('use_fly_and_fixed');
+        $this->fly_and_fixed_entity_flying = $this->container->getParameter('fly_and_fixed_entity_flying');
     }
 
     /**
@@ -71,7 +75,7 @@ class BeneficiaryService
     {
         $hasWarningStatus = $this->membershipService->hasWarningStatus($beneficiary->getMembership());
 
-        if ($this->container->getParameter('use_fly_and_fixed')) {
+        if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {
             $hasWarningStatus = $hasWarningStatus || $beneficiary->isFlying();
         }
         
@@ -96,8 +100,13 @@ class BeneficiaryService
         if ($beneficiary->getMembership()->getFrozen()) {
             $symbols[] = $this->container->getParameter('member_frozen_icon');
         }
-        if ($beneficiary->isFlying()) {
-            $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
+        if ($this->use_fly_and_fixed) {
+            if ($this->fly_and_fixed_entity_flying == 'Beneficiary' && $beneficiary->isFlying()) {
+                $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
+            }
+            if ($this->fly_and_fixed_entity_flying == 'Membership' && $beneficiary->getMembership()->isFlying()) {
+                $symbols[] = $this->container->getParameter('member_flying_icon');;
+            }
         }
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
             $symbols[] = $this->container->getParameter('member_exempted_icon');

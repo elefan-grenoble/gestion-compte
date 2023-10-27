@@ -204,7 +204,11 @@
                                             <li>{{ member_frozen_icon }} Membre gelé</li>
                                             <li>{{ member_exempted_icon }} Membre exempté de créneaux</li>
                                             <li>{{ member_registration_missing_icon }} Membre avec une adhésion expirée</li>
-                                            <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
+                                            {% if fly_and_fixed_entity_flying == 'Membership' %}
+                                                <li>{{ beneficiary_flying_icon }} Membre avec un statut "volant"</li>
+                                            {% else %}
+                                                <li>{{ beneficiary_flying_icon }} Bénéficiaire avec un statut "volant"</li>
+                                            {% endif %}
                                         </ul>
                                     </td>
                                 </tr>
