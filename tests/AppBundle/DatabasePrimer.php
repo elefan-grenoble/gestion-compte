@@ -2,13 +2,18 @@
 
 namespace Tests\AppBundle;
 
-use Doctrine\ORM\EntityManager;
+use AppBundle\DataFixtures\Purger\CustomPurger;
+use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\DBAL\Exception;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 
 class DatabasePrimer extends WebTestCase
 {
+    /**
+     * @throws Exception
+     */
     public static function setUpBeforeClass(): void
     {
         $client = static::createClient();
@@ -17,20 +22,36 @@ class DatabasePrimer extends WebTestCase
         $entityManager = $container->get('doctrine')->getManager();
 
         // Purge the database to start fresh
-        $purger = new ORMPurger($entityManager);
+        $purger = new CustomPurger($entityManager);
         $purger->purge();
+    }
 
-        // now re-run the fixture loading command,
-        // or call the service that loads your fixtures
+    /**
+     * @throws \Exception
+     */
+    public function loadFixturesWithGroups(array $group = null): void
+    {
+
+        $client = static::createClient();
+
+        // re-run the fixture loading command
         $application = new Application($client->getKernel());
         $application->setAutoExit(false);
 
-        $input = new ArrayInput([
+        $inputArray = [
             'command' => 'doctrine:fixtures:load',
             '--no-interaction' => true,
-            '--quiet' => true
-        ]);
+            '--quiet' => true,
+        ];
+
+        if ($group) {
+            $inputArray['--group'] = $group;
+        }
+
+        $input = new ArrayInput($inputArray);
+
         $application->run($input);
+
     }
 }
 

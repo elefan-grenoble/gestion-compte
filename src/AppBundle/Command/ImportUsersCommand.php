@@ -64,7 +64,7 @@ class ImportUsersCommand extends CsvCommand
             'email' => array('label' => 'Email','index'=>8),
             'commissions' => array('label' => 'Commission (liste id)',
                 'tips'=>'Liste d\'id de commissions, séparé par des virgules. ex: 1,5,7',
-                "required" => false,"default" =>''),
+                "required" => false,"default" =>'', 'index'=>9),
             'add_to' => array('label' => 'Email du compte associé','index'=>10,"required" => false,"default" =>''),
             'date' => array('label' => 'Date inscription',
                 'tips'=>'Au format d/m/Y ex: 13/12/2018',

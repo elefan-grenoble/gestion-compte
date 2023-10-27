@@ -8,10 +8,11 @@ use AppBundle\Entity\Client;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 
-class ClientFixtures extends Fixture implements FixtureGroupInterface, DependentFixtureInterface
+class ClientFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
 
     public function load(ObjectManager $manager)
@@ -44,11 +45,9 @@ class ClientFixtures extends Fixture implements FixtureGroupInterface, Dependent
         return ['period'];
     }
 
-    public function getDependencies(): array
+    public function getOrder(): int
     {
-        return [
-            ServiceFixtures::class,
-        ];
+        return 7;
     }
 
 }

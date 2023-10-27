@@ -6,10 +6,10 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Beneficiary;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class BeneficiaryFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     public function load(ObjectManager $manager)
@@ -113,16 +113,14 @@ class BeneficiaryFixtures extends Fixture implements DependentFixtureInterface, 
         echo $beneficiaryCount." beneficiaries created\n";
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            UserFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder()
+    {
+        return 6;
     }
 
 }

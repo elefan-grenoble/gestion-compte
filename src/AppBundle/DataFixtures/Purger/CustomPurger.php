@@ -25,7 +25,7 @@ class CustomPurger extends ORMPurger
      */
     public function purge(): void
     {
-        echo "Purging database expect tables: " . implode(", ", $this->excludedTables) . "\n";
+        echo "\n Purging database expect tables: " . implode(", ", $this->excludedTables) . "\n";
 
         $conn = $this->entityManager->getConnection();
         $sm = $conn->getSchemaManager();

@@ -7,11 +7,11 @@ use AppBundle\Entity\Registration;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class RegistrationFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class RegistrationFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     /**
@@ -65,15 +65,13 @@ class RegistrationFixtures extends Fixture implements DependentFixtureInterface,
         echo $registrationCount . " registrations created\n";
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            BeneficiaryFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 14;
     }
 }
