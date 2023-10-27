@@ -18,6 +18,10 @@ services:
 
   php:
     container_name: php
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     build:
       context: .
     command: >
@@ -28,6 +32,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    restart: always
     depends_on:
       - database
       - mailcatcher

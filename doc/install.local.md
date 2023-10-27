@@ -27,7 +27,16 @@ Pour créer l'utilisateur super admin, visiter :
 Vous pouvez vous connecter avec l'utilisateur super admin :
 **admin** / **password**.
 
+### Remplir la base de donnée avec des données fictives
 
+```bash
+docker compose exec php php bin/console doctrine:fixtures:load -n
+```
+Le groupe de fixtures "period" omet les données de la table **shift**, utile pour tester la génération des shifts à partir des périodes. 
+
+```bash
+docker compose exec php php bin/console doctrine:fixtures:load -n --group=period
+```
 
 ### Importer un dump de la base de données
 
