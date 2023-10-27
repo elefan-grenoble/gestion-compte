@@ -71,6 +71,13 @@ class Membership
     private $frozen_change;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="flying", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $flying;
+
+    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="membership",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -117,17 +124,17 @@ class Membership
     private $timeLogs;
 
     /**
+     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership", cascade={"persist", "remove"})
+     * @OrderBy({"createdAt" = "DESC"})
+     */
+    private $membershipShiftExemptions;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
-
-    /**
-     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership", cascade={"persist", "remove"})
-     * @OrderBy({"createdAt" = "DESC"})
-     */
-    private $membershipShiftExemptions;
 
     /**
      * Membership constructor.
@@ -487,6 +494,20 @@ class Membership
     public function getFrozenChange()
     {
         return $this->frozen_change;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFlying(): ?bool {
+        return $this->flying;
+    }
+
+    /**
+     * @param bool $flying
+     */
+    public function setFlying(?bool $flying): void {
+        $this->flying = $flying;
     }
 
     /**
