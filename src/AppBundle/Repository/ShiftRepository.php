@@ -19,7 +19,6 @@ use \Datetime;
  */
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
-
     public function findBucket($shift)
     {
         $qb = $this->createQueryBuilder('s');
@@ -93,6 +92,32 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         return $this->findFrom($now, $max, $job, $withShifters);
     }
 
+    public function findInProgress()
+    {
+        $now = new \DateTime('now');
+
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->where('s.shifter is not null')
+            ->andWhere(':date between s.start and s.end')
+            ->setParameter('date', $now)
+            ->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findUpcomingToday()
+    {
+        $now = new \DateTime('now');
+        $end_of_day = new \DateTime('now');
+        $end_of_day->setTime(23, 59, 59);
+
+        return $this->findFrom($now, $end_of_day);
+    }
+
     /**
      * @param $user
      * @return mixed
@@ -144,8 +169,8 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->where('s.start < :max')
-            ->andWhere('s.lastShifter is not null')
+            ->where('s.lastShifter is not null')
+            ->andWhere('s.start < :max')
             ->setParameter('max', $max);
 
         return $qb
@@ -161,9 +186,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $datePlusOne->modify('+1 day');
 
         $qb
-            ->where('s.start >= :date')
+            ->where('s.lastShifter is not null')
+            ->andWhere('s.start >= :date')
             ->andwhere('s.start < :datePlusOne')
-            ->andWhere('s.lastShifter is not null')
             ->setParameter('date', $date)
             ->setParameter('datePlusOne', $datePlusOne);
 
@@ -229,57 +254,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findInProgress()
-    {
-        $now = new \DateTime('now');
-
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->where('s.shifter is not null')
-            ->andwhere(':date between s.start and s.end')
-            ->setParameter('date', $now)
-            ->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findUpcomingToday()
-    {
-        $now = new \DateTime('now');
-        $end_of_day = new \DateTime('now');
-        $end_of_day->setTime(23, 59, 59);
-
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->andwhere('s.start > :now AND s.end < :end_of_day')
-            ->setParameter('now', $now)
-            ->setParameter('end_of_day', $end_of_day)
-            ->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function getOngoingShifts($beneficiary)
-    {
-        $qb = $this->createQueryBuilder('s')
-            ->where('s.end > :now')
-            ->andwhere('s.start < :now_plus_ten')
-            ->andwhere('s.shifter = :sid')
-            ->setParameter('now', new \Datetime('now'))
-            ->setParameter('now_plus_ten', new \Datetime('now +10 minutes'))
-            ->setParameter('sid', $beneficiary->getId());
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
     public function getYears()
     {
         $qb = $this->createQueryBuilder('s')
@@ -300,7 +274,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findShiftsByCycles($membership, $start_after, $end_before)
     {
-        $shifts = $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before);
+        $shifts = $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $start_after, $end_before);
         $now = new DateTime('now');
         $now->setTime(0, 0, 0);
         // Compute the cycle number corresponding to the $start_after date
@@ -333,7 +307,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
     public function findInProgressAndUpcomingShiftsForMembership($membership)
     {
         $now = new \Datetime('now');
-        return $this->findShifts($membership->getBeneficiaries(), $now, null);
+        return $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $now, null);
     }
 
     /**
@@ -344,7 +318,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findShiftsForMembership(Membership $membership, $start_after, $end_before)
     {
-        return $this->findShifts($membership->getBeneficiaries(), $start_after, $end_before);
+        return $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $start_after, $end_before);
     }
 
     /**
@@ -357,16 +331,19 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $start_before = null, $end_after = null)
     {
-        return $this->findShifts([$beneficiary], $start_after, $end_before, $start_before, $end_after);
+        return $this->findShiftsForBeneficiaries([$beneficiary], $start_after, $end_before, $start_before, $end_after);
     }
 
-    private function findShifts($beneficiaries, $start_after, $end_before, $start_before = null, $end_after = null)
+    public function findShiftsForBeneficiaries($beneficiaries, $start_after = null, $end_before = null, $start_before = null, $end_after = null)
     {
         $qb = $this->createQueryBuilder('s')
             ->where('s.shifter IN (:beneficiaries)')
-            ->andwhere('s.start > :start_after')
-            ->setParameter('beneficiaries', $beneficiaries)
+            ->setParameter('beneficiaries', $beneficiaries);
+
+        if ($start_after != null) {
+            $qb->andwhere('s.start > :start_after')
             ->setParameter('start_after', $start_after);
+        }
 
         if ($end_before != null) {
             $qb->andwhere('s.end < :end_before')

@@ -85,7 +85,9 @@ class CardReaderController extends Controller
         $member = $beneficiary->getMembership();
 
         // validate beneficiary ongoing shift(s)
-        $ongoingShifts = $em->getRepository('AppBundle:Shift')->getOngoingShifts($beneficiary);
+        $now = new \Datetime('now');
+        $now_plus_ten = new \Datetime('now +10 minutes');
+        $ongoingShifts = $em->getRepository('AppBundle:Shift')->findShiftsForBeneficiaries([$beneficiary], null, null, $now_plus_ten, $now);
         $ongoingShiftsValidated = 0;
         if ($ongoingShifts) {
             foreach ($ongoingShifts as $shift) {
