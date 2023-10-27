@@ -238,7 +238,7 @@
                             <td>
                                 {% for period in periods_by_day[key] %}
                                     {% if ((filling_filter == null) and (beneficiary_filter == null))
-                                        or (filling_filter == "problematic" and period.isProblematic(week_filter))
+                                        or (filling_filter == "problematic" and period_service.hasWarningStatus(period, week_filter))
                                         or (filling_filter == "empty" and period.isEmpty(week_filter))
                                         or (filling_filter == "full" and period.isFull(week_filter))
                                         or (filling_filter == "partial" and period.isPartial(week_filter))
