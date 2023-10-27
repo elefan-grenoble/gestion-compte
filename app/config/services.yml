@@ -184,7 +184,6 @@ services:
             $entityManager: "@doctrine.orm.entity_manager"
             $logger: "@logger"
             $container: "@service_container"
-            $mailer: "@mailer"
         tags:
             - { name: kernel.event_listener, event: shift.alerts.mattermost, method: onShiftAlerts }
 

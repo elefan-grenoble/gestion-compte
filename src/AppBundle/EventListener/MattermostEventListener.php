@@ -5,7 +5,6 @@ namespace AppBundle\EventListener;
 use AppBundle\Event\ShiftAlertsMattermostEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
-use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\HttpClient\HttpClient;
 
@@ -14,14 +13,12 @@ class MattermostEventListener
     protected $em;
     protected $logger;
     protected $container;
-    protected $mailer;
 
-    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Swift_Mailer $mailer)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
-        $this->mailer = $mailer;
     }
 
     /**
