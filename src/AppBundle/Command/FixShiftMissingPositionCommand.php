@@ -7,12 +7,12 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FixShiftPositionCommand extends ContainerAwareCommand
+class FixShiftMissingPositionCommand extends ContainerAwareCommand
 {
     protected function configure()
     {
         $this
-            ->setName('app:user:fix_shift_position')
+            ->setName('app:shift:fix_missing_position')
             ->setDescription('Fix shifts without position (find and attach corresponding position)')
             ->setHelp('This command allows you to fix missing shift position data (most likely deleted by the migration Version20211223205749')
             ->addOption('dry_run', null, InputOption::VALUE_NONE, 'Dry run');
