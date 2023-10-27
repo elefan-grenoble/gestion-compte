@@ -7,6 +7,13 @@
 * docker
 * docker-compose
 
+
+### Créer les conteneurs
+
+```shell
+docker-compose build
+``` 
+
 ### Lancer l'instance
 
 Lancer le docker-compose pour deployer un conteneur de base de données (mariadb) et un conteneur symfony
