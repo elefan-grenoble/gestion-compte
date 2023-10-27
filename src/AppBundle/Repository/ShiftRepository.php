@@ -99,8 +99,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->where('s.shifter is not null')
-            ->andWhere(':date between s.start and s.end')
+            ->where(':date between s.start and s.end')
             ->setParameter('date', $now)
             ->orderBy('s.start', 'ASC');
 
