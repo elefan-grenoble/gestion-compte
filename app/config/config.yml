@@ -87,6 +87,8 @@ twig:
     member_exempted_icon: '%member_exempted_icon%'
     member_exempted_material_icon: '%member_exempted_material_icon%'
     member_exempted_background_color: '%member_exempted_background_color%'
+    member_flying_icon: '%member_flying_icon%'
+    member_flying_material_icon: '%member_flying_material_icon%'
     member_registration_missing_icon: '%member_registration_missing_icon%'
     member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
     member_registration_missing_background_color: '%member_registration_missing_background_color%'
@@ -105,6 +107,7 @@ twig:
     display_name_shifters: '%display_name_shifters%'
     use_card_reader_to_validate_shifts: '%use_card_reader_to_validate_shifts%'
     # fly and fixed
+    fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
     fly_and_fixed_allow_fixed_shift_free: '%fly_and_fixed_allow_fixed_shift_free%'
     # time log saving
     time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
