@@ -5,13 +5,13 @@
 ### Prérequis
 
 * docker
-* docker-compose
+* docker compose
 
 
 ### Créer les conteneurs
 
 ```shell
-docker-compose build
+docker compose build
 ``` 
 
 ### Lancer l'instance
@@ -19,7 +19,7 @@ docker-compose build
 Lancer le docker-compose pour deployer un conteneur de base de données (mariadb) et un conteneur symfony
 
 ```shell
-docker-compose up
+docker compose up
 ```
 
 Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
