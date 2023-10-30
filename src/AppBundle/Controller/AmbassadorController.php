@@ -77,7 +77,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "sans adhésion",
+            'reason' => "Liste des membres sans adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -137,7 +137,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "en retard de ré-adhésion",
+            'reason' => "Liste des membres en retard de ré-adhésion",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -189,7 +189,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "en retard de créneaux",
+            'reason' => "Liste des membres en retard de créneaux",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
@@ -200,13 +200,14 @@ class AmbassadorController extends Controller
 
     /**
      * List all beneficiaries "fixe" without periodposition
+     * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'
      *
-     * @Route("/noperiodposition", name="ambassador_noperiodposition_list", methods={"GET","POST"})
+     * @Route("/beneficiary_fixe_without_periodposition", name="ambassador_beneficiary_fixe_without_periodposition_list", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
-    public function beneficiaryFixeNoPeriodPosition(Request $request, SearchUserFormHelper $formHelper)
+    public function beneficiaryFixeWithoutPeriodPosition(Request $request, SearchUserFormHelper $formHelper)
     {
         $defaults = [
             'withdrawn' => 1,
@@ -219,10 +220,10 @@ class AmbassadorController extends Controller
         ];
         $disabledFields = ['withdrawn', 'registration', 'flying', 'has_period_position'];
 
-        $form = $formHelper->createBeneficiaryFixeNoPeriodPositionForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form = $formHelper->createBeneficiaryFixeWithoutPeriodPositionForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'noperiodposition');
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'fixe_without_periodposition');
         $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
 
         $sort = $form->get('sort')->getData();
@@ -242,7 +243,7 @@ class AmbassadorController extends Controller
             ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "fixes sans poste fixe",
+            'reason' => "Liste des bénéficiaires fixes sans poste fixe",
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,

@@ -344,8 +344,8 @@ class SearchUserFormHelper
         return $form;
     }
 
-    public function createBeneficiaryFixeNoPeriodPositionForm($formBuilder, $defaults = [], $disabledFields = []) {
-        $form = $this->getSearchForm($formBuilder, 'noperiodposition', $disabledFields);
+    public function createBeneficiaryFixeWithoutPeriodPositionForm($formBuilder, $defaults = [], $disabledFields = []) {
+        $form = $this->getSearchForm($formBuilder, 'fixe_without_periodposition', $disabledFields);
         foreach ($defaults as $k => $v) {
             $form->get($k)->setData($v);
         }
@@ -366,7 +366,7 @@ class SearchUserFormHelper
             ->leftJoin("b.commissions", "c")->addSelect("c")
             ->leftJoin("b.formations", "f")->addSelect("f");
 
-        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog', 'noperiodposition'])) {
+        if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog', 'fixe_without_periodposition'])) {
             $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->where('lr.id IS NULL') // registration is the last one registered
                 ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.type != 20 AND ti.membership = m.id) AS HIDDEN time")

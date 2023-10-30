@@ -48,9 +48,11 @@
                     <i class="material-icons left">phone</i>Relances créneaux
                 </a>
                 {% if use_fly_and_fixed %}
-                    <a href="{{ path('ambassador_noperiodposition_list') }}" class="waves-effect waves-light btn">
-                        <i class="material-icons left">phone</i>Relances postes fixes
-                    </a>
+                    {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
+                        <a href="{{ path('ambassador_beneficiary_fixe_without_periodposition_list') }}" class="waves-effect waves-light btn">
+                            <i class="material-icons left">phone</i>Relances postes fixes
+                        </a>
+                    {% endif %}
                 {% endif %}
             {% endif %}
 
