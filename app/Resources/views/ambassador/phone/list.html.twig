@@ -1,15 +1,15 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Liste des membres {{ reason }} - {{ site_name }}{% endblock %}
+{% block title %}{{ reason }} - {{ site_name }}{% endblock %}
 
 {% block breadcrumbs %}
 <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
 <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
-<i class="material-icons">list</i>&nbsp;Liste des membres {{ reason }}
+<i class="material-icons">list</i>&nbsp;{{ reason }}
 {% endblock %}
 
 {% block content %}
-    <h4>Liste des membres {{ reason }} ({{ result_count }})</h4>
+    <h4>{{ reason }} ({{ result_count }})</h4>
 
     <ul class="collapsible">
         <li>

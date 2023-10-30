@@ -344,7 +344,7 @@ class SearchUserFormHelper
         return $form;
     }
 
-    public function createBeneficiaryFixeNoPeriodPositionForm($formBuilder, $defaults = [], $disabledFields = []) {
+    public function createBeneficiaryFixeWithoutPeriodPositionForm($formBuilder, $defaults = [], $disabledFields = []) {
         $form = $this->getSearchForm($formBuilder, 'noperiodposition', $disabledFields);
         foreach ($defaults as $k => $v) {
             $form->get($k)->setData($v);
