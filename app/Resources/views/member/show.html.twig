@@ -46,6 +46,7 @@
         </ul>
     {% endif %}
 
+    <!-- Collapsible "informations" -->
     <ul class="collapsible collapsible-expandable">
         <!-- Adhésion(s) -->
         <li id="registration">
@@ -131,7 +132,10 @@
                 </div>
             </li>
         {% endif %}
+    </ul>
 
+    <!-- Collapsible "actions" -->
+    <ul class="collapsible collapsible-expandable">
         <!-- Geler/Dégeler le compte -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="freeze">
