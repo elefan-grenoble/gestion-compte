@@ -223,7 +223,7 @@ class AmbassadorController extends Controller
         $form = $formHelper->createBeneficiaryFixeWithoutPeriodPositionForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'noperiodposition');
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'fixe_without_periodposition');
         $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
 
         $sort = $form->get('sort')->getData();
