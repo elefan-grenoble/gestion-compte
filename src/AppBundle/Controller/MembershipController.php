@@ -87,6 +87,7 @@ class MembershipController extends Controller
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
+        $flyingForm = $this->createFlyingForm($member);
         $freezeForm = $this->createFreezeForm($member);
         $unfreezeForm = $this->createUnfreezeForm($member);
         $freezeChangeForm = $this->createFreezeChangeForm($member);
@@ -193,6 +194,7 @@ class MembershipController extends Controller
             'new_beneficiary_form' => $beneficiaryForm->createView(),
             'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'flying_form' => $flyingForm->createView(),
             'freeze_form' => $freezeForm->createView(),
             'unfreeze_form' => $unfreezeForm->createView(),
             'freeze_change_form' => $freezeChangeForm->createView(),
@@ -498,7 +500,55 @@ class MembershipController extends Controller
     }
 
     /**
-     * freeze member
+     * Change flying status member
+     *
+     * @Route("/{id}/flying", name="member_flying", methods={"POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function flyingAction(Request $request, Membership $member)
+    {
+        $this->denyAccessUnlessGranted('flying', $member);
+
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $form = $this->createFlyingForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $flying = $form->get("flying")->getData();
+            if ($flying) {
+                if ($member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà volant');
+                    return $this->redirectToShow($member);
+                }
+            } else {
+                if (!$member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fixe');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setFlying($flying);
+
+            $em->persist($member);
+            $em->flush();
+
+            if ($flying) {
+                $session->getFlashBag()->add('success', 'Le compte est maintenant volant !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte est maintenant fixe !');
+            }
+        }
+
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * Freeze member
      *
      * @Route("/{id}/freeze", name="member_freeze", methods={"POST"})
      * @param Request $request
@@ -1059,6 +1109,21 @@ class MembershipController extends Controller
     {
         $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
         return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
+    }
+
+    /**
+     * Creates a form to set flying for a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFlyingForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_flying', array('id' => $member->getId())))
+            ->add('flying', HiddenType::class, array('data' => $member->isFlying() ? 0 : 1))
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**

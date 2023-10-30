@@ -136,6 +136,43 @@
 
     <!-- Collapsible "actions" -->
     <ul class="collapsible collapsible-expandable">
+        <!-- Passer fixe ou volant -->
+        {% if use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+            <li id="flying">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.flying_open is defined and frontend_cookie.user_show.flying_open %}active{% endif %}">
+                    <i class="material-icons">{{ member_flying_material_icon }}</i>Passer en {% if member.flying %}fixe{% else %}volant{% endif %}
+                </div>
+                <div class="collapsible-body white">
+                    <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn teal" {% if member.withdrawn %}disabled{% endif %}>
+                        {% if not member.flying %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
+                        {% else %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> fixe
+                        {% endif %}
+                    </a>
+                    <div id="flying-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">cached</i>Passage du compte membre en {% if member.flying %}fixe{% else %}volant{% endif %}
+                            </h5>
+                            <p>Attention, vous êtes sur le point de passer le compte du membre en {% if member.flying %}fixe{% else %}volant{% endif %}.</p>
+                            <ul>
+                                <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_start(flying_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>OK
+                            </button>
+                            {{ form_end(flying_form) }}
+                        </div>
+                    </div>
+                </div>
+            </li>
+        {% endif %}
+
         <!-- Geler/Dégeler le compte -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="freeze">
