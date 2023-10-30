@@ -118,10 +118,12 @@
                             {{ form_label(form.email) }}
                         </div>
                         {% if use_fly_and_fixed %}
-                            <div class="input-field">
-                                {{ form_widget(form.flying) }}
-                                {{ form_label(form.flying) }}
-                            </div>
+                            {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
+                                <div class="input-field">
+                                    {{ form_widget(form.flying) }}
+                                    {{ form_label(form.flying) }}
+                                </div>
+                            {% endif %}
                             <div class="input-field">
                                 {{ form_widget(form.has_period_position) }}
                                 {{ form_label(form.has_period_position) }}
