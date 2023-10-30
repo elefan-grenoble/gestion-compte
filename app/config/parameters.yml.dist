@@ -107,6 +107,7 @@ parameters:
 
     # Shifting: fly & fixed
     use_fly_and_fixed: false
+    fly_and_fixed_entity_flying: 'Beneficiary'
     fly_and_fixed_allow_fixed_shift_free: false
 
     # Shifting: card reader
@@ -146,6 +147,8 @@ parameters:
     member_exempted_icon: '☂'
     member_exempted_material_icon: 'beach_access'
     member_exempted_background_color: rgb(0, 150, 136, 0.1)
+    member_flying_icon: '✈'
+    member_flying_material_icon: 'flightsmode'
     member_registration_missing_icon: '$'
     member_registration_missing_material_icon: 'attach_money'
     member_registration_missing_background_color: rgb(0, 150, 136, 0.1)

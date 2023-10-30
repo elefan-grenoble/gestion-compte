@@ -22,12 +22,14 @@ class SearchUserFormHelper
 {
     private $container;
     private $use_fly_and_fixed;
+    private $fly_and_fixed_entity_flying;
     private $maximum_nb_of_beneficiaries_in_membership;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
         $this->use_fly_and_fixed = $this->container->getParameter('use_fly_and_fixed');
+        $this->fly_and_fixed_entity_flying = $this->container->getParameter('fly_and_fixed_entity_flying');
         $this->maximum_nb_of_beneficiaries_in_membership = $this->container->getParameter('maximum_nb_of_beneficiaries_in_membership');
     }
 
@@ -204,15 +206,15 @@ class SearchUserFormHelper
         }
         if ($this->use_fly_and_fixed) {
             $formBuilder->add('flying', ChoiceType::class, [
-                'label' => $this->container->getParameter('beneficiary_flying_icon') . ' volant',
+                'label' => (($this->fly_and_fixed_entity_flying == 'Membership') ? $this->container->getParameter('member_flying_icon') : $this->container->getParameter('beneficiary_flying_icon')) . ' volant',
                 'required' => false,
                 'disabled' => in_array('flying', $disabledFields) ? true : false,
                 'choices' => [
                     'Oui' => 2,
                     'Non (fixe)' => 1,
                 ],
-            ])
-            ->add('has_period_position', ChoiceType::class, [
+            ]);
+            $formBuilder->add('has_period_position', ChoiceType::class, [
                 'label' => 'créneau fixe',
                 'required' => false,
                 'disabled' => in_array('has_period_position', $disabledFields) ? true : false,
@@ -456,8 +458,13 @@ class SearchUserFormHelper
 
         if ($this->use_fly_and_fixed) {
             if ($form->get('flying')->getData() > 0) {
-                $qb = $qb->andWhere('b.flying = :flying')
-                    ->setParameter('flying', $form->get('flying')->getData()-1);
+                if ($this->fly_and_fixed_entity_flying == 'Membership') {
+                    $qb = $qb->andWhere('m.flying = :flying')
+                        ->setParameter('flying', $form->get('flying')->getData()-1);
+                } else {
+                    $qb = $qb->andWhere('b.flying = :flying')
+                        ->setParameter('flying', $form->get('flying')->getData()-1);
+                }
             }
             if ($form->get('has_period_position')->getData() > 0) {
                 $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");
@@ -631,8 +638,13 @@ class SearchUserFormHelper
 
         if ($this->use_fly_and_fixed) {
             if ($form->get('flying')->getData() > 0) {
-                $qb = $qb->andWhere('b.flying = :flying')
-                    ->setParameter('flying', $form->get('flying')->getData()-1);
+                if ($this->fly_and_fixed_entity_flying == 'Membership') {
+                    $qb = $qb->andWhere('m.flying = :flying')
+                        ->setParameter('flying', $form->get('flying')->getData()-1);
+                } else {
+                    $qb = $qb->andWhere('b.flying = :flying')
+                        ->setParameter('flying', $form->get('flying')->getData()-1);
+                }
             }
             if ($form->get('has_period_position')->getData() > 0) {
                 $qb = $qb->leftJoin("b.periodPositions", "pp")->addSelect("pp");

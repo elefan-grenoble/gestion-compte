@@ -120,6 +120,4 @@ class BeneficiaryType extends AbstractType
     {
         return 'appbundle_beneficiary';
     }
-
-
 }

@@ -143,6 +143,7 @@ class BeneficiaryController extends Controller
                 $new_member->setMainBeneficiary($beneficiary);
             }
             // init other fields
+            $new_member->setFlying(false);
             $new_member->setWithdrawn(false);
             $new_member->setFrozen(false);
             $new_member->setFrozenChange(false);

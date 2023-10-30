@@ -461,31 +461,6 @@ class Period
     }
 
     /**
-     * Return true if at least one shifter (a.k.a. beneficiary) registered for
-     * this period is "problematic", meaning with a withdrawn or frozen membership
-     * of if the shifter is member of the flying team.
-     *
-     * useful only if the use_fly_and_fixed is activated
-     *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return bool
-     */
-    public function isProblematic(?String $weekCycle=null): bool
-    {
-        foreach ($this->positions as $position) {
-            if($shifter = $position->getShifter()){
-                if((($weekCycle && $position->getWeekCycle()==$weekCycle) or !$weekCycle)
-                    and ($shifter->isFlying()
-                    or $shifter->getMembership()->isFrozen()
-                    or $shifter->getMembership()->isWithdrawn())){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
      * Return true if 0 periods have been assigned to a shifter (a.k.a. beneficiary)
      * Note: useful only if the use_fly_and_fixed is activated
      *

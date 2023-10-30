@@ -16,17 +16,23 @@ use \Datetime;
 
 class MembershipService
 {
+    private $container;
     protected $em;
     protected $registration_duration;
     protected $registration_every_civil_year;
     protected $cycle_type;
+    protected $use_fly_and_fixed;
+    protected $fly_and_fixed_entity_flying;
 
     public function __construct(ContainerInterface $container, EntityManagerInterface $em)
     {
+        $this->container = $container;
         $this->em = $em;
-        $this->registration_duration = $container->getParameter('registration_duration');
-        $this->registration_every_civil_year = $container->getParameter('registration_every_civil_year');
-        $this->cycle_type = $container->getParameter('cycle_type');
+        $this->registration_duration = $this->container->getParameter('registration_duration');
+        $this->registration_every_civil_year = $this->container->getParameter('registration_every_civil_year');
+        $this->cycle_type = $this->container->getParameter('cycle_type');
+        $this->use_fly_and_fixed = $this->container->getParameter('use_fly_and_fixed');
+        $this->fly_and_fixed_entity_flying = $this->container->getParameter('fly_and_fixed_entity_flying');
     }
 
      /**
@@ -194,10 +200,16 @@ class MembershipService
      */
     public function hasWarningStatus(Membership $member): bool
     {
-        return $member->getWithdrawn() ||
+        $hasWarningStatus = $member->getWithdrawn() ||
             $member->getFrozen() ||
             $member->isCurrentlyExemptedFromShifts() ||
             !$this->isUptodate($member);
+
+        if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Membership') {
+            $hasWarningStatus = $hasWarningStatus || $member->isFlying();
+        }
+
+        return $hasWarningStatus;
     }
 
     public function getShiftFreeLogs(Membership $member)
