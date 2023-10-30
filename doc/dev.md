@@ -1,8 +1,15 @@
 # Guide du développeur
 
-## Code guidelines
+## Contribuer
 
-* [GitFlow](https://grafikart.fr/tutoriels/git-flow-742)
+* Les *Issues* servent à documenter, discuter et suivre les bugs ou idées d'améliorations
+* La branche principale est `master`
+* Ouvrir une *Pull Request* (PR) pour tout changement de code :
+  * en essayant de les garder petites (quite à faire 2 ou 3 PR pour une grosse fonctionnalité)
+  * en préférant le Français (l'application est actuellement seulement disponible dans cette langue)
+  * en donnant un titre clair (il apparaitra dans le contenu de la release)
+  * quand la PR est acceptée le contributeur est libre de merger
+  * un *squash* est effectué au moment du merge, pour garder un historique facilement lisible
 
 ## Modèle de données
 
@@ -28,7 +35,7 @@ Permet de visualiser les mails envoyés en local.
 
 ### Docker
 
-Un _docker-compose.yml_ existe pour permettre le développement sous Docker. Suivez le [guide d'installation](install.local.md).
+Un *docker-compose.yml* existe pour permettre le développement sous Docker. Suivez le [guide d'installation](install.local.md).
 
 N'oubliez pas de définir la variable d'environnement `DEV_MODE_ENABLED` dans le container qui exécute le code de l'application.
 
@@ -52,13 +59,9 @@ docker exec -i php php ./vendor/bin/phpunit
 
 ## Logs
 
-En local :
+En local
+
 ```shell
 // voir les 100 dernières lignes
 tail -100 var/logs/dev.log
-
-// pour les copier dans un fichier
-sudo apt-get install xclip
-tail -100 var/logs/dev.log | xclip -selection clipboard
-(puis coller dans un fichier)
 ```
