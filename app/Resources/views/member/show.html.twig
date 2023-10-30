@@ -224,66 +224,50 @@
         {% endif %}
 
         <!-- Fermer le compte -->
-        {% if is_granted("ROLE_USER_MANAGER") and is_granted("close",member) %}
+        {% if is_granted("ROLE_USER_MANAGER") and ((member.withdrawn and is_granted("open",member)) or (not member.withdrawn and is_granted("close",member))) %}
             <li id="close">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
-                    <i class="material-icons">close</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
+                    <i class="material-icons">{{ member_withdrawn_material_icon }}</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
                 </div>
                 <div class="collapsible-body white">
-                    {% if not member.withdrawn %}
-                        <a href="#close-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn red">
-                            <i class="material-icons left">close</i>Fermer le compte
-                        </a>
-                        {{ form_start(close_form) }}
-                        <div id="close-member-confirmation-modal" class="modal">
-                            <div class="modal-content">
-                                <h5>
-                                    <i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre
-                                </h5>
-                                <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
+                    <a href="#withdrawn-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn {% if not member.withdrawn %}red{% else %}teal{% endif %}">
+                        {% if not member.withdrawn %}
+                            <i class="material-icons left">{{ member_withdrawn_material_icon }}</i>Fermer <span class="hide-on-med-and-down">le compte</span>
+                        {% else %}
+                            <i class="material-icons left">check</i>Ré-ouvrir <span class="hide-on-med-and-down">le compte</span>
+                        {% endif %}
+                    </a>
+                    <div id="withdrawn-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">{{ member_withdrawn_material_icon }}</i>{% if member.withdrawn %}Ré-ouverture{% else %}Fermeture{% endif %} du compte membre
+                            </h5>
+                            <p>Attention, vous êtes sur le point de {% if member.withdrawn %}ré-ouvrir{% else %}fermer{% endif %} le compte du membre.</p>
+                            {% if not member.withdrawn %}
                                 <ul>
                                     {% if use_fly_and_fixed %}
                                         <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
                                     {% endif %}
                                     <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
                                 </ul>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <button type="submit" class="btn waves-effect waves-light orange">
-                                    <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </button>
-                            </div>
+                            {% endif %}
                         </div>
-                        {{ form_end(close_form) }}
-                    {% else %}
-                        {% if member.withdrawnDate %}
-                            <p>
-                                Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
-                                {% if member.withdrawnBy %}
-                                    par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
-                                {% endif %}
-                            </p>
-                        {% endif %}
-                        <a href="#open-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn teal">
-                            <i class="material-icons left">check</i>Ré-ouvrir le compte
-                        </a>
-                        {{ form_start(open_form) }}
-                        <div id="open-member-confirmation-modal" class="modal">
-                            <div class="modal-content">
-                                <h5>
-                                    <i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre
-                                </h5>
-                                <p>Attention, vous êtes sur le point de ré-ouvrir le compte du membre.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <button type="submit" class="btn waves-effect waves-light orange">
-                                    <i class="material-icons left">check</i>Je sais ce que je fais !
-                                </button>
-                            </div>
+                        <div class="modal-footer">
+                            {{ form_start(withdrawn_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                            {{ form_end(withdrawn_form) }}
                         </div>
-                        {{ form_end(open_form) }}
+                    </div>
+                    {% if member.withdrawnDate %}
+                        <p>
+                            Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
+                            {% if member.withdrawnBy %}
+                                par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
+                            {% endif %}
+                        </p>
                     {% endif %}
                 </div>
             </li>
