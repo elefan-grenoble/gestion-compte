@@ -3,10 +3,12 @@
 {% if app.user.beneficiary %}
     {% set beneficiary = app.user.beneficiary %}
     {% set member = beneficiary.membership %}
+
     <h5 class="center-align">
         <img src="{{ gravatar(beneficiary.email,100) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
         <br />
         {{ app.user }}
+        {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
     </h5>
     <ul class="collapsible">
         <li>

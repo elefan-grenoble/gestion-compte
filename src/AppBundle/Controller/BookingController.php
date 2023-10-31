@@ -63,14 +63,14 @@ class BookingController extends Controller
      */
     public function homepageShiftsAction(): Response
     {
-        $membership = $this->getUser()->getBeneficiary()->getMembership();
-        $beneficiaries = $membership->getBeneficiaries();
-
         $em = $this->getDoctrine()->getManager();
-        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($membership, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
-        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($membership, 1);
-        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($membership, $preceding_previous_cycle_start, $next_cycle_end);
-        $period_positions = $em->getRepository('AppBundle:PeriodPosition')->findByBeneficiaries($beneficiaries);
+
+        $member = $this->getUser()->getBeneficiary()->getMembership();
+
+        $period_positions = $this->get('membership_service')->getPeriodPositions($member);
+        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
+        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
+        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
 
         $shiftFreeForms = [];
         foreach ($shifts_by_cycle as $key => $shifts) {
@@ -80,9 +80,9 @@ class BookingController extends Controller
         }
 
         return $this->render('booking/home_booked_shifts.html.twig', array(
-            'shift_free_forms' => $shiftFreeForms,
             'period_positions' => $period_positions,
-            'shiftsByCycle' => $shifts_by_cycle,
+            'shifts_by_cycle' => $shifts_by_cycle,
+            'shift_free_forms' => $shiftFreeForms,
         ));
     }
 

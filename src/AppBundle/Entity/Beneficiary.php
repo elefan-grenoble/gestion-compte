@@ -579,6 +579,16 @@ class Beneficiary
     }
 
     /**
+     * Get periodPositions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPeriodPositions()
+    {
+        return $this->periodPositions;
+    }
+
+    /**
      * Add swipeCard
      *
      * @param \AppBundle\Entity\SwipeCard $swipeCard

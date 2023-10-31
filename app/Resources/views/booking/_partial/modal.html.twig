@@ -25,15 +25,13 @@
 
         {% if bookableShifts | length == 1 %}
             {% if not firstBookable.formation and beneficiary.formations | length %}
-                <div class="card-panel teal warning">
-                    <span class="white-text">
-                        <i class="material-icons">warning</i>
-                        Ce créneau n'est <b>pas</b> qualifié.
-                        <br>
-                        {{ beneficiary.firstname }} a {% if beneficiary.formations | length == 1 %}une formation{% else %}des formations{% endif %} ({{ beneficiary.formations | join(', ')}}).
-                        <br>
-                        Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
-                    </span>
+                <div class="card-panel teal warning white-text">
+                    <i class="material-icons">warning</i>
+                    Ce créneau n'est <b>pas</b> qualifié.
+                    <br>
+                    {{ beneficiary.firstname }} a {% if beneficiary.formations | length == 1 %}une formation{% else %}des formations{% endif %} ({{ beneficiary.formations | join(', ')}}).
+                    <br>
+                    Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                 </div>
             {% endif %}
         {% endif %}

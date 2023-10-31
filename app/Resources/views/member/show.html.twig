@@ -90,10 +90,14 @@
                 <i class="material-icons">date_range</i>Créneaux
                 {% if not member.firstShiftDate %}
                     <span style="margin-left:14px;">⚠️</span>
+                {% elseif use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' %}
+                    {% if member.flying and period_positions | length > 1 or not member.flying and period_positions | length == 0 %}
+                        <span style="margin-left:14px;">⚠️</span>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/shifts.html.twig" %}
+                {% include "member/_partial/shifts.html.twig" with { member: member, period_positions: period_positions, shifts_by_cycle: shifts_by_cycle } %}
             </div>
         </li>
 
