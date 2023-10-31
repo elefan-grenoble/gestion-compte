@@ -11,7 +11,7 @@
                     {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position, show_actions: true } %}
                 </div>
             {% endfor %}
-            {% if member.flying %}
+            {% if fly_and_fixed_entity_flying == 'Membership' and member.flying %}
                 <div class="col s12">
                     <div class="card-panel red white-text">
                         Ce membre est <strong>volant</strong> alors qu'il a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
@@ -19,14 +19,15 @@
                 </div>
             {% endif %}
         {% else %}
-            {% if not member.flying %}
+            {% if fly_and_fixed_entity_flying == 'Membership' and not member.flying %}
                 <div class="col s12">
                     <div class="card-panel red white-text">
                         Ce membre est <strong>fixe</strong> alors qu'il n'a aucun créneaux fixe.
                     </div>
                 </div>
             {% else %}
-                <span>Aucun créneau fixe</span>
+                <span>Aucun créneau fixe</span><br />
+                <span>(compte volant)</span>
             {% endif %}
         {% endif %}
     </div>

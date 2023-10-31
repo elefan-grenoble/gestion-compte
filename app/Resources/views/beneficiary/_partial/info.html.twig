@@ -8,13 +8,7 @@
         <span class="badge main-color white-text">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
     {% if use_fly_and_fixed %}
-        {% if fly_and_fixed_entity_flying == 'Membership' %}
-            {% if beneficiary.membership.flying %}
-                <span class="badge teal white-text">{{ member_flying_icon }} Compte volant</span>
-            {% else %}
-                <span class="badge main-color white-text">Compte fixe</span>
-            {% endif %}
-        {% else %}
+        {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
             {% if beneficiary.flying %}
                 <span class="badge teal white-text">{{ beneficiary_flying_icon }} Equipe volante</span>
             {% else %}
