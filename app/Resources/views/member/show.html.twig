@@ -88,8 +88,12 @@
         <li id="shifts">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.shifts_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
-                {% if not member.firstShiftDate or use_fly_and_fixed and member.flying and period_positions | length > 1 or use_fly_and_fixed and not member.flying and period_positions | length == 0 %}
+                {% if not member.firstShiftDate %}
                     <span style="margin-left:14px;">⚠️</span>
+                {% elseif use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' %}
+                    {% if member.flying and period_positions | length > 1 or not member.flying and period_positions | length == 0 %}
+                        <span style="margin-left:14px;">⚠️</span>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="collapsible-body white">

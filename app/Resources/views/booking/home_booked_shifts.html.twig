@@ -7,8 +7,10 @@
             <li class="active">
                 <div class="collapsible-header">
                     <i class="material-icons">event</i>Créneau{% if period_positions | length > 1 %}x{% endif %} fixe
-                    {% if member.flying and period_positions | length > 1 or not member.flying and period_positions | length == 0 %}
-                        <span style="margin-left:14px;">⚠️</span>
+                    {% if fly_and_fixed_entity_flying == 'Membership' %}
+                        {% if member.flying and period_positions | length > 1 or not member.flying and period_positions | length == 0 %}
+                            <span style="margin-left:14px;">⚠️</span>
+                        {% endif %}
                     {% endif %}
                 </div>
                 <div class="collapsible-body">
@@ -19,7 +21,7 @@
                                     {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position } %}
                                 </div>
                             {% endfor %}
-                            {% if member.flying %}
+                            {% if fly_and_fixed_entity_flying == 'Membership' and member.flying %}
                                 <div class="col s12">
                                     <div class="card-panel teal warning white-text">
                                         {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est <strong>volant</strong> alors que {% if member.beneficiaries | length > 1 %}vous avez{% else %}tu as{% endif %} {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
@@ -27,7 +29,7 @@
                                 </div>
                             {% endif %}
                         {% else %}
-                            {% if not member.flying %}
+                            {% if fly_and_fixed_entity_flying == 'Membership' and not member.flying %}
                                 <div class="col s12">
                                     <div class="card-panel teal warning white-text">
                                         {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est <strong>fixe</strong> alors que {% if member.beneficiaries | length > 1 %}vous n'avez{% else %}tu n'as{% endif %} pas de créneaux fixe.
