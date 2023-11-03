@@ -21,6 +21,8 @@ RUN sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-
 # Installation de Composer
 COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
 
+COPY php.ini usr/local/etc/php/php.ini
+
 # Configuration de gd avec FreeType
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
