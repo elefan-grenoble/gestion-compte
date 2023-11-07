@@ -7,8 +7,7 @@ parameters:
     database_name: symfony
     database_user: root
     database_password: secret
-    # You should uncomment this if you want to use pdo_sqlite
-    #database_path: '%kernel.project_dir%/var/data/data.sqlite'
+    database_test_host: 127.0.0.1 # keep this for github action CI, change it to database for local dev
 
     # A secret key that's used to generate certain security-related tokens
     secret: ThisTokenIsNotSoSecretChangeIt

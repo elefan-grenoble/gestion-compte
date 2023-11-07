@@ -7,11 +7,11 @@ use AppBundle\Entity\Membership;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class MembershipFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class MembershipFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     /**
@@ -44,6 +44,7 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface, F
                 $membership->setWithdrawn(0);
             }
 
+            $membership->setFlying(false);
 
             // one user is frozen
             if ($i == $roleGoesToId["FROZEN"]) {
@@ -80,15 +81,13 @@ class MembershipFixtures extends Fixture implements DependentFixtureInterface, F
         $manager->flush();
     }
 
-    public function getDependencies()
-    {
-        return [
-            UserFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 11;
     }
 }

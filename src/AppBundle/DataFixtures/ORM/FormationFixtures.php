@@ -8,9 +8,10 @@ use AppBundle\Entity\Formation;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class FormationFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class FormationFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
 
     public function load(ObjectManager $manager)
@@ -44,16 +45,14 @@ class FormationFixtures extends Fixture implements DependentFixtureInterface, Fi
 
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            BeneficiaryFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder(): int
+    {
+        return 10;
     }
 
 

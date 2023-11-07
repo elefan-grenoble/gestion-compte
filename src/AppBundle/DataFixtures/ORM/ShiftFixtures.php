@@ -7,11 +7,11 @@ use AppBundle\Entity\Shift;
 use DateInterval;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class ShiftFixtures extends Fixture implements DependentFixtureInterface
+class ShiftFixtures extends Fixture implements OrderedFixtureInterface
 {
     /**
      * @throws Exception
@@ -85,12 +85,8 @@ class ShiftFixtures extends Fixture implements DependentFixtureInterface
         echo $shiftsCount . " shifts for a random number of beneficiaries created\n";
     }
 
-    public function getDependencies()
+    public function getOrder(): int
     {
-        return [
-            UserFixtures::class,
-            BeneficiaryFixtures::class,
-            JobFixtures::class,
-        ];
+        return 15;
     }
 }

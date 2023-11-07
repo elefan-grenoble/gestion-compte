@@ -6,10 +6,10 @@ use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\Entity\Address;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class AddressFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
+class AddressFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
 
     public function load(ObjectManager $manager)
@@ -43,16 +43,14 @@ class AddressFixtures extends Fixture implements DependentFixtureInterface, Fixt
         echo $addresses_count . " addresses created\n";
     }
 
-    public function getDependencies(): array
-    {
-        return [
-            BeneficiaryFixtures::class,
-        ];
-    }
-
     public static function getGroups(): array
     {
         return ['period'];
+    }
+
+    public function getOrder()
+    {
+        return 16;
     }
 
 }
