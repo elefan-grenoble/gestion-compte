@@ -2,10 +2,12 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\Event;
+use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Note;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
@@ -79,7 +81,7 @@ class AnonymizeDataCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
 
-        $output->writeln('<info>Anonymising User & Beneficiary data</>');
+        $output->writeln('<info>Anonymizing User & Beneficiary data</>');
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
         foreach ($beneficiaries as $beneficiary) {
             $firstname = $this->randomValue($firstnames);
@@ -109,10 +111,34 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $user->setEmail($email);
             $em->persist($user);
 
+            // anonymize User registrations via Helloasso
+            $user_registrations = $user->getRecordedRegistrations();
+            foreach ($user_registrations as $user_registration) {
+                if ($user_registration->getHelloassoPayment()) {
+                    $helloassopayment = $user_registration->getHelloassoPayment();
+                    $helloassopayment->setEmail($user->getEmail());
+                    $helloassopayment->setPayerFirstName($user->getFirstname());
+                    $helloassopayment->setPayerLastName($user->getLastname());
+                }
+            }
+
             $em->persist($beneficiary);
         }
 
-        $output->writeln('<info>Anonymising Commission data</>');
+        $output->writeln('<info>Deleting AnonymousBeneficiary data</>');
+        $em->getRepository(AnonymousBeneficiary::class)->createQueryBuilder('c')
+            ->delete()
+            ->getQuery()
+            ->execute();
+
+        $output->writeln('<info>Deleting HelloassoPayment orphans data</>');
+        $em->getRepository(HelloassoPayment::class)->createQueryBuilder('hp')
+            ->where('hp.registration IS NULL')
+            ->delete()
+            ->getQuery()
+            ->execute();
+
+        $output->writeln('<info>Anonymizing Commission data</>');
         $comissions = $em->getRepository(Commission::class)->findAll();
         foreach ($comissions as $comission) {
             $comission->setName('comission '.$comission->getId());
@@ -120,7 +146,7 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $em->persist($comission);
         }
 
-        $output->writeln('<info>Anonymising Event data</>');
+        $output->writeln('<info>Anonymizing Event data</>');
         $events = $em->getRepository(Event::class)->findAll();
         foreach ($events as $event) {
             $event->setTitle('event '.$event->getId());
