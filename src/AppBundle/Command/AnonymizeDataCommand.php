@@ -3,7 +3,9 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Client;
 use AppBundle\Entity\Commission;
+use AppBundle\Entity\Note;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
 use Doctrine\ORM\EntityManager;
@@ -21,7 +23,7 @@ class AnonymizeDataCommand extends ContainerAwareCommand
     {
         $this
             ->setName('app:anonymize')
-            ->setDescription('Anonimize app data')
+            ->setDescription('Anonymize app data')
             ->setHelp('This command make data ready to share. usefull for shared and public access')
         ;
     }
@@ -74,13 +76,11 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             "La perfection est atteinte, non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer."
         ];
 
-        /** @var EntityManager $em */
         $em = $this->getContainer()->get('doctrine')->getManager();
 
+        $output->writeln('<info>Anonymising User & Beneficiary data</>');
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
-
-        /** @var Beneficiary $beneficiary */
-        foreach ($beneficiaries as $beneficiary){
+        foreach ($beneficiaries as $beneficiary) {
             $firstname = $this->randomValue($firstnames);
             $lastname = $this->randomValue($lastnames);
             $username = User::makeUsername($firstname,$lastname).'_'.$beneficiary->getId();
@@ -88,11 +88,12 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $subst = 'username@';
             $email = preg_replace($re, $username.'@', $beneficiary->getEmail(), 1);
 
+            // anonymize Beneficiary name & phone
             $beneficiary->setFirstName($firstname);
             $beneficiary->setLastName($lastname);
             $beneficiary->setPhone($this->randomValue($phones));
-            $beneficiary->setEmail($email);
 
+            // anonymize Beneficiary address, zipcode & city
             $address = $beneficiary->getAddress();
             $city = $this->randomValue($cities);
             $address->setCity($city);
@@ -101,24 +102,36 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $address->setStreet2('');
             $em->persist($address);
 
-            /** @var User $user */
+            // anonymize User username & email
             $user = $beneficiary->getUser();
             $user->setUsername($username);
             $user->setEmail($email);
-            foreach ($user->getClients() as $client)
-                $em->remove($client);
             $em->persist($user);
 
             $em->persist($beneficiary);
-
-            $comissions = $em->getRepository(Commission::class)->findAll();
-            /** @var Commission $comission */
-            foreach ($comissions as $comission){
-                $comission->setName('comission '.$comission->getId());
-                $comission->setDescription($this->randomValue($texts));
-                $em->persist($comission);
-            }
         }
+
+        $output->writeln('<info>Anonymising Commission data</>');
+        $comissions = $em->getRepository(Commission::class)->findAll();
+        foreach ($comissions as $comission) {
+            $comission->setName('comission '.$comission->getId());
+            $comission->setDescription($this->randomValue($texts));
+            $em->persist($comission);
+        }
+
+        $output->writeln('<info>Deleting Client data</>');
+        $em->getRepository(Client::class)->createQueryBuilder('c')
+            ->delete()
+            ->getQuery()
+            ->execute();
+
+        $output->writeln('<info>Deleting Note data</>');
+        $em->getRepository(Note::class)->createQueryBuilder('n')
+            ->delete()
+            ->getQuery()
+            ->execute();
+
         $em->flush();
+        $output->writeln('<info>Done!</>');
     }
 }
