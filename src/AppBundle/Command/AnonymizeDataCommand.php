@@ -5,6 +5,7 @@ namespace AppBundle\Command;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Client;
 use AppBundle\Entity\Commission;
+use AppBundle\Entity\Event;
 use AppBundle\Entity\Note;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\User;
@@ -117,6 +118,14 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $comission->setName('comission '.$comission->getId());
             $comission->setDescription($this->randomValue($texts));
             $em->persist($comission);
+        }
+
+        $output->writeln('<info>Anonymising Event data</>');
+        $events = $em->getRepository(Event::class)->findAll();
+        foreach ($events as $event) {
+            $event->setTitle('event '.$event->getId());
+            $event->setDescription($this->randomValue($texts));
+            $em->persist($event);
         }
 
         $output->writeln('<info>Deleting Client data</>');
