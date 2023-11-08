@@ -47,6 +47,8 @@ class EmailingEventListener
         $this->shift_email = $this->container->getParameter('emails.shift');
         $this->wiki_keys_url = $this->container->getParameter('wiki_keys_url');
         $this->reserve_new_shift_to_prior_shifter_delay = $this->container->getParameter('reserve_new_shift_to_prior_shifter_delay');
+        $locale = $this->container->getParameter('locale');
+        setlocale(LC_TIME, $locale);
     }
 
     /**
