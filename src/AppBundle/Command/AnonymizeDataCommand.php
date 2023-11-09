@@ -126,14 +126,15 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $user->setEmail($email);
             $em->persist($user);
 
-            // anonymize User registrations via Helloasso
-            $user_registrations = $user->getRecordedRegistrations();
-            foreach ($user_registrations as $user_registration) {
-                if ($user_registration->getHelloassoPayment()) {
-                    $helloassopayment = $user_registration->getHelloassoPayment();
-                    $helloassopayment->setEmail($user->getEmail());
-                    $helloassopayment->setPayerFirstName($user->getFirstname());
-                    $helloassopayment->setPayerLastName($user->getLastname());
+            // anonymize Membership registrations via Helloasso
+            $member_registrations = $beneficiary->getMembership()->getRegistrations();
+            foreach ($member_registrations as $member_registration) {
+                if ($member_registration->getHelloassoPayment()) {
+                    $helloassopayment = $member_registration->getHelloassoPayment();
+                    $helloassopayment->setEmail($email);
+                    $helloassopayment->setPayerFirstName($firstname);
+                    $helloassopayment->setPayerLastName($lastname);
+                    $em->persist($helloassopayment);
                 }
             }
 
