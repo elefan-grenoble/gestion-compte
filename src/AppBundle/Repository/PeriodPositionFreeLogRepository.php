@@ -16,9 +16,7 @@ class PeriodPositionFreeLogRepository extends \Doctrine\ORM\EntityRepository
     public function getMemberPeriodPositionFreed(Membership $member)
     {
         $qb = $this->createQueryBuilder('ppfl')
-            ->leftJoin('ppfl.periodPosition', 'pp')
-            ->addSelect('pp')
-            ->where('pp.shifter IN (:beneficiaries)')
+            ->where('ppfl.beneficiary IN (:beneficiaries)')
             ->setParameter('beneficiaries', $member->getBeneficiaries());
 
         $qb->orderBy('ppfl.createdAt', 'DESC');
