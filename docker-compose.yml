@@ -52,6 +52,7 @@ services:
       PMA_PORT: 3306
       PMA_USER: root
       PMA_PASSWORD: secret
+      UPLOAD_LIMIT: 50000000
     ports:
       - "8080:80"
     depends_on:
