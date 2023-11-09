@@ -1,6 +1,6 @@
 # Installation sur un serveur
 
-### Prérequis
+## Prérequis
 
 * PHP (version 7.2 et supérieure)
 * [Composer](https://getcomposer.org/)
@@ -9,7 +9,7 @@
 * php-xml
 * php-gd
 
-### Installation
+## Installation
 
 Clone code
 
@@ -57,13 +57,13 @@ php bin/console server:start *:8080
 
 Pour un usage en production, il est très fortement recommandé d'utiliser un vrai serveur Web tel que Apache ou Nginx.
 
-Ajouter ``127.0.0.1 membres.yourcoop.local`` au fichier _/etc/hosts_.
+Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
 
 Visiter [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
 
-## Autres
+## En prod
 
-### En Prod
+### nginx
 
 Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode (au lieu de 404)
 
@@ -95,6 +95,6 @@ location ~* ^/sw/(.*)/(qr|br)\.png$ {
 45 21 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:code:verify_change --last_run 24
 ```
 
-### mise en route
+## Mise en route
 
 * Suivez le [guide de mise en route](start.md)
