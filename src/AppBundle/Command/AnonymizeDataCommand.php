@@ -19,6 +19,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class AnonymizeDataCommand extends ContainerAwareCommand
 {
@@ -39,6 +41,19 @@ class AnonymizeDataCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+
+        // Create a new question helper instance
+        $helper = $this->getHelper('question');
+
+        // Create the question with the default answer of 'no'
+        $question = new ConfirmationQuestion('Are you sure you want to proceed ? It will change the current database. (y/N) ', false);
+
+        // Ask the question
+        if (!$helper->ask($input, $output, $question)) {
+            $output->writeln('Command aborted.');
+            return 0;
+        }
+        
         $firstnames = [
             'sophie','marie','noemie','hélène','chloé','laura','lily','celeste','capucine','zoé','julie','mimi','charlotte',
             'paul','stephane','manu','jean-paul','tim','pierre','florian','clement','julien','baptiste','bruno','arthur',
@@ -168,5 +183,7 @@ class AnonymizeDataCommand extends ContainerAwareCommand
 
         $em->flush();
         $output->writeln('<info>Done!</>');
+
+        return 0;
     }
 }
