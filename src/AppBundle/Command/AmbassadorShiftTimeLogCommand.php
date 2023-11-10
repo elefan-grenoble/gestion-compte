@@ -23,6 +23,8 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $locale = $this->getContainer()->getParameter('locale');
+        setlocale(LC_TIME, $locale);
         $email_template = $input->getOption('emailTemplate');
 
         $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');

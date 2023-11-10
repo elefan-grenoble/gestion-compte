@@ -19,6 +19,8 @@ class MattermostEventListener
         $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
+        $locale = $this->container->getParameter('locale');
+        setlocale(LC_TIME, $locale);
     }
 
     /**
