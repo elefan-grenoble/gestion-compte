@@ -25,6 +25,7 @@
             </div>
         </li>
 
+        {% if not oidc_enable %}
         <li>
             <div class="collapsible-header">
                 <i class="material-icons">card_membership</i>Adhésions
@@ -33,6 +34,7 @@
                 {% include "member/_partial/registrations.html.twig" with { member: beneficiary.membership } %}
             </div>
         </li>
+        {% endif %}
 
         {% if profile_display_time_log %}
             <li>
