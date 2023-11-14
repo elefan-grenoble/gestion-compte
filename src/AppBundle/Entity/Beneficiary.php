@@ -88,7 +88,7 @@ class Beneficiary
     protected $openid;
 
     /**
-     * @ORM\Column(name="openid_member_number", type="integer")
+     * @ORM\Column(name="openid_member_number", type="string", length=255)
      * @var string $openid_member_number
      */
     protected $openid_member_number;

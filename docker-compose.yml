@@ -61,3 +61,12 @@ services:
       - "8080:80"
     depends_on:
       - database
+
+#  keycloak:
+#    image: jboss/keycloak:16.1.1
+#    container_name: keycloak
+#    environment:
+#      - KEYCLOAK_USER=admin
+#      - KEYCLOAK_PASSWORD=admin
+#    ports:
+#      - "8081:8080"

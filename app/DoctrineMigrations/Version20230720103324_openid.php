@@ -22,8 +22,8 @@ final class Version20230720103324_openid extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE beneficiary ADD openid VARCHAR(255) NOT NULL');
-        $this->addSql('ALTER TABLE beneficiary ADD openid_member_number INT NOT NULL');
+        $this->addSql('ALTER TABLE beneficiary ADD openid VARCHAR(255)');
+        $this->addSql('ALTER TABLE beneficiary ADD openid_member_number INT');
 
     }
 

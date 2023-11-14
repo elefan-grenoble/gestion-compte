@@ -22,7 +22,7 @@ final class Version20230911115612_update_openid_member_number extends AbstractMi
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE beneficiary MODIFY openid_member_number VARCHAR(255) NOT NULL');
+        $this->addSql('ALTER TABLE beneficiary MODIFY openid_member_number VARCHAR(255)');
     }
 
     public function down(Schema $schema) : void
@@ -30,6 +30,6 @@ final class Version20230911115612_update_openid_member_number extends AbstractMi
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE beneficiary MODIFY openid_member_number INT NOT NULL');
+        $this->addSql('ALTER TABLE beneficiary MODIFY openid_member_number INT');
     }
 }
