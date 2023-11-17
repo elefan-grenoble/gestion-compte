@@ -1,6 +1,21 @@
 # Changelog
 
-## 2023-10-27 (v1.45.6)
+## [v1.45.7](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.6...v1.45.7) (2023-11-17)
+
+* Créneaux : Alertes : refactoring de l'envoi via l'EmailingEventListener & MattermostEventListener by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1057
+* Membre : pouvoir rajouter la notion de volant by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1058
+* Membre (coté admin) : améliore la fermeture / ré-ouverture de compte by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1062
+* Membre (coté admin) : pouvoir modifier le statut fixe / volant by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1061
+* Admin : petites améliorations sur la page filtre des ambassadeurs by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1063
+* Membre fixe/volant : afficher des messages pour les cas particuliers by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/999
+* Test fonctionnel : import des users par CSV en ligne de commande by @samueleyre in https://github.com/elefan-grenoble/gestion-compte/pull/1059
+* Améliorer la commande d'anonymisation de la base de données by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1066
+* Mise à jour de la documentation : git, maj by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1047
+* Générer le fichier CHANGELOG.md by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1069
+* Ajout de set_locale pour les commandes by @petitalb in https://github.com/elefan-grenoble/gestion-compte/pull/1068
+* Correction de la dépendance des fixtures en prod by @samueleyre in https://github.com/elefan-grenoble/gestion-compte/pull/1071
+
+## [v1.45.6](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.5...v1.45.6) (2023-10-27)
 
 * Événements : Procurations : refactoring de l'envoi de l'e-mail de confirmation by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1040
 * Créneaux : Rappel : refactoring de l'envoi via l'EmailingEventListener by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1044
@@ -11,9 +26,7 @@
 * Created the first fixtures for the main tables of the application by @samueleyre in https://github.com/elefan-grenoble/gestion-compte/pull/1046
 * Script pour réparer les créneaux sans poste type by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1055
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.5...v1.45.6
-
-## 2023-10-23 (v1.45.5)
+## [v1.45.5](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.4...v1.45.5) (2023-10-23)
 
 * Profile : pouvoir afficher son historique de postes fixes annulés by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1037
 * Membre (coté admin) : pouvoir afficher l'historique de ses postes fixes annulés by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1038
@@ -21,9 +34,7 @@
 * Langue : forcer le Français en langue par défaut by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1032
 * Semaine type : répare la fonction de duplication d'un jour entier by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1043
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.4...v1.45.5
-
-## 2023-10-17 (v1.45.4)
+## [v1.45.4](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.3...v1.45.4) (2023-10-17)
 
 * Compte épargne
   * répare à nouveau l'erreur de début de cycle by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1010
@@ -56,9 +67,7 @@
 
 * @samueleyre made their first contribution in https://github.com/elefan-grenoble/gestion-compte/pull/1033
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.3...v1.45.4
-
-## 2023-09-22 (v1.45.3)
+## [v1.45.3](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.2...v1.45.3) (2023-09-22)
 
 * Compte épargne :
   * corrige l'affichage sur la badgeuse by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/991
@@ -70,9 +79,7 @@
   * mise à jour du README
   * nouvelles pages dans le Wiki
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.2...v1.45.3
-
-## 2023-09-13 (v1.45.2)
+## [v1.45.2](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.1...v1.45.2) (2023-09-13)
 
 * Membre & Profil
   * améliorations de la gestion des badges by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/978
@@ -87,9 +94,7 @@
 * Fermetures exceptionnelles
   * améliorer l'affichage pour les fermetures en cours by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/986
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.1...v1.45.2
-
-## 2023-09-02 (v1.45.1)
+## [v1.45.1](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.0...v1.45.1) (2023-09-02)
 
 * Gestion des utilisateurs
   * Profile : afficher la section Adhésion by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/972
@@ -115,11 +120,9 @@
   * Materialize CSS : traduction du datepicker by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/965
   * Répare l'affichage des formfields "markdown" dans les modals by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/974
 
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.0...v1.45.1
+## [v1.45.0](https://github.com/elefan-grenoble/gestion-compte/compare/v1.44.7...v1.45.0) (2023-08-22)
 
-## 2023-08-22 (v1.45.0)
-
-* Gestion des utilisateurs 
+* Gestion des utilisateurs
   * améliorer la liste des utilisateurs admin by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/905
   * nouvelle page avec la liste des utilisateurs non-membres by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/906
   * Bénéficiaire : ne pas cacher les informations qui débordent by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/930
@@ -136,8 +139,6 @@
 * Header : ouvrir les liens dans un nouvel onglet by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/932
 * MaterializeCSS : améliorer l'affichage de l'autocomplete by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/910
 * fix display for "Relances Créneaux" using dynamic registration date (#901) by @janssens in https://github.com/elefan-grenoble/gestion-compte/pull/913
-
-**Full Changelog**: https://github.com/elefan-grenoble/gestion-compte/compare/v1.44.7...v1.45.0
 
 ## 2023-06-28 (v1.44.7)
 
