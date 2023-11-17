@@ -1,0 +1,21 @@
+name: Run release-please
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        with:
+          release-type: php
+          command: github-release
+          extra-files: |
+            app/config/config.yml
