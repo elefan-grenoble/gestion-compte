@@ -15,8 +15,9 @@ services:
         public: false
         bind:
             $local_currency_name: '%local_currency_name%'
-            $use_fly_and_fixed: '%use_fly_and_fixed%'
             $cycle_type: '%cycle_type%'
+            $use_fly_and_fixed: '%use_fly_and_fixed%'
+            $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
 
     # makes classes in src/AppBundle available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
