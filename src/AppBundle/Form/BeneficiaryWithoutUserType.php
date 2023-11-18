@@ -9,9 +9,12 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BeneficiaryWithoutUserType extends BeneficiaryType
 {
-    public function __construct(TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    private $use_fly_and_fixed;
+    private $fly_and_fixed_entity_flying;
+
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
-         parent::__construct($tokenStorage, $validator, $beneficiaryInitializationSubscriber);
+        parent::__construct($use_fly_and_fixed, $fly_and_fixed_entity_flying, $tokenStorage, $validator, $beneficiaryInitializationSubscriber);
     }
 
     /**

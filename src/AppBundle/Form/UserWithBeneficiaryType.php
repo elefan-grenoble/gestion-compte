@@ -20,7 +20,6 @@ class UserWithBeneficiaryType extends UserType
         parent::__construct($tokenStorage);
     }
 
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         parent::buildForm($builder, $options);
@@ -44,6 +43,4 @@ class UserWithBeneficiaryType extends UserType
     {
         return 'appbundle_user';
     }
-
-
 }
