@@ -15,7 +15,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class MemberType extends AbstractType
 {
-
     private $tokenStorage;
 
     public function __construct(TokenStorageInterface $tokenStorage)
@@ -40,13 +39,13 @@ class MemberType extends AbstractType
             $form = $event->getForm();
             $memberData = $event->getData();
 
-            if (is_object($user) && ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))){
+            if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
             }else{
                 $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent', 'disabled' => true));
             }
 
-            if (is_object($user)){
+            if (is_object($user)) {
                 if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')){
                     if ($memberData && $memberData->getId()) { //in not new
                         $form->add('withdrawn', CheckboxType::class, array(
@@ -61,12 +60,11 @@ class MemberType extends AbstractType
                 }
             }
 
-            $form->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
+            $form->add('mainBeneficiary', BeneficiaryType::class, array('label'=>' '));
 
-            if ($memberData && !$memberData->getId()){
+            if ($memberData && !$memberData->getId()) {
                 $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
             }
-
         });
     }
 
@@ -87,6 +85,4 @@ class MemberType extends AbstractType
     {
         return 'appbundle_membership';
     }
-
-
 }
