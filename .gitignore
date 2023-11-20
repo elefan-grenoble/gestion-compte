@@ -36,6 +36,7 @@
 /.idea
 /*.iml
 LICENSE
+docker-compose.yml
 
 .!
 .buildpath

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # The MIT License (MIT)
 #

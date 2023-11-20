@@ -26,13 +26,17 @@ services:
           memory: 512M
     build:
       context: .docker
+      dockerfile: DockerfileNginxXdebug
     command: >
       bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
+      && rm -rf var/cache/*
+      && chown www-data:www-data var/cache/ -R
       && php bin/console doctrine:migration:migrate"
     ports:
       - "8000:80"
     volumes:
       - .:/var/www/site
+      - /tmp/:/var/www/site/var/cache
     restart: always
     depends_on:
       - database
