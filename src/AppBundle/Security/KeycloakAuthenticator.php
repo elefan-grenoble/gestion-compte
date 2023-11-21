@@ -246,6 +246,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $membership->setMemberNumber($member_number);
         $membership->setWithdrawn(false);
         $membership->setFrozen(false);
+        $membership->setFlying(false);
         $membership->setFrozenChange(false);
         $membership->setMainBeneficiary($beneficiary);
 
@@ -310,6 +311,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 $this->em->remove($address);
                 $this->em->flush();
             }
+        }
+        if ($beneficiary->isFlying()){
+            $beneficiary->getMembership()->setFlying(true);
         }
         if (!$beneficiary->getId())
             $this->eventDispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));

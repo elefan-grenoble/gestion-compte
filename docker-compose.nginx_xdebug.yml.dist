@@ -66,11 +66,12 @@ services:
     depends_on:
       - database
 
-#  keycloak:
-#    image: jboss/keycloak:16.1.1
-#    container_name: keycloak
-#    environment:
-#      - KEYCLOAK_USER=admin
-#      - KEYCLOAK_PASSWORD=admin
-#    ports:
-#      - "8081:8080"
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=h2
+    ports:
+      - "8081:8080"
