@@ -132,13 +132,14 @@ class KeycloakAuthenticator extends SocialAuthenticator
         //user not exist in database
         $beneficiary = new Beneficiary();
 
-        // co_member
+        //populate new beneficiary
+        $this->updateBeneficiary($keycloakUser,$beneficiary);
+
+        // does he have a co_member ?
         $is_co_member = $this->updateCoMembership($keycloakUser,$beneficiary);
         if (!$is_co_member){
             $this->createMembership($beneficiary,$this->getKeycloakUserAttribute($keycloakUser,'member_number',1));
         }
-
-        $this->updateBeneficiary($keycloakUser,$beneficiary);
 
         $beneficiary->setOpenId($keycloakUser->getId());
         $beneficiary->getUser()->setEnabled(true);
