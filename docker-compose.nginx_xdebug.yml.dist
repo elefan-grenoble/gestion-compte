@@ -36,7 +36,6 @@ services:
       - "8000:80"
     volumes:
       - .:/var/www/site
-      - /tmp/:/var/www/site/var/cache
     restart: always
     depends_on:
       - database
@@ -69,6 +68,8 @@ services:
   keycloak:
     image: jboss/keycloak:16.1.1
     container_name: keycloak
+    volumes:
+     - .docker/keycloak/data:/opt/jboss/keycloak/standalone/data/
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
