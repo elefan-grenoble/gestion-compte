@@ -9,6 +9,7 @@ RUN dpkg-reconfigure --frontend noninteractive tzdata
 RUN apt-get update && apt-get install -y \
     unzip \
     locales \
+    locales-all \
     libpng-dev \
     libfreetype6-dev \
     libjpeg-dev \

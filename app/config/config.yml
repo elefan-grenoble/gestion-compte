@@ -7,14 +7,15 @@ imports:
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-  locale: fr_FR.utf8
+  locale: fr_FR
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   github_repo_url: 'elefan-grenoble/gestion-compte'
-  github_current_release: 'v1.45.6'
+  github_current_release: 'v1.45.7'  # x-release-please-version
 
 framework:
+  translator: { fallbacks: ['%locale%'] }
   secret: '%secret%'
   router:
     resource: '%kernel.project_dir%/app/config/routing.yml'
@@ -24,6 +25,7 @@ framework:
   validation: { enable_annotations: true }
   templating:
     engines: ['twig']
+  default_locale: '%locale%'
   trusted_hosts: ~
   session:
     # https://symfony.com/doc/current/reference/configuration/framework.html#handler-id

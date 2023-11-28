@@ -2,14 +2,13 @@
 
 namespace AppBundle\DataFixtures\ORM;
 
-use _PHPStan_d5c599c96\Nette\Utils\DateTime;
 use AppBundle\DataFixtures\FixturesConstants;
 use AppBundle\DataFixtures\FixtureTools;
 use AppBundle\Entity\OpeningHour;
 use AppBundle\Entity\OpeningHourKind;
+use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;

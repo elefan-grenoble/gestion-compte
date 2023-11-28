@@ -22,22 +22,16 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BeneficiaryType extends AbstractType
 {
+    private $use_fly_and_fixed;
+    private $fly_and_fixed_entity_flying;
     private $tokenStorage;
-    /**
-     * @var ValidatorInterface
-     */
     private $validator;
-    /**
-     * @var EntityManager
-     */
-    private $em;
-    /**
-     * @var BeneficiaryInitializationSubscriber
-     */
     private $beneficiaryInitializationSubscriber;
 
-    public function __construct(TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->fly_and_fixed_entity_flying = $fly_and_fixed_entity_flying;
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
         $this->beneficiaryInitializationSubscriber = $beneficiaryInitializationSubscriber;
@@ -65,15 +59,17 @@ class BeneficiaryType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
             $form = $event->getForm();
-            if (is_object($user)&&($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
-                $form->add('flying', ChoiceType::class, array(
-                    'choices'  => array(
-                        'Oui' => true,
-                        'Non' => false,
-                    ),
-                    'required' => true,
-                    'label' => 'Equipe volante'
-                ));
+            if (is_object($user) && ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
+                if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {
+                    $form->add('flying', ChoiceType::class, array(
+                        'choices'  => array(
+                            'Oui' => true,
+                            'Non' => false,
+                        ),
+                        'required' => true,
+                        'label' => 'Equipe volante'
+                    ));
+                }
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
                     'choice_label' => 'name',
