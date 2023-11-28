@@ -88,7 +88,7 @@ class CommissionController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $current_app_user->getBeneficiary();
 
-        if (! $current_app_user->hasRole('ROLE_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->hasRole('ROLE_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 
