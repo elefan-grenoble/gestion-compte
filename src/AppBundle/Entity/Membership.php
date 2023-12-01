@@ -375,7 +375,7 @@ class Membership
     /**
      * Set withdrawnDate
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return Membership
      */
@@ -790,5 +790,4 @@ class Membership
             return $membershipShiftExemption->isCurrent($date);
         });
     }
-
 }

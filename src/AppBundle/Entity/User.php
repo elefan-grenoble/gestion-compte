@@ -54,7 +54,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "DESC"})
+     * @OrderBy({"createdAt" = "DESC"})
      */
     private $annotations;
 
