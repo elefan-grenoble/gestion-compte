@@ -10,6 +10,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -69,6 +70,11 @@ class BeneficiaryType extends AbstractType
                         'required' => true,
                         'label' => 'Equipe volante'
                     ));
+                } else {
+                    $form->add('flying', HiddenType::class, [
+                        'data' => '0',
+                        'label' => false
+                    ]);
                 }
                 $form->add('commissions', EntityType::class, array(
                     'class' => 'AppBundle:Commission',
