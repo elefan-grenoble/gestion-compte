@@ -327,40 +327,42 @@
         {% endif %}
 
         <!-- Actions super admin (supprimer le membre ; adhésions enregistrées) -->
-        {% if is_granted("ROLE_SUPER_ADMIN") and not oidc_enable %}
-            <li id="super">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_admin_open is defined and frontend_cookie.user_show.super_admin_open %}active{% endif %}">
-                    <i class="material-icons">build</i>Actions super admin
-                </div>
-                <div class="collapsible-body white">
-                    {{ form_start(delete_form) }}
-                    {{ form_widget(delete_form) }}
-                    <a href="#delete-member-confirmation-modal" class="modal-trigger btn red">
-                        <i class="material-icons left">delete</i>Supprimer le compte
-                    </a>
-                    <div id="delete-member-confirmation-modal" class="modal">
-                        <div class="modal-content">
-                            <h5>
-                                <i class="material-icons left small">delete</i>Suppression du compte membre
-                            </h5>
-                            <p>Attention, vous êtes sur le point de <strong>supprimer</strong> le compte du membre.</p>
-                            <p>Cette action est <strong>irréversible</strong>.</p>
-                            {% if not member.withdrawn %}
-                                <p>Le compte de ce membre n'est pas fermé. Ne voulez-vous pas plutôt "Fermer le compte" ?</p>
-                            {% endif %}
-                        </div>
-                        <div class="modal-footer">
-                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                            <button type="submit" class="btn waves-effect waves-light orange">
-                                <i class="material-icons left">check</i>Je sais ce que je fais !
-                            </button>
-                        </div>
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+            {% if not oidc_enable %}
+                <li id="super">
+                    <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_admin_open is defined and frontend_cookie.user_show.super_admin_open %}active{% endif %}">
+                        <i class="material-icons">build</i>Actions super admin
                     </div>
-                    {{ form_end(delete_form) }}
+                    <div class="collapsible-body white">
+                        {{ form_start(delete_form) }}
+                        {{ form_widget(delete_form) }}
+                        <a href="#delete-member-confirmation-modal" class="modal-trigger btn red">
+                            <i class="material-icons left">delete</i>Supprimer le compte
+                        </a>
+                        <div id="delete-member-confirmation-modal" class="modal">
+                            <div class="modal-content">
+                                <h5>
+                                    <i class="material-icons left small">delete</i>Suppression du compte membre
+                                </h5>
+                                <p>Attention, vous êtes sur le point de <strong>supprimer</strong> le compte du membre.</p>
+                                <p>Cette action est <strong>irréversible</strong>.</p>
+                                {% if not member.withdrawn %}
+                                    <p>Le compte de ce membre n'est pas fermé. Ne voulez-vous pas plutôt "Fermer le compte" ?</p>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                <button type="submit" class="btn waves-effect waves-light orange">
+                                    <i class="material-icons left">check</i>Je sais ce que je fais !
+                                </button>
+                            </div>
+                        </div>
+                        {{ form_end(delete_form) }}
 
-                    {% include "member/_partial/recorded_registrations.html.twig" %}
-                </div>
-            </li>
+                        {% include "member/_partial/recorded_registrations.html.twig" %}
+                    </div>
+                </li>
+            {% endif %}
         {% endif %}
 
         <!-- Informations sur le membre -->

@@ -60,14 +60,12 @@ class CommissionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em->persist($commission);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
 
             return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
-
         }
 
         return $this->render('admin/commission/new.html.twig', array(
@@ -88,7 +86,8 @@ class CommissionController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $current_app_user->getBeneficiary();
 
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->hasRole('ROLE_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
+        // only super admin, admin, or commission owner can edit commission
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && !$current_app_user->hasRole('ROLE_ADMIN') && !$beneficiary->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 

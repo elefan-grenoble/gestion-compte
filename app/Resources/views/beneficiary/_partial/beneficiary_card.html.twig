@@ -30,6 +30,16 @@
                         <button type="submit" class="btn btn-floating waves-effect waves-light" title="éditer"><i class="material-icons">mode_edit</i></button>
                     </form>
                 </div>
+            {% endif %}
+            {% if app.user.hasRole('ROLE_USER_MANAGER') %}
+                {% if not isTemporaryEmail(beneficiary.user.email) %}
+                    <div class="card-btn">
+                        <a href="{{ path('mail_edit_one_beneficiary', { 'id': beneficiary.id }) }}"
+                        class="btn btn-floating waves-effect waves-light teal" title="écrire à {{ beneficiary.user.firstname }}">
+                            <i class="material-icons">email</i>
+                        </a>
+                    </div>
+                {% endif %}
                 {% if not beneficiary.isMain %}{# implies that maximum_nb_of_beneficiaries_in_membership > 1 #}
                     <div class="card-btn">
                         <a href="{{ path('beneficiary_set_main', { 'id': beneficiary.id }) }}" class="modal-trigger btn btn-floating waves-effect waves-light purple" title="mettre en bénéficiaire principal">
@@ -37,36 +47,26 @@
                         </a>
                     </div>
                 {% endif %}
-                {% if is_granted("ROLE_ADMIN") %}
-                    {% if not beneficiary.isMain and detach_form is defined %}
-                        <div class="card-btn">
-                            <a href="#detach-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="séparer le bénéficiaire">
-                                <i class="material-icons">call_split</i>
-                            </a>
-                        </div>
-                    {% endif %}
-                    {% if not beneficiary.isMain and delete_form is defined %}
-                        <div class="card-btn">
-                            <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le bénéficiaire">
-                                <i class="material-icons">remove</i>
-                            </a>
-                        </div>
-                    {% endif %}
-                {% endif %}
             {% endif %}
-            {% if app.user.hasRole('ROLE_USER_MANAGER') or is_granted("edit", beneficiary.membership) %}
+            {% if is_granted("ROLE_ADMIN") %}
                 <div class="card-btn">
                     <a href="{{ path('homepage', { '_login_as':  beneficiary.user.username }) }}"
-                       class="btn btn-floating waves-effect waves-light grey" style="padding-top: 6px"
-                       title="Se connecter comme {{ beneficiary.user.username }}">
+                    class="btn btn-floating waves-effect waves-light grey" style="padding-top: 6px"
+                    title="Se connecter comme {{ beneficiary.user.username }}">
                         {% image '@AppBundle/Resources/public/img/emoticons/072-ninja.svg' %}<img height="22px" class="emoticon" src="{{ asset_url }}" alt="ninja mode">{% endimage %}
                     </a>
                 </div>
-                {% if not isTemporaryEmail(beneficiary.user.email) %}
+                {% if not beneficiary.isMain and detach_form is defined %}
                     <div class="card-btn">
-                        <a href="{{ path('mail_edit_one_beneficiary', { 'id': beneficiary.id }) }}"
-                           class="btn btn-floating waves-effect waves-light teal" title="écrire à {{ beneficiary.user.firstname }}">
-                            <i class="material-icons">email</i>
+                        <a href="#detach-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="séparer le bénéficiaire">
+                            <i class="material-icons">call_split</i>
+                        </a>
+                    </div>
+                {% endif %}
+                {% if not beneficiary.isMain and delete_form is defined %}
+                    <div class="card-btn">
+                        <a href="#remove-beneficiary-{{ beneficiary.id }}" class="modal-trigger btn btn-floating waves-effect waves-light red" title="supprimer le bénéficiaire">
+                            <i class="material-icons">remove</i>
                         </a>
                     </div>
                 {% endif %}
