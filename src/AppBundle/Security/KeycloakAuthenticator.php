@@ -28,6 +28,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Exception;
 
 /**
  * Class KeycloakAuthenticator
@@ -71,7 +74,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $this->container = $container;
     }
 
-    public function start(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $authException = null)
+    public function start(Request $request, AuthenticationException $authException = null)
     {
         return new RedirectResponse(
             '/oauth/login', // might be the site, where users choose their oauth provider
@@ -153,7 +156,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
      * @param Beneficiary $beneficiary
      * @return bool
      */
-    private function updateCoMembership(KeycloakResourceOwner $keycloakUser,Beneficiary $beneficiary) : bool
+    private function updateCoMembership(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary) : bool
     {
         $is_co_member = false;
         $co_member = $this->getKeycloakUserAttribute($keycloakUser,'co_member_number'); //co_member_number
@@ -264,9 +267,9 @@ class KeycloakAuthenticator extends SocialAuthenticator
      * @param KeycloakResourceOwner $keycloakUser
      * @param Beneficiary $beneficiary
      * @return Void
-     * @throws \Exception
+     * @throws Exception
      */
-    private function updateBeneficiary(KeycloakResourceOwner $keycloakUser,Beneficiary $beneficiary) : Void
+    private function updateBeneficiary(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary) : Void
     {
 
         $mandatory = ['firstname','lastname','member_number'];
@@ -279,7 +282,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
              'flying'=>'setFlying'] as $key => $action){
             $value = $this->getKeycloakUserAttribute($keycloakUser,$key);
             if (!$value && in_array($key,$mandatory)) {
-                throw new \Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
+                throw new Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
                     'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
             }elseif (!$value && isset($default[$key]))
             {
@@ -387,7 +390,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
 
     }
 
-    private function getKeycloakUserAttribute(KeycloakResourceOwner $keycloakUser,$attributeKey, $defaultValue = null)
+    private function getKeycloakUserAttribute(KeycloakResourceOwner $keycloakUser, $attributeKey, $defaultValue = null)
     {
         $map = $this->container->getParameter('oidc_user_attributes_map');
         $array = $keycloakUser->toArray();
@@ -421,14 +424,14 @@ class KeycloakAuthenticator extends SocialAuthenticator
         return array_keys($keycloakUser->toArray()) ;
     }
 
-    public function onAuthenticationFailure(Request $request, \Symfony\Component\Security\Core\Exception\AuthenticationException $exception)
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
         $message = strtr($exception->getMessageKey(), $exception->getMessageData());
 
         return new Response($message, Response::HTTP_FORBIDDEN);
     }
 
-    public function onAuthenticationSuccess(Request $request, \Symfony\Component\Security\Core\Authentication\Token\TokenInterface $token, $providerKey)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         $targetUrl = $this->router->generate('homepage');
 
