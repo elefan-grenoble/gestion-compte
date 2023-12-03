@@ -76,10 +76,22 @@ class Beneficiary
 
     /**
      * @var Membership
-     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries", cascade={"persist"})
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
+
+    /**
+     * @ORM\Column(name="openid", type="string", length=255)
+     * @var string $openid
+     */
+    protected $openid;
+
+    /**
+     * @ORM\Column(name="openid_member_number", type="string", length=255)
+     * @var string $openid_member_number
+     */
+    protected $openid_member_number;
 
     /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter", cascade={"remove"})
@@ -183,7 +195,10 @@ class Beneficiary
      */
     public function getMemberNumber()
     {
-        return $this->getMembership()->getMemberNumber();
+        $membership = $this->getMembership();
+        if (!$membership)
+            return null;
+        return $membership->getMemberNumber();
     }
 
     /**
@@ -288,6 +303,40 @@ class Beneficiary
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getOpenId() {
+        return $this->openid;
+    }
+
+    /**
+     * @param string $id
+     * @return $this
+     */
+    public function setOpenId(string $id) : Beneficiary
+    {
+        $this->openid = $id;
+        return $this;
+    }
+    /**
+     * @return string
+     */
+    public function getOpenIdMemberNumber() : ?string
+    {
+        return $this->openid_member_number;
+    }
+
+    /**
+     * @param string $number
+     * @return $this
+     */
+    public function setOpenIdMemberNumber(string $number) : Beneficiary
+    {
+        $this->openid_member_number = $number;
+        return $this;
     }
 
     /**

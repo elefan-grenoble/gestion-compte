@@ -27,10 +27,4 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 # Installation des extensions nécessaires
 RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
 
-# Copy custom php.ini file to the default location
-COPY php.ini /usr/local/etc/php/php.ini
-
-WORKDIR /app
-COPY . .
-
-RUN COMPOSER_MEMORY_LIMIT=2G composer install --no-interaction --optimize-autoloader
+WORKDIR /var/www/app/

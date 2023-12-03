@@ -16,6 +16,7 @@ class MembershipVoter extends Voter
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
+    const BOOK = 'book';
     const OPEN = 'open';
     const CLOSE = 'close';
     const FREEZE = 'freeze';
@@ -41,6 +42,7 @@ class MembershipVoter extends Voter
         if (!in_array($attribute, array(
                 self::VIEW,
                 self::EDIT,
+                self::BOOK,
                 self::OPEN,
                 self::CLOSE,
                 self::ROLE_REMOVE,
@@ -73,17 +75,20 @@ class MembershipVoter extends Voter
             return false;
         }
 
-        // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_USER_MANAGER can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
-            return true;
+        if (!$this->container->getParameter("oidc_enable"))
+        {
+            // ROLE_SUPER_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_USER_MANAGER can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+                return true;
+            }
         }
 
         // you know $subject is a Post object, thanks to supports
@@ -95,6 +100,7 @@ class MembershipVoter extends Voter
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
+            case self::BOOK:
             case self::FREEZE_CHANGE:
                 if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject) {
                     return true;
@@ -129,6 +135,10 @@ class MembershipVoter extends Voter
 
     private function canEdit(Membership $subject, TokenInterface $token)
     {
+        if ($this->container->getParameter("oidc_enable")){
+            return false;
+        }
+
         $user = $token->getUser();
 
         if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership

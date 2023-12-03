@@ -36,6 +36,8 @@
 /.idea
 /*.iml
 LICENSE
+docker-compose.yml
+/.docker/keycloak/data
 
 .!
 .buildpath

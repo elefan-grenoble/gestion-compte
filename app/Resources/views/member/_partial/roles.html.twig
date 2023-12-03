@@ -6,7 +6,7 @@
     {% set roles_list = ['ROLE_ADMIN', 'ROLE_USER_MANAGER', 'ROLE_FINANCE_MANAGER', 'ROLE_SHIFT_MANAGER', 'ROLE_PROCESS_MANAGER'] %}
     
     {% for role in roles_list %}
-        {% if role == 'ROLE_ADMIN' and not is_granted("ROLE_SUPER_ADMIN") %}
+        {% if oidc_enable or role == 'ROLE_ADMIN' and not is_granted("ROLE_SUPER_ADMIN") %}
             <button class="btn {% if beneficiary.user.hasRole(role) %}light-green{% else %}blue-grey{% endif %}" title="Vous n'avez pas les droits pour modifier ce rôle">
                 {{ names[role] }}
                 <i class="material-icons right">{{ icons[role] }}</i>

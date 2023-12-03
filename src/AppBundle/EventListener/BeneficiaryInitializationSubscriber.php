@@ -45,6 +45,7 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
             if (!$beneficiary->getUser()) {
                 $user = new User();
                 $beneficiary->setUser($user);
+                $user->setBeneficiary($beneficiary);
             }
 
             if (!$beneficiary->getUser()->getUsername()) {

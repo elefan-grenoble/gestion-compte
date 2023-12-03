@@ -15,10 +15,12 @@
             </h4>
 
             {% if is_granted("ROLE_USER_VIEWER") %}
-                <h6><i class="material-icons">person_add</i>&nbsp;Adhésions</h6>
-                <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
-                    <i class="material-icons left">folder_shared</i>Adhésion / ré-adhésion
-                </a>
+                {% if not oidc_enable %}
+                    <h6><i class="material-icons">person_add</i>&nbsp;Adhésions</h6>
+                    <a href="{{ path("user_office_tools") }}" class="waves-effect waves-light btn teal">
+                        <i class="material-icons left">folder_shared</i>Adhésion / ré-adhésion
+                    </a>
+                {% endif %}
             {% endif %}
 
             {% if is_granted("ROLE_USER_MANAGER") %}
@@ -31,10 +33,11 @@
                 </a>
             {% endif %}
             {% if is_granted("ROLE_ADMIN") %}
-                <br />
-                <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">call_merge</i>Joindre deux comptes
-                </a>
+                {% if not oidc_enable %}
+                    <a href="{{ path("member_join") }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">call_merge</i>Joindre deux comptes
+                    </a>
+                {% endif %}
                 <a href="{{ path("admin_commissions") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">tune</i>Gérer les commissions
                 </a>
@@ -127,16 +130,18 @@
             {% endif %}
 
             {% if is_granted("ROLE_FINANCE_MANAGER") %}
-                <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
-                <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
-                    <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
-                </a>
-                <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
-                    <i class="material-icons left">settings_ethernet</i>Paiements helloasso
-                </a>
-                <a href="{{ path("helloasso_browser") }}" class="waves-effect waves-light btn indigo">
-                    <i class="material-icons left">contact_mail</i>Campagnes helloasso
-                </a>
+                {% if not oidc_enable %}
+                    <h6><i class="material-icons">attach_money</i>&nbsp;Finances</h6>
+                    <a href="{{ path("registrations") }}" class="waves-effect waves-light btn indigo">
+                        <i class="material-icons left">attach_money</i>Gérer les Adhésions / Ré-adhésions
+                    </a>
+                    <a href="{{ path("helloasso_payments") }}" class="waves-effect waves-light btn indigo">
+                        <i class="material-icons left">settings_ethernet</i>Paiements helloasso
+                    </a>
+                    <a href="{{ path("helloasso_browser") }}" class="waves-effect waves-light btn indigo">
+                        <i class="material-icons left">contact_mail</i>Campagnes helloasso
+                    </a>
+                {% endif %}
             {% endif %}
 
             {% if display_keys_shop %}
@@ -173,25 +178,31 @@
             {% if is_granted("ROLE_SUPER_ADMIN") %}
                 <h5>Actions super admin</h5>
                 <h6>Membres</h6>
-                <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">file_upload</i>Importer des adhérents (CSV)
-                </a>
+                {% if not oidc_enable %}
+                    <a href="{{ path("user_import_csv") }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">file_upload</i>Importer des adhérents (CSV)
+                    </a>
+                {% endif %}
                 <a href="{{ path("admin_emails_csv") }}" class="waves-effect waves-light btn">
                     <i class="material-icons left">file_download</i>Exporter les adhérents (CSV)
                 </a>
 
-                <h6>Admins</h6>
-                <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple">
-                    <i class="material-icons left">add</i>Ajouter un admin
-                </a>
+                {% if not oidc_enable %}
+                    <h6>Admins</h6>
+                    <a href="{{ path("user_install_admin") }}" class="waves-effect waves-light btn deep-purple">
+                        <i class="material-icons left">add</i>Ajouter un admin
+                    </a>
+                {% endif %}
 
-                <h6>Divers</h6>
-                <a href="{{ path("client_list") }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">vpn_key</i>Gérer les clients Oauth
-                </a>
-                <a href="{{ path("service_list") }}" class="waves-effect waves-light btn">
-                    <i class="material-icons left">extension</i>Gérer les services
-                </a>
+                {% if not oidc_enable %}
+                    <h6>Divers</h6>
+                    <a href="{{ path("client_list") }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">vpn_key</i>Gérer les clients Oauth
+                    </a>
+                    <a href="{{ path("service_list") }}" class="waves-effect waves-light btn">
+                        <i class="material-icons left">extension</i>Gérer les services
+                    </a>
+                {% endif %}
             {% endif %}
         </div>
     </div>

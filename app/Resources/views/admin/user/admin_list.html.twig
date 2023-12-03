@@ -43,20 +43,24 @@
                         <td></td>
                     {% endif %}
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
-                        <td>
-                            {{ form_start(delete_forms[admin.id]) }}
-                            {{ form_widget(delete_forms[admin.id]) }}
-                            {% if admin.beneficiary %}
-                                <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small" title="Enlever le rôle">
-                                    <i class="material-icons left">arrow_downward</i>
-                                </a>
-                            {% else %}
-                                <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cet utilisateur ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer l'utilisateur ⚠️">
-                                    <i class="material-icons left">delete</i>
-                                </a>
-                            {% endif %}
-                            {{ form_end(delete_forms[admin.id]) }}
-                        </td>
+                        {% if not oidc_enable %}
+                            <td>
+                                {{ form_start(delete_forms[admin.id]) }}
+                                {{ form_widget(delete_forms[admin.id]) }}
+                                {% if admin.beneficiary %}
+                                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small" title="Enlever le rôle">
+                                        <i class="material-icons left">arrow_downward</i>
+                                    </a>
+                                {% else %}
+                                    <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cet utilisateur ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer l'utilisateur ⚠️">
+                                        <i class="material-icons left">delete</i>
+                                    </a>
+                                {% endif %}
+                                {{ form_end(delete_forms[admin.id]) }}
+                            </td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
                     {% endif %}
                 </tr>
             {% endfor %}
