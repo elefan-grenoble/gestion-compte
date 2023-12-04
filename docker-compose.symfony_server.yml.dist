@@ -55,6 +55,18 @@ services:
       PMA_PASSWORD: secret
       UPLOAD_LIMIT: 50000000
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - database
+
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: keycloak
+    volumes:
+    - .docker/keycloak/data:/opt/jboss/keycloak/standalone/data/
+    environment:
+    - KEYCLOAK_USER=admin
+    - KEYCLOAK_PASSWORD=admin
+    - DB_VENDOR=h2
+    ports:
+    - "8080:8080"
