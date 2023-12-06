@@ -73,9 +73,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
                 ->leftJoin('s.shifter', 'b')
                 ->addSelect('b')
                 ->leftJoin('b.formations', 'bf')
-                ->addSelect('bf')
-                ->leftJoin('b.shifts', 'bs')  // for Beneficiary.isNew()
-                ->addSelect('bs');
+                ->addSelect('bf');
+                // ->leftJoin('b.shifts', 'bs')  // for Beneficiary.isNew()
+                // ->addSelect('bs');
         }
 
         $qb->orderBy('s.start', 'ASC');

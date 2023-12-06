@@ -8,7 +8,7 @@
 
         {# New week --------- #}
         {% if not date and previousWeekIndex != weekIndex %}
-        {% include "booking/_partial/week_title.html.twig" with { first_shift: buckets|first } %}
+            {% include "booking/_partial/week_title.html.twig" with { first_shift: buckets|first } %}
             {% set previousWeekIndex = weekIndex %}
         {% endif %}
 
