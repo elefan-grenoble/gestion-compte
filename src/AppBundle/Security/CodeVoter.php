@@ -99,7 +99,7 @@ class CodeVoter extends Voter
         $now = new \DateTime('now');
         if ($this->canView($code, $user)) { //can add only if last code can be seen
             if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d') != ($now->format('Y m d'))) { // on ne change pas son propre code
-                if ($this->isLocationOk()) { // et si l'utilisateur est physiquement à l'épicerie
+                if ($this->container->get(PlaceIP::class)->isLocationOk()) { // et si l'utilisateur est physiquement à l'épicerie
                     return true;
                 }
             }
@@ -144,15 +144,5 @@ class CodeVoter extends Voter
     private function canDelete(Code $code, User $user)
     {
         return false;
-    }
-
-    //\AppBundle\Security\UserVoter::isLocationOk DUPLICATED
-    private function isLocationOk()
-    {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $checkIps = $this->container->getParameter('enable_place_local_ip_address_check');
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',', $ips);
-        return (isset($checkIps) and !$checkIps) or (isset($ip) and in_array($ip, $ips));
     }
 }

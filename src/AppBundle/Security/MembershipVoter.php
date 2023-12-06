@@ -96,7 +96,7 @@ class MembershipVoter extends Voter
             case self::ACCESS_TOOLS:
             case self::BENEFICIARY_ADD:
             case self::CREATE:
-                return $this->isLocationOk();
+                return $this->container->get(PlaceIP::class)->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
@@ -156,15 +156,5 @@ class MembershipVoter extends Voter
         }
 
         return false;
-
-    }
-
-    private function isLocationOk()
-    {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $checkIps = $this->container->getParameter('enable_place_local_ip_address_check');
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',', $ips);
-        return (isset($checkIps) and !$checkIps) or (isset($ip) and in_array($ip, $ips));
     }
 }
