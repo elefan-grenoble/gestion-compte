@@ -2,6 +2,8 @@
 //DependencyInjection/SearchUserFormHelper.php
 namespace AppBundle\Service;
 
+use AppBundle\Repository\CommissionRepository;
+use AppBundle\Repository\FormationRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -230,7 +232,11 @@ class SearchUserFormHelper
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
-                'label'=>'Avec le(s) formations(s)'
+                'label' =>'Avec le(s) formations(s)',
+                'query_builder' => function(FormationRepository $repository) {
+                    $qb = $repository->createQueryBuilder('f');
+                    return $qb->orderBy('f.name', 'ASC');
+                }
             ])
             ->add('or_and_exp_formations', ChoiceType::class, [
                 'label' => 'Toutes ?',
@@ -245,21 +251,33 @@ class SearchUserFormHelper
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
-                'label'=>'Dans la/les commissions(s)'
+                'label'=>'Dans la/les commissions(s)',
+                'query_builder' => function(CommissionRepository $repository) {
+                    $qb = $repository->createQueryBuilder('c');
+                    return $qb->orderBy('c.name', 'ASC');
+                }
             ])
             ->add('not_formations', EntityType::class, [
                 'class' => 'AppBundle:Formation',
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
-                'label'=>'Sans le(s) formations(s)'
+                'label'=>'Sans le(s) formations(s)',
+                'query_builder' => function(FormationRepository $repository) {
+                    $qb = $repository->createQueryBuilder('f');
+                    return $qb->orderBy('f.name', 'ASC');
+                }
             ])
             ->add('not_commissions', EntityType::class, [
                 'class' => 'AppBundle:Commission',
                 'choice_label' => 'name',
                 'multiple' => true,
                 'required' => false,
-                'label'=>'Hors de la/les commissions(s)'
+                'label'=>'Hors de la/les commissions(s)',
+                'query_builder' => function(CommissionRepository $repository) {
+                    $qb = $repository->createQueryBuilder('c');
+                    return $qb->orderBy('c.name', 'ASC');
+                }
             ]);
         }
         $formBuilder->add('action', HiddenType::class, [
