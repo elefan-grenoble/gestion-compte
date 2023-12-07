@@ -196,7 +196,7 @@ parameters:
     oidc_enable: false
     oidc_profile_custom_message : 'vos informations personnelles sont éditables <a href="http://localhost:8081/"> ici </a>'
     oidc_issuer: 'http://host.docker.internal:8081/auth'
-    oidc_realm: master
+    oidc_realm: elefan
     oidc_client_id: elefan
     oidc_client_secret: secret
     oidc_user_attributes_map:
