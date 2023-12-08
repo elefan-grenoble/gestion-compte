@@ -5,6 +5,8 @@ namespace AppBundle\Form;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\User;
 use AppBundle\EventListener\BeneficiaryInitializationSubscriber;
+use AppBundle\Repository\CommissionRepository;
+use AppBundle\Repository\FormationRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -88,7 +90,11 @@ class BeneficiaryType extends AbstractType
                     'choice_label' => 'name',
                     'multiple' => true,
                     'required' => false,
-                    'label' => 'Formation(s)'
+                    'label' => 'Formation(s)',
+                    'query_builder' => function(FormationRepository $repository) {
+                        $qb = $repository->createQueryBuilder('f');
+                        return $qb->orderBy('f.name', 'ASC');
+                    }
                 ));
             } else if (is_object($user) && ($user->getBeneficiary() && count($user->getBeneficiary()->getOwnedCommissions()))) {
                 $form->add('commissions', EntityType::class, array(
@@ -97,7 +103,11 @@ class BeneficiaryType extends AbstractType
                     'choice_label' => 'name',
                     'multiple' => true,
                     'required' => true,
-                    'label' => 'Commission(s) / College(s)'
+                    'label' => 'Commission(s) / College(s)',
+                    'query_builder' => function(CommissionRepository $repository) {
+                        $qb = $repository->createQueryBuilder('c');
+                        return $qb->orderBy('c.name', 'ASC');
+                    }
                 ));
             }
         });
