@@ -30,6 +30,9 @@
     </div>
 
     {{ form_widget(form.content) }}
+
+    {% include "admin/member/_partial/created_updated_card.html.twig" with { item: emailTemplate } %}
+
     <div>
         <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
