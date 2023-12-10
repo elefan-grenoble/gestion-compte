@@ -1,0 +1,36 @@
+<div class="row">
+    <div class="col s6 input-field">
+        {{ form_label(form.name) }}
+        {{ form_errors(form.name) }}
+        {{ form_widget(form.name) }}
+    </div>
+    <div class="col s6 input-field">
+        {{ form_errors(form.type) }}
+        {{ form_widget(form.type) }}
+        {{ form_label(form.type) }}
+    </div>
+    <div id='api_key'  class="col s6 input-field">
+        {{ form_label(form.igloohome_api_key) }}
+        {{ form_errors(form.igloohome_api_key) }}
+        {{ form_widget(form.igloohome_api_key) }}
+    </div>
+    <div id='lock_id' class="col s6 input-field">
+        {{ form_label(form.igloohome_lock_id) }}
+        {{ form_errors(form.igloohome_lock_id) }}
+        {{ form_widget(form.igloohome_lock_id) }}
+    </div>
+    <div class="col s12 input-field">
+        {{ form_label(form.description) }}
+        {{ form_errors(form.description) }}
+        {{ form_widget(form.description) }}
+    </div>
+    <div class="col s6 input-field">
+        <p>
+            {{ form_errors(form.enabled) }}
+            <label>
+                {{ form_widget(form.enabled) }}
+                <span>{{ form_label(form.enabled) }}</span>
+            </label>
+        </p>
+    </div>
+</div>

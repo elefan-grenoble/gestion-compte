@@ -1,0 +1,29 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Ajouter un équipement à code - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_codedevice_index') }}"><i class="material-icons">list</i>&nbsp;Liste des équipements à code</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter
+{% endblock %}
+
+{% block content %}
+    <h4>Ajout d'un équipement à code</h4>
+
+    {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form) }}
+    </div>
+    {% include "/admin/codedevice/_form.html.twig" with { form: form } %}
+    <div>
+        <a href="{{ path('admin_codedevice_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+    </div>
+    {{ form_end(form) }}
+{% endblock %}
+
+{% block javascripts %}
+    {% include "/admin/codedevice/_js.twig" %}
+{% endblock %}
