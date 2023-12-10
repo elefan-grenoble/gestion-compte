@@ -174,7 +174,6 @@ parameters:
     opening_hour_open_closed_header_closed_message: "Fermé"
 
     # Code generation
-    code_generation_enabled: true
     display_keys_shop: true
     wiki_keys_url: ~
 
@@ -187,7 +186,6 @@ parameters:
     logging.swiftmailer.level: 'critical'
     logging.swiftmailer.recipient: ~
 
-    code_generation_enabled: true
     display_freeze_account: true
     display_freeze_account_false_message: "Le gel de compte n'est pas autorisé."
     display_keys_shop: true

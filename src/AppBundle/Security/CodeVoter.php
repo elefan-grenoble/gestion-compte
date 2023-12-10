@@ -16,8 +16,8 @@ class CodeVoter extends Voter
     const GENERATE = 'generate';
     const EDIT = 'edit';
     const DELETE = 'delete';
-    const CLOSE = 'close';
-    const OPEN = 'open';
+    const DEACTIVATE = 'deactivate';
+    const ACTIVATE = 'activate';
 
     private $decisionManager;
     private $container;
@@ -31,7 +31,7 @@ class CodeVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::GENERATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE))) {
+        if (!in_array($attribute, array(self::GENERATE, self::EDIT, self::VIEW, self::DELETE, self::ACTIVATE, self::DEACTIVATE))) {
             return false;
         }
 
@@ -54,9 +54,6 @@ class CodeVoter extends Voter
 
         // ROLE_SUPER_ADMIN can do anything! The power!
         if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            if ($attribute == self::GENERATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
-                return false;
-            }
             return true;
         }
 
@@ -67,46 +64,27 @@ class CodeVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::VIEW:
-            case self::CLOSE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_CODE_MANAGER'))) {
                     return true;
                 }
                 return $this->canView($code, $user);
             case self::GENERATE:
-                if (!$this->container->getParameter('code_generation_enabled')) {
-                    return false;
-                }
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_CODE_MANAGER'))) {
                     return true;
                 }
-                return $this->canAdd($code, $user);
-            case self::OPEN:
+            case self::ACTIVATE:
+            case self::DEACTIVATE:
             case self::EDIT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, array('ROLE_CODE_MANAGER'))) {
                     return true;
                 }
             case self::DELETE:
                 if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
                     return true;
                 }
-                return $this->canDelete($code, $user);
         }
 
         throw new \LogicException('This code should not be reached!');
-    }
-
-    private function canAdd(Code $code, User $user)
-    {
-        $now = new \DateTime('now');
-        if ($this->canView($code, $user)) { //can add only if last code can be seen
-            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d') != ($now->format('Y m d'))) { // on ne change pas son propre code
-                if ($this->container->get(PlaceIP::class)->isLocationOk()) { // et si l'utilisateur est physiquement à l'épicerie
-                    return true;
-                }
-            }
-        }
-
-        return false;
     }
 
 

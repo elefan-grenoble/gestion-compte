@@ -1,5 +1,7 @@
 <?php
 
+use Doctrine\ORM\Query\ResultSetMapping;
+
 namespace AppBundle\Repository;
 
 /**
@@ -10,4 +12,41 @@ namespace AppBundle\Repository;
  */
 class CodeRepository extends \Doctrine\ORM\EntityRepository
 {
+
+    public function findActiveCodes()
+    {
+        $qb = $this->createQueryBuilder('c')
+                   ->leftJoin('c.codeDevice', 'd')
+                   ->where('d.type != \'igloohome\' AND c.closed = 0')
+                   ->orWhere('d.type = \'igloohome\' AND c.startDate < CURRENT_TIMESTAMP() AND c.endDate > CURRENT_TIMESTAMP() AND c.closed = 0');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findOldCodes($max_codes_per_device = 10)
+    {
+        $rsm = new \Doctrine\ORM\Query\ResultSetMapping();
+        $rsm->addEntityResult('AppBundle:Code', 'c');
+        $rsm->addFieldResult('c', 'id', 'id');
+        $rsm->addFieldResult('c', 'closed', 'closed');
+        $rsm->addFieldResult('c', 'value', 'value');
+        $rsm->addFieldResult('c', 'created_at', 'createdAt');
+        $rsm->addMetaResult('c', 'registrar_id', 'registrar_id');
+        $rsm->addMetaResult('c', 'codedevice_id', 'codedevice_id');
+        $rsm->addFieldResult('c', 'description', 'description');
+        $rsm->addFieldResult('c', 'start_date', 'startDate');
+        $rsm->addFieldResult('c', 'end_date', 'endDate');
+        $query = $this->getEntityManager()->createNativeQuery('SELECT * FROM (
+                SELECT *, ROW_NUMBER() OVER (PARTITION BY codedevice_id Order by created_at DESC) AS rank
+                FROM code
+                WHERE (closed = 1) OR (
+                    codedevice_id IN (SELECT id FROM code_device WHERE type = \'igloohome\') AND (start_date > NOW() OR end_date < NOW())
+                )
+            ) Q WHERE rank <= :max_codes_per_device', $rsm)
+                           ->setParameter('max_codes_per_device', $max_codes_per_device);
+
+        return $query->getResult();
+    }
 }

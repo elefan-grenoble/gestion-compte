@@ -214,6 +214,11 @@ services:
         arguments:
             $container: "@service_container"
 
+    # codes
+    code_service:
+        class: AppBundle\Service\CodeService
+        public: true
+
     # services
     shift_service:
         class: AppBundle\Service\ShiftService

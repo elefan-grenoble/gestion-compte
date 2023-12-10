@@ -1,0 +1,88 @@
+{{ form_start(form) }}
+<div id="modal-add-code-content" class="modal-content">
+    {% if form.value is defined %}
+        <h4>Ajouter un code</h4>
+    {% else %}
+        <h4>Générer un nouveau code</h4>
+    {% endif %}
+
+    <div class="errors">
+        {{ form_errors(form) }}
+    </div>
+
+    <div class="row">
+        {% if form.value is not defined %}
+        <div class="col s12">
+            <div class="card-panel teal warning lighten-1">
+                <span class="white-text">Le code généré ne pourra pas être supprimé sans une intervention physique sur le boitier. Bien penser les dates de début et de fin ; elles ne sont pas modifiables par la suite.</span>
+            </div>
+        </div>
+        {% endif %}
+        {% if form.description is defined %}
+        <div class="input-field col s12">
+            {{ form_label(form.description) }}
+            {{ form_errors(form.description) }}
+            {{ form_widget(form.description) }}
+        </div>
+        {% endif %}
+        {% if form.value is defined %}
+        <div class="input-field col s12 m6">
+            {{ form_label(form.value) }}
+            {{ form_errors(form.value) }}
+            {{ form_widget(form.value) }}
+        </div>
+        {% endif %}
+        {% if form.generate_random_value is defined %}
+        <div class="input-field col s12 m6">
+            <p>
+                {{ form_errors(form.generate_random_value) }}
+                <label>
+                    {{ form_widget(form.generate_random_value) }}
+                    <span>{{ form.generate_random_value.vars.label }}</span>
+                </label>
+            </p>
+        </div>
+        {% endif %}
+        {% if form.deactivate_old_codes is defined %}
+        <div class="input-field col s12 m6">
+            <p>
+                {{ form_errors(form.deactivate_old_codes) }}
+                <label>
+                    {{ form_widget(form.deactivate_old_codes) }}
+                    <span>{{ form.deactivate_old_codes.vars.label }}</span>
+                </label>
+            </p>
+        </div>
+        {% endif %}
+        {% if form.start_date is defined %}
+        <div class="input-field col s12 m4">
+            {{ form_label(form.start_date.date, 'Jour de début') }}
+            {{ form_errors(form.start_date.date) }}
+            {{ form_widget(form.start_date.date, { attr: { class: 'datepicker' } }) }}
+        </div>
+        <div class="input-field col s12 m2">
+            {{ form_label(form.start_date.time, 'Heure de début') }}
+            {{ form_errors(form.start_date.time) }}
+            {{ form_widget(form.start_date.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        {% endif %}
+        {% if form.end_date is defined %}
+        <div class="input-field col s12 m4">
+            {{ form_label(form.end_date.date, 'Jour de fin') }}
+            {{ form_errors(form.end_date.date) }}
+            {{ form_widget(form.end_date.date, { attr: { class: 'datepicker' } }) }}
+        </div>
+        <div class="input-field col s12 m2">
+            {{ form_label(form.end_date.time, 'Heure de fin') }}
+            {{ form_errors(form.end_date.time) }}
+            {{ form_widget(form.end_date.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
+    <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+</div>
+{{ form_end(form) }}
