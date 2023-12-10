@@ -25,6 +25,19 @@ class CodeRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
+    public function findActiveCodesToDisplay()
+    {
+        $qb = $this->createQueryBuilder('c')
+                   ->leftJoin('c.codeDevice', 'd')
+                   ->where('d.enabled = 1')
+                   ->andwhere('(d.type != \'igloohome\' AND c.closed = 0) OR (d.type = \'igloohome\' AND c.startDate < CURRENT_TIMESTAMP() AND c.endDate > CURRENT_TIMESTAMP() AND c.closed = 0)');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+
     public function findOldCodes($max_codes_per_device = 10)
     {
         $rsm = new \Doctrine\ORM\Query\ResultSetMapping();
