@@ -22,7 +22,7 @@
         </thead>
         <tbody>
             {% for non_member in non_members %}
-                <tr>
+                <tr id="user_{{ non_member.id }}">
                     <td>
                         {% if not non_member.enabled %}
                             <i class="material-icons" title="Utilisateur désactivé">{{ member_withdrawn_material_icon }}</i>

@@ -239,13 +239,14 @@ class DynamicContent
     /**
      * Set createdBy
      *
-     * @param \AppBundle\Entity\User $createBy
+     * @param \AppBundle\Entity\User $user
      *
      * @return DynamicContent
      */
     public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
         $this->createdBy = $user;
+
         return $this;
     }
 
@@ -272,7 +273,7 @@ class DynamicContent
     /**
      * Set updatedBy
      *
-     * @param \AppBundle\Entity\User $createBy
+     * @param \AppBundle\Entity\User $user
      *
      * @return DynamicContent
      */

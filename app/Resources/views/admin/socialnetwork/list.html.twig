@@ -23,7 +23,7 @@
         </thead>
         <tbody>
         {% for socialNetwork in socialNetworks %}
-            <tr>
+            <tr id="socialnetwork_{{ socialNetwork.id }}">
                 <td>{{ socialNetwork.name }}</td>
                 <td class="center-align">
                     {% if socialNetwork.description is not empty %}

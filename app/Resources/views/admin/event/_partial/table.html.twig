@@ -17,7 +17,7 @@
     </thead>
     <tbody>
         {% for event in events %}
-            <tr>
+            <tr id="event_{{ event.id }}">
                 <td>
                     {{ event.title }}
                     {% if event.displayedHome %}⭐️{% endif %}

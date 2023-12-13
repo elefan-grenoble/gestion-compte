@@ -155,7 +155,7 @@
         </thead>
         <tbody>
         {% for member in members %}
-            <tr class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
+            <tr id="member_{{ member.id }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
                 <td class="hide-on-med-and-down">
                     {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
                 </td>

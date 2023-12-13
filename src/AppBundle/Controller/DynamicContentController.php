@@ -16,16 +16,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class DynamicContentController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * Lists all dynamic contents.
      *
@@ -83,5 +73,4 @@ class DynamicContentController extends Controller
             'form' => $form->createView()
         ));
     }
-
 }

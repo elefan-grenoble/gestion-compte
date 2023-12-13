@@ -55,7 +55,7 @@
         </thead>
         <tbody>
         {% for membershipShiftExemption in membershipShiftExemptions %}
-            <tr class="{% if membershipShiftExemption.isPast() %}grey lighten-2{% elseif membershipShiftExemption.isCurrent() %}exempted{% endif %}">
+            <tr id="membershipshiftexemption_{{ membershipShiftExemption.id }}" class="{% if membershipShiftExemption.isPast() %}grey lighten-2{% elseif membershipShiftExemption.isCurrent() %}exempted{% endif %}">
                 <td>
                     {% if membershipShiftExemption.isPast() %}
                         <i class="material-icons" title="Passé">close</i>

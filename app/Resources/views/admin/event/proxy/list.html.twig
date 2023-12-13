@@ -47,7 +47,7 @@
 
         <tbody>
             {% for proxy in proxies %}
-                <tr>
+                <tr id="proxy_{{ proxy.id }}">
                     {% if not event %}
                         <td>
                             {% if proxy.event %}

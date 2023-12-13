@@ -25,7 +25,7 @@
             <tbody>
             {% for code in codes %}
                 {% if is_granted("view", code) %}
-                    <tr>
+                    <tr id="code_{{ code.id }}">
                         <td>
                             {% if code.closed %}<del>{% endif %}
                             <b>{{ code.value }}</b>
@@ -50,7 +50,7 @@
                         </td>
                     </tr>
                 {% else %}
-                    <tr>
+                    <tr id="code_{{ code.id }}">
                         <td>
                             {% if code.closed %}<del>{% endif %}
                             <b>XXXX</b>
@@ -93,7 +93,7 @@
             <tbody>
             {% for code in old_codes %}
                 {% if is_granted("view",code)  %}
-                    <tr>
+                    <tr id="code_{{ code.id }}">
                         <td>
                             {% if code.closed %}<del>{% endif %}
                             <b>{{ code.value }}</b>

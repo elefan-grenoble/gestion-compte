@@ -29,18 +29,17 @@
     </div>
     <table class="hide-on-small-only">
         <thead>
-        <tr>
-            <th>Badge n°</th>
-            <th>Code</th>
-            <th>Date d'association</th>
-            <th>Date de désactivation</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>Badge n°</th>
+                <th>Code</th>
+                <th>Date d'association</th>
+                <th>Date de désactivation</th>
+                <th>Actions</th>
+            </tr>
         </thead>
-
         <tbody>
         {% for swipeCard in swipeCards %}
-            <tr>
+            <tr id="swipecard_{{ swipecard.id }}">
                 <td>{{ swipeCard.number }}</td>
                 <td>
                     {% include "swipeCard/_partial/image.html.twig" with { card: swipeCard } %}
