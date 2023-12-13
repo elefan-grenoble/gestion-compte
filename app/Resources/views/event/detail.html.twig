@@ -15,7 +15,7 @@
 
 {% if event.description %}
     <div class="card-panel blue lighten-5">
-        {{ event.description | markdown | raw }}
+        {{ event.description | nl2br | markdown | raw }}
     </div>
 {% else %}
     <i>pas de description</i>
