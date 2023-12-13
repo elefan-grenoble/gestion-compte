@@ -17,16 +17,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class EmailTemplateController extends Controller
 {
-    private $_current_app_user;
-
-    public function getCurrentAppUser()
-    {
-        if (!$this->_current_app_user) {
-            $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        }
-        return $this->_current_app_user;
-    }
-
     /**
      * Lists all email templates.
      *
@@ -35,14 +25,14 @@ class EmailTemplateController extends Controller
      */
     public function listAction(Request $request)
     {
-
         $em = $this->getDoctrine()->getManager();
+
         $emailTemplates = $em->getRepository('AppBundle:EmailTemplate')->findAll();
+
         return $this->render('admin/mail/template/list.html.twig', array(
             'emailTemplates' => $emailTemplates,
         ));
     }
-
 
     /**
      * Create an email template
@@ -52,15 +42,19 @@ class EmailTemplateController extends Controller
      */
     public function newAction(Request $request)
     {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $emailTemplate = new EmailTemplate();
         $form = $this->createForm(EmailTemplateType::class, $emailTemplate);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
-            $em = $this->getDoctrine()->getManager();
+            $emailTemplate->setCreatedBy($current_user);
             $em->persist($emailTemplate);
             $em->flush();
+
             $session->getFlashBag()->add('success', "Modèle d'email créé");
             return $this->redirectToRoute('email_template_list');
         }
@@ -80,6 +74,7 @@ class EmailTemplateController extends Controller
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $this->denyAccessUnlessGranted('edit', $emailTemplate);
 
@@ -87,6 +82,7 @@ class EmailTemplateController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $emailTemplate->setUpdatedBy($current_user);
             $em->persist($emailTemplate);
             $em->flush();
 
@@ -95,8 +91,8 @@ class EmailTemplateController extends Controller
         }
 
         return $this->render('admin/mail/template/edit.html.twig', array(
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'emailTemplate' => $emailTemplate,
         ));
     }
-
 }

@@ -18,6 +18,11 @@
                     <div class="card-content white-text">
                         <span class="card-title"><i class="material-icons left">content_paste</i>{{ emailTemplate.name }}</span>
                         {{ emailTemplate.description }}
+                        {% if emailTemplate.updatedBy %}
+                            <br />
+                            <br />
+                            <i>Dernière modification le {{ emailTemplate.updatedAt | date_fr_full_with_time }} par {{ emailTemplate.updatedBy }}</i>
+                        {% endif %}
                     </div>
                     <div class="card-action">
                         <a href="{{ path("email_template_edit", {'id': emailTemplate.id}) }}"><i class="material-icons left">edit</i>Editer</a>
