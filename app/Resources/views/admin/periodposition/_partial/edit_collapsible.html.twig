@@ -32,14 +32,14 @@
         {% if use_fly_and_fixed %}
             {% if position.shifter %}
                 <p>
-                    Créneau fixe réservé
+                    Poste type réservé
                     pour <a href="{{ path("member_show", { 'member_number': position.shifter.membership.memberNumber }) }}" target="_blank">{{ position.shifter }}</a>
                     le <i>{{ position.bookedTime | date_fr_full_with_time }}</i>
                     par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: position.booker, target_blank: true } %}.
                 </p>
                 {{ form_start(position_free_form) }}
                 {{ form_widget(position_free_form) }}
-                <a href="#" class="btn waves-effect waves-light orange" onclick="var r = confirm('Etes-vous sûr de vouloir libérer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Libérer ce poste">
+                <a href="#" class="btn waves-effect waves-light orange" onclick="var r = confirm('Etes-vous sûr de vouloir libérer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Libérer ce poste type">
                     <i class="material-icons left">lock_open</i>Libérer
                 </a>
                 {{ form_end(position_free_form) }}
@@ -65,12 +65,15 @@
                 <div class="row">
                     {{ form_start(position_delete_form) }}
                     {{ form_widget(position_delete_form) }}
-                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste">
+                    <a href="#" class="btn waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste type">
                         <i class="material-icons left">delete</i>Supprimer
                     </a>
                     {{ form_end(position_delete_form) }}
                 </div>
             {% endif %}
+        {% endif %}
+        {% if position.formation %}
+            <p>Ce poste type nécessite la formation <strong>{{ position.formation }}</strong>.</p>
         {% endif %}
         {% if position.createdBy %}
             <p>
