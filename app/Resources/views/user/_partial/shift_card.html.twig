@@ -1,6 +1,6 @@
 {% set shift_member = shift.shifter.membership %}
 
-<div class="card center {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+<div id="shift_{{ shift.id }}" class="card center {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
     <div class="card-content">
         {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
     </div>

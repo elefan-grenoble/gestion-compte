@@ -21,7 +21,7 @@
     </thead>
     <tbody>
         {% for eventKind in eventKinds %}
-            <tr>
+            <tr id="eventkind_{{ eventKind.id }}">
                 <td class="{{ eventKind.name }}">{{ eventKind.name }}</td>
                 <td>{{ eventKind.events | length }}</td>
                 <td>

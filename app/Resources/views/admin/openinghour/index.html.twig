@@ -45,7 +45,7 @@
     </thead>
     <tbody>
     {% for openingHour in openingHours %}
-        <tr>
+        <tr id="openinghour_{{ openingHour.id }}">
             <td>{{ openingHour.dayOfWeekString | capitalize }}</td>
             {% if openingHour.closed %}
                 <td colspan="2">Fermé</td>

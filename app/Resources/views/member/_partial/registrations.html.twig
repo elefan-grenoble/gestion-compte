@@ -7,7 +7,7 @@
 {% if member.registrations | length > 0 %}
     <ul class="collapsible">
         {% for registration in member.registrations %}
-            <li>
+            <li id="registration_{{ registration.id }}">
                 <div class="collapsible-header" style="cursor: default;">
                     {% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
                         <i class="material-icons tiny">credit_card</i>

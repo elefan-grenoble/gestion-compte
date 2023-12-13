@@ -20,7 +20,7 @@
 
         <tbody>
         {% for periodPositionFreeLog in periodPositionFreeLogs %}
-            <tr>
+            <tr id="periodpositionfreelog_{{ periodPositionFreeLog.id }}">
                 <td title="{{ periodPositionFreeLog.createdAt | date_fr_full_with_time }}">
                     {{ periodPositionFreeLog.createdAt | date_short }}
                 </td>

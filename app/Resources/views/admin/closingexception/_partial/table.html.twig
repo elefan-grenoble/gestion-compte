@@ -12,7 +12,7 @@
     </thead>
     <tbody>
         {% for closingException in closingExceptions %}
-            <tr>
+            <tr id="closingexception_{{ closingException.id }}">
                 <td>{{ closingException.date | date_fr_full }}</td>
                 <td>{{ closingException.reason }}</td>
                 <td>

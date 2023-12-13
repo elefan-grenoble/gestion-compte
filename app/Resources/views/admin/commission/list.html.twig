@@ -14,7 +14,7 @@
     <div class="row">
         {% for commission in commissions %}
             <div class="col s12 m6">
-                <div class="card blue-grey darken-2 small">
+                <div id="commission_{{ commission.id }}" class="card blue-grey darken-2 small">
                     <div class="card-content white-text">
                         <span class="card-title">{{ commission.name }} <span class="chip right deep-purple lighten-5">x{{ commission.beneficiaries | length }}<i class="material-icons tiny left">person</i></span></span>
                         {{ commission.description | markdown | raw }}

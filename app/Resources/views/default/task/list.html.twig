@@ -29,7 +29,7 @@
                     </thead>
                     <tbody>
                         {% for task in commission.tasks %}
-                            <tr>
+                            <tr id="task_{{ task.id }}">
                                 <td>{% if task.closed %}<del>{% endif %}
                                     {{ task.title }}
                                     {% if task.closed %}</del>{% endif %}

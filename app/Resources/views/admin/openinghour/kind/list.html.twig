@@ -23,7 +23,7 @@
     </thead>
     <tbody>
         {% for openingHourKind in openingHourKinds %}
-            <tr class="{% if not openingHourKind.enabled %}grey lighten-2{% endif %}">
+            <tr id="openinghourkind_{{ openingHourKind.id }}" class="{% if not openingHourKind.enabled %}grey lighten-2{% endif %}">
                 <td>
                     {% if not openingHourKind.enabled %}
                         <i class="material-icons" title="Inactif">close</i>

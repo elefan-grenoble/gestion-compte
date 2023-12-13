@@ -24,7 +24,7 @@
         </thead>
         <tbody>
             {% for formation in formations %}
-                <tr>
+                <tr id="formation_{{ formation.id }}">
                     <td>{{ formation.name }}</td>
                     <td class="center-align">
                         {% if formation.description is not empty %}

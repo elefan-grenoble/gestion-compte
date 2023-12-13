@@ -113,7 +113,7 @@
                         </thead>
                         <tbody>
                         {% for client in app.user.clients %}
-                            <tr>
+                            <tr id="client_{{ client.id }}">
                                 <td>
                                     {% if client.service.logo %}
                                         <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"

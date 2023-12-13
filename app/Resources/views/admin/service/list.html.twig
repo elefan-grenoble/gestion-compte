@@ -25,7 +25,7 @@
         </thead>
         <tbody>
         {% for service in services %}
-            <tr>
+            <tr id="service_{{ service.id }}">
                 <td>
                     {% if service.logo %}
                         <img src="{{ service|img('logoFile','service_logo') }}" />

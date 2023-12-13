@@ -25,7 +25,7 @@
         </thead>
         <tbody>
             {% for admin in admins %}
-                <tr>
+                <tr id="user_{{ admin.id }}">
                     <td>
                         {% if admin.beneficiary and admin.beneficiary.membership.withdrawn %}
                             <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>

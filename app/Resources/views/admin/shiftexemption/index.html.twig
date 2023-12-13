@@ -22,7 +22,7 @@
 
         <tbody>
         {% for shiftExemption in shiftExemptions %}
-            <tr>
+            <tr id="shiftexemption_{{ shiftExemption.id }}">
                 <td>{{ shiftExemption.name }}</td>
                 <td>{{ shiftExemption.membershipShiftExemptions | length }}</td>
                 <td>

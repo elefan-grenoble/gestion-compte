@@ -46,7 +46,7 @@
         </thead>
         <tbody>
             {% for job in jobs %}
-                <tr>
+                <tr id="job_{{ job.id }}">
                     <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
                     <td class="{{ job.color }} white-text">{{ job.color }}</td>
                     <td class="center-align">

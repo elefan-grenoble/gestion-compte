@@ -54,7 +54,7 @@
             </thead>
             <tbody>
             {% for payment in payments %}
-                <tr>
+                <tr id="helloassopayment_{{ payment.id }}">
                     <td>{{ payment.id }}</td>
                     <td>{{ payment.date }}</td>
                     <td>{{ payment.amount }}</td>
