@@ -39,7 +39,7 @@
         </thead>
         <tbody>
         {% for swipeCard in swipeCards %}
-            <tr id="swipecard_{{ swipecard.id }}">
+            <tr id="swipecard_{{ swipeCard.id }}">
                 <td>{{ swipeCard.number }}</td>
                 <td>
                     {% include "swipeCard/_partial/image.html.twig" with { card: swipeCard } %}

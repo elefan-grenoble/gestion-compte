@@ -1,5 +1,5 @@
 
-<div class="card-panel {% if note.parent %}grey lighten-4{% else %}grey lighten-5{% endif %} z-depth-1 note">
+<div id="note_{{ note.id }}" class="card-panel {% if note.parent %}grey lighten-4{% else %}grey lighten-5{% endif %} z-depth-1 note">
     <div class="row valign-wrapper" style="margin-bottom: 0;">
         <div class="col s2">
             <img src="{{ gravatar(note.author.email) }}" alt="" class="circle responsive-img">
