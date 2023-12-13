@@ -5,33 +5,31 @@
 
 {% set anonymized = anonymized ?? true %}
 {% set shifter = position.shifter %}
-{% set formation = position.formation ?? "Sans formation" %}
+{% set icon = position.formation ? "account_circle" : "person" %}
+{% set tooltip_formation = position.formation ? "Formation : " ~ position.formation : "Sans formation" %}
 
-{% if shifter %}
-    {# sombody is registered for this PeriodPosition #}
-
+{% if shifter %} {# sombody is registered for this PeriodPosition #}
     {% if anonymized %}
-        {# sombody is registered for this periodposition #}
-        <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="Formation : {{ formation }}">
-            <i class="material-icons">person</i>
+        <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ tooltip_formation }}">
+            <i class="material-icons">{{ icon }}</i>
             Réservé
         </div>
     {% else %}
         {% set warning = beneficiary_service.hasWarningStatus(shifter) %}
         <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}" target="_blank"
            class="black-text tooltipped editable-box truncate" data-position="bottom"
-           data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ formation }})">
+           data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ tooltip_formation }})">
             {% if warning %}
                 <i class="red-text material-icons warning-animation">warning</i>
             {% else %}
-                <i class="material-icons">person</i>
+                <i class="material-icons">{{ icon }}</i>
             {% endif %}
             {{ shifter.getFirstname() }} {{ shifter.getLastname() | first }}
         </a>
     {% endif %}
-{% else %} {# free PeriodPosition #}
-    <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ formation }}">
-        <i class="material-icons">person</i>
+{% else %} {# this PeriodPosition is free #}
+    <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ tooltip_formation }}">
+        <i class="material-icons">{{ icon }}</i>
         <strong><i>Libre</i></strong>
     </div>
 {% endif %}
