@@ -17,7 +17,7 @@
                 <div class="card blue-grey darken-2 small">
                     <div class="card-content white-text">
                         <span class="card-title">{{ commission.name }} <span class="chip right deep-purple lighten-5">x{{ commission.beneficiaries | length }}<i class="material-icons tiny left">person</i></span></span>
-                        {{ commission.description | markdown | raw }}
+                        {{ commission.description | nl2br | markdown | raw }}
                     </div>
                     <div class="card-action">
                         <a href="{{ path("commission_edit",{'id':commission.id}) }}"><i class="material-icons left">edit</i></a>

@@ -113,11 +113,6 @@ class Note
         return $this->text;
     }
 
-    public function getTextWithBr()
-    {
-        return nl2br($this->getText());
-    }
-
     /**
      * Get createdAt
      *
