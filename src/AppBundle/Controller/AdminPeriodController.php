@@ -284,13 +284,13 @@ class AdminPeriodController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             if ($position->getShifter()) {
                 $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-                return new Response($this->generateUrl('admin_period_edit',array('id'=>$period->getId())), 205);
+                return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
             }
 
             $beneficiary = $form->get("shifter")->getData();
             if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
                 $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
-                return new Response($this->generateUrl('admin_period_edit',array('id'=>$period->getId())), 205);
+                return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
             }
 
             if (!$position->getBooker()) {
