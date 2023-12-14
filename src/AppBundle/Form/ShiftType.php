@@ -32,7 +32,7 @@ class ShiftType extends AbstractType
                             'propertyPath' => 'parent.all[start].data'
                         ])]])
                 ->add('job', EntityType::class, array(
-                    'label' => 'Type',
+                    'label' => 'Poste',
                     'class' => 'AppBundle:Job',
                     'choice_label' => 'name',
                     'multiple' => false,
@@ -66,7 +66,11 @@ class ShiftType extends AbstractType
                     'class' => 'AppBundle:Formation',
                     'choice_label' => 'name',
                     'multiple' => false,
-                    'required' => false
+                    'required' => false,
+                    'query_builder' => function(FormationRepository $repository) {
+                        $qb = $repository->createQueryBuilder('f');
+                        return $qb->orderBy('f.name', 'ASC');
+                    }
                 ))
                 ->add('number', IntegerType::class, [
                     'label' => 'Nombre de postes disponibles',
