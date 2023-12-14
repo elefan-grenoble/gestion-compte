@@ -7,40 +7,37 @@
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Ajouter un créneau ponctuel</h4>
+    <h4>Ajouter un créneau ponctuel</h4>
+
     {{ form_start(form) }}
+    <div class="errors">
+        {{ form_errors(form) }}
+    </div>
     <div class="row">
         <div class="col s12">
-            {{ form_label(form.start.date) }}
-            {{ form_errors(form.start.date) }}
-            {{ form_widget(form.start.date, { attr: { class: 'datepicker' } }) }}
+            {{ form_row(form.start.date, { attr: { class: 'datepicker' } }) }}
         </div>
-        <div class="col s12">
-            {{ form_label(form.start.time, 'Heure de début') }}
-            {{ form_errors(form.start.time) }}
-            {{ form_widget(form.start.time, { attr: { class: 'timepicker' } }) }}
+    </div>
+    <div class="row">
+        <div class="col s12 m6">
+            {{ form_row(form.start.time, { label: 'Heure de début', attr: { class: 'timepicker' } }) }}
         </div>
-        <div class="col s12">
+        <div class="col s12 m6">
             <input type="hidden" id="{{ form.end.date.vars.id }}" name="{{ form.end.date.vars.full_name }}">
-            {{ form_label(form.end.time, 'Heure de fin') }}
-            {{ form_errors(form.end.date) }}
-            {{ form_errors(form.end.time) }}
-            {{ form_widget(form.end.time, { attr: { class: 'timepicker' } }) }}
+            {{ form_row(form.end.time, { label: 'Heure de fin', attr: { class: 'timepicker' } }) }}
         </div>
-        <div class="col s8">
-            {{ form_label(form.formation) }}
-            {{ form_errors(form.formation) }}
-            {{ form_widget(form.formation) }}
+    </div>
+    <div class="row">
+        <div class="col s12 m8">
+            {{ form_row(form.formation) }}
         </div>
-        <div class="col s4">
-            {{ form_label(form.number) }}
-            {{ form_errors(form.number) }}
-            {{ form_widget(form.number) }}
+        <div class="col s12 m4">
+            {{ form_row(form.number) }}
         </div>
+    </div>
+    <div class="row">
         <div class="col s12">
-            {{ form_label(form.job) }}
-            {{ form_errors(form.job) }}
-            {{ form_widget(form.job) }}
+            {{ form_row(form.job) }}
         </div>
     </div>
     <div>
