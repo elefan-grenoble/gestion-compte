@@ -88,21 +88,8 @@
                 <i class="material-icons">edit</i>Editer le créneau type
             </div>
             <div class="collapsible-body">
-                {{ form_start(form, {'attr': { 'style': 'display:inline;' }}) }}
-                {{ form_widget(form) }}
-                {% if period.createdBy or period.updatedBy %}
-                    <br />
-                    <div class="card-panel">
-                        {% if period.createdBy %}
-                            <i>Création le {{ period.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: period.createdBy, target_blank: true } %}</i>
-                            <br />
-                        {% endif %}
-                        {% if period.updatedBy %}
-                            <i>Dernière modification le {{ period.updatedAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: period.updatedBy, target_blank: true } %}</i>
-                        {% endif %}
-                    </div>
-                {% endif %}
-                <br />
+                {{ form_start(form) }}
+                {% include "/admin/period/_partial/form.html.twig" with { form: form, edit: true, period: period } %}
                 <button type="submit" class="btn waves-effect waves-light">
                     <i class="material-icons left">save</i>Enregistrer
                 </button>
