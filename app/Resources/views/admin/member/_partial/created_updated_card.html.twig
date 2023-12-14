@@ -1,6 +1,6 @@
-{% if item.createdBy or item.updatedBy %}
+{% if item.createdBy ?? false or item.updatedBy ?? false %}
     <div class="card-panel">
-        {% if item.createdBy %}
+        {% if item.createdBy ?? false %}
             <i>Création le {{ item.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: item.createdBy, target_blank: true } %}</i>
             <br />
         {% endif %}
