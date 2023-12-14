@@ -4,6 +4,7 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Form\JobHiddenType;
+use AppBundle\Repository\FormationRepository;
 use AppBundle\Repository\JobRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -51,7 +52,6 @@ class ShiftType extends AbstractType
                 ->add('start', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
                 ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
                 ->add('job', JobHiddenType::class);
-
         }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
