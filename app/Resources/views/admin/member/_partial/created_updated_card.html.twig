@@ -4,7 +4,7 @@
             <i>Création le {{ item.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: item.createdBy, target_blank: true } %}</i>
             <br />
         {% endif %}
-        {% if item.updatedBy %}
+        {% if item.updatedBy ?? false %}
             <i>Dernière modification le {{ item.updatedAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: item.updatedBy, target_blank: true } %}</i>
         {% endif %}
     </div>
