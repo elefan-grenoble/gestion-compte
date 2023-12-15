@@ -5,6 +5,7 @@ namespace AppBundle\Form;
 use AppBundle\Entity\Shift;
 use AppBundle\Form\JobHiddenType;
 use AppBundle\Repository\JobRepository;
+use AppBundle\Repository\FormationRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -17,7 +18,6 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class ShiftType extends AbstractType
 {
-
     /**
      * {@inheritdoc}
      */
@@ -45,13 +45,11 @@ class ShiftType extends AbstractType
                             ->orderBy('j.name', 'ASC');
                     }
                 ));
-
         } else {
             $builder
                 ->add('start', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
                 ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
                 ->add('job', JobHiddenType::class);
-
         }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
