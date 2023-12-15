@@ -431,7 +431,7 @@ class AdminEventController extends Controller
                 'label' => "Quel type d'événement ?",
                 'class' => 'AppBundle:EventKind',
                 'choice_label' => 'name',
-                'multiple' => false,
+                'multiple' => true,
                 'required' => false
             ))
             ->add('date_max', TextType::class, array(
@@ -461,8 +461,13 @@ class AdminEventController extends Controller
 
         if ($form->handleRequest($request)->isValid()) {
             $data = $form->getData();
-
-            $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);
+            $widgetQueryString = '';
+            if ($data['kind']) {
+                foreach ($data['kind'] as $kind) {
+                    $widgetQueryString .= 'event_kind_id[]=' . $kind->getId() . '&';
+                }
+            }
+            $widgetQueryString .= 'date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);
 
             return $this->render('admin/event/widget_generator.html.twig', array(
                 'form' => $form->createView(),
