@@ -50,12 +50,7 @@
         {% if beneficiary.address %}
             <div class="col s12">
                 <i class="material-icons tiny">location_on</i>
-                {{ beneficiary.address.street1 }}
-                {% if beneficiary.address.street2 %}
-                    {{ beneficiary.address.street2 }}
-                {% endif %}
-                {{ "%d"|format(beneficiary.address.zipCode) }}
-                {{ beneficiary.address.city }}
+                {% include "beneficiary/_partial/address.html.twig" with { address: beneficiary.address } %}
             </div>
         {% endif %}
     {% endif %}

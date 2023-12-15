@@ -1,0 +1,8 @@
+{{ address.street1 }}
+{% if address.street2 %}
+    {{ address.street2 }}
+{% endif %}
+{% if address.zipCode %}
+    {{ "%d"|format(address.zipCode) }}
+{% endif %}
+{{ address.city }}
