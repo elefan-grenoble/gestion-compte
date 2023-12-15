@@ -33,31 +33,32 @@ class EventController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $buckets = array();
-        $eventKind = null;
-        $eventDateMax = null;
+        $filter_event_kind_id_list = null;
+        $filter_date_max_cleaned = null;
 
         $filter_title = $request->query->has('title') ? ($request->get('title') == 1) : false;
         $filter_links = $request->query->has('links') ? ($request->get('links') == 1) : false;
         $filter_date_max = $request->query->has('date_max') ? ($request->get('date_max') ? new DateTime($request->get('date_max')) : null) : null;
         if ($filter_date_max) {
-            $eventDateMax = clone($filter_date_max);
-            $eventDateMax->modify('+1 day');  // also return events happening on max date
+            $filter_date_max_cleaned = clone($filter_date_max);
+            $filter_date_max_cleaned->modify('+1 day');  // also return events happening on max date
         }
         $filter_limit = $request->query->has('limit') ? ($request->get('limit') ? $request->get('limit') : null) : null;
 
-        $filter_event_kind_id = $request->get('event_kind_id');
-        if ($filter_event_kind_id) {
-            $eventKind = $em->getRepository('AppBundle:EventKind')->find($filter_event_kind_id);
+        $filter_event_kind_id_list = $request->get('event_kind_id');  // should be an array (or null)
+        if (is_string($filter_event_kind_id_list)) {  // manage case if string (retro-compatibility)
+            $filter_event_kind_id_list = array($filter_event_kind_id_list);
         }
+        $filter_event_kind_id_list = array_filter($filter_event_kind_id_list);  // remove any empty values
 
-        $events = $em->getRepository('AppBundle:Event')->findFutureOrOngoing($eventKind, false, $eventDateMax, $filter_limit);
+        $events = $em->getRepository('AppBundle:Event')->findFutureOrOngoing($filter_event_kind_id_list, false, $filter_date_max_cleaned, $filter_limit);
 
         return $this->render('event/_partial/widget.html.twig', [
             'events' => $events,
-            'eventKind' => $eventKind,
             'title' => $filter_title,
             'links' => $filter_links,
-            'maxDate' => $filter_date_max,
+            'date_max' => $filter_date_max,
+            'event_kind_id_list' => $filter_event_kind_id_list
         ]);
     }
 
