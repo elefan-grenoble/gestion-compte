@@ -1,0 +1,249 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Code - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">vpn_key</i>&nbsp;Code(s)
+{% endblock %}
+
+{% block stylesheets %}
+{% endblock %}
+
+{% block content %}
+<h4>Liste des codes actifs</h4>
+{% for device in code_devices %}
+  <div class="section">
+    <h5>{{device.name}}</h5>
+        {% if active_codes is empty or active_codes[device.id] is not defined %}
+            Aucun code actif actuellement...
+        {% else %}
+            <table class="striped">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Description</th>
+                  {% if device.type == 'igloohome' %}
+                  <th>Début</th>
+                  <th>Fin</th>
+                  {% endif %}
+                  <th>Créé le</th>
+                  <th>Membre</th>
+                  {% if device.type != 'igloohome' or is_granted("ROLE_SUPER_ADMIN") %}
+                  <th>Actions</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody>
+                {% for code in active_codes[device.id] %}
+                <tr>
+                  <td>
+                    <b>{{ code.value }}</b>
+                  </td>
+                  <td>
+                    {{ code.description }}
+                  </td>
+                  {% if device.type == 'igloohome' %}
+                  <td>
+                    {{ code.startDate | date_fr_with_time}}
+                  </td>
+                  <td>
+                    {{ code.endDate | date_fr_with_time }}
+                  </td>
+                  {% endif %}
+                  <td>
+                    {{ code.createdAt | date_fr_with_time }}
+                  </td>
+                  <td>
+                    {{ code.getRegistrar }}
+                  </td>
+                  {% if device.type != 'igloohome' or is_granted("ROLE_SUPER_ADMIN") %}
+                  <td>
+                    <div style="display: flex; justify-content: center;">
+                        <a style="margin-inline: 5px" class="btn-small waves-effect waves-light orange" href="{{ path("admin_code_toggle", {'id': code.id}) }}"><i class="material-icons">stop</i></a>
+                        {% if is_granted("ROLE_SUPER_ADMIN") %}
+                            {{ form_start(delete_forms[code.id]) }}
+                            <button style="margin-inline: 5px" type="submit" class="btn-small waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce code ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();">
+                                <i class="material-icons">delete</i>
+                            </button>
+                            {{ form_end(delete_forms[code.id]) }}
+                        {% endif %}
+                    </div>
+                  </td>
+                  {% endif %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        {% endif %}
+        <div class="section">
+            {% if device.type == 'igloohome' %}
+                <a href="#modal-add-code" data-source="{{ path('admin_code_new', { 'id': device.id }) }}" class="modal-trigger waves-effect waves-light btn teal"><i class="material-icons left">add</i>Générer un nouveau code</a>
+            {% else %}
+                <a href="#modal-add-code" data-source="{{ path('admin_code_new', { 'id': device.id }) }}" class="modal-trigger waves-effect waves-light btn teal"><i class="material-icons left">add</i>Mettre à jour le code</a>
+            {% endif %}
+            <a style="margin-inline: 20px" class="modal-trigger btn waves-effect waves-light green" href="#modal{{device.id}}"><i class="material-icons left">history</i>Afficher les anciens codes</a>
+        </div>
+    </div>
+    <div class="divider"></div>
+{% endfor %}
+
+{% for device in code_devices %}
+<!-- Modal Structure -->
+<div id="modal{{device.id}}" class="modal bottom-sheet">
+  <div class="modal-content">
+    <h5>Liste des anciens codes pour {{device.name}}</h5>
+    {% if old_codes is empty or old_codes[device.id] is not defined %}
+    Aucun ancien code...
+    {% else %}
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Description</th>
+          {% if device.type == 'igloohome' %}
+          <th>Début</th>
+          <th>Fin</th>
+          {% endif %}
+          <th>Créé le</th>
+          <th>Membre</th>
+          {% if device.type != 'igloohome' or is_granted("ROLE_SUPER_ADMIN") %}
+          <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for code in old_codes[device.id] %}
+        <tr>
+          <td>
+            <b>{{ code.value }}</b>
+          </td>
+          <td>
+            {% if code.description is not null %}
+                {{ code.description }}
+            {% endif %}
+          </td>
+          {% if device.type == 'igloohome' %}
+          <td>
+            {% if code.startDate is not null %}
+                {{ code.startDate | date_fr_with_time}}
+            {% endif %}
+          </td>
+          <td>
+            {% if code.endDate is not null %}
+                {{ code.endDate | date_fr_with_time }}
+            {% endif %}
+          </td>
+          {% endif %}
+          <td>
+            {{ code.createdAt | date_fr_with_time }}
+          </td>
+          <td>
+            {{ code.getRegistrar }}
+          </td>
+          {% if device.type != 'igloohome' or is_granted("ROLE_SUPER_ADMIN") %}
+          <td>
+            <div style="display: flex; justify-content: center;">
+                <a style="margin-inline: 5px" class="btn-small waves-effect waves-light green" href="{{ path("admin_code_toggle", {'id': code.id}) }}"><i class="material-icons">play_arrow</i></a>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    {{ form_start(delete_forms[code.id]) }}
+                    <button style="margin-inline: 5px" type="submit" class="btn-small waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer ce code ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();">
+                        <i class="material-icons">delete</i>
+                    </button>
+                    {{ form_end(delete_forms[code.id]) }}
+                {% endif %}
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div id="modal-add-code" class="modal modal-fixed-footer">
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function ajaxError (jqXHR, exception) {
+            var msg = '';
+            if (jqXHR.status === 0) {
+                msg = 'Perte de connexion à internet. Vérifier votre connexion.';
+            } else if (jqXHR.status == 404) {
+                msg = 'Oups, l\'équipement à code n\'existe plus. Quelqu\'un d\'autre l\'a supprimé entre temps ?';
+            } else if (jqXHR.status == 500) {
+                msg = 'Erreur interne, il faut mettre les informaticiens sur le coup !';
+            } else if (exception === 'parsererror') {
+                msg = 'Réponse du serveur incompréhensible (JSON parse failed).';
+            } else if (exception === 'timeout') {
+                msg = 'Le serveur n\'a pas répondu dans les temps...';
+            } else if (exception === 'abort') {
+                msg = 'Ajax request aborted.';
+            } else {
+                var data = jqXHR.responseJSON;
+                msg = data.message;
+            }
+            M.toast({ text: msg, displayLength: 5000, classes: 'red' });
+        }
+
+        $(document).ready(function () {
+            $('#modal-add-code').modal({
+                onCloseEnd: function() {
+                    $('#modal-add-code').html('');
+                },
+                onOpenStart: function(modal, trigger) {
+                    var url = $(trigger).attr('data-source');
+                    $.get(url, function( data ) {
+                        $('#modal-add-code').html(data);
+                        $('#modal-add-code').find('.datepicker').datepicker({
+                            container: "body",
+                            autoClose: true,
+                            format: 'yyyy-mm-dd',
+                            minDate: new Date(),
+                            showClearBtn: true,
+                            i18n: {
+                                done: 'OK',
+                                clear: 'Effacer',
+                                cancel: 'Annuler',
+                                months: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
+                                monthsShort: ['Jan', 'Fev', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aou', 'Sep', 'Oct', 'Nov', 'Dec'],
+                                weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
+                                weekdaysShort: ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'],
+                            },
+                        });
+                        $('#modal-add-code').find('.timepicker').timepicker({
+                            container: "body",
+                            defaultTime: '',
+                            twelveHour: false,
+                            showClearBtn: true,
+                            i18n: {
+                                done: 'OK',
+                                clear: 'Effacer',
+                                cancel: 'Annuler',
+                            },
+                            onSelect: function(hours, minutes) {
+                                this.minutes = 0;
+                                this.done();
+                            },
+                            autoClose: true, // Close upon selecting a time
+                        });
+                        $("#appbundle_code_generate_random_value").click(function() {
+                            var elmt = $("#appbundle_code_value");
+                            elmt.attr("disabled", this.checked);
+                            if(this.checked) {
+                                elmt.val('');
+                            }
+                        });
+                    }).fail(ajaxError);
+                }
+            });
+        });
+    </script>
+{% endblock %}
