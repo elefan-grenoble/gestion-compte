@@ -25,8 +25,7 @@ class Address
     /**
      * @var string
      *
-     * @ORM\Column(name="street1", type="string", length=255)
-     * @Assert\NotBlank(message="L'adresse est requise")
+     * @ORM\Column(name="street1", type="string", length=255, nullable=true)
      */
     private $street1;
 
@@ -40,8 +39,7 @@ class Address
     /**
      * @var string
      *
-     * @ORM\Column(name="zipcode", type="string", length=255)
-     * @Assert\NotNull(message="Le code postal est requis")
+     * @ORM\Column(name="zipcode", type="string", length=255, nullable=true)
      * @Assert\Regex(pattern="/^[0-9]+$/", message="Le code postal doit comporter uniquement des chiffres")
      * @Assert\Length(min="4", max="10", exactMessage="Le code postal doit comporter entre 4 et 10 chiffres")
      */
@@ -50,13 +48,12 @@ class Address
     /**
      * @var string
      *
-     * @ORM\Column(name="city", type="string", length=255)
-     * @Assert\NotBlank(message="La ville est requise")
+     * @ORM\Column(name="city", type="string", length=255, nullable=true)
      */
     private $city;
 
     /**
-     * One Address has Beneficiary.
+     * One Address per Beneficiary.
      * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="address")
      */
     private $beneficiary;
