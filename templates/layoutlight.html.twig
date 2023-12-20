@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>{% block title %}{{ site_name }}{% endblock %}</title>
+        {% block stylesheets %}{% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
+        {% include "_partial" %}
+        {{ encore_entry_link_tags('app') }}
+    </head>
+    <body>
+        <header>
+        </header>
+        <main>
+            {% block beforecontainer %}{% endblock %}
+
+            <div class="container">
+                <div class="section">
+                    {% if app.request.hasPreviousSession %}
+                        {% for type, messages in app.session.flashBag.all %}
+                            {% for message in messages %}
+                                <div class="row">
+                                    <div class="col s12">
+                                        <div class="card-panel teal {{ type }}">
+                                            <span class="white-text">{{ message|trans({}, 'FOSUserBundle') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                    {% endif %}
+                    {% block fos_user_content %}
+                    {% endblock fos_user_content %}
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+
+            {% block aftercontainer %}{% endblock %}
+        </main>
+        {{ encore_entry_script_tags('app') }}
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

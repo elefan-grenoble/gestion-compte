@@ -1,0 +1,113 @@
+# Twig Configuration
+twig:
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    form_themes:
+        - "form/fields.html.twig"
+    globals:
+        site_name: "%site_name%"
+        main_color: "%main_color%"
+        project_name: "%project_name%"
+        project_url: "%project_url%"
+        project_url_display: "%project_url_display%"
+        github_repo_url: "%github_repo_url%"
+        github_current_release: "%github_current_release%"
+        helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
+        due_duration_by_cycle: '%due_duration_by_cycle%'
+        cycle_type: '%env(CYCLE_TYPE)%'
+        registration_duration: '%registration_duration%'
+        registration_manual_enabled: '%env(bool:REGISTRATION_MANUAL_ENABLED)%'
+        support_email: '%transactional_mailer_user%'
+        images_tmp_dir: '%images_tmp_dir%'
+        maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
+        allow_extra_shifts: '%allow_extra_shifts%'
+        time_after_which_members_are_late_with_shifts: '%time_after_which_members_are_late_with_shifts%'
+        max_time_in_advance_to_book_extra_shifts : '%max_time_in_advance_to_book_extra_shifts%'
+        code_generation_enabled: '%code_generation_enabled%'
+        local_currency_name: '%local_currency_name%'
+        use_fly_and_fixed: '%use_fly_and_fixed%'
+        max_event_proxy_per_member: '%max_event_proxy_per_member%'
+        use_time_log_saving: '%use_time_log_saving%'
+        display_gauge: '%display_gauge%'
+        max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
+        profile_display_task_list: '%profile_display_task_list%'
+        profile_display_time_log: '%profile_display_time_log%'
+        profile_display_shift_free_log: '%profile_display_shift_free_log%'
+        profile_display_period_position_free_log: '%profile_display_period_position_free_log%'
+        # user
+        user_account_not_enabled_material_icon: '%user_account_not_enabled_material_icon%'
+        user_account_enabled_material_icon: '%user_account_enabled_material_icon%'
+        # member
+        member_withdrawn_icon: '%member_withdrawn_icon%'
+        member_withdrawn_material_icon: '%member_withdrawn_material_icon%'
+        member_withdrawn_background_color: '%member_withdrawn_background_color%'
+        member_frozen_icon: '%member_frozen_icon%'
+        member_frozen_material_icon: '%member_frozen_material_icon%'
+        member_frozen_background_color: '%member_frozen_background_color%'
+        member_exempted_icon: '%member_exempted_icon%'
+        member_exempted_material_icon: '%member_exempted_material_icon%'
+        member_exempted_background_color: '%member_exempted_background_color%'
+        member_flying_icon: '%member_flying_icon%'
+        member_flying_material_icon: '%member_flying_material_icon%'
+        member_registration_missing_icon: '%member_registration_missing_icon%'
+        member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
+        member_registration_missing_background_color: '%member_registration_missing_background_color%'
+        # beneficiary
+        beneficiary_main_icon: '%beneficiary_main_icon%'
+        beneficiary_new_icon: '%beneficiary_new_icon%'
+        beneficiary_flying_icon: '%beneficiary_flying_icon%'
+        # admin: member
+        admin_member_display_shift_free_log: '%admin_member_display_shift_free_log%'
+        admin_member_display_period_position_free_log: '%admin_member_display_period_position_free_log%'
+        # swipe card
+        display_swipe_cards_settings: '%env(bool:DISPLAY_SWIPE_CARDS_SETTINGS)%'
+        display_freeze_account: '%display_freeze_account%'
+        display_freeze_account_false_message: '%display_freeze_account_false_message%'
+        display_keys_shop: '%display_keys_shop%'
+        display_name_shifters: '%env(bool:DISPLAY_NAME_SHIFTERS)%'
+        use_card_reader_to_validate_shifts: '%env(bool:USE_CARD_READER_TO_VALIDATE_SHIFTS)%'
+        # fly and fixed
+        fly_and_fixed_entity_flying: '%env(FLY_AND_FIXED_ENTITY_FLYING)%'
+        fly_and_fixed_allow_fixed_shift_free: '%env(bool:FLY_AND_FIXED_ALLOW_FIXED_SHIFT_FREE)%'
+        # time log saving
+        time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
+        time_log_saving_shift_free_allow_only_if_enough_saving: '%time_log_saving_shift_free_allow_only_if_enough_saving%'
+        # opening hours
+        display_opening_hour_open_closed_header: '%display_opening_hour_open_closed_header%'
+        opening_hour_open_closed_header_open_message: '%opening_hour_open_closed_header_open_message%'
+        opening_hour_open_closed_header_closed_message: '%opening_hour_open_closed_header_closed_message%'
+        # role names & icons
+        role_user_name: Utilisateur
+        role_user_material_icon: person
+        role_user_manager_name: Gestion des utilisateurs
+        role_user_manager_material_icon: group
+        role_finance_manager_name: Gestion financiaire
+        role_finance_manager_material_icon: attach_money
+        role_shift_manager_name: Gestion des créneaux
+        role_shift_manager_material_icon: date_range
+        role_process_manager_name: Gestion des procédures
+        role_process_manager_material_icon: assignment
+        role_admin_name: Administrateur
+        role_admin_panel_name: Accès à /admin
+        role_admin_material_icon: verified_user
+        role_super_admin_name: Super admin
+        role_super_admin_material_icon:
+        # services
+        beneficiary_service: "@beneficiary_service"
+        membership_service: "@membership_service"
+        shift_service: "@shift_service"
+        period_service: "@period_service"
+        time_log_service: "@time_log_service"
+        opening_hour_service: "@opening_hour_service"
+        opening_hour_kind_service: "@opening_hour_kind_service"
+        #open id
+        oidc_enable: '%env(bool:OIDC_ENABLE)%'
+        oidc_issuer: '%env(OIDC_ISSUER)%'
+        oidc_client_id: "%env(OIDC_CLIENT_ID)%"
+        oidc_roles_claim: "%env(OIDC_ROLES_CLAIM)%"
+        oidc_roles_map: "%oidc_roles_map%"
+        oidc_formations_claim: "%env(OIDC_FORMATIONS_CLAIM)%"
+        oidc_formations_map: "%env(OIDC_FORMATIONS_MAP)%"
+        oidc_commissions_claim: "%env(OIDC_COMMISSIONS_CLAIM)%"
+        oidc_commissions_map: "%env(OIDC_COMMISSIONS_MAP)%"
+        oidc_profile_custom_message: '%env(OIDC_PROFILE_CUSTOM_MESSAGE)%'
