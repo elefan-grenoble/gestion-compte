@@ -1,0 +1,499 @@
+# Learn more about services, parameters and containers at
+# https://symfony.com/doc/current/service_container.html
+parameters:
+  admin_member_display_period_position_free_log: '%env(bool:ADMIN_MEMBER_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
+  admin_member_display_shift_free_log: '%env(bool:ADMIN_MEMBER_DISPLAY_SHIFT_FREE_LOG)%'
+  allow_extra_shifts: '%env(bool:ALLOW_EXTRA_SHIFTS)%'
+  beneficiary_flying_icon: '%env(BENEFICIARY_FLYING_ICON)%'
+  beneficiary_main_icon: '%env(BENEFICIARY_MAIN_ICON)%'
+  beneficiary_new_icon: '%env(BENEFICIARY_NEW_ICON)%'
+  code_generation_enabled: '%env(bool:CODE_GENERATION_ENABLED)%'
+  cycle_duration: '%env(CYCLE_DURATION)%'
+  cycle_type: '%env(CYCLE_TYPE)%'
+  display_freeze_account: '%env(DISPLAY_FREEZE_ACCOUNT)%'
+  display_freeze_account_false_message: '%env(bool:DISPLAY_FREEZE_ACCOUNT_FALSE_MESSAGE)%'
+  display_gauge: '%env(bool:DISPLAY_GAUGE)%'
+  display_keys_shop: '%env(bool:DISPLAY_KEYS_SHOP)%'
+  display_name_shifters: '%env(bool:DISPLAY_NAME_SHIFTERS)%'
+  display_opening_hour_open_closed_header: '%env(bool:DISPLAY_OPENING_HOUR_OPEN_CLOSED_HEADER)%'
+  display_swipe_cards_settings: '%env(bool:DISPLAY_SWIPE_CARDS_SETTINGS)%'
+  due_duration_by_cycle: '%env(DUE_DURATION_BY_CYCLE)%'
+  emails.admin:
+    address: '%env(EMAILS_ADMIN_ADDRESS)%'
+    from_name: '%env(EMAILS_ADMIN_NAME)%'
+  emails.base_domain: '%env(EMAILS_BASE_DOMAIN)%'
+  emails.contact:
+    address: '%env(EMAILS_CONTACT_ADDRESS)%'
+    from_name: '%env(EMAILS_CONTACT_NAME)%'
+  emails.formation:
+    address: '%env(EMAILS_FORMATION_ADDRESS)%'
+    from_name: '%env(EMAILS_FORMATION_NAME)%'
+  emails.member:
+    address: '%env(EMAILS_MEMBER_ADDRESS)%'
+    from_name: '%env(EMAILS_MEMBER_NAME)%'
+  emails.noreply:
+    address: '%env(EMAILS_NOREPLY_ADDRESS)%'
+    from_name: '%env(EMAILS_NOREPLY_NAME)%'
+  emails.shift:
+    address: '%env(EMAILS_SHIFT_ADDRESS)%'
+    from_name: '%env(EMAILS_SHIFT_NAME)%'
+  emails.sendable:
+    - '%emails.contact%'
+    - '%emails.member%'
+    - '%emails.shift%'
+    - '%emails.formation%'
+    - '%emails.admin%'
+    - '%emails.noreply%'
+  enable_place_local_ip_address_check: '%env(bool:ENABLE_PLACE_LOCAL_IP_ADDRESS_CHECK)%'
+  fly_and_fixed_entity_flying: '%env(FLY_AND_FIXED_ENTITY_FLYING)%'
+  fly_and_fixed_allow_fixed_shift_free: '%env(bool:FLY_AND_FIXED_ALLOW_FIXED_SHIFT_FREE)%'
+  forbid_own_shift_book_admin: '%env(bool:FORBID_OWN_SHIFT_BOOK_ADMIN)%'
+  forbid_own_shift_free_admin: '%env(bool:FORBID_OWN_SHIFT_FREE_ADMIN)%'
+  forbid_own_shift_validate_admin: '%env(bool:FORBID_OWN_SHIFT_VALIDATE_ADMIN)%'
+  forbid_own_timelog_new_admin: '%env(bool:FORBID_OWN_TIMELOG_NEW_ADMIN)%'
+  forbid_shift_overlap_time: '%env(FORBID_SHIFT_OVERLAP_TIME)%'
+  github_repo_url: 'elefan-grenoble/gestion-compte'
+  github_current_release: 'v1.45.7'  # x-release-please-version
+
+  helloasso_campaign_slug: '%env(HELLOASSO_CAMPAIGN_SLUG)%'
+  helloasso_client_id: '%env(HELLOASSO_CLIENT_ID)%'
+  helloasso_client_secret: '%env(HELLOASSO_CLIENT_SECRET)%'
+  helloasso_organization_slug: '%env(HELLOASSO_ORGANIZATION_SLUG)%'
+  helloasso_api_base_url: '%env(HELLOASSO_API_BASE_URL)%'
+  helloasso_api_auth_url: '%env(HELLOASSO_API_AUTH_URL)%'
+
+  images_tmp_dir: '%kernel.project_dir%/web/tmp'
+  locale: fr_FR
+  local_currency_name: '%env(LOCAL_CURRENCY_NAME)%'
+  logging.mattermost.channel: '%env(LOGGING_MATTERMOST_CHANNEL)%'
+  logging.mattermost.enabled: '%env(bool:LOGGING_MATTERMOST_ENABLED)%'
+  logging.mattermost.level: '%env(LOGGING_MATTERMOST_LEVEL)%'
+  logging.mattermost.url: '%env(LOGGING_MATTERMOST_URL)%'
+  logging.swiftmailer.enabled: '%env(bool:LOGGING_SWIFTMAILER_ENABLED)%'
+  logging.swiftmailer.level: '%env(LOGGING_SWIFTMAILER_LEVEL)%'
+  logging.swiftmailer.recipient: '%env(LOGGING_SWIFTMAILER_RECIPIENT)%'
+  main_color: '%env(MAIN_COLOR)%'
+  max_event_proxy_per_member: '%env(MAX_EVENT_PROXY_PER_MEMBER)%'
+  max_nb_of_past_cycles_to_display: '%env(MAX_NB_OF_PAST_CYCLES_TO_DISPLAY)%'
+  max_time_in_advance_to_book_extra_shifts: '%env(MAX_TIME_IN_ADVANCE_TO_BOOK_EXTRA_SHIFTS)%'
+  maximum_nb_of_beneficiaries_in_membership: '%env(MAXIMUM_NB_OF_BENEFICIARIES_IN_MEMBERSHIP)%'
+  member_exempted_background_color: '%env(MEMBER_EXEMPTED_BACKGROUND_COLOR)%'
+  member_exempted_icon: '%env(MEMBER_EXEMPTED_ICON)%'
+  member_exempted_material_icon: '%env(MEMBER_EXEMPTED_MATERIAL_ICON)%'
+  member_flying_icon: '%env(MEMBER_FLYING_ICON)%'
+  member_flying_material_icon: '%env(MEMBER_FLYING_MATERIAL_ICON)%'
+  member_frozen_background_color: '%env(MEMBER_FROZEN_BACKGROUND_COLOR)%'
+  member_frozen_icon: '%env(MEMBER_FROZEN_ICON)%'
+  member_frozen_material_icon: '%env(MEMBER_FROZEN_MATERIAL_ICON)%'
+  member_registration_missing_background_color: '%env(MEMBER_REGISTRATION_MISSING_BACKGROUND_COLOR)%'
+  member_registration_missing_icon: '%env(MEMBER_REGISTRATION_MISSING_ICON)%'
+  member_registration_missing_material_icon: '%env(MEMBER_REGISTRATION_MISSING_MATERIAL_ICON)%'
+  member_withdrawn_background_color: '%env(MEMBER_WITHDRAWN_BACKGROUND_COLOR)%'
+  member_withdrawn_icon: '%env(MEMBER_WITHDRAWN_ICON)%'
+  member_withdrawn_material_icon: '%env(MEMBER_WITHDRAWN_MATERIAL_ICON)%'
+  min_shift_duration: '%env(MIN_SHIFT_DURATION)%'
+  new_users_start_as_beginner: '%env(bool:NEW_USERS_START_AS_BEGINNER)%'
+  opening_hour_open_closed_header_closed_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_CLOSED_MESSAGE)%'
+  opening_hour_open_closed_header_open_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_OPEN_MESSAGE)%'
+  oidc_enable: '%env(bool:OIDC_ENABLE)%'
+  oidc_roles_map:
+    ROLE_USER: '%env(OIDC_ROLE_USER)%'
+    ROLE_ADMIN_PANEL: '%env(OIDC_ROLE_ADMIN_PANEL)%'
+    ROLE_FINANCE_MANAGER: '%env(OIDC_ROLE_FINANCE_MANAGER)%'
+    ROLE_SHIFT_MANAGER: '%env(OIDC_ROLE_SHIFT_MANAGER)%'
+    ROLE_PROCESS_MANAGER: '%env(OIDC_ROLE_PROCESS_MANAGER)%'
+    ROLE_USER_MANAGER: '%env(OIDC_ROLE_USER_MANAGER)%'
+    ROLE_USER_VIEWER: '%env(OIDC_ROLE_USER_VIEWER)%'
+    ROLE_ADMIN: '%env(OIDC_ROLE_ADMIN)%'
+    ROLE_SUPER_ADMIN: '%env(OIDC_ROLE_SUPER_ADMIN)%'
+    ROLE_OAUTH_LOGIN: '%env(OIDC_ROLE_OAUTH_LOGIN)%'
+  place_local_ip_address: '%env(PLACE_LOCAL_IP_ADDRESS)%'
+  profile_display_period_position_free_log: '%env(bool:PROFILE_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
+  profile_display_shift_free_log: '%env(bool:PROFILE_DISPLAY_SHIFT_FREE_LOG)%'
+  profile_display_task_list: '%env(bool:PROFILE_DISPLAY_TASK_LIST)%'
+  profile_display_time_log: '%env(bool:PROFILE_DISPLAY_TIME_LOG)%'
+  project_name: '%env(PROJECT_NAME)%'
+  project_url: '%env(PROJECT_URL)%'
+  project_url_display: '%env(PROJECT_URL_DISPLAY)%'
+  registration_duration: '%env(REGISTRATION_DURATION)%'
+  registration_every_civil_year: '%env(bool:REGISTRATION_EVERY_CIVIL_YEAR)%'
+  site_name: '%env(SITE_NAME)%'
+  super_admin.initial_password: '%env(SUPER_ADMIN_INITIAL_PASSWORD)%'
+  super_admin.username: '%env(SUPER_ADMIN_USERNAME)%'
+  swipe_card_logging: '%env(bool:SWIPE_CARD_LOGGING)%'
+  swipe_card_logging_anonymous: '%env(bool:SWIPE_CARD_LOGGING_ANONYMOUS)%'
+  time_after_which_members_are_late_with_shifts: '%env(TIME_AFTER_WHICH_MEMBERS_ARE_LATE_WITH_SHIFTS)%'
+  time_log_saving_shift_free_allow_only_if_enough_saving: '%env(bool:TIME_LOG_SAVING_SHIFT_FREE_ALLOW_ONLY_IF_ENOUGH_SAVING)%'
+  time_log_saving_shift_free_min_time_in_advance_days: '%env(TIME_LOG_SAVING_SHIFT_FREE_MIN_TIME_IN_ADVANCE_DAYS)%'
+  transactional_mailer_user: '%env(TRANSACTIONAL_MAILER_USER)%'
+  transactional_mailer_user_name: '%env(TRANSACTIONAL_MAILER_USER_NAME)%'
+  use_fly_and_fixed: '%env(bool:USE_FLY_AND_FIXED)%'
+  use_time_log_saving: '%env(bool:USE_TIME_LOG_SAVING)%'
+  user_account_enabled_icon: '%env(USER_ACCOUNT_ENABLED_ICON)%'
+  user_account_enabled_material_icon: '%env(USER_ACCOUNT_ENABLED_MATERIAL_ICON)%'
+  user_account_not_enabled_material_icon: '%env(USER_ACCOUNT_NOT_ENABLED_MATERIAL_ICON)%'
+  wiki_keys_url: '%env(WIKI_KEYS_URL)%'
+
+services:
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    bind:
+      $mailer: '@swiftmailer.mailer.default'
+      $local_currency_name: '%local_currency_name%'
+      $use_fly_and_fixed: '%use_fly_and_fixed%'
+      $cycle_type: '%cycle_type%'
+      $localCurrency: '%local_currency_name%'
+      $helloAssoApiKey: '%helloasso_api_key%'
+      $helloAssoApiBaseUrl: '%helloasso_api_base_url%'
+      $helloAssoApiPassword: '%helloasso_api_password%'
+      $registrationDuration: '%registration_duration%'
+      $shiftEmail: '%emails.shift%'
+      $adminEmail: '%emails.admin%'
+      $superAdminUsername: '%super_admin.username%'
+      $superAdminInitialPassword: '%super_admin.initial_password%'
+      $baseDomain: '%emails.base_domain%'
+      $memberEmail: "%emails.member%"
+      $project_name: "%project_name%"
+      $sendableEmails: '%emails.sendable%'
+      $maximumNbOfBeneficiariesInMembership: '%maximum_nb_of_beneficiaries_in_membership%'
+      $localCurrencyName: '%local_currency_name%'
+      $transactionalMailerUser: '%transactional_mailer_user%'
+      $wikiKeysUrl: "%wiki_keys_url%"
+      $dueDurationByCycle: '%due_duration_by_cycle%'
+      $cycleDuration: '%cycle_duration%'
+      $minShiftDuration: '%min_shift_duration%'
+      $newUserStartAsBeginner: '%new_users_start_as_beginner%'
+      $placeLocalIpAddress: '%place_local_ip_address%'
+      $codeGenerationEnabled: '%code_generation_enabled%'
+      $kernelProjectDir: '%kernel.project_dir%'
+      $useFlyAndFixed: '%use_fly_and_fixed%'
+      $allowExtraShifts: '%allow_extra_shifts%'
+      $maxTimeInAdvanceToBookExtraShifts: '%max_time_in_advance_to_book_extra_shifts%'
+      $swipeCardLogging: '%swipe_card_logging%'
+      $entity_manager: "@doctrine.orm.entity_manager"
+      $router: "@router"
+      $templating: "@twig"
+
+  # makes classes in src available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/*'
+    # you can exclude directories or files
+    # but if a service is unused, it's removed anyway
+    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php,Event,Repository,Validator,Datatables,Monolog}'
+
+  # controllers are imported separately to make sure they're public
+  # and have a tag that allows actions to type-hint services
+  App\Controller\:
+    resource: '../src/Controller'
+    public: true
+    tags: [ 'controller.service_arguments' ]
+  App\Controller\CardReaderController:
+    arguments:
+      - '%swipe_card_logging%'
+      - '%swipe_card_logging_anonymous%'
+  App\Controller\AmbassadorController:
+    arguments:
+      - "%time_after_which_members_are_late_with_shifts%"
+      - "%registration_every_civil_year%"
+  App\Controller\BookingController:
+    arguments:
+      - "%use_fly_and_fixed%"
+      - "%display_name_shifters%"
+  App\Controller\ShiftController:
+    arguments:
+      - "%forbid_own_shift_book_admin%"
+      - "%forbid_own_shift_free_admin%"
+      - "%forbid_own_shift_validate_admin%"
+      - "%use_fly_and_fixed%"
+      - "%use_time_log_saving%"
+      - "%time_log_saving_shift_free_min_time_in_advance_days%"
+      - "%time_log_saving_shift_free_allow_only_if_enough_saving%"
+  App\Controller\TimeLogController:
+    arguments:
+      - "%forbid_own_timelog_new_admin%"
+  App\Helper\:
+    resource: '../src/Helper'
+    arguments: [ '@service_container' ]
+    tags: [ 'controller.service_arguments' ]
+  #    app.twig_extension:
+  #        class: App\Twig\Extension\AppExtension
+  #        arguments:
+  #            - '@App\Service\Picture\BasePathPicture'
+  #            - '@doctrine.orm.entity_manager'
+  #            - '%local_currency_name%'
+  #            - '@App\Helper\SwipeCard'
+  #        tags:
+  #            - { name: twig.extension }
+  #    app.twig.extensions.mail:
+  #        class: App\Twig\Extension\MailExtension
+  #        arguments: ['@mailer_service']
+  #        tags:
+  #            - { name: twig.extension }
+  #    app.twig.extensions.event:
+  #        class: App\Twig\Extension\EventExtension
+  #        arguments: ['@event_service']
+  #        tags:
+  #            - { name: twig.extension }
+  #    app.twig.extensions.process_update:
+  #        class: App\Twig\Extension\ProcessUpdateExtension
+  #        arguments: ['@service_container']
+  #        tags:
+  #            - { name: twig.extension }
+  #    app.twig.extensions.membership:
+  #        class: App\Twig\Extension\MembershipExtension
+  #        arguments: ['@service_container']
+  #        tags:
+  #            - { name: twig.extension }
+  #    app.twig.extensions.beneficiary:
+  #        class: App\Twig\Extension\BeneficiaryExtension
+  #        arguments: ['@service_container']
+  #        tags:
+  #            - { name: twig.extension }
+  app.form.registration:
+    class: App\Form\RegistrationType
+    tags:
+      - { name: form.type, alias: app_user_registration }
+  app.authentication_success_handler:
+    class: App\EventListener\AuthenticationSuccessHandler
+    tags:
+      - { name: kernel.event_listener, event: security.interactive_login, method: onSecurityInteractiveLogin }
+
+  # listeners
+  oauth_event_listener:
+    class: App\EventListener\OAuthEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+    tags:
+      - { name: kernel.event_listener, event: fos_oauth_server.pre_authorization_process, method: onPreAuthorizationProcess }
+      - { name: kernel.event_listener, event: fos_oauth_server.post_authorization_process, method: onPostAuthorizationProcess }
+  helloasso_event_listener:
+    class: App\EventListener\HelloassoEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $container: "@service_container"
+      $mailer: "@mailer"
+    tags:
+      - { name: kernel.event_listener, event: helloasso.payment_after_save, method: onPaymentAfterSave }
+      - { name: kernel.event_listener, event: helloasso.orphan_solve, method: onOrphanSolve }
+  commission_leave_or_join_listener:
+    class: App\EventListener\CommissionEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: commission.join, method: onJoin }
+      - { name: kernel.event_listener, event: commission.leave, method: onLeave }
+  shift_free_log_event_listener:
+    class: App\EventListener\ShiftFreeLogEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+  period_position_free_log_event_listener:
+    class: App\EventListener\PeriodPositionFreeLogEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: period_position.freed, method: onPeriodPositionFreed }
+  time_log_event_listener:
+    class: App\EventListener\TimeLogEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+      - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+      - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+      - { name: kernel.event_listener, event: shift.validated, method: onShiftValidated }
+      - { name: kernel.event_listener, event: shift.invalidated, method: onShiftInvalidated }
+      - { name: kernel.event_listener, event: member.cycle.end, method: onMemberCycleEnd }
+  emailing_event_listener:
+    class: App\EventListener\EmailingEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+      $mailer: "@mailer"
+    tags:
+      - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
+      - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }
+      - { name: kernel.event_listener, event: shift.freed, method: onShiftFreed }
+      - { name: kernel.event_listener, event: shift.reminder, method: onShiftReminder }
+      - { name: kernel.event_listener, event: shift.deleted, method: onShiftDeleted }
+      - { name: kernel.event_listener, event: shift.alerts, method: onShiftAlerts }
+      - { name: kernel.event_listener, event: member.cycle.start, method: onMemberCycleStart }
+      - { name: kernel.event_listener, event: member.cycle.half, method: onMemberCycleHalf }
+      - { name: kernel.event_listener, event: member.created, method: onMemberCreated }
+      - { name: kernel.event_listener, event: anonymous_beneficiary.created, method: onAnonymousBeneficiaryCreated }
+      - { name: kernel.event_listener, event: anonymous_beneficiary.recall, method: onAnonymousBeneficiaryRecall }
+      - { name: kernel.event_listener, event: beneficiary.add, method: onBeneficiaryAdd }
+      - { name: kernel.event_listener, event: event.proxy.created, method: onEventProxyCreated }
+      - { name: kernel.event_listener, event: helloasso.registration_success, method: onHelloassoRegistrationSuccess }
+      - { name: kernel.event_listener, event: helloasso.too_early, method: onHelloassoTooEarly }
+      - { name: kernel.event_listener, event: code.new, method: onCodeNew }
+  mattermost_event_listener:
+    class: App\EventListener\MattermostEventListener
+    arguments:
+      $entityManager: "@doctrine.orm.entity_manager"
+      $logger: "@logger"
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: shift.alerts.mattermost, method: onShiftAlerts }
+  kernel.listener.oidc_firewall_listener:
+    class: App\EventListener\OidcFirewallListener
+    arguments:
+      $container: "@service_container"
+    tags:
+      - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
+  oidc_logout_handler:
+    class: App\EventListener\OidcLogoutHandler
+  set_password:
+    class: App\EventListener\SetFirstPasswordListener
+    public: true
+    arguments:
+      $entity_manager: "@doctrine.orm.entity_manager"
+      $router: "@router"
+      $token_storage: '@security.token_storage'
+    tags:
+      #                - { name: kernel.event_listener, event: fos_user.user.created, method: onUserCreated }
+      #                - { name: kernel.event_listener, event: fos_user.registration.success, method: onRegistrationSuccess }
+      - { name: doctrine.event_listener, event: prePersist }
+      - { name: kernel.event_listener, event: kernel.request, method: forcePasswordChange }
+      - { name: kernel.event_listener, event: fos_user.user.password_changed, method: onPasswordChanged }
+
+  # subscribers
+  beneficiary_initialization_subscriber:
+    class: App\EventListener\BeneficiaryInitializationSubscriber
+    arguments:
+      - "@doctrine.orm.entity_manager"
+    tags:
+      - { name: kernel.event_listener, event: beneficiary.created, method: onBeforePersist }
+
+  # validators
+  validator_anonymous_beneficiary_unique_email:
+    class: App\Validator\Constraints\UniqueEmailValidator
+    arguments:
+      - "@doctrine.orm.entity_manager"
+  validator_anonymous_beneficiary_beneficiary_can_host:
+    class: App\Validator\Constraints\BeneficiaryCanHostValidator
+    arguments:
+      $container: "@service_container"
+
+  # services
+  shift_service:
+    class: App\Service\ShiftService
+    public: true
+    arguments:
+      - "@doctrine.orm.entity_manager"
+      - '@beneficiary_service'
+      - '@membership_service'
+      - "%due_duration_by_cycle%"
+      - "%min_shift_duration%"
+      - "%new_users_start_as_beginner%"
+      - "%allow_extra_shifts%"
+      - "%max_time_in_advance_to_book_extra_shifts%"
+      - "%forbid_shift_overlap_time%"
+      - "%use_fly_and_fixed%"
+      - "%fly_and_fixed_allow_fixed_shift_free%"
+      - "%use_time_log_saving%"
+      - "%time_log_saving_shift_free_min_time_in_advance_days%"
+      - "%time_log_saving_shift_free_allow_only_if_enough_saving%"
+  shift_free_log_service:
+    class: App\Service\ShiftFreeLogService
+    public: true
+    arguments:
+      $tokenStorage: '@security.token_storage'
+  period_service:
+    class: App\Service\PeriodService
+    public: true
+  period_position_free_log_service:
+    class: App\Service\PeriodPositionFreeLogService
+    public: true
+    arguments:
+      $tokenStorage: '@security.token_storage'
+  time_log_service:
+    class: App\Service\TimeLogService
+    public: true
+    arguments:
+      $em: "@doctrine.orm.entity_manager"
+      $membershipService: '@membership_service'
+      $due_duration_by_cycle: "%due_duration_by_cycle%"
+  beneficiary_service:
+    class: App\Service\BeneficiaryService
+    public: true
+  mailer_service:
+    class: App\Service\MailerService
+    public: true
+    arguments:
+      $mailer: "@mailer"
+      $baseDomain: '%emails.base_domain%'
+      $memberEmail: "%emails.member%"
+      $project_name: "%project_name%"
+      $sendableEmails: '%emails.sendable%'
+      $entity_manager: "@doctrine.orm.entity_manager"
+      $router: "@router"
+      $templating: "@templating"
+  membership_service:
+    class: App\Service\MembershipService
+    public: true
+  event_service:
+    class: App\Service\EventService
+    public: true
+  opening_hour_service:
+    class: App\Service\OpeningHourService
+    public: true
+  opening_hour_kind_service:
+    class: App\Service\OpeningHourKindService
+    public: true
+
+  search_user_form_helper:
+    class: App\Service\SearchUserFormHelper
+    public: true
+
+  logger.user_processor:
+    class: App\Monolog\MonologUserProcessor
+    arguments:
+      - '@security.token_storage'
+    tags:
+      - { name: monolog.processor, method: processRecord }
+
+  logging.handler.swiftmailer:
+    class: App\Monolog\ToggleableHandler
+    decorates: monolog.handler.swiftmailer
+    arguments:
+      - '@logging.handler.swiftmailer.inner'
+      - '%logging.swiftmailer.enabled%'
+
+  # factories
+  doctrine.fixtures.purger.orm_purger_factory:
+    class: App\DataFixtures\Purger\CustomPurgerFactory
+    tags:
+      - { name: doctrine.fixtures.purger_factory, alias: default }
+
+  # Types
+  App\Form\BeneficiaryType:
+    arguments:
+      $use_fly_and_fixed: '%use_fly_and_fixed%'
+      $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
+
+  App\Form\BeneficiaryWithoutUserType:
+    arguments:
+      $use_fly_and_fixed: '%use_fly_and_fixed%'
+      $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
+
+
+
+
+
+
+
+
