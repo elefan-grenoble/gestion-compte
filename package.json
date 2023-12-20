@@ -1,0 +1,45 @@
+{
+    "name": "gestion-compte",
+    "version": "1.0.0",
+    "description": "Espace adhérent super marché coopératifs",
+    "main": "webpack.config.js",
+    "directories": {
+        "doc": "doc",
+        "test": "tests"
+    },
+    "dependencies": {
+        "canvas-gauges": "^2.1.5-radial",
+        "jquery": "^3.4.1",
+        "material-icons-css": "^1.0.1",
+        "materialize-css": "^1.0.0",
+        "simplemde": "^1.11.2"
+    },
+    "devDependencies": {
+        "@babel/plugin-proposal-class-properties": "^7.18.6",
+        "@hotwired/stimulus": "^3.0.0",
+        "@symfony/stimulus-bridge": "^3.0.0",
+        "@symfony/webpack-encore": "^1.7.0",
+        "core-js": "^3.0.0",
+        "file-loader": "^6.2.0",
+        "less": "^4.2.0",
+        "less-loader": "^11.1.3",
+        "regenerator-runtime": "^0.13.2",
+        "webpack-notifier": "^1.8.0"
+    },
+    "scripts": {
+        "dev-server": "encore dev-server --disable-host-check",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/elefan-grenoble/gestion-compte.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/elefan-grenoble/gestion-compte/issues"
+    },
+    "homepage": "https://github.com/elefan-grenoble/gestion-compte#readme"
+}

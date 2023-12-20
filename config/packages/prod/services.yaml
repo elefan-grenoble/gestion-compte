@@ -1,0 +1,7 @@
+services:
+  logging.handler.mattermost:
+    class: App\Monolog\ToggleableHandler
+    decorates: monolog.handler.mattermost
+    arguments:
+      - '@logging.handler.mattermost.inner'
+      - '%logging.mattermost.enabled%'

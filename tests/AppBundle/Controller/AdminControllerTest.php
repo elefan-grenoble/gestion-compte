@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\AppBundle\Controller;
+namespace Tests\App\Controller;
 
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Tests\AppBundle\DatabasePrimer;
+use Tests\App\DatabasePrimer;
 
 class AdminControllerTest extends DatabasePrimer
 {
@@ -43,17 +43,17 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('AppBundle:User')->findAll();
+        $users = $em->getRepository('App:User')->findAll();
 
         // Assert that the number of users in the database matches the number in the CSV
         $this->assertCount(50, $users);
 
-        $Beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
+        $Beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $Beneficiaries);
 
-        $memberships = $em->getRepository('AppBundle:Membership')->findAll();
+        $memberships = $em->getRepository('App:Membership')->findAll();
 
         // Assert that the number of memberships in the database matches the number in the CSV
         $this->assertCount(50, $memberships);
@@ -94,17 +94,17 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('AppBundle:User')->findAll();
+        $users = $em->getRepository('App:User')->findAll();
 
         // Assert that the number of users in the database matches the number in the CSV
         $this->assertCount(50, $users);
 
-        $Beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
+        $Beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $Beneficiaries);
 
-        $memberships = $em->getRepository('AppBundle:Membership')->findAll();
+        $memberships = $em->getRepository('App:Membership')->findAll();
 
         // Assert that the number of memberships in the database matches the number in the CSV
         $this->assertCount(50, $memberships);
@@ -141,7 +141,7 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);
@@ -188,7 +188,7 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $beneficiaries = $em->getRepository('AppBundle:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);

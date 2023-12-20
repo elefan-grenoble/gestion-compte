@@ -25,10 +25,7 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
-    command: >
-      bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
-      && php bin/console doctrine:migration:migrate
-      && php bin/console server:run *:8000"
+    command: php -S 0.0.0.0:8000 -t public"
     ports:
       - "8000:8000"
     volumes:
@@ -64,9 +61,14 @@ services:
     container_name: keycloak
     volumes:
     - .docker/keycloak/data:/opt/jboss/keycloak/standalone/data/
+    - .docker/keycloak/config/realm-export.json:/config/realm-export.json
     environment:
     - KEYCLOAK_USER=admin
     - KEYCLOAK_PASSWORD=admin
     - DB_VENDOR=h2
+    - KEYCLOAK_IMPORT=/config/realm-export.json
+    user: root
     ports:
     - "8080:8080"
+
+
