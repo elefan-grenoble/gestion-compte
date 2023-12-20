@@ -1,0 +1,49 @@
+<?php
+
+namespace App\Service;
+
+use App\Entity\Beneficiary;
+use App\Entity\PeriodPosition;
+use App\Entity\PeriodPositionFreeLog;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+
+class PeriodPositionFreeLogService
+{
+    protected $em;
+    protected $requestStack;
+    private $tokenStorage;
+
+    public function __construct(EntityManagerInterface $em, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    {
+        $this->em = $em;
+        $this->requestStack = $requestStack;
+        $this->tokenStorage = $tokenStorage;
+    }
+
+    public function generatePeriodPositionString(PeriodPosition $periodPosition)
+    {
+        return (string) $periodPosition;
+    }
+
+    public function initPeriodPositionFreeLog(PeriodPosition $periodPosition, Beneficiary $beneficiary, $bookedTime = null)
+    {
+        $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        $request = $this->requestStack->getCurrentRequest();
+
+        $log = new PeriodPositionFreeLog;
+        $log->setPeriodPosition($periodPosition);
+        $log->setPeriodPositionString($this->generatePeriodPositionString($periodPosition));
+        $log->setBeneficiary($beneficiary);
+        if ($bookedTime) {
+            $log->setBookedTime($bookedTime);
+        }
+        if (is_object($current_user)) {
+            $log->setCreatedBy($current_user);
+        }
+        $log->setRequestRoute($request->get('_route'));
+
+        return $log;
+    }
+}

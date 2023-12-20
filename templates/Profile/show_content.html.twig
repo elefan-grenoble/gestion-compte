@@ -1,0 +1,142 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% if app.user.beneficiary %}
+    {% set beneficiary = app.user.beneficiary %}
+    {% set member = beneficiary.membership %}
+
+    <h5 class="center-align">
+        <img src="{{ gravatar(beneficiary.email,100) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img">
+        <br />
+        {{ app.user }}
+        {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
+    </h5>
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">person</i>Mes informations
+            </div>
+            <div class="collapsible-body">
+                {% include "beneficiary/_partial/info.html.twig" with { beneficiary: beneficiary } %}
+                {% if not oidc_enable %}
+                <a href="{{ path('fos_user_profile_edit') }}" class="btn waves-effect waves-light"><i class="material-icons left">mode_edit</i>Editer</a>
+                {% else %}
+                    {{ oidc_profile_custom_message | raw }}
+                {% endif %}
+            </div>
+        </li>
+
+        {% if not oidc_enable %}
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">card_membership</i>Adhésions
+            </div>
+            <div class="collapsible-body">
+                {% include "member/_partial/registrations.html.twig" with { member: beneficiary.membership } %}
+            </div>
+        </li>
+        {% endif %}
+
+        {% if profile_display_time_log %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">access_time</i>Compteur de temps
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/time_logs.html.twig" with { member: member } %}
+                </div>
+            </li>
+        {% endif %}
+
+        {% if profile_display_shift_free_log %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">delete_sweep</i>Historique des créneaux annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member), custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
+
+        {% if use_fly_and_fixed and profile_display_period_position_free_log %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">delete_sweep</i>Historique des postes fixes annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/period_position_free_logs.html.twig" with { periodPositionFreeLogs: membership_service.getPeriodPositionFreeLogs(member), custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
+
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">{{ member_frozen_material_icon }}</i>Gel du compte
+            </div>
+            <div class="collapsible-body">
+                {% if display_freeze_account %}
+                    {{ render(controller("App\\Controller\\MembershipController::homepageFreezeAction")) }}
+                {% else %}
+                    <p class="red-text">
+                        {{ display_freeze_account_false_message }}
+                    </p>
+                {% endif %}
+            </div>
+        </li>
+
+        {% if display_swipe_cards_settings %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">credit_card</i>Badge{% if beneficiary.swipeCards | length > 1 %}s{% endif %}
+                </div>
+                <div class="collapsible-body">
+                    {% include "beneficiary/_partial/swipe_cards.html.twig" with { beneficiary: beneficiary, show_badge_image: true } %}
+                </div>
+            </li>
+        {% endif %}
+
+        {% if app.user.clients | length %}
+            <li>
+                <div class="collapsible-header">
+                    <i class="material-icons">extension</i>Services
+                </div>
+                <div class="collapsible-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Service</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for client in app.user.clients %}
+                            <tr id="client_{{ client.id }}">
+                                <td>
+                                    {% if client.service.logo %}
+                                        <img src="{{ asset(vich_uploader_asset(client.service, 'logoFile')) | imagine_filter('service_logo') }}"
+                                            alt="{{ client.service.name }}"
+                                            class="circle responsive-img"
+                                            style="background: white">
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ client.service.url }}" class="">{{ client.service.name }}</a>
+                                </td>
+                                <td>
+                                    {{ client.service.description }}
+                                </td>
+                                <td>
+                                    <a href="{{ path('user_client_remove',{'username':app.user.username,'client_id':client.id}) }}"
+                                    class="btn-floating red left"><i class="material-icons">close</i></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </li>
+        {% endif %}
+    </ul>
+{% endif %}

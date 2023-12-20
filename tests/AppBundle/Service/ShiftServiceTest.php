@@ -1,15 +1,15 @@
 <?php
 
-namespace Tests\AppBundle\Service;
+namespace Tests\App\Service;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Membership;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\User;
-use AppBundle\Repository\ShiftRepository;
-use AppBundle\Service\BeneficiaryService;
-use AppBundle\Service\MembershipService;
-use AppBundle\Service\ShiftService;
+use App\Entity\Beneficiary;
+use App\Entity\Membership;
+use App\Entity\Shift;
+use App\Entity\User;
+use App\Repository\ShiftRepository;
+use App\Service\BeneficiaryService;
+use App\Service\MembershipService;
+use App\Service\ShiftService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -111,7 +111,7 @@ class ShiftServiceTest extends TestCase
         // Mock the getRepository() method of the EntityManager
         $this->em->expects($this->any())
             ->method('getRepository')
-            ->with('AppBundle:Shift')
+            ->with('App:Shift')
             ->willReturn($shiftRepositoryMock);
 
         $membershipService = new MembershipService($this->container, $this->em);

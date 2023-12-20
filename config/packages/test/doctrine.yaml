@@ -1,0 +1,3 @@
+doctrine:
+    dbal:
+        host: '%database_test_host%'

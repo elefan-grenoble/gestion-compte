@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\AppBundle;
+namespace Tests\App;
 
-use AppBundle\DataFixtures\Purger\CustomPurger;
+use App\DataFixtures\Purger\CustomPurger;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Exception;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;

@@ -1,0 +1,9 @@
+knpu_oauth2_client:
+    clients:
+        keycloak:
+            type: keycloak
+            auth_server_url: '%env(OIDC_ISSUER)%'
+            realm: '%env(OIDC_REALM)%'
+            client_id: '%env(OIDC_CLIENT_ID)%'
+            redirect_route: 'oauth_check'
+            client_secret: '%env(OIDC_CLIENT_SECRET)%'

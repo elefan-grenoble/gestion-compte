@@ -1,0 +1,63 @@
+{% set beneficiary = app.user.beneficiary %}
+{% set member = beneficiary.membership %}
+
+<div class="card center sticky-action {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+    <div class="card-content">
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
+    </div>
+    {% if shift.isPastOrCurrent %}
+        {% if shift.isCurrent %}
+            <div class="card-action">
+                <a href="#contact{{ shift.id }}" id="more{{ shift.id }}" class="modal-trigger" title="Contacter les bénévoles du créneau"><i class="material-icons right">email</i></a>
+                <span>créneau en cours</span>
+            </div>
+            {% endif %}
+        {% if use_card_reader_to_validate_shifts %}
+            {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
+        {% endif %}
+    {% else %}
+        {% if shift_service.canFreeShift(beneficiary, shift)['result'] or shift.isUpcoming %}
+            <div class="card-action">
+                {% if shift_service.canFreeShift(beneficiary, shift)['result'] %}
+                    <a href="#free{{ shift.id }}" class="modal-trigger btn-flat red white-text" title="Annuler">Annuler</a>
+                {% endif %}
+                {% if shift.isUpcoming %}
+                    <a href="#contact{{ shift.id }}" class="modal-trigger btn-flat" title="Contacter les bénévoles du créneau"><i class="material-icons">email</i></a>
+                {% endif %}
+            </div>
+            <div id="free{{ shift.id }}" class="modal black-text">
+                {{ form_start(shift_free_forms[shift.id]) }}
+                    <div class="modal-content">
+                        <h5>Je ne peux pas faire mon créneau{% if shift.fixe %} fixe{% endif %}</h5>
+                        <div class="input-field">
+                            {{ form_label(shift_free_forms[shift.id].reason) }}
+                            {{ form_errors(shift_free_forms[shift.id].reason) }}
+                            {{ form_widget(shift_free_forms[shift.id].reason) }}
+                        </div>
+                        {% if use_time_log_saving and use_card_reader_to_validate_shifts %}
+                            <div class="card-panel blue lighten-3">
+                                <i class="material-icons left">info</i>
+                                {% if not time_log_saving_shift_free_allow_only_if_enough_saving and shift.duration > member.savingTimeCount %}
+                                    Vous <strong>n'avez pas assez de temps sur votre compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                                    <br />
+                                    Ce créneau ne sera donc pas comptabilisé, et votre compteur épargne ne sera pas utilisé.
+                                {% else %}
+                                    Grâce au compteur épargne, ce créneau sera tout de même comptabilisé.
+                                    <br />
+                                    En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés de votre compteur épargne (<strong>{{ member.savingTimeCount | duration_from_minutes }}</strong>).
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
+                        <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, je me désiste !</button>
+                    </div>
+                {{ form_end(shift_free_forms[shift.id]) }}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% if (shift.isUpcoming or shift.isCurrent) %}
+    {{ render(controller("App\\Controller\\ShiftController::contactFormAction", { "shift": shift })) }}
+{% endif %}

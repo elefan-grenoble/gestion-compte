@@ -1,0 +1,211 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+<div id="home-annoucemements-top" class="center">
+    {{ dynamicContentTop | markdown | raw }}
+</div>
+
+<div id="home-welcome" class="row center">
+    {% if app.user.beneficiary %}
+        {% set member = app.user.beneficiary.membership %}
+
+        <div class="col s12">
+            <h4 class="header">
+                Bonjour {{ app.user.beneficiary.firstname }}
+                <br />
+                #{{ member.memberNumber }}
+            </h4>
+        </div>
+        <div class="col s12">
+            <p>
+                Bienvenue sur ton espace personnel à {{ project_name }}
+                {% if member.beneficiaries | length > 1 %}
+                    <br />
+                    Tu partages ton compte avec {% for beneficiary in member.beneficiaries %}{% if beneficiary != app.user.beneficiary %}<strong>{{ beneficiary.firstname }}</strong>{% endif %}{% endfor %}
+                {% endif %}
+            </p>
+        </div>
+    {% else %}
+        <div class="col s12">
+            <h4 class="header">Bonjour {{ app.user.username }}</h4>
+        </div>
+    {% endif %}
+
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <div class="col s12">
+            <p>
+                <span class="orange-text">&lt;warning&gt;</span>
+                <span>With great power comes great responsibility</span>
+                <span class="orange-text">&lt;/warning&gt;</span>
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{% if app.user.beneficiary %}
+    {% set member = app.user.beneficiary.membership %}
+
+    {% if member.isCurrentlyExemptedFromShifts() %}
+        {% include "member/_partial/exempted.html.twig" with { member: member } %}
+    {% endif %}
+
+    <div id="home-actions" class="row center">
+        <div class="col s12 l6">
+            {% if (member | uptodate) %}
+                <div class="homebox">
+                    <h5><span class="white">{% if member.beneficiaries | length > 1 %}Votre{% else %}Mon{% endif %} bénévolat</span></h5>
+                    {% include "booking/home_dashboard.html.twig" %}{# with { beneficiary: app.user.beneficiary } #}
+                </div>
+            {% else %}
+                <div class="col show-on-xl-only xl3"></div>
+            {% endif %}
+            {% if not (member | uptodate) or (member | uptodate) and (member | can_register) %}
+                <div class="homebox">
+                    <h5><span class="white">Adhésion</span></h5>
+                    <div>
+                        {% if not (member | uptodate) %}
+                            {% if (member.registrations | length) %}{# existing member #}
+                                <p>
+                                    <i class="material-icons">warning</i>
+                                    {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} adhésion a expirée le {{ 'now' | date_modify((member | remainder | date('%R%a'))~" days")| date_fr_long }}.
+                                </p>
+                                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                    <i class="material-icons left">card_membership</i>Ré-adhèrer en ligne
+                                </a>
+                            {% else %}{# new member #}
+                                <p>
+                                    <i class="material-icons">warning</i>
+                                    Il est temps d'adhérer :)
+                                </p>
+                                <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                    <i class="material-icons left">card_membership</i>Adhèrer en ligne
+                                </a>
+                            {% endif %}
+                        {% elseif (member | uptodate) and (member | can_register) %}
+                            <p>
+                                <i class="material-icons">warning</i>
+                                {% if member.beneficiaries | length %}Votre{% else %}Ton{% endif %} adhésion expire dans {{ membership_service.getRemainder(member) | date('%a') }} jours.
+                            </p>
+                            <a href="{{ path("user_self_register") }}" class="waves-effect waves-light light-green btn">
+                                <i class="material-icons left">card_membership</i>Je ré-adhère en ligne
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {% if (member.registrations | length) %}
+                <div class="homebox">
+                    <h5><span class="white">Mon compte</span></h5>
+                    <div>
+                        <a href="{{ path("fos_user_profile_show") }}" class="waves-effect waves-light blue-grey btn">
+                            <i class="material-icons left">settings</i>Gérer mon compte
+                        </a>
+                        {% if display_freeze_account %}
+                            <br />
+                            {{ render(controller("App\\Controller\\MembershipController::homepageFreezeAction")) }}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="col s12 l6">
+            <div class="homebox">
+                <h5><span class="white">En ce moment à {{ project_name }}</span></h5>
+                <a href="{{ path("schedule") }}" class="waves-effect waves-light btn teal">
+                    <i class="material-icons left">schedule</i>Planning
+                </a>
+                <br />
+                <a href="{{ path("period_index") }}" class="waves-effect waves-light btn teal">
+                    <i class="material-icons left">date_range</i>Semaine type
+                </a>
+                <br />
+                {% if profile_display_task_list %}
+                    <a href="{{ path("tasks_list") }}" class="waves-effect waves-light btn blue-grey">
+                        <i class="material-icons left">list</i>Tâches en cours
+                    </a>
+                    <br />
+                {% endif %}
+                <a href="{{ path("process_update_list") }}" class="btn blue-grey" id="news_home_button" style="position: relative">
+                    <i class="material-icons left" >info</i>Les nouveautés
+                    <span class="bubble_counter red white-text" style="display:none;">{{ app.user.beneficiary | last_shift_date | count_updates_list_from_date }}</span>
+                </a>
+
+                <script>
+                    defer(function () {
+                        var cookie_data = myCookieInit({'last_processupdates_check' : "{{ app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
+                        jQuery.ajax(process_update_count_unread_url,{
+                            data: {date: cookie_data.last_processupdates_check.replace('_','+')},
+                            method: "post",
+                            dataType: "json"
+                        }).done(function (data, textStatus, jqXHR) {
+                        if (textStatus == "success"){
+                            if (data.count > 0){
+                                $('#news_home_button').find('.bubble_counter').html(data.count).show();
+                                $('head title').prepend('('+data.count+') ');
+                            }
+                        }
+                        });
+                    });
+                </script>
+            </div>
+
+            <div class="homebox">
+                <h5><span class="white">Événements</span></h5>
+                {% if eventsFutureOrOngoingDisplayedHome | length %}
+                    <div class="row">
+                        {% for eventDisplayedHome in eventsFutureOrOngoingDisplayedHome %}
+                            <div class="col s12">
+                                {% include "admin/event/_partial/card.html.twig" with { event: eventDisplayedHome } %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <a href="{{ path("event_index") }}" class="btn blue" style="position: relative">
+                    <i class="material-icons left" >event</i>Les événements à venir
+                    {% if eventsFutureOrOngoing | length %}
+                        <span class="bubble_counter red white-text">{{ eventsFutureOrOngoing | length }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            {% if app.user.beneficiary.ownedCommissions | length %}
+                <div class="homebox">
+                    <h5><span class="white">Mes commissions</span></h5>
+                    {% for commission in app.user.beneficiary.ownedCommissions %}
+                        <a href="{{ path("commission_edit",{'id': commission.id }) }}" class="waves-effect waves-light btn blue-grey">
+                            Gérer la commission {{ commission.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if (member | uptodate) and display_keys_shop %}
+                <div class="homebox">
+                    <h5><span class="white"><i class="material-icons">build</i>&nbsp;Outils</span></h5>
+                    {% if display_keys_shop %}
+                        {{ render(controller("App\\Controller\\CodeController::homepageDashboardAction")) }}
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if member | uptodate %}
+        <div id="home-shifts" class="row">
+            <div class="col s12">
+                {{ render(controller("App\\Controller\\BookingController::homepageShiftsAction")) }}
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+
+<div id="home-annoucemements-bottom" class="center">
+    {{ dynamicContentBottom | markdown | raw }}
+</div>
+{% endblock %}
+
+{% block aftercontainer %}
+<div class="center-align">
+    <img class="responsive-img" src="{{ asset("build/images/cute-elefan.png") }}" alt="elefan" height="50px"/>
+</div>
+{% endblock %}
