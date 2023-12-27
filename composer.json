@@ -57,8 +57,10 @@
         "vich/uploader-bundle": "^1.4"
     },
     "require-dev": {
+        "dbrekelmans/bdi": "^1.1",
         "phpstan/phpstan": "^1.9",
         "phpunit/phpunit": "^9",
+        "symfony/panther": "^1.1",
         "symfony/phpunit-bridge": "^5.0"
     },
     "scripts": {

@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libfreetype6-dev \
     libjpeg-dev \
-    netcat
+    netcat \
+    libzip-dev
 
 # Paramétrage de locale pour le Français
 RUN sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
@@ -27,6 +28,6 @@ COPY php.ini usr/local/etc/php/php.ini
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 # Installation des extensions nécessaires
-RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
+RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd zip
 
 WORKDIR /var/www/app/

@@ -22,6 +22,9 @@
       <!-- env name="TRUSTED_HOSTS" value="'^(localhost|example\.com)$'" -->
       <!-- ###- symfony/framework-bundle ### -->
   </php>
+    <extensions>
+        <extension class="Symfony\Component\Panther\ServerExtension" />
+    </extensions>
   <testsuites>
     <testsuite name="Project Test Suite">
       <directory>tests</directory>
