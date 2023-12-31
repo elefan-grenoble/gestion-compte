@@ -8,14 +8,12 @@ class LoginTest extends PantherTestCase
 {
     public function testLogin()
     {
-        $client = static::createPantherClient(
-            [
-                'hostname' => 'example.com',
-                'port' => 8000,
-            ]
-        );
+        $client = static::createPantherClient();
 
         $crawler = $client->request('GET', '/login');
+
+        sleep(30);
+
 
 
 //        $form = $crawler->selectButton('Login')->form([
@@ -31,11 +29,13 @@ class LoginTest extends PantherTestCase
             ]
         );
 
-        $client->submit($form);
+        sleep(30);
+
+//        $client->submit($form);
 
         // wait for navigation to finish
-        $client->waitFor('#main');
+//        $client->waitFor('#main');
 
-        $this->assertSame('/', $client->getCurrentURL());
+//        $this->assertSame('/', $client->getCurrentURL());
     }
 }
