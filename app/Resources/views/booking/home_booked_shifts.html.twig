@@ -87,16 +87,21 @@
                 <div class="row">
                     {% for cycle in -1..(-1 * max_nb_of_past_cycles_to_display) %}
                         <div class="col s12 m6 xl4">
-                            {% set previousShifts = shifts_by_cycle[cycle] %}
                             <h6>Cycle précédent (du {{ membership_service.startOfCycle(member,cycle) | date_short }} au {{ membership_service.endOfCycle(member,cycle) | date_short }})</h6>
-                            {% if previousShifts | length > 0 %}
-                                {% for shift in previousShifts %}
-                                    <div class="col s12 m12">
-                                        {% include "user/_partial/mini_shift_card.html.twig" with { shift: shift } %}
-                                    </div>
-                                {% endfor %}
+                            {% set iscycleexist = cycle in shifts_by_cycle|keys %}
+                            {% if iscycleexist  %}
+                                {% set previousShifts = shifts_by_cycle[cycle] %}
+                                {% if previousShifts | length > 0 %}
+                                    {% for shift in previousShifts %}
+                                        <div class="col s12 m12">
+                                            {% include "user/_partial/mini_shift_card.html.twig" with { shift: shift } %}
+                                        </div>
+                                    {% endfor %}
+                                {% else %}
+                                    Pas de créneau
+                                {% endif %}
                             {% else %}
-                                Pas de créneau
+                                    Pas de créneau    
                             {% endif %}
                         </div>
                     {% endfor %}
