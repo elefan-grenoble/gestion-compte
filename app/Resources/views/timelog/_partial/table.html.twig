@@ -36,7 +36,7 @@
                 <td>{{ timeLog.typeDisplay }}</td>
                 <td>
                     {% if timeLog.shift %}
-                        {{ timeLog.shift.job.name }} - {{ timeLog.shift.displayDateSeperateTime }}
+                        {{ timeLog.shift.job.name }} {% if timeLog.shift.formation %} - {{ timeLog.shift.formation.name }}{% endif %} - {{ timeLog.shift.displayDateSeperateTime }}
                         {% if timeLog.shift.shifter and timeLog.type not in [20, 21] %}
                             ({{ timeLog.shift.shifter }})
                         {% endif %}
