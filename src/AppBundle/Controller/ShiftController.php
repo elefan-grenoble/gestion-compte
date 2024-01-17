@@ -166,7 +166,7 @@ class ShiftController extends Controller
 
         $member = $beneficiary->getMembership();
         if ($member->getFirstShiftDate() == null) {
-            $firstDate = clone($shift->getStart());
+            $firstDate = new \DateTime('now');
             $firstDate->setTime(0, 0, 0);
             $member->setFirstShiftDate($firstDate);
             $em->persist($member);
@@ -225,7 +225,7 @@ class ShiftController extends Controller
 
                 $member = $beneficiary->getMembership();
                 if ($member->getFirstShiftDate() == null) {
-                    $firstDate = clone($shift->getStart());
+                    $firstDate = new \DateTime('now');
                     $firstDate->setTime(0, 0, 0);
                     $member->setFirstShiftDate($firstDate);
                     $em->persist($member);
