@@ -153,6 +153,7 @@ twig:
     oidc_commissions_claim: "%oidc_commissions_claim%"
     oidc_commissions_map: "%oidc_commissions_map%"
     oidc_profile_custom_message: '%oidc_profile_custom_message%'
+    oidc_no_account_message: '%oidc_no_account_message%'
 # Doctrine Configuration
 doctrine:
   dbal:
