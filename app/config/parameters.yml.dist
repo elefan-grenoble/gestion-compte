@@ -195,6 +195,7 @@ parameters:
     # Open id client
     oidc_enable: false
     oidc_profile_custom_message : 'vos informations personnelles sont éditables <a href="http://localhost:8081/"> ici </a>'
+    oidc_no_account_message : 'Si vous n''avez pas de compte, merci d''envoyer un email à <a href="mailto:elefan@scopeli.fr?Subject=Cr%%C3%%A9ation%%20d%%20un%%20compte%%20Scop%%C3%%A9li">elefan@scopeli.fr </a>'
     oidc_issuer: 'http://host.docker.internal:8081/auth'
     oidc_realm: elefan
     oidc_client_id: elefan

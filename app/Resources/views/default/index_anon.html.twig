@@ -10,11 +10,19 @@
         <i class="material-icons left">lock_outline</i>Se connecter
     </a>
 </div>
+{% if not oidc_enable %}
 <div class="row center">
     <p class=" col s12 light"> Pas encore d'identifiant ?
         <a href="{{ path('find_me') }}" class="orange-text">Créer mon compte</a>
     </p>
 </div>
+{% else %}
+<div class="row center">
+    <p class=" col s12 light"> 
+         {{ oidc_no_account_message | raw }}.
+    </p>
+</div>
+{% endif %}
 {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay, display_names: false } %}
 {% endblock %}
 
