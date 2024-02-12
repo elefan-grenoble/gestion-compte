@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- https://phpunit.de/manual/current/en/appendixes.configuration.html -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" colors="true" bootstrap="vendor/autoload.php" convertWarningsToExceptions="false" convertDeprecationsToExceptions="false">
+<phpunit
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
+        backupGlobals="false"
+        colors="true"
+        bootstrap="config/bootstrap.php"
+        convertWarningsToExceptions="false"
+        convertDeprecationsToExceptions="false">
   <coverage>
     <include>
       <directory>src</directory>
@@ -13,10 +20,10 @@
   </coverage>
   <php>
       <ini name="error_reporting" value="-1" />
-      <server name="KERNEL_CLASS" value="AppKernel"/>
+      <server name="KERNEL_CLASS" value="App\Kernel"/>
       <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
       <!-- ###+ symfony/framework-bundle ### -->
-      <env name="APP_ENV" value="dev"/>
+      <env name="APP_ENV" value="test"/>
       <env name="APP_SECRET" value="3b4fa8b96ecb2d65bc474115bb8705bb"/>
       <!-- env name="TRUSTED_PROXIES" value="127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16" -->
       <!-- env name="TRUSTED_HOSTS" value="'^(localhost|example\.com)$'" -->

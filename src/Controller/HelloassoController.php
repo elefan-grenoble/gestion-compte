@@ -54,12 +54,6 @@ class HelloassoController extends Controller
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
         }
 
-<<<<<<< HEAD:src/AppBundle/Controller/HelloassoController.php
-=======
-        //todo: save this somewhere ?
-        $campaigns_json = $this->container->get('App\Helper\Helloasso')->get('campaigns');
-
->>>>>>> 7c5796f4 (Mise à jour de la version de symfony de 3.4 à 4.4):src/Controller/HelloassoController.php
         $campaigns = array();
         $campaign_ids = array_unique(array_map(function($payment) { return $payment->getCampaignId(); }, $payments));
         foreach ($campaign_ids as $id) {
@@ -83,45 +77,12 @@ class HelloassoController extends Controller
      */
     public function helloassoBrowserAction(HelloassoClient $helloassoClient)
     {
-<<<<<<< HEAD:src/AppBundle/Controller/HelloassoController.php
         try {
             $campaigns = $helloassoClient->getForms();
         } catch (ClientExceptionInterface $e) {
             $session = new Session();
             $session->getFlashBag()->add('error','Connexion à helloasso impossible');
             return $this->redirectToRoute('admin');
-=======
-        if (!($currentPage = $request->get('page')))
-            $currentPage = 1;
-
-        if (!($campaignId = $request->get('campaign'))) {
-            $campaigns_json = $this->container->get('App\Helper\Helloasso')->get('campaigns');
-            if ($campaigns_json && array_key_exists('resources', $campaigns_json)) {
-                $campaigns = $campaigns_json->resources;
-            } else {
-                $campaigns = null;
-            }
-            return $this->render('admin/helloasso/browser.html.twig', array('campaigns' => $campaigns));
-        } else {
-            $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
-            $campaign_json = $this->container->get('App\Helper\Helloasso')->get('campaigns/' . $campaignId);
-            if (!$campaign_json){
-                $session = new Session();
-                $session->getFlashBag()->add('error','campaign not found');
-                return $this->redirectToRoute('helloasso_browser');
-            }
-            $payments_json = $this->container->get('App\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $currentPage));
-            $currentPage = $payments_json->pagination->page;
-            $page_count = $payments_json->pagination->max_page;
-            $results_per_page = $payments_json->pagination->results_per_page;
-
-            return $this->render('admin/helloasso/browser.html.twig', array(
-                'payments' => $payments_json->resources,
-                'campaign' => $campaign_json,
-                'current_page' => $currentPage,
-                'page_count' => $page_count
-            ));
->>>>>>> 7c5796f4 (Mise à jour de la version de symfony de 3.4 à 4.4):src/Controller/HelloassoController.php
         }
 
         return $this->render('admin/helloasso/browser.html.twig', ['campaigns' => $campaigns]);
@@ -172,47 +133,6 @@ class HelloassoController extends Controller
             }
 
             return $this->redirectToRoute('helloasso_browser');
-<<<<<<< HEAD:src/AppBundle/Controller/HelloassoController.php
-=======
-        } else {
-            $payment_json = $this->container->get('App\Helper\Helloasso')->get('payments/' . $paiementId);
-
-            $em = $this->getDoctrine()->getManager();
-            $exist = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-
-            if ($exist) {
-                $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
-                return $this->redirectToRoute('helloasso_browser', array('campaign' => $exist->getCampaignId()));
-            }
-
-            $payments = array();
-            $action_json = null;
-            $dispatcher = $this->get('event_dispatcher');
-            foreach ($payment_json->actions as $action) {
-                $action_json = $this->container->get('App\Helper\Helloasso')->get('actions/' . $action->id);
-                $payment = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-                if ($payment) { //payment already exist (created from a previous actions in THIS loop)
-                    $amount = $action_json->amount;
-                    $amount = str_replace(',', '.', $amount);
-                    $payment->setAmount($payment->getAmount() + $amount);
-                } else {
-                    $payment = new HelloassoPayment();
-                    $payment->fromActionObj($action_json);
-                }
-                $em->persist($payment);
-                $em->flush();
-                $payments[$payment->getId()] = $payment;
-            }
-            foreach ($payments as $payment) {
-                $dispatcher->dispatch(
-                    HelloassoEvent::PAYMENT_AFTER_SAVE,
-                    new HelloassoEvent($payment)
-                );
-            }
-
-            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
-            return $this->redirectToRoute('helloasso_browser', array('campaign' => $action_json->id_campaign));
->>>>>>> 7c5796f4 (Mise à jour de la version de symfony de 3.4 à 4.4):src/Controller/HelloassoController.php
         }
 
         $newPayment = $paymentHandler->savePayments([$payment]);

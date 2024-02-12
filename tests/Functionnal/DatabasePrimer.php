@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\App;
+namespace App\Tests\Functionnal;
 
 use App\DataFixtures\Purger\CustomPurger;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Exception;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 
 class DatabasePrimer extends WebTestCase

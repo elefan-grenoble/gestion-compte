@@ -174,7 +174,6 @@ class DefaultController extends Controller
             return new Response($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-<<<<<<< HEAD:src/AppBundle/Controller/DefaultController.php
         if (!$notification->isPaymentValidated()) {
             return new Response('Successfully handled, but not validated payment.', Response::HTTP_OK);
         }
@@ -191,68 +190,5 @@ class DefaultController extends Controller
 
         $handler->savePayments([$payment]);
         return new Response('Successfully handled.', Response::HTTP_CREATED);
-=======
-        $actionId = str_pad($actionId, 12, '0', STR_PAD_LEFT);
-
-        $action_json = $this->container->get('App\Helper\Helloasso')->get('actions/' . $actionId);
-
-        if (!isset($action_json->id)) {
-            $message = 'Unable to find an action for action id ' . $actionId;
-            if (isset($action_json->code)) {
-                $logger->critical($message . ' code ' . $action_json->code);
-                return $this->json(array('success' => false, "code" => $action_json->code, "message" => $action_json->message));
-            } else {
-                $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response for actions/" . $actionId));
-            }
-        }
-        $payment_json = $this->container->get('App\Helper\Helloasso')->get('payments/' . $action_json->id_payment);
-        if (!isset($payment_json->id)) {
-            $message = 'Unable to find a payment for payment id ' . $action_json->id_payment;
-            if (isset($payment_json->code)) {
-                $logger->critical($message . ' code ' . $payment_json->code);
-                return $this->json(array('success' => false, "code" => $payment_json->code, "message" => $payment_json->message));
-            } else {
-                $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response for payments/" . $action_json->id_payment));
-            }
-        }
-
-        $em = $this->getDoctrine()->getManager();
-        $exist = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-
-        if ($exist) { //notification already exist
-            $logger->info("notification already exist");
-            return $this->json(array('success' => false, "message" => "notification already exist"));
-        }
-
-        $payments = array();
-        $action_json = null;
-        $dispatcher = $this->get('event_dispatcher');
-        foreach ($payment_json->actions as $action) {
-            $action_json = $this->container->get('App\Helper\Helloasso')->get('actions/' . $action->id);
-            $payment = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-            if ($payment) { //payment already exist (created from a previous actions in THIS loop)
-                $amount = $action_json->amount;
-                $amount = str_replace(',', '.', $amount);
-                $payment->setAmount($payment->getAmount() + $amount);
-            } else {
-                $payment = new HelloassoPayment();
-                $payment->fromActionObj($action_json);
-            }
-            $em->persist($payment);
-            $em->flush();
-            $payments[$payment->getId()] = $payment;
-        }
-        foreach ($payments as $payment) {
-            $dispatcher->dispatch(
-                HelloassoEvent::PAYMENT_AFTER_SAVE,
-                new HelloassoEvent($payment)
-            );
-        }
-
-        return $this->json(array('success' => true));
-
->>>>>>> 7c5796f4 (Mise à jour de la version de symfony de 3.4 à 4.4):src/Controller/DefaultController.php
     }
 }

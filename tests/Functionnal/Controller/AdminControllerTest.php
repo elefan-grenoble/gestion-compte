@@ -1,12 +1,12 @@
 <?php
 
-namespace Tests\App\Controller;
+namespace App\Tests\Functionnal\Controller;
 
+use App\Tests\Functionnal\DatabasePrimer;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Tests\App\DatabasePrimer;
 
 class AdminControllerTest extends DatabasePrimer
 {
