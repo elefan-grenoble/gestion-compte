@@ -25,7 +25,7 @@ services:
     build:
       context: .
       dockerfile: .docker/Dockerfile
-    command: php -S 0.0.0.0:8000 -t public"
+    command: php -S 0.0.0.0:8000 -t public
     ports:
       - "8000:8000"
     volumes:
