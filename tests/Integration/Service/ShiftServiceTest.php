@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\App\Service;
+namespace App\Tests\Integration\Service;
 
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
