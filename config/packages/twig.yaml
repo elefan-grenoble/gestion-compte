@@ -111,3 +111,4 @@ twig:
         oidc_commissions_claim: "%env(OIDC_COMMISSIONS_CLAIM)%"
         oidc_commissions_map: "%env(OIDC_COMMISSIONS_MAP)%"
         oidc_profile_custom_message: '%env(OIDC_PROFILE_CUSTOM_MESSAGE)%'
+        oidc_no_account_message: '%env(OIDC_NO_ACCOUNT_MESSAGE)%'
