@@ -211,7 +211,7 @@
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
-                            <a href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                            <a id="open_freeze_member_confirmation_modal" href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
                             </a>
                             {{ form_start(freeze_form) }}
@@ -231,14 +231,14 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                    <button id="freeze_member_confirmation_modal_confirm" type="submit" class="btn waves-effect waves-light orange">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </button>
                                 </div>
                             </div>
                             {{ form_end(freeze_form) }}
                         {% else %}
-                            <a href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                            <a id="open_unfreeze_member_confirmation_modal" href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3">
                                 <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
                             </a>
                             {{ form_start(unfreeze_form) }}
@@ -252,7 +252,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                    <button id="unfreeze_member_confirmation_modal_confirm" type="submit" class="btn waves-effect waves-light orange">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </button>
                                 </div>

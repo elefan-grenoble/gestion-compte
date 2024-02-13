@@ -33,7 +33,7 @@
             <ul id="nav-desktop" class="right hide-on-med-and-down">
                 {% if is_granted("ROLE_ADMIN_PANEL") %}
                     <li class="highlight">
-                        <a href="{{ path("admin") }}" title="Administration">
+                        <a id="admin_link" href="{{ path("admin") }}" title="Administration">
                             <i class="material-icons left">build</i>
                             <span class="show-on-xl-only">Administration</span>
                         </a>
