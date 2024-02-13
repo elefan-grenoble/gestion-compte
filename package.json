@@ -20,6 +20,7 @@
         "@symfony/stimulus-bridge": "^3.0.0",
         "@symfony/webpack-encore": "^1.7.0",
         "core-js": "^3.0.0",
+        "cypress": "^13.6.4",
         "file-loader": "^6.2.0",
         "less": "^4.2.0",
         "less-loader": "^11.1.3",
