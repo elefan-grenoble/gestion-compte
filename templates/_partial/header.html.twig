@@ -33,7 +33,7 @@
             <ul id="nav-desktop" class="right hide-on-med-and-down">
                 {% if is_granted("ROLE_ADMIN_PANEL") %}
                     <li class="highlight">
-                        <a id="admin_link" href="{{ path("admin") }}" title="Administration">
+                        <a href="{{ path("admin") }}" title="Administration" data-cy="admin_link">
                             <i class="material-icons left">build</i>
                             <span class="show-on-xl-only">Administration</span>
                         </a>
@@ -44,7 +44,7 @@
 
                     {% if app.user.beneficiary %}
                         <li>
-                            <a href="{{ path('fos_user_profile_show') }}" title="{{ app.user.firstname }}">
+                            <a href="{{ path('fos_user_profile_show') }}" title="{{ app.user.firstname }}" data-cy="settings_link">
                                 <i class="material-icons small left">settings</i>
                                 <span class="show-on-xl-only">{{ app.user.firstname }}</span>
                             </a>

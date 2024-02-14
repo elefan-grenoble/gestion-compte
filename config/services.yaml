@@ -92,17 +92,34 @@ parameters:
   opening_hour_open_closed_header_closed_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_CLOSED_MESSAGE)%'
   opening_hour_open_closed_header_open_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_OPEN_MESSAGE)%'
   oidc_enable: '%env(bool:OIDC_ENABLE)%'
+  oidc_user_attributes_map:
+    firstname: "%env(OIDC_USER_ATTRIBUTE_FIRSTNAME)%"
+    lastname: "%env(OIDC_USER_ATTRIBUTE_LASTNAME)%"
+    member_number: "%env(OIDC_USER_ATTRIBUTE_MEMBER_NUMBER)%"
+    email: "%env(OIDC_USER_ATTRIBUTE_EMAIL)%"
+    phone: "%env(OIDC_USER_ATTRIBUTE_PHONE)%"
+    flying: "%env(OIDC_USER_ATTRIBUTE_FLYING)%"
+    address_street1: "%env(OIDC_USER_ATTRIBUTE_ADDRESS_STREET1)%"
+    address_street2: "%env(OIDC_USER_ATTRIBUTE_ADDRESS_STREET2)%"
+    address_zipcode: "%env(OIDC_USER_ATTRIBUTE_ADDRESS_ZIPCODE)%"
+    address_city: "%env(OIDC_USER_ATTRIBUTE_ADDRESS_CITY)%"
+    co_member_number: "%env(OIDC_USER_ATTRIBUTE_CO_MEMBER_NUMBER)%"
   oidc_roles_map:
-    ROLE_USER: '%env(OIDC_ROLE_USER)%'
-    ROLE_ADMIN_PANEL: '%env(OIDC_ROLE_ADMIN_PANEL)%'
-    ROLE_FINANCE_MANAGER: '%env(OIDC_ROLE_FINANCE_MANAGER)%'
-    ROLE_SHIFT_MANAGER: '%env(OIDC_ROLE_SHIFT_MANAGER)%'
-    ROLE_PROCESS_MANAGER: '%env(OIDC_ROLE_PROCESS_MANAGER)%'
-    ROLE_USER_MANAGER: '%env(OIDC_ROLE_USER_MANAGER)%'
-    ROLE_USER_VIEWER: '%env(OIDC_ROLE_USER_VIEWER)%'
-    ROLE_ADMIN: '%env(OIDC_ROLE_ADMIN)%'
-    ROLE_SUPER_ADMIN: '%env(OIDC_ROLE_SUPER_ADMIN)%'
-    ROLE_OAUTH_LOGIN: '%env(OIDC_ROLE_OAUTH_LOGIN)%'
+    USER: '%env(OIDC_ROLE_USER)%'
+    ADMIN_PANEL: '%env(OIDC_ROLE_ADMIN_PANEL)%'
+    FINANCE_MANAGER: '%env(OIDC_ROLE_FINANCE_MANAGER)%'
+    SHIFT_MANAGER: '%env(OIDC_ROLE_SHIFT_MANAGER)%'
+    PROCESS_MANAGER: '%env(OIDC_ROLE_PROCESS_MANAGER)%'
+    USER_MANAGER: '%env(OIDC_ROLE_USER_MANAGER)%'
+    USER_VIEWER: '%env(OIDC_ROLE_USER_VIEWER)%'
+    ADMIN: '%env(OIDC_ROLE_ADMIN)%'
+    SUPER_ADMIN: '%env(OIDC_ROLE_SUPER_ADMIN)%'
+    OAUTH_LOGIN: '%env(OIDC_ROLE_OAUTH_LOGIN)%'
+  oidc_roles_claim: '%env(OIDC_ROLES_CLAIM)%'
+  oidc_formations_claim: '%env(OIDC_FORMATIONS_CLAIM)%'
+  oidc_formations_map: '%env(OIDC_FORMATIONS_MAP)%'
+  oidc_commissions_claim: '%env(OIDC_COMMISSIONS_CLAIM)%'
+  oidc_commissions_map: '%env(OIDC_COMMISSIONS_MAP)%'
   place_local_ip_address: '%env(PLACE_LOCAL_IP_ADDRESS)%'
   profile_display_period_position_free_log: '%env(bool:PROFILE_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
   profile_display_shift_free_log: '%env(bool:PROFILE_DISPLAY_SHIFT_FREE_LOG)%'
