@@ -32,9 +32,10 @@
         "dev-server": "encore dev-server --disable-host-check",
         "dev": "encore dev",
         "watch": "encore dev --watch",
-        "build": "encore production --progress",
-        "cy:run:oidc": "cypress run --env configFile=oidc --spec 'cypress/e2e/oidc/*'",
-        "cy:run:cookie": "cypress run --env configFile=test --spec 'cypress/e2e/cookie/*'"
+        "build": "npx encore production --progress",
+        "cy:open": "cypress open",
+        "cy:test:oidc": "CYPRESS_BASE_URL=http://127.0.0.1:8000 cypress run --spec 'cypress/e2e/oidc/*'",
+        "cy:test:main": "CYPRESS_BASE_URL=http://localhost:8000 cypress run --spec 'cypress/e2e/login/**/*'"
     },
     "repository": {
         "type": "git",

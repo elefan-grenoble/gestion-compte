@@ -23,7 +23,7 @@ describe('admin1 can login', function () {
         cy.get('[data-cy=open_my_informations]').click()
 
         cy.log('check if role_admin in the page')
-        cy.get('[data-cy=user_roles_container]').contains('role_admin')
+        cy.get('[data-cy=user_roles_container]').contains('ROLE_ADMIN', {timeout: 2000})
 
     })
 })
