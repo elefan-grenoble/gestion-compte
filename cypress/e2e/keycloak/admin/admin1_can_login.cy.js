@@ -2,7 +2,9 @@
 
 
 // temporarily disable uncaught exception handling
-import {login} from "../keycloak_reusables";
+import {login} from "../keycloak_reusables.cytools";
+
+const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
 
 Cypress.on('uncaught:exception', (err, runnable) => {
     return false
@@ -11,7 +13,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 describe('admin1 can login', function () {
     it('admin story', function () {
 
-        login("admin1", "password")
+        login(keycloakUrl, "admin1", "password")
 
         cy.log('home page banner contains "admin"')
         cy.get('[data-cy=home_welcome_message]').contains('admin')

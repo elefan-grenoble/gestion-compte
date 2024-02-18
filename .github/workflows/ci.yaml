@@ -246,4 +246,42 @@ jobs:
 
 #       RUN CYPRESS TESTS ----------------
       - name: Run Cypress tests
-        run: npm run cy:test:main
+        run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:main
+
+
+#       CHANGE ENV VARIABLES ----------------
+      - name: Set up test environment variables
+        run: cp .env.oidc.test .env.test
+
+#       START KEYCLOAK ----------------
+      - name: Start Keycloak
+        run: |
+          docker run -d \
+          --name keycloak \
+          -e KEYCLOAK_USER=admin \
+          -e KEYCLOAK_PASSWORD=admin \
+          -e DB_VENDOR=h2 \
+          -e KEYCLOAK_IMPORT=/config/realm-export.json \
+          -v ${{ github.workspace }}/.docker/keycloak/config/realm-export.localhost.json:/config/realm-export.json \
+          -p 8080:8080 \
+          --user root \
+          jboss/keycloak:16.1.1
+
+#       Wait for Keycloak to start
+      - name: Wait for Keycloak to be ready
+        run: |
+          until $(curl --output /dev/null --silent --head --fail http://localhost:8080/auth); do
+              printf '.'
+              sleep 5
+          done
+
+#       RUN CYPRESS TESTS ----------------
+      - name: Run Cypress keycloak tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run cy:test:oidc
+        env:
+          CYPRESS_BASE_URL: http://localhost:8000
+          CYPRESS_KEYCLOAK_URL: http://localhost:8080
+
+
