@@ -6,6 +6,10 @@ import {login} from "../keycloak_reusables.cytools";
 
 const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
 
+if (!keycloakUrl) {
+    throw new Error('keycloakUrl is not defined')
+}
+
 Cypress.on('uncaught:exception', (err, runnable) => {
     return false
 })

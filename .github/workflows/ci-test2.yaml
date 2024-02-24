@@ -1,0 +1,26 @@
+name: testing cypress envs
+
+on:
+  pull_request:
+    branches:
+      - master
+      - staging
+      - dev
+
+jobs:
+  setup:
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: true
+      matrix:
+        php-versions: ['7.4']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+#       RUN CYPRESS TESTS ----------------
+      - name: Run Cypress keycloak tests
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run cy:test:oidc
+
