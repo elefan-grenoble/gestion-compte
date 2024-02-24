@@ -4,7 +4,7 @@
 // temporarily disable uncaught exception handling
 import {login} from "../keycloak_reusables.cytools";
 
-const keycloakUrl = Cypress.env('keycloakUrl') || 'http://localhost:8080'
+const keycloakUrl = Cypress.env('KEYCLOAK_URL') || 'http://localhost:8080'
 
 if (!keycloakUrl) {
     throw new Error('keycloakUrl is not defined')

@@ -7,6 +7,6 @@ module.exports = defineConfig({
     viewportHeight: 1080,
   },
   env: {
-    keycloakUrl: 'http://keycloak:8080',
+    KEYCLOAK_URL: 'http://keycloak:8080',
   },
 });
