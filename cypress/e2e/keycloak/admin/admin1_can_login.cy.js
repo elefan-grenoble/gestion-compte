@@ -19,7 +19,7 @@ describe('admin1 can login', function () {
         cy.visit("/")
         cy.get('#login').click()
 
-        cy.origin(keycloakUrl, () => {
+        cy.origin(keycloakUrl, { args: { keycloakUrl } }, ({ keycloakUrl }) => {
             cy.log("fill in the login form")
             cy.get('#username').type('admin1', {force: true})
             cy.get('#password').type('password', {force: true})
@@ -27,13 +27,13 @@ describe('admin1 can login', function () {
             // submit
             cy.get('#kc-login').click()
 
-            // cy.location().then((location) => {
-            //     if (location !== null && location.origin === keycloakUrl) {
-            //         cy.get('#kc-login').click()
-            //     } else {
-            //         cy.log("not asked for access to user data")
-            //     }
-            // })
+            cy.location().then((location) => {
+                if (location !== null && location.origin === keycloakUrl) {
+                    cy.get('#kc-login').click()
+                } else {
+                    cy.log("not asked for access to user data")
+                }
+            })
         })
 
         cy.log('home page banner contains "admin"')
