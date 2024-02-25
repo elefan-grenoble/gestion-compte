@@ -11,6 +11,10 @@ if (keycloakUrl === undefined) {
     keycloakUrl = 'http://localhost:8080' // default value need for CI
 }
 
+if (!['http://localhost:8080', 'http://keycloak:8080'].includes(keycloakUrl)) {
+    keycloakUrl = 'http://localhost:8080' // default value need for CI
+}
+
 Cypress.on('uncaught:exception', (err, runnable) => {
     return false
 })

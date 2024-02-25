@@ -277,5 +277,5 @@ jobs:
 
       #       RUN CYPRESS TESTS ----------------
       - name: Run Cypress tests
-        run: CYPRESS_BASE_URL=http://localhost:8000 npx cypress run --spec 'cypress/e2e/keycloak/**/*'" --env CYPRESS_KEYCLOAK_URL=http://localhost:8080
+        run: CYPRESS_BASE_URL=http://localhost:8000 npx cypress run --spec 'cypress/e2e/keycloak/**/*' --env CYPRESS_KEYCLOAK_URL=http://localhost:8080
 
