@@ -2,8 +2,8 @@
 //DependencyInjection/SearchUserFormHelper.php
 namespace App\Service;
 
-use AppBundle\Repository\CommissionRepository;
-use AppBundle\Repository\FormationRepository;
+use App\Repository\CommissionRepository;
+use App\Repository\FormationRepository;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;

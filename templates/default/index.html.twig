@@ -10,7 +10,7 @@
         {% set member = app.user.beneficiary.membership %}
 
         <div class="col s12">
-            <h4 class="header">
+            <h4 class="header" data-cy="home_welcome_message">
                 Bonjour {{ app.user.beneficiary.firstname }}
                 <br />
                 #{{ member.memberNumber }}
@@ -26,7 +26,7 @@
             </p>
         </div>
     {% else %}
-        <div class="col s12">
+        <div class="col s12" data-cy="home_welcome_message">
             <h4 class="header">Bonjour {{ app.user.username }}</h4>
         </div>
     {% endif %}
