@@ -23,8 +23,6 @@ describe('admin1 can login', function () {
     it('admin story', function () {
 
         cy.visit("/")
-        cy.get('#login').click()
-
         cy.origin(keycloakUrl, () => {
             cy.get('#username').type('test', {force: true})
         })
