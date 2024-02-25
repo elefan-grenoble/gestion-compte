@@ -276,12 +276,6 @@ jobs:
           done
 
 #       RUN CYPRESS TESTS ----------------
-      - name: Run Cypress keycloak tests
-        uses: cypress-io/github-action@v6
-        with:
-          command: npm run cy:test:oidc
-        env:
-          CYPRESS_BASE_URL: http://localhost:8000
-          CYPRESS_KEYCLOAK_URL: http://localhost:8080
-
+      - name: Run Cypress tests
+        run: CYPRESS_BASE_URL=http://localhost:8000 CYPRESS_KEYCLOAK_URL=http://localhost:8080 npm run cy:test:oidc
 

@@ -4,7 +4,7 @@ export function login(keycloakUrl, username, password) {
     cy.visit("/")
     cy.get('#login').click()
 
-    cy.origin(keycloakUrl, { args : { username, password }}, ({ username, password }) => {
+    cy.origin(keycloakUrl, { args : { username, password, keycloakUrl }}, ({ username, password, keycloakUrl }) => {
         cy.log("fill in the login form")
         cy.get('#username').type(username, {force: true})
         cy.get('#password').type(password, {force: true})
