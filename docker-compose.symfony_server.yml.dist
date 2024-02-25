@@ -63,8 +63,8 @@ services:
     - .docker/keycloak/data:/opt/jboss/keycloak/standalone/data/
     - .docker/keycloak/config/realm-export.json:/config/realm-export.json
     environment:
-    - KEYCLOAK_USER=admin
-    - KEYCLOAK_PASSWORD=admin
+    - KEYCLOAK_USER=keycloak_admin
+    - KEYCLOAK_PASSWORD=password
     - DB_VENDOR=h2
     - KEYCLOAK_IMPORT=/config/realm-export.json
     user: root

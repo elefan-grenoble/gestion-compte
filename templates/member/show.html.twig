@@ -179,7 +179,7 @@
 
         <!-- Geler/Dégeler le compte -->
         {% if is_granted("ROLE_USER_MANAGER") %}
-            <li id="freeze">
+            <li id="freeze" data-cy="freeze">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
                     <i class="material-icons">{{ member_frozen_material_icon }}</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
                 </div>
@@ -211,7 +211,7 @@
                     {% endif %}
                     {% if is_granted("freeze", member) %}
                         {% if not member.frozen %}
-                            <a href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                            <a href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2" data-cy="open_freeze_member_confirmation_modal">
                                 <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
                             </a>
                             {{ form_start(freeze_form) }}
@@ -231,14 +231,14 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                    <button type="submit" class="btn waves-effect waves-light orange" data-cy="freeze_member_confirmation_modal_confirm">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </button>
                                 </div>
                             </div>
                             {{ form_end(freeze_form) }}
                         {% else %}
-                            <a href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                            <a href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3" data-cy="open_unfreeze_member_confirmation_modal">
                                 <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
                             </a>
                             {{ form_start(unfreeze_form) }}
@@ -252,7 +252,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                    <button type="submit" class="btn waves-effect waves-light orange" data-cy="unfreeze_member_confirmation_modal_confirm">
                                         <i class="material-icons left">check</i>Je sais ce que je fais !
                                     </button>
                                 </div>
