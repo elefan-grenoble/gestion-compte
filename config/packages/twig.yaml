@@ -104,9 +104,10 @@ twig:
         oidc_enable: '%env(bool:OIDC_ENABLE)%'
         oidc_issuer: '%env(OIDC_ISSUER)%'
         oidc_client_id: "%env(OIDC_CLIENT_ID)%"
-        oidc_roles_claim: "%env(OIDC_ROLES_CLAIM)%"
+        oidc_roles_claim: "%oidc_roles_claim%"
         oidc_roles_map: "%oidc_roles_map%"
-        oidc_formations_claim: "%env(OIDC_FORMATIONS_CLAIM)%"
+        oidc_user_attributes_map: "%oidc_user_attributes_map%"
+        oidc_formations_claim: "%oidc_formations_claim%"
         oidc_formations_map: "%env(OIDC_FORMATIONS_MAP)%"
         oidc_commissions_claim: "%env(OIDC_COMMISSIONS_CLAIM)%"
         oidc_commissions_map: "%env(OIDC_COMMISSIONS_MAP)%"

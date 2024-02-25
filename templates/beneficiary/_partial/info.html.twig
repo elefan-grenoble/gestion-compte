@@ -87,7 +87,7 @@
         </div>
     {% endif %}
     {% if beneficiary.user and beneficiary.user.roles | length %}
-        <div class="col s12">
+        <div class="col s12" data-cy="user_roles_container">
             <i class="material-icons tiny">settings</i>
             {% for role in beneficiary.user.roles %}
                 <div class="chip purple-text">{{ role }}</div>

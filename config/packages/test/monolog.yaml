@@ -5,16 +5,16 @@ monolog:
             path: '%kernel.logs_dir%/%kernel.environment%.log'
             level: debug
             channels: ['!event']
-        mattermost:
-            type: slackwebhook
-            webhook_url: "%logging.mattermost.url%"
-            channel: '%logging.mattermost.channel%'
-            bot_name: 'Monolog'
-            use_attachment: true,
-            icon_emoji: ''
-            use_short_attachment: true
-            include_extra: true
-            level: '%logging.mattermost.level%'
+#        mattermost:
+#            type: slackwebhook
+#            webhook_url: "%logging.mattermost.url%"
+#            channel: '%logging.mattermost.channel%'
+#            bot_name: 'Monolog'
+#            use_attachment: true,
+#            icon_emoji: ''
+#            use_short_attachment: true
+#            include_extra: true
+#            level: '%logging.mattermost.level%'
         console:
             type: console
             process_psr_3_messages: false

@@ -1,6 +1,6 @@
 {
-  "id": "master",
-  "realm": "master",
+  "id": "elefan",
+  "realm": "elefan",
   "displayName": "Keycloak",
   "displayNameHtml": "<div class=\"kc-logo-text\"><span>Keycloak</span></div>",
   "notBefore": 0,
@@ -646,17 +646,17 @@
       "secret": "secret",
       "description": "membres.yourcoop.local",
       "rootUrl": "",
-      "adminUrl": "http://membres.yourcoop.local:8000/",
-      "baseUrl": "http://membres.yourcoop.local:8000/",
+      "adminUrl": "http://localhost:8000/",
+      "baseUrl": "http://localhost:8000/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "http://membres.yourcoop.local:8000/*"
+        "http://localhost:8000/*"
       ],
       "webOrigins": [
-        "http://membres.yourcoop.local:8000/"
+        "http://localhost:8000/"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -678,7 +678,7 @@
         "use.refresh.tokens": "true",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
-        "backchannel.logout.url": "http://membres.yourcoop.local:8000/logout",
+        "backchannel.logout.url": "http://localhost:8000/logout",
         "client_credentials.use_refresh_token": "false",
         "require.pushed.authorization.requests": "false",
         "saml.client.signature": "false",
@@ -693,23 +693,23 @@
         "tls.client.certificate.bound.access.tokens": "false",
         "saml.authnstatement": "false",
         "display.on.consent.screen": "true",
-        "saml.onetimeuse.condition": "false",
+        "saml.onetimeuse.condition": "false"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": true,
       "nodeReRegistrationTimeout": -1,
       "protocolMappers": [
         {
-          "name": "adresse.ville",
+          "name": "address_city",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "adresse.ville",
+            "user.attribute": "address.city",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "adresse.ville",
+            "claim.name": "address_city",
             "jsonType.label": "String"
           }
         },
@@ -757,16 +757,16 @@
           }
         },
         {
-          "name": "adresse.adresse",
+          "name": "address_street1",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "adresse.adresse",
+            "user.attribute": "address.street1",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "adresse.adresse",
+            "claim.name": "address_street1",
             "jsonType.label": "String"
           }
         },
@@ -777,7 +777,7 @@
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "conjoint",
+            "user.attribute": "co_member_number",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "co_member_number",
@@ -799,16 +799,16 @@
           }
         },
         {
-          "name": "adresse.complement",
+          "name": "address_street2",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "adresse.complement",
+            "user.attribute": "address.street2",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "adresse.complement",
+            "claim.name": "address_street2",
             "jsonType.label": "String"
           }
         },
@@ -832,7 +832,7 @@
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "telephone",
+            "user.attribute": "phone",
             "id.token.claim": "true",
             "access.token.claim": "true",
             "claim.name": "phone",
@@ -840,16 +840,16 @@
           }
         },
         {
-          "name": "adresse.code_postal",
+          "name": "address_zipcode",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-attribute-mapper",
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "adresse.code_postal",
+            "user.attribute": "address.zipcode",
             "id.token.claim": "true",
             "access.token.claim": "true",
-            "claim.name": "adresse.code_postal",
+            "claim.name": "address_zipcode",
             "jsonType.label": "String"
           }
         },
@@ -860,7 +860,7 @@
           "consentRequired": false,
           "config": {
             "userinfo.token.claim": "true",
-            "user.attribute": "id",
+            "user.attribute": "member_number",
             "id.token.claim": "false",
             "access.token.claim": "false",
             "claim.name": "member_number",
@@ -2350,12 +2350,12 @@
   },
   "users": [
     {
-      "username": "admin2",
+      "username": "newfromkeycloak",
       "enabled": true,
       "emailVerified": true,
-      "firstName": "Sebastian (admin)",
-      "lastName": "Johnson",
-      "email": "admin2@example.com",
+      "firstName": "Jimmy (new keycloak)",
+      "lastName": "flake",
+      "email": "newfromkeycloak@mail.com",
       "credentials": [
         {
           "type": "password",
@@ -2365,9 +2365,186 @@
           "algorithm": "pbkdf2-sha256"
         }
       ],
-      "clientRoles": {
-        "elefan": ["admin"]
+      "attributes": {
+        "member_number": ["11111"],
+        "phone": ["0612345651"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["12345"],
+        "address.city": ["Anytown"],
+        "co_member_number": ["11111"]
       },
+      "groups": [
+        "/coopérateur"
+      ]
+    },
+    {
+      "username": "admin1",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Samuel (admin)",
+      "lastName": "Smith",
+      "email": "admin1@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
+      "attributes": {
+        "member_number": ["11111"],
+        "phone": ["0612345651"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["12345"],
+        "address.city": ["Anytown"]
+      },
+      "groups": [
+        "/coopérateur",
+        "/infrastructure/informatique/elefan/admin"
+      ]
+    },
+    {
+      "username": "admin2",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Sebastian (admin)",
+      "lastName": "Johnson",
+      "email": "admin2@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
+      "attributes": {
+        "member_number": ["11112"],
+        "phone": ["0612345652"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["12345"],
+        "address.city": ["Anytown"]
+      },
+      "groups": [
+        "/coopérateur",
+        "/infrastructure/informatique/elefan/admin"
+      ]
+    },
+    {
+      "username": "admin3",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "David (admin)",
+      "lastName": "Williams",
+      "email": "admin3@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
+      "attributes": {
+        "member_number": ["12345"],
+        "phone": ["0612345653"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["11113"],
+        "address.city": ["Anytown"]
+      },
+      "groups": [
+        "/coopérateur",
+        "/infrastructure/informatique/elefan/admin"
+      ]
+    },
+    {
+      "username": "admin4",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Carter (admin)",
+      "lastName": "Brown",
+      "email": "admin4@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
+      "attributes": {
+        "member_number": ["12345"],
+        "phone": ["0612345654"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["11114"],
+        "address.city": ["Anytown"]
+      },
+      "groups": [
+        "/coopérateur",
+        "/infrastructure/informatique/elefan/admin"
+      ]
+    },
+    {
+      "username": "admin5",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Wyatt (admin)",
+      "lastName": "Jones",
+      "email": "admin5@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
+      "attributes": {
+        "member_number": ["11115"],
+        "phone": ["0612345655"],
+        "flying": [true],
+        "address.street1": ["123 Main St"],
+        "address.street2": ["Apt 4"],
+        "address.zipcode": ["12345"],
+        "address.city": ["Anytown"]
+      },
+      "groups": [
+        "/coopérateur",
+        "/infrastructure/informatique/elefan/admin"
+      ]
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Jayden (super admin)",
+      "lastName": "Garcia",
+      "email": "superadmin@email.com",
+      "credentials": [
+        {
+          "type": "password",
+          "hashedSaltedValue": "xjNR06W/ur5nBS8KFTrDgE81vLjb/t4A5LG2ubs/rII=",
+          "salt": "dyyLTNS/D+Ukspy5xgIa4w==",
+          "hashIterations": 27500,
+          "algorithm": "pbkdf2-sha256"
+        }
+      ],
       "attributes": {
         "member_number": ["12345"],
         "phone": ["0685428468"],
@@ -2380,9 +2557,10 @@
       },
       "groups": [
         "/coopérateur",
-        "/infrastructure/informatique/elefan/admin"
+        "/infrastructure/informatique/elefan/super_admin"
       ]
     }
+
   ],
   "groups": [
     {

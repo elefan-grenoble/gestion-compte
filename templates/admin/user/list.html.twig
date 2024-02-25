@@ -252,7 +252,7 @@
         <tbody>
         {% for member in members %}
             {% if member.mainBeneficiary %}
-                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
+                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}" data-cy="member_{{ member.id }}">
                     <td class="hide-on-med-and-down">
                         {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
                     </td>
@@ -312,7 +312,7 @@
                     </td>
                 </tr>
             {% else %}
-                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}">
+                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-cy="member_{{ member.id }}">
                     <td colspan="9">{{ member }}</td>
                 </tr>
             {% endif %}

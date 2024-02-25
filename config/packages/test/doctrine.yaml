@@ -1,3 +1,0 @@
-doctrine:
-    dbal:
-        host: '%env(DATABASE_TEST_HOST)%'

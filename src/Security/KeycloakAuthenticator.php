@@ -346,7 +346,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         // formations
         $formations_claim = $this->container->getParameter('oidc_formations_claim');
         $formations_from_keycloak = (isset($keycloakUser->toArray()[$formations_claim])) ? $keycloakUser->toArray()[$formations_claim] : [];
-        $formations_map = $this->container->getParameter('oidc_formations_map');
+        $formations_map = json_decode($this->container->getParameter('oidc_formations_map'));
         foreach ($beneficiary->getFormations() as $formation){
             $beneficiary->removeFormation($formation);
         }
@@ -368,7 +368,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         // commissions
         $commissions_claim = $this->container->getParameter('oidc_commissions_claim');
         $commissions_from_keycloak = (isset($keycloakUser->toArray()[$commissions_claim])) ? $keycloakUser->toArray()[$commissions_claim] : [];
-        $commissions_map = $this->container->getParameter('oidc_commissions_map');
+        $commissions_map = json_decode($this->container->getParameter('oidc_commissions_map'));
         foreach ($beneficiary->getCommissions() as $commission){
             $beneficiary->removeCommission($commission);
         }

@@ -1,2 +1,4 @@
 framework:
   test: true
+  session:
+    cookie_domain: "localhost"
