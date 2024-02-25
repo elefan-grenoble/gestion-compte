@@ -3,8 +3,7 @@ export function login(keycloakUrl, username, password) {
 
     cy.visit("/")
     cy.get('#login').click()
-    console.log(Cypress.config());
-    console.log(Cypress.env());
+
     cy.origin(keycloakUrl, { args : { username, password }}, ({ username, password }) => {
         cy.log("fill in the login form")
         cy.get('#username').type(username, {force: true})
