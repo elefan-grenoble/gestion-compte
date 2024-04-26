@@ -135,6 +135,7 @@ parameters:
   site_name: '%env(SITE_NAME)%'
   super_admin.initial_password: '%env(SUPER_ADMIN_INITIAL_PASSWORD)%'
   super_admin.username: '%env(SUPER_ADMIN_USERNAME)%'
+  use_card_reader_to_validate_shifts: '%env(bool:USE_CARD_READER_TO_VALIDATE_SHIFTS)%'
   swipe_card_logging: '%env(bool:SWIPE_CARD_LOGGING)%'
   swipe_card_logging_anonymous: '%env(bool:SWIPE_CARD_LOGGING_ANONYMOUS)%'
   time_after_which_members_are_late_with_shifts: '%env(TIME_AFTER_WHICH_MEMBERS_ARE_LATE_WITH_SHIFTS)%'
