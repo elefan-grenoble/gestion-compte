@@ -147,8 +147,9 @@ class AdminClosingExceptionController extends Controller
             ))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request)->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0);

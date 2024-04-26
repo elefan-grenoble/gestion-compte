@@ -245,9 +245,9 @@ class AdminController extends Controller
             //->add('persist', CheckboxType::class, array('required' => false, 'label' => 'Sauver en base'))
             //->add('compute', SubmitType::class, array('label' => 'Importer les données'))
             ->getForm();
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request)->isValid()) {
-
+        if ($form->isSubmitted() && $form->isValid()) {
             // Get file
             $file = $form->get('submitFile');
             $delimiter = ($form->get('delimiter')) ? $form->get('delimiter')->getData() : ',';
