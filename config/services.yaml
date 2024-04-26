@@ -52,6 +52,7 @@ parameters:
   forbid_own_shift_validate_admin: '%env(bool:FORBID_OWN_SHIFT_VALIDATE_ADMIN)%'
   forbid_own_timelog_new_admin: '%env(bool:FORBID_OWN_TIMELOG_NEW_ADMIN)%'
   forbid_shift_overlap_time: '%env(FORBID_SHIFT_OVERLAP_TIME)%'
+  max_time_at_end_of_shift: '%env(MAX_TIME_AT_END_OF_SHIFT)%'
   github_repo_url: 'elefan-grenoble/gestion-compte'
   github_current_release: 'v1.45.7'  # x-release-please-version
   helloasso_registration_campaign_url: '%env(HELLOASSO_REGISTRATION_CAMPAIGN_URL)%'
