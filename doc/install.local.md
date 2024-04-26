@@ -23,7 +23,7 @@ Il est par exemple possible d'ajuster la configuration des ports si certains ne 
 
 ```shell
 docker compose build
-``` 
+```
 
 #### Lancer l'instance
 
