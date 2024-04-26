@@ -181,11 +181,11 @@ class EmailTemplate
     /**
      * Set createdBy
      *
-     * @param \AppBundle\Entity\User $user
+     * @param \App\Entity\User $user
      *
      * @return EmailTemplate
      */
-    public function setCreatedBy(\AppBundle\Entity\User $user = null)
+    public function setCreatedBy(\App\Entity\User $user = null)
     {
         $this->createdBy = $user;
 
@@ -195,7 +195,7 @@ class EmailTemplate
     /**
      * Get createdBy
      *
-     * @return \AppBundle\Entity\User
+     * @return \App\Entity\User
      */
     public function getCreatedBy()
     {
@@ -215,11 +215,11 @@ class EmailTemplate
     /**
      * Set updatedBy
      *
-     * @param \AppBundle\Entity\User $user
+     * @param \App\Entity\User $user
      *
      * @return EmailTemplate
      */
-    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    public function setUpdatedBy(\App\Entity\User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -229,7 +229,7 @@ class EmailTemplate
     /**
      * Get updatedBy
      *
-     * @return \AppBundle\Entity\User
+     * @return \App\Entity\User
      */
     public function getUpdatedBy()
     {
