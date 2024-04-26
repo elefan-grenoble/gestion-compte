@@ -174,8 +174,9 @@ class AdminOpeningHourController extends Controller
             ))
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request)->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&kind_title=' . ($data['kind_title'] ? 1 : 0) . '&align=' . $data['align'];

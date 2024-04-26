@@ -236,8 +236,9 @@ class BeneficiaryController extends Controller
                 ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
                 ->getForm();
         }
+        $form->handleRequest($request);
 
-        if ($form->handleRequest($request)->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $firstname = $form->get('firstname')->getData();
             $beneficiaries = $em->getRepository(Beneficiary::class)->findActiveFromFirstname($firstname);
 
