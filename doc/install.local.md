@@ -7,12 +7,17 @@
 * docker
 * docker compose
 
+### Générer le docker-compose
+
+```shell
+cp docker-compose.symfony_server.yml.dist docker-compose.yml
+```
 
 ### Créer les conteneurs
 
 ```shell
 docker compose build
-``` 
+```
 
 ### Lancer l'instance
 
@@ -33,6 +38,34 @@ Pour créer l'utilisateur super admin, visiter :
 
 Vous pouvez vous connecter avec l'utilisateur super admin :
 **admin** / **password**.
+
+### Dupliquer le .env
+
+```shell
+cp .env.dist .env
+```
+
+Besoin de créer le .env.local.php ? `composer dump-env prod`
+
+### Installer les dépendances PHP
+
+```shell
+docker compose exec php composer install
+```
+
+### Installer les dépendances JS
+
+```
+// en dehors du conteneur
+npm install
+npm run dev  // build
+```
+
+### Créer la base de données
+
+```shell
+docker compose exec php php bin/console doctrine:migration:migrate -n
+```
 
 ### Remplir la base de donnée avec des données fictives
 
