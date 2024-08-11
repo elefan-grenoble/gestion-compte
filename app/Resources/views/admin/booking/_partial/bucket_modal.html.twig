@@ -3,6 +3,9 @@ Template for the modal popup used to change the user register for a shift bucket
 It use the materialize modal class https://materializeweb.com/modals.html
 id = "modal-bucket"
 #}
+{% if (display_names ?? true) %}
+    {% set display_names = display_name_shifters %}
+{% endif %}
 {% set nbBookableShifts = shifts | filter ( shift => not shift.shifter) | length %}
 {% set nbShifts = (shifts | length) %}
 {% set nbBookedShifts = nbShifts - nbBookableShifts %}
@@ -33,7 +36,9 @@ id = "modal-bucket"
                             {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                 <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                             {% endif %}
-                            {{ shift.shifter.displayNameWithMemberNumber }}
+                            {% if display_names %}
+                                {{ shift.shifter.displayNameWithMemberNumber }}
+                            {% endif %}
                             {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}
                                 &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
@@ -54,7 +59,7 @@ id = "modal-bucket"
                             <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
                         {% endif %}
                         réservé
-                        {% if shift.shifter != shift.booker.beneficiary %}
+                        {% if shift.shifter != shift.booker.beneficiary and display_names %}
                             pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
                         {% endif %}
                         le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
@@ -75,18 +80,20 @@ id = "modal-bucket"
                                 {% endif %}
                             {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
                         {% endif %}
-                        {{ form_start(shift_free_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
-                            {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
-                            {% if shift.isPast %}
-                                <button type="submit" class="btn red" title="Supprimer la participation">
-                                    <i class="material-icons left">delete</i>Supprimer la participation
-                                </button>
-                            {% else %}
-                                <button type="submit" class="btn orange" title="Libérer">
-                                    <i class="material-icons left">lock_open</i>Libérer
-                                </button>
-                            {% endif %}
-                        {{ form_end(shift_free_forms[shift.id]) }}
+                        {% if shift_free_forms is defined %}
+                            {{ form_start(shift_free_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                                {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
+                                {% if shift.isPast %}
+                                    <button type="submit" class="btn red" title="Supprimer la participation">
+                                        <i class="material-icons left">delete</i>Supprimer la participation
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn orange" title="Libérer">
+                                        <i class="material-icons left">lock_open</i>Libérer
+                                    </button>
+                                {% endif %}
+                            {{ form_end(shift_free_forms[shift.id]) }}
+                        {% endif %}
                     {% endif %}
                     <!-- shift.createdBy -->
                     {% if shift.createdBy %}
@@ -104,8 +111,13 @@ id = "modal-bucket"
                         <div class="col s12">
                             <b>
                                 <span style="font-style: italic">
-                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayNameWithMemberNumber }}
-                                    {% else %}libre
+                                    {% if shift.lastShifter %}
+                                        réservé
+                                        {% if display_names %}
+                                            à {{ shift.lastShifter.displayNameWithMemberNumber }}
+                                        {% endif %}
+                                    {% else %}
+                                        libre
                                     {% endif %}
                                 </span>
                             </b>
@@ -119,27 +131,30 @@ id = "modal-bucket"
                 </div>
                 <div class="collapsible-body">
                     <!-- shift book form -->
-                    {{ form_start(shift_book_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
-                    <div class="row">
-                        <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
-                            {{ form_label(shift_book_forms[shift.id].shifter) }}
-                            {{ form_widget(shift_book_forms[shift.id].shifter) }}
-                        </div>
-                        {% if use_fly_and_fixed %}
-                            <div class="col s2 input-field">
-                                {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                    {% if shift_book_forms is defined %}
+                        {{ form_start(shift_book_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                        <div class="row">
+                            <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                                {{ form_label(shift_book_forms[shift.id].shifter) }}
+                                {{ form_widget(shift_book_forms[shift.id].shifter) }}
                             </div>
-                        {% endif %}
-                        <div class="col s3 input-field">
-                            {% if not use_fly_and_fixed %}
-                                {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                            {% if use_fly_and_fixed %}
+                                <div class="col s2 input-field">
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                                </div>
                             {% endif %}
-                            <button type="submit" class="btn">
-                                <i class="material-icons left">add</i>Ajouter
-                            </button>
+                            <div class="col s3 input-field">
+                                {% if not use_fly_and_fixed %}
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                                {% endif %}
+                                <button type="submit" class="btn">
+                                    <i class="material-icons left">add</i>Ajouter
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                    {{ form_end(shift_book_forms[shift.id]) }}
+                        {{ form_end(shift_book_forms[shift.id]) }}
+                    {% endif %}
+
                     <!-- shift delete form -->
                     {% if is_granted("ROLE_ADMIN") %}
                         {% if not shift.lastShifter %}
@@ -164,48 +179,59 @@ id = "modal-bucket"
 </ul>
 
 {# add shift form #}
-{{ form_start(bucket_shift_add_form, {'attr': { 'style': 'display:inline;' }}) }}
-<input type="hidden" id="{{ bucket_shift_add_form.start.date.vars.id }}" name="{{ bucket_shift_add_form.start.date.vars.full_name }}" value="{{ bucket_shift_add_form.start.date.vars.value }}">
-<input type="hidden" id="{{ bucket_shift_add_form.start.time.vars.id }}" name="{{ bucket_shift_add_form.start.time.vars.full_name }}" value="{{ bucket_shift_add_form.start.time.vars.value }}">
-<input type="hidden" id="{{ bucket_shift_add_form.end.date.vars.id }}" name="{{ bucket_shift_add_form.end.date.vars.full_name }}" value="{{ bucket_shift_add_form.end.date.vars.value }}">
-<input type="hidden" id="{{ bucket_shift_add_form.end.time.vars.id }}" name="{{ bucket_shift_add_form.end.time.vars.full_name }}" value="{{ bucket_shift_add_form.end.time.vars.value }}">
-{{ form_widget(bucket_shift_add_form.job) }}
-<div class="row valign-wrapper">
-    <div class="col s3">
-        {{ form_label(bucket_shift_add_form.number) }}
-        {{ form_widget(bucket_shift_add_form.number) }}
+{% if bucket_shift_add_form is defined %}
+    {{ form_start(bucket_shift_add_form, {'attr': { 'style': 'display:inline;' }}) }}
+    <input type="hidden" id="{{ bucket_shift_add_form.start.date.vars.id }}" name="{{ bucket_shift_add_form.start.date.vars.full_name }}" value="{{ bucket_shift_add_form.start.date.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.start.time.vars.id }}" name="{{ bucket_shift_add_form.start.time.vars.full_name }}" value="{{ bucket_shift_add_form.start.time.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.end.date.vars.id }}" name="{{ bucket_shift_add_form.end.date.vars.full_name }}" value="{{ bucket_shift_add_form.end.date.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.end.time.vars.id }}" name="{{ bucket_shift_add_form.end.time.vars.full_name }}" value="{{ bucket_shift_add_form.end.time.vars.value }}">
+    {{ form_widget(bucket_shift_add_form.job) }}
+    <div class="row valign-wrapper">
+        <div class="col s3">
+            {{ form_label(bucket_shift_add_form.number) }}
+            {{ form_widget(bucket_shift_add_form.number) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(bucket_shift_add_form.formation) }}
+            {{ form_widget(bucket_shift_add_form.formation) }}
+        </div>
+        <div class="col s3">
+            <button type="submit" class="btn waves-effect waves-light teal">
+                <i class="material-icons left">add</i>Ajouter
+            </button>
+        </div>
     </div>
-    <div class="col s6">
-        {{ form_label(bucket_shift_add_form.formation) }}
-        {{ form_widget(bucket_shift_add_form.formation) }}
-    </div>
-    <div class="col s3">
-        <button type="submit" class="btn waves-effect waves-light teal">
-            <i class="material-icons left">add</i>Ajouter
-        </button>
-    </div>
-</div>
-{{ form_row(bucket_shift_add_form._token) }}
-{{ form_end(bucket_shift_add_form, {'render_rest': false}) }}
+    {{ form_row(bucket_shift_add_form._token) }}
+    {{ form_end(bucket_shift_add_form, {'render_rest': false}) }}
+{% endif %}
 
 {# bucket actions #}
-<a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
-    <i class="material-icons left">mail</i>Envoyer un email
-</a>
-{{ form_start(bucket_lock_unlock_form, {'attr': { 'style': 'display:inline;' }}) }}
-{% if bucket.locked %}
-    <button type="submit" class="btn orange">
-        <i class="material-icons left">lock_open</i>Déverrouiller
-    </button>
-{% else %}
-    <button type="submit" class="btn orange">
-        <i class="material-icons left">lock</i>Verrouiller
-    </button>
+{% if is_granted("ROLE_ADMIN_PANEL") %}
+    <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
+        <i class="material-icons left">mail</i>Envoyer un email
+    </a>
 {% endif %}
-{{ form_end(bucket_lock_unlock_form) }}
-<a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
-    <i class="material-icons left">edit</i>Editer
-</a>
+
+{% if bucket_lock_unlock_form is defined %}
+    {{ form_start(bucket_lock_unlock_form, {'attr': { 'style': 'display:inline;' }}) }}
+    {% if bucket.locked %}
+        <button type="submit" class="btn orange">
+            <i class="material-icons left">lock_open</i>Déverrouiller
+        </button>
+    {% else %}
+        <button type="submit" class="btn orange">
+            <i class="material-icons left">lock</i>Verrouiller
+        </button>
+    {% endif %}
+    {{ form_end(bucket_lock_unlock_form) }}
+{% endif %}
+
+{% if is_granted("ROLE_SHIFT_MANAGER") %}
+    <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
+        <i class="material-icons left">edit</i>Editer
+    </a>
+{% endif %}
+
 {% if is_granted("ROLE_ADMIN") %}
     <!-- bucket delete is allowed only if all shifts are free -->
     {{ form_start(bucket_delete_form, {'attr': { 'style': 'display:inline;' }}) }}

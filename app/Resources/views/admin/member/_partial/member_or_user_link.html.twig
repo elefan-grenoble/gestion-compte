@@ -1,6 +1,9 @@
+{% if (display_names ?? true) %}
+    {% set display_names = display_name_shifters %}
+{% endif %}
 {% set target_blank = target_blank ?? false %}
 
-{% if user %}
+{% if user and display_names %}
     {% if user.beneficiary %}
         <a href="{{ path("member_show", { 'member_number': user.beneficiary.membership.memberNumber }) }}" {% if target_blank %}target="_blank"{% endif %}>
             {{ user.beneficiary }}
@@ -8,4 +11,6 @@
     {% else %}
         {{ user }}
     {% endif %}
+{% else %}
+    quelqu'un⋅e
 {% endif %}
