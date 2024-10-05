@@ -170,6 +170,20 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $em->persist($event);
         }
 
+        $output->writeln('<info>Anonymizing CodeDevice data</>');
+        $codedevices = $em->getRepository(CodeDevice::class)->findAll();
+        foreach ($codedevices as $cd) {
+            $cd->setIgloohomeApiKey('x');
+            $cd->setIgloohomeLockId('x');
+        }
+
+        $output->writeln('<info>Anonymizing Code data</>');
+        $codes = $em->getRepository(Code::class)->findAll();
+        foreach ($codes as $code) {
+            $value = rand(0,9999); // code aléatoire à 4 chiffres
+            $code->setValue($value);
+        }
+
         $output->writeln('<info>Deleting Client data</>');
         $em->getRepository(Client::class)->createQueryBuilder('c')
             ->delete()

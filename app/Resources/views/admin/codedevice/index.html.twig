@@ -1,0 +1,61 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des équipements à code - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des équipements à code
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des équipements à code</h4>
+
+        <tbody>
+        </tbody>
+    </table>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nom</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Visible</th>
+                <th>Date de création</th>
+                <th>Date de mise à jour</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for codeDevice in codeDevices %}
+            <tr>
+                <td>{{ codeDevice.id }}</td>
+                <td>{{ codeDevice.name }}</td>
+                <td>{{ codeDevice.description }}</td>
+                <td>{{ codeDevice.type }}</td>
+                <td>{% if codeDevice.enabled %}Yes{% else %}No{% endif %}</td>
+                <td>{% if codeDevice.createdAt %}{{ codeDevice.createdAt|date_short }}{% endif %}</td>
+                <td>{% if codeDevice.updatedAt %}{{ codeDevice.updatedAt|date_short }}{% endif %}</td>
+                <td>
+                    <a href="{{ path('admin_codedevice_edit', { 'id': codeDevice.id }) }}">
+                        <i class="material-icons">edit</i>Editer
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('admin_codedevice_new') }}" class="btn">
+                <i class="material-icons left">add</i>Ajouter un nouvel équipement à code
+            </a>
+        </li>
+    </ul>
+
+{% endblock %}
+
+{% block javascripts %}
+{% endblock %}
