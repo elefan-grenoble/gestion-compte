@@ -72,6 +72,8 @@
     {% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, cycle: cycle } %}
 {% else %}
     <div id="show{{ bucket.id }}" class="modal">
-        {% include "admin/booking/_partial/bucket_modal.html.twig" with { shifts: bucket.getSortedShifts() } %}
+        <div class="modal-content">
+            {% include "admin/booking/_partial/bucket_modal.html.twig" with { shifts: bucket.getSortedShifts() } %}
+        </div>
     </div>
 {% endif %}
