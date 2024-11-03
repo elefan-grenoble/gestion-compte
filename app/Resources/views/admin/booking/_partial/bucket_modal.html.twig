@@ -1,5 +1,6 @@
 {#
 Template for the modal popup used to change the user register for a shift bucket in /booking/admin
+Also on the /schedule page to display more shift infos (without any action buttons)
 It use the materialize modal class https://materializeweb.com/modals.html
 id = "modal-bucket"
 #}
@@ -206,7 +207,7 @@ id = "modal-bucket"
 {% endif %}
 
 {# bucket actions #}
-{% if is_granted("ROLE_ADMIN_PANEL") %}
+{% if display_send_email_button ?? false and is_granted("ROLE_ADMIN_PANEL") %}
     <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
         <i class="material-icons left">mail</i>Envoyer un email
     </a>
@@ -226,7 +227,7 @@ id = "modal-bucket"
     {{ form_end(bucket_lock_unlock_form) }}
 {% endif %}
 
-{% if is_granted("ROLE_SHIFT_MANAGER") %}
+{% if display_edit_button ?? false and is_granted("ROLE_SHIFT_MANAGER") %}
     <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
         <i class="material-icons left">edit</i>Editer
     </a>
