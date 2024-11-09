@@ -14,7 +14,12 @@
             {% endfor %}
         {% endif %}
     </div>
-    <a {% if firstBookableShift %}href="#book{{ firstBookableShift.id }}"{% endif %}
+    <a
+        {% if firstBookableShift %}
+            href="#book{{ firstBookableShift.id }}"
+        {% else %}
+            href="#show{{ bucket.id }}"
+        {% endif %}
        class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.sortedShifts.first.job.name }}">
         <div class="z-depth-1 {{ bucket.sortedShifts.first.job.color }} lighten-5 black-text" style="position: relative">
             <div class="shift-block">
@@ -65,4 +70,10 @@
 </div>
 {% if firstBookableShift %}
     {% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, cycle: cycle } %}
+{% else %}
+    <div id="show{{ bucket.id }}" class="modal">
+        <div class="modal-content">
+            {% include "admin/booking/_partial/bucket_modal.html.twig" with { shifts: bucket.getSortedShifts() } %}
+        </div>
+    </div>
 {% endif %}
