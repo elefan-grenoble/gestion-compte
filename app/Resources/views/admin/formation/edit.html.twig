@@ -12,7 +12,7 @@
 {% block content %}
     <h4>Editer une formation</h4>
 
-    {% include "admin/formation/_form.html.twig" with { form: form } %}
+    {% include "admin/formation/_partial/form.html.twig" with { form: form, edit: true, formation: formation } %}
 
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         {{ form_start(delete_form) }}

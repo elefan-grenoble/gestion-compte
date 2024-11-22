@@ -20,13 +20,19 @@
     </div>
 </div>
 <div class="row">
-    {{ form_row(form.location) }}
+    <div class="col">
+        {{ form_row(form.location) }}
+    </div>
 </div>
 <div class="row">
-    {{ form_row(form.description) }}
+    <div class="col">
+        {{ form_row(form.description) }}
+    </div>
 </div>
 <div class="row">
-    {{ form_row(form.imgFile) }}
+    <div class="col">
+        {{ form_row(form.imgFile) }}
+    </div>
 </div>
 <div class="row">
     {{ form_errors(form.displayed_home) }}
