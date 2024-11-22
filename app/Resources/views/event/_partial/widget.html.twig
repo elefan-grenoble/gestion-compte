@@ -3,9 +3,8 @@
 {% block content %}
 {% if title %}
     <p style="margin-top:0;">
-        liste des prochains événements
-        {% if eventKind %}<strong>{{ eventKind.name }}</strong>{% endif %}
-        {% if maxDate %}(jusqu'au {{ maxDate | date_short }}){% endif %}
+        Liste des prochains événements
+        {% if date_max %}(jusqu'au {{ date_max | date_short }}){% endif %}
     </p>
 {% endif %}
 <ul style="margin:0;">
@@ -20,7 +19,7 @@
                     <span>[en cours]</span>
                 {% endif %}
             {% endif %}
-            {# {% if not eventKind %}[{{ event.kind }}] {% endif %} #}
+            {# {% if not event_kind_id_list %}[{{ event.kind }}] {% endif %} #}
         </li>
     {% endfor %}
 </ul>
