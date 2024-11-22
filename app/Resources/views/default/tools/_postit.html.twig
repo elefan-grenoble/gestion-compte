@@ -8,7 +8,7 @@
             <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger settings"><i class="material-icons tiny">settings</i></a>
             <div class="box">
                 <div class="content black-text">
-                    {{ note.textWithBr  | markdown | raw }}
+                    {{ note.text | nl2br | markdown | raw }}
                 </div>
             </div>
             {#<img src="{{ gravatar(note.author.email) }}" alt="" class="circle responsive-img" width="30px">#}
@@ -31,7 +31,7 @@
             </h6>
             <div class="content black-text">
                 <p>
-                    {{ child.textWithBr  | markdown | raw }}
+                    {{ child.text | nl2br | markdown | raw }}
                 </p>
             </div>
                 {{ form_start(note_delete_forms[child.id], {'attr': {'id': 'form_note_delete_'~child.id }}) }}
