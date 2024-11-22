@@ -2,53 +2,75 @@
 
 namespace AppBundle\Form;
 
-use AppBundle\Entity\Beneficiary;
-use AppBundle\Entity\Code;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use AppBundle\Entity\CodeDevice;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Regex;
 
 class CodeType extends AbstractType
 {
-    private $tokenStorage;
-
-    public function __construct(TokenStorageInterface $tokenStorage)
-    {
-        $this->tokenStorage = $tokenStorage;
-    }
 
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('value',TextType::class,array('label'=>'valeur','constraints' => array(
-            new NotBlank(),
-            new Regex(array(
-                    'pattern' => '/^[0-9]\d*$/',
-                    'message' => 'Un nombre positif à 4 chiffres'
-                )
-            ),
-            new Length(array('max' => 4,'min'=> 4))
-        )));
+        $builder->add('description', null, array('label'=>'Description','constraints' => array(
+                        new NotBlank(),
+                    )));
+        if ($options['codedevice_type'] == 'igloohome') {
+            $builder->add('start_date', DateTimeType::class, [
+                        'html5' => false,
+                        'date_widget' => 'single_text',
+                        'time_widget' => 'single_text',
+                        'model_timezone' => 'Europe/Paris',
+                        'view_timezone'  => 'Europe/Paris'
+                    ])
+                    ->add('end_date', DateTimeType::class, [
+                        'html5' => false,
+                        'date_widget' => 'single_text',
+                        'time_widget' => 'single_text',
+                        'model_timezone' => 'Europe/Paris',
+                        'view_timezone'  => 'Europe/Paris'
+                    ]);
+        } else {
+            $builder->add('value', null, array('label'=>'Code'));
+        }
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+            $code = $event->getData();
+            $form = $event->getForm();
+
+            // checks if the Code object is "new"
+            // If no data is passed to the form, the data is "null".
+            if ((!$code || null === $code->getId()) && $options['codedevice_type'] != 'igloohome') {
+                $form->add('generate_random_value', CheckboxType::class, array(
+                    'label' => 'Générer une combinaison aléatoire ?',
+                    'mapped' => false,
+                    'required' => false,
+                    'attr' => array('class' => 'filled-in')))
+                     ->add('deactivate_old_codes', CheckboxType::class, array(
+                    'label' => 'Désactiver les anciens codes ?',
+                    'mapped' => false,
+                    'required' => false,
+                    'attr' => array('class' => 'filled-in')));
+            }
+        });
     }
-    
+
     /**
      * {@inheritdoc}
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Code::class
+            'data_class' => 'AppBundle\Entity\Code',
+            'codedevice_type' => 'other',
         ));
     }
 
@@ -57,7 +79,7 @@ class CodeType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'appbundle_Code';
+        return 'appbundle_code';
     }
 
 
