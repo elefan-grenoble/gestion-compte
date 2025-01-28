@@ -200,6 +200,7 @@ parameters:
     oidc_realm: elefan
     oidc_client_id: elefan
     oidc_client_secret: secret
+    oidc_keycloak_version: x.y.z
     oidc_user_attributes_map:
         firstname: firstName
         lastname: lastName

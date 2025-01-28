@@ -7,3 +7,4 @@ knpu_oauth2_client:
       client_id: '%oidc_client_id%'
       redirect_route: 'oauth_check'
       client_secret: '%oidc_client_secret%'
+      version: '%oidc_keycloak_version%'
