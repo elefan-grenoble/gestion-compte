@@ -13,9 +13,11 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -156,6 +158,8 @@ class AmbassadorController extends Controller
      */
     public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
+        $action = $request->request->get("form")["action"] ?? null;
+
         $defaults = [
             'withdrawn' => 1,
             'frozen' => 1,
@@ -176,8 +180,29 @@ class AmbassadorController extends Controller
         $order = $form->get('dir')->getData();
         $currentPage = $form->get('page')->getData();
 
-        $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
+
+        // Export CSV
+        if ($action == "csv") {
+            $members = $qb->getQuery()->getResult();
+            $return = '';
+            $d = ',';
+            foreach ($members as $member) {
+                $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
+                $return .= $member->getMemberNumber() . $d .
+                    join($names->toArray(), " & ") . $d .
+                    $member->getLastRegistration()->getDate()->format("d/m/Y") . $d .
+                    $member->getShiftTimeCount() / 60 .
+                    "\n";
+            }
+            return new Response($return, 200, [
+                'Content-Encoding: UTF-8',
+                'Content-Type' => 'application/force-download; charset=UTF-8',
+                'Content-Disposition' => 'attachment; filename="relances_créneaux_' . date('dmyhis') . '.csv"'
+            ]);
+        }
+
+        $limitPerPage = 25;
         $paginator = new Paginator($qb);
         $resultCount = count($paginator);
         $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
