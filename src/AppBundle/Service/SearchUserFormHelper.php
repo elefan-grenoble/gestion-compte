@@ -356,7 +356,7 @@ class SearchUserFormHelper
             new LessThanOrEqual($defaults['compteurlt'])
         ];
         $form->add('compteurlt', NumberType::class, $options);
-        $form->add('action', SubmitType::class, [
+        $form->add('csv', SubmitType::class, [
             'label' => 'Export CSV',
             'attr' => [
                 'class' => 'btn',

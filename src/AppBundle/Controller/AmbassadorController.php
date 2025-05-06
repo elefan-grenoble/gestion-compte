@@ -158,7 +158,7 @@ class AmbassadorController extends Controller
      */
     public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
-        $action = $request->request->get("form")["action"] ?? null;
+        $action = $request->request->get("form")["csv"] ?? null;
 
         $defaults = [
             'withdrawn' => 1,
