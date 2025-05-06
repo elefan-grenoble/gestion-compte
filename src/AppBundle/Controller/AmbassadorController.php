@@ -18,6 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -185,21 +186,32 @@ class AmbassadorController extends Controller
         // Export CSV
         if ($action == "csv") {
             $members = $qb->getQuery()->getResult();
-            $return = '';
-            $d = ',';
-            foreach ($members as $member) {
+
+            $data = array_map(function($member) {
                 $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
-                $return .= $member->getMemberNumber() . $d .
-                    join($names->toArray(), " & ") . $d .
-                    $member->getLastRegistration()->getDate()->format("d/m/Y") . $d .
-                    $member->getShiftTimeCount() / 60 .
-                    "\n";
-            }
-            return new Response($return, 200, [
-                'Content-Encoding: UTF-8',
-                'Content-Type' => 'application/force-download; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="relances_créneaux_' . date('dmyhis') . '.csv"'
-            ]);
+                return [
+                    $member->getMemberNumber(),
+                    join($names->toArray(), " & "),
+                    $member->getLastRegistration()->getDate()->format("d/m/Y"),
+                    $member->getShiftTimeCount() / 60
+                ];
+            }, $members);
+
+            $response = new StreamedResponse();
+            $response->setCallback(function () use ($data) {
+                $handle = fopen('php://output', 'wb');
+                foreach ($data as $row) {
+                    fputcsv($handle, $row, ',');
+                }
+                fclose($handle);
+            });
+
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Encoding', 'UTF-8');
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="relances_créneaux_' . date('dmyhis') . '.csv"');
+
+            return $response;
         }
 
         $limitPerPage = 25;
