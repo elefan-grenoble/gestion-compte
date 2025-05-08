@@ -185,22 +185,23 @@ class AmbassadorController extends Controller
 
         // Export CSV
         if ($action == "csv") {
+            /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
+             * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
+             * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
+             *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
+             */
             $members = $qb->getQuery()->getResult();
 
-            $data = array_map(function($member) {
-                $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
-                return [
-                    $member->getMemberNumber(),
-                    join($names->toArray(), " & "),
-                    $member->getLastRegistration()->getDate()->format("d/m/Y"),
-                    $member->getShiftTimeCount() / 60
-                ];
-            }, $members);
-
-            $response = new StreamedResponse();
-            $response->setCallback(function () use ($data) {
+            $response = new StreamedResponse(function () use ($members) {
                 $handle = fopen('php://output', 'wb');
-                foreach ($data as $row) {
+                foreach ($members as $member) {
+                    $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
+                    $row = [
+                        $member->getMemberNumber(),
+                        join($names->toArray(), " & "),
+                        $member->getLastRegistration()->getDate()->format("d/m/Y"),
+                        $member->getShiftTimeCount() / 60
+                    ];
                     fputcsv($handle, $row, ',');
                 }
                 fclose($handle);
