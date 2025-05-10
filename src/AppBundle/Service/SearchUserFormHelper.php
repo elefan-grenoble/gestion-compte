@@ -355,6 +355,28 @@ class SearchUserFormHelper
             new NotBlank(),
             new LessThanOrEqual($defaults['compteurlt'])
         ];
+        $form->add('commissions', EntityType::class, [
+            'class' => 'AppBundle:Commission',
+            'choice_label' => 'name',
+            'multiple' => true,
+            'required' => false,
+            'label'=>'Dans la/les commissions(s)',
+              'query_builder' => function(CommissionRepository $repository) {
+                  $qb = $repository->createQueryBuilder('c');
+                  return $qb->orderBy('c.name', 'ASC');
+              }
+        ]);
+        $form->add('not_commissions', EntityType::class, [
+            'class' => 'AppBundle:Commission',
+            'choice_label' => 'name',
+            'multiple' => true,
+            'required' => false,
+            'label'=>'Hors de la/les commissions(s)',
+              'query_builder' => function(CommissionRepository $repository) {
+                  $qb = $repository->createQueryBuilder('c');
+                  return $qb->orderBy('c.name', 'ASC');
+              }
+        ]);
         $form->add('compteurlt', NumberType::class, $options);
         $form->add('csv', SubmitType::class, [
             'label' => 'Export CSV',
@@ -498,6 +520,26 @@ class SearchUserFormHelper
                 } else if ($form->get('has_period_position')->getData() == 1) {
                     $qb = $qb->andWhere('pp.id IS NULL');
                 }
+            }
+        }
+
+        $join_commissions = false;
+        if ($form->has('commissions') && $form->get('commissions')->getData() && count($form->get('commissions')->getData())) {
+            $qb->andWhere('c.id IN (:cids)')
+            ->setParameter('cids', $form->get('commissions')->getData());
+            $join_commissions = true;
+        }
+        if ($form->has('not_commissions') && $form->get('not_commissions')->getData() && count($form->get('not_commissions')->getData())) {
+            $ncqb = clone $qb;
+            if (!$join_commissions) {
+                $ncqb->andWhere('c.id IN (:cids)');
+            }
+            $ncqb->setParameter('cids', $form->get('not_commissions')->getData());
+            $subQuery = $ncqb->select('DISTINCT m.id')->getQuery()->getArrayResult();
+
+            if (count($subQuery)) {
+                $qb = $qb->andWhere('m.id NOT IN (:subQueryformations)')
+                ->setParameter('subQueryformations', $subQuery);
             }
         }
 
