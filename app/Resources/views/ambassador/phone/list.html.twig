@@ -132,7 +132,9 @@
                         <br />
                         <h5>Actions</h5>
                         {{ form_widget(form.submit) }}
-                        {{ form_widget(form.csv) }}
+                        {% if form.offsetExists("csv") %}
+                            {{ form_widget(form.csv) }}
+                        {% endif %}
                     </div>
                 </div>
 
