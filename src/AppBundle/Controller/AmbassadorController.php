@@ -201,6 +201,9 @@ class AmbassadorController extends Controller
                         join($names->toArray(), " & "),
                         $member->getLastRegistration()->getDate()->format("d/m/Y"),
                         $member->getShiftTimeCount() / 60
+                        /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
+                         * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
+                         */
                     ];
                     fputcsv($handle, $row, ',');
                 }
