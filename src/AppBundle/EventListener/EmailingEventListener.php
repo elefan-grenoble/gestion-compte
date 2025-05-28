@@ -388,6 +388,9 @@ class EmailingEventListener
         $shift = $event->getShift();
         $beneficiary = $shift->getShifter();
 
+        $router = $this->container->get('router');
+        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+
         $dynamicContent = $this->em->getRepository('AppBundle:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
         $template = $this->container->get('twig')->createTemplate($dynamicContent);
         $dynamicContent = $this->container->get('twig')->render($template, array('beneficiary' => $beneficiary));
@@ -405,7 +408,8 @@ class EmailingEventListener
                         'emails/shift_reminder.html.twig',
                         array(
                             'shift' => $shift,
-                            'dynamicContent' => $dynamicContent
+                            'dynamicContent' => $dynamicContent,
+                            'home_url' => $home_url,
                         )
                     ),
                     'text/html'
