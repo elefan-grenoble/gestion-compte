@@ -303,6 +303,9 @@ class EmailingEventListener
         $shift = $event->getShift();
         $beneficiary = $shift->getShifter();
 
+        $router = $this->container->get('router');
+        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+
         // send a "confirmation" e-mail to the beneficiary
         $emailObject = '[ESPACE MEMBRES] Réservation de ton créneau confirmée';
         $emailTo = $beneficiary->getEmail();
@@ -314,7 +317,8 @@ class EmailingEventListener
                 $this->renderView(
                     'emails/shift_booked_confirmation.html.twig',
                     array(
-                        'shift' => $shift
+                        'shift' => $shift,
+                        'home_url' => $home_url,
                     )
                 ),
                 'text/html'
