@@ -13,9 +13,12 @@ use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
@@ -156,6 +159,8 @@ class AmbassadorController extends Controller
      */
     public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
+        $action = $request->request->get("form")["csv"] ?? null;
+
         $defaults = [
             'withdrawn' => 1,
             'frozen' => 1,
@@ -176,8 +181,44 @@ class AmbassadorController extends Controller
         $order = $form->get('dir')->getData();
         $currentPage = $form->get('page')->getData();
 
-        $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
+
+        // Export CSV
+        if ($action == "csv") {
+            /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
+             * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
+             * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
+             *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
+             */
+            $members = $qb->getQuery()->getResult();
+
+            $response = new StreamedResponse(function () use ($members) {
+                $handle = fopen('php://output', 'wb');
+                foreach ($members as $member) {
+                    $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
+                    $row = [
+                        $member->getMemberNumber(),
+                        join($names->toArray(), " & "),
+                        $member->getLastRegistration()->getDate()->format("d/m/Y"),
+                        $member->getShiftTimeCount() / 60
+                        /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
+                         * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
+                         */
+                    ];
+                    fputcsv($handle, $row, ',');
+                }
+                fclose($handle);
+            });
+
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Encoding', 'UTF-8');
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="relances_créneaux_' . date('dmyhis') . '.csv"');
+
+            return $response;
+        }
+
+        $limitPerPage = 25;
         $paginator = new Paginator($qb);
         $resultCount = count($paginator);
         $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
