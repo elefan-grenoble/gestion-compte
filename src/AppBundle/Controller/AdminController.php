@@ -107,16 +107,12 @@ class AdminController extends Controller
              *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
              */
             $members = $qb->getQuery()->getResult();
-            $export_compteur = !is_null($form->get('compteurlt')->getData()) || !is_null($form->get('compteurgt')->getData());
 
-            $response = new StreamedResponse(function () use ($members, $export_compteur) {
+            $response = new StreamedResponse(function () use ($members) {
                 $handle = fopen('php://output', 'wb');
                 $delimiter = ',';
 
-                $headers = ["Numéro de membre", "Prénom", "Nom", "Email", "Téléphone"];
-                if ($export_compteur) {
-                    $headers[] = "Compteur de temps";
-                }
+                $headers = ["Numéro de membre", "Prénom", "Nom", "Email", "Téléphone", "Compteur de temps", "Formations"];
                 fputcsv($handle, $headers, $delimiter);
 
                 foreach ($members as $member) {
@@ -127,14 +123,13 @@ class AdminController extends Controller
                             $beneficiary->getLastname(),
                             $beneficiary->getEmail(),
                             $beneficiary->getPhone(),
-                        ];
-
-                        if ($export_compteur) {
-                            $row[] = (string) round($member->getShiftTimeCount() / 60);
+                            (string) round($member->getShiftTimeCount() / 60),
                             /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
                             * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
                             */
-                        }
+                            join(", ", $beneficiary->getFormations()->map(function($f) { return $f->getName(); })->toArray()),
+                        ];
+
 
                         fputcsv($handle, $row, $delimiter);
                     }
