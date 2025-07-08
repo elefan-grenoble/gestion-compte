@@ -31,6 +31,7 @@ use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -100,25 +101,49 @@ class AdminController extends Controller
 
         // Export CSV
         if ($action == "csv") {
+            /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
+             * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
+             * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
+             *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
+             */
             $members = $qb->getQuery()->getResult();
-            $return = '';
-            $d = ','; // this is the default but i like to be explicit
-            foreach ($members as $member) {
-                foreach ($member->getBeneficiaries() as $beneficiary) {
-                    $return .=
-                        $beneficiary->getMemberNumber() . $d .
-                        $beneficiary->getFirstname() . $d .
-                        $beneficiary->getLastname() . $d .
-                        $beneficiary->getEmail() . $d .
-                        $beneficiary->getPhone() .
-                        "\n";
+
+            $response = new StreamedResponse(function () use ($members) {
+                $handle = fopen('php://output', 'wb');
+                $delimiter = ',';
+
+                $headers = ["Numéro de membre", "Prénom", "Nom", "Email", "Téléphone", "Compteur de temps", "Formations"];
+                fputcsv($handle, $headers, $delimiter);
+
+                foreach ($members as $member) {
+                    foreach ($member->getBeneficiaries() as $beneficiary) {
+                        $row = [
+                            $beneficiary->getMemberNumber(),
+                            $beneficiary->getFirstname(),
+                            $beneficiary->getLastname(),
+                            $beneficiary->getEmail(),
+                            $beneficiary->getPhone(),
+                            (string) round($member->getShiftTimeCount() / 60),
+                            /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
+                            * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
+                            */
+                            join(", ", $beneficiary->getFormations()->map(function($f) { return $f->getName(); })->toArray()),
+                        ];
+
+
+                        fputcsv($handle, $row, $delimiter);
+                    }
                 }
-            }
-            return new Response($return, 200, array(
-                'Content-Encoding: UTF-8',
-                'Content-Type' => 'application/force-download; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
-            ));
+                fclose($handle);
+            });
+
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Encoding', 'UTF-8');
+            $response->headers->set('Content-Type', 'application/force-download; charset=UTF-8');
+            $response->headers->set('Content-Disposition', 'attachment; filename="membres_' . date('Y-m-d-H-i-s') . '.csv"');
+
+            return $response;
+
         // Envoyer un mail
         } else if ($action === "mail") {
             return $this->redirectToRoute('mail_edit', [
