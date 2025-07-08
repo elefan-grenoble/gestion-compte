@@ -89,9 +89,10 @@ class DefaultController extends Controller
                 }
             }
         } else {
+            $from = new \Datetime('today');
             $to = new \DateTime();
             $to->modify('+7 days');
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures($to);
+            $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
 
             return $this->render('default/index_anon.html.twig', [
@@ -142,7 +143,10 @@ class DefaultController extends Controller
     {
         $em = $this->getDoctrine()->getManager();
 
-        $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+        $from = new \Datetime('today');
+        $to = new \DateTime();
+        $to->modify('+7 days');
+        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
         $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
 
         return $this->render('booking/schedule.html.twig', [
