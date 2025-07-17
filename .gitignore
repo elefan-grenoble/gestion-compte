@@ -52,6 +52,6 @@ docker-compose.yml
 /updateLocalDbFromProd.sh
 
 **/*~
-
+.todo
 .direnv
 .devenv

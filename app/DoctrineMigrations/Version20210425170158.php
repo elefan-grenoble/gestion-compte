@@ -23,7 +23,8 @@ final class Version20210425170158 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('ALTER TABLE period DROP week_cycle');
-        $this->addSql('ALTER TABLE period ADD week_cycle LONGTEXT DEFAULT \'0,1,2,3\' NOT NULL COMMENT \'(DC2Type:simple_array)\'');
+        $this->addSql('ALTER TABLE period ADD week_cycle LONGTEXT NOT NULL COMMENT \'(DC2Type:simple_array)\'');
+        $this->addSql('UPDATE period SET week_cycle = "0,1,2,3"');
     }
 
     public function down(Schema $schema) : void
