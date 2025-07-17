@@ -1,0 +1,24 @@
+{% set openingHourJoinString = "&" %}
+
+<table style=" width: max-content; margin-left: auto; margin-right: auto; border-collapse: separate; border-spacing: 10px 0px" class="no-padding">
+    <tbody>
+        {% set dayOfWeek = -1 %}
+        {% for openingHour in openingHours %}
+            {% set openingHourTimeString = openingHour.closed ? "Fermé" : openingHour.start | time_short ~ "-" ~ openingHour.end | time_short %}
+            {% if openingHour.dayOfWeek != dayOfWeek %}
+                {# close previous day #}
+                {% if loop.index > 0 %}</td></tr>{% endif %}
+                {# open new day #}
+                <tr>
+                    <td class="no-padding" style="text-align:right">{{ openingHour.dayOfWeekString | capitalize }} :</td>
+                    <td class="no-padding">{{ openingHourTimeString }}
+            {% else %}
+                {# continue existing day #}
+                {{ openingHourJoinString | raw }} {{ openingHourTimeString }}
+            {% endif %}
+            {% set dayOfWeek = openingHour.dayOfWeek %}
+        {% endfor %}
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,0 +1,19 @@
+{% set only_header = only_header ?? false %}
+{% set only_action = only_action ?? false %}
+{% set from_admin = from_admin ?? false %}
+
+<div class="card {% if not only_header and not only_action %}small{% endif %} {% if from_admin %}blue-grey darken-1{% endif %}">
+    {% if not only_header and not only_action and event.img %}
+        <div class="card-image">
+            <img src="{{ event|img('imgFile', 'card') }}" />
+        </div>
+    {% endif %}
+
+    {% if not only_action %}
+        {% include "admin/event/_partial/card_content.html.twig" with { event: event, only_header: only_header, from_admin: from_admin } %}
+    {% endif %}
+
+    {% if not only_header %}
+        {% include "admin/event/_partial/card_action.html.twig" with { event: event, only_action: only_action, from_admin: from_admin } %}
+    {% endif %}
+</div>

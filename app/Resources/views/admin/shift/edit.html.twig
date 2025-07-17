@@ -1,19 +1,49 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('booking_admin') }}"><i class="material-icons">date_range</i>Créneaux admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>Editer
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('booking_admin') }}"><i class="material-icons">date_range</i>&nbsp;Liste des créneaux</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;&nbsp;Editer
 {% endblock %}
 
 {% block content %}
-    <h4> Editer créneau / <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
-    <h5>{{ shift.start|date_fr_long }} de {{ shift.start|date('G\\hi') }} à {{ shift.end|date('G\\hi') }}</h5>
+    <h4> Editer créneaux / <span class="{{ shift.job.color }}-text">{{ shift.job.name }}</span></h4>
+    <h5>{{ shift.displayDateLongWithTime }}</h5>
     {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
+    <div class="row">
+        <div class="col s12">
+            {{ form_label(form.start.date) }}
+            {{ form_errors(form.start.date) }}
+            {{ form_widget(form.start.date, { attr: { class: 'datepicker' } }) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.start.time, 'Heure de début') }}
+            {{ form_errors(form.start.time) }}
+            {{ form_widget(form.start.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        <div class="col s12">
+            <input type="hidden" id="{{ form.end.date.vars.id }}" name="{{ form.end.date.vars.full_name }}">
+            {{ form_label(form.end.time, 'Heure de fin') }}
+            {{ form_errors(form.end.date) }}
+            {{ form_errors(form.end.time) }}
+            {{ form_widget(form.end.time, { attr: { class: 'timepicker' } }) }}
+        </div>
+        <div class="col s12">
+            {{ form_label(form.job) }}
+            {{ form_errors(form.job) }}
+            {{ form_widget(form.job) }}
+        </div>
     </div>
-    {{ form_end(form) }}
+    <div>
+        <button type="submit" class="btn waves-effect waves-light">
+            <i class="material-icons left">save</i>Enregistrer
+        </button>
+    </div>
+    {{ form_row(form._token) }}
+    {{ form_end(form, {'render_rest': false}) }}
+{% endblock %}
+
+{% block javascripts %}
+    {% include "/admin/shift/_form_js.html.twig" %}
 {% endblock %}

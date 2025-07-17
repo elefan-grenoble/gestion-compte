@@ -1,42 +1,67 @@
-{% set firstShiftDate = member.firstShiftDate %}
-                {% set previousShifts = member.getShiftsOfCycle(-1) %}
-                {% set currentShifts = member.getShiftsOfCycle() %}
-                {% set nextShifts = member.getShiftsOfCycle(1) %}
-<div class="col m12">
-    <div class="row">
-        <h6>Cycle précédent (du {{ member.startOfCycle(-1) | date_fr_long }} au {{ member.endOfCycle(-1) | date_fr_long }})</h6>
-        {% if previousShifts|length == 0 %}
-            Pas de créneau
-        {% endif %}
-        {% for shift in previousShifts %}
-            <div class="col m4 s6">
-                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
-            </div>
-        {% endfor %}
-    </div>
-    <div class="row">
-        <h6>Cycle en cours (du {{ member.startOfCycle | date_fr_long }} au {{ member.endOfCycle | date_fr_long }})</h6>
-        {% if currentShifts|length == 0 %}
-            Pas de créneau
-        {% endif %}
-        {% for shift in currentShifts %}
-            <div class="col m4 s6">
-                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
-            </div>
-        {% endfor %}
-    </div>
-    <div class="row">
-        <h6>Prochain cycle (du {{ member.startOfCycle(1) | date_fr_long }} au {{ member.endOfCycle(1) | date_fr_long }})</h6>
-        {% if nextShifts|length == 0 %}
-            Pas de créneau
-        {% endif %}
-        {% for shift in nextShifts %}
-            <div class="col m4 s6">
-                {% include "user/_partial/shift.html.twig" with { shift: shift  } %}
-            </div>
-        {% endfor %}
-    </div>
+{% if member.isCurrentlyExemptedFromShifts() %}
+    {% include "member/_partial/exempted.html.twig" with { member: member, from_admin: true } %}
+{% endif %}
 
-</div>
+{% if use_fly_and_fixed %}
+    <div class="row">
+        <h6>Créneau{% if period_positions | length > 1 %}x{% endif %} fixe</h6>
+        {% if period_positions | length > 0 %}
+            {% for period_position in period_positions %}
+                <div class="col s12 m6 xl4">
+                    {% include "user/_partial/period_position_card.html.twig" with { period_position: period_position, show_actions: true } %}
+                </div>
+            {% endfor %}
+            {% if fly_and_fixed_entity_flying == 'Membership' and member.flying %}
+                <div class="col s12">
+                    <div class="card-panel red white-text">
+                        Ce membre est <strong>volant</strong> alors qu'il a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            {% if fly_and_fixed_entity_flying == 'Membership' and not member.flying %}
+                <div class="col s12">
+                    <div class="card-panel red white-text">
+                        Ce membre est <strong>fixe</strong> alors qu'il n'a aucun créneaux fixe.
+                    </div>
+                </div>
+            {% else %}
+                <span>Aucun créneau fixe</span><br />
+                <span>(compte volant)</span>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
 
-<p>Date du tout premier créneau : {% if firstShiftDate %}{{ firstShiftDate|date_fr_full }}{% else %}Néant{% endif %}</p>
+{% if not member.firstShiftDate %}
+    <div class="row">
+        <h6>Créneaux</h6>
+        <div class="card-panel red white-text">
+            Ce membre n'est pas encore inscrit à son premier créneau.
+        </div>
+    </div>
+{% else %}
+    {% for cycle, shifts in shifts_by_cycle %}
+        <div class="row">
+            <h6>
+                {% if cycle <= -1 %}
+                    Cycle précédent
+                {% elseif cycle == 0 %}
+                    Cycle en cours
+                {% elseif cycle >= 1 %}
+                    Prochain cycle
+                {% endif %}
+                (du {{ membership_service.startOfCycle(member, cycle) | date_fr_long }} au {{ membership_service.endOfCycle(member, cycle) | date_fr_long }})
+            </h6>
+            {% if shifts | length > 0 %}
+                {% for shift in shifts %}
+                    <div class="col s12 m6 xl4">
+                        {% include "user/_partial/shift_card.html.twig" with { shift: shift } %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                Pas de créneau
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}

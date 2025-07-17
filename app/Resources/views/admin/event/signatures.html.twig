@@ -1,21 +1,210 @@
-<html>
-<head>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+{#########################################################################
+ # Twig template for /Controller/EventController.php/signaturesListAction()
+ #
+ # @param beneficiaries: beneficiary entity for this line
+ # @param event: The event entity object signature sheet
+ #########################################################################}
 
+{% block macro %}
+    {#########################################################################
+     # Compute and output the 2 last cells of a table_line depending on the beneficiary status.
+     # @param beneficiary: beneficiary entity for this line
+     # @param event: The event entity object signature sheet
+     #########################################################################}
+    {% macro sign_cells(beneficiary, event) %}
+        {% if not beneficiary.isMain %}
+            {# Not main benificiary, only one vote per memeber whatever the beneficiries number -----#}
+            <td colspan="2" class="warning" style="background: gray; color: white;">
+                Bénéficiaire de <strong>{{ beneficiary.membership.mainBeneficiary.displayName }}</strong>
+            </td>
+
+        {% elseif (beneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
+            {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
+            <td colspan="2" class="wrong" style="background: gray; color: white;">
+                Compteur de créneaux à {{ beneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
+                <br />
+                &#9888&nbsp;<strong>VOTE IMPOSSIBLE</strong>&nbsp;&#9888
+            </td>
+
+        {% elseif (event.proxiesByGiver(beneficiary.membership) | length > 0) %}
+            {# This member designated a proxy to vote and is not the proxy ------------------------- #}
+            {# first? only 1 proxy per member #}
+            <td colspan="2" class="warning" style="background: gray; color: white;">
+                Procuration donnée à
+                <br />
+                {% if event.proxiesByGiver(beneficiary.membership).first.owner.membership.mainBeneficiary %}
+                    <strong>
+                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumberWithBeneficiaryListString }}
+                    </strong>
+                {% else %}
+                    Membre supprimé
+                {% endif %}
+            </td>
+
+        {% else %}
+            {# This beneficiary can vote ------------------------------------------------------------ #}
+            <td></td>
+            <td></td>
+        {% endif %}
+    {% endmacro sign_cells %}
+
+    {#########################################################################
+     # Compute and output a line for each beneficiary
+     # @param beneficiary: beneficiary entity for this line
+     # @param event: The event entity object signature sheet
+     #########################################################################}
+    {% macro table_line(beneficiary, event) %}
+        <tr>
+            <td {% if beneficiary.lastname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.lastname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.lastname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td {% if beneficiary.firstname | length > 12 %}class="smaller"{% endif %}>
+                {{ beneficiary.firstname }}
+                {% if (maximum_nb_of_beneficiaries_in_membership > 1) and beneficiary.isMain %}
+                    {% for other_beneficiary in beneficiary.membership.beneficiaries %}
+                        {% if other_beneficiary != beneficiary %}
+                            <br />
+                            <small>{{ other_beneficiary.firstname }}</small>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </td>
+            <td class="center">#{{ beneficiary.membership.memberNumber }}</td>
+            <td class="center date">{{ beneficiary.membership.lastRegistration.date | date_short }}</td>
+            {{ _self.sign_cells(beneficiary, event) }}
+        </tr>
+
+        {# this beneficiary designated a proxy so generation of a additional line for this proxy to sign #}
+        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
+            {% for proxy in event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) %}
+                <tr>
+                    <td>
+                        <span class="smaller">&#8618;&nbsp;A une procuration pour</span>
+                        <br />
+                        {{ proxy.giver.mainBeneficiary.lastname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.lastname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ proxy.giver.mainBeneficiary.firstname }}
+                        {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
+                            {% for other_beneficiary in proxy.giver.mainBeneficiary.membership.beneficiaries %}
+                                {% if other_beneficiary != proxy.giver.mainBeneficiary %}
+                                    <br />
+                                    <small>{{ other_beneficiary.firstname }}</small>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                    <td class="center">#{{ proxy.giver.mainBeneficiary.memberNumber }}</td>
+                    <td class="center">{{ proxy.giver.mainBeneficiary.membership.lastRegistration.date | date_short }}</td>
+
+                {% if (proxy.giver.mainBeneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
+                    {# this member is too late in his/her shifts cannot vote ---------------------------------- #}
+                    {# Todo: Maybe it should be put in the sign_cells macro #}
+                    <td colspan="2" class="wrong" style="background: gray; color: white;">
+                        Compteur de créneaux de #{{ proxy.giver.mainBeneficiary.memberNumber }} à {{ proxy.giver.mainBeneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}
+                        <br />
+                        &#9888&nbsp;<strong>VOTE IMPOSSIBLE</strong>&nbsp;&#9888
+                    </td>
+                {% else %}
+                    <td></td>
+                    <td></td>
+                {% endif %}
+                </tr>
+            {% endfor %}
+        {% endif %}
+    {% endmacro table_line %}
+
+    {#########################################################################
+    # Output an header for the signature table
+    #########################################################################}
+    {% macro table_header() %}
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th class="center">#</th>
+                <th class="center">Adhésion</th>
+                <th>Signature</th>
+                <th>Vote</th>
+            </tr>
+        </thead>
+    {% endmacro table_header %}
+
+    {#########################################################################
+     # Compute and output the number of memeber that can vot for this event
+     # @param beneficiaries: an array containing all the active memeber
+     # @param event: The event entity object signature sheet
+     #########################################################################}
+    {% macro member_count(beneficiaries, event) %}
+        {% set number_of_voters = 0 %}
+        {% set number_of_proxy = 0 %}
+
+        {% for beneficiary in beneficiaries %}
+            {% set time_count_ok = not (beneficiary.membership.getShiftTimeCount(event.maxDateOfLastRegistration) <= time_after_which_members_are_late_with_shifts * 60) %}
+
+            {% if (event.proxiesByGiver(beneficiary.membership) | length > 0) and beneficiary.isMain %}
+                {% set number_of_proxy = number_of_proxy + 1 %}
+            {% endif %}
+
+            {% if beneficiary.isMain and time_count_ok %}
+                {% set number_of_voters = number_of_voters+1 %}
+            {% endif %}
+        {% endfor %}
+        Nombre de votants : {{ number_of_voters }}
+        <br />
+        Nombre de procurations : {{ number_of_proxy }}
+    {% endmacro member_count %}
+
+{% endblock %}
+
+
+<html lang="fr">
+<head>
     <style>
+        * {
+            box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+
         body {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             background-color: #FAFAFA;
-            font-size: 12px ;
-            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-family: 'Calibri', sans-serif;
         }
-        * {
-            box-sizing: border-box;
-            -moz-box-sizing: border-box;
+
+        .title{
+            font-size: 18px;
+            padding-bottom: 20px;
+            text-align: center;
         }
+
+        .page_number {
+            float: right;
+            position: relative;
+            top: 5mm;
+            right: -5mm;
+        }
+
         .page {
             width: 210mm;
             min-height: 297mm;
@@ -26,33 +215,86 @@
             background: white;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
+
         .subpage {
-            /*padding: 1cm;*/
-            /*border: 5px red solid;*/
             height: 257mm;
-            /*outline: 2cm #FFEAEA solid;*/
         }
-        .subpage table{
+
+        .subpage table {
             width: 100%;
             border: 0;
             border-collapse: collapse;
         }
-        .subpage table th{
-            text-align: left;
+
+        .subpage th {
+            background: white !important;
+            border: 1px solid rgba(100, 100, 100, 0.25);
+            text-align: center;
+            font-size: 13px;
         }
-        .subpage table tr{
+
+        .subpage td {
+            font-size: 13px;
+            padding-left: 5px;
+            border: 1px solid rgba(100, 100, 100, 0.25);
+        }
+
+        .subpage tr {
             height: 1cm;
+        }
+
+        .wrong {
+            background: lightgray;
+            color: black;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .warning {
+            color: black;
+            text-align: center;
+            font-size: 10px;
+        }
+
+        .subpage td:nth-child(n+5):nth-last-child(-n+6) {
+            border: 2px solid rgba(25, 25, 25, 1);
+            width: 3cm;
+            /*background: white;*/
+        }
+
+        .subpage tr:nth-child(even) {
+            background: lightgray !important;
+            -webkit-print-color-adjust: exact;
+        }
+
+        .date {
+            font-size: 10px;
+        }
+
+        .smaller {
+            font-size: 8px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .letter td {
+            font-size: 18px;
+            padding: 2mm;
         }
 
         @page {
             size: A4;
             margin: 0;
         }
+
         @media print {
             html, body {
                 width: 210mm;
                 height: 297mm;
             }
+
             .page {
                 margin: 0;
                 border: initial;
@@ -64,168 +306,79 @@
                 page-break-after: always;
             }
 
-            tr.odd{
+            tr:nth-child(even) {
                 background: lightgray !important;
                 -webkit-print-color-adjust: exact;
             }
         }
-        .wrong{
-            background: lightgray;
-            color: black;
-            text-align: center;
-            font-size: 10px;
-        }.warning{
-             color: black;
-             text-align: center;
-             font-size: 10px;
-         }
-        .index{
-            font-size: 8px;
-            color: gray;
-        }
-        .date{
-            font-size: 9px;
-        }
-        .smaller{
-            font-size: 9px;
-        }
-        tr.odd{
-            background: lightgray;
-        }
-        .sign{
-            border: 2px solid black;
-            background: white;
-        }
-        .center{
-            text-align: center;
-        }
+
     </style>
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <title>Emargement pour {{ event.title() }} - {{ site_name }}</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}"/>
 </head>
 <body>
-<div class="book">
-    <div class="page">
-        <div class="subpage">
-            {#<h3 class="center">Emargement {{ event.title }} / {{ event.date | date('d-m-Y H:i') }}</h3>#}
-            <table>
-                <tr>
-                    <th></th>
-                    <th>Nom</th>
-                    <th>Prenom</th>
-                    <th>numéro</th>
-                    <th>(re)adhésion</th>
-                    <th class="center">Signature</th>
-                    <th class="center">&nbsp;&nbsp;Vote&nbsp;&nbsp;&nbsp;</th>
-                </tr>
-                {% set index = 1 %}
-                {% set numberOfVoters = 0 %}
-                {% set letter = "" %}
-                {% for beneficiary in beneficiaries %}
-                {% if beneficiary.membership.lastRegistration %}
-                    {% set letter = beneficiary.lastname|first %}
-                    {% if beneficiary.lastname|first != letter and letter != "" %}
-                        {#{% set index = index + 1 %}#}
-                        {#{% if index > 16 %}#}
-                            {% set index = 0 %}
-            </table>
-        </div>
-    </div>
-    <div class="page">
-        <div class="subpage">
-            <table>
-                <tr>
-                    <th></th>
-                    <th>Nom</th>
-                    <th>Prenom</th>
-                    <th>numéro</th>
-                    <th>(re)adhésion</th>
-                    <th class="center">Signature</th>
-                    <th class="center">&nbsp;&nbsp;Vote&nbsp;&nbsp;&nbsp;</th>
-                </tr>
+    <main class="book">
+        <div class="page">
+            <div class="subpage">
+                <div class="title" id="main_title">
+                    Liste des votants pour l'événement "{{ event.title() }}"
+                    <span style="white-space: nowrap;">le {{ event.date | date_fr_full_with_time }}</span>
+                    <br />
+                    <small>généré le <span style="white-space: nowrap;">{{ date('now') | date_fr_full_with_time }}</span></small>
+                </div>
+                <div class="center" id="member_count">
+                    <p>{{ _self.member_count(beneficiaries, event) }}</p>
+                </div>
+                <table>
+                    {# keep track of the number of line generated to make page break #}
+                    {% set index = 2 %}
+                    {# keep track of the number of page to write it in the footer #}
+                    {% set page = 1 %}
+                    {# keep track of the lastname letter for letter sub header #}
+                    {% set letter = "a" %}
 
-                        {#{% endif %}#}
-                <tr>
-                    <td colspan="6" align="center">- <b>{{ letter }}</b> -</td>
-                </tr>
-                    {% endif %}
-                        {% if index < 22 %}
-                            <tr class="{% if loop.index is divisible by(2) %}odd{% else %}even{% endif %}" >
-                                <td class="index">{{ loop.index }}</td>
-                                <td {% if beneficiary.lastname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.lastname }}</td>
-                                <td {% if beneficiary.firstname | length > 10 %}class="smaller"{% endif %}>{{ beneficiary.firstname }}</td>
-                                <td>#{{ beneficiary.membership.memberNumber }}</td>
-                                <td class="date">{{ beneficiary.membership.lastRegistration.date | date('d-m-Y') }}</td>
-                                {% if not beneficiary.isMain %}
-                                    <td colspan="2" class="warning" style="background: gray; color: white;">Beneficiaire de <b>{{ beneficiary.membership.mainBeneficiary.lastname }}&nbsp;{{ beneficiary.membership.mainBeneficiary.firstname }}</b>
-                                        <br>
-                                        <i class="fas fa-exclamation-triangle"></i>&nbsp;<b>NE PAS SIGNER ICI</b>&nbsp;<i class="fas fa-exclamation-triangle"></i>
-                                    </td>
-                                {% elseif (beneficiary.membership.withdrawn) %}
-                                    <td colspan="2" class="wrong" style="background: gray; color: white;">Compte fermé<br><i class="fas fa-times-circle"></i>&nbsp;Vote impossible</td>
-                                {% elseif (beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) < time_after_which_members_are_late_with_shifts * 60) %}
-                                    <td colspan="2" class="wrong" style="background: gray; color: white;">Compteur de créneaux à {{beneficiary.membership.getTimeCount(event.maxDateOfLastRegistration) | duration_from_minutes }}<br><i class="fas fa-times-circle"></i>&nbsp;Vote impossible</td>
-                                {% elseif (event.proxiesByGiver(beneficiary.membership) | length > 0) %}
-                                    <td colspan="2" class="warning" style="background: gray; color: white;">Procuration donnée à
-                                        {% if event.proxiesByGiver(beneficiary.membership).first.owner %}
-                                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.lastname }}&nbsp;{{ event.proxiesByGiver(beneficiary.membership).first.owner.firstname }}&nbsp;
-                                        {{ event.proxiesByGiver(beneficiary.membership).first.owner.membership.memberNumber }}
-                                        {% else %}
-                                            Membre inconnu
-                                        {% endif %}
-                                        <br><i class="fas fa-times-circle"></i>&nbsp;Vote déjà pris en compte</td>
-                                {% elseif ((minDateOfLastRegistration is not null) and (beneficiary.membership.lastRegistration.date < minDateOfLastRegistration)) %}
-                                    <td colspan="2" class="wrong" style="background: gray; color: white;"><i class="fas fa-times-circle"></i>&nbsp;Adhésion expirée - Vote impossible</td>
-                                {% else %}
-                                    {% set numberOfVoters = numberOfVoters + 1 %}
-                                    <td class="sign"></td>
-                                    <td class="sign"></td>
-                                {% endif %}
-
-                            </tr>
-                            {% set index = index + 1 %}
-                            {% if ((event.proxiesByOwner(beneficiary) | length) > 0) and (event.proxiesByOwner(beneficiary).first.giver) %}
-                                <tr class="{% if loop.index is divisible by(2) %}odd{% else %}even{% endif %}">
-                                    <td class="smaller">Procuration</td>
-                                    <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.lastname }}</td>
-                                    <td>{{ event.proxiesByOwner(beneficiary).first.giver.mainBeneficiary.firstname }}</td>
-                                    <td>#{{ event.proxiesByOwner(beneficiary).first.giver.memberNumber }}</td>
-                                    <td></td>
-                                    <td class="sign"></td>
-                                    <td class="sign"></td>
-                                </tr>
-                                {% set index = index + 1 %}
-                            {% endif %}
+                    {% for beneficiary in beneficiaries %}
+                    {# New letter sub header ------------------------- #}
+                        {% if beneficiary.lastname|first != letter %}
+                            {# sub table header for letter separation #}
+                            {% set letter = beneficiary.lastname|first %}
+                            <th colspan="6" class="letter">- {{ letter }} -</th>
+                            {% set index = index + 3 %}
+                            {{ _self.table_header() }}
                         {% endif %}
-                {% endif %}
-                {% if (index > 0) and index >= 22 %}
-                {% set index = 0 %}
-            </table>
-        </div>
-    </div>
-    <div class="page">
-        <div class="subpage">
-            <table>
-                <tr>
-                    <th></th>
-                    <th>Nom</th>
-                    <th>Prenom</th>
-                    <th>numéro</th>
-                    <th>(re)adhésion</th>
-                    <th class="center">Signature</th>
-                    <th class="center">&nbsp;&nbsp;Vote&nbsp;&nbsp;&nbsp;</th>
-                </tr>
-                {% endif %}
-                {% endfor %}
-            </table>
-            <br>
-            <center>
-                Nombre de votants : {{ numberOfVoters}}
-            <center>
-        </div>
-    </div>
-</div>
-<script>
-    window.print();
-</script>
+
+                        {# generate a benificiary line -------------------- #}
+                        {{ _self.table_line(beneficiary, event) }}
+                        {# if proxy, a line is added, so index++ ----------- #}
+                        {% if ((event.proxiesByOwnerMembershipMainBeneficiary(beneficiary) | length) > 0) and (event.proxiesByOwnerMembershipMainBeneficiary(beneficiary).first.giver) %}
+                            {% set index = index + 1 %}
+                        {% endif %}
+                        {% set index = index + 1 %}
+                        {# new page or not--------------------------------- #}
+                        {% if index > 23 %}
+                            {# end the page an start a new one #}
+                            {% set index = 0 %}
+
+                </table>
+            </div> {# closure tag for subpage #}
+            <div class="page_number"> - <b>{{ page }}</b> -</div>
+        </div>{# closure tag for page #}
+        <div class="page">
+            <div class="subpage">
+                <table>
+                            {{ _self.table_header() }}
+                            {% set page = page + 1 %}
+
+                        {% endif %}
+                    {% endfor %}
+                {# final closure #}
+                </table>
+            </div> {# closure tag for subpage #}
+            <div class="page_number">- <b>{{ page }}</b> - </div>
+        </div> {# closure tag for page #}
+    </main>
+    <script>
+        window.print();
+    </script>
 </body>
 </html>

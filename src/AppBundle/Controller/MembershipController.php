@@ -16,6 +16,7 @@ use AppBundle\Event\AnonymousBeneficiaryCreatedEvent;
 use AppBundle\Event\BeneficiaryAddEvent;
 use AppBundle\Event\MemberCreatedEvent;
 use AppBundle\EventListener\SetFirstPasswordListener;
+use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\MembershipType;
 use AppBundle\Form\NoteType;
@@ -29,23 +30,18 @@ use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserBundle;
 use FOS\UserBundle\FOSUserEvents;
 use Spipu\Html2Pdf\Tag\Html\U;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -75,35 +71,40 @@ class MembershipController extends Controller
 
     /**
      * Finds and displays a membership entity.
+     * Why the '/show' in the route? Because routing conflict if not
      *
-     * @Route("/show/{member_number}", name="member_show")
-     * @Method("GET")
+     * @Route("/{member_number}/show", name="member_show", methods={"GET"})
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function showAction(Membership $member)
     {
-        $session = new Session();
         if ($member->getMemberNumber() <= 0) {
             return $this->redirectToRoute("homepage");
         }
         $this->denyAccessUnlessGranted('view', $member);
 
-        $user = $member->getMainBeneficiary()->getUser(); // FIXME
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
+        $flyingForm = $this->createFlyingForm($member);
+        $freezeForm = $this->createFreezeForm($member);
+        $unfreezeForm = $this->createUnfreezeForm($member);
+        $freezeChangeForm = $this->createFreezeChangeForm($member);
+        $withdrawnForm = $this->createWithdrawnForm($member);
         $deleteForm = $this->createDeleteForm($member);
 
         $note = new Note();
-        $note_form = $this->createForm(NoteType::class, $note, array(
+        $noteNewForm = $this->createForm(NoteType::class, $note, array(
             'action' => $this->generateUrl('ambassador_new_note', array("member_number" => $member->getMemberNumber())),
             'method' => 'POST',
         ));
-        $notes_form = array();
-        $notes_delete_form = array();
+        $noteEditForms = array();
+        $noteDeleteForms = array();
         $new_notes_form = array();
         foreach ($member->getNotes() as $n) {
-            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
-            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+            $noteEditForms[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $noteDeleteForms[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
             $response_note->setParent($n);
@@ -112,60 +113,107 @@ class MembershipController extends Controller
 
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
+
         $newReg = new Registration();
         $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get('membership_service')->getExpire($member));
+            $expire = $this->get('membership_service')->getExpire($member);
+            $expire->modify('+1 day');
+            $newReg->setDate($expire);
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
         $newReg->setRegistrar($this->get('security.token_storage')->getToken()->getUser());
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber()));
-        else
+        } else {
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
-
+        }
 
         $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
         $registrationForm->add('is_new', HiddenType::class, array('attr' => array('value' => '1')));
 
+        $detachBeneficiaryForms = array();
         $deleteBeneficiaryForms = array();
         foreach ($member->getBeneficiaries() as $beneficiary) {
-            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
+            if (!$beneficiary->isMain()) {
+                $detachBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
+                    ->setAction($this->generateUrl('beneficiary_detach', array('id' => $beneficiary->getId())))
+                    ->setMethod('POST')->getForm()->createView();
+            } else {
+                $detachBeneficiaryForms[$beneficiary->getId()] = array();
+            }
+            if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
                     ->setMethod('DELETE')->getForm()->createView();
-            else
+            } else {
+                $user = $member->getMainBeneficiary()->getUser(); // FIXME
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array(
                         'id' => $beneficiary->getId(),
                         'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
                     )))
                     ->setMethod('DELETE')->getForm()->createView();
+            }
         }
-
         $beneficiaryForm = $this->createNewBeneficiaryForm($member);
 
-        $timeLogForm = $this->createNewTimeLogForm($member);
+        $timeLogNewForm = $this->createNewTimeLogForm($member);
+        $timeLogDeleteForms = [];
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
+            foreach ($member->getTimeLogs() as $mtl) {
+                $timeLogDeleteForms[$mtl->getId()] = $this->createTimeLogDeleteForm($member, $mtl)->createView();
+            }
+        }
+
+        $period_positions = $this->get('membership_service')->getPeriodPositions($member);
+        $previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
+        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
+        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
+        $shifts_by_cycle = array_reverse($shifts_by_cycle, true);  // from latest to oldest
+
+        $shiftFreeForms = [];
+        $shiftValidateInvalidateForms = [];
+        foreach ($shifts_by_cycle as $shifts) {
+            foreach ($shifts as $shift) {
+                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
+                $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateAdminForm($shift)->createView();
+            }
+        }
+
+        $in_progress_and_upcoming_shifts = $em->getRepository('AppBundle:Shift')->findInProgressAndUpcomingShiftsForMembership($member);
 
         return $this->render('member/show.html.twig', array(
             'member' => $member,
             'note' => $note,
-            'note_form' => $note_form->createView(),
+            'note_form' => $noteNewForm->createView(),
+            'notes_form' => $noteEditForms,
+            'note_delete_forms' => $noteDeleteForms,
+            'new_notes_form' => $new_notes_form,
             'new_registration_form' => $registrationForm->createView(),
             'new_beneficiary_form' => $beneficiaryForm->createView(),
-            'notes_form' => $notes_form,
-            'notes_delete_form' => $notes_delete_form,
-            'new_notes_form' => $new_notes_form,
+            'detach_beneficiary_forms' => $detachBeneficiaryForms,
             'delete_beneficiary_forms' => $deleteBeneficiaryForms,
+            'flying_form' => $flyingForm->createView(),
+            'freeze_form' => $freezeForm->createView(),
+            'unfreeze_form' => $unfreezeForm->createView(),
+            'freeze_change_form' => $freezeChangeForm->createView(),
+            'withdrawn_form' => $withdrawnForm->createView(),
             'delete_form' => $deleteForm->createView(),
-            'time_log_form' => $timeLogForm->createView()
+            'time_log_new_form' => $timeLogNewForm->createView(),
+            'time_log_delete_forms' => $timeLogDeleteForms,
+            'period_positions' => $period_positions,
+            'in_progress_and_upcoming_shifts' => $in_progress_and_upcoming_shifts,
+            'shifts_by_cycle' => $shifts_by_cycle,
+            'shift_free_forms' => $shiftFreeForms,
+            'shift_validate_invalidate_forms' => $shiftValidateInvalidateForms,
         ));
     }
 
     private function createNewTimeLogForm(Membership $member)
     {
-        $newTimeLogAction = $this->generateUrl('time_log_new', array('id' => $member->getId()));
+        $newTimeLogAction = $this->generateUrl('timelog_new', array('id' => $member->getId()));
         return $this->createForm(TimeLogType::class, new TimeLog(), array('action' => $newTimeLogAction));
     }
 
@@ -173,8 +221,7 @@ class MembershipController extends Controller
     /**
      * Add a new registration.
      *
-     * @Route("/newRegistration/{member_number}/", name="member_new_registration")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_number}/newRegistration", name="member_new_registration", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -186,7 +233,9 @@ class MembershipController extends Controller
         $newReg = new Registration();
         $remainder = $this->get('membership_service')->getRemainder($member);
         if (!$remainder->invert) { //still some days
-            $newReg->setDate($this->get('membership_service')->getExpire($member));
+            $expire = $this->get('membership_service')->getExpire($member);
+            $expire->modify('+1 day');
+            $newReg->setDate($expire);
         } else { //register now !
             $newReg->setDate(new DateTime('now'));
         }
@@ -202,13 +251,13 @@ class MembershipController extends Controller
             }
 
             if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
-                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre réadhésion, demande à un autre adhérent :)');
+                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre ré-adhésion, demande à un autre adhérent :)');
                 return $this->redirectToShow($member);
             }
             $newReg->setRegistrar($this->getCurrentAppUser());
 
             $date = $registrationForm->get('date')->getData();
-            if (!$this->get('membership_service')->canRegister($member,$date)) {
+            if ($this->get('membership_service')->getExpire($member) >= $date) {
                 $session->getFlashBag()->add('warning', 'l\'adhésion précédente est encore valable à cette date !');
                 return $this->redirectToShow($member);
             }
@@ -221,12 +270,6 @@ class MembershipController extends Controller
 
             $session->getFlashBag()->add('success', 'Enregistrement effectuée');
             return $this->redirectToShow($member);
-        }
-
-        $registrationForms = array();
-        foreach ($member->getRegistrations() as $registration) {
-            $form = $this->createForm(RegistrationType::class, $registration);
-            $registrationForms[$registration->getId()] = $form->createView();
         }
 
         $id = $request->request->get("registration_id");
@@ -258,8 +301,7 @@ class MembershipController extends Controller
     /**
      * Add a beneficiary from admin to a member
      *
-     * @Route("/newBeneficiary/{member_number}/", name="member_new_beneficiary")
-     * @Method({"GET", "POST"})
+     * @Route("/{member_number}/newBeneficiary", name="member_new_beneficiary", methods={"GET","POST"})
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
@@ -278,7 +320,7 @@ class MembershipController extends Controller
         if (0 !== count($violations)) {
             // there are errors, now you can show them
             foreach ($violations as $violation) {
-                $session->getFlashBag()->add('error',$violation->getMessage());
+                $session->getFlashBag()->add('error', $violation->getMessage());
             }
             $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
 
@@ -290,9 +332,10 @@ class MembershipController extends Controller
         $beneficiaryForm->handleRequest($request);
         if ($beneficiaryForm->isSubmitted() && $beneficiaryForm->isValid()) {
             $beneficiary = $beneficiaryForm->getData();
+            $dispatcher = $this->get('event_dispatcher');
 
             $event = new FormEvent($beneficiaryForm->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             if (count($member->getBeneficiaries()) <= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
                 $beneficiary->setMembership($member);
@@ -301,9 +344,7 @@ class MembershipController extends Controller
                 $em->persist($beneficiary);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
-
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
@@ -316,20 +357,13 @@ class MembershipController extends Controller
         }
 
         return $this->redirectToShow($member);
-
-    }
-
-    private function createNewBeneficiaryForm(Membership $member)
-    {
-        $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
-        return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
     }
 
     /**
      * Displays a form to edit an existing member entity.
      *
-     * @Route("/edit", name="member_edit_firewall")
-     * @Method({"GET", "POST"})
+     * @Route("/edit", name="member_edit_firewall", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
@@ -337,18 +371,18 @@ class MembershipController extends Controller
     {
         $session = new Session();
 
-        if ($this->isGranted('view', new User())) {
+        if ($this->isGranted('ROLE_USER_VIEWER')) {
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                ->add('email', HiddenType::class, array('label' => 'email'))
+                ->add('email', HiddenType::class, array('label' => 'email'))  # hidden
                 ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
-        } else {
+        } else {  # higher privileges
             $form = $this->createFormBuilder()
                 ->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'))
                 ->add('username', HiddenType::class, array('attr' => array('value' => '')))
-                ->add('email', EmailType::class, array('label' => 'email'))
+                ->add('email', EmailType::class, array('label' => 'email'))  # visible
                 ->add('edit', SubmitType::class, array('label' => 'Editer', 'attr' => array('class' => 'btn')))
                 ->getForm();
         }
@@ -356,7 +390,6 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $member_number = $form->get('member_number')->getData();
             $username = $form->get('username')->getData();
             $email = $form->get('email')->getData();
@@ -386,8 +419,7 @@ class MembershipController extends Controller
     }
 
     /**
-     * @Route("/{id}/set_email", name="set_email")
-     * @Method({"POST"})
+     * @Route("/{id}/set_email", name="set_email", methods={"POST"})
      * @param Beneficiary $beneficiary
      * @param Request $request
      * @return Response
@@ -408,7 +440,7 @@ class MembershipController extends Controller
             $em->flush();
             $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été enregistré');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $request->getSession()->getFlashBag()->add('warning', 'Oups, le format du courriel entré semble problématique');
+            $request->getSession()->getFlashBag()->add('warning', "Oups, le format de l'email entré semble problématique");
         }
         return $this->render('beneficiary/confirm.html.twig', array(
             'beneficiary' => $beneficiary,
@@ -468,110 +500,152 @@ class MembershipController extends Controller
         ));
     }
 
-
     /**
-     * Close member
+     * Change flying status member
      *
-     * @Route("/{id}/close/", name="member_close")
-     * @Method({"GET"})
+     * @Route("/{id}/flying", name="member_flying", methods={"POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function closeAction(Membership $member)
+    public function flyingAction(Request $request, Membership $member)
     {
-        $this->denyAccessUnlessGranted('close', $member);
+        $this->denyAccessUnlessGranted('flying', $member);
+
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
-        $member->setWithdrawn(true);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte fermé');
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $form = $this->createFlyingForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $flying = $form->get("flying")->getData();
+            if ($flying) {
+                if ($member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà volant');
+                    return $this->redirectToShow($member);
+                }
+            } else {
+                if (!$member->isFlying()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fixe');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setFlying($flying);
+
+            $em->persist($member);
+            $em->flush();
+
+            if ($flying) {
+                $session->getFlashBag()->add('success', 'Le compte est maintenant volant !');
+            } else {
+                $session->getFlashBag()->add('success', 'Le compte est maintenant fixe !');
+            }
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
-     * Open member
+     * Freeze member
      *
-     * @Route("/{id}/open/", name="member_open")
-     * @Method({"GET"})
+     * @Route("/{id}/freeze", name="member_freeze", methods={"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function openAction(Membership $member)
-    {
-        $this->denyAccessUnlessGranted('open', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setWithdrawn(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte reouvert');
-        return $this->redirectToShow($member);
-    }
-
-    /**
-     * freeze user
-     *
-     * @Route("/{id}/freeze/", name="member_freeze")
-     * @Method({"GET"})
-     * @param Membership $member
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
-     */
-    public function freezeAction(Membership $member)
+    public function freezeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozen(true);
-        $member->setFrozenChange(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte gelé');
+
+        $form = $this->createFreezeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozen(true);
+            $member->setFrozenChange(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte gelé !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
      * Unfreeze member
      *
-     * @Route("/{id}/unfreeze/", name="member_unfreeze")
-     * @Method({"GET"})
+     * @Route("/{id}/unfreeze", name="member_unfreeze", methods={"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function unfreezeAction(Membership $member)
+    public function unfreezeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozen(false);
-        $member->setFrozenChange(false);
-        $em->persist($member);
-        $em->flush();
-        $session->getFlashBag()->add('success', 'Compte dégelé');
+
+        $form = $this->createUnfreezeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozen(false);
+            $member->setFrozenChange(false);
+            $em->persist($member);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Compte dégelé !');
+        }
+
         return $this->redirectToShow($member);
     }
 
     /**
      * Ask freeze status change for user
      *
-     * @Route("/{id}/freeze_change/}", name="member_freeze_change")
-     * @Method({"GET"})
+     * @Route("/{id}/freeze_change", name="member_freeze_change", methods={"POST"})
+     * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function freezeChangeAction(Membership $member)
+    public function freezeChangeAction(Request $request, Membership $member)
     {
         $this->denyAccessUnlessGranted('freeze_change', $member);
-        $session = new Session();
-        $em = $this->getDoctrine()->getManager();
-        $member->setFrozenChange(!$member->getFrozenChange());
-        $em->persist($member);
-        $em->flush();
-        if ($member->getFrozenChange()) {
-            $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle');
-        } else {
-            $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle');
+
+        $form = $this->createFreezeChangeForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $session = new Session();
+            $em = $this->getDoctrine()->getManager();
+
+            $member->setFrozenChange(!$member->getFrozenChange());
+            $em->persist($member);
+            $em->flush();
+
+            if ($member->isFrozen()) {
+                if ($member->getFrozenChange()) {
+                    $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+                } else {
+                    $session->getFlashBag()->add('success', 'La demande de dégel a été annulée !');
+                }
+            } else {
+                if ($member->getFrozenChange()) {
+                    $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+                } else {
+                    $session->getFlashBag()->add('success', 'La demande de gel a été annulée !');
+                }
+            }
         }
+
         if ($this->getCurrentAppUser()->getBeneficiary() && $member === $this->getCurrentAppUser()->getBeneficiary()->getMembership()) {
             return $this->redirectToRoute("fos_user_profile_show");
         } else {
@@ -580,10 +654,58 @@ class MembershipController extends Controller
     }
 
     /**
-     * Deletes a member entity.
+     * Close/Re-open member
      *
-     * @Route("/delete/{id}", name="member_delete")
-     * @Method("DELETE")
+     * @Route("/{id}/withdrawn", name="member_withdrawn", methods={"POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param Request $request
+     * @param Membership $member
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function withdrawnAction(Request $request, Membership $member)
+    {
+        $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
+        $form = $this->createWithdrawnForm($member);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $withdrawn = $form->get("withdrawn")->getData();
+            if ($withdrawn) {
+                $this->denyAccessUnlessGranted('close', $member);
+                if ($member->isWithdrawn()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà fermé');
+                    return $this->redirectToShow($member);
+                }
+                $member->setWithdrawnDate(new \DateTime('now'));
+                $member->setWithdrawnBy($current_user);
+            } else {
+                $this->denyAccessUnlessGranted('open', $member);
+                if (!$member->isWithdrawn()) {
+                    $session->getFlashBag()->add('error', 'Ce compte est déjà ouvert');
+                    return $this->redirectToShow($member);
+                }
+            }
+            $member->setWithdrawn($withdrawn);
+            $em->persist($member);
+            $em->flush();
+
+            if ($withdrawn) {
+                $session->getFlashBag()->add('success', 'Compte fermé !');
+            } else {
+                $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
+            }
+        }
+
+        return $this->redirectToShow($member);
+    }
+
+    /**
+     * Delete member
+     *
+     * @Route("/{id}", name="member_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param Membership $member
@@ -591,58 +713,57 @@ class MembershipController extends Controller
      */
     public function deleteAction(Request $request, Membership $member)
     {
+        $session = new Session();
+
         $form = $this->createDeleteForm($member);
         $form->handleRequest($request);
 
-        $session = new Session();
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Le membre a bien été supprimé");
+            $session->getFlashBag()->add('success', "Le membre a bien été supprimé !");
         }
 
         return $this->redirectToRoute('user_index');
     }
 
     /**
-     * Creates a new membership entity.
+     * Creates a new membership entity
      *
-     * @Route("/new", name="member_new")
-     * @Method({"GET", "POST"})
-     * @param Request $request
-     * @return Response
-     * @throws
+     * @Route("/new", name="member_new", methods={"GET","POST"})
      */
     public function newAction(Request $request)
     {
         $session = new Session();
-
-        $code = $request->query->get('code');
         $em = $this->getDoctrine()->getManager();
+        $current_user = $this->get('security.token_storage')->getToken()->getUser();
+
         $a_beneficiary = null;
-        if ($code){
+        $code = $request->query->get('code');
+
+        if ($code) {
             $email = $this->get('AppBundle\Helper\SwipeCard')->vigenereDecode($code);
-            if ($email){
+            if ($email) {
                 $a_beneficiary = $em->getRepository('AppBundle:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
             }
-            if (!$a_beneficiary){
+            if (!$a_beneficiary) {
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
                 return $this->redirectToRoute("homepage");
-            }else{
-                if ($a_beneficiary->getJoinTo()){ //adding beneficiary to an existing membership : wrong place
+            } else {
+                if ($a_beneficiary->getJoinTo()) { //adding beneficiary to an existing membership : wrong place
                     return $this->redirectToRoute('member_add_beneficiary', array('code' => $this->container->get('AppBundle\Helper\SwipeCard')->vigenereEncode($email)));
                 }
             }
         }
 
-        if (!$a_beneficiary){
+        if (!$a_beneficiary) {
             $this->denyAccessUnlessGranted('create', $this->getCurrentAppUser());
         }
 
         $member = new Membership();
-        if ($a_beneficiary){
+        if ($a_beneficiary) {
             $user = new User();
             $user->setEmail($a_beneficiary->getEmail());
             $beneficiary = new Beneficiary();
@@ -651,6 +772,7 @@ class MembershipController extends Controller
             $member->setMainBeneficiary($beneficiary);
         }
 
+        // init member_number
         $m = $em->getRepository('AppBundle:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
         $mm = 1;
         if ($m)
@@ -658,17 +780,17 @@ class MembershipController extends Controller
         $member->setMemberNumber($mm);
 
         $registration = new Registration();
-        if ($a_beneficiary){
+        if ($a_beneficiary) {
             $registration->setDate($a_beneficiary->getCreatedAt());
             $registration->setRegistrar($a_beneficiary->getRegistrar());
             $registration->setAmount($a_beneficiary->getAmount());
             $registration->setMode($a_beneficiary->getMode());
-            if ($a_beneficiary->getMode()===Registration::TYPE_HELLOASSO){
+            if ($a_beneficiary->getMode()===Registration::TYPE_HELLOASSO) {
                 $registration->setAmount('--');
             }
-        }else{
+        } else {
             $registration->setDate(new DateTime('now'));
-            $registration->setRegistrar($this->getUser());
+            $registration->setRegistrar($current_user);
         }
         $registration->setMembership($member);
 
@@ -678,33 +800,34 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $dispatcher = $this->get('event_dispatcher');
 
             if (!$a_beneficiary) {
-                if (!$member->getLastRegistration()->getRegistrar())
-                    $member->getLastRegistration()->setRegistrar($this->getUser());
+                if (!$member->getLastRegistration()->getRegistrar()) {
+                    $member->getLastRegistration()->setRegistrar($current_user);
+                }
             } else if ($a_beneficiary->getMode() === Registration::TYPE_HELLOASSO) {
                 $member->removeRegistration($registration); //no registration yet
             }
 
+            $member->setFlying(false);
             $member->setWithdrawn(false);
             $member->setFrozen(false);
             $member->setFrozenChange(false);
 
             $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($member);
             if ($a_beneficiary) {
                 $beneficiaries_emails = $a_beneficiary->getBeneficiariesEmailsAsArray();
-                foreach ($beneficiaries_emails as $email){
+                foreach ($beneficiaries_emails as $email) {
                     $new_anonymous_beneficiary = new AnonymousBeneficiary();
-                    $new_anonymous_beneficiary->setCreatedAtValue(new \DateTime());
                     $new_anonymous_beneficiary->setEmail($email);
                     $new_anonymous_beneficiary->setJoinTo($member->getMainBeneficiary());
                     $new_anonymous_beneficiary->setRegistrar($a_beneficiary->getRegistrar());
                     $em->persist($new_anonymous_beneficiary);
+
                     //dispatch to send mail
                     $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($new_anonymous_beneficiary));
                 }
@@ -723,7 +846,8 @@ class MembershipController extends Controller
             }
 
             return $this->redirectToShow($member);
-        } else if ($form->isSubmitted()) {
+
+        } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
                 $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
@@ -738,8 +862,7 @@ class MembershipController extends Controller
     /**
      * Add a new beneficiary from an anonymous one to an existing membership.
      *
-     * @Route("/add_beneficiary", name="member_add_beneficiary")
-     * @Method({"GET", "POST"})
+     * @Route("/add_beneficiary", name="member_add_beneficiary", methods={"GET","POST"})
      * @param Request $request
      * @return Response
      * @throws
@@ -763,7 +886,7 @@ class MembershipController extends Controller
         }
 
         if (!$a_beneficiary) {
-            $this->createAccessDeniedException('Tu cherches ?');
+            throw $this->createAccessDeniedException('Tu cherches ?');
         }
         if (!$a_beneficiary->getJoinTo()){
             $session->getFlashBag()->add('error','destination non trouvé');
@@ -802,24 +925,23 @@ class MembershipController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $beneficiary = $form->get('beneficiary')->getData();
             $beneficiary->setMembership($member);
+            $dispatcher = $this->get('event_dispatcher');
 
             $event = new FormEvent($form->get('beneficiary')->get('user'), $request);
-            $this->get('event_dispatcher')->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
             $em->persist($beneficiary);
             $em->remove($a_beneficiary);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
             $dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
 
             $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
             return $this->redirectToRoute('fos_user_registration_check_email');
 
-        } else if ($form->isSubmitted()) {
+        } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
                 $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
@@ -834,77 +956,69 @@ class MembershipController extends Controller
     /**
      * Join two members
      *
-     * @Route("/join", name="member_join")
-     * @Method({"GET","POST"})
+     * @Route("/join", name="member_join", methods={"GET","POST"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function joinAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('from_text', TextType::class, array('label' => 'Adhérent a joindre'))
-            ->add('dest_text', TextType::class, array('label' => 'au compte de l\'adhérent'))
+            ->add('from_text', AutocompleteBeneficiaryType::class, array('label' => 'Adhérent a joindre'))
+            ->add('dest_text', AutocompleteBeneficiaryType::class, array('label' => 'au compte de l\'adhérent'))
             ->add('join', SubmitType::class, array('label' => 'Joindre les deux comptes', 'attr' => array('class' => 'btn')))
             ->getForm();
         $form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
+        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
-            $re = '/#([0-9]+).*/';
-            $str = $form->get('from_text')->getData() . "\n" . $form->get('dest_text')->getData();
-            preg_match_all($re, $str, $matches, PREG_SET_ORDER, 0);
-            if (count($matches) >= 2) {
-                $fromMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[0][1]));
-                if ($fromMember) {
-                    $destMember = $em->getRepository('AppBundle:Membership')->findOneBy(array("member_number" => $matches[1][1]));
-                    if ($destMember) {
-                        foreach ($fromMember->getBeneficiaries() as $beneficiary) {
-                            $destMember->addBeneficiary($beneficiary); //in
-                            $fromMember->removeBeneficiary($beneficiary); //out
-                            $beneficiary->setMembership($destMember);
-                            $em->persist($beneficiary);
-                        }
-                        $em->persist($destMember);
-                        $em->flush();
-                        $fromMember->setMainBeneficiary(null);
-                        $em->remove($fromMember);
-                        $em->flush();
-
-                        $session->getFlashBag()->add('success', 'Les deux adhérents ont bien été fusionnés');
-
-                        return $this->redirectToShow($destMember);
-                    } else {
-                        $session->getFlashBag()->add('error', 'impossible de trouver le compte de destination');
-                    }
-                } else {
-                    $session->getFlashBag()->add('error', 'impossible de trouver le compte à lier');
+            $fromMember = $form->get('from_text')->getData()->getMembership();
+            $destMember = $form->get('dest_text')->getData()->getMembership();
+            if ($fromMember == $destMember) {
+                $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
+            } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
+            }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
+            } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
+                $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
+            } else {
+                foreach ($fromMember->getBeneficiaries() as $beneficiary) {
+                    $destMember->addBeneficiary($beneficiary); //in
+                    $fromMember->removeBeneficiary($beneficiary); //out
+                    $beneficiary->setMembership($destMember);
+                    $em->persist($beneficiary);
                 }
+                $em->persist($destMember);
+                $em->flush();
+                $fromMember->setMainBeneficiary(null);
+                $em->remove($fromMember);
+                $em->flush();
+
+                $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
+
+                return $this->redirectToShow($destMember);
             }
-
         }
-
-        $members = $em->getRepository('AppBundle:Membership')->findAll(); //todo exclude closed
-        return $this->render('admin/member/join.html.twig', array('form' => $form->createView(), 'members' => $members));
+        return $this->render('admin/member/join.html.twig', array('form' => $form->createView()));
     }
 
     /**
-     * Lists all user entities.
+     * Office tools: membership creation & management
      *
-     * @Route("/office_tools", name="user_office_tools")
-     * @Method({"GET","POST"})
+     * @Route("/office_tools", name="user_office_tools", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function officeToolsAction(Request $request)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
         $note = new Note();
         $note->setAuthor($this->getCurrentAppUser());
         $note_form = $this->createForm(NoteType::class, $note);
         $note_form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
-
         $session = $request->getSession();
+
         if ($note_form->isSubmitted()) {
             if ($note_form->isValid()) {
                 $existing_note = $em->getRepository('AppBundle:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
@@ -920,14 +1034,13 @@ class MembershipController extends Controller
             }
         }
 
-
         $notes = $em->getRepository('AppBundle:Note')->findBy(array("subject" => null));
-        $notes_form = array();
-        $notes_delete_form = array();
+        $noteEditForms = array();
+        $noteDeleteForms = array();
         $new_notes_form = array();
         foreach ($notes as $n) {
-            $notes_form[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
-            $notes_delete_form[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
+            $noteEditForms[$n->getId()] = $this->createForm(NoteType::class, $n, array('action' => $this->generateUrl('note_edit', array('id' => $n->getId()))))->createView();
+            $noteDeleteForms[$n->getId()] = $this->createNoteDeleteForm($n)->createView();
 
             $response_note = clone $note;
             $response_note->setParent($n);
@@ -936,13 +1049,139 @@ class MembershipController extends Controller
 
             $new_notes_form[$n->getId()] = $response_note_form->createView();
         }
+
         return $this->render('default/tools/office_tools.html.twig', array(
             'note_form' => $note_form->createView(),
-            'notes_form' => $notes_form,
-            'notes_delete_form' => $notes_delete_form,
+            'notes_form' => $noteEditForms,
+            'note_delete_forms' => $noteDeleteForms,
             'new_notes_form' => $new_notes_form,
             'notes' => $notes
         ));
+    }
+
+    /**
+     * Export all emails of members (including beneficiary)
+     *
+     * @Route("/emails_csv", name="admin_emails_csv", methods={"GET"})
+     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     */
+    public function exportEmails(Request $request)
+    {
+        $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
+        $return = '';
+        if ($beneficiaries) {
+            $d = ','; // this is the default but i like to be explicit
+            $e = '"'; // this is the default but i like to be explicit
+
+            /** @var MailerService $mailerService */
+            $mailerService = $this->get('mailer_service');
+
+            foreach ($beneficiaries as $beneficiary) {
+                if (!$beneficiary->getMembership()->isWithdrawn()) {
+                    if (!$mailerService->isTemporaryEmail($beneficiary->getEmail()) && filter_var($beneficiary->getEmail(), FILTER_VALIDATE_EMAIL)) { //was not a temp mail
+                        $return .= $beneficiary->getFirstname() . $d . $beneficiary->getLastname() . $d . $beneficiary->getEmail() . "\n";
+                    }
+                }
+            }
+        }
+        return new Response($return, 200, array(
+            'Content-Encoding: UTF-8',
+            'Content-Type' => 'application/force-download; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
+        ));
+    }
+
+    /**
+     * @return Response
+     */
+    public function homepageFreezeAction(): Response
+    {
+        $member = $this->getUser()->getBeneficiary()->getMembership();
+
+        $freezeChangeForm = $this->createFreezeChangeForm($member);
+
+        return $this->render('member/_partial/frozen.html.twig', array(
+            'member' => $member,
+            'freeze_change_form' => $freezeChangeForm->createView(),
+        ));
+    }
+
+    private function createNewBeneficiaryForm(Membership $member)
+    {
+        $newBeneficiaryAction = $this->generateUrl('member_new_beneficiary', array('member_number' => $member->getMemberNumber()));
+        return $this->createForm(BeneficiaryType::class, new Beneficiary(), array('action' => $newBeneficiaryAction));
+    }
+
+    /**
+     * Creates a form to set flying for a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFlyingForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_flying', array('id' => $member->getId())))
+            ->add('flying', HiddenType::class, array('data' => $member->isFlying() ? 0 : 1))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to freeze a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFreezeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_freeze', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to unfreeze a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createUnfreezeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_unfreeze', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to edit member frozen_change
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createFreezeChangeForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_freeze_change', array('id' => $member->getId())))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to close or re-open a member entity.
+     *
+     * @param Membership $member
+     * @return \Symfony\Component\Form\FormInterface
+     */
+    private function createWithdrawnForm(Membership $member)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_withdrawn', array('id' => $member->getId())))
+            ->add('withdrawn', HiddenType::class, array('data' => $member->isWithdrawn() ? 0 : 1))
+            ->setMethod('POST')
+            ->getForm();
     }
 
     /**
@@ -975,36 +1214,19 @@ class MembershipController extends Controller
     }
 
     /**
-     * Export all emails of members (including beneficiary)
+     * Creates a form to delete a time log.
      *
-     * @Route("/emails_csv", name="admin_emails_csv")
-     * @Method({"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @param Membership $member
+     * @param TimeLog $timeLog the time_log entity
+     *
+     * @return \Symfony\Component\Form\FormInterface The form
      */
-    public function exportEmails(Request $request)
+    private function createTimeLogDeleteForm(Membership $member, TimeLog $timeLog)
     {
-        $beneficiaries = $this->getDoctrine()->getRepository("AppBundle:Beneficiary")->findAll();
-        $return = '';
-        if ($beneficiaries) {
-            $d = ','; // this is the default but i like to be explicit
-            $e = '"'; // this is the default but i like to be explicit
-
-            /** @var MailerService $mailerService */
-            $mailerService = $this->get('mailer_service');
-
-            foreach ($beneficiaries as $beneficiary) {
-                if (!$beneficiary->getMembership()->isWithdrawn()) {
-                    if (!$mailerService->isTemporaryEmail($beneficiary->getEmail()) && filter_var($beneficiary->getEmail(), FILTER_VALIDATE_EMAIL)) { //was not a temp mail
-                        $return .= $beneficiary->getFirstname() . $d . $beneficiary->getLastname() . $d . $beneficiary->getEmail() . "\n";
-                    }
-                }
-            }
-        }
-        return new Response($return, 200, array(
-            'Content-Encoding: UTF-8',
-            'Content-Type' => 'application/force-download; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
-        ));
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('member_timelog_delete', array('id' => $member->getId(), 'timelog_id' => $timeLog->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
     }
 
     private function redirectToShow(Membership $member)
@@ -1018,5 +1240,41 @@ class MembershipController extends Controller
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+    }
+
+    /**
+     * Creates a form to free a shift entity (admin side).
+     * // TODO: how to avoid having same createShiftFreeAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftFreeAdminForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to validate / invalidate a shift entity.
+     * // TODO: how to avoid having same createShiftValidateInvalidateAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftValidateInvalidateAdminForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
+            ->add('validate', HiddenType::class, [
+                'data' => ($shift->getWasCarriedOut() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
     }
 }

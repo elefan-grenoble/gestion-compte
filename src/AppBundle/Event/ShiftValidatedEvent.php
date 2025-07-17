@@ -20,5 +20,4 @@ class ShiftValidatedEvent extends Event
     {
         return $this->shift;
     }
-
 }

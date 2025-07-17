@@ -1,61 +1,71 @@
-{% if codes | length == 0%}
+{% if codes | length == 0 %}
     Auncun code en cours... peut-être 0000 ?
 {% else %}
-    {% if codes | length == 1%}
-        <h4 class="">Code en cours de validité</h4>
+    {% if codes | length == 1 %}
+        <h4>Code en cours de validité</h4>
         <div class="row">
             <div class="col s12">
                 <div class="card-panel">
-                    <h5><i class="material-icons left">vpn_key</i>{{ codes|first.value }}</h5>
-                    entré à {{ codes|first.createdAt | date('H:m:i') }} le {{ codes|first.createdAt | date_fr_long }} par {{ codes|first.getRegistrar }}
+                    <h5><i class="material-icons left">vpn_key</i>{{ codes | first.value }}</h5>
+                    entré à {{ codes | first.createdAt | date('H:m:i') }} le {{ codes | first.createdAt | date_fr_long }} par {{ codes | first.getRegistrar }}
                 </div>
             </div>
         </div>
     {% else %}
-        <h4 class="">Liste des codes {% if not is_granted("ROLE_ADMIN") %}en cours{% endif %}</h4>
+        <h4>Liste des codes {% if not is_granted("ROLE_ADMIN") %}en cours{% endif %}</h4>
         <table>
             <thead>
-            <tr>
-                <th>Code</th>
-                <th>Créé le</th>
-                <th>Membre</th>
-                <th></th>
-            </tr>
+                <tr>
+                    <th>Code</th>
+                    <th>Créé le</th>
+                    <th>Membre</th>
+                    <th>Actions</th>
+                </tr>
             </thead>
             <tbody>
             {% for code in codes %}
-                {% if is_granted("view",code)  %}
-                    <tr>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                <b>{{ code.value }}</b>
-                                {% if code.closed %}</del>{% endif %}
+                {% if is_granted("view", code) %}
+                    <tr id="code_{{ code.id }}">
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            <b>{{ code.value }}</b>
+                            {% if code.closed %}</del>{% endif %}
                         </td>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
-                        </td>{% if code.closed %}</del>{% endif %}
-                        <td>{% if code.closed %}<del>{% endif %}
-                                {{ code.getRegistrar }}
-                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            {{ code.getRegistrar }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
                         <td class="hover-toggle-text-icon center">
                             {% if code.closed %}
-                                <a href="{{ path("code_toggle",{'id':code.id}) }}" class="text-black"><span>inactif</span><i class="material-icons green-text">check</i></a>
+                                <a href="{{ path("code_toggle", {'id': code.id}) }}" class="text-black"><span>inactif</span><i class="material-icons green-text">check</i></a>
                             {% else %}
-                                <a href="{{ path("code_toggle",{'id':code.id}) }}"><i class="material-icons red-text">close</i></a>
+                                <a href="{{ path("code_toggle", {'id': code.id}) }}"><i class="material-icons red-text">close</i></a>
                             {% endif %}
                         </td>
                     </tr>
                 {% else %}
-                    <tr>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                <b>XXXX</b>
-                                {% if code.closed %}</del>{% endif %}
+                    <tr id="code_{{ code.id }}">
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            <b>XXXX</b>
+                            {% if code.closed %}</del>{% endif %}
                         </td>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
-                        </td>{% if code.closed %}</del>{% endif %}
-                        <td>{% if code.closed %}<del>{% endif %}
-                                {{ code.getRegistrar }}
-                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            {{ code.getRegistrar }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
                         <td class="red-text">
                             {% if code.closed %}
                                 inactif
@@ -70,46 +80,56 @@
         </table>
     {% endif %}
     {% if old_codes | length %}
-        <h4 class="">Liste des codes précedents inactifs</h4>
+        <h4>Liste des codes précedents inactifs</h4>
         <table>
             <thead>
-            <tr>
-                <th>Code</th>
-                <th>Créé le</th>
-                <th>Membre</th>
-                <th></th>
-            </tr>
+                <tr>
+                    <th>Code</th>
+                    <th>Créé le</th>
+                    <th>Membre</th>
+                    <th></th>
+                </tr>
             </thead>
             <tbody>
             {% for code in old_codes %}
                 {% if is_granted("view",code)  %}
-                    <tr>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                <b>{{ code.value }}</b>
-                                {% if code.closed %}</del>{% endif %}
+                    <tr id="code_{{ code.id }}">
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            <b>{{ code.value }}</b>
+                            {% if code.closed %}</del>{% endif %}
                         </td>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
-                        </td>{% if code.closed %}</del>{% endif %}
-                        <td>{% if code.closed %}<del>{% endif %}
-                                {{ code.getRegistrar }}
-                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            {{ code.getRegistrar }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
                         <td>
                             inactif
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                <b>XXXX</b>
-                                {% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            <b>XXXX</b>
+                            {% if code.closed %}</del>{% endif %}
                         </td>
-                        <td>{% if code.closed %}<del>{% endif %}
-                                à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
-                        </td>{% if code.closed %}</del>{% endif %}
-                        <td>{% if code.closed %}<del>{% endif %}
-                                {{ code.getRegistrar }}
-                        </td>{% if code.closed %}</del>{% endif %}
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            à {{ code.createdAt | date('H:m:i') }} le {{ code.createdAt | date_fr_long }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
+                        <td>
+                            {% if code.closed %}<del>{% endif %}
+                            {{ code.getRegistrar }}
+                            {% if code.closed %}</del>{% endif %}
+                        </td>
                         <td class="red-text">
                             {% if code.closed %}
                                 inactif

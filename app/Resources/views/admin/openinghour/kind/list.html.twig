@@ -1,0 +1,55 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des types d'horaires d'ouverture - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des types d'horaires d'ouverture
+{% endblock %}
+
+{% block content %}
+<h4>Liste des types d'horaires d'ouverture ({{ openingHourKinds | length }})</h4>
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Etat</th>
+            <th>Type d'horaire d'ouverture</th>
+            <th>Période</th>
+            <th>Nombre d'horaires d'ouverture</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for openingHourKind in openingHourKinds %}
+            <tr id="openinghourkind_{{ openingHourKind.id }}" class="{% if not openingHourKind.enabled %}grey lighten-2{% endif %}">
+                <td>
+                    {% if not openingHourKind.enabled %}
+                        <i class="material-icons" title="Inactif">close</i>
+                    {% else %}
+                        <i class="material-icons" title="Actif">check</i>
+                    {% endif %}
+                </td>
+                <td class="{{ openingHourKind.name }}">{{ openingHourKind.name }}</td>
+                <td>
+                    {% if openingHourKind.startDate and openingHourKind.endDate %}
+                        {{ openingHourKind.startDate | date_fr_full }} - {{ openingHourKind.endDate | date_fr_full }}
+                    {% endif %}
+                </td>
+                <td>{{ openingHourKind.openingHours | length }}</td>
+                <td>
+                    <a href="{{ path('admin_openinghour_kind_edit', { 'id': openingHourKind.id }) }}">
+                        <i class="material-icons">edit</i>Editer
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br />
+<a href="{{ path('admin_openinghour_kind_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter un type d'horaire d'ouverture
+</a>
+{% endblock %}

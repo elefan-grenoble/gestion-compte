@@ -27,13 +27,6 @@ class SwipeCard
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $created_at;
-
-    /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="disabled_at", type="datetime", nullable=true)
      */
     private $disabled_at;
@@ -71,16 +64,25 @@ class SwipeCard
     private $logs;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
     {
-        $this->created_at = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
         $this->disabled_at = null;
     }
 
     /**
-     * Get id.
+     * Get id
      *
      * @return int
      */
@@ -90,7 +92,7 @@ class SwipeCard
     }
 
     /**
-     * Set number.
+     * Set number
      *
      * @param int $number
      *
@@ -104,7 +106,7 @@ class SwipeCard
     }
 
     /**
-     * Get number.
+     * Get number
      *
      * @return int
      */
@@ -114,7 +116,7 @@ class SwipeCard
     }
 
     /**
-     * Set code.
+     * Set code
      *
      * @param string $code
      *
@@ -128,7 +130,7 @@ class SwipeCard
     }
 
     /**
-     * Get code.
+     * Get code
      *
      * @return string
      */
@@ -138,7 +140,7 @@ class SwipeCard
     }
 
     /**
-     * Set enable.
+     * Set enable
      *
      * @param bool|null $enable
      *
@@ -158,7 +160,7 @@ class SwipeCard
     }
 
     /**
-     * Get enable.
+     * Get enable
      *
      * @return bool|null
      */
@@ -170,7 +172,7 @@ class SwipeCard
     }
 
     /**
-     * Set beneficiary.
+     * Set beneficiary
      *
      * @param \AppBundle\Entity\Beneficiary|null $beneficiary
      *
@@ -184,7 +186,7 @@ class SwipeCard
     }
 
     /**
-     * Get beneficiary.
+     * Get beneficiary
      *
      * @return \AppBundle\Entity\Beneficiary|null
      */
@@ -195,31 +197,31 @@ class SwipeCard
 
 
     /**
-     * Set createdAt.
+     * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param \DateTime $date
      *
      * @return SwipeCard
      */
-    public function setCreatedAt($createdAt)
+    public function setCreatedAt($date)
     {
-        $this->created_at = $createdAt;
+        $this->createdAt = $date;
 
         return $this;
     }
 
     /**
-     * Get createdAt.
+     * Get createdAt
      *
      * @return \DateTime
      */
     public function getCreatedAt()
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     /**
-     * Set disabledAt.
+     * Set disabledAt
      *
      * @param \DateTime? $disabledAt
      *
@@ -233,7 +235,7 @@ class SwipeCard
     }
 
     /**
-     * Get disabledAt.
+     * Get disabledAt
      *
      * @return \DateTime
      */

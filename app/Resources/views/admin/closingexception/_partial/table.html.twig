@@ -1,0 +1,36 @@
+{% set delete_forms = delete_forms ?? [] %}
+
+<table class="responsive-table">
+    <thead>
+        <tr>
+            <th>Date de la fermeture</th>
+            <th>Raison</th>
+            <th>Auteur</th>
+            <th>Date de création</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for closingException in closingExceptions %}
+            <tr id="closingexception_{{ closingException.id }}">
+                <td>{{ closingException.date | date_fr_full }}</td>
+                <td>{{ closingException.reason }}</td>
+                <td>
+                    {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: closingException.createdBy, target_blank: true } %}
+                </td>
+                <td title="{{ closingException.createdAt | date_time }}">
+                    {{ closingException.createdAt | date_short }}
+                </td>
+                <td>
+                    {% if delete_forms and delete_forms[closingException.id] is defined %}
+                        {{ form_start(delete_forms[closingException.id]) }}
+                        <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cette fermeture exceptionnelle ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer la fermeture exceptionnelle ⚠️">
+                            <i class="material-icons left">delete</i>
+                        </a>
+                        {{ form_end(delete_forms[closingException.id]) }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -1,15 +1,15 @@
-Bonjour {{ shift.lastShifter.firstname | lower | capitalize }},<br >
-<br >
-Tu viens de réaliser un créneau à l'épicerie, merci de rendre possible notre projet.<br >
-Nous te proposons de reprendre le même créneau dans {{ days }} jours, soit le {{ shift.start | date_fr_full }} de {{ shift.start | date('G\\hi') }} à {{ shift.end | date('G\\hi') }}.<br >
-Tu es prioritaire sur ce créneau pendant 7 jours, ensuite il deviendra disponible à la réservation pour les autres membres.<br >
-<br >
-Merci de nous indiquer si tu souhaites le reprendre :<br >
+Bonjour {{ shift.lastShifter.firstname | lower | capitalize }},<br />
+<br />
+Tu viens de réaliser un créneau à l'épicerie, merci de rendre possible notre projet.<br />
+Nous te proposons de reprendre le même créneau dans {{ days }} jours, soit le {{ shift.displayDateLongWithTime }}.<br />
+Tu es prioritaire sur ce créneau pendant {{ reserve_new_shift_to_prior_shifter_delay }} jours, ensuite il deviendra disponible à la réservation pour les autres membres.<br />
+<br />
+Merci de nous indiquer si tu souhaites le reprendre :<br />
 
 <a href="{{ accept_url }}" style="-webkit-box-sizing:inherit;box-sizing:inherit;-webkit-box-shadow:0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);box-shadow:0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);border-style:none;border-radius:2px;height:36px;line-height:36px;padding-top:0;padding-bottom:0;padding-right:2rem;padding-left:2rem;text-transform:uppercase;font-size:1rem;outline-color:0;text-decoration:none;text-align:center;letter-spacing:.5px;position:relative;cursor:pointer;display:inline-block;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;vertical-align:middle;z-index:1;-webkit-transition:.3s ease-out;transition:.3s ease-out;background-color:#4CAF50 !important;margin-bottom:5px;color:white;" >J'accepte</a>
 <a href="{{ reject_url }}" style="-webkit-box-sizing:inherit;box-sizing:inherit;-webkit-box-shadow:0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);box-shadow:0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);border-style:none;border-radius:2px;height:36px;line-height:36px;padding-top:0;padding-bottom:0;padding-right:2rem;padding-left:2rem;text-transform:uppercase;font-size:1rem;outline-color:0;text-decoration:none;text-align:center;letter-spacing:.5px;position:relative;cursor:pointer;display:inline-block;overflow:hidden;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;vertical-align:middle;z-index:1;-webkit-transition:.3s ease-out;transition:.3s ease-out;background-color:#ff9800 !important;margin-bottom:5px;color:white;" >Je refuse</a>
-<br >
-Il n'est pas nécessaire de répondre à ce mail, sauf si tu as des questions.<br >
-<br >
-Belle journée à toi.<br >
+<br />
+Il n'est pas nécessaire de répondre à ce mail, sauf si tu as des questions.<br />
+<br />
+Belle journée à toi.<br />
 Céleste, la petite fée des créneaux :)

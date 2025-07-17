@@ -1,0 +1,57 @@
+{% set previousWeekIndex = -1 %}
+
+{% for bucketsByjob in bucketsByDay %}
+    {% set date = false %}
+
+    {% for buckets in bucketsByjob %}
+        {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
+
+        {# New week --------- #}
+        {% if not date and previousWeekIndex != weekIndex %}
+            {% include "booking/_partial/week_title.html.twig" with { first_shift: buckets|first } %}
+            {% set previousWeekIndex = weekIndex %}
+        {% endif %}
+
+        {# New day --------- #}
+        {% if not date %}
+            {% set date = true %}
+            <div class="row center show-on-small hide-on-med-and-up">
+                {{ (buckets|first).start | date_fr_long }}
+            </div>
+
+            <div class="col m2 hide-on-small-only valign-wrapper">
+                <div>
+                    <b>{{ (buckets|first).start | date_fr_long }}</b><br>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row" style="display: flex;min-height: 70px;">
+            <div class="col m10 s12">
+                <div style="position: relative">
+                    {% set lignes = {} %}
+                    {% for bucket in buckets %}
+                        {# compute lines #}
+                        {% set l = 0 %}
+                        {% set break = false %}
+                        {% for i in 0..100 if not break %}
+                            {% if lignes[i~'_'] is not defined %}
+                                {% set l = i %}
+                                {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                {% set break = true %}
+                            {% else %}
+                                {% if lignes[i~'_'] < bucket.start %}
+                                    {% set l = i %}
+                                    {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
+                                    {% set break = true %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                        {# / compute lines #}
+                        {% include "admin/booking/_partial/bucket_card.html.twig" with { bucket: bucket, start: 6, end: 22, line: l } %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}

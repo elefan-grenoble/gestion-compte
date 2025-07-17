@@ -1,0 +1,63 @@
+{% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
+{% set nbShifts = (bucket.shifts() | length) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+
+<div id="main-bucket-{{ bucket.id }}" data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
+    style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left: {{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
+    <a href="#modal-bucket" data-source="{{ path('bucket_show', { 'id': bucket.id }) }}" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}">
+        <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
+            <div style="height:2px; width: 100%; position: absolute;">
+                {% if nbBookableShifts < nbShifts %}
+                    {% for shifter in 1..nbBookedShifts %}
+                        <div class="green lighten-3 left" style="height:100%; width: {{ 100/(nbShifts) }}%"></div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">
+                {{ bucket.start|date('G\\hi') }}&nbsp;{{ bucket.end|date('G\\hi') }}
+            </div>
+            <ul style="font-size: 9px; padding-left: 15px;">
+                {% set shiftercount = 0 %}
+                {% for shift in bucket.sortedShifts() %}
+                    {% if (shiftercount < 4) %}
+                        {% if (shift.shifter) %}{# is booked #}
+                            <li id="main-shift-{{ shift.id }}">
+                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
+                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                    <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                                {% endif %}
+                                {{ shift.shifter.publicDisplayName }}
+                                {% if shift.formation %}</b>{% endif %}
+                                {% if not shift.formation and shift.shifter.formations | length > 0 %}
+                                    &nbsp;<strong class="orange-text">(q)</strong>
+                                {% endif %}
+                                {% if shift.shifter.isNew %}
+                                    &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                {% endif %}
+                            </li>
+                        {% else %}
+                            <li id="main-shift-{{ shift.id }}">
+                                <b>
+                                    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                        <span class="red-text">&#9673;</span>&nbsp;
+                                    {% endif %}
+                                    <i>libre</i>
+                                </b>
+                            </li>
+                        {% endif %}
+                    {% elseif shiftercount == 4 %}
+                        <li>( ... )</li>
+                    {% endif %}
+                    {% set shiftercount = shiftercount + 1 %}
+                {% endfor %}
+            </ul>
+            {% if bucket.first.locked %}
+                <span id="main-lock-label" class="text-darken-1-text truncate admin-shift-warning"><i class="material-icons tiny">lock</i>&nbsp;verrouillé</span>
+            {% elseif (shiftercount == 0) %}
+                <span class="red-text red lighten-5 truncate admin-shift-warning"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+            {% elseif (shiftercount < (bucket.shifts() | length)/2) %}
+                <span class="orange-text orange lighten-4 truncate admin-shift-warning"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
+            {% endif %}
+        </div>
+    </a>
+</div>

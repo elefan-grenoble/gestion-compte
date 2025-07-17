@@ -1,16 +1,17 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a>
-    <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i><span>Liste des retardataires</span>
+{% block title %}{{ reason }} - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;{{ reason }}
 {% endblock %}
 
 {% block content %}
-    <h1>Liste des membres en retard {{ reason }} ({{ nb_of_result }})</h1>
+    <h4>{{ reason }} ({{ result_count }})</h4>
 
-    <ul class="collapsible" data-collapsible="accordion">
+    <ul class="collapsible">
         <li>
             <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
             <div class="collapsible-body">
@@ -19,54 +20,85 @@
                 <div class="row">
                     <div class="col s12 m4">
                         <h5>Compte</h5>
-                        <div>
-                            <div class="row">
-                                <div class="col s6">
-                                    ouvert/fermé :
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
                                     {{ form_widget(form.withdrawn) }}
                                     {{ form_label(form.withdrawn) }}
                                 </div>
-                                <div class="col s6">
-                                    gelé :
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.enabled) }}
+                                    {{ form_label(form.enabled) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
                                     {{ form_widget(form.frozen) }}
                                     {{ form_label(form.frozen) }}
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumber) }}
-                                        {{ form_label(form.membernumber) }}
-                                    </div>
+                        </div>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumber) }}
+                                    {{ form_label(form.membernumber) }}
                                 </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumbergt) }}
-                                        {{ form_label(form.membernumbergt) }}
-                                    </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumbergt) }}
+                                    {{ form_label(form.membernumbergt) }}
                                 </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberlt) }}
-                                        {{ form_label(form.membernumberlt) }}
-                                    </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberlt) }}
+                                    {{ form_label(form.membernumberlt) }}
                                 </div>
+                            </div>
+                        </div>
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                                {{ form_errors(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                <span><</span>&nbsp;&nbsp;compteur&nbsp;&nbsp;<span><</span>
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
+                                {{ form_errors(form.compteurlt) }}
                             </div>
                         </div>
                     </div>
                     <div class="col s12 m4">
+                        <h5>Adhésion(s)</h5>
+                        <div class="row">
+                            <div class="col s6">
+                                <div class="input-field">
+                                    {{ form_widget(form.registration) }}
+                                    {{ form_label(form.registration) }}
+                                </div>
+                            </div>
+                        </div>
                         <h5>Dernière Adhésion</h5>
                         <div class="row">
                             <div class="col s6">
                                 <div class="input-field">
-                                    {{ form_widget(form.lastregistrationdatelt) }}
-                                    {{ form_label(form.lastregistrationdatelt) }}
+                                    {{ form_widget(form.lastregistrationdategt) }}
+                                    {{ form_label(form.lastregistrationdategt) }}
                                 </div>
                             </div>
                             <div class="col s6">
                                 <div class="input-field">
-                                    {{ form_widget(form.lastregistrationdategt) }}
-                                    {{ form_label(form.lastregistrationdategt) }}
+                                    {{ form_widget(form.lastregistrationdatelt) }}
+                                    {{ form_label(form.lastregistrationdatelt) }}
                                 </div>
                             </div>
                         </div>
@@ -85,22 +117,24 @@
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
                         </div>
-                    </div>
-                    <div class="col s12 m4">
-                        <h5>Compteur</h5>
-                        <div class="row valign-wrapper">
-                            <div class="input-field col s3">
-                                {{ form_widget(form.compteurgt) }}
-                                {{ form_label(form.compteurgt) }}
+                        {% if use_fly_and_fixed %}
+                            {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
+                                <div class="input-field">
+                                    {{ form_widget(form.flying) }}
+                                    {{ form_label(form.flying) }}
+                                </div>
+                            {% endif %}
+                            <div class="input-field">
+                                {{ form_widget(form.has_period_position) }}
+                                {{ form_label(form.has_period_position) }}
                             </div>
-                            <div class="col s6 center">
-                                <  &nbsp; compteur &nbsp; <
-                            </div>
-                            <div class="input-field col s3">
-                                {{ form_widget(form.compteurlt) }}
-                                {{ form_label(form.compteurlt) }}
-                            </div>
-                        </div>
+                        {% endif %}
+                        <br />
+                        <h5>Actions</h5>
+                        {{ form_widget(form.submit) }}
+                        {% if form.offsetExists("csv") %}
+                            {{ form_widget(form.csv) }}
+                        {% endif %}
                     </div>
                 </div>
 
@@ -109,97 +143,97 @@
         </li>
     </ul>
 
-    <table class="striped">
+    <table class="responsive-table">
         <thead>
-        <tr>
-            <th data-col="o.member_number">#</th>
-            <th data-col="b.firstname">prénom</th>
-            <th data-col="b.lastname">nom</th>
-            <th data-col="r.date">Adhésion(s)</th>
-            <th data-col="time">Compteur</th>
-            <th>Note(s)</th>
-            <th></th>
-        </tr>
+            <tr>
+                <th class="hide-on-med-and-down">Etat</th>
+                <th data-col="m.member_number">#</th>
+                <th data-col="b.firstname">Prénom</th>
+                <th data-col="b.lastname">Nom</th>
+                <th data-col="r.date">Dernière adhésion</th>
+                <th data-col="time">Compteur</th>
+                <th>Note(s)</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
         {% for member in members %}
-            <tr class="{% if member.withdrawn %}withdrawn{% endif %}">
-                <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a></td>
+            <tr id="member_{{ member.id }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
+                <td class="hide-on-med-and-down">
+                    {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
+                </td>
+                <td>
+                    <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.membernumber }}</a>
+                </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.firstname }}{% if not loop.last %}<hr/>{% endif %}
+                        {{ beneficiary.firstname }}<br />
                     {% endfor %}
                 </td>
                 <td>
                     {% for beneficiary in member.beneficiaries %}
-                        {{ beneficiary.lastname }}{% if not loop.last %}<hr/>{% endif %}
+                        {{ beneficiary.lastname }}<br />
                     {% endfor %}
                 </td>
                 <td>
-                    <strong>
-                        {{ member.lastregistration.date | date('d/m/Y') }}
-                    </strong>
                     {% if member.lastregistration %}
-                        <br>
-                        {% set difference = member.lastregistration.date.diff(date('now')) %}
-                        {% set m = difference.m %}
-                        {% set y = difference.y %}
-                        {% if y > 0 or m > 12 %}
-                            <strong class="red-text">dépassé de {{ difference.days - 365 }} jours</strong>
+                        <strong>{{ member.lastregistration.date | date_short }}</strong>
+                        <br />
+                        {% if not member | uptodate %}
+                            {% set difference = (member | expire).diff(date('now')) %}
+                            <strong class="red-text">dépassé de {{ difference.days }} jours</strong>
                         {% endif %}
                     {% endif %}
                 </td>
                 <td class="center">
-                    {{ member.timeCount | duration_from_minutes }}
+                    {{ member.shiftTimeCount | duration_from_minutes }}
                 </td>
                 <td>
                     <blockquote class="truncate">
                         {% for note in member.notes %}
-                            <i>{{ note.createdAt | date('d/m/y H:i') }}
-                            : </i>{{ note.text|length > 50 ? note.text|slice(0, 50) ~ '...' : note.text }}
-                            <br>
+                            <i>{{ note.createdAt | date_short }} :</i>
+                            <span title="{{ note.text }}">{{ note.text|length > 50 ? note.text|ellipsis(50) : note.text }}</span>
+                            <br />
                         {% endfor %}
                     </blockquote>
                 </td>
-                <td><i class="material-icons">phone</i><a
-                            href="{{ path('ambassador_phone_show', { 'member_number': member.memberNumber }) }}"
-                            class="">Appeler</a></td>
+                <td>
+                    <i class="material-icons">phone</i>
+                    <a href="{{ path('ambassador_phone_show', { 'member_number': member.memberNumber }) }}">Appeler</a>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
 
-    {% if nb_of_pages > 1 %}
+    {% if page_count > 1 %}
         <ul class="pagination">
-            <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==1) %}#!{% else %}{{ path(path,{'page':page-1}) }}{% endif %}"
-                   data-page="{{ page-1 }}">
+            <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ current_page-1 }}">
                     <i class="material-icons">chevron_left</i>
                 </a>
             </li>
-            {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
-                            href="{{ path(path,{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+            {% for i in range(1, page_count) %}
+                <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}">
+                    <a href="#" data-page="{{ i }}">{{ i }}</a>
+                </li>
             {% endfor %}
-            <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path(path,{'page':page+1}) }}{% endif %}"
-                   data-page="{{ page+1 }}">
+            <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="#" data-page="{{ current_page+1 }}">
                     <i class="material-icons">chevron_right</i>
                 </a>
             </li>
         </ul>
     {% endif %}
-
 {% endblock %}
 
 {% block stylesheets %}
     <style>
-        td strong {
-            /*font-weight: 600;*/
-        }
-
         th.active {
-            color: #51CAE9;
+            color: {{ main_color }};
+        }
+        th[data-col] {
+            cursor: pointer;
         }
     </style>
 {% endblock %}
@@ -207,19 +241,11 @@
 {% block javascripts %}
     <script>
         jQuery(function () {
-            $('[type=submit]').click(function (e) {
-                e.preventDefault();
-                $('#form_action').val($(this).val());
-                $('form[name=form]').submit();
-            });
             $('.pagination li:not(.disabled) a').click(function (e) {
                 e.preventDefault();
-                $('#form_page').val($(this).attr('data-page'));
+                $('#form_page').val($(this).data('page'));
                 $('form[name=form]').submit();
             });
-            // $('select').on('change', function() {
-            //     $('form[name=form]').submit();
-            // });
             $('th[data-col]').click(function (e) {
                 e.preventDefault();
                 if ($('#form_sort').val() === $(this).attr('data-col')) {

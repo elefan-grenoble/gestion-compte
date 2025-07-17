@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * PeriodRoom
  *
  * @ORM\Table(name="period_position")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PeriodPositionRepository")
  */
 class PeriodPosition
@@ -23,34 +24,34 @@ class PeriodPosition
 
     /**
      * One Period has One Formation.
-     * @ORM\ManyToOne(targetEntity="Formation")
+     * @ORM\ManyToOne(targetEntity="Formation", fetch="EAGER")
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $formation;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions")
+     * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions", fetch="EAGER")
      * @ORM\JoinColumn(name="period_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $period;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @var string
+     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=true)
+     */
+    private $weekCycle;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="periodPositions")
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
     private $shifter;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary")
+     * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
-
-    /**
-     * @var string
-     * @ORM\Column(name="week_cycle", type="string", length=1, nullable=false)
-     */
-    private $weekCycle;
 
     /**
      * @var \DateTime
@@ -59,6 +60,82 @@ class PeriodPosition
      */
     private $bookedTime;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="position", cascade={"persist"})
+     */
+    private $shifts;
+
+    /**
+     * @ORM\OneToMany(targetEntity="PeriodPositionFreeLog", mappedBy="periodPosition")
+     */
+    private $freeLogs;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @ORM\Column(type="datetime")
+     *
+     * @var \DateTime
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+    }
+
+    /**
+     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)"
+     */
+    public function __toString()
+    {
+        $name = (string) $this->getPeriod();
+        if ($this->getWeekCycle()) {
+            $name .= ' - Semaine ' . $this->getWeekCycle();
+        }
+        if ($this->getFormation()) {
+            $name .= ' (' . $this->getFormation()->getName() . ')';
+        }
+        return $name;
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
+
+    /**
+     * @ORM\PrePersist
+     * @ORM\PreUpdate
+     */
+    public function setUpdatedAtValue()
+    {
+        $this->updatedAt = new \DateTime();
+    }
 
     /**
      * Get id
@@ -128,6 +205,7 @@ class PeriodPosition
     public function setWeekCycle($weekCycle)
     {
         $this->weekCycle = $weekCycle;
+
         return $this;
     }
 
@@ -168,11 +246,11 @@ class PeriodPosition
     /**
      * Set booker
      *
-     * @param \AppBundle\Entity\Beneficiary $booker
+     * @param \AppBundle\Entity\User $booker
      *
      * @return BookedShift
      */
-    public function setBooker(\AppBundle\Entity\Beneficiary $booker = null)
+    public function setBooker(\AppBundle\Entity\User $booker = null)
     {
         $this->booker = $booker;
 
@@ -182,7 +260,7 @@ class PeriodPosition
     /**
      * Get booker
      *
-     * @return \AppBundle\Entity\Beneficiary
+     * @return \AppBundle\Entity\User
      */
     public function getBooker()
     {
@@ -214,6 +292,100 @@ class PeriodPosition
     }
 
     /**
+     * Get shifts
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShifts()
+    {
+        $shifts = $this->shifts;
+
+        return $shifts;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return PeriodPosition
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return PeriodPosition
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->createdBy = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \AppBundle\Entity\User $user
+     *
+     * @return PeriodPosition
+     */
+    public function setUpdatedBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->updatedBy = $user;
+
+        return $this;
+    }
+
+    /**
      * free
      *
      * @return \AppBundle\Entity\PeriodPosition
@@ -225,20 +397,4 @@ class PeriodPosition
         $this->setShifter(null);
         return $this;
     }
-
-    public function __toString()
-    {
-        if ($this->getFormation())
-            return $this->getFormation()->getName();
-        else
-            return "Membre";
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->periods = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
 }

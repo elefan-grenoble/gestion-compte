@@ -1,0 +1,64 @@
+
+{% set from_admin = from_admin ?? false %}
+{% set custom_styles = custom_styles ?? null %}
+
+<div {% if custom_styles %}style="{{ custom_styles }}"{% endif %}>
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Date d'annulation</th>
+                <th>Bénéficiaire</th>
+                <th>Créneau</th>
+                {% if use_fly_and_fixed %}
+                    <th>Fixe</th>
+                {% endif %}
+                {% if from_admin %}
+                    <th>Auteur</th>
+                    {% if is_granted("ROLE_ADMIN") %}
+                        <th>Route</th>
+                    {% endif %}
+                {% endif %}
+                <th>Raison</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for shiftFreeLog in shiftFreeLogs %}
+                <tr id="shiftfreelog_{{ shiftFreeLog.id }}">
+                    <td title="{{ shiftFreeLog.createdAt | date_fr_full_with_time }}">
+                        {{ shiftFreeLog.createdAt | date_short }}
+                    </td>
+                    <td>
+                        {% if from_admin %}
+                            <a href="{{ path("member_show",{'member_number': shiftFreeLog.beneficiary.membership.memberNumber}) }}">
+                                {{ shiftFreeLog.beneficiary }}
+                            </a>
+                        {% else %}
+                            {{ shiftFreeLog.beneficiary }}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ shiftFreeLog.shiftString }}
+                    </td>
+                    {% if use_fly_and_fixed %}
+                        <td>{{ shiftFreeLog.fixe }}</td>
+                    {% endif %}
+                    {% if from_admin %}
+                        <td>
+                            {% if shiftFreeLog.createdBy and shiftFreeLog.createdBy.beneficiary %}
+                                <a href="{{ path("member_show",{'member_number': shiftFreeLog.createdBy.beneficiary.membership.memberNumber}) }}">
+                                    {{ shiftFreeLog.createdBy.beneficiary }}
+                                </a>
+                            {% else %}
+                                {{ shiftFreeLog.createdBy }}
+                            {% endif %}
+                        </td>
+                        {% if is_granted("ROLE_ADMIN") %}
+                            <td>{{ shiftFreeLog.requestRoute }}</td>
+                        {% endif %}
+                    {% endif %}
+                    <td>{{ shiftFreeLog.reason }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

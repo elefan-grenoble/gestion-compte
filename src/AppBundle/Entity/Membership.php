@@ -14,10 +14,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping\OrderBy;
 
 /**
- * Commission
+ * Membership
  *
- * @ORM\Table(name="membership")
+ * @ORM\Table(name="membership", uniqueConstraints={@ORM\UniqueConstraint(columns={"member_number"})})
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\MembershipRepository")
+ * @UniqueEntity(fields={"member_number"}, message="Ce numéro de membre existe déjà")
  */
 class Membership
 {
@@ -29,17 +31,30 @@ class Membership
     protected $id;
 
     /**
-     * @ORM\Column(type="bigint")
      * @Assert\NotBlank(message="Merci d'entrer votre numéro d'adhérent")
+     * @ORM\Column(type="bigint")
      */
     protected $member_number;
 
     /**
-     * @var bool
+     * @var \DateTime
      *
      * @ORM\Column(name="withdrawn", type="boolean", nullable=false, options={"default" : 0})
      */
     private $withdrawn;
+
+    /**
+     * @var bool
+     *
+     * @ORM\Column(name="withdrawn_date", type="date", nullable=true)
+     */
+    private $withdrawnDate;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="withdrawn_by_id", referencedColumnName="id")
+     */
+    private $withdrawnBy;
 
     /**
      * @var bool
@@ -56,6 +71,13 @@ class Membership
     private $frozen_change;
 
     /**
+     * @var bool
+     *
+     * @ORM\Column(name="flying", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $flying;
+
+    /**
      * @ORM\OneToMany(targetEntity="Registration", mappedBy="membership",cascade={"persist", "remove"})
      * @OrderBy({"date" = "DESC"})
      */
@@ -68,16 +90,18 @@ class Membership
 
     /**
      * @var Beneficiary
+     * 
      * One Membership has One Main Beneficiary.
+     * 
+     * @Assert\Valid
      * @ORM\OneToOne(targetEntity="Beneficiary",cascade={"persist", "remove"})
      * @ORM\JoinColumn(name="main_beneficiary_id", referencedColumnName="id", onDelete="SET NULL")
-     * @Assert\Valid
      */
     private $mainBeneficiary;
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="subject",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "ASC"})
+     * @OrderBy({"createdAt" = "ASC"})
      */
     private $notes;
 
@@ -93,15 +117,24 @@ class Membership
      */
     private $firstShiftDate;
 
-    // array of date
-    private $_startOfCycle;
-    private $_endOfCycle;
-
     /**
-     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership",cascade={"persist", "remove"})
-     * @OrderBy({"date" = "DESC"})
+     * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="membership", cascade={"persist", "remove"})
+     * @OrderBy({"createdAt" = "DESC", "type" = "DESC"})
      */
     private $timeLogs;
+
+    /**
+     * @ORM\OneToMany(targetEntity="MembershipShiftExemption", mappedBy="membership", cascade={"persist", "remove"})
+     * @OrderBy({"createdAt" = "DESC"})
+     */
+    private $membershipShiftExemptions;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
 
     /**
      * Membership constructor.
@@ -111,10 +144,27 @@ class Membership
         $this->registrations = new ArrayCollection();
         $this->beneficiaries = new ArrayCollection();
         $this->timeLogs = new ArrayCollection();
+        $this->membershipShiftExemptions = new ArrayCollection();
     }
 
-    public function getTmpToken($key = ''){
-        return md5($this->getId().$this->getMemberNumber().$key.date('d'));
+    public function __toString()
+    {
+        return $this->getDisplayMemberNumber();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
+
+    public function getTmpToken($key = '')
+    {
+        return md5($this->getId() . $this->getMemberNumber() . $key . date('d'));
     }
 
     /**
@@ -216,9 +266,40 @@ class Membership
         return $this->beneficiaries;
     }
 
-    public function __toString()
+    /**
+     * Get beneficiaries (with main in first position)
+     * Why? because beneficiaries are ordered by id ASC
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getBeneficiariesWithMainInFirstPosition()
     {
-        return '#'.$this->getMemberNumber();
+        $beneficiaries[] = $this->getMainBeneficiary();
+        if ($this->getBeneficiaries()->count() > 1) {
+            foreach ($this->getBeneficiaries() as $beneficiary) {
+                if ($beneficiary !== $this->getMainBeneficiary()) {
+                    $beneficiaries[] = $beneficiary;
+                }
+            }
+        }
+        return $beneficiaries;
+    }
+
+    /**
+     * Get member_number & list of beneficiaries
+     *
+     * @return string
+     */
+    public function getMemberNumberWithBeneficiaryListString()
+    {
+        $memberNumberWithBeneficiaryListString = '#' . $this->getMemberNumber();
+        foreach ($this->getBeneficiariesWithMainInFirstPosition() as $key => $beneficiary) {
+            if ($key > 0) {
+                $memberNumberWithBeneficiaryListString .= ' &';
+            }
+            $memberNumberWithBeneficiaryListString .= ' '. $beneficiary->getDisplayName();
+        }
+        return $memberNumberWithBeneficiaryListString;
     }
 
     /**
@@ -264,6 +345,10 @@ class Membership
     public function setWithdrawn($withdrawn)
     {
         $this->withdrawn = $withdrawn;
+        if ($this->withdrawn == false) {
+            $this->withdrawnDate = null;
+            $this->withdrawnBy = null;
+        }
         return $this;
     }
 
@@ -287,7 +372,54 @@ class Membership
         return $this->withdrawn;
     }
 
-    public function getCommissions(){
+    /**
+     * Set withdrawnDate
+     *
+     * @param \DateTime $date
+     *
+     * @return Membership
+     */
+    public function setWithdrawnDate($date)
+    {
+        $this->withdrawnDate = $date;
+        return $this;
+    }
+
+    /**
+     * Get withdrawnDate
+     *
+     * @return \DateTime
+     */
+    public function getWithdrawnDate()
+    {
+        return $this->withdrawnDate;
+    }
+
+    /**
+     * Set withdrawnBy
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return TimeLog
+     */
+    public function setWithdrawnBy(\AppBundle\Entity\User $user = null)
+    {
+        $this->withdrawnBy = $user;
+        return $this;
+    }
+
+    /**
+     * Get withdrawnBy
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getWithdrawnBy()
+    {
+        return $this->withdrawnBy;
+    }
+
+    public function getCommissions()
+    {
         $commissions = array();
         foreach ($this->getBeneficiaries() as $beneficiary){
             $commissions = array_merge($beneficiary->getCommissions()->toArray(),$commissions);
@@ -295,7 +427,8 @@ class Membership
         return new ArrayCollection($commissions);
     }
 
-    public function getOwnedCommissions(){
+    public function getOwnedCommissions()
+    {
         return $this->getCommissions()->filter(function($commission) {
             $r = false;
             foreach ($commission->getOwners() as $owner){
@@ -322,7 +455,7 @@ class Membership
 
     /**
      * Get frozen
-     *
+     * @deprecated illogic isFlying, isWithdrawn but getFrozen
      * @return boolean
      */
     public function getFrozen()
@@ -330,6 +463,15 @@ class Membership
         return $this->frozen;
     }
 
+    /**
+     * return if the member is frozen
+     *
+     * @return boolean
+     */
+    public function isFrozen()
+    {
+        return $this->frozen;
+    }
 
     /**
      * Set frozen_change
@@ -355,6 +497,20 @@ class Membership
     }
 
     /**
+     * @return bool
+     */
+    public function isFlying(): ?bool {
+        return $this->flying;
+    }
+
+    /**
+     * @param bool $flying
+     */
+    public function setFlying(?bool $flying): void {
+        $this->flying = $flying;
+    }
+
+    /**
      * Get lastRegistration
      *
      * @return \AppBundle\Entity\Registration
@@ -368,62 +524,19 @@ class Membership
      * Return if the member has a valid registration before the given date
      *
      * @param \DateTime $date
-     * @return \AppBundle\Entity\Registration
+     * @return bool
      */
     public function hasValidRegistrationBefore($date)
     {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
         foreach ($this->getRegistrations() as $registration) {
             if ($registration->getDate() < $date) {
                 return true;
             }
         }
         return false;
-    }
-
-    /**
-     * Get total shift duration for current cycle
-     */
-    public function getCycleShiftsDuration($cycleOffset = 0, $excludeDismissed = false)
-    {
-        $duration = 0;
-        foreach ($this->getShiftsOfCycle($cycleOffset, $excludeDismissed) as $shift) {
-            $duration += $shift->getDuration();
-        }
-        return $duration;
-    }
-
-    /**
-     * Get all shifts for all beneficiaries
-     */
-    public function getAllShifts($excludeDismissed = false)
-    {
-        $shifts = new ArrayCollection();
-        foreach ($this->getBeneficiaries() as $beneficiary) {
-            foreach ($beneficiary->getShifts() as $shift) {
-                $shifts->add($shift);
-            }
-        }
-        if ($excludeDismissed) {
-            return $shifts->filter(function($shift) {
-                return !$shift->getIsDismissed();
-            });
-        } else {
-            return $shifts;
-        }
-    }
-
-    /**
-     * Get all booked shifts for all beneficiaries
-     */
-    public function getAllBookedShifts()
-    {
-        $shifts = new ArrayCollection();
-        foreach ($this->getBeneficiaries() as $beneficiary) {
-            foreach ($beneficiary->getBookedShifts() as $shift) {
-                $shifts->add($shift);
-            }
-        }
-        return $shifts;
     }
 
     /**
@@ -438,96 +551,6 @@ class Membership
             }
         }
         return $shifts;
-    }
-
-
-    /**
-     * Get shifts of a specific cycle
-     * @param $cycleOffset int to chose a cycle (0 for current cycle, 1 for next, -1 for previous)
-     * @param bool $excludeDismissed
-     * @return ArrayCollection|\Doctrine\Common\Collections\Collection
-     */
-    public function getShiftsOfCycle($cycleOffset = 0, $excludeDismissed = false)
-    {
-        return $this->getAllShifts($excludeDismissed)->filter(function($shift) use ($cycleOffset) {
-            return $shift->getStart() > $this->startOfCycle($cycleOffset) &&
-                $shift->getEnd() < $this->endOfCycle($cycleOffset);
-        });
-    }
-
-    /**
-     * Get start date of current cycle
-     * IMPORTANT : time are reset, only date are kept
-     * @param int $cycleIndex
-     * @return DateTime|null
-     */
-    public function startOfCycle($cycleOffset = 0)
-    {
-        if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[$cycleOffset])) {
-            if (!isset($this->_startOfCycle) || !isset($this->_startOfCycle[0])){
-                if (!isset($this->_startOfCycle)) {
-                    $this->_startOfCycle = array();
-                }
-                $firstDate = $this->getFirstShiftDate();
-                $modFirst = null;
-                $now = new DateTime('now');
-                $now->setTime(0, 0, 0);
-                if ($firstDate) {
-                    $diff = $firstDate->diff($now);
-                    $currentCycleCount = intval($diff->format('%a') / 28);
-                }else{
-                    $firstDate = new DateTime('now');
-                    $currentCycleCount = 0;
-                }
-                $this->_startOfCycle[0] = clone($firstDate);
-                if ($firstDate < $now) {
-                    $this->_startOfCycle[0]->modify("+" . (28 * $currentCycleCount) . " days");
-                }
-            }
-            if ($cycleOffset != 0 ){
-                $this->_startOfCycle[$cycleOffset] = clone($this->_startOfCycle[0]);
-                $this->_startOfCycle[$cycleOffset]->modify((($cycleOffset>0)?"+":"").(28*$cycleOffset)." days");
-            }
-        }
-
-        return $this->_startOfCycle[$cycleOffset];
-    }
-
-    /**
-     * Get end date of current cycle
-     * @param int $cycleIndex
-     * @return DateTime|null
-     */
-    public function endOfCycle($cycleOffset = 0)
-    {
-        if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[$cycleOffset])) {
-            if (!isset($this->_endOfCycle) || !isset($this->_endOfCycle[0])) {
-                if (!isset($this->_endOfCycle)) {
-                    $this->_endOfCycle = array();
-                }
-                $this->_endOfCycle[0] = clone($this->startOfCycle());
-                $this->_endOfCycle[0]->modify("+27 days");
-                $this->_endOfCycle[0]->setTime(23, 59, 59);
-            }
-
-            if ($cycleOffset != 0 ){
-                $this->_endOfCycle[$cycleOffset] = clone($this->_endOfCycle[0]);
-                $this->_endOfCycle[$cycleOffset]->modify("+".(28*$cycleOffset)."days");
-            }
-        }
-
-        return $this->_endOfCycle[$cycleOffset];
-    }
-
-    /**
-     * Get all rebooked shifts in the future
-     */
-    public function getFutureRebookedShifts()
-    {
-        return $this->getAllBookedShifts()->filter(function($shift) {
-            return $shift->getStart() > new DateTime('now') &&
-                $shift->getBooker() != $shift->getShifter();
-        });
     }
 
     /**
@@ -596,8 +619,9 @@ class Membership
         return $this->given_proxies;
     }
 
-    public function getAutocompleteLabel(){
-        return '#'.$this->getMemberNumber();
+    public function getDisplayMemberNumber()
+    {
+        return '#' . $this->getMemberNumber();
     }
 
     /**
@@ -656,19 +680,114 @@ class Membership
         return $this->timeLogs;
     }
 
-    public function getTimeCount($before = null)
+    /**
+     * Get shiftTimeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getShiftTimeLogs()
+    {
+        return $this->timeLogs->filter(function (TimeLog $log) {
+            return ($log->getType() != TimeLog::TYPE_SAVING);
+        });
+    }
+
+    /**
+     * Get savingTimeLogs
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSavingTimeLogs()
+    {
+        return $this->timeLogs->filter(function (TimeLog $log) {
+            return ($log->getType() == TimeLog::TYPE_SAVING);
+        });
+    }
+
+    public function getShiftTimeCount($before = null)
     {
         $sum = function($carry, TimeLog $log)
         {
             $carry += $log->getTime();
             return $carry;
         };
-        if ($before)
-            $logs = $this->getTimeLogs()->filter(function ($log) use ($before){
-                return ($log->getDate() < $before);
+
+        $logs = $this->getShiftTimeLogs();
+        if ($before) {
+            $logs = $this->getShiftTimeLogs()->filter(function (TimeLog $log) use ($before) {
+                return ($log->getCreatedAt() < $before);
             });
-        else
-            $logs = $this->getTimeLogs();
+        }
+
         return array_reduce($logs->toArray(), $sum, 0);
+    }
+
+    public function getSavingTimeCount($before = null)
+    {
+        $sum = function($carry, TimeLog $log)
+        {
+            $carry += $log->getTime();
+            return $carry;
+        };
+
+        $logs = $this->getSavingTimeLogs();
+        if ($before) {
+            $logs = $logs->filter(function (TimeLog $log) use ($before) {
+                return ($log->getCreatedAt() < $before);
+            });
+        }
+
+        return array_reduce($logs->toArray(), $sum, 0);
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Get membershipShiftExemptions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMembershipShiftExemptions()
+    {
+        return $this->membershipShiftExemptions;
+    }
+
+    /**
+     * Get valid membership shiftExemptions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCurrentMembershipShiftExemptions(\DateTime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $this->membershipShiftExemptions->filter(function($membershipShiftExemption) use ($date) {
+            return $membershipShiftExemption->isCurrent($date);
+        });
+    }
+
+    /**
+     * Return if the membership is exempted from doing shifts
+     *
+     * @param \DateTime $date
+     * @return boolean
+     */
+    public function isCurrentlyExemptedFromShifts(\DateTime $date = null)
+    {
+        if (!$date) {
+            $date = new \DateTime('now');
+        }
+        return $this->membershipShiftExemptions->exists(function($key, $membershipShiftExemption) use ($date) {
+            return $membershipShiftExemption->isCurrent($date);
+        });
     }
 }

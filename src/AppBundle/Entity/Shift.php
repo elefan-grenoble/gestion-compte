@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Shift
  *
  * @ORM\Table(name="shift")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\ShiftRepository")
  */
 class Shift
@@ -45,27 +46,6 @@ class Shift
     /**
      * @var bool
      *
-     * @ORM\Column(name="is_dismissed", type="boolean", options={"default" : 0})
-     */
-    private $isDismissed;
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="dismissed_time", type="datetime", nullable=true)
-     */
-    private $dismissedTime;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="dismissed_reason", type="string", length=255, nullable=true)
-     */
-    private $dismissedReason;
-
-    /**
-     * @var bool
-     *
      * @ORM\Column(name="was_carried_out", type="boolean", options={"default" : 0})
      */
     private $wasCarriedOut;
@@ -77,7 +57,7 @@ class Shift
     private $shifter;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="booked_shifts")
+     * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
@@ -89,22 +69,22 @@ class Shift
     private $lastShifter;
 
     /**
-     * One Period has One Formation.
+     * One Shift has one Formation.
      * @ORM\ManyToOne(targetEntity="Formation")
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $formation;
 
     /**
-     * One Period has One Job.
-     * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts")
+     * One Shift has One Job.
+     * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts", fetch="EAGER")
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
 
     /**
-     * One shift may have been created from One PeriodPosition.
-     * @ORM\ManyToOne(targetEntity="PeriodPosition")
+     * One Shift may have been created from One PeriodPosition.
+     * @ORM\ManyToOne(targetEntity="PeriodPosition", inversedBy="shifts")
      * @ORM\JoinColumn(name="position_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $position;
@@ -113,6 +93,11 @@ class Shift
      * @ORM\OneToMany(targetEntity="TimeLog", mappedBy="shift")
      */
     private $timeLogs;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ShiftFreeLog", mappedBy="shift")
+     */
+    private $freeLogs;
 
     /**
      * @var bool
@@ -128,16 +113,40 @@ class Shift
      */
     private $fixe = false;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
+
     public function __construct()
     {
-        $this->isDismissed = false;
         $this->wasCarriedOut = false;
     }
 
+    /**
+     * Example: "vendredi 22 juillet de 09:30 à 12:30 [#0001 Prénom NOM]"
+     */
     public function __toString()
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%A %e %B de %R", $this->getStart()->getTimestamp()).' à '.strftime("%R", $this->getEnd()->getTimestamp()).' ['.$this->getShifter().']';
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi') . ' [' . $this->getShifter() . ']';
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -223,78 +232,6 @@ class Shift
     }
 
     /**
-     * Set isDismissed
-     *
-     * @param boolean $isDismissed
-     *
-     * @return BookedShift
-     */
-    public function setIsDismissed($isDismissed)
-    {
-        $this->isDismissed = $isDismissed;
-
-        return $this;
-    }
-
-    /**
-     * Get isDismissed
-     *
-     * @return bool
-     */
-    public function getIsDismissed()
-    {
-        return $this->isDismissed;
-    }
-
-    /**
-     * Set dismissedTime
-     *
-     * @param \DateTime $dismissedTime
-     *
-     * @return BookedShift
-     */
-    public function setDismissedTime($dismissedTime)
-    {
-        $this->dismissedTime = $dismissedTime;
-
-        return $this;
-    }
-
-    /**
-     * Get dismissedTime
-     *
-     * @return \DateTime
-     */
-    public function getDismissedTime()
-    {
-        return $this->dismissedTime;
-    }
-
-    /**
-     * Set dismissedReason
-     *
-     * @param string $dismissedReason
-     *
-     * @return BookedShift
-     */
-    public function setDismissedReason($dismissedReason)
-    {
-        $this->dismissedReason = $dismissedReason;
-
-        return $this;
-    }
-
-    /**
-     * Get dismissedReason
-     *
-     * @return string
-     */
-    public function getDismissedReason()
-    {
-        return $this->dismissedReason;
-    }
-
-    /**
      * Set wasCarriedOut
      *
      * @param boolean $wasCarriedOut
@@ -309,28 +246,6 @@ class Shift
     }
 
     /**
-     * Validate shift participation
-     *
-     * @return BookedShift
-     */
-    public function validateShiftParticipation()
-    {
-        $this->wasCarriedOut = 1;
-        return $this;
-    }
-
-    /**
-     * Invalidate shift participation
-     *
-     * @return BookedShift
-     */
-    public function invalidateShiftParticipation()
-    {
-        $this->wasCarriedOut = 0;
-        return $this;
-    }
-
-    /**
      * Get wasCarriedOut
      *
      * @return bool
@@ -341,13 +256,37 @@ class Shift
     }
 
     /**
-     * Set booker
-     *
-     * @param \AppBundle\Entity\Beneficiary $booker
+     * Validate shift participation
      *
      * @return BookedShift
      */
-    public function setBooker(\AppBundle\Entity\Beneficiary $booker = null)
+    public function validateShiftParticipation()
+    {
+        $this->setWasCarriedOut(true);
+
+        return $this;
+    }
+
+    /**
+     * Invalidate shift participation
+     *
+     * @return BookedShift
+     */
+    public function invalidateShiftParticipation()
+    {
+        $this->setWasCarriedOut(false);
+
+        return $this;
+    }
+
+    /**
+     * Set booker
+     *
+     * @param \AppBundle\Entity\User $booker
+     *
+     * @return BookedShift
+     */
+    public function setBooker(\AppBundle\Entity\User $booker = null)
     {
         $this->booker = $booker;
 
@@ -357,7 +296,7 @@ class Shift
     /**
      * Get booker
      *
-     * @return \AppBundle\Entity\Beneficiary
+     * @return \AppBundle\Entity\User
      */
     public function getBooker()
     {
@@ -457,9 +396,6 @@ class Shift
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
-        $this->setDismissedReason('');
-        $this->setIsDismissed(false);
-        $this->setDismissedTime(null);
         $this->setShifter(null);
         $this->setFixe(false);
         return $this;
@@ -484,7 +420,27 @@ class Shift
     public function getIsCurrent()
     {
         $now = new \DateTime('now');
-        return ($this->start < $now) && ($now < $this->end );
+        return ($this->start < $now) && ($now < $this->end);
+    }
+
+    /**
+     * Return true if the shift is now or in the past
+     *
+     * @return boolean
+     */
+    public function getIsPastOrCurrent()
+    {
+        return ($this->getIsPast() or $this->getIsCurrent());
+    }
+
+    /**
+     * Return true if the shift is in the future
+     *
+     * @return boolean
+     */
+    public function getIsFuture()
+    {
+        return !$this->getIsPastOrCurrent();
     }
 
     /**
@@ -492,7 +448,8 @@ class Shift
      *
      * @return boolean
      */
-    public function getIsUpcoming(){
+    public function getIsUpcoming()
+    {
         return $this->isBefore('2 days');
     }
 
@@ -507,7 +464,7 @@ class Shift
     {
         $futureDate = new \DateTime($duration);
         $futureDate->setTime(23, 59, 59);
-        return !$this->getIsPast() && !$this->getIsCurrent() && ($futureDate > $this->start);
+        return $this->getIsFuture() && ($this->start < $futureDate);
     }
 
     /**
@@ -532,10 +489,6 @@ class Shift
     public function getLastShifter()
     {
         return $this->lastShifter;
-    }
-
-    public function getTmpToken($key = ''){
-        return md5($this->getId().$this->getStart()->format('d-m-Y').$this->getEnd()->format('d-m-Y').$key);
     }
 
     /**
@@ -591,19 +544,21 @@ class Shift
     /**
      * @return bool
      */
-    public function isFixe(): ?bool {
+    public function isFixe(): ?bool
+    {
         return $this->fixe;
     }
 
     /**
      * @param bool $fixe
      */
-    public function setFixe(?bool $fixe): void {
+    public function setFixe(?bool $fixe): void
+    {
         $this->fixe = $fixe;
     }
 
     /**
-     * Set job
+     * Set position
      *
      * @param \AppBundle\Entity\PeriodPosition $position
      *
@@ -616,4 +571,93 @@ class Shift
         return $this;
     }
 
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy.
+     *
+     * @param \AppBundle\Entity\User $createBy
+     *
+     * @return Shift
+     */
+    public function setCreatedBy(\AppBundle\Entity\User $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy.
+     *
+     * @return \AppBundle\Entity\User
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Return true if this is the first ever shift by the shifter
+     *
+     * @return bool
+     */
+    public function isFirstByShifter()
+    {
+        if ($this->getShifter()) {
+            // last? beneficiary->shifts are ordered by start DESC
+            if ($this === $this->getShifter()->getShifts()->last()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Generate token from key
+     */
+    public function getTmpToken($key = '')
+    {
+        return md5($this->getId() . $this->getStart()->format('d/m/Y') . $this->getEnd()->format('d/m/Y') . $key);
+    }
+
+    /**
+     * Example: "22/07/2022 - 9h30 à 12h30"
+     */
+    public function getDisplayDateSeperateTime()
+    {
+        return $this->getStart()->format('d/m/Y') . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "22/07/2022 de 9h30 à 12h30"
+     */
+    public function getDisplayDateWithTime()
+    {
+        return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "vendredi 22 juillet de 9h30 à 12h30"
+     */
+    public function getDisplayDateLongWithTime()
+    {
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
+
+    /**
+     * Example: "vendredi 22 juillet 2022 de 9h30 à 12h30"
+     */
+    public function getDisplayDateFullWithTime()
+    {
+        return strftime("%A %e %B %Y", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+    }
 }

@@ -5,9 +5,9 @@ security:
     encoders:
       FOS\UserBundle\Model\UserInterface: bcrypt
     role_hierarchy:
-      ROLE_USER_VIEWER: ROLE_USER
       ROLE_ADMIN_PANEL: ROLE_USER
-      ROLE_USER_MANAGER: [ ROLE_USER_VIEWER,ROLE_ADMIN_PANEL ]
+      ROLE_USER_VIEWER: ROLE_ADMIN_PANEL
+      ROLE_USER_MANAGER: ROLE_USER_VIEWER
       ROLE_SHIFT_MANAGER: ROLE_ADMIN_PANEL
       ROLE_FINANCE_MANAGER: ROLE_ADMIN_PANEL
       ROLE_PROCESS_MANAGER: ROLE_ADMIN_PANEL
@@ -24,11 +24,18 @@ security:
         form_login:
             provider: fos_userbundle
             csrf_token_generator: security.csrf.token_manager
-        logout:       true
+        logout:
+            path:   /logout
+            success_handler: oidc_logout_handler
         anonymous:    true
         switch_user:
             role: ROLE_ADMIN
             parameter: _login_as
+        guard:
+          authenticators:
+#            - keycloak_authenticator
+            - AppBundle\Security\KeycloakAuthenticator
+
       oauth_token:
         pattern:    ^/oauth/v2/token
         security:   false
@@ -51,7 +58,7 @@ security:
       - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
-      - { path: ^/member/new, role: IS_AUTHENTICATED_ANONYMOUSLY }
       - { path: ^/admin/, role: ROLE_ADMIN_PANEL }
-      - { path: ^/api, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_REMEMBERED] }
+      - { path: ^/api, role: IS_AUTHENTICATED_FULLY }
+      - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }
       - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }

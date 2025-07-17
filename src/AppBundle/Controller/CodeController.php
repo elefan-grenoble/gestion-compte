@@ -2,13 +2,11 @@
 
 namespace AppBundle\Controller;
 
-
 use AppBundle\Entity\Code;
 use AppBundle\Event\CodeNewEvent;
 use AppBundle\Security\CodeVoter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -30,27 +28,28 @@ class CodeController extends Controller
     public function homepageDashboardAction()
     {
         $em = $this->getDoctrine()->getManager();
+
         $codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
         if (!$codes) {
             $codes[] = new Code();
         }
-        return $this->render('default/code/home_dashboard.html.twig',array('codes'=>$codes));
+
+        return $this->render('default/code/home_dashboard.html.twig', array('codes' => $codes));
     }
 
     /**
      * Lists all codes.
      *
-     * @Route("/", name="codes_list")
-     * @Method("GET")
+     * @Route("/", name="codes_list", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function listAction(Request $request){
+    public function listAction(Request $request)
+    {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $logger = $this->get('logger');
         $logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
-
-        $em = $this->getDoctrine()->getManager();
 
         if ($this->getUser()->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('AppBundle:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
@@ -76,8 +75,7 @@ class CodeController extends Controller
     /**
      * add new code.
      *
-     * @Route("/new", name="code_edit")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="code_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
     public function newAction(Request $request)
@@ -89,24 +87,24 @@ class CodeController extends Controller
             ->setAction($this->generateUrl('code_edit'))
             ->setMethod('POST')
             ->add('code', TextType::class, array('label' => 'code', 'required' => true))
-            ->add('close_old_codes', CheckboxType::class, array('label' => 'fermer les anciens codes ?', 'required' => false))
+            ->add('close_old_codes', CheckboxType::class, array(
+                'label' => 'fermer les anciens codes ?',
+                'required' => false,
+                'attr' => array('class' => 'filled-in')))
             ->getForm();
 
         $codeform->handleRequest($request);
 
         if ($codeform->isSubmitted() && $codeform->isValid()) {
-
             $value = $codeform->get('code')->getData();
             $code = new Code();
             $code->setValue($value);
-
             $code->setClosed(false);
-            $code->setCreatedAt(new \DateTime('now'));
             $code->setRegistrar($this->getUser());
 
             $em->persist($code);
 
-            if ($codeform->get('close_old_codes')->getData()){
+            if ($codeform->get('close_old_codes')->getData()) {
                 //close old codes
                 $open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed' => 0));
                 foreach ($open_codes as $open_code) {
@@ -127,18 +125,18 @@ class CodeController extends Controller
             'form' => $codeform->createView()
         ));
     }
+
     /**
-     * add new code.
+     * generate new code.
      *
-     * @Route("/generate", name="code_generate")
-     * @Method({"GET","POST"})
+     * @Route("/generate", name="code_generate", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function generateAction(Request $request){
+    public function generateAction(Request $request)
+    {
         $session = new Session();
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
         $em = $this->getDoctrine()->getManager();
+        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $my_open_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $old_codes = $em->getRepository('AppBundle:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
@@ -148,7 +146,7 @@ class CodeController extends Controller
             $granted = $granted || $this->isGranted('view',$code);
         }
         if (!$granted){
-            return $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
+            throw $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
         }
 
         $logger = $this->get('logger');
@@ -161,29 +159,26 @@ class CodeController extends Controller
                     'code' => $my_open_codes[0],
                     'old_codes' => $old_codes,
                 ));
-            }else{
+            } else {
                 return $this->render('default/code/generate.html.twig', array(
                     'display' =>  true,
                     'code' => $my_open_codes[0],
                     'old_codes' => $my_open_codes,
                 ));
             }
-
         }
 
-        //no code open for this user
+        // no code open for this user
 
-        if ($request->get('generate') === null){ //first visit
+        if ($request->get('generate') === null){ // first visit
             $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
             return $this->render('default/code/generate.html.twig');
         }
 
-        $value = rand(0,9999);//code aléatoire à 4 chiffres
+        $value = rand(0,9999); // code aléatoire à 4 chiffres
         $code = new Code();
         $code->setValue($value);
-
         $code->setClosed(false);
-        $code->setCreatedAt(new \DateTime('now'));
         $code->setRegistrar($current_app_user);
 
         $em->persist($code);
@@ -201,24 +196,23 @@ class CodeController extends Controller
             'code' => $code,
             'old_codes' => $old_codes,
         ));
-
     }
 
     /**
+     * toggle code 
      *
-     * @Route("/toggle/{id}", name="code_toggle")
-     * @Method({"GET"})
+     * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER')")
      */
-    public function toggleAction(Request $request,Code $code){
+    public function toggleAction(Request $request, Code $code)
+    {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         if ($code->getClosed())
             $this->denyAccessUnlessGranted('open',$code);
         else
             $this->denyAccessUnlessGranted('close',$code);
-
-        $em = $this->getDoctrine()->getManager();
 
         $code->setClosed(!$code->getClosed());
 
@@ -233,14 +227,14 @@ class CodeController extends Controller
     /**
      * close all codes.
      *
-     * @Route("/close_all", name="code_change_done")
-     * @Method("GET")
+     * @Route("/close_all", name="code_change_done", methods={"GET"})
      */
-    public function closeAllButMineAction(Request $request){
+    public function closeAllButMineAction(Request $request)
+    {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
         $securityContext = $this->container->get('security.authorization_checker');
 
-        $em = $this->getDoctrine()->getManager();
         $logged_out = false;
         $previousToken = null;
 
@@ -291,21 +285,24 @@ class CodeController extends Controller
 
 
     /**
-     * code delete
+     * delete code
      *
-     * @Route("/{id}", name="code_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="code_delete", methods={"DELETE"})
      */
-    public function removeAction(Request $request,Code $code)
+    public function deleteAction(Request $request, Code $code)
     {
-        $this->denyAccessUnlessGranted('delete',$code);
+        $this->denyAccessUnlessGranted('delete', $code);
+
         $session = new Session();
+
         $form = $this->getDeleteForm($code);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($code);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');
         }
         return $this->redirectToRoute('codes_list');
@@ -315,7 +312,7 @@ class CodeController extends Controller
      * @param Code $code
      * @return \Symfony\Component\Form\FormInterface
      */
-    protected function getDeleteForm(Code $code){
+    protected function getDeleteForm(Code $code) {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('code_delete', array('id' => $code->getId())))
             ->setMethod('DELETE')

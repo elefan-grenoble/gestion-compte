@@ -1,107 +1,50 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('event_list') }}"><i class="material-icons">list</i>événements</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i>
+{% block title %}Editer un événement - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Modifier l'événement</h4>
+<h4>Editer un événement</h4>
 
-    {{ form_start(form) }}
-    <div class="row">
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.title) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.title) }}
-                {{ form_label(form.title) }}
-            </div>
-        </div>
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.date) }}
-            </div>
-            <div>
-                {{ form_label(form.date) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.date) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s12">
-            <div class="errors">
-                {{ form_errors(form.imgFile) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.imgFile) }}
-                {{ form_label(form.imgFile) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.need_proxy) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.need_proxy) }}
-                {{ form_label(form.need_proxy) }}
-            </div>
-        </div>
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.anonymous_proxy) }}
-            </div>
-            <div class="">
-                {{ form_widget(form.anonymous_proxy) }}
-                {{ form_label(form.anonymous_proxy) }}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col s6">
-            <div class="errors">
-                {{ form_errors(form.max_date_of_last_registration) }}
-            </div>
-            <div class="input-field">
-                {{ form_widget(form.max_date_of_last_registration) }}
-                {{ form_label(form.max_date_of_last_registration) }}
-            </div>
-        </div>
-    </div>
-    <div class="errors">
-        {{ form_errors(form.description) }}
-    </div>
-    {{ form_label(form.description) }}
-    {{ form_widget(form.description) }}
-    <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
-    </div>
-    {{ form_end(form) }}
+{{ form_start(form) }}
+{% include "/admin/event/_partial/form.html.twig" with { form: form, edit: true, event: event } %}
+<button type="submit" class="btn waves-effect waves-light" title="Enregistrer">
+    <i class="material-icons left">save</i>Enregistrer
+</button>
+{{ form_end(form) }}
 
+{% if is_granted("ROLE_ADMIN") %}
     {% if event.needProxy %}
         <ul>
             <li>
-                <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons">list</i>Procurations</a>
+                <a href="{{ path("admin_event_proxies_list",{'id':event.id}) }}"><i class="material-icons">list</i>Procurations</a>
             </li>
             <li>
-                <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons">list</i>Emargement</a>
+                <a href="{{ path("admin_event_signatures",{'id':event.id}) }}"><i class="material-icons">list</i>Emargement</a>
             </li>
         </ul>
     {% endif %}
 
     {{ form_start(delete_form) }}
     {{ form_widget(delete_form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
-    </div>
+    <button type="submit" class="btn waves-effect waves-light red" onclick="return confirm('Etes-vous sûr ?!');">
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
     {{ form_end(delete_form) }}
-
+{% endif %}
 {% endblock %}
 
+{% block stylesheets %}
+<style>
+    .vich-image {
+        max-height: 300px;
+        overflow: auto;
+    }
+</style>
+{% endblock %}

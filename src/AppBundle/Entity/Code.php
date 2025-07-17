@@ -8,11 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
  * Code
  *
  * @ORM\Table(name="code")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\CodeRepository")
  */
 class Code
 {
-
     /**
      * @var int
      *
@@ -30,13 +30,6 @@ class Code
     private $value;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
-
-    /**
      * @var bool
      *
      * @ORM\Column(name="closed", type="boolean", nullable=false, options={"default" : 0})
@@ -49,6 +42,29 @@ class Code
      */
     private $registrar;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
 
     /**
      * Get id
@@ -82,40 +98,6 @@ class Code
     public function getValue()
     {
         return $this->value;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Code
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-
-
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
     }
 
     /**
@@ -164,5 +146,29 @@ class Code
     public function getClosed()
     {
         return $this->closed;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $date
+     *
+     * @return Code
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

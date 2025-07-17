@@ -13,29 +13,20 @@ use AppBundle\Repository\JobRepository;
 
 class PeriodType extends AbstractType
 {
-
     /**
      * {@inheritdoc}
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('day_of_week', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => array(
-                "Lundi" => 0,
-                "Mardi" => 1,
-                "Mercredi" => 2,
-                "Jeudi" => 3,
-                "Vendredi" => 4,
-                "Samedi" => 5,
-                "Dimanche" => 6,
-            )))
+            ->add('day_of_week', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
             ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
             ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
             ->add('job', EntityType::class, array(
                 'label' => 'Poste',
                 'class' => 'AppBundle:Job',
                 'choice_label'=> 'name',
-                'multiple'     => false,
+                'multiple' => false,
                 'required' => true,
                 'query_builder' => function(JobRepository $repository) {
                     $qb = $repository->createQueryBuilder('j');
@@ -64,6 +55,4 @@ class PeriodType extends AbstractType
     {
         return 'appbundle_period';
     }
-
-
 }

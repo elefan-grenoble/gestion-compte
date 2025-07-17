@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/UpdateIgloohomeCodeCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Code;
@@ -60,7 +60,6 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $newCodeValue = $response->toArray()['code'];
         $output->writeln('<fg=cyan;>>>></><fg=green;> Code créé avec succès via l\'API Igloohome : ' . $newCodeValue . '</>');
 
-
         // Get the old open codes
         $em = $this->getContainer()->get('doctrine')->getManager();
         $codeRepository = $em->getRepository('AppBundle:Code');
@@ -68,18 +67,16 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $qb->where('c.closed = :closed')->setParameter('closed', 0);
         $open_codes = $qb->getQuery()->getResult();
 
-
         // Get the admin user
         $adminUsername = $this->getContainer()->getParameter('super_admin.username');
         $userRepository = $em->getRepository('AppBundle:User');
-        $adminUSer = $userRepository->findOneByUsername($adminUsername);
+        $adminUser = $userRepository->findOneByUsername($adminUsername);
 
         // Insert the new code created from the Igloohome API
         $code = new Code();
         $code->setValue($newCodeValue);
         $code->setClosed(false);
-        $code->setCreatedAt(new \DateTime('now'));
-        $code->setRegistrar($adminUSer);
+        $code->setRegistrar($adminUser);
         
         $em->persist($code);
 

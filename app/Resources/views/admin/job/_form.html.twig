@@ -6,28 +6,40 @@
 </div>
 <div class="row">
     {{ form_errors(form.min_shifter_alert) }}
-    {{ form_widget(form.min_shifter_alert) }}
     {{ form_label(form.min_shifter_alert) }}
+    {{ form_widget(form.min_shifter_alert) }}
 </div>
 <div class="row">
-    {{ form_label(form.color) }}<br>
-    <a href="https://materializecss.com/color.html" target="_blank"><i class="material-icons left">link</i> Couleur
-        materialize</a>
-    <span class="badge red">red</span>
-    <span class="badge pink">pink</span>
-    <span class="badge purple">purple</span>
-    <span class="badge deep-purple">deep-purple</span>
-    <span class="badge indigo">indigo</span>
-    <span class="badge blue">blue</span>
-    <span class="badge light-blue">light-blue</span>
-    <span class="badge cyan">cyan</span>
-    <span class="badge teal">teal</span>
-    <span class="badge green">green</span>
-    <span class="badge light-green">light-green</span>
-    <span class="badge lime">lime</span>
-    <span class="badge gray">...</span>
-    {{ form_errors(form.color) }}
-    {{ form_widget(form.color) }}
+    <div class="col m6 l4">
+        {{ form_label(form.color) }}
+        {{ form_errors(form.color) }}
+        {{ form_widget(form.color) }}
+    </div>
+    <div class="col m6 l8">
+        <a href="https://materializeweb.com/color.html" target="_blank"><i class="material-icons left">link</i> Couleurs materialize</a>
+        <p>
+            <span class="badge red white-text">red</span>
+            <span class="badge pink white-text">pink</span>
+            <span class="badge purple white-text">purple</span>
+            <span class="badge deep-purple white-text">deep-purple</span>
+            <span class="badge indigo white-text">indigo</span>
+            <span class="badge blue white-text">blue</span>
+            <span class="badge light-blue white-text">light-blue</span>
+            <span class="badge cyan white-text">cyan</span>
+            <span class="badge teal white-text">teal</span>
+            <span class="badge green white-text">green</span>
+            <span class="badge light-green white-text">light-green</span>
+            <span class="badge lime white-text">lime</span>
+            <span class="badge yellow white-text">yellow</span>
+            <span class="badge amber white-text">amber</span>
+            <span class="badge orange white-text">orange</span>
+            <span class="badge deep-orange white-text">deep-orange</span>
+            <span class="badge brown white-text">brown</span>
+            <!-- <span class="badge gray white-text">gray</span> -->
+            <!-- <span class="badge blue-gray white-text">blue-gray</span> -->
+            <span class="badge black white-text">black</span>
+        </p>
+    </div>
 </div>
 <div class="row">
     {{ form_label(form.description) }}
@@ -35,10 +47,16 @@
     {{ form_widget(form.description) }}
 </div>
 <div class="row">
-    {{ form_errors(form.enabled) }}
-    {{ form_widget(form.enabled) }}
-    {{ form_label(form.enabled) }}
+    {{ form_label(form.url) }}
+    {{ form_errors(form.url) }}
+    {{ form_widget(form.url) }}
 </div>
-<button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+<div class="row">
+    {{ form_errors(form.enabled) }}
+    <label>
+        {{ form_widget(form.enabled) }}
+        <span>{{ form.enabled.vars.label }}</span>
+    </label>
+</div>
+<button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
 {{ form_end(form) }}
-

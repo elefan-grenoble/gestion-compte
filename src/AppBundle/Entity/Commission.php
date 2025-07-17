@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * Commission
  *
  * @ORM\Table(name="commission")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\CommissionRepository")
  */
 class Commission
@@ -58,23 +59,59 @@ class Commission
     private $next_meeting_date = null;
 
     /**
-     * Many Commissions have Many Beneficiary.
+     * Many Commissions have Many Beneficiaries.
+     * 
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
      */
     private $beneficiaries;
 
     /**
      * Many Commissions have Many Tasks.
+     * 
      * @ORM\ManyToMany(targetEntity="Task", mappedBy="commissions")
      * @OrderBy({"closed" = "ASC","dueDate" = "ASC"})
      */
     private $tasks;
 
     /**
-     * One Commission have Many Owners (Beneficiary).
+     * One Commission has Many Owners (Beneficiary).
+     * 
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="own",cascade={"persist"})
      */
     private $owners;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getName();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
 
     /**
      * Get id
@@ -108,14 +145,6 @@ class Commission
     public function getName()
     {
         return $this->name;
-    }
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -314,5 +343,15 @@ class Commission
     public function getNextMeetingDate()
     {
         return $this->next_meeting_date;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

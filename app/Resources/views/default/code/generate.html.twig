@@ -2,6 +2,12 @@
 
 {% block title %}Nouveau code boîtier - {{ site_name }}{% endblock %}
 
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">vpn_key</i>&nbsp;Nouveau code boîtier
+{% endblock %}
+
 {% block content %}
     {% if not code is defined %}
         <h4 class="row center">
@@ -54,11 +60,10 @@
         </div>
         <div class="center-align">
             {% if no_smartphone is defined %}
-                <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>J'ai noté merci !</a>
+                <a href="{{ path('code_change_done') }}" class="btn waves-effect waves-light green"><i class="material-icons">check</i>J'ai noté merci !</a>
             {% else %}
-                <a href="{{ path('code_change_done') }}" class="btn large green"><span class="material-icons">check</span>Changement de code effectué !</a>
+                <a href="{{ path('code_change_done') }}" class="btn waves-effect waves-light green"><i class="material-icons">check</i>Changement de code effectué !</a>
             {% endif %}
         </div>
     {% endif %}
-
 {% endblock %}

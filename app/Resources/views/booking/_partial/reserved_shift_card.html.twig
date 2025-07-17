@@ -1,0 +1,29 @@
+<div class="card center cyan lighten-5">
+    <div class="card-content">
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
+    </div>
+    <div class="card-action">
+        <a href="#accept{{ shift.id }}" class="modal-trigger btn waves-effect waves-green green">J'accepte</a>
+        <a href="#reject{{ shift.id }}" class="modal-trigger btn waves-effect waves-orange orange">Je refuse</a>
+    </div>
+    <div id="accept{{ shift.id }}" class="modal">
+        <div class="modal-content">
+            <h4>Confirmation</h4>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+            <a href="{{ path("shift_accept_reserved", { 'id': shift.id }) }}"
+               class="modal-action modal-close waves-effect waves-green btn teal">Oui, je reprends mon créneau</a>
+        </div>
+    </div>
+    <div id="reject{{ shift.id }}" class="modal">
+        <div class="modal-content">
+            <h4>Confirmation</h4>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text">Retour</a>
+            <a href="{{ path("shift_reject_reserved", { 'id': shift.id }) }}"
+               class="modal-action modal-close waves-effect waves-green btn teal">Oui, Je ne reprends pas ce créneau</a>
+        </div>
+    </div>
+</div>

@@ -9,3 +9,9 @@ fos_oauth_server_authorize:
     resource: "@FOSOAuthServerBundle/Resources/config/routing/authorize.xml"
 _liip_imagine:
     resource: "@LiipImagineBundle/Resources/config/routing.xml"
+root:
+    path: /cardReader
+    defaults:
+        _controller: FrameworkBundle:Redirect:urlRedirect
+        path: /card_reader
+        permanent: true

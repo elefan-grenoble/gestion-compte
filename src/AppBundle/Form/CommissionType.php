@@ -50,14 +50,15 @@ class CommissionType extends AbstractType
             ->add('description',MarkdownEditorType::class,array('label'=>'Description'))
             ->add('email',EmailType::class,array('constraints' => array( new NotBlank(), new Email()),'label'=>'Courriel'));
 
-        $builder->add('next_meeting_date',DateTimeType::class,array('required' => false,
+        $builder->add('next_meeting_date', DateTimeType::class,array(
+            'required' => false,
             'input'  => 'datetime',
             'date_widget' => 'single_text',
             'time_widget' => 'single_text',
             'label' => 'Date & heure de la prochaine réunion',
-            'attr' => [
+            'attr' => array(
                 'class' => 'datepicker'
-            ]
+            )
         ));
         $builder->add('next_meeting_desc', TextType::class, array('required' => false, 'label' => 'Libelé de la prochaine réunion'));
 
@@ -67,6 +68,7 @@ class CommissionType extends AbstractType
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')) {
                 $form->add('owners', EntityType::class, array(
                     'class' => Beneficiary::class,
+                    'label' => 'Référent(s)',
                     'choice_label' => 'display_name',
                     'choices' => $commission->getBeneficiaries(),
                     'multiple' => true,

@@ -8,18 +8,26 @@ use Doctrine\ORM\Mapping as ORM;
  * TimeLog
  *
  * @ORM\Table(name="time_log")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\TimeLogRepository")
  */
 class TimeLog
 {
     const TYPE_CUSTOM = 0;
 
-    const TYPE_SHIFT = 1;
+    const TYPE_SHIFT_VALIDATED = 1;
+    const TYPE_SHIFT_INVALIDATED = 10;
+    const TYPE_SHIFT_FREED_SAVING = 21;
 
     const TYPE_CYCLE_END = 2;
     const TYPE_CYCLE_END_FROZEN = 3;
     const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
-    const TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS = 5;
+    const TYPE_CYCLE_END_EXEMPTED = 6;
+    const TYPE_CYCLE_END_SAVING = 7;
+
+    const TYPE_REGULATE_OPTIONAL_SHIFTS = 5;
+
+    const TYPE_SAVING = 20;
 
     /**
      * @var int
@@ -33,9 +41,15 @@ class TimeLog
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="date", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $date;
+    private $createdAt;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
+     */
+    private $createdBy;
 
     /**
      * @var int
@@ -71,6 +85,23 @@ class TimeLog
     private $shift;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    private $requestRoute;
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
+
+    /**
      * Get id
      *
      * @return int
@@ -81,27 +112,37 @@ class TimeLog
     }
 
     /**
-     * Set date
+     * Get createdAt
      *
-     * @param \DateTime $date
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \AppBundle\Entity\User $createBy
      *
      * @return TimeLog
      */
-    public function setDate($date)
+    public function setCreatedBy(\AppBundle\Entity\User $user = null)
     {
-        $this->date = $date;
+        $this->createdBy = $user;
 
         return $this;
     }
 
     /**
-     * Get date
+     * Get createdBy
      *
-     * @return \DateTime
+     * @return \AppBundle\Entity\User
      */
-    public function getDate()
+    public function getCreatedBy()
     {
-        return $this->date;
+        return $this->createdBy;
     }
 
     /**
@@ -201,6 +242,20 @@ class TimeLog
     }
 
     /**
+     * Set created_at
+     *
+     * @param \DateTime $created_at
+     *
+     * @return TimeLog
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
      * @param int $type
      */
     public function setType(int $type): void
@@ -208,32 +263,59 @@ class TimeLog
         $this->type = $type;
     }
 
+    public function getRequestRoute(): ?string
+    {
+        return $this->requestRoute;
+    }
+
+    public function setRequestRoute(?string $requestRoute): self
+    {
+        $this->requestRoute = $requestRoute;
+
+        return $this;
+    }
 
     /**
      * @return string
      */
-    public function getComputedDescription(): string
+    public function getTypeDisplay(): string
     {
         switch ($this->type) {
             case self::TYPE_CUSTOM:
                 return $this->description;
-            case self::TYPE_SHIFT:
-                if ($this->shift) {
-                    setlocale(LC_TIME, 'fr_FR.UTF8');
-                    return strftime("Créneau de %R", $this->shift->getStart()->getTimestamp()) . ' à ' . strftime("%R", $this->shift->getEnd()->getTimestamp()) . ' [' . $this->shift->getShifter() . ']';
-                } else {
-                    return "Créneau (non renseigné)";
-                }
+            case self::TYPE_SHIFT_VALIDATED:
+                return "Créneau validé";
+            case self::TYPE_SHIFT_INVALIDATED:
+                return "Créneau invalidé";
+            case self::TYPE_SHIFT_FREED_SAVING:
+                return "Créneau libéré et compteur temps incrémenté (grâce au compteur épargne)";
             case self::TYPE_CYCLE_END:
                 return "Début de cycle";
             case self::TYPE_CYCLE_END_FROZEN:
                 return "Début de cycle (compte gelé)";
             case self::TYPE_CYCLE_END_EXPIRED_REGISTRATION:
                 return "Début de cycle (compte expiré)";
-            case self::TYPE_CYCLE_END_REGULATE_OPTIONAL_SHIFTS:
+            case self::TYPE_CYCLE_END_EXEMPTED:
+                return "Début de cycle (compte exempté de créneau - exemption n°" . join(",", $this->membership->getMembershipShiftExemptions()->filter(function($membershipShiftExemption) {
+                    return $membershipShiftExemption->isCurrent($this->createdAt);
+                })->map(function($element) {
+                    return $element->getId();
+                })->toArray()) . ")";
+            case self::TYPE_CYCLE_END_SAVING:
+                if ($this->getTime() > 0) {
+                    return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
+                } else {
+                    return "Début de cycle " . $this->description;
+                }
+            case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
                 return "Régulation du bénévolat facultatif";
+            case self::TYPE_SAVING:
+                if ($this->getTime() >= 0) {
+                    return "Compteur épargne incrémenté";
+                } else {
+                    return "Compteur épargne décrémenté";
+                }
         }
-        return "Type de log de temps inconnu: " . $this->type;
+        return "Type de log de temps inconnu : " . $this->type;
     }
-
 }

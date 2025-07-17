@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/FixTimeLogCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Membership;
@@ -22,42 +22,32 @@ class FixTimeLogCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $countShiftLogs = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
         $members = $em->getRepository('AppBundle:Membership')->findAll();
+
+        $countShiftLogs = 0;
+
         foreach ($members as $member) {
             if ($member->getFirstShiftDate()) {
+                $previous_cycle_start = $this->getContainer()->get('membership_service')->getStartOfCycle($member, -1);
+                $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
+                $shifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
 
-                $lastCycleShifts = $member->getShiftsOfCycle(-1, true)->toArray();
-                $currentCycleShifts = $member->getShiftsOfCycle(0, true)->toArray();
-                $shifts = array_merge($lastCycleShifts, $currentCycleShifts);
                 foreach ($shifts as $shift) {
-
                     $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {
                         return ($log->getShift() && $log->getShift()->getId() == $shift->getId());
                     });
-
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $this->createShiftLog($em, $shift, $member);
+                        $log = $this->getContainer()->get('time_log_service')->initShiftValidatedTimeLog($shift, $shift->getStart(), "Créneau réalisé");
+                        $em->persist($log);
                         $countShiftLogs++;
                     }
                 }
             }
         }
+
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
     }
-
-    private function createShiftLog(EntityManager $em, Shift $shift, Membership $membership)
-    {
-        $log = new TimeLog();
-        $log->setMembership($membership);
-        $log->setTime($shift->getDuration());
-        $log->setShift($shift);
-        $log->setDate($shift->getStart());
-        $log->setDescription("Créneau réalisé");
-        $em->persist($log);
-    }
-
 }

@@ -1,0 +1,73 @@
+{% set shift_member = shift.shifter.membership %}
+
+<div id="shift_{{ shift.id }}" class="card center {% if (shift.isCurrent) %}deep-purple white-text{% elseif (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+    <div class="card-content">
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
+    </div>
+    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+        {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
+    {% endif %}
+    <div class="card-action">
+        {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+            {{ form_start(shift_validate_invalidate_forms[shift.id]) }}
+                {% if shift.wasCarriedOut %}
+                    <button type="submit" class="btn orange" title="Invalider la participation">
+                        <i class="material-icons left">highlight_off</i>Invalider la participation
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn green" title="Valider la participation">
+                        <i class="material-icons left">check_circle</i>Valider la participation
+                    </button>
+                {% endif %}
+            {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
+        {% endif %}
+        {% if is_granted('free', shift) %}
+            {% if shift.isPast %}
+                {{ form_start(shift_free_forms[shift.id]) }}
+                    {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
+                    <button type="submit" class="btn red" title="Supprimer la participation">
+                        <i class="material-icons left">delete</i>Supprimer la participation
+                    </button>
+                {{ form_end(shift_free_forms[shift.id]) }}
+            {% else %}
+                <a href="#free{{ shift.id }}" class="modal-trigger btn orange" title="Libérer">
+                    <i class="material-icons left">lock_open</i>Libérer
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div id="free{{ shift.id }}" class="modal black-text">
+        {{ form_start(shift_free_forms[shift.id]) }}
+            <div class="modal-content">
+                <h5>Ce membre ne peut pas faire son créneau</h5>
+                <div class="input-field">
+                    {{ form_label(shift_free_forms[shift.id].reason) }}
+                    {{ form_errors(shift_free_forms[shift.id].reason) }}
+                    {{ form_widget(shift_free_forms[shift.id].reason) }}
+                </div>
+                {% if use_time_log_saving %}
+                    <div class="card-panel blue lighten-3">
+                        <i class="material-icons left">info</i>
+                        {% if time_log_saving_shift_free_min_time_in_advance_days and shift.isBefore(time_log_saving_shift_free_min_time_in_advance_days|trans ~ ' days') %}
+                            Ce créneau a lieu dans <strong>moins de {{ time_log_saving_shift_free_min_time_in_advance_days }} jours</strong>.
+                            <br />
+                            Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
+                        {% elseif shift.duration > shift_member.savingTimeCount %}
+                            Ce membre <strong>n'a pas assez de temps sur son compteur épargne</strong> (durée du créneau : <strong>{{ shift.duration | duration_from_minutes }}</strong> ; compteur épargne : <strong>{{ shift_member.savingTimeCount | duration_from_minutes }}</strong>).
+                            <br />
+                            Ce créneau ne sera donc pas comptabilisé, et son compteur épargne ne sera pas utilisé.
+                        {% else %}
+                            Grâce au compteur épargne du membre, ce créneau sera comptabilisé !
+                            <br />
+                            En échange, <strong>{{ shift.duration | duration_from_minutes }}</strong> seront décrémentés du compteur épargne (<strong>{{ shift_member.savingTimeCount | duration_from_minutes }}</strong>) du membre.
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat grey-text">Annuler</a>
+                <button type="submit" class="modal-action modal-close waves-effect waves-green btn red">Oui, libérer le créneau !</button>
+            </div>
+        {{ form_end(shift_free_forms[shift.id]) }}
+    </div>
+</div>

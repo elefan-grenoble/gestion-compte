@@ -1,18 +1,29 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des dernières adhésions - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">attach_money</i>&nbsp;Liste des dernières adhésions
+{% endblock %}
+
 {% block content %}
-    <h4 class="">Liste des dernières adhésions / ré-adhésions</h4>
+    <h4>Liste des dernières adhésions / ré-adhésions</h4>
+
     <h5>par date de saisie</h5>
 
     {% if is_granted("ROLE_FINANCE_MANAGER") %}
         <ul class="collapsible">
             <li>
-                <div class="collapsible-header"><i class="material-icons">tune</i>Filtres (
+                <div class="collapsible-header">
+                    <i class="material-icons">tune</i>Filtres
                     {% if to is not null %}
-                    du {{ from | date_fr_full }} au {{ to | date_fr_full }}
+                        (du {{ from | date_fr_full }} au {{ to | date_fr_full }})
                     {% else %}
-                    à partir du {{ from | date_fr_full }}
-                    {% endif %})</div>
+                        (à partir du {{ from | date_fr_full }})
+                    {% endif %}
+                </div>
                 <div class="collapsible-body">
                     <form name="form" method="get" action="">
                         <div class="row">
@@ -32,7 +43,8 @@
         </ul>
 
         <h5>Total sur toute la période : {{ grand_total['grand_total'] }}€</h5>
-        <ul class="collapsible" data-collapsible="accordion">
+
+        <ul class="collapsible">
             <li>
                 <div class="row">
                     {% for i in 1..6 %}
@@ -52,27 +64,31 @@
                 <li>
                     <div class="row">
                         {% for i in 1..6 %}
-                        <div class="col s2 center">
-                            <small>Total {{ i | payment_mode }}</small>{% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}<br><b>{{ totaux[datekey]['sum_'~i] }}</b>€{% endif %}
-                        </div>
+                            <div class="col s2 center">
+                                <small>Total {{ i | payment_mode }}</small>
+                                {% if totaux[datekey]['sum_'~i] is defined and totaux[datekey]['sum_'~i] > 0 %}
+                                    <br />
+                                    <strong>{{ totaux[datekey]['sum_'~i] }}</strong>€
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     </div>
                 </li>
             {% endif %}
             {% if not date or date != (registration.date | date('d F Y')) %}
-
                 {% if date %}
                     </ul>
                 {% endif %}
                 {% set date = (registration.date | date('d F Y')) %}
                 {% set datekey = (registration.date | date('Y-m-d')) %}
+
                 <h5>{{ registration.date | date_fr_long }}</h5>
-                <ul class="collapsible" data-collapsible="accordion">
+                <ul class="collapsible">
             {% endif %}
-            <li class="">
+            <li>
                 <div class="collapsible-header {% if registration.membership is defined and registration.membership and (registration.membership.registrations | length) > 1 %}teal{% elseif registration.type == constant('TYPE_ANONYMOUS', registration) %}orange{% else %}indigo{% endif %} lighten-4">
                     {% if registration.amount is not null %}
-                        {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or  registration.mode == constant('TYPE_HELLOASSO', R)  %}
+                        {% if registration.mode == constant('TYPE_CREDIT_CARD', R) or registration.mode == constant('TYPE_HELLOASSO', R)  %}
                             <i class="material-icons tiny">credit_card</i>
                         {% else %}
                             <i class="material-icons tiny">attach_money</i>
@@ -85,24 +101,17 @@
                         Bénéficiaire rattaché
                     {% endif %}
                     {% if registration.registrar %}
-                        par&nbsp;
-                        {% if registration.registrar.beneficiary %}
-                            <a href="{{ path("member_show",{"member_number":registration.registrar.beneficiary.membership.memberNumber}) }}">{{ registration.registrar.username }}</a>
-                        {% else %}
-                            {{ registration.registrar.username }}
-                        {% endif %}
+                        par&nbsp;{% include "admin/member/_partial/member_or_user_link.html.twig" with { user: registration.registrar, target_blank: true } %}
                         &nbsp;&agrave;&nbsp;
-                        {{ registration.date | date('H:i') }}
+                        {{ registration.date | date('G\\hi') }}
                     {% endif %}
                     {% if registration.membership %}
-                        pour #<a
-                            href="{{ path("member_show",{"member_number":registration.membership.memberNumber}) }}">{{ registration.membership.memberNumber }}</a>&nbsp;
-                        {{ registration.beneficiary }}
-                        {% if(registration.membership.registrations | length) > 1 %}
-                            (Ré-adhésion) effective le {{ registration.startDate | date('d F Y') }}
+                        pour&nbsp;<a href="{{ path("member_show",{ "member_number": registration.membership.memberNumber }) }}" target="_blank">{{ registration.membership.memberNumberWithBeneficiaryListString }}</a>&nbsp;
+                        {% if (registration.membership.registrations | length) > 1 %}
+                            (Ré-adhésion) effective le {{ registration.startDate | date_fr }}
                         {% endif %}
                     {% else %}
-                        pour {{ registration.beneficiary }}
+                        pour&nbsp;{{ registration.beneficiary }}
                     {% endif %}
                 </div>
 
@@ -124,11 +133,13 @@
                     <div class="collapsible-body">
                         <div>
                             {% if registration | recall_date %}
-                                Dernière relance faite le {{ registration | recall_date | date_fr_with_time }}
+                                Dernière relance faite le {{ registration | recall_date | date_fr_full_with_time }}
                             {% else %}
                                 Jamais relancé
                             {% endif %}&nbsp;
-                            <a href="{{ path('user_quick_new_recall',{'id' : registration.id[2:]}) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
+                            <a href="{{ path('pre_user_recall', { 'id' : registration.id[2:] }) }}" class="btn waves-effect waves-light green darken-2">
+                                <i class="material-icons left">redo</i>Relancer
+                            </a>
                         </div>
                     </div>
                 {% endif %}
@@ -150,37 +161,36 @@
         <br>
         <ul class="pagination">
             {% if to is not null %}
-                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==1) %}#!{% else %}{{ path("registrations",{'page':current_page-1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
-                {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                {% for i in range(1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a
                                 href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
-                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(page==page_count) %}#!{% else %}{{ path("registrations",{'page':current_page+1,'from':(from | date('Y-m-d')),'to':(to | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>
             {% else %}
-                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("registrations",{'page':page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==1) %}#!{% else %}{{ path("registrations",{'page':current_page-1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_left</i>
                     </a>
                 </li>
-                {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a
+                {% for i in range(1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a
                                 href="{{ path("registrations",{'page':i,'from':(from | date('Y-m-d'))}) }}">{{ i }}</a></li>
                 {% endfor %}
-                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("registrations",{'page':page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
+                <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                    <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("registrations",{'page':current_page+1,'from':(from | date('Y-m-d'))}) }}{% endif %}">
                         <i class="material-icons">chevron_right</i>
                     </a>
                 </li>
             {% endif %}
         </ul>
     {% endif %}
-
 {% endblock %}

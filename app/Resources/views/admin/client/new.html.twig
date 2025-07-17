@@ -1,26 +1,23 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-{% endblock %}
-{% block aftercontainer %}
-{% endblock %}
-{% block content %}
-    <div class="section no-pad-bot" id="index-banner">
-        {% if is_granted("ROLE_ADMIN") %}
-            <div class="container">
-                <h3 class=" enter">Nouveau client Oauth</h3>
-                {{ form_start(form) }}
-                    {{ form_row(form) }}
-                    <div>
-                        <button type="submit" class="btn waves-effect waves-light">Créer</button>
-                    </div>
-                {{ form_end(form) }}
-            </div>
-        {% endif %}
-    </div>
+{% block title %}Ajouter un client (Oauth) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('client_list') }}"><i class="material-icons">list</i>&nbsp;Gestion des clients (Oauth)</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
+{% block content %}
+    {% if is_granted("ROLE_ADMIN") %}
+        <h4>Ajouter un client (Oauth)</h4>
+
+        {{ form_start(form) }}
+        {{ form_row(form) }}
+        <div>
+            <button type="submit" class="btn waves-effect waves-light">Créer</button>
+        </div>
+        {{ form_end(form) }}
+    {% endif %}
 {% endblock %}

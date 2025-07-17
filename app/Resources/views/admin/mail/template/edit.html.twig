@@ -1,14 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>modèles d'emails</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">edit</i>
+{% block title %}Editer le modèle d'email - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>&nbsp;Modèles d'emails</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Modifier le modèle d'email</h4>
+    <h4>Editer le modèle d'email</h4>
 
     <p>La balise <strong>{{ "{{template_content}}" }}</strong> dans le modèle sera remplacée par le contenu du mail.</p>
 
@@ -16,7 +18,6 @@
     <div class="errors">
         {{ form_errors(form.content) }}
     </div>
-
 
     <div class="row">
         <div class="input-field col s12">
@@ -29,9 +30,11 @@
     </div>
 
     {{ form_widget(form.content) }}
+
+    {% include "admin/member/_partial/created_updated_card.html.twig" with { item: emailTemplate } %}
+
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Enregistrer</button>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}

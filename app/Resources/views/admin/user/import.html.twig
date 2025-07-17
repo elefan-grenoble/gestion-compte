@@ -1,12 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}">Admin</a><i class="material-icons">chevron_right</i>
-    Import CSV
+{% block title %}Importer des adhérents (CSV) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">file_upload</i>&nbsp;Importer des adhérents (CSV)
 {% endblock %}
 
 {% block content %}
+    <h4>Importer des adhérents au format CSV</h4>
+
     <div class="row">
         Colonnes par default :<br>
         <pre>
@@ -15,7 +19,9 @@
 
         <div class="col s8 offset-s2">
             {{ form_start(form) }}
-            {{ form_errors(form) }}
+            <div class="errors">
+                {{ form_errors(form) }}
+            </div>
             <div class="row">
                 <div class="col s7">
                     <div class="file-field input-field">
@@ -36,7 +42,6 @@
                     <button type="submit" class="btn"><i class="material-icons left">file_upload</i>Importer</button>
                 </div>
             </div>
-
             {{ form_end(form) }}
         </div>
         <div class="col s12">
@@ -48,6 +53,5 @@
             </pre>
             </p>
         </div>
-
     </div>
 {% endblock %}

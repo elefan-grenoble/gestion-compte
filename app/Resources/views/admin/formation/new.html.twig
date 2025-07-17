@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Ajouter une formation - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('formation_list') }}"><i class="material-icons">list</i>&nbsp;Liste des formations</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter
+{% endblock %}
+
+{% block content %}
+    <h4>Nouvelle formation</h4>
+
+    {% include "admin/formation/_form.html.twig" with { form: form } %}
+{% endblock %}

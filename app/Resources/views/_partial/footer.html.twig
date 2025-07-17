@@ -1,0 +1,13 @@
+<footer class="page-footer" style="background-color: {{ main_color }}">
+    <div class="footer-copyright">
+        <div class="container">
+            <a class="grey-text text-lighten-4" href="{{ path('about') }}" title="À propos de cette application">À propos</a>
+            {% for socialNetwork in socialNetworks %}
+                <a class="grey-text text-lighten-4 right" href="{{ socialNetwork.url }}">
+                    &nbsp;|&nbsp;{{ socialNetwork.name }}
+                </a>
+            {% endfor %}
+            <a class="grey-text text-lighten-4 right" href="{{ project_url }}">{{ project_url_display }}</a>
+        </div>
+    </div>
+</footer>

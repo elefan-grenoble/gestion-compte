@@ -11,24 +11,12 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Shift;
 use AppBundle\Entity\TimeLog;
 use AppBundle\Entity\User;
-use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\NoteType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -55,17 +43,14 @@ class NoteController extends Controller
     /**
      * reply to a note
      *
-     * @Route("/note/{id}/reply", name="note_reply")
-     * @Method({"POST"})
+     * @Route("/note/{id}/reply", name="note_reply", methods={"POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      */
     public function noteReplyAction(Request $request, Note $note)
     {
-        $this->denyAccessUnlessGranted('access_tools', $this->getCurrentAppUser());
-
         $new_note = new Note();
         $new_note->setParent($note);
         $new_note->setAuthor($this->getCurrentAppUser());
-        $new_note->setCreatedAt(new \DateTime());
         $new_note->setSubject($note->getSubject());
 
         $note_form = $this->createForm(NoteType::class, $new_note);
@@ -88,8 +73,7 @@ class NoteController extends Controller
     /**
      * edit a note
      *
-     * @Route("/note/{id}/edit", name="note_edit")
-     * @Method({"GET","POST"})
+     * @Route("/note/{id}/edit", name="note_edit", methods={"GET","POST"})
      */
     public function noteEditAction(Request $request, Note $note)
     {
@@ -130,8 +114,7 @@ class NoteController extends Controller
     /**
      * Delete a note.
      *
-     * @Route("/note/{id}", name="note_delete")
-     * @Method("DELETE")
+     * @Route("/note/{id}", name="note_delete", methods={"DELETE"})
      */
     public function deleteNoteAction(Request $request, Note $note)
     {

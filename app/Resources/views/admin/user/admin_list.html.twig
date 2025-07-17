@@ -1,52 +1,69 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Liste des utilisateurs admin - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des utilisateurs admin
+{% endblock %}
+
 {% block content %}
-    <h1>Liste des utilisateurs admin ({{ admins | length }})</h1>
+    <h4>Liste des utilisateurs admin ({{ admins | length }})</h4>
 
     <table class="striped">
         <thead>
-        <tr>
-            <th data-col="o.member_number">#</th>
-            <th data-col="o.username">username</th>
-            <th data-col="b.email">email</th>
-            <th></th>
-        </tr>
+            <tr>
+                <th>Etat</th>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Dernière connexion</th>
+                {% if is_granted("ROLE_SUPER_ADMIN") %}
+                    <th>Actions</th>
+                {% endif %}
+            </tr>
         </thead>
         <tbody>
-        {% for admin in admins %}
-            <tr>
-                <td>
-                    {% if admin.beneficiary %}
-                        <a href="{{ path('member_show', { 'member_number': admin.beneficiary.membership.memberNumber }) }}">
-                            {{ admin.beneficiary.membership.memberNumber }}
-                        </a>
-                    {% endif %}
-                </td>
-                <td>{{ admin.username }}</td>
-                <td>{{ admin.email }}</td>
-                <td>
-                    {{ form_start(delete_forms[admin.id]) }}
-                    {{ form_widget(delete_forms[admin.id]) }}
-                    {% if admin.beneficiary %}
-                        <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}"
-                           class="orange btn-floating small"> <i class="material-icons left">arrow_downward</i></a>
-
+            {% for admin in admins %}
+                <tr id="user_{{ admin.id }}">
+                    <td>
+                        {% if admin.beneficiary and admin.beneficiary.membership.withdrawn %}
+                            <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
+                        {% elseif not admin.enabled %}
+                            <i class="material-icons" title="Utilisateur désactivé">{{ member_withdrawn_material_icon }}</i>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: admin, target_blank: true } %}
+                    </td>
+                    <td>{{ admin.email }}</td>
+                    {% if admin.lastLogin %}
+                        <td title="{{ admin.lastLogin | date_fr_full_with_time }}">{{ admin.lastLogin | date_short }}</td>
                     {% else %}
-                        <button type="submit" class="btn-floating waves-effect waves-light red"><i
-                                    class="material-icons left">close</i></button>
+                        <td></td>
                     {% endif %}
-                    {{ form_end(delete_forms[admin.id]) }}
-                </td>
-            </tr>
-        {% endfor %}
+                    {% if is_granted("ROLE_SUPER_ADMIN") %}
+                        {% if not oidc_enable %}
+                            <td>
+                                {{ form_start(delete_forms[admin.id]) }}
+                                {{ form_widget(delete_forms[admin.id]) }}
+                                {% if admin.beneficiary %}
+                                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small" title="Enlever le rôle">
+                                        <i class="material-icons left">arrow_downward</i>
+                                    </a>
+                                {% else %}
+                                    <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cet utilisateur ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer l'utilisateur ⚠️">
+                                        <i class="material-icons left">delete</i>
+                                    </a>
+                                {% endif %}
+                                {{ form_end(delete_forms[admin.id]) }}
+                            </td>
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
-
-
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-
-{% block javascripts %}
 {% endblock %}

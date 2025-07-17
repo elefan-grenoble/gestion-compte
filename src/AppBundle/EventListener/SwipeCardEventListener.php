@@ -30,8 +30,9 @@ class SwipeCardEventListener implements EventSubscriberInterface
     {
         $log = new SwipeCardLog();
         $log->setDate(new \DateTime());
+        $log->setSwipeCard($event->getSwipeCard());
         $log->setCounter($event->getCounter());
-        $this->em->persist($log);;
+        $this->em->persist($log);
         $this->em->flush();
     }
 }

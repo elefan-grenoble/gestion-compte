@@ -71,10 +71,15 @@ class ShiftBucket
                     return 1;
                 }
             } else {
-                if (!$b->getFormation())
+                if (!$b->getFormation()) {
                     return -1;
-                else
-                    return $a->getFormation()->getId() < $b->getFormation()->getId();
+                } else {
+                    if ($a->getFormation()->getId() != $b->getFormation()->getId()) {
+                        return $a->getFormation()->getId() < $b->getFormation()->getId();
+                    } else {
+                        return $a->getBookedTime() < $b->getBookedTime();
+                    }
+                }
             }
         }
         if ($a->getLastShifter() && $a->getLastShifter()->getId() == $beneficiary->getId()) {
@@ -83,19 +88,7 @@ class ShiftBucket
         if ($b->getLastShifter() && $b->getLastShifter()->getId() == $beneficiary->getId()) {
             return 1;
         }
-        if ($a->getIsDismissed()) {
-            if ($b->getIsDismissed()) {
-                if ($a->getDismissedTime() == $b->getDismissedTime()) {
-                    return 0;
-                } else {
-                    return $a->getDismissedTime() < $b->getDismissedTime() ? -1 : 1;
-                }
-            } else {
-                return -1;
-            }
-        } else {
-            return $b->getIsDismissed() ? 1 : 0;
-        }
+        return 0;
     }
 
     public function getShifts()
@@ -109,6 +102,20 @@ class ShiftBucket
             $ids[] = $shift->getId();
         }
         return $ids;
+    }
+
+    public function getId(){
+        return min($this->getShiftIds());
+    }
+
+    public function getShiftWithMinId(){
+        $min = $this->shifts->first();
+        foreach ($this->getShifts() as $shift){
+            if ($min->getId() > $shift->getId()) {
+                $min = $shift;
+            }
+        }
+        return $min;
     }
 
     public function getShifterCount()
@@ -158,9 +165,13 @@ class ShiftBucket
         return $this->shifts->first()->getDuration();
     }
 
-    public function canBookInterval(Beneficiary $beneficiary) // check if none of the shifts belong to the beneficiary ?
+    /**
+     * - check that none of the shifts belong to the beneficiary
+     * - check that the beneficiary doesn't already have a shift in the same interval
+     */
+    public function canBookInterval(Beneficiary $beneficiary)
     {
-        $alreadyBooked =  $beneficiary->getShifts()->exists(function ($key, Shift $shift) {
+        $alreadyBooked = $beneficiary->getShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
         });
         $alreadyReserved = $beneficiary->getReservedShifts()->exists(function ($key, Shift $shift) {
@@ -228,5 +239,13 @@ class ShiftBucket
                     return true;
             };
         }
+    }
+
+    /**
+     * Example: "vendredi 22 juillet de 09h30 à 12h30"
+     */
+    public function getDisplayDateLongWithTime()
+    {
+        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
     }
 }

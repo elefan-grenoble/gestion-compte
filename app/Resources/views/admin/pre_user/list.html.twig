@@ -1,9 +1,10 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>Liste des adhésions en attente
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des adhésions en attente
 {% endblock %}
 
 {% block stylesheets %}
@@ -35,10 +36,9 @@
 
         <tbody>
         {% for anonymousBeneficiary in anonymousBeneficiaries %}
-            <tr class="{% if app.user.id == anonymousBeneficiary.registrar.id %}myself{% endif %}">
-                <td>{{ anonymousBeneficiary.createdAt | date('d-m-Y H:i') }}</td>
+            <tr id="anonymousbeneficiary_{{ anonymousBeneficiary.id }}" class="{% if app.user.id == anonymousBeneficiary.registrar.id %}myself{% endif %}">
+                <td>{{ anonymousBeneficiary.createdAt | date_time }}</td>
                 <td>{{ anonymousBeneficiary.email }}</td>
-
                 <td>
                     {% if anonymousBeneficiary.registrar %}
                         {% if anonymousBeneficiary.registrar.beneficiary %}
@@ -64,19 +64,24 @@
                         Nouvelle adhésion
                     {% endif %}
                 </td>
-
                 <td>
                     {% if anonymousBeneficiary.recallDate %}
-                        Dernière relance faite le {{ anonymousBeneficiary.recallDate | date_fr_with_time }}
+                        Dernière relance faite le {{ anonymousBeneficiary.recallDate | date_fr_full_with_time }}
                     {% else %}
                         Jamais relancé
                     {% endif %}&nbsp;
                 </td>
-
                 <td>
-                    {% if is_granted("ROLE_USER_MANAGER") %}
-                        <a href="{{ path('user_quick_new_recall',{'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2"><i class="material-icons left">redo</i> Relancer</a>
-                        <br> <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red"><i class="material-icons left">delete</i>Supprimer</a>
+                    {% if is_granted("ROLE_USER_VIEWER") %}
+                        <a href="{{ path('pre_user_recall', { 'id' : anonymousBeneficiary.id }) }}" class="btn waves-effect waves-light green darken-2">
+                            <i class="material-icons left">redo</i>Relancer
+                        </a>
+                    {% endif %}
+                    {% if is_granted("ROLE_ADMIN") %}
+                        <br />
+                        <a href="{{ path('pre_user_delete', { 'id': anonymousBeneficiary.id }) }}" class="btn red">
+                            <i class="material-icons left">delete</i>Supprimer
+                        </a>
                     {% endif %}
                 </td>
             </tr>

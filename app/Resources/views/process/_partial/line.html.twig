@@ -1,6 +1,6 @@
-<tr class="{% if check_date < processUpdate.date %}new {% else %}{% endif %}">
+<tr id="processupdate_{{ processUpdate.id }}" class="{% if check_date < processUpdate.date %}new {% else %}{% endif %}">
     <td>
-        <i class="material-icons left">content_paste</i><a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails">{{ processUpdate.date | date_fr_with_time }}</a>
+        <i class="material-icons left">content_paste</i><a href="#view_{{ processUpdate.id }}" class="modal-trigger" title="Détails">{{ processUpdate.date | date_fr_full_with_time }}</a>
     </td>
     <td>
         {{ processUpdate.title }}
@@ -13,9 +13,9 @@
             {{ processUpdate.author }}
         {% endif %}
     </td>
-    <td>
+    <td style="overflow:hidden">
         {% if processUpdate.link %}
-            <a href="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
+            <a href="{{ processUpdate.link }}" title="{{ processUpdate.link }}">{{ processUpdate.link }}</a>
         {% endif %}
     </td>
     {% endif %}
@@ -24,7 +24,7 @@
         <div id="view_{{ processUpdate.id }}" class="modal">
             <div class="modal-content">
                 <h5>{{ processUpdate.title }}</h5>
-                {{ processUpdate.description | markdown | raw}}
+                {{ processUpdate.description | markdown | raw }}
             </div>
             <div class="modal-footer">
                 {% if processUpdate.link %}

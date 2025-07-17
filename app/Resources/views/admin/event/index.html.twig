@@ -1,0 +1,56 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Événements - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">event</i>&nbsp;Événements
+{% endblock %}
+
+{% block content %}
+{% if eventsOngoing | length %}
+    <h4>Événements en cours ({{ eventsOngoing | length }})</h4>
+
+    <div class="row">
+        {% for event in eventsOngoing %}
+            <div class="col m12 l6">
+                {% include "admin/event/_partial/card.html.twig" with { event: event, from_admin: true } %}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<h4>Événements à venir ({{ eventsFuture | length }})</h4>
+
+<div class="row">
+    {% for event in eventsFuture %}
+        <div class="col m12 l6">
+            {% include "admin/event/_partial/card.html.twig" with { event: event, from_admin: true } %}
+        </div>
+    {% endfor %}
+</div>
+
+<h4>Événements passés (10 plus récents)</h4>
+
+{% if eventsPast | length %}
+    {% include "admin/event/_partial/table.html.twig" with { events: eventsPast, from_admin: true } %}
+{% endif %}
+
+{% if is_granted("ROLE_ADMIN") %}
+    <br />
+    <a href="{{ path("admin_event_list") }}" class="btn">
+        <i class="material-icons left">list</i>Tous les événements
+    </a>
+    <a href="{{ path("admin_proxies_list") }}" class="btn">
+        <i class="material-icons left">list</i>Toutes les procurations
+    </a>
+{% endif %}
+<br />
+<a href="{{ path('admin_event_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter un événement
+</a>
+<a href="{{ path('admin_event_widget_generator') }}" class="btn">
+    <i class="material-icons left">tune</i>Générer un widget
+</a>
+{% endblock %}

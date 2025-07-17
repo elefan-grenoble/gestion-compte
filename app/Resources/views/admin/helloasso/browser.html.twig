@@ -1,103 +1,106 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
+{% block breadcrumbs %}
     <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
-    <a href="{{ path('helloasso_payments') }}">Helloasso</a><i class="material-icons">chevron_right</i>
-    <a href="{{ path('helloasso_browser') }}">campagnes</a>
-    {% if campaigns is not defined and campaign is defined  %}
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('helloasso_browser') }}"><i class="material-icons">contact_mail</i>&nbsp;Liste des campagnes Helloasso</a>
+    {% if campaigns is not defined and campaign is defined %}
         <i class="material-icons">chevron_right</i>
         <strong>{{ campaign.name }}</strong>
     {% endif %}
 {% endblock %}
 
 {% block content %}
-    {% if is_granted("ROLE_FINANCE_MANAGER") %}
-        <h4 class="">Mes campagnes Helloasso</h4>
-        {% if campaigns is defined and campaigns | length %}
+    <h4>Mes campagnes Helloasso</h4>
+    {% if campaigns is defined and campaigns | length %}
         <div class="row">
             {% for campaign in campaigns %}
-            <div class="col s12 m6 l6 xl4">
-                {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign } %}
-            </div>
+                <div class="col s12 m6 l6 xl4">
+                    {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign } %}
+                </div>
             {% endfor %}
         </div>
-        {% else %}
-            <h5>campagne : <strong>{{ campaign.name }}</strong></h5>
-            {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign, no_link: true } %}
-            <table>
-                <thead>
-                <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    <th colspan="7" class="center" style="border-bottom: 1px solid black">payer</th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+    {% elseif campaigns is defined and campaigns is not null %}
+        <h5>campagne : <strong>{{ campaign.name }}</strong></h5>
+        {% include "admin/helloasso/_partial/campaign.html.twig" with { campaign: campaign, no_link: true } %}
+        <table>
+            <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th colspan="7" class="center" style="border-bottom: 1px solid black">payer</th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+            <tr>
+                <th>id</th>
+                <th>date</th>
+                <th>amount</th>
+                <th>type</th>
+                <th>first_name</th>
+                <th>last_name</th>
+                <th>address</th>
+                <th>zip_code</th>
+                <th>city</th>
+                <th>country</th>
+                <th>email</th>
+                <th>status</th>
+                <th>actions</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for payment in payments %}
+                <tr id="helloassopayment_{{ payment.id }}">
+                    <td>{{ payment.id }}</td>
+                    <td>{{ payment.date }}</td>
+                    <td>{{ payment.amount }}</td>
+                    <td>{{ payment.type }}</td>
+                    <td>{{ payment.payer_first_name }}</td>
+                    <td>{{ payment.payer_last_name }}</td>
+                    <td>{% if payment.payer_city is defined %}{{ payment.payer_address }}{% endif %}</td>
+                    <td>{% if payment.payer_city is defined %}{{ payment.payer_zip_code }}{% endif %}</td>
+                    <td>{% if payment.payer_city is defined %}{{ payment.payer_city }}{% endif %}</td>
+                    <td>{{ payment.payer_country }}</td>
+                    <td>{{ payment.payer_email }}</td>
+                    <td>{{ payment.status }}</td>
+                    <td>
+                        <ul>
+                            {% for key,action in payment.actions %}
+                                <li>#{{ action.id }} {{ action.amount }}€ ({{ action.type }})</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        <form action="{{ path("helloasso_manual_paiement_add",{paiementId : payment.id }) }}" method="post">
+                            <input type="hidden" name="paiementId" value="{{ payment.id }}">
+                            <button class="btn red" type="submit"><i class="material-icons">save</i></button>
+                        </form>
+                    </td>
                 </tr>
-                <tr>
-                    <th>id</th>
-                    <th>date</th>
-                    <th>amount</th>
-                    <th>type</th>
-                    <th>first_name</th>
-                    <th>last_name</th>
-                    <th>address</th>
-                    <th>zip_code</th>
-                    <th>city</th>
-                    <th>country</th>
-                    <th>email</th>
-                    <th>status</th>
-                    <th>actions</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for payment in payments %}
-                    <tr>
-                        <td>{{ payment.id }}</td>
-                        <td>{{ payment.date }}</td>
-                        <td>{{ payment.amount }}</td>
-                        <td>{{ payment.type }}</td>
-                        <td>{{ payment.payer_first_name }}</td>
-                        <td>{{ payment.payer_last_name }}</td>
-                        <td>{% if payment.payer_city is defined %}{{ payment.payer_address }}{% endif %}</td>
-                        <td>{% if payment.payer_city is defined %}{{ payment.payer_zip_code }}{% endif %}</td>
-                        <td>{% if payment.payer_city is defined %}{{ payment.payer_city }}{% endif %}</td>
-                        <td>{{ payment.payer_country }}</td>
-                        <td>{{ payment.payer_email }}</td>
-                        <td>{{ payment.status }}</td>
-                        <td><ul>{% for key,action in payment.actions %}
-                                    <li>#{{ action.id }} {{ action.amount }}€ ({{ action.type }})</li>
-                            {% endfor %}</ul>
-                        </td>
-                        <td>
-                            <form action="{{ path("helloasso_manual_paiement_add",{paiementId : payment.id }) }}" method="post">
-                                <input type="hidden" name="paiementId" value="{{ payment.id }}">
-                                <button class="btn red" type="submit" ><i class="material-icons">save</i></button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
+            {% endfor %}
 
-                </tbody>
-            </table>
-            <ul class="pagination">
-                <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==1) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':page-1}) }}{% endif %}">
-                        <i class="material-icons">chevron_left</i>
-                    </a>
-                </li>
-                {% for i in range(1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_browser",{campaign:campaign.id,'page':i}) }}">{{ i }}</a></li>
-                {% endfor %}
-                <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-                    <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':page+1}) }}{% endif %}">
-                        <i class="material-icons">chevron_right</i>
-                    </a>
-                </li>
-            </ul>
-        {% endif %}
+            </tbody>
+        </table>
+        <ul class="pagination">
+            <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{% if(current_page==1) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':current_page-1}) }}{% endif %}">
+                    <i class="material-icons">chevron_left</i>
+                </a>
+            </li>
+            {% for i in range(1, page_count) %}
+                <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("helloasso_browser",{campaign:campaign.id,'page':i}) }}">{{ i }}</a></li>
+            {% endfor %}
+            <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("helloasso_browser",{campaign:campaign.id,'page':current_page+1}) }}{% endif %}">
+                    <i class="material-icons">chevron_right</i>
+                </a>
+            </li>
+        </ul>
+    {% else %}
+        Pas de campagne en cours (ou Helloasso n'est pas correctement configuré).
     {% endif %}
 {% endblock %}

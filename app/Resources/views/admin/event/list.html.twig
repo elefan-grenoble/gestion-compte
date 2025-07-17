@@ -1,70 +1,68 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}
-    evenements
-{% endblock %}
+{% block title %}Événements - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>evenements
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des événements
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des evenements</h4>
-    <div class="row">
-        {% for event in events %}
-            {% if event.date < date() %}
-                <div class="col s12">
-                    <a href="{{ path("event_edit",{'id':event.id}) }}">
-                        <i class="material-icons left black-text">event</i>{{ event.title }} - <i><span class="black-text">{{ event.date | date('d F Y H:i') }}</span></i>
-                    </a>
-                    {% if event.needProxy %}
-                        <br>
-                        <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons tiny">list</i>&nbsp;Procurations</a> - <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons tiny">print</i>&nbsp;Emargement</a>
-                    {% endif %}
-                </div>
-            {% else %}
-                <div class="col s12 m6">
-                    <div class="card blue-grey darken-1 small">
-                        {% if event.img %}
-                            <div class="card-image">
-                                <img src="{{ event|img('imgFile','card') }}" />
-                                <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
-                            </div>
-                        {% endif %}
-                        <div class="card-content white-text">
-                            {% if not event.img %}
-                                <span class="card-title"><i class="material-icons left">event</i>{{ event.title }}</span>
-                            {% endif %}
-                            <i>{{ event.date | date('d F Y H:i') }}</i>
-                            {{ event.description | markdown | raw }}
-                        </div>
-                        <div class="card-action">
+<h4>Liste des événements ({{ result_count }})</h4>
 
-                            <div class="left">
-                                <a href="{{ path("event_edit",{'id':event.id}) }}"><i class="material-icons left">edit</i>Editer</a>
-                            </div>
-                            {% if event.needProxy %}
-                                <div class="left">
-                                    <a href="{{ path("event_proxies_list",{'id':event.id}) }}"><i class="material-icons left">list</i>Procurations</a>
-                                </div>
-                                <div class="left">
-                                    <a href="{{ path("event_signatures",{'id':event.id}) }}"><i class="material-icons left">print</i>Emargement</a>
-                                </div>
-                            {% endif %}
-                            <div>
-                                &nbsp;
-                            </div>
-                        </div>
+{# Filter form  --------- #}
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header">
+            <i class="material-icons">tune</i>Filtres
+        </div>
+        <div class="collapsible-body">
+            {{ form_start(filter_form) }}
+            <div class="row">
+                <div class="col s6">
+                    <div class="input-field">
+                        {{ form_widget(filter_form.kind) }}
+                        {{ form_label(filter_form.kind) }}
                     </div>
                 </div>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <a href="{{ path("proxies_list") }}" class="btn"><i class="material-icons left">list</i>Toutes les procurations</a>
-    {% if is_granted("ROLE_SUPER_ADMIN") %}
-        <a href="{{ path('event_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un événement</a>
-    {% endif %}
+            </div>
+            {{ form_widget(filter_form.submit) }}
+            {{ form_end(filter_form) }}
+        </div>
+    </li>
+</ul>
 
+{% include "admin/event/_partial/table.html.twig" with { events: events, from_admin: true } %}
+
+<ul class="pagination">
+    <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+        <a href="{% if(current_page==1) %}#!{% else %}{{ path("admin_event_list", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
+            <i class="material-icons">chevron_left</i>
+        </a>
+    </li>
+    {% for i in range(1, page_count) %}
+        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}">
+            <a href="#" data-page="{{ i }}">{{ i }}</a>
+        </li>
+    {% endfor %}
+    <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+        <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("admin_event_list", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
+            <i class="material-icons">chevron_right</i>
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    jQuery(function() {
+        $('.pagination li:not(.disabled) a').click(function(e) {
+            e.preventDefault();
+            $('#form_page').val($(this).data('page'));
+            $('form[name=form]').submit();
+        });
+    });
+</script>
 {% endblock %}

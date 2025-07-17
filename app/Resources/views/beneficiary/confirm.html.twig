@@ -1,12 +1,13 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-        <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">search</i><a href="{{ path('find_member_number') }}">Recherche numéro d'adhérent</a> <i class="material-icons">chevron_right</i>
-        <i class="material-icons">check</i><span>Trouvé</span>
-    {% endif %}
+{% block breadcrumbs %}
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('find_member_number') }}"><i class="material-icons">search</i>&nbsp;Recherche numéro d'adhérent</a><i class="material-icons">chevron_right</i>
+    <i class="material-icons">check</i>&nbsp;Trouvé
+{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -23,9 +24,11 @@
                 {% else %}
                     {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent <strong>{{ beneficiary.publicDisplayNameWithMemberNumber }}</strong> est déjà actif.
                             <br>
-                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}<br>
+                            Il est lié à l'adresse courriel <strong>{{ user.anonymousEmail }}</strong>
+                            <br>
+                            <br>
                             <form action="{{ path('fos_user_resetting_send_email') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
                                 <a href="{{ path('fos_user_security_login') }}" class="btn">Se connecter</a>
@@ -33,12 +36,10 @@
                             </form>
                             <form action="{{ path('member_edit_firewall') }}" method="POST" class="fos_user_resetting_request">
                                 <input type="hidden" name="username" value="{{ user.username }}" />
-                                <div>
-                                    <a href="#" onclick="$(this).closest('form').submit()"><i class="material-icons">edit</i>Editer la fiche</a>
-                                </div>
+                                <a href="#" onclick="$(this).closest('form').submit()" class="btn"><i class="material-icons left">edit</i>Editer la fiche</a>
                             </form>
                         {% else %}
-                            C'est <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            C'est <b>{{ beneficiary.publicDisplayName }}</b> !
                             {% if not member.lastRegistration %}
                                 <div>Oups, erreur de saisie, nous n'avons pas enregistré d'adhésion pour ce compte. <br/>Il ne peux donc pas être activé.</div>
                                 <div class="center-align">
@@ -55,7 +56,7 @@
                                         <div>
                                             Envoyer le lien de connexion sur {{ user.anonymousEmail }}
                                             <br>
-                                            <input type="submit" name="submit" value="Oui, Activer !" class="btn " />
+                                            <input type="submit" class="btn" name="submit" value="Oui, Activer !" />
                                         </div>
                                     </form>
                                     ou
@@ -74,9 +75,9 @@
                         {% endif %}
                     {% else %}
                         {% if user.isEnabled %}
-                            Le compte de l'adhérent #{{ member.memberNumber }} <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> est déjà actif.
+                            Le compte de l'adhérent <strong>{{ beneficiary.publicDisplayNameWithMemberNumber }}</strong> est déjà actif.
                             <br>
-                            Il est lié à l'adresse courriel {{ user.anonymousEmail }}
+                            Il est lié à l'adresse courriel <strong>{{ user.anonymousEmail }}</strong>
                             <br>
                             <div class="row">
                                 <div class="col m6 center">
@@ -94,7 +95,7 @@
                                 </div>
                             </div>
                         {% else %}
-                            Bonjour <b>{{ beneficiary.firstname }} {{ beneficiary.lastname|first|upper }}</b> !
+                            Bonjour <b>{{ beneficiary.publicDisplayName }}</b> !
                             {% if not member.lastRegistration %}
                                 <div class="text-orange">Oups, erreur de saisie, nous n'avons pas enregistré ton adhésion cette année. Ton compte ne peut pas être activé.</div>
                             {% else %}
@@ -125,7 +126,7 @@
             </div>
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                     <div class="row center">
-                        <p class=" col s12 light">Ce n'est pas celui que tu cherchais ? <a href="{{ path('find_member_number') }}">Chercher un autre numéro d'adhérent</a></p>
+                        <p class=" col s12 light">Ce n'est pas l'adhérent que tu cherchais ? <a href="{{ path('find_member_number') }}">Chercher un autre numéro d'adhérent</a></p>
                     </div>
                 {% else %}
                     <div class="row center">
@@ -143,9 +144,4 @@
             {% endif %}
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}

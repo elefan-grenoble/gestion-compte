@@ -1,5 +1,5 @@
 <?php
-// src/AppBundle/Command/CycleStartCommand.php
+
 namespace AppBundle\Command;
 
 use AppBundle\Event\MemberCycleHalfEvent;
@@ -40,10 +40,15 @@ class CycleHalfCommand extends ContainerAwareCommand
 
         $em = $this->getContainer()->get('doctrine')->getManager();
         $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $members_with_half_cycle = $em->getRepository('AppBundle:Membership')->findWithHalfCyclePast($date);
+        $cycle_type = $this->getContainer()->getParameter('cycle_type');
+
+        $members_with_half_cycle = $em->getRepository('AppBundle:Membership')->findWithHalfCyclePast($date, $cycle_type);
         $count = 0;
         foreach ($members_with_half_cycle as $member) {
-            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date));
+            $current_cycle_start = $this->getContainer()->get('membership_service')->getStartOfCycle($member, 0);
+            $current_cycle_end = $this->getContainer()->get('membership_service')->getEndOfCycle($member, 0);
+            $currentCycleShifts = $em->getRepository('AppBundle:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
+            $dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date, $currentCycleShifts));
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
             $count++;

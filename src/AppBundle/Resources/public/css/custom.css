@@ -20,6 +20,11 @@
 .shifter {
   font-size: 16px;
   width: 10px;
+  vertical-align: top;
+}
+.shifter-name {
+  padding-left: 6px;
+  line-height: 1.8;
 }
 .shift-with-role {
   color: #ff1744;
@@ -34,7 +39,7 @@
 .admin-shift-warning {
   position: absolute;
   bottom: 0;
-  right: 0;
+  left: 0;
   opacity: 0.6;
   text-align: right;
   font-size: small;
@@ -60,11 +65,11 @@
 .time-counter div span {
   padding-right: 10px;
 }
-.card-content .card-btn-bar {
+.card .card-btn-bar {
   position: absolute;
   bottom: -20px;
 }
-.card-content .card-btn-bar .card-btn {
+.card .card-btn-bar .card-btn {
   display: inline-block;
 }
 .homebox .card.event .btn {
@@ -109,17 +114,11 @@ body {
 main {
   flex: 1 0 auto;
 }
-.main-navigation {
-  background-color: #51CAE9;
-}
 .impersonate {
   background: black;
 }
 .impersonate .brand-logo {
   margin-left: 10px;
-}
-footer.page-footer {
-  background-color: #51CAE9;
 }
 #logo-container {
   font-family: 'black_jackregular';
@@ -127,16 +126,19 @@ footer.page-footer {
 /* Links */
 .card .card-action a.btn {
   color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
+}
+.card .card-action button.btn {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 100%;
 }
 .btn,
 .btn-large {
   color: #fff;
-  background-color: #51CAE9;
   margin-bottom: 5px;
-}
-.btn:hover,
-.btn-large:hover {
-  background-color: #189bbc;
 }
 .breadcrumbs {
   font-size: 12px;
@@ -147,6 +149,7 @@ footer.page-footer {
 }
 .breadcrumbs i.material-icons {
   font-size: 15px;
+  vertical-align: top;
 }
 .breadcrumbs a,
 .breadcrumbs span {
@@ -334,12 +337,6 @@ strong {
   width: 300px;
   margin-left: -170px;
 }
-#quick_search_nav {
-  display: none;
-  position: fixed;
-  top: 0;
-  z-index: 1000;
-}
 .CodeMirror,
 .CodeMirror-scroll {
   min-height: 100px;
@@ -480,4 +477,9 @@ strong {
 }
 .hover-toggle-text-icon a:hover span {
   display: none;
+}
+ul.list-unstyled {
+  list-style: none;
+	margin-left: 0;
+	padding-left: 0;
 }

@@ -1,0 +1,35 @@
+{# generate one line with the icon and the shifter id+name and if needed a warning icon
+# position: an Entity/PeriodPosition object to be display in a period
+# anonymized: if true will not display the shifter name
+#}
+
+{% set anonymized = anonymized ?? true %}
+{% set shifter = position.shifter %}
+{% set icon = position.formation ? "account_circle" : "person" %}
+{% set tooltip_formation = position.formation ? "Formation : " ~ position.formation : "Sans formation" %}
+
+{% if shifter %} {# sombody is registered for this PeriodPosition #}
+    {% if anonymized %}
+        <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ tooltip_formation }}">
+            <i class="material-icons">{{ icon }}</i>
+            Réservé
+        </div>
+    {% else %}
+        {% set warning = beneficiary_service.hasWarningStatus(shifter) %}
+        <a href="{{ path('member_show', { 'member_number': shifter.membership.memberNumber }) }}" target="_blank"
+           class="black-text tooltipped editable-box truncate" data-position="bottom"
+           data-tooltip="{{ shifter | print_with_number_and_status_icon | raw }} &#013;&#010; ({{ tooltip_formation }})">
+            {% if warning %}
+                <i class="red-text material-icons warning-animation">warning</i>
+            {% else %}
+                <i class="material-icons">{{ icon }}</i>
+            {% endif %}
+            {{ shifter.getFirstname() }} {{ shifter.getLastname() | first }}
+        </a>
+    {% endif %}
+{% else %} {# this PeriodPosition is free #}
+    <div class="tooltipped truncate black-text" data-position="bottom" data-tooltip="{{ tooltip_formation }}">
+        <i class="material-icons">{{ icon }}</i>
+        <strong><i>Libre</i></strong>
+    </div>
+{% endif %}

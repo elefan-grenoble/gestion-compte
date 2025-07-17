@@ -1,37 +1,41 @@
 {% extends 'layout.html.twig' %}
+
+{% block title %}Liste des tâches en cours - {{ site_name }}{% endblock %}
+
 {% block content %}
-    <h4 class="">Liste des taches en cours</h4>
-<ul class="collapsible popout" data-collapsible="accordion">
+    <h4>Liste des tâches en cours</h4>
+<ul class="collapsible popout">
     {% for commission in commissions %}
         <li>
             <div class="collapsible-header">{{ commission.name }}<span class="badge">{{ commission.tasks | length }}</span></div>
             <div class="collapsible-body">
                 {% if commission.nextMeetingDate %}
                 <div class="card-panel teal white-text">
-                    <strong>{{ commission.nextMeetingDesc  }}</strong> {{ commission.nextMeetingDate | date_fr_full }} à {{ commission.nextMeetingDate | date('H:i') }}
+                    <strong>{{ commission.nextMeetingDesc }}</strong> {{ commission.nextMeetingDate | date_fr_full_with_time }}
                 </div>
                 {% endif %}
                 <table>
                     <thead>
                         <tr>
-                            <th>tache</th>
-                            <th>début</th>
-                            <th>échéance</th>
-                            <th>priorité</th>
+                            <th>Tâche</th>
+                            <th>Début</th>
+                            <th>Echéance</th>
+                            <th>Priorité</th>
                             <th>Personne(s) ressource(s)</th>
                             <th>Progression</th>
                             <th>Commission(s) / College(s)</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for task in commission.tasks %}
-                            <tr>
+                            <tr id="task_{{ task.id }}">
                                 <td>{% if task.closed %}<del>{% endif %}
                                     {{ task.title }}
                                     {% if task.closed %}</del>{% endif %}
                                 </td>
                                 <td>
-                                    {{ task.createdAt | date('d-m-Y') }}
+                                    {{ task.createdAt | date_short }}
                                 </td>
                                 <td>
                                     {{ task.dueDate | date('m-Y') }}
@@ -44,8 +48,8 @@
                                 <td>
                                     {% for owner in task.owners %}
                                         <span class="chip truncate">
-                                            <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
-                                            {{ owner.firstname }}&nbsp;{{ owner.lastname }}
+                                            <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayNameWithMemberNumber }}">
+                                            {{ owner.displayName }}
                                         </span>
                                     {% endfor %}
                                 </td>

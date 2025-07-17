@@ -6,8 +6,6 @@ namespace AppBundle\Entity;
 use FOS\OAuthServerBundle\Entity\AuthCode as BaseAuthCode;
 use Doctrine\ORM\Mapping as ORM;
 
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-
 /**
  * @ORM\Entity
  * @ORM\Table(name="auth_code", options={"collate"="utf8mb4_unicode_ci", "charset"="utf8mb4"})

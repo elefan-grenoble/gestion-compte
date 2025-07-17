@@ -1,0 +1,203 @@
+{% extends 'layoutlight.html.twig' %}
+
+{% set member = beneficiary.membership %}
+{% set can_access = true %}
+{% if member.frozen or not beneficiary.user.enabled or member.withdrawn or not member | uptodate %}
+    {% set can_access = false %}
+{% endif %}
+{% set helloList = ['Bonjour', 'Salut', 'Coucou', 'Hola','Bienvenue', 'Hello'] %}
+
+{% block content %}
+<div class="container">
+    <h3 class="header center-align">{{ random(helloList) }} {{ beneficiary.firstname }} !</h3>
+
+    {# Ongoing shift(s) #}
+    {% if ongoingShifts | length %}
+        {% if ongoingShiftsValidated > 0 %}
+            <div class="card-panel green lighten-5">
+                {% if ongoingShifts | length == 1 %}
+                    ✅ Ton créneau en cours <strong>{{ (ongoingShifts | first).job }}</strong> a été validé !
+                {% else %}
+                    ✅ Tes créneaux en cours ont été validés !
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="card-panel blue lighten-5">
+                {% if ongoingShifts | length == 1 %}
+                    ✅ Ton créneau en cours <strong>{{ (ongoingShifts | first).job }}</strong> a déjà été validé 😉
+                {% else %}
+                    ✅ Tes créneaux en cours ont déjà été validés 😉
+                {% endif %}
+                <br />
+                <i>Pas besoin de re-badger.</i>
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {# Compteur temps & épargne #}
+    {% if can_access and not member.isCurrentlyExemptedFromShifts() %}
+        <p class="center-align">
+            {% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compteur temps est {% if ongoingShiftsValidated > 0 %}maintenant{% endif %} à <strong>{{ counter | duration_from_minutes }}</strong>
+            {% if use_time_log_saving %}
+                <br />
+                <small>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compteur épargne est à <strong>{{ member.savingTimeCount | duration_from_minutes }}</strong></small>
+            {% endif %}
+        </p>
+    {% endif %}
+
+    {# Image left & right #}
+    <div class="row">
+        <div class="col s6">
+            {% if can_access %}
+                {% if counter > due_duration_by_cycle %}
+                    {% image '@AppBundle/Resources/public/img/love.svg' %}
+                        <img class="responsive-img" src="{{ asset_url }}" alt="we love you" />
+                    {% endimage %}
+                {% elseif counter == due_duration_by_cycle %}
+                    {% image '@AppBundle/Resources/public/img/good.svg' %}
+                        <img class="responsive-img" src="{{ asset_url }}" alt="all good" />
+                    {% endimage %}
+                {% elseif counter < due_duration_by_cycle and counter >=0 %}
+                    {% image '@AppBundle/Resources/public/img/thumbup.svg' %}
+                        <img class="responsive-img" src="{{ asset_url }}" alt="fair enough" />
+                    {% endimage %}
+                {% else %}{# < 0 = retard #}
+                    {% image '@AppBundle/Resources/public/img/bad.svg' %}
+                        <img class="responsive-img" src="{{ asset_url }}" alt="Oups" />
+                    {% endimage %}
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="col s6">
+            {% if can_access %}
+                {% image '@AppBundle/Resources/public/img/enter.svg' %}
+                    <img class="responsive-img" src="{{ asset_url }}" alt="accès autorisé" />
+                {% endimage %}
+            {% else %}
+                {% image '@AppBundle/Resources/public/img/donotenter.svg' %}
+                    <img class="responsive-img" src="{{ asset_url }}" alt="accès interdit" />
+                {% endimage %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# Texte #}
+    {% if member.isCurrentlyExemptedFromShifts() %}
+        {% include "member/_partial/exempted.html.twig" with { member: member } %}
+    {% elseif can_access %}
+        {% if counter > due_duration_by_cycle %}
+            <p class="center-align">
+                Wha ! c'est trop d'amour, merci ! 😍
+            </p>
+        {% endif %}
+        {% if counter == due_duration_by_cycle %}
+            <p class="center-align">
+                Tout roule, passe un bon moment à {{ project_name }} 🙂
+            </p>
+        {% endif %}
+        {% if counter < due_duration_by_cycle and counter >=0 %}
+            <p class="center-align">
+                Pense à réserver les {{ (due_duration_by_cycle - counter) | duration_from_minutes }} qu'il {% if member.beneficiaries | length > 1 %}vous{% else %}te{% endif %} manque 😉
+            </p>
+        {% endif %}
+        {% if counter < 0 and counter >= -3*due_duration_by_cycle %}
+            <p class="center-align">
+                Oups, {% if member.beneficiaries | length > 1 %}vous êtes{% else %}tu es{% endif %} en retard ! il {% if member.beneficiaries | length > 1 %}vous{% else %}te{% endif %} reste {{ (due_duration_by_cycle - counter) | duration_from_minutes }} à réserver !!
+            </p>
+        {% endif %}
+        {% if counter < -3*due_duration_by_cycle %}
+            <p class="center-align">
+                <strong>Oups, {% if member.beneficiaries | length > 1 %}vous êtes{% else %}tu es{% endif %} vraiment trop en retard sur ton devoir !</strong> 😲
+            </p>
+        {% endif %}
+    {% else %}
+        {% if member.frozen %}
+            <p class="center-align">
+                <i class="material-icons" title="Compte gelé">{{ member_frozen_material_icon }}</i>
+                <strong>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est gelé !</strong> 
+                <br />
+                Tu ne peux pas faire tes courses aujourd'hui ☹️
+            </p>
+            {% if member.frozenChange %}
+                <p class="center-align">Le degel est programmé, il sera effectif le {{ membership_service.endOfCycle(member) | date_fr_long }}</p>
+            {% else %}
+                {% if display_freeze_account %}
+                    <p class="center-align">Rendez vous sur {% if member.beneficiaries | length > 1 %}votre{% else %}ton{% endif %} espace membre pour programmer le degel !</p>
+                {% endif %}
+            {% endif %}
+        {% elseif member.withdrawn %}
+            <p class="center-align">
+                <i class="material-icons" title="Compte fermé">{{ member_withdrawn_material_icon }}</i>
+                <strong>{% if member.beneficiaries | length > 1 %}Votre{% else %}Ton{% endif %} compte est fermé !</strong>
+                <br />
+                Mais je suis content de te voir revoir quand même ! 👻
+            </p>
+        {% elseif not beneficiary.user.enabled %}
+            <p class="center-align">
+                <i class="material-icons" title="Compte pas encore activé">{{ user_account_not_enabled_material_icon }}</i>
+                <strong>Ton compte n'est pas actif</strong> 🤔
+            </p>
+        {% elseif not member | uptodate %}
+            <p class="center-align">
+                <i class="material-icons" title="Compte en attente d'adhésion">{{ member_registration_missing_material_icon }}</i>
+                <strong>Oups, {% if member.beneficiaries | length > 1 %}votre{% else %}ton{% endif %} adhésion n'est plus à jour !</strong> 😲
+                <br />
+                Rendez-vous au bureau de membres régulariser tout ça !
+            </p>
+        {% endif %}
+    {% endif %}
+</div>
+
+<a id="close" href="{{ path('card_reader_index') }}" class="black-text">
+    <i class="material-icons large">close</i>
+</a>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    // page stays open for 10 seconds, then goes back to card_reader index
+    window.setTimeout(function(){
+        window.location.href = "{{ path('card_reader_index') }}";
+    }, 10 * 1000);
+
+    // can scan another barcode
+    var barcode_submit_url = "{{ path('card_reader_check') }}";
+</script>
+<script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    p, .card-panel {
+        font-size: 25px;
+    }
+    #close {
+        position: fixed;
+        top: 1em;
+        right: 1em;
+        display: block;
+        text-align: center;
+    }
+    {% if ongoingShiftsValidated > 0 %}
+        body {
+                background-color: #f3faf4; /* lighter than green lighten-5 */
+        }
+    {% elseif member.withdrawn or not beneficiary.user.enabled %}
+        body {
+            background-color: {{ member_withdrawn_background_color }};
+        }
+    {% elseif member.frozen %}
+        body {
+            background-color: {{ member_frozen_background_color }};
+        }
+    {% elseif member.isCurrentlyExemptedFromShifts() %}
+        body {
+            background-color: {{ member_exempted_background_color }};
+        }
+    {% elseif not member | uptodate %}
+        body {
+            background-color: {{ member_registration_missing_background_color }};
+        }
+    {% endif %}
+</style>
+{% endblock %}

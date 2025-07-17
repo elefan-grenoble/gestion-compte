@@ -1,38 +1,78 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>postes
+{% block title %}Liste des postes de bénévolat - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des postes de bénévolat
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des postes</h4>
+    <h4>Liste des postes de bénévolat ({{ jobs | length }})</h4>
 
-    <table class="responsive-table striped">
+    {# Filter form  --------- #}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">tune</i>Filtres
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(filter_form) }}
+                <div class="row">
+                    <div class="col s6">
+                        <div class="input-field">
+                            {{ form_widget(filter_form.enabled) }}
+                            {{ form_label(filter_form.enabled) }}
+                        </div>
+                    </div>
+                </div>
+                {{ form_widget(filter_form.filter) }}
+                {{ form_end(filter_form) }}
+            </div>
+        </li>
+    </ul>
+
+    <table class="responsive-table">
         <thead>
-        <tr>
-            <th>id</th>
-            <th>Poste</th>
-            <th>Couleur</th>
-            <th>Description</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for job in jobs %}
             <tr>
-                <td>{{ job.id }}</td>
-                <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
-                <td class="{{ job.color }} white-text">{{ job.color }}</td>
-                <td class="center-align">{% if job.description is not empty %} <i class="material-icons">playlist_add_check</i> {% endif %}</td>
-                <td><a href="{{ path("job_edit",{'id':job.id}) }}"><i class="material-icons">edit</i>editer</a></td>
+                <th>Poste</th>
+                <th>Couleur</th>
+                <th>Description</th>
+                <th>Lien<br />(vers une doc)</th>
+                <th>Nombre de créneaux<br />(semaine type)</th>
+                <th>Actions</th>
             </tr>
-        {% endfor %}
+        </thead>
+        <tbody>
+            {% for job in jobs %}
+                <tr id="job_{{ job.id }}">
+                    <td {% if not job.enabled %}style="text-decoration: line-through"{% endif %}>{{ job.name }}</td>
+                    <td class="{{ job.color }} white-text">{{ job.color }}</td>
+                    <td class="center-align">
+                        {% if job.description is not empty %}
+                            <i class="material-icons" title="{{ job.description }}">playlist_add_check</i>
+                        {% endif %}
+                    </td>
+                    <td class="center-align">
+                        {% if job.url is not empty %}
+                            <a href="{{ job.url }}" target="_blank">lien</a>
+                        {% endif %}
+                    </td>
+                    <td>{{ job.periods | length }}</td>
+                    <td>
+                        <a href="{{ path('job_edit', { 'id': job.id }) }}"><i class="material-icons">edit</i>Editer</a>
+                    </td>
+                </tr>
+            {% endfor %}
         </tbody>
     </table>
-    <br>
-    <a href="{{ path('job_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter un poste</a>
 
+    <br />
+    <a href="{{ path('job_new') }}" class="btn">
+        <i class="material-icons left">add</i>Ajouter un poste
+    </a>
+    <a href="{{ path("job_widget_generator") }}" class="btn">
+        <i class="material-icons left">tune</i>Générer un widget (créneaux d'un poste)
+    </a>
 {% endblock %}

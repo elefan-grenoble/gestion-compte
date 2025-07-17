@@ -2,17 +2,19 @@ imports:
   - { resource: parameters.yml }
   - { resource: security.yml }
   - { resource: services.yml }
+  - { resource: knpu_oauth2_client.yml }
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-  locale: fr
+  locale: fr_FR
   registration_period: '15 days ago'
   remainder_warning_delay: '15'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
+  github_repo_url: 'elefan-grenoble/gestion-compte'
+  github_current_release: 'v1.45.7'  # x-release-please-version
 
 framework:
-  #esi: ~
   translator: { fallbacks: ['%locale%'] }
   secret: '%secret%'
   router:
@@ -21,7 +23,6 @@ framework:
   form: ~
   csrf_protection: ~
   validation: { enable_annotations: true }
-  #serializer: { enable_annotations: true }
   templating:
     engines: ['twig']
   default_locale: '%locale%'
@@ -50,12 +51,15 @@ twig:
     project_name: "%project_name%"
     project_url: "%project_url%"
     project_url_display: "%project_url_display%"
+    github_repo_url: "%github_repo_url%"
+    github_current_release: "%github_current_release%"
     helloasso_registration_campaign_url: "%helloasso_registration_campaign_url%"
     due_duration_by_cycle: '%due_duration_by_cycle%'
+    cycle_type: '%cycle_type%'
     registration_duration: '%registration_duration%'
+    registration_manual_enabled: '%registration_manual_enabled%'
     support_email: '%transactional_mailer_user%'
     images_tmp_dir: '%images_tmp_dir%'
-    shift_service: "@shift_service"
     maximum_nb_of_beneficiaries_in_membership: '%maximum_nb_of_beneficiaries_in_membership%'
     allow_extra_shifts: '%allow_extra_shifts%'
     time_after_which_members_are_late_with_shifts: '%time_after_which_members_are_late_with_shifts%'
@@ -63,13 +67,93 @@ twig:
     code_generation_enabled: '%code_generation_enabled%'
     local_currency_name: '%local_currency_name%'
     use_fly_and_fixed: '%use_fly_and_fixed%'
+    max_event_proxy_per_member: '%max_event_proxy_per_member%'
+    use_time_log_saving: '%use_time_log_saving%'
     display_gauge: '%display_gauge%'
+    max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
+    profile_display_task_list: '%profile_display_task_list%'
+    profile_display_time_log: '%profile_display_time_log%'
+    profile_display_shift_free_log: '%profile_display_shift_free_log%'
+    profile_display_period_position_free_log: '%profile_display_period_position_free_log%'
+    # user
+    user_account_not_enabled_material_icon: '%user_account_not_enabled_material_icon%'
+    user_account_enabled_material_icon: '%user_account_enabled_material_icon%'
+    # member
+    member_withdrawn_icon: '%member_withdrawn_icon%'
+    member_withdrawn_material_icon: '%member_withdrawn_material_icon%'
+    member_withdrawn_background_color: '%member_withdrawn_background_color%'
+    member_frozen_icon: '%member_frozen_icon%'
+    member_frozen_material_icon: '%member_frozen_material_icon%'
+    member_frozen_background_color: '%member_frozen_background_color%'
+    member_exempted_icon: '%member_exempted_icon%'
+    member_exempted_material_icon: '%member_exempted_material_icon%'
+    member_exempted_background_color: '%member_exempted_background_color%'
+    member_flying_icon: '%member_flying_icon%'
+    member_flying_material_icon: '%member_flying_material_icon%'
+    member_registration_missing_icon: '%member_registration_missing_icon%'
+    member_registration_missing_material_icon: '%member_registration_missing_material_icon%'
+    member_registration_missing_background_color: '%member_registration_missing_background_color%'
+    # beneficiary
+    beneficiary_main_icon: '%beneficiary_main_icon%'
+    beneficiary_new_icon: '%beneficiary_new_icon%'
+    beneficiary_flying_icon: '%beneficiary_flying_icon%'
+    # admin: member
+    admin_member_display_shift_free_log: '%admin_member_display_shift_free_log%'
+    admin_member_display_period_position_free_log: '%admin_member_display_period_position_free_log%'
+    # swipe card
     display_swipe_cards_settings: '%display_swipe_cards_settings%'
     display_freeze_account: '%display_freeze_account%'
+    display_freeze_account_false_message: '%display_freeze_account_false_message%'
     display_keys_shop: '%display_keys_shop%'
     display_name_shifters: '%display_name_shifters%'
     use_card_reader_to_validate_shifts: '%use_card_reader_to_validate_shifts%'
-
+    # fly and fixed
+    fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
+    fly_and_fixed_allow_fixed_shift_free: '%fly_and_fixed_allow_fixed_shift_free%'
+    # time log saving
+    time_log_saving_shift_free_min_time_in_advance_days: '%time_log_saving_shift_free_min_time_in_advance_days%'
+    time_log_saving_shift_free_allow_only_if_enough_saving: '%time_log_saving_shift_free_allow_only_if_enough_saving%'
+    # opening hours
+    display_opening_hour_open_closed_header: '%display_opening_hour_open_closed_header%'
+    opening_hour_open_closed_header_open_message: '%opening_hour_open_closed_header_open_message%'
+    opening_hour_open_closed_header_closed_message: '%opening_hour_open_closed_header_closed_message%'
+    # role names & icons
+    role_user_name: Utilisateur
+    role_user_material_icon: person
+    role_admin_panel_name: Accès à /admin
+    role_admin_material_icon: build
+    role_user_manager_name: Gestion des utilisateurs
+    role_user_manager_material_icon: group
+    role_finance_manager_name: Gestion financiaire
+    role_finance_manager_material_icon: attach_money
+    role_shift_manager_name: Gestion des créneaux
+    role_shift_manager_material_icon: date_range
+    role_process_manager_name: Gestion des procédures
+    role_process_manager_material_icon: assignment
+    role_admin_name: Administrateur
+    role_admin_material_icon: verified_user
+    role_super_admin_name: Super admin
+    role_super_admin_material_icon: 
+    # services
+    beneficiary_service: "@beneficiary_service"
+    membership_service: "@membership_service"
+    shift_service: "@shift_service"
+    period_service: "@period_service"
+    time_log_service: "@time_log_service"
+    opening_hour_service: "@opening_hour_service"
+    opening_hour_kind_service: "@opening_hour_kind_service"
+    #open id
+    oidc_enable: '%oidc_enable%'
+    oidc_issuer: '%oidc_issuer%'
+    oidc_client_id: "%oidc_client_id%"
+    oidc_roles_claim: "%oidc_roles_claim%"
+    oidc_roles_map: "%oidc_roles_map%"
+    oidc_formations_claim: "%oidc_formations_claim%"
+    oidc_formations_map: "%oidc_formations_map%"
+    oidc_commissions_claim: "%oidc_commissions_claim%"
+    oidc_commissions_map: "%oidc_commissions_map%"
+    oidc_profile_custom_message: '%oidc_profile_custom_message%'
+    oidc_no_account_message: '%oidc_no_account_message%'
 # Doctrine Configuration
 doctrine:
   dbal:
@@ -95,6 +179,12 @@ doctrine:
     auto_generate_proxy_classes: '%kernel.debug%'
     naming_strategy: doctrine.orm.naming_strategy.underscore
     auto_mapping: true
+    dql:
+      string_functions:
+        DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
+        MONTH: DoctrineExtensions\Query\Mysql\Month
+        YEAR: DoctrineExtensions\Query\Mysql\Year
+        WEEK: DoctrineExtensions\Query\Mysql\Week
 
 doctrine_migrations:
   dir_name: "%kernel.root_dir%/DoctrineMigrations"
@@ -103,6 +193,10 @@ doctrine_migrations:
   name: Application Migrations
   column_length: 191
   organize_migrations: false # Version >=1.2 Possible values are: "BY_YEAR", "BY_YEAR_AND_MONTH", false
+
+sensio_framework_extra:
+  router:
+    annotations: false
 
 # Swiftmailer Configuration
 swiftmailer:
@@ -140,19 +234,10 @@ assetic:
       node_paths: [/usr/local/lib/node_modules]
       apply_to: '\.less$'
     cssrewrite: ~
-  bundles: [ JqueryBundle, MaterializeBundle ]
-  assets:
-    jquery:
-      inputs:
-        - '%kernel.root_dir%/../vendor/components/jquery/jquery.js'
-      output: js/jquery.js
-materialize:
-  version: 1.0.0-beta
 ornicar_gravatar:
   rating: g
   size: 80
   default: robohash
-jquery: ~
 
 fos_oauth_server:
   db_driver:            orm   # Drivers available: orm, mongodb, or propel
@@ -202,6 +287,8 @@ liip_imagine:
         data_root: '%kernel.project_dir%/web/'
   filter_sets:
     cache: ~
+    default:
+      quality: 75
     card:
       quality: 75
       filters:

@@ -7,14 +7,14 @@
 
 ### Activer l'utilisateur
 
-L'activation passe par un envoi de mail. En dev, il est conseillé d'installer [un mail catcher](./dev.md#mailcatcher) pour pouvoir faire fonctionner l'envoi de mail en local.
+L'activation passe par un envoi de mail. En dev, il est conseillé d'installer [un mail catcher](dev.md#mailcatcher) pour pouvoir faire fonctionner l'envoi de mail en local.
 
-Sinon, il est possible d'activer un utilisateur via cette procédure:
+Sinon, il est possible d'activer un utilisateur via cette procédure :
 
-* Activer l'utilisateur avec la commande suivante ``php bin/console fos:user:activate $username``
-* Changer le mot de passe avec la commande suivante ``php bin/console fos:user:change-password $username newp@ssword``
+* Activer l'utilisateur avec la commande suivante `php bin/console fos:user:activate $username`
+* Changer le mot de passe avec la commande suivante `php bin/console fos:user:change-password $username newp@ssword`
 
-Documentation Symfony pour manipuler les utilisateurs: http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
+Documentation Symfony pour manipuler les utilisateurs : http://symfony.com/doc/2.0/bundles/FOSUserBundle/command_line_tools.html
 
 ## Mise en route des créneaux
 
@@ -30,4 +30,4 @@ Dans l'admin panel :
 - Quand tous les créneaux-types et postes d'une journée sont créés, il est possible de les *dupliquer* sur une autre journée avec la fonction idoine
 - Une fois la semaine type créée, il faut *générer les créneaux* sur une période de temps donnée
 
-La génération de créneaux peut être automatisée via une [tâche cron](install.md#crontab).
+La génération de créneaux peut être automatisée via une [tâche cron](install.serveur.md#crontab).

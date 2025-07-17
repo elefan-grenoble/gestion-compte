@@ -2,81 +2,111 @@
 
 namespace AppBundle\Controller;
 
+use DateTime;
+use Exception;
+use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Job;
 use AppBundle\Entity\Shift;
-use AppBundle\Event\ShiftBookedEvent;
-use AppBundle\Event\ShiftDeletedEvent;
-use AppBundle\Event\ShiftDismissedEvent;
-use AppBundle\Event\ShiftFreedEvent;
-use AppBundle\Event\ShiftValidatedEvent;
-use AppBundle\Event\ShiftInvalidatedEvent;
-use AppBundle\Security\MembershipVoter;
-use AppBundle\Security\ShiftVoter;
-use DateTime;
 use AppBundle\Entity\ShiftBucket;
+use AppBundle\Event\ShiftDeletedEvent;
+use AppBundle\Form\AutocompleteBeneficiaryType;
+use AppBundle\Form\RadioChoiceType;
 use AppBundle\Form\ShiftType;
+use AppBundle\Repository\JobRepository;
+use AppBundle\Security\ShiftVoter;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- * User controller.
+ * Booking controller.
  *
  * @Route("booking")
  */
 class BookingController extends Controller
 {
-    public function homepageDashboardAction()
+    /**
+     * @var boolean
+     */
+    private $use_fly_and_fixed;
+    private $display_name_shifters;
+
+    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters)
+    {
+        $this->use_fly_and_fixed = $use_fly_and_fixed;
+        $this->display_name_shifters = $display_name_shifters;
+    }
+
+    /**
+     * @return Response
+     */
+    public function homepageDashboardAction(): Response
     {
         return $this->render('booking/home_dashboard.html.twig');
     }
 
-    public function homepageShiftsAction()
+    /**
+     * @return Response
+     */
+    public function homepageShiftsAction(): Response
     {
-        $undismissShiftForm = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
+        $em = $this->getDoctrine()->getManager();
 
-        return $this->render('booking/home_booked_shifts.html.twig', [
-            'undismiss_shift_form' => $undismissShiftForm->createView()
-        ]);
+        $member = $this->getUser()->getBeneficiary()->getMembership();
+
+        $period_positions = $this->get('membership_service')->getPeriodPositions($member);
+        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
+        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
+        $shifts_by_cycle = $em->getRepository('AppBundle:Shift')->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
+
+        $shiftFreeForms = [];
+        foreach ($shifts_by_cycle as $key => $shifts) {
+            foreach ($shifts as $shift) {
+                $shiftFreeForms[$shift->getId()] = $this->createShiftFreeForm($shift)->createView();
+            }
+        }
+
+        return $this->render('booking/home_booked_shifts.html.twig', array(
+            'period_positions' => $period_positions,
+            'shifts_by_cycle' => $shifts_by_cycle,
+            'shift_free_forms' => $shiftFreeForms,
+        ));
     }
 
-
-
     /**
-     * @Route("/", name="booking")
-     * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @Method({"GET","POST"})
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     * @Route("/", name="booking", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
+
         $mode = null;
         if ($this->getUser()->getBeneficiary() == null) {
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
-            $remainder = $this->get('membership_service')->getRemainder($this->getUser()->getBeneficiary()->getMembership());
-            if (intval($remainder->format("%R%a")) < 0) {
-                $session->getFlashBag()->add('warning', 'Oups, ton adhésion  a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
+            if (!$this->get('membership_service')->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
++               $remainder = $this->get('membership_service')->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+                $session->getFlashBag()->add('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
             }
             if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
-                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ ! Dégel pour reserver 😉');
+                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
                 return $this->redirectToRoute('homepage');
             }
         }
@@ -100,22 +130,14 @@ class BookingController extends Controller
 
         //beneficiary selected, or only one beneficiary
         if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
-
-            $em = $this->getDoctrine()->getManager();
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
             } else {
                 $beneficiary = $beneficiaries->first();
             }
 
-            $shifts = $em->getRepository('AppBundle:Shift')->findFutures();
+            $shifts = $em->getRepository('AppBundle:Shift')->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
-            $dismissedShifts = array();
-            foreach ($shifts as $shift) {
-                if ($shift->getIsDismissed()) {
-                    $dismissedShifts[] = $shift;
-                }
-            }
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -124,14 +146,12 @@ class BookingController extends Controller
 
             return $this->render('booking/index.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
-                'dismissedShifts' => $dismissedShifts,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
                 'jobs' => $em->getRepository(Job::class)->findByEnabled(true)
             ]);
 
         } else { // no beneficiary selected
-
             return $this->render('booking/index.html.twig', [
                 'beneficiary_form' => $beneficiaryForm->createView(),
             ]);
@@ -140,134 +160,208 @@ class BookingController extends Controller
     }
 
     /**
-     * @Route("/admin", name="booking_admin")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET","POST"})
+     * Build the filter form for the admin main page (route /booking/admin)
+     * and rerun an array with the form object and the date range and the action
+     *
+     * the return object :
+     * array(
+     *      "form":FormBuilderInterface
+     *      "from" => DateTime,
+     *      "to" => DateTime,
+     *      "job" => Job|null,
+     *      "filling" => str|null,
+     *      )
      */
-    public function adminAction(Request $request)
+    private function adminFilterFormFactory($em, Request $request): array
     {
-        $monday = strtotime('last monday', strtotime('tomorrow'));
+        // default values
         $defaultFrom = new DateTime();
-        $defaultFrom->setTimestamp($monday);
+        $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
+        $defaultTo = null;
+        $defaultWeek = (new DateTime())->format('W');
+        $defaultYear = (new DateTime())->format('Y');
+        $years = $em->getRepository(Shift::class)->getYears();
 
-        $form = $this->createFormBuilder()
+        $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
-            ->add('from', TextType::class, [
+            ->add('type', ChoiceType::class, array(
+                'label' => 'Type de filtre',
+                'required' => true,
+                'data' => "Date",
+                'choices' => array(
+                    'Date' => "date",
+                    'Semaine' => "week",
+                ),
+            ))
+            ->add('from', TextType::class, array(
                 'label' => 'A partir de',
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
-                'attr' => array('class' => 'datepicker')])
-            ->add('to', TextType::class, [
+                'attr' => array('class' => 'datepicker'),
+            ))
+            ->add('to', TextType::class, array(
                 'label' => 'Jusqu\'à',
                 'required' => false,
-                'data' => '',
-                'attr' => array('class' => 'datepicker')])
-            ->add('action', HiddenType::class, array())
-            ->add('filter', SubmitType::class, array('label' => 'Filtrer', 'attr' => array('class' => 'btn', 'value' => 'filtrer')))
-            ->add('booker', SubmitType::class, array('label' => 'Voir les booker', 'attr' => array('class' => 'btn', 'value' => 'booker')))
+                'attr' => array('class' => 'datepicker'),
+            ))
+            ->add('year', ChoiceType::class, array(
+                'required' => false,
+                'choices' => array_combine($years, $years),
+                'label' => 'Année',
+                'data' => $defaultYear,
+                'placeholder' => false,
+            ))
+            ->add('week', IntegerType::class, array(
+                'required' => false,
+                'label' => 'Numéro de semaine',
+                'scale' => 0,
+                'data' => $defaultWeek,
+                'attr' => [
+                    'min' => 1,
+                    'max' => 52,
+                ],
+            ))
+            ->add('job', EntityType::class, array(
+                'label' => 'Type de créneau',
+                'class' => 'AppBundle:Job',
+                'choice_label' => 'name',
+                'multiple' => false,
+                'required' => false,
+                'query_builder' => function(JobRepository $repository) {
+                    $qb = $repository->createQueryBuilder('j');
+                    return $qb
+                        ->where($qb->expr()->eq('j.enabled', '?1'))
+                        ->setParameter('1', '1')
+                        ->orderBy('j.name', 'ASC');
+                }
+            ))
+            ->add('filling', ChoiceType::class, array(
+                'label' => 'Remplissage',
+                'required' => false,
+                'choices' => array(
+                    'Complet' => 'full',
+                    'Partiel' => 'partial',
+                    'Vide' => 'empty',
+                ),
+            ))
+            ->add('filter', SubmitType::class, array(
+                'label' => 'Filtrer',
+                'attr' => array('class' => 'btn', 'value' => 'filtrer')
+            ))
             ->getForm();
-        $form->handleRequest($request);
 
+        $filterForm->handleRequest($request);
         $from = $defaultFrom;
-        $to = null;
-        if ($form->isSubmitted() && $form->isValid()) {
-            $dateStr = $form->get('from')->getData();
-            $from = new DateTime($dateStr);
-            $to = $form->get('to')->getData();
-            if ($to)
-                $to = new DateTime($to);
+        $to = $defaultTo;
+        $job = null;
+        $filling = null;
+
+        try {
+            if ($filterForm->isSubmitted() && $filterForm->isValid()) {
+                $job = $filterForm->get("job")->getData();
+                $filling = $filterForm->get("filling")->getData();
+
+                // selection mode based on dates
+                if ($filterForm->get("type")->getData() == "date") {
+                    $from = new DateTime($filterForm->get('from')->getData());
+                    $to = $filterForm->get('to')->getData();
+                    if ($to) {
+                        $to = new DateTime($to);
+                    }
+                // selection mode based on week number
+                } else {
+                    $week = $filterForm->get("week")->getData();
+                    $year = $filterForm->get("year")->getData();
+                    $from = new DateTime();
+                    $from->setISODate($year, $week, 1);
+                    $from->setTime(0,0);
+                    $to = clone $from;
+                    $to->modify('+6 days');
+                }
+            }
+        } catch (Exception $ex) {
+            $from = $defaultFrom;
+            $to = $defaultTo;
+            $job = null;
         }
 
-        /** @var EntityManager $em */
-        $em = $this->getDoctrine()->getManager();
-        $jobs = $em->getRepository(Job::class)->findByEnabled(true);
-
-
-        $beneficiariesQb = $em->getRepository('AppBundle:Beneficiary')
-            ->createQueryBuilder('b')
-            ->select('b, m')
-            ->join('b.user', 'u')
-            ->join('b.membership', 'm');
-        $beneficiaries = $beneficiariesQb->getQuery()->getResult();
-
-        $shifts = $em->getRepository('AppBundle:Shift')->findFrom($from, $to);
-
-        $action = $form->get('action')->getData();
-
-        if ($action == "booker") {
-            $mm = array();
-            foreach ($shifts as $shift) {
-                if ($shift->getBooker()) {
-                    $mm[] = $shift->getBooker()->getMembership()->getMemberNumber();
-                }
-            }
-            return $this->redirectToRoute('user_index', array('membernumber' => implode(',', $mm)));
-        } else {
-            $hours = array();
-            for ($i = 6; $i < 22; $i++) { //todo put this in conf
-                $hours[] = $i;
-            }
-
-            $bucketsByDay = array();
-            foreach ($shifts as $shift) {
-                $day = $shift->getStart()->format("d m Y");
-                $job = $shift->getJob()->getId();
-                $interval = $shift->getIntervalCode();
-                if (!isset($bucketsByDay[$day])) {
-                    $bucketsByDay[$day] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job])) {
-                    $bucketsByDay[$day][$job] = array();
-                }
-                if (!isset($bucketsByDay[$day][$job][$interval])) {
-                    $bucket = new ShiftBucket();
-                    $bucketsByDay[$day][$job][$interval] = $bucket;
-                }
-                $bucketsByDay[$day][$job][$interval]->addShift($shift);
-            }
-
-            $delete_bucket_form = $this->createFormBuilder()
-                ->setAction($this->generateUrl('delete_bucket'))
-                ->setMethod('DELETE')
-                ->add('shift_id', HiddenType::class)
-                ->getForm();
-
-            $shift_delete_form = array();
-            $shift_add_form = array();
-            foreach ($shifts as $shift) {
-                $shift_delete_form[$shift->getId()] = $this->createFormBuilder()
-                    ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
-                    ->setMethod('DELETE')
-                    ->getForm()->createView();
-                $shift_add_form[$shift->getId()] = $this->createForm(
-                    ShiftType::class,
-                    $shift,
-                    array('action' => $this->generateUrl('shift_new'), 'only_add_formation' => true)
-                  )
-                ->createView();
-            }
-
-            return $this->render('admin/booking/index.html.twig', [
-                'form' => $form->createView(),
-                'bucketsByDay' => $bucketsByDay,
-                'hours' => $hours,
-                'jobs' => $jobs,
-                'delete_bucket_form' => $delete_bucket_form->createView(),
-                'beneficiaries' => $beneficiaries,
-                'shift_delete_form' => $shift_delete_form,
-                'shift_add_form' => $shift_add_form
-            ]);
-        }
+        return array(
+            "form" => $filterForm,
+            "from" => $from,
+            "to" => $to,
+            "job" => $job,
+            "filling" => $filling,
+        );
     }
 
     /**
-     * @Route("/edit_bucket/{id}", name="shift_edit")
+     * main administration page for booking shift
+     *
+     * @Route("/admin", name="booking_admin", methods={"GET","POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method({"GET", "POST"})
+     */
+    public function adminAction(Request $request): Response
+    {
+        $em = $this->getDoctrine()->getManager();
+        $filter = $this->adminFilterFormFactory($em, $request);
+
+        $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"], true);
+        $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+        $bucketsByDay = $this->get('shift_service')->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
+
+        return $this->render('admin/booking/index.html.twig', [
+            'filterForm' => $filter["form"]->createView(),
+            'bucketsByDay' => $bucketsByDay,
+        ]);
+    }
+
+    /**
+     * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     */
+    public function showBucketAction(Request $request, Shift $bucket)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $shifts = $em->getRepository('AppBundle:Shift')->findBucket($bucket);
+
+        $shiftBookForms = [];
+        $shiftDeleteForms = [];
+        $shiftFreeForms = [];
+        $shiftValidateInvalidateForms = [];
+        foreach ($shifts as $shift) {
+            $shiftBookForms[$shift->getId()] = $this->createShiftBookAdminForm($shift)->createView();
+            $shiftDeleteForms[$shift->getId()] = $this->createShiftDeleteForm($shift)->createView();
+            $shiftFreeForms[$shift->getId()] = $this->createShiftFreeAdminForm($shift)->createView();
+            $shiftValidateInvalidateForms[$shift->getId()] = $this->createShiftValidateInvalidateAdminForm($shift)->createView();
+        }
+        $bucketShiftAddForm = $this->createBucketShiftAddForm($bucket);
+        $bucketDeleteform = $this->createBucketDeleteForm($bucket);
+        $bucketLockUnlockForm = $this->createBucketLockUnlockForm($bucket);
+
+        return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
+            'shifts' => $shifts,
+            'display_send_email_button' => true,
+            'display_edit_button' => true,
+            'bucket_shift_add_form' => $bucketShiftAddForm->createView(),
+            'shift_book_forms' => $shiftBookForms,
+            'shift_delete_forms' => $shiftDeleteForms,
+            'shift_free_forms' => $shiftFreeForms,
+            'shift_validate_invalidate_forms' => $shiftValidateInvalidateForms,
+            'bucket_delete_form' => $bucketDeleteform->createView(),
+            'bucket_lock_unlock_form' => $bucketLockUnlockForm->createView(),
+        ]);
+    }
+
+    /**
+     * When the user click on the 'edit' button on the bucket popup.
+     *
+     * @Route("/bucket/{id}/edit", name="bucket_edit", methods={"GET", "POST"})
+     * @Security("has_role('ROLE_SHIFT_MANAGER')")
      */
     public function editBucketAction(Request $request,Shift $shift)
     {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ShiftType::class, $shift);
         // Keep a record of the shift before update
@@ -275,15 +369,19 @@ class BookingController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $bucket->getJob(), 'start' => $bucket->getStart(), 'end' => $bucket->getEnd()));
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy([
+                'job' => $bucket->getJob(),
+                'start' => $bucket->getStart(),
+                'end' => $bucket->getEnd()
+            ]);
             foreach ($shifts as $s) {
-                $s->setStart($shift->getStart());
-                $s->setEnd($shift->getEnd());
-                $s->setJob($shift->getJob());
+                $s->setStart($form->get('start')->getData());
+                $s->setEnd($form->get('end')->getData());
+                $s->setJob($form->get('job')->getData());
                 $em->persist($s);
             }
             $em->flush();
+
             $session->getFlashBag()->add('success', 'Le créneau a bien été édité !');
             return $this->redirectToRoute('booking_admin');
         }
@@ -295,456 +393,257 @@ class BookingController extends Controller
     }
 
     /**
-     * delete all shifts in bucket.
+     * lock a bucket, used when the user click on the 'verouiller' button
+     * on the bucket popup.
      *
-     * @Route("/delete_bucket/", name="delete_bucket")
+     * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
      * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("DELETE")
      */
-    public function deleteBucketAction(Request $request)
+    public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
+        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('delete_bucket'))
-            ->setMethod('DELETE')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
+        $em = $this->getDoctrine()->getManager();
 
+        $form = $this->createBucketLockUnlockForm($shift);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shifts = $em->getRepository('AppBundle:Shift')->findBy(array('job' => $shift->getJob(), 'start' => $shift->getStart(), 'end' => $shift->getEnd()));
-                $count = 0;
-                foreach ($shifts as $s) {
-
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($s));
-
-                    $em->remove($s);
-                    $count++;
+            $lock = $form->get('lock')->getData() == 1;
+            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            $current = $bucket->getFirst()->isLocked() == 1;
+            if ($lock == $current) {
+                $success = false;
+                $message = "Le créneau a déjà été " . ($lock ? "verrouillé" : "déverrouillé");
+            } else {
+                foreach ($bucket->getShifts() as $s) {
+                    $s->setLocked($lock);
                 }
                 $em->flush();
-                $session->getFlashBag()->add('success', $count . " shifts removed");
-            } else {
-                $session->getFlashBag()->add('xarning', "shift not found");
+                $message = "Le créneau a été " . ($lock ? "verrouillé" : "déverrouillé");
+                $success = true;
             }
-        }
-        return $this->redirectToRoute('booking_admin');
-    }
-
-    /**
-     * Book a shift.
-     *
-     * @Route("/shift/{id}/book", name="shift_book")
-     * @Method("POST")
-     */
-    public function bookShiftAction(Shift $shift,Request $request)
-    {
-        $session = new Session();
-
-        $content = json_decode($request->getContent());
-        $beneficiaryId = $content->beneficiaryId;
-        $isFixe = $content->typeService;
-
-        $em = $this->getDoctrine()->getManager();
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->find($beneficiaryId);
-
-        // Check if the shift is bookable by the given beneficiary
-        // Also check if the beneficiary belongs to the same membership as the current user
-        if (!$beneficiary
-            || !$this->get('shift_service')->isShiftBookable($shift, $beneficiary)
-            || !$this->isGranted(MembershipVoter::EDIT, $beneficiary->getMembership())
-        ) {
-            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
-            return new Response($this->generateUrl('booking'), 205);
-        }
-
-        if (!$shift->getBooker()) {
-            $shift->setBooker($beneficiary);
-            $shift->setBookedTime(new DateTime('now'));
-        }
-        $shift->setShifter($beneficiary);
-        $shift->setIsDismissed(false);
-        $shift->setDismissedReason(null);
-        $shift->setDismissedTime(null);
-        $shift->setLastShifter(null);
-        $shift->setFixe($isFixe);
-        $em->persist($shift);
-
-        $member = $beneficiary->getMembership();
-        if ($member->getFirstShiftDate() == null) {
-            $firstDate = clone($shift->getStart());
-            $firstDate->setTime(0, 0, 0);
-            $member->setFirstShiftDate($firstDate);
-            $em->persist($member);
-        }
-
-        $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-
-        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé");
-        return new Response($this->generateUrl('homepage'), 200);
-    }
-
-    /**
-     * Dismiss a booked shift.
-     *
-     * @Route("/shift/{id}/dismiss", name="shift_dismiss")
-     * @Method("POST")
-     */
-    public function dismissShiftAction(Request $request, Shift $shift)
-    {
-        if (!$this->isGranted('dismiss', $shift)) {
-            $session = new Session();
-            $session->getFlashBag()->add("error", "Impossible d'annuler ce créneau");
-            return $this->redirectToRoute("booking");
-        }
-
-        $beneficiary = $shift->getShifter();
-        $em = $this->getDoctrine()->getManager();
-        if($shift->isFixe()) {
-            $session = new Session();
-            $session->getFlashBag()->add("error", "Impossible d'annuler un créneau fixe");
-            return $this->redirectToRoute("booking");
         } else {
-            $shift->setShifter(null);
-            $shift->setBooker(null);
-            $shift->setFixe(false);
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de verrouiller/déverouiller le créneau. " . (string) $form->getErrors(true, false);
         }
-        $em->persist($shift);
-        $em->flush();
 
-        $reason = $request->get("reason");
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftDismissedEvent::NAME, new ShiftDismissedEvent($shift, $beneficiary, $reason));
-
-        return $this->redirectToRoute('homepage');
+        if ($request->isXmlHttpRequest()) {
+            if ($success) {
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    'bucket' => $bucket,
+                    'start' => 6,
+                    'end' => 22,
+                    'line' => 0,
+                ));
+                $modal = $this->forward('AppBundle\Controller\BookingController::showBucketAction', [
+                    'bucket' => $bucket->getShiftWithMinId()
+                ])->getContent();
+                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
+            } else {
+                return new JsonResponse(array('message'=>$message), 400);
+            }
+        } else {
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
     }
 
     /**
-     * Undismiss a shift
+     * delete all shifts in bucket
+     * (used when the user clicks on the 'supprimer' button in the bucket popup)
      *
-     * @Route("/undismiss_shift/", name="undismiss_shift")
-     * @Method("POST")
+     * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
+     * @Security("has_role('ROLE_ADMIN')")
      */
-    public function undismissShift(Request $request)
+    public function deleteBucketAction(Request $request, Shift $bucket)
     {
-
         $session = new Session();
-        $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('undismiss_shift'))
-            ->setMethod('POST')
-            ->add('shift_id', HiddenType::class)
-            ->getForm();
+        $em = $this->getDoctrine()->getManager();
 
+        $form = $this->createBucketDeleteForm($bucket);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $shift_id = $form->get('shift_id')->getData();
-            $shift = $em->getRepository('AppBundle:Shift')->find($shift_id);
-            if ($shift) {
-                $shift->setIsDismissed(false);
-                $shift->setDismissedTime(null);
-                $shift->setDismissedReason(null);
-                $em->persist($shift);
-                $em->flush();
-
+            $shifts = $em->getRepository('AppBundle:Shift')->findBy([
+                'job' => $bucket->getJob(),
+                'start' => $bucket->getStart(),
+                'end' => $bucket->getEnd()
+            ]);
+            $count = 0;
+            foreach ($shifts as $shift) {
+                $beneficiary = $shift->getShifter();
                 $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-
-            } else {
-                $session->getFlashBag()->add('xarning', "shift not found");
-            }
-        }
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Accept a reserved shift
-     *
-     * @Route("/shift/{id}/accept/", name="accept_reserved_shift")
-     * @Method("GET")
-     */
-    public function acceptReservedShift(Request $request, Shift $shift)
-    {
-
-        $session = new Session();
-
-        if (!$shift->getId() || !$this->isGranted('accept', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
-            return $this->redirectToRoute("homepage");
-        }
-
-        if ($shift->getId()) {
-            if ($shift->getLastShifter()) {
-                $beneficiary = $shift->getLastShifter();
-                $shift->setBooker($beneficiary);
-                $shift->setShifter($beneficiary);
-                $shift->setBookedTime(new DateTime('now'));
-                $shift->setLastShifter(null);
-                $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($shift);
-                $em->flush();
-
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
-
-                $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
-            } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
-            }
-        } else {
-            $session->getFlashBag()->add('error', "shift not found");
-        }
-
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Reject a reserved shift
-     *
-     * @Route("/shift/{id}/reject/", name="reject_reserved_shift")
-     * @Method("GET")
-     */
-    public function rejectReservedShift(Request $request, Shift $shift)
-    {
-
-        $session = new Session();
-
-        if (!$this->isGranted('reject', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
-            return $this->redirectToRoute("homepage");
-        }
-
-        if ($shift->getId()) {
-            if ($shift->getLastShifter()) {
-                $shift->setLastShifter(null);
-                $shift->setFixe(false);
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($shift);
-                $em->flush();
-                $session->getFlashBag()->add('success', "Créneau libéré");
-                $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat");
-            } else {
-                $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé ou le délais de reservation est écoulé.");
-            }
-        } else {
-            $session->getFlashBag()->add('error', "shift not found");
-        }
-
-        return $this->redirectToRoute('homepage');
-    }
-
-    /**
-     * Book a shift admin.
-     *
-     * @Route("/admin/shift/{id}/book", name="admin_shift_book")
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
-     * @Method("POST")
-     */
-    public function bookShiftAdminAction(Request $request, Shift $shift)
-    {
-        $session = new Session();
-
-        if ($shift->getShifter() && !$shift->getIsDismissed()) {
-            $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
-            return new Response($this->generateUrl("booking_admin"), 205);
-        }
-
-        $content = json_decode($request->getContent());
-        $str = $content->beneficiary;
-        $fixe = $content->typeService;
-
-        $em = $this->getDoctrine()->getManager();
-        /**@var  Beneficiary $beneficiary*/
-        $beneficiary = $em->getRepository('AppBundle:Beneficiary')->findFromAutoComplete($str);
-
-        if (!$beneficiary) {
-            $session->getFlashBag()->add("error", "Impossible de trouve ce béneficiaire 😕");
-            return new Response($this->generateUrl("booking_admin"), 205);
-        }
-
-        if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
-            $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")");
-            return new Response($this->generateUrl("booking_admin"), 205);
-        }
-
-        if (!$shift->getBooker()) {
-            $shift->setBooker($beneficiary);
-            $shift->setBookedTime(new DateTime('now'));
-        }
-        $shift->setShifter($beneficiary);
-        $shift->setIsDismissed(false);
-        $shift->setDismissedReason(null);
-        $shift->setDismissedTime(null);
-        $shift->setLastShifter(null);
-        $shift->setFixe($fixe);
-
-        $em->persist($shift);
-
-        $member = $beneficiary->getMembership();
-        if ($member->getFirstShiftDate() == null) {
-            $firstDate = clone($shift->getStart());
-            $firstDate->setTime(0, 0, 0);
-            $member->setFirstShiftDate($firstDate);
-            $em->persist($member);
-        }
-
-        $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
-
-        $session->getFlashBag()->add("success", "Créneau réservé avec succès pour " . $shift->getShifter());
-        return new Response($this->generateUrl("booking_admin"), 200);
-
-    }
-
-    /**
-     * free a shift.
-     *
-     * @Route("/free_shift/{id}", name="free_shift")
-     * @Method("POST")
-     */
-    public function freeShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::FREE, $shift);
-
-        $session = new Session();
-
-        $membership = $shift->getShifter()->getMembership();
-
-        $em = $this->getDoctrine()->getManager();
-        $shift->free();
-        $shift->invalidateShiftParticipation();
-        $em->persist($shift);
-        $em->flush();
-
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $membership));
-
-        $session->getFlashBag()->add('success', "Le shift a bien été libéré");
-
-        $referer = $request->headers->get('referer');
-
-        return new RedirectResponse($referer);
-
-    }
-
-    /**
-     * validate a shift.
-     *
-     * @Route("/validate_shift/{id}", name="validate_shift")
-     * @Method("POST")
-     */
-    public function validateShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::VALIDATE, $shift);
-        $session = new Session();
-
-        if ($shift->getWasCarriedOut() == 0) {
-            $membership = $shift->getShifter()->getMembership();
-
-            $em = $this->getDoctrine()->getManager();
-            $shift->validateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
-
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été validée");
-        } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été validée");
-        }
-
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-    }
-
-    /**
-     * invalidate a shift.
-     *
-     * @Route("/invalidate_shift/{id}", name="invalidate_shift")
-     * @Method("POST")
-     */
-    public function invalidateShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::INVALIDATE, $shift);
-        $session = new Session();
-
-        if ($shift->getWasCarriedOut() == 0) {
-            $membership = $shift->getShifter()->getMembership();
-
-            $em = $this->getDoctrine()->getManager();
-            $shift->invalidateShiftParticipation();
-            $em->persist($shift);
-            $em->flush();
-
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $membership));
-
-            $session->getFlashBag()->add('success', "La participation au créneau a bien été invalidée");
-        } else {
-            $session->getFlashBag()->add('error', "La participation au créneau a déjà été invalidée");
-        }
-
-        $referer = $request->headers->get('referer');
-        return new RedirectResponse($referer);
-    }
-
-    /**
-     * lock a shift.
-     *
-     * @Route("/lock_shift/{id}", name="lock_shift")
-     * @Method("GET")
-     */
-    public function lockShiftAction(Request $request, Shift $shift)
-    {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
-
-        $em = $this->getDoctrine()->getManager();
-
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(true);
+                $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+                $em->remove($shift);
+                $count++;
             }
             $em->flush();
+            $success = true;
+            $message = $count . (($count > 1) ? " créneaux ont été supprimés" : " créneau a été supprimé") . " !";
+        } else {
+            $success = false;
+            $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);
         }
-
-        return $this->redirectToRoute('booking_admin');
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
+        } else {
+            $session = new Session();
+            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            return $this->redirectToRoute('booking_admin');
+        }
     }
 
     /**
-     * free a shift.
+     * Creates a form to lock/unlock a bucket entity.
      *
-     * @Route("/unlock_shift/{id}", name="unlock_shift")
-     * @Method("GET")
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
      */
-    public function unlockShiftAction(Request $request, Shift $shift)
+    private function createBucketLockUnlockForm(Shift $bucket)
     {
-        $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
+        return $this->get('form.factory')->createNamedBuilder('bucket_lock_unlock_form')
+            ->setAction($this->generateUrl('bucket_lock_unlock', array('id' => $bucket->getId())))
+            ->add('lock', HiddenType::class, [
+                'data'  => ($bucket->isLocked() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
+    }
 
-        $em = $this->getDoctrine()->getManager();
+    /**
+     * Creates a form to add a bucket (shift(s)).
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createBucketShiftAddForm(Shift $bucket)
+    {
+        return $this->get('form.factory')->createNamed(
+            'bucket_shift_add_form',
+            ShiftType::class,
+            $bucket,
+            array(
+                'action' => $this->generateUrl('shift_new'),
+                'only_add_formation' => true,
+            ));
+    }
 
-        if ($shift) {
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
-            foreach ($bucket->getShifts() as $s) {
-                $s->setLocked(false);
-            }
-            $em->flush();
+    /**
+     * Creates a form to delete a bucket entity.
+     *
+     * @param Shift $bucket One shift of the bucket
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createBucketDeleteForm(Shift $bucket)
+    {
+        return $this->get('form.factory')->createNamedBuilder('bucket_delete_form')
+            ->setAction($this->generateUrl('bucket_delete', array('id' => $bucket->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to book a shift entity.
+     * // TODO: how to avoid having same createShiftBookAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftBookAdminForm(Shift $shift)
+    {
+        $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
+            ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
+
+        if ($this->use_fly_and_fixed) {
+            $form = $form->add('fixe', RadioChoiceType::class, [
+                'choices'  => [
+                    'Volant' => 0,
+                    'Fixe' => 1,
+                ],
+                'data' => 0
+            ]);
+        } else {
+            $form = $form->add('fixe', HiddenType::class, [
+                'data' => 0
+            ]);
         }
 
-        return $this->redirectToRoute('booking_admin');
+        return $form->getForm();
+    }
+
+    /**
+     * Creates a form to delete a shift entity.
+     * // TODO: how to avoid having same createShiftDeleteForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftDeleteForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setMethod('DELETE')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity.
+     * // TODO: how to avoid having similar createShiftFreeForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftFreeForm(Shift $shift)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to free a shift entity (admin side).
+     * // TODO: how to avoid having same createShiftFreeAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftFreeAdminForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
+            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setMethod('POST')
+            ->getForm();
+    }
+
+    /**
+     * Creates a form to validate / invalidate a shift entity.
+     * // TODO: how to avoid having same createShiftValidateInvalidateAdminForm in ShiftController ?
+     *
+     * @param Shift $shift The shift entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createShiftValidateInvalidateAdminForm(Shift $shift)
+    {
+        return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
+            ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
+            ->add('validate', HiddenType::class, [
+                'data' => ($shift->getWasCarriedOut() ? 0 : 1),
+            ])
+            ->setMethod('POST')
+            ->getForm();
     }
 }

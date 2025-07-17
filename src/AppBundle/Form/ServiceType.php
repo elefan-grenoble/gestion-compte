@@ -51,7 +51,11 @@ class ServiceType extends AbstractType
                 'allow_delete' => true,
                 'download_link' => true,
             ));
-            $form->add('public',CheckboxType::class,array('required' => false,'label'=>'Visible sur le menu ?'));
+            $form->add('public', CheckboxType::class, array(
+                'required' => false,
+                'label'=>'Visible sur le menu ?',
+                'attr' => array('class' => 'filled-in')
+            ));
         });
 
     }

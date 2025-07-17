@@ -12,9 +12,7 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Formation;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\BeneficiaryType;
 use AppBundle\Form\RegistrationType;
-use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -27,15 +25,6 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -44,8 +33,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
@@ -62,8 +50,7 @@ class RegistrationsController extends Controller
     /**
      * Registrations list
      *
-     * @Route("/", name="registrations")
-     * @Method({"POST","GET"})
+     * @Route("/", name="registrations", methods={"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
@@ -101,8 +88,8 @@ class RegistrationsController extends Controller
 
 
         $em = $this->getDoctrine()->getManager();
-        if (!($page = $request->get('page')))
-            $page = 1;
+        if (!($currentPage = $request->get('page')))
+            $currentPage = 1;
         $limit = 25;
         $qb = $em->createQueryBuilder()->from('AppBundle\Entity\AbstractRegistration', 'r')
             ->select('count(r.id)')
@@ -114,8 +101,8 @@ class RegistrationsController extends Controller
 
         $max = $qb->getQuery()
             ->getSingleScalarResult();
-        $nb_of_pages = intval($max / $limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+        $pageCount = intval($max / $limit);
+        $pageCount += (($max % $limit) > 0) ? 1 : 0;
         $repository = $em->getRepository('AppBundle:AbstractRegistration');
         $queryb = $repository->createQueryBuilder('r')
             ->where('r.date >= :from')
@@ -124,7 +111,7 @@ class RegistrationsController extends Controller
             $queryb = $queryb->andwhere('r.date <= :to')->setParameter('to', $to);
         }
         $queryb = $queryb->orderBy('r.date', 'DESC')
-            ->setFirstResult(($page - 1) * $limit)
+            ->setFirstResult(($currentPage - 1) * $limit)
             ->setMaxResults($limit);
 
         $registrations = $queryb->getQuery()->getResult();
@@ -192,34 +179,28 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
                 'grand_total' => $grand_total,
                 'totaux' => $totaux,
                 'delete_forms' => $delete_forms,
-                'page' => $page,
                 'from' => $from,
                 'to' => $to,
-                'nb_of_pages' => $nb_of_pages));
+                'current_page' => $currentPage,
+                'page_count' => $pageCount));
     }
 
     /**
      * edit registration
      *
-     * @Route("/{id}/edit", name="registration_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="registration_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function editRegistrationAction(Request $request, Registration $registration)
     {
         $session = new Session();
-        if ($registration->getId() && ($request->attributes->get('id') == $registration->getId())){
-            $edit_form = $this->createForm(RegistrationType::class, $registration);
-            $edit_form->handleRequest($request);
-            if ($edit_form->isSubmitted() && $edit_form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($registration);
-                $em->flush();
-                $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
-                return $this->redirectToRoute("registrations");
-            }
-        }else{
-            $session->getFlashBag()->add('error', 'l\'entrée #'.$request->attributes->get('id').' n\'a pas été trouvée');
+        $edit_form = $this->createForm(RegistrationType::class, $registration);
+        $edit_form->handleRequest($request);
+        if ($edit_form->isSubmitted() && $edit_form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($registration);
+            $em->flush();
+            $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
             return $this->redirectToRoute("registrations");
         }
 
@@ -229,8 +210,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
     /**
      * remove registration
      *
-     * @Route("/{id}/remove", name="registration_remove")
-     * @Method({"DELETE"})
+     * @Route("/{id}/remove", name="registration_remove", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function removeRegistrationAction(Request $request, Registration $registration)

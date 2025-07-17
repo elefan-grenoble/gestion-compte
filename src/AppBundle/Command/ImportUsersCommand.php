@@ -64,11 +64,11 @@ class ImportUsersCommand extends CsvCommand
             'email' => array('label' => 'Email','index'=>8),
             'commissions' => array('label' => 'Commission (liste id)',
                 'tips'=>'Liste d\'id de commissions, séparé par des virgules. ex: 1,5,7',
-                "required" => false,"default" =>''),
+                "required" => false,"default" =>'', 'index'=>9),
             'add_to' => array('label' => 'Email du compte associé','index'=>10,"required" => false,"default" =>''),
             'date' => array('label' => 'Date inscription',
                 'tips'=>'Au format d/m/Y ex: 13/12/2018',
-                "required" => false,"default" =>date("d/m/Y")),
+                "required" => false,"default" =>date('d/m/Y')),
             'amount' => array('label' => 'Montant','index'=>11),
             'mode' => array('label' => 'Mode de paiement',
                 'tips'=>'int : 1 = espèce,2 = chèque, 3 = monnaie locale, 4 = cb, 6 = Helloasso, 5 = autre',
@@ -143,6 +143,7 @@ class ImportUsersCommand extends CsvCommand
                             $membership = new Membership();
                             $output->writeln("<info>No Membership with number <fg=cyan>$member_number</> found, create one</info>",OutputInterface::VERBOSITY_DEBUG);
                             $membership->setMemberNumber($member_number);
+                            $membership->setFlying(false);
                             $membership->setWithdrawn(false);
                             $membership->setFrozen(false);
                             $membership->setFrozenChange(false);

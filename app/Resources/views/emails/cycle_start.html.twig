@@ -1,11 +1,12 @@
-Bonjour {{ beneficiary.firstname | lower | capitalize }},<br >
-<br >
-{% if beneficiary.membership.beneficiaries | length %}
-Votre nouveau cycle commence aujourd'hui.<br >
-Pensez à aller sur <a href="{{ home_url }}">votre espace membre</a> pour réserver vos créneaux.<br >{% else %}
-Ton nouveau cycle commence aujourd'hui.<br >
-Pense à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver tes créneaux.<br >{% endif %}
-<br >
-Merci<br >
-<br >
+Bonjour {{ beneficiary.firstname | lower | capitalize }},<br />
+<br />
+{% if beneficiary.membership.beneficiaries | length > 1 %}
+Votre nouveau cycle commence aujourd'hui.<br />
+Pensez à aller sur <a href="{{ home_url }}">votre espace membre</a> pour réserver vos créneaux.<br />
+{% else %}
+Ton nouveau cycle commence aujourd'hui.<br />
+Pense à aller sur <a href="{{ home_url }}">ton espace membre</a> pour réserver tes créneaux.<br />
+{% endif %}
+<br />
+Merci, et belle journée à toi.<br />
 Céleste, la petite fée des créneaux :)

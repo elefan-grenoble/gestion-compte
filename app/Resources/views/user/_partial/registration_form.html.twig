@@ -1,17 +1,15 @@
 
 <div class="row">
-    <div class="input-field amount col s1">
+    <div class="col s1">
         {{ form_row(form.amount) }}
     </div>
-    <div class="type col s2">
+    <div class="col s2">
         {{ form_row(form.mode) }}
     </div>
-    <div class="date col s3">
-        <div class="row">
-            <div class="col s4">{{ form_row(form.date.day) }}</div>
-            <div class="col s4">{{ form_row(form.date.month) }}</div>
-            <div class="col s4">{{ form_row(form.date.year) }}</div>
-        </div>
+    <div class="col s3 input-field">
+       {{ form_label(form.date) }}
+       {{ form_errors(form.date) }}
+       {{ form_widget(form.date) }}
     </div>
     <div class="col s3">
         {{ form_row(form.registrar) }}

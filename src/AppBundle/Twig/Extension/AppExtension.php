@@ -34,23 +34,29 @@ class AppExtension extends AbstractExtension
     {
         return array(
             new TwigFilter('markdown', array($this, 'markdown')),
+            new TwigFilter('ellipsis', array($this, 'ellipsis')),
             new TwigFilter('json_decode', array($this, 'jsonDecode')),
-            new TwigFilter('email_encode',array($this, 'encodeText')),
-            new TwigFilter('priority_to_color',array($this, 'priority_to_color')),
-            new TwigFilter('date_fr_long',array($this, 'date_fr_long')),
-            new TwigFilter('date_fr_full',array($this, 'date_fr_full')),
-            new TwigFilter('date_fr_with_time',array($this, 'date_fr_with_time')),
-            new TwigFilter('date_time',array($this, 'date_time')),
-            new TwigFilter('date_w3c',array($this, 'date_w3c')),
-            new TwigFilter('duration_from_minutes',array($this, 'duration_from_minutes')),
-            new TwigFilter('qr',array($this, 'qr')),
-            new TwigFilter('barcode',array($this, 'barcode')),
-            new TwigFilter('vigenere_encode',array($this, 'vigenere_encode')),
-            new TwigFilter('vigenere_decode',array($this, 'vigenere_decode')),
-            new TwigFilter('recall_date',array($this, 'get_recall_date')),
-            new TwigFilter('img',array($this, 'imgFilter')),
-            new TwigFilter('payment_mode_devise',array($this, 'payment_mode_devise')),
-            new TwigFilter('payment_mode',array($this, 'payment_mode')),
+            new TwigFilter('email_encode', array($this, 'encodeText')),
+            new TwigFilter('priority_to_color', array($this, 'priority_to_color')),
+            new TwigFilter('date_fr', array($this, 'date_fr')),
+            new TwigFilter('date_fr_long', array($this, 'date_fr_long')),
+            new TwigFilter('date_fr_full', array($this, 'date_fr_full')),
+            new TwigFilter('date_fr_with_time', array($this, 'date_fr_with_time')),
+            new TwigFilter('date_fr_long_with_time', array($this, 'date_fr_long_with_time')),
+            new TwigFilter('date_fr_full_with_time', array($this, 'date_fr_full_with_time')),
+            new TwigFilter('date_short', array($this, 'date_short')),
+            new TwigFilter('date_time', array($this, 'date_time')),
+            new TwigFilter('date_w3c', array($this, 'date_w3c')),
+            new TwigFilter('time_short', array($this, 'time_short')),
+            new TwigFilter('duration_from_minutes', array($this, 'duration_from_minutes')),
+            new TwigFilter('qr', array($this, 'qr')),
+            new TwigFilter('barcode', array($this, 'barcode')),
+            new TwigFilter('vigenere_encode', array($this, 'vigenere_encode')),
+            new TwigFilter('vigenere_decode', array($this, 'vigenere_decode')),
+            new TwigFilter('recall_date', array($this, 'get_recall_date')),
+            new TwigFilter('img', array($this, 'imgFilter')),
+            new TwigFilter('payment_mode_devise', array($this, 'payment_mode_devise')),
+            new TwigFilter('payment_mode', array($this, 'payment_mode')),
         );
     }
 
@@ -63,6 +69,13 @@ class AppExtension extends AbstractExtension
     {
         $html = Markdown::defaultTransform($markdown);
         return $html;
+    }
+
+    public function ellipsis($text, $maxLen = 50, $ellipsis = '…')
+    {
+        if (strlen($text) <= $maxLen)
+            return $text;
+        return substr($text, 0, $maxLen-strlen($ellipsis)).$ellipsis;
     }
 
     public function encodeText($text)
@@ -117,33 +130,92 @@ class AppExtension extends AbstractExtension
         return 'my_app_extension';
     }
 
+    /**
+     * Exemple: "29 juin 2022"
+     */
+    public function date_fr(\DateTime $date)
+    {
+        return strftime("%e %B %Y", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "mercredi 29 juin"
+     */
     public function date_fr_long(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B", $date->getTimestamp());
     }
 
-    public function date_time(\DateTime $date)
-    {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%D %H:%M", $date->getTimestamp());
-    }
-
+    /**
+     * Example: "mercredi 29 juin 2022"
+     */
     public function date_fr_full(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
         return strftime("%A %e %B %Y", $date->getTimestamp());
     }
 
+    /**
+     * Example: "29 juin 2022 à 9h30"
+     */
     public function date_fr_with_time(\DateTime $date)
     {
-        setlocale(LC_TIME, 'fr_FR.UTF8');
-        return strftime("%A %e %B %Y à %H:%M", $date->getTimestamp());
+        return strftime("%e %B %Y à %kh%M", $date->getTimestamp());
     }
 
+    /**
+     * Example: "mercredi 29 juin à 9h30"
+     * 
+     * Note: not used
+     */
+    public function date_fr_long_with_time(\DateTime $date)
+    {
+        return strftime("%A %e %B à %kh%M", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "mercredi 29 juin 2022 à 9h30"
+     *
+     * @param: \DateTime|\DateTimeImmutable $date
+     */
+    public function date_fr_full_with_time($date)
+    {
+        return strftime("%A %e %B %Y à %kh%M", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "29/06/22"
+     */
+    public function date_short($date)  # \DateTime or \DateTimeImmutable
+    {
+        return strftime("%d/%m/%Y", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "29/06/22 9h30"
+     */
+    public function date_time(\DateTime $date)
+    {
+        return strftime("%d/%m/%Y %kh%M", $date->getTimestamp());
+    }
+
+    /**
+     * Example: "2022-06-29T09:30:18+02:00"
+     */
     public function date_w3c(\DateTime $date)
     {
-        return $date->format( \DateTimeInterface::W3C);
+        return $date->format(\DateTimeInterface::W3C);
+    }
+
+    /**
+     * Example: "9h30" ; "10h"
+     */
+    public function time_short(\DateTime $date)
+    {
+        $time_minutes = $date->format('i');
+        if ($time_minutes == "00") {
+            return strftime("%kh", $date->getTimestamp());
+        }
+        return strftime("%kh%M", $date->getTimestamp());
     }
 
     public function payment_mode_devise(int $value)

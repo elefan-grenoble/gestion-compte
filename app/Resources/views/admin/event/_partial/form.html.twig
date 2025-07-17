@@ -1,0 +1,64 @@
+{% set edit = edit ?? false %}
+
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_row(form.title) }}
+    </div>
+    <div class="col m6">
+        {{ form_row(form.kind) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_row(form.date) }}
+    </div>
+    <div class="col m6">
+        {{ form_row(form.end) }}
+    </div>
+</div>
+<div class="row">
+    {{ form_row(form.location) }}
+</div>
+<div class="row">
+    {{ form_row(form.description) }}
+</div>
+<div class="row">
+    {{ form_row(form.imgFile) }}
+</div>
+<div class="row">
+    {{ form_errors(form.displayed_home) }}
+    <label>
+        {{ form_widget(form.displayed_home) }}
+        <span>{{ form.displayed_home.vars.label }}</span>
+        <div class="helper-text" data-error="wrong" data-success="right">L'événement sera affiché sur la page d'accueil de chaque membre</div>
+    </label>
+</div>
+
+{% if edit %}
+    <h5>Nécessite un vote ?</h5>
+    <div class="row">
+        <div class="col m6">
+            {{ form_errors(form.need_proxy) }}
+            <label>
+                {{ form_widget(form.need_proxy) }}
+                <span>{{ form.need_proxy.vars.label }}</span>
+            </label>
+        </div>
+        <div class="col m6">
+            {{ form_errors(form.anonymous_proxy) }}
+            <label>
+                {{ form_widget(form.anonymous_proxy) }}
+                <span>{{ form.anonymous_proxy.vars.label }}</span>
+            </label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col m6">
+            {{ form_row(form.max_date_of_last_registration) }}
+        </div>
+    </div>
+    {% include "admin/member/_partial/created_updated_card.html.twig" with { item: event } %}
+{% endif %}

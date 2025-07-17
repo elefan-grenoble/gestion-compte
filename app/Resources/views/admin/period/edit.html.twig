@@ -1,182 +1,138 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('period') }}"><i class="material-icons">date_range</i>Semaine type</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>Nouveau
+{% block title %}Editer le créneau type - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_period_index') }}"><i class="material-icons">date_range</i>&nbsp;Semaine type</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer le créneau type
 {% endblock %}
 
-{% block content %}
-    <h4 class="">Editer créneau type</h4>
-    {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light">Sauvegarder</button>
-    </div>
-    {{ form_end(form) }}
+{% set periodPositionCount = period.positions | length %}
+{% set periodPositionBookedCount = period.positionsWithFilter(true, null) | length %}
+{% set periodPositionFreeCount = periodPositionCount - periodPositionBookedCount %}
 
-    {% if is_granted("ROLE_ADMIN") %}
-    {{ form_start(delete_form) }}
-    {{ form_widget(delete_form) }}
-    <div>
-        <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+{% block content %}
+    <h4>Editer le créneau type</h4>
+
+    <div class="row">
+        <div class="col m4">
+            {% include "period/_partial/period_card.html.twig" with { period: period, anonymized: true, show_day_of_week: true, show_details: false } %}
+        </div>
+        <div class="col m8">
+            <div class="card">
+                <div class="card-content">
+                    Ce créneau type comporte <strong>{{ periodPositionCount }}</strong> poste{% if periodPositionCount > 1 %}s{% endif %} type{% if periodPositionCount > 1 %}s{% endif %}.
+                    {% if use_fly_and_fixed %}
+                        <br />
+                        <span class="green-text">&#9673;</span>&nbsp;<strong>{{ periodPositionBookedCount }}</strong> poste{% if periodPositionBookedCount > 1 %}s{% endif %} réservé{% if periodPositionBookedCount > 1 %}s{% endif %}<br />
+                        <span class="red-text">&#9673;</span>&nbsp;<strong>{{ periodPositionFreeCount }}</strong> poste{% if periodPositionFreeCount > 1 %}s{% endif %} libre{% if periodPositionFreeCount > 1 %}s{% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
-    {{ form_end(delete_form) }}
-    {% endif %}
 
     <h5>Postes disponibles</h5>
 
-    {% if use_fly_and_fixed %}
-        {% if (period.positionsperweekcycle | length == 0) %}
-            Aucun poste n'existe pour ce créneau
-        {% endif %}
-        {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{week}}</h6>
-            <ul class="collapsible" data-collapsible="accordion">
-                {% for position in positions %}
-                    {% if position.shifter %}
-                        <li id="position{{ position.id }}">
-                            <div class="collapsible-header">
-                                <div class="col s12">
-                                    {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
-                                    #{{ position.shifter.membership.memberNumber }}&nbsp;{{ position.shifter.firstname }}&nbsp;{{ position.shifter.lastname }}
-                                    {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
-                                    {% if not position.formation and position.shifter.formations | length > 0 %}&nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>{% endif %}
-                                </div>
-                            </div>
-                            <div class="collapsible-body">
-                                Créneau fixe réservé le <i>{{ position.bookedTime | date_fr_with_time }}</i> par <a href="{{ path("member_show",{'member_number': position.booker.membership.memberNumber}) }}">{{ position.booker }}</a>.
-                                <form action="{{ path('free_position_from_period', {'id' : position.id }) }}" method="post" id="free_position_{{ position.id }}">
-                                    <button type="submit" class="btn orange"><i class="material-icons left">lock_open</i>Libérer</button>
-                                </form>
-                            </div>
-                        </li>
-                    {% else %}
-                        <li id="position{{ position.id }}">
-                            <div class="collapsible-header">
-                                <div class="row" style="margin-bottom: 0px; width: 100%;">
-                                    <div class="col s11">
-                                        <b>
-                                            <span style="font-style: italic">libre</span>
-                                        </b>
-                                        {% if position.formation %}
-                                            &nbsp;({{ position.formation.name }})
-                                        {% else %}
-                                            &nbsp;(sans formation particulière)
-                                        {% endif %}
-                                    </div>
-                                    <div class="col s1 right-align">
-                                        {{ form_start(positions_delete_form[position.id]) }}
-                                        {{ form_widget(positions_delete_form[position.id]) }}
-                                        <a href="#" onclick="var r = confirm('Supprimer ce poste ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="Supprimer ce poste" class="red-text">✗</a>
-                                        {{ form_end(positions_delete_form[position.id]) }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="collapsible-body">
-                                <div class="row">
-                                    <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %}">
-                                        <input id ="benef{{ position.id }}" type="text" class="empty-position" name="beneficiary" placeholder="Beneficiaire">
-                                    </div>
-                                    <div class="col s3">
-                                        <input type="hidden" class="checkedTypeService{{ position.id }}" name="typeService{{ position.id }}" value=0>
-                                        <button class="btn add" onclick="postPosition({{ position.id }})">Ajouter</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    {% endif %}
-                {% endfor %}
-           </ul>
-        {% endfor %}
-    {% else %}
-        {% for week, positions in period.positionsperweekcycle %}
-            <h6>Semaine {{week}}</h6>
-            <ul>
-            {% for position in positions %}
-                <li>
-                    {{ form_start(positions_delete_form[position.id]) }}
-                    {{ form_widget(positions_delete_form[position.id]) }}
-                    {{ position }} <a href="#" onclick="$(this).closest('form').submit()" title="supprimer" class="red-text">&cross;</a>
-                    {{ form_end(positions_delete_form[position.id]) }}
-                </li>
-            {% endfor %}
-            </ul>
-        {% endfor %}
+    {% if (period.positionsperweekcycle | length == 0) %}
+        Aucun poste n'existe pour ce créneau
     {% endif %}
-    <h5>Ajouter un poste</h5>
-    {{ form_start(position_form) }}
-    <div class="row">
-        <div class="col s3">
-            {{ form_label(position_form.nb_of_shifter) }}
-            {{ form_widget(position_form.nb_of_shifter) }}
-        </div>
-        <div class="col s3">
-            {{ form_label(position_form.week_cycle) }}
-            {{ form_widget(position_form.week_cycle) }}
-        </div>
-        <div class="col s6">
-            {{ form_label(position_form.formation) }}
-            {{ form_widget(position_form.formation) }}
-        </div>
-        <div class="col s6">
-            <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
-        </div>
-    </div>
-    {{ form_end(position_form) }}
+    {% for week, positions in period.positionsperweekcycle %}
+        {% if cycle_type == 'abcd' %}
+            <h6>Semaine {{ week }}</h6>
+        {% endif %}
+        <ul class="collapsible">
+            {% for position in positions %}
+                {% include "admin/periodposition/_partial/edit_collapsible.html.twig" with { position: position, position_free_form: positions_free_forms[position.id] ?? null, position_book_form: positions_book_forms[position.id] ?? null, position_delete_form: positions_delete_forms[position.id] ?? null } %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
 
+    <br />
+    <h5>Actions supplémentaires</h5>
 
-{% endblock %}
-{% block javascripts %}
-    <script>
-        jQuery(function ($) {
-            $('input.empty-position').autocomplete({
-                data: {
-                    {% for beneficiary in beneficiaries %}
-                        "{{ beneficiary.autocompleteLabel }}" : null,
-                    {% endfor %}
-                },
-                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
-                onAutocomplete: function(val) {
-                    // Callback function when value is autcompleted.
-                    $('button.add').removeAttr('disabled');
-                },
-                minLength: 2, // The minimum length of the input for the autocomplete to start. Default: 1.
-            });
-            $('input.empty-shift').keydown(function () {
-                $('button.add:not(:disabled)').attr('disabled','disabled');
-            });
-        })
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">add</i>Ajouter un poste
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(position_add_form) }}
+                <div class="row">
+                    <div class="col s3">
+                        {{ form_label(position_add_form.nb_of_shifter) }}
+                        {{ form_widget(position_add_form.nb_of_shifter) }}
+                    </div>
+                    {% if cycle_type == 'abcd' %}
+                        <div class="col s3">
+                            {{ form_label(position_add_form.week_cycle) }}
+                            {{ form_widget(position_add_form.week_cycle) }}
+                        </div>
+                    {% endif %}
+                    <div class="col s6">
+                        {{ form_label(position_add_form.formation) }}
+                        {{ form_widget(position_add_form.formation) }}
+                    </div>
+                    <div class="col s6">
+                        <button type="submit" class="btn waves-effect waves-light teal"><i class="material-icons left">add</i>Ajouter</button>
+                    </div>
+                </div>
+                {{ form_row(position_add_form._token) }}
+                {{ form_end(position_add_form, {'render_rest': false}) }}
+            </div>
+        </li>
+        <li>
+            <div class="collapsible-header">
+                <i class="material-icons">edit</i>Editer le créneau type
+            </div>
+            <div class="collapsible-body">
+                {{ form_start(form, {'attr': { 'style': 'display:inline;' }}) }}
+                {{ form_widget(form) }}
+                {% if period.createdBy or period.updatedBy %}
+                    <br />
+                    <div class="card-panel">
+                        {% if period.createdBy %}
+                            <i>Création le {{ period.createdAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: period.createdBy, target_blank: true } %}</i>
+                            <br />
+                        {% endif %}
+                        {% if period.updatedBy %}
+                            <i>Dernière modification le {{ period.updatedAt | date_fr_full_with_time }} par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: period.updatedBy, target_blank: true } %}</i>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                <br />
+                <button type="submit" class="btn waves-effect waves-light">
+                    <i class="material-icons left">save</i>Enregistrer
+                </button>
+                {{ form_end(form) }}
 
-        function postPosition(positionId) {
-
-            let selectedBenef = document.getElementById('benef'+positionId);
-
-            if (selectedBenef != null) {
-                let url = "{{ path('book_position_from_period',{'id': 'tmpId'}) }}";
-                url = url.replace("tmpId", positionId);
-
-                let body = {
-                    "beneficiary": selectedBenef.value
-                };
-
-                // If using old IE version
-                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-
-                xhttp.open("POST", url, true);
-                xhttp.onreadystatechange = function () {
-                    if (xhttp.readyState > 3) {
-                        if (200 <= xhttp.status && xhttp.status < 300) {
-                            window.location.replace(xhttp.responseText);
-                        } else {
-                            alert("une erreur est survenue");
-                        }
-                    }
-                };
-                xhttp.send(JSON.stringify(body));
-                return xhttp;
-            }
-        }
-    </script>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <a href="#remove-period-confirmation-modal" class="btn red modal-trigger" title="Supprimer le créneau type" {% if use_fly_and_fixed and not period.isEmpty %}disabled{% endif %}>
+                        <i class="material-icons left">delete</i>Supprimer
+                    </a>
+                    {% if use_fly_and_fixed and not period.isEmpty %}
+                        <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les postes doivent être libérés avant de pouvoir supprimer le créneau type">info</i>
+                    {% endif %}
+                    {{ form_start(admin_period_delete_form) }}
+                    <div id="remove-period-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5><i class="material-icons left small">remove_circle_outline</i>Supprimer le créneau type</h5>
+                            <p>Attention, cela va aussi supprimer tous les postes de ce créneau type.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">
+                                Retour à la raison
+                            </a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                        </div>
+                    </div>
+                    {{ form_end(admin_period_delete_form) }}
+                {% endif %}
+            </div>
+        </li>
+    </ul>
 {% endblock %}

@@ -3,6 +3,7 @@
 namespace AppBundle\Security;
 
 use AppBundle\Entity\User;
+use AppBundle\Helper\PlaceIP;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
@@ -51,10 +52,15 @@ class UserVoter extends Voter
         $user = $token->getUser();
 
         if (!$user instanceof User) {
-            if ($attribute == self::CARD_READER){
-                return $this->isLocationOk();
+            if ($attribute == self::CARD_READER) {
+                return $this->container->get(PlaceIP::class)->isLocationOk();
             }
             // the user must be logged in; if not, deny access
+            return false;
+        }
+
+        if ($this->container->getParameter("oidc_enable"))
+        {
             return false;
         }
 
@@ -77,7 +83,7 @@ class UserVoter extends Voter
                 return true;
             case self::ACCESS_TOOLS:
             case self::CREATE:
-                return $this->isLocationOk();
+                return $this->container->get(PlaceIP::class)->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
@@ -114,7 +120,7 @@ class UserVoter extends Voter
     {
         $user = $token->getUser();
 
-        if ($this->isLocationOk()) {
+        if ($this->container->get(PlaceIP::class)->isLocationOk()) {
             if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
                 return true;
             }
@@ -125,13 +131,5 @@ class UserVoter extends Voter
         }
         return false;
 
-    }
-
-    private function isLocationOk()
-    {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',',$ips);
-        return (isset($ip) and in_array($ip,$ips));
     }
 }

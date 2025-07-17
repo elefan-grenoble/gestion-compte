@@ -1,0 +1,292 @@
+{#
+Template for the modal popup used to change the user register for a shift bucket in /booking/admin
+Also on the /schedule page to display more shift infos (without any action buttons)
+It use the materialize modal class https://materializeweb.com/modals.html
+id = "modal-bucket"
+#}
+{% if (display_names ?? true) %}
+    {% set display_names = display_name_shifters %}
+{% endif %}
+{% set nbBookableShifts = shifts | filter ( shift => not shift.shifter) | length %}
+{% set nbShifts = (shifts | length) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+{% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
+
+{# header #}
+{% if bucket.locked %}
+    <i class="material-icons left large">lock</i>
+{% endif %}
+<h4>
+    Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span>
+</h4>
+<h5>
+    {{ bucket.displayDateLongWithTime }}
+</h5>
+<span>
+    remplissage : {{ nbBookedShifts }}/{{ nbShifts }} ({{ ((nbBookedShifts / nbShifts)*100) | round }}%)
+</span>
+
+{# bucket shifts #}
+<ul class="collapsible">
+    {% for shift in shifts %}
+        {% if shift.shifter %}{# is booked #}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px">
+                        <div id="modal-shift-{{ shift.id }}" class="col s12">
+                            {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                            {% endif %}
+                            {% if display_names %}
+                                {{ shift.shifter.displayNameWithMemberNumber }}
+                            {% endif %}
+                            {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
+                            {% if not shift.formation and shift.shifter.formations | length > 0 %}
+                                &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
+                            {% endif %}
+                            {% if shift.shifter.isNew %}
+                                &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                            {% endif %}
+                            {% if shift.isFirstByShifter %}
+                                &nbsp;<strong class="red-text">(Premier créneau)</strong>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="collapsible-body">
+                    <p>
+                        Créneau
+                        {% if use_fly_and_fixed %}
+                            <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
+                        {% endif %}
+                        réservé
+                        {% if shift.shifter != shift.booker.beneficiary and display_names %}
+                            pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
+                        {% endif %}
+                        le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
+                        par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true } %}.
+                    </p>
+                    <!-- shift (in)validate & free forms -->
+                    {% if is_granted('free', shift) %}
+                        {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                            {{ form_start(shift_validate_invalidate_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                                {% if shift.wasCarriedOut %}
+                                    <button type="submit" class="btn orange" title="Invalider la participation">
+                                        <i class="material-icons left">highlight_off</i>Invalider la participation
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn green" title="Valider la participation">
+                                        <i class="material-icons left">check_circle</i>Valider la participation
+                                    </button>
+                                {% endif %}
+                            {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
+                        {% endif %}
+                        {% if shift_free_forms is defined %}
+                            {{ form_start(shift_free_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                                {% do shift_free_forms[shift.id].reason.setRendered() %} <!-- hidden -->
+                                {% if shift.isPast %}
+                                    <button type="submit" class="btn red" title="Supprimer la participation">
+                                        <i class="material-icons left">delete</i>Supprimer la participation
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn orange" title="Libérer">
+                                        <i class="material-icons left">lock_open</i>Libérer
+                                    </button>
+                                {% endif %}
+                            {{ form_end(shift_free_forms[shift.id]) }}
+                        {% endif %}
+                    {% endif %}
+                    <!-- shift.createdBy -->
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true } %}.
+                        </p>
+                    {% endif %}
+                </div>
+            </li>
+        {% else %}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px;">
+                        <div class="col s12">
+                            <b>
+                                <span style="font-style: italic">
+                                    {% if shift.lastShifter %}
+                                        réservé
+                                        {% if display_names %}
+                                            à {{ shift.lastShifter.displayNameWithMemberNumber }}
+                                        {% endif %}
+                                    {% else %}
+                                        libre
+                                    {% endif %}
+                                </span>
+                            </b>
+                            {% if shift.formation %}
+                                </b>&nbsp;({{ shift.formation.name }})
+                            {% else %}
+                                </b>&nbsp;(sans formation particulière)
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="collapsible-body">
+                    <!-- shift book form -->
+                    {% if shift_book_forms is defined %}
+                        {{ form_start(shift_book_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                        <div class="row">
+                            <div class="col {% if use_fly_and_fixed %}s7{% else %}s9{% endif %} input-field">
+                                {{ form_label(shift_book_forms[shift.id].shifter) }}
+                                {{ form_widget(shift_book_forms[shift.id].shifter) }}
+                            </div>
+                            {% if use_fly_and_fixed %}
+                                <div class="col s2 input-field">
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                                </div>
+                            {% endif %}
+                            <div class="col s3 input-field">
+                                {% if not use_fly_and_fixed %}
+                                    {{ form_widget(shift_book_forms[shift.id].fixe) }}
+                                {% endif %}
+                                <button type="submit" class="btn">
+                                    <i class="material-icons left">add</i>Ajouter
+                                </button>
+                            </div>
+                        </div>
+                        {{ form_end(shift_book_forms[shift.id]) }}
+                    {% endif %}
+
+                    <!-- shift delete form -->
+                    {% if is_granted("ROLE_ADMIN") and shift_delete_forms is defined %}
+                        {% if not shift.lastShifter %}
+                            {{ form_start(shift_delete_forms[shift.id]) }}
+                            <button type="submit" title="Supprimer le poste" class="btn red">
+                                <i class="material-icons left">delete</i>Supprimer
+                            </button>
+                            {{ form_end(shift_delete_forms[shift.id]) }}
+                        {% endif %}
+                    {% endif %}
+                    <!-- shift.createdBy -->
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true } %}.
+                        </p>
+                    {% endif %}
+                </div>
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+{# add shift form #}
+{% if bucket_shift_add_form is defined %}
+    {{ form_start(bucket_shift_add_form, {'attr': { 'style': 'display:inline;' }}) }}
+    <input type="hidden" id="{{ bucket_shift_add_form.start.date.vars.id }}" name="{{ bucket_shift_add_form.start.date.vars.full_name }}" value="{{ bucket_shift_add_form.start.date.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.start.time.vars.id }}" name="{{ bucket_shift_add_form.start.time.vars.full_name }}" value="{{ bucket_shift_add_form.start.time.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.end.date.vars.id }}" name="{{ bucket_shift_add_form.end.date.vars.full_name }}" value="{{ bucket_shift_add_form.end.date.vars.value }}">
+    <input type="hidden" id="{{ bucket_shift_add_form.end.time.vars.id }}" name="{{ bucket_shift_add_form.end.time.vars.full_name }}" value="{{ bucket_shift_add_form.end.time.vars.value }}">
+    {{ form_widget(bucket_shift_add_form.job) }}
+    <div class="row valign-wrapper">
+        <div class="col s3">
+            {{ form_label(bucket_shift_add_form.number) }}
+            {{ form_widget(bucket_shift_add_form.number) }}
+        </div>
+        <div class="col s6">
+            {{ form_label(bucket_shift_add_form.formation) }}
+            {{ form_widget(bucket_shift_add_form.formation) }}
+        </div>
+        <div class="col s3">
+            <button type="submit" class="btn waves-effect waves-light teal">
+                <i class="material-icons left">add</i>Ajouter
+            </button>
+        </div>
+    </div>
+    {{ form_row(bucket_shift_add_form._token) }}
+    {{ form_end(bucket_shift_add_form, {'render_rest': false}) }}
+{% endif %}
+
+{# bucket actions #}
+{% if display_send_email_button ?? false and is_granted("ROLE_ADMIN_PANEL") %}
+    <a href="{{ path('mail_bucketshift', { 'id': bucket.id }) }}" class="btn">
+        <i class="material-icons left">mail</i>Envoyer un email
+    </a>
+{% endif %}
+
+{% if bucket_lock_unlock_form is defined %}
+    {{ form_start(bucket_lock_unlock_form, {'attr': { 'style': 'display:inline;' }}) }}
+    {% if bucket.locked %}
+        <button type="submit" class="btn orange">
+            <i class="material-icons left">lock_open</i>Déverrouiller
+        </button>
+    {% else %}
+        <button type="submit" class="btn orange">
+            <i class="material-icons left">lock</i>Verrouiller
+        </button>
+    {% endif %}
+    {{ form_end(bucket_lock_unlock_form) }}
+{% endif %}
+
+{% if display_edit_button ?? false and is_granted("ROLE_SHIFT_MANAGER") %}
+    <a href="{{ path('bucket_edit', { 'id': bucket.id }) }}" class="btn deep-purple">
+        <i class="material-icons left">edit</i>Editer
+    </a>
+{% endif %}
+
+{% if is_granted("ROLE_ADMIN") and bucket_delete_form is defined %}
+    <!-- bucket delete is allowed only if all shifts are free -->
+    {{ form_start(bucket_delete_form, {'attr': { 'style': 'display:inline;' }}) }}
+    <button id="bucket_delete" class="btn red" title="Supprimer tous les créneaux à cette heure et ce poste" {% if not use_time_log_saving and (nbBookedShifts > 0) %}disabled{% endif %}>
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
+    {{ form_end(bucket_delete_form) }}
+    {% if not use_time_log_saving and (nbBookedShifts > 0) %}
+        <i class="material-icons grey-text tooltipped" style="vertical-align:middle;" data-tooltip="Tous les créneaux doivent être libérés avant de pouvoir les supprimer">info</i>
+    {% endif %}
+{% endif %}
+
+<script>
+    function makeAjaxCall(event) {
+        if (event.data.confirmation) {
+            var result = confirm(event.data.confirmation);
+        } else {
+            var result = true;
+        }
+        if (result) {
+            $.ajax({
+                url: $(event.currentTarget).attr('action'),
+                data: $(event.currentTarget).serialize(),
+                method: 'POST',
+                success: function (data) {
+                    M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
+                    if (this.data.includes("bucket_delete_form") || data.card === null) {
+                        $('#main-bucket-{{ bucket.id }}').remove();
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    } else if (data.modal) {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        if (this.data.includes("shift_delete_forms_") && (this.url.substring(this.url.lastIndexOf('/') + 1) == {{ bucket.id }})) {
+                            // Change id as bucket id has been removed
+                            $('#main-bucket-{{ bucket.id }}').attr("id",$(data.card).attr('id'));
+                        }
+                        $('#modal-bucket-content').html(data.modal);
+                        $('#modal-bucket-content .collapsible').collapsible();
+                        $('#modal-bucket-content select').formSelect();
+                    } else {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    }
+                },
+                error: ajaxError
+            });
+        }
+        event.preventDefault();
+    }
+    $('form[name="bucket_delete_form"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ces créneaux ?!{% if use_time_log_saving %} Ils ne seront pas libérés au préalable (et n'utiliseront donc pas le compteur épargne du membre).{% endif %}"}, makeAjaxCall);
+    $('form[name^="shift_delete_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir supprimer ce poste ?!"}, makeAjaxCall);
+    $('form[name^="shift_free_forms_"]').on('submit', {confirmation: "Etes-vous sûr de vouloir libérer ce poste ?!"}, makeAjaxCall);
+    $('form[name="bucket_shift_add_form"]').on('submit', {}, makeAjaxCall);
+    $('form[name="bucket_lock_unlock_form"]').on('submit', {}, makeAjaxCall);
+    $('form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
+    $('form[name^="shift_validate_invalidate_forms_"]').on('submit', {}, makeAjaxCall);
+    $('.tooltipped').tooltip();
+</script>

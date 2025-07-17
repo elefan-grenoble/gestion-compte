@@ -38,14 +38,6 @@ class Registration
     private $date;
 
     /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="created_at", type="datetime")
-     * @Assert\DateTime()
-     */
-    private $created_at;
-
-    /**
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
@@ -62,7 +54,7 @@ class Registration
     private $mode;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations",)
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations")
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
@@ -74,18 +66,28 @@ class Registration
     private $registrar;
 
     /**
-     * @ORM\OneToOne(targetEntity="HelloassoPayment", mappedBy="registration", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="HelloassoPayment", mappedBy="registration", cascade={"persist"}, fetch="EAGER")
      */
     private $helloassoPayment;
 
     private $is_new;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     * @Assert\DateTime()
+     */
+    private $createdAt;
+
+    /**
      * @ORM\PrePersist
      */
     public function setCreatedAtValue()
     {
-        $this->created_at = new \DateTime();
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
     }
 
     /**
@@ -212,54 +214,6 @@ class Registration
     }
 
     /**
-     * Set createdAt
-     *
-     * @param \DateTime $createdAt
-     *
-     * @return Registration
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->created_at = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Registration
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updated_at = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
-    }
-
-    /**
      * Set helloassoPayment.
      *
      * @param \AppBundle\Entity\HelloassoPayment|null $helloassoPayment
@@ -297,5 +251,29 @@ class Registration
     public function setMembership($membership)
     {
         $this->membership = $membership;
+    }
+
+    /**
+     * Set createdAt
+     *
+     * @param \DateTime $createdAt
+     *
+     * @return Registration
+     */
+    public function setCreatedAt($date)
+    {
+        $this->createdAt = $date;
+
+        return $this;
+    }
+
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
+    {
+        return $this->createdAt;
     }
 }

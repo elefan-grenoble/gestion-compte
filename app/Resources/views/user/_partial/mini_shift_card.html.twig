@@ -1,0 +1,8 @@
+<div class="card center mini-shift {% if (shift.isPast) %}grey lighten-2{% else %}cyan darken-4 white-text{% endif %}">
+    <div class="card-content">
+        {% include "user/_partial/shift_card_header.html.twig" with { shift: shift } %}
+    </div>
+    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+        {% include "user/_partial/shift_card_validation_status.html.twig" with { shift: shift } %}
+    {% endif %}
+</div>

@@ -38,13 +38,15 @@ class User extends BaseUser
 
     /**
      * Beneficiary's user.
+     * 
      * @Assert\Valid()
-     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user")
+     * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="user", fetch="EAGER")
      */
     private $beneficiary;
 
     /**
      * Many Users have Many clients.
+     * 
      * @ORM\ManyToMany(targetEntity="Client", inversedBy="users")
      * @ORM\JoinTable(name="users_clients")
      */
@@ -52,7 +54,7 @@ class User extends BaseUser
 
     /**
      * @ORM\OneToMany(targetEntity="Note", mappedBy="author",cascade={"persist", "remove"})
-     * @OrderBy({"created_at" = "DESC"})
+     * @OrderBy({"createdAt" = "DESC"})
      */
     private $annotations;
 
@@ -62,14 +64,25 @@ class User extends BaseUser
      */
     private $processUpdates;
 
+    // other fields
+    // username, email, enabled, last_login, roles
+
+    public function __toString()
+    {
+        if (!$this->getBeneficiary())
+            return $this->getUsername();
+        else{
+            return (string)$this->getBeneficiary();
+        }
+    }
+
     public function getGroups()
     {
         if ($this->getBeneficiary()){
-            return $this->getBeneficiary()->getFormations();
+            return $this->getBeneficiary()->getFormations()->toArray();
         }else{
             return new ArrayCollection();
         }
-
     }
 
     public function __get($property) {
@@ -103,15 +116,6 @@ class User extends BaseUser
             return $beneficiary->getLastname();
         else
             return '';
-    }
-
-    public function __toString()
-    {
-        if (!$this->getBeneficiary())
-            return $this->getUsername();
-        else{
-            return (string)$this->getBeneficiary();
-        }
     }
 
     public function getTmpToken($key = '')
@@ -276,7 +280,6 @@ class User extends BaseUser
         return $this->clients;
     }
 
-
     /**
      * Add annotation
      *
@@ -311,11 +314,12 @@ class User extends BaseUser
         return $this->annotations;
     }
 
-    public function getAutocompleteLabel(){
-        if ($this->getBeneficiary())
-            return '#'.$this->getId().' '.$this->getFirstname().' '.$this->getLastname();
-        else
-            return '#'.$this->getId().' '.$this->getUsername();
+    /**
+     * @param mixed $beneficiary
+     */
+    public function setBeneficiary($beneficiary)
+    {
+        $this->beneficiary = $beneficiary;
     }
 
     /**
@@ -327,11 +331,27 @@ class User extends BaseUser
     }
 
     /**
-     * @param mixed $beneficiary
+     * @return Membership
      */
-    public function setBeneficiary($beneficiary)
+    public function getMembership()
     {
-        $this->beneficiary = $beneficiary;
+        if ($this->getBeneficiary()) {
+            return $this->getBeneficiary()->getMembership();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @return string
+     */
+    public function getBeneficiaryStringWithLink()
+    {
+        if ($this->getBeneficiary()) {
+            return '<a href="{{ path("member_show", { \'member_number\': '. $this->getBeneficiary()->getMembership()->getMemberNumber() .' }) }}">'. $this->getBeneficiary() .'</a>';
+        } else {
+            return $this;
+        }
     }
 
     /**
@@ -340,5 +360,13 @@ class User extends BaseUser
     public function getProcessUpdates()
     {
         return $this->processUpdates;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getLastLogin()
+    {
+        return $this->lastLogin;
     }
 }

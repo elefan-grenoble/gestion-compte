@@ -1,5 +1,4 @@
 <?php
-// src/AppBundle/Form/RegistrationType.php
 
 namespace AppBundle\Form;
 
@@ -14,21 +13,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class RegistrationType extends AbstractType
 {
-    private $localCurrency;
+    private $local_currency_name;
     private $tokenStorage;
 
-    public function __construct(string $localCurrency, TokenStorageInterface $tokenStorage)
+    public function __construct(string $local_currency_name, TokenStorageInterface $tokenStorage)
     {
-        $this->localCurrency = $localCurrency;
+        $this->local_currency_name = $local_currency_name;
         $this->tokenStorage = $tokenStorage;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-
         // grab the user, do a quick sanity check that one exists
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$user) {
@@ -43,87 +42,68 @@ class RegistrationType extends AbstractType
             $registration = $event->getData();
 
             $form->add('date', DateType::class,array(
-                'label' => [
-                    'dat' => 'Jour',
-                    'year' => 'Année',
-                    'month' => 'Mois',
-                ],'placeholder' => [
-                    'year' => 'Année',
-                    'month' => 'Mois',
-                ],
-                'years' => range(2016, date('Y')),'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))),
+                'label' => 'Date',
+                'disabled' => !is_object($user)||(!($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))),
+                'html5' => false,
+                'widget' => 'single_text',
                 'attr' => [
                     'class' => 'datepicker'
                 ]
             ));
 
-            if (!is_object($user)||!$user->hasRole('ROLE_SUPER_ADMIN')){
+            if (!is_object($user) || !$user->hasRole('ROLE_SUPER_ADMIN')) {
                 if ($registration){
-                    if (!$registration->getAmount()){
-                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
-                    }else{
+                    if (!$registration->getAmount()) {
+                        $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15'),
+                            'constraints' => [ new GreaterThan(0) ]));
+                    } else {
                         $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('disabled'=>'true')));
                     }
-                    if (!$registration->getRegistrar()){
-                        $form->add('registrar',EntityType::class,array(
-                            'label' => 'Enregistré par',
-                            'class' => 'AppBundle:User',
-                            'query_builder' => function (EntityRepository $er) {
-                                return $er->createQueryBuilder('u,b')
-                                    ->leftJoin('u.beneficiary', 'b')
-                                    ->orderBy('u.username', 'ASC');
-                            },
-                            'choice_label' => 'username',
-                        ));
-                    }else{
-                        $form->add('registrar',EntityType::class,array(
-                            'label' => 'Enregistré par',
-                            'class' => 'AppBundle:User',
-                            'query_builder' => function (EntityRepository $er) use ($registration) {
-                                return $er->createQueryBuilder('u')
-                                    ->where(':uid = u.id')
-                                    ->setParameter('uid', $registration->getRegistrar()->getId())
-                                    ->orderBy('u.username', 'ASC');
-                            },
-                            'choice_label' => 'username',
-                            'attr'=>array('disabled' => true)
-                        ));
-                    }
-                    if (!$registration->getMode()) {
-                        $form->add('mode', ChoiceType::class, array('choices' => array(
+                    $form->add('registrar', EntityType::class, array(
+                        'label' => 'Enregistrée par',
+                        'class' => 'AppBundle:User',
+                        'query_builder' => function (EntityRepository $er) {
+                            return $er->createQueryBuilder('u')
+                                ->leftJoin('u.beneficiary', 'b')
+                                ->addSelect('b')
+                                ->orderBy('u.username', 'ASC');
+                        },
+                        'choice_label' => 'username',
+                        'attr' => array(
+                            'disabled' => !is_null($registration->getRegistrar())
+                        )
+                    ));
+                    $form->add('mode', ChoiceType::class, array(
+                        'choices' => array(
                             'Espèce' => Registration::TYPE_CASH,
                             'Chèque' => Registration::TYPE_CHECK,
-                            $this->localCurrency => Registration::TYPE_LOCAL,
+                            $this->local_currency_name => Registration::TYPE_LOCAL,
                             'HelloAsso' => Registration::TYPE_HELLOASSO,
-                        ), 'label' => 'Mode de réglement')); //todo, make it dynamic
-                    }else{
-                        $form->add('mode', ChoiceType::class, array('choices' => array(
-                            'Espèce' => Registration::TYPE_CASH,
-                            'Chèque' => Registration::TYPE_CHECK,
-                             $this->localCurrency => Registration::TYPE_LOCAL,
-                            'HelloAsso' => Registration::TYPE_HELLOASSO,
-                        ), 'label' => 'Mode de réglement','attr'=>array('disabled' => true))); //todo, make it dynamic
-                    }
+                        ),
+                        'label' => 'Mode de réglement',
+                        'attr' => array(
+                            'disabled' => !is_null($registration->getMode())
+                        )
+                    )); //todo, make it dynamic
                 }
-            }else{
+            } else {
                 $form->add('amount', TextType::class, array('label' => 'Montant','attr'=>array('placeholder'=>'15')));
-                $form->add('registrar',EntityType::class,array(
-                    'label' => 'Enregistré par',
+                $form->add('registrar', EntityType::class, array(
+                    'label' => 'Enregistrée par',
                     'class' => 'AppBundle:User',
                     'query_builder' => function (EntityRepository $er) {
                         return $er->createQueryBuilder('u')
-                            ->select('u,b')
                             ->leftJoin('u.beneficiary', 'b')
+                            ->addSelect('b')
                             ->orderBy('u.username', 'ASC');
                     },
                     'choice_label' => 'username',
-                    'data' => $registration->getRegistrar()
                 ));
                 $form->add('mode', ChoiceType::class, array('choices'  => array(
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
-                    $this->localCurrency => Registration::TYPE_LOCAL,
-//                    'CB' => Registration::TYPE_CREDIT_CARD,
+                    $this->local_currency_name => Registration::TYPE_LOCAL,
+                    // 'CB' => Registration::TYPE_CREDIT_CARD,
                 ),'label' => 'Mode de réglement')); //todo, make it dynamic
             }
 

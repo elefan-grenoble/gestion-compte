@@ -1,0 +1,31 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Événement : {{ event.title }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+    <a href="{{ path('event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+{% endif %}
+<i class="material-icons">event</i>&nbsp;{{ event.title }}
+{% endblock %}
+
+{% block content %}
+{% include "admin/event/_partial/card.html.twig" with { event: event, only_header: true } %}
+
+{% if event.description %}
+    <div class="card-panel blue lighten-5">
+        {{ event.description | markdown | raw }}
+    </div>
+{% else %}
+    <i>pas de description</i>
+{% endif %}
+
+{% if event.needProxy %}
+    {% include "admin/event/_partial/card.html.twig" with { event: event, only_action: true } %}
+{% endif %}
+
+{% if event.img %}
+    <img src="{{ event|img('imgFile', 'default') }}" class="materialboxed" style="max-width:50%" />
+{% endif %}
+{% endblock %}

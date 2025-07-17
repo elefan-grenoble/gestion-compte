@@ -1,17 +1,14 @@
 {% extends 'layout.html.twig' %}
 
-{% block beforecontainer %}
-{% endblock %}
-{% block aftercontainer %}
-{% endblock %}
-
 {% block content %}
     <div class="section no-pad-bot" id="index-banner">
         <div class="container">
             <br><br>
             <h2 class="header center orange-text">Première connexion</h2>
             {{ form_start(form) }}
-            {{ form_errors(form) }}
+                <div class="errors">
+                    {{ form_errors(form) }}
+                </div>
                 <div class="row">
                     <div class="input-field col s6">
                         {{ form_widget(form.member_number) }}
@@ -28,9 +25,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block stylesheets %}
-{% endblock %}
-{% block javascripts %}
 {% endblock %}

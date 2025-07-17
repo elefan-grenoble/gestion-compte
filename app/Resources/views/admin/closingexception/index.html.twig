@@ -1,0 +1,49 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Fermetures exceptionnelles - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">block</i>&nbsp;Fermetures exceptionnelles
+{% endblock %}
+
+{% block content %}
+<div class="card-panel blue lighten-3">
+    <i class="material-icons left">info</i>
+    Aucun créneau ne sera généré pour le jour de la fermeture exceptionnelle.
+    <br />
+    ⚠️ Les créneaux étant générés à l'avance, il faut définir le jour de fermeture d'avantage en amont ⚠️
+</div>
+
+{% if closingExceptionsOngoing %}
+    <h4>Fermeture exceptionnelle en cours</h4>
+
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: [closingExceptionsOngoing] } %}
+{% endif %}
+
+<h4>Fermetures exceptionnelles à venir ({{ closingExceptionsFuture | length }})</h4>
+
+{% if closingExceptionsFuture | length %}
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsFuture, delete_forms: delete_forms } %}
+{% endif %}
+
+<br />
+<h4>Fermetures exceptionnelles passées (10 plus récentes)</h4>
+
+{% if closingExceptionsPast | length %}
+    {% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptionsPast } %}
+{% endif %}
+
+<br />
+<a href="{{ path("admin_closingexception_list") }}" class="btn">
+    <i class="material-icons left">list</i>Toutes les fermetures exceptionnelles
+</a>
+<br />
+<a href="{{ path('admin_closingexception_new') }}" class="btn">
+    <i class="material-icons left">add</i>Ajouter une fermeture exceptionnelle
+</a>
+<a href="{{ path('admin_closingexception_widget_generator') }}" class="btn">
+    <i class="material-icons left">tune</i>Générer un widget
+</a>
+{% endblock %}

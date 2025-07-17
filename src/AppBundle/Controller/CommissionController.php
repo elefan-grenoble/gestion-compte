@@ -18,8 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -34,8 +33,7 @@ class CommissionController extends Controller
     /**
      * Comissions list
      *
-     * @Route("/", name="admin_commissions")
-     * @Method("GET")
+     * @Route("/", name="admin_commissions", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
@@ -47,8 +45,7 @@ class CommissionController extends Controller
     /**
      * Comission new
      *
-     * @Route("/new", name="commission_new")
-     * @Method({"GET", "POST"})
+     * @Route("/new", name="commission_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
@@ -63,14 +60,12 @@ class CommissionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em->persist($commission);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
 
             return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
-
         }
 
         return $this->render('admin/commission/new.html.twig', array(
@@ -82,9 +77,8 @@ class CommissionController extends Controller
     /**
      * Commission edit
      *
-     * @Route("/{id}/edit", name="commission_edit")
-     * @Method({"GET", "POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Route("/{id}/edit", name="commission_edit", methods={"GET","POST"})
+     * @Security("has_role('ROLE_ADMIN')")
      */
     public function editAction(Request $request,Commission $commission)
     {
@@ -92,7 +86,8 @@ class CommissionController extends Controller
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $current_app_user->getBeneficiary();
 
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $beneficiary->getOwnedCommissions()->contains($commission)) {
+        // only super admin, admin, or commission owner can edit commission
+        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && !$current_app_user->hasRole('ROLE_ADMIN') && !$beneficiary->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
 
@@ -138,21 +133,15 @@ class CommissionController extends Controller
     private function getAddBeneficiaryForm(Commission $commission){
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
-            ->add('beneficiary',AutocompleteBeneficiaryType::class,array('label'=>'Email ou nom de la personne','required'=>true))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, array('label'=>'Email ou nom de la personne', 'required'=>true))
             ->setMethod('POST')
             ->getForm();
     }
 
     /**
-     * Commission add beneficiary'query_builder' => function (EntityRepository $er) {
-                    return $er->createQueryBuilder('b')
-                        ->join("b.user", "u")
-                        ->addSelect("u")
-                        ->where('u.withdrawn = 0');
-                },
+     * Commission add a beneficiary
      *
-     * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary")
-     * @Method({"POST"})
+     * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary", methods={"POST"})
      */
     public function addBeneficiaryAction(Request $request,Commission $commission)
     {
@@ -200,8 +189,7 @@ class CommissionController extends Controller
     /**
      * Commission remove beneficiary
      *
-     * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary")
-     * @Method({"POST"})
+     * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary", methods={"POST"})
      */
     public function removeBeneficiaryAction(Request $request,Commission $commission)
     {
@@ -237,11 +225,10 @@ class CommissionController extends Controller
     /**
      * Comission delete
      *
-     * @Route("/{id}", name="commission_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="commission_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Commission $commission)
+    public function deleteAction(Request $request,Commission $commission)
     {
         $session = new Session();
         $form = $this->getDeleteForm($commission);

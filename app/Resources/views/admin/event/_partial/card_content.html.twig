@@ -1,0 +1,35 @@
+{% set only_header = only_header ?? false %}
+{% set from_admin = from_admin ?? false %}
+
+<div class="card-content {% if from_admin %}white-text{% endif %} left-align">
+    <span class="card-title">
+        {{ event.title }}
+        {% if event.displayedHome %}⭐️{% endif %}
+    </span>
+    <p style="margin:0">
+        <i class="material-icons tiny">event</i>
+        {{ event.date | date_fr_full_with_time }}
+        {% if event.kind %}
+            <span class="badge teal white-text">{{ event.kind }}</span>
+        {% endif %}
+        {% if event.end and event.isOngoing %}
+            <span class="badge deep-purple white-text">En cours</span>
+        {% endif %}
+    </p>
+    {% if event.end %}
+        <p style="margin:0">
+            <i class="material-icons tiny">timer</i>
+            <span title="jusqu'à {{ event.end | date_fr_full_with_time }}">durée : {{ event.duration }}</span>
+        </p>
+    {% endif %}
+    {% if event.location %}
+        <p style="margin:0">
+            <i class="material-icons tiny">location_on</i>
+            {{ event.location }}
+        </p>
+    {% endif %}
+    {% if not only_header %}
+        <br />
+        {{ event.description | markdown | raw }}
+    {% endif %}
+</div>

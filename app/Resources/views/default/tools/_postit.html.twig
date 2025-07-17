@@ -2,7 +2,7 @@
     <div class="postit-container" id="postit{{ note.id }}">
         <div class="postit">
             <span class="info">
-                {{ note.author.firstname }} le {{ note.createdAt | date('d/m/Y à H:i') }}
+                {{ note.author.firstname }} le {{ note.createdAt | date_fr_with_time }}
             </span>
             <a href="#post-it_children{{ note.id }}" class="black-text modal-trigger replies"><i class="material-icons tiny">reply</i>{% if note.children | length %}({{ note.children | length }}){% endif %}</a>
             <a href="#post-it_edit{{ note.id }}" class="black-text modal-trigger settings"><i class="material-icons tiny">settings</i></a>
@@ -22,7 +22,7 @@
             {% for child in note.children %}
             <h6>
                 <i class="material-icons tiny">reply</i>
-                {{ child.author.firstname }} le {{ child.createdAt | date('d/m/Y à H:i') }}
+                {{ child.author.firstname }} le {{ child.createdAt | date_fr_with_time }}
                 {% if is_granted('delete',child) %}
                 <a href="#!" class="red-text right" onclick="document.getElementById('form_note_delete_{{ child.id }}').submit();">
                     <i class="material-icons">close</i>
@@ -34,12 +34,12 @@
                     {{ child.textWithBr  | markdown | raw }}
                 </p>
             </div>
-                {{ form_start(notes_delete_form[child.id], {'attr': {'id': 'form_note_delete_'~child.id }}) }}
-                {{ form_widget(notes_delete_form[child.id]) }}
-                {{ form_end(notes_delete_form[child.id]) }}
+                {{ form_start(note_delete_forms[child.id], {'attr': {'id': 'form_note_delete_'~child.id }}) }}
+                {{ form_widget(note_delete_forms[child.id]) }}
+                {{ form_end(note_delete_forms[child.id]) }}
             {% endfor %}
             {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new_note_form_child_'~note.id ,'class':'reply'}}) }}
-                {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
+            {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
             {{ form_end(new_notes_form[note.id]) }}
         </div>
         <div class="modal-footer">
@@ -54,7 +54,7 @@
                     Ajouter une réponse
                 </h4>
             {{ form_start(new_notes_form[note.id], {'attr': {'id': 'new_note_form_'~note.id ,'class':'reply'}}) }}
-                {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
+            {{ form_row(new_notes_form[note.id].text, {'id': 'note_text_reply_'~note.id}) }}
             {{ form_end(new_notes_form[note.id]) }}
             </div>
             <div class="modal-footer">
@@ -64,19 +64,17 @@
         </div>
 {% endif %}
 
-
 <div id="post-it_edit{{ note.id }}" class="modal modal-fixed-footer post-it_edit">
-
     <div class="modal-content">
         <h4>Editer ce post-it</h4>
         {{ form_start(notes_form[note.id], {'attr': {'id': 'form_note_edit_'~note.id,'class': 'edit-post-it' }}) }}
-            {{ form_row(notes_form[note.id].text, {'id': 'note_text_edit_'~note.id}) }}
+        {{ form_row(notes_form[note.id].text, {'id': 'note_text_edit_'~note.id}) }}
         {{ form_end(notes_form[note.id]) }}
 
         {% if is_granted('delete',note) %}
-        {{ form_start(notes_delete_form[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
-        {{ form_widget(notes_delete_form[note.id]) }}
-        {{ form_end(notes_delete_form[note.id]) }}
+        {{ form_start(note_delete_forms[note.id], {'attr': {'id': 'form_note_delete_'~note.id }}) }}
+        {{ form_widget(note_delete_forms[note.id]) }}
+        {{ form_end(note_delete_forms[note.id]) }}
         {% endif %}
     </div>
     <div class="modal-footer">
@@ -86,5 +84,4 @@
             <a href="#!" class="modal-action modal-close waves-effect waves-red btn red" onclick="document.getElementById('form_note_delete_{{ note.id }}').submit();"><i class="material-icons left">delete</i>Supprimer</a>
         {% endif %}
     </div>
-
 </div>

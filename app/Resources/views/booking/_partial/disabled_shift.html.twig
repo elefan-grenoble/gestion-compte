@@ -1,20 +1,24 @@
 {% set nbShifts = bucket.shifts | length %}
 {% set nbBookableShifts = shift_service.getBookableShifts(bucket) | length %}
-{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+
 <div class="tooltipped" data-tooltip="{{ bucket.sortedShifts.first.job.name }} - {% if nbBookableShifts == 0 %}complet{% else %}inaccessible pour {{ beneficiary.firstname }}{% endif %}"
         data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}"
         data-length="{{ (100/(end-start+1)) }}"
-        style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;
-                left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;
-                top: {{ line*10 }}px;">
+        style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left:{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
     <div class="z-depth-1 grey lighten-3" style="height:40px;position: relative; cursor: not-allowed">
-
         <div class="shift-block grey-text text-lighten-1">
-            <i class="material-icons tiny">lock</i><span class="small hide-on-med-and-up" style="font-size: 10px">
-                    {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
+            {% if bucket.first.locked %}
+                <i class="material-icons tiny">lock</i>
+            {% elseif nbBookableShifts == 0 %}
+                <i class="material-icons tiny">check</i>
+            {% endif %}
+            <span class="small hide-on-med-and-up" style="font-size: 10px">
+                {% if bucket.start|date('i') == '00' %}{{ bucket.start|date('G\\h') }}{% else %}{{ bucket.start|date('G\\hi') }}{% endif %}
                 {% if bucket.end|date('i') == '00' %}{{ bucket.end|date('G\\h') }}{% else %}{{ bucket.end|date('G\\hi') }}{% endif %}
-                </span>
-            <span class="hide-on-small-and-down">{{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}</span>
+            </span>
+            <span class="hide-on-small-and-down">
+                {{ bucket.start|date('G\\hi') }} - {{ bucket.end|date('G\\hi') }}
+            </span>
         </div>
         <div class="shift-block">
             <div class="hide-on-med-and-down">
@@ -24,6 +28,10 @@
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}account_circle{% else %}person_outline{% endif %}</i>
+                        {% endif %}
+                        {% if display_names and (shift.shifter or shift.lastShifter) %}
+                            {% set shifter = shift.shifter ? shift.shifter : shifter.lastShifter %}
+                            <span class="shifter-name">{{ shifter.firstname|lower|capitalize }}&nbsp;{{ shifter.lastname|first|upper }}</span>
                         {% endif %}
                     </span>
                 {% endfor %}

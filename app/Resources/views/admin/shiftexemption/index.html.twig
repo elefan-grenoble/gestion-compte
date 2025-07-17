@@ -1,0 +1,41 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des motifs d'exemptions de bénévolat - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des motifs d'exemptions de bénévolat
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des motifs d'exemptions de bénévolat ({{ shiftExemptions | length }})</h4>
+
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Exemption</th>
+                <th>Nombre d'exemptions</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for shiftExemption in shiftExemptions %}
+            <tr id="shiftexemption_{{ shiftExemption.id }}">
+                <td>{{ shiftExemption.name }}</td>
+                <td>{{ shiftExemption.membershipShiftExemptions | length }}</td>
+                <td>
+                    <a href="{{ path('admin_shiftexemption_edit', { 'id': shiftExemption.id }) }}"><i class="material-icons">edit</i>editer</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('admin_shiftexemption_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une exemption</a>
+        </li>
+    </ul>
+{% endblock %}

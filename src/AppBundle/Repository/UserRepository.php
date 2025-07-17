@@ -27,7 +27,7 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findNonMember()
+    public function findNonMembers($active = false)
     {
         $qb = $this->_em->createQueryBuilder();
         $qb->select('u')
@@ -35,6 +35,25 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
             ->leftJoin('u.beneficiary', 'b')
             ->where('b.id is NULL');
 
+        if ($active) {
+            $qb->andWhere("u.enabled = 1");
+        }
+
         return $qb->getQuery()->getResult();
+    }
+
+    public function findSuperAdminAccount()
+    {
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('u')
+            ->from($this->_entityName, 'u')
+            ->leftJoin('u.beneficiary', 'b')
+            ->where('b.id is NULL')
+            ->andwhere('u.roles LIKE :roles')
+            ->setParameter('roles', '%ROLE_SUPER_ADMIN%')
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults(1);
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 }

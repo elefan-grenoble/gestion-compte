@@ -50,12 +50,12 @@
         </div>
     </div>
     <div class="col s3">
-        <div class="errors">
+        <div class="row">
             {{ form_errors(form.public) }}
-        </div>
-        <div class="">
-            {{ form_widget(form.public) }}
-            {{ form_label(form.public) }}
+            <label>
+                {{ form_widget(form.public) }}
+                <span>{{ form.public.vars.label }}</span>
+            </label>
         </div>
     </div>
 </div>

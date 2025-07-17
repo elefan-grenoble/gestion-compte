@@ -7,8 +7,7 @@ use AppBundle\Entity\Service;
 use AppBundle\Entity\Task;
 use AppBundle\Form\ServiceType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
@@ -19,7 +18,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
 
 
 /**
- * Task controller.
+ * Service controller.
  *
  * @Route("services")
  */
@@ -28,8 +27,7 @@ class ServiceController extends Controller
     /**
      * Lists all services.
      *
-     * @Route("/", name="admin_services")
-     * @Method("GET")
+     * @Route("/", name="service_list", methods={"GET"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function listAction(Request $request)
@@ -43,10 +41,9 @@ class ServiceController extends Controller
     }
 
     /**
-     * Lists all services.
+     * Lists all services (header navlist)
      *
-     * @Route("/navlist", name="nav_list_services")
-     * @Method("GET")
+     * @Route("/navlist", name="service_navlist", methods={"GET"})
      * @Security("has_role('ROLE_USER')")
      */
     public function navlistAction()
@@ -61,8 +58,7 @@ class ServiceController extends Controller
     /**
      * add new services.
      *
-     * @Route("/new", name="service_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="service_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
@@ -71,99 +67,81 @@ class ServiceController extends Controller
 
         $service = new Service();
 
-        $em = $this->getDoctrine()->getManager();
-
         $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            $em = $this->getDoctrine()->getManager();
             $em->persist($service);
             $em->flush();
 
-            if ($service->getLogo()){
+            if ($service->getLogo()) {
                 $this->resolveLogo($service);
             }
 
             $session->getFlashBag()->add('success', 'Le nouveau service a bien été créée !');
-
-            return $this->redirectToRoute('admin_services');
-
+            return $this->redirectToRoute('service_list');
         }
+
         return $this->render('admin/service/new.html.twig', array(
             'form' => $form->createView()
         ));
-
     }
 
     /**
      * edit service.
      *
-     * @Route("/edit/{id}", name="service_edit")
-     * @Method({"GET","POST"})
+     * @Route("/{id}/edit", name="service_edit", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function editAction(Request $request,Service $service)
+    public function editAction(Request $request, Service $service)
     {
         $session = new Session();
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(ServiceType::class, $service);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
+            $em = $this->getDoctrine()->getManager();
             $em->persist($service);
             $em->flush();
 
-            if ($service->getLogo()){
+            if ($service->getLogo()) {
                 $this->resolveLogo($service);
             }
 
             $session->getFlashBag()->add('success', 'Le service a bien été édité !');
-
-            return $this->redirectToRoute('admin_services');
-
+            return $this->redirectToRoute('service_list');
         }
+
         return $this->render('admin/service/edit.html.twig', array(
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($service)->createView()
         ));
-
-
     }
 
-
     /**
-     * edit service.
+     * delete service.
      *
-     * @Route("/{id}", name="service_remove")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="service_delete", methods={"DELETE"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
-    public function removeAction(Request $request,Service $service)
+    public function deleteAction(Request $request,Service $service)
     {
         $session = new Session();
 
         $form = $this->getDeleteForm($service);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $em = $this->getDoctrine()->getManager();
             $em->remove($service);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le service a bien été supprimé !');
-
-            return $this->redirectToRoute('admin_services');
-
         }
 
-        return $this->redirectToRoute('admin_services');
-
+        return $this->redirectToRoute('service_list');
     }
 
     /**
@@ -173,7 +151,7 @@ class ServiceController extends Controller
     protected function getDeleteForm(Service $service)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('service_remove', array('id' => $service->getId())))
+            ->setAction($this->generateUrl('service_delete', array('id' => $service->getId())))
             ->setMethod('DELETE')
             ->getForm();
     }

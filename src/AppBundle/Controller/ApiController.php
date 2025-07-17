@@ -11,7 +11,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -38,8 +37,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/swipe/in", name="api_swipe_in")
-     * @Method({"POST"})
+     * @Route("/swipe/in", name="api_swipe_in",  methods={"POST"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
     public function swipeInAction(){
@@ -49,8 +47,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/oauth/user", name="api_user")
-     * @Method({"GET"})
+     * @Route("/oauth/user", name="api_user",  methods={"GET"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
     public function userAction()
@@ -69,8 +66,7 @@ class ApiController extends Controller
     }
 
     /**
-     * @Route("/oauth/nextcloud_user", name="api_nextcloud_user")
-     * @Method({"GET"})
+     * @Route("/oauth/nextcloud_user", name="api_nextcloud_user",  methods={"GET"})
      * @Security("has_role('ROLE_OAUTH_LOGIN')")
      */
     public function nextcloudUserAction()
@@ -82,16 +78,20 @@ class ApiController extends Controller
         if (!$response['user']){
             return new JsonResponse($response);
         }
+        $groups = array_map(
+            function($group) { return $group->getName(); },
+            $response['user']->getGroups()
+        );
         return new JsonResponse(array(
             'email' => $response['user']->getEmail(),
             'displayName' => $response['user']->getFirstName() . ' ' . $response['user']->getLastName(),
-            'identifier' => $response['user']->getUserName()
+            'identifier' => $response['user']->getUserName(),
+            'groups' => $groups
         ));
     }
 
     /**
-     * @Route("/v4/user", name="api_gitlab_user")
-     * @Method({"GET"})
+     * @Route("/v4/user", name="api_gitlab_user",  methods={"GET"})
      */
     public function gitlabUserAction()
     {

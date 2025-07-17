@@ -9,41 +9,108 @@
     </div>
 {%- endblock form_row -%}
 
-{% block autocomplete_beneficiary_widget %}
+{% block autocomplete_membership_widget %}
     {% spaceless %}
-        {% set attr = attr|merge({class: (attr.class|default('') ~ 'email_membership_autocomplete')|trim}) %}
-        {{ form_label(form) }}
-        <input type="text" autocomplete="off" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+        <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     {% endspaceless %}
     <script>
         defer(function(){
-            //
-            $('#{{ id }}').on('keydown',function () {
-                if ($(this).val().length > 2){
-                    jQuery.ajax({
-                        type: 'POST',
-                        url: "{{ path('beneficiary_list') }}",
-                        data: {'string':$(this).val()},
-                        success: function (response) {
-                            var accounts = response;
-                            var data = {};
-                            for (var i = 0; i < accounts.length; i++) {
-                                data[accounts[i].name] = accounts[i].icon;
-                            }
-                            $('#{{ id }}').autocomplete({
-                                data: data,
-                                limit: 6, // The max amount of results that can be shown at once. Default: Infinity.
-                            }).trigger('keyup');
-                        }
-                    });
-                }
-            }).dblclick(function () {
-                $(this).val('');
-            })
+            // Init autocomplete
+            $('#{{ id }}').autocomplete({
+                data: {{ membership_service.autocompleteMemberships | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                limit: 6,
+            });
         });
     </script>
 {% endblock %}
 
+{% block autocomplete_beneficiary_widget %}
+    {% spaceless %}
+        <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
+    {% endspaceless %}
+    <script>
+        defer(function(){
+            // Init autocomplete
+            $('#{{ id }}').autocomplete({
+                data: {{ beneficiary_service.autocompleteBeneficiaries | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                limit: 6,
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block autocomplete_beneficiary_collection_widget %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% for child in form %}
+                {{ form_widget(child) }}
+            {% endfor %}
+        </div>
+    {% endspaceless %}
+    <div {% if id is not empty %}id="{{ id }}_chips"{% endif %} class="chips">
+    </div>
+    <script>
+        defer(function() {
+            function updateInput{{ id }}Forms() {
+                var chipsData = M.Chips.getInstance($('#{{ id }}_chips')).chipsData;
+                var list = $('#{{ id }}');
+                var counter = list.children().length
+                for (let i = 0; i < Math.abs(chipsData.length - counter); i++) {
+                    if (chipsData.length > counter) {
+                        $("<input>").attr({
+                            name: "{{ full_name }}[" + counter + "]",
+                            id: "{{ id }}" + '_' + counter,
+                            type: "hidden",
+                        }).appendTo(list);
+                    } else {
+                        list.children().last().remove();
+                    }
+                }
+                chipsData.forEach(function (member, index) {
+                    $("input[name='{{ full_name }}[" + index + "]']").val(member['tag']);
+                });
+            }
+            $('#{{ id }}_chips').chips({
+                placeholder: 'Beneficiaire',
+                data: $('#{{ id }} :input').map(function() {
+                    return {tag: this.value};
+                }),
+                autocompleteOptions: {
+                    {% if is_granted("ROLE_USER_MANAGER") %}
+                    data: {{ beneficiary_service.autocompleteBeneficiaries | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
+                    {% else %}
+                    data: [],
+                    {% endif %}
+                    minLength: 1,  // default
+                    limit: 5,
+                    dropdownOptions: {
+                        constrainWidth: false
+                    }
+                },
+                onChipAdd: updateInput{{ id }}Forms,
+                onChipDelete: updateInput{{ id }}Forms,
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block radio_choice_widget %}
+    {% spaceless %}
+        <div {{ block('widget_container_attributes') }}>
+            {% for child in form %}
+                <div>
+                    <label for="{{ child.vars.id }}" class="required" style="color: #5f5a5a; font-weight: 600;">
+                        {{ form_widget(child) }}
+                        <span>{{ child.vars.label }}</span>
+                    </label>
+                </div>
+            {% endfor %}
+            {% for child in form %}
+                {{ form_widget(child) }}
+            {% endfor %}
+        </div>
+    {% endspaceless %}
+{% endblock %}
 
 {% block simplemde_editor_row %}
     <div class="markdow-editor">
@@ -57,7 +124,7 @@
 
 {% block simplemde_editor_widget %}
     <div class="simplemde-container row" data-for="{{ id }}">
-    {{ block('textarea_widget') }}
+        {{ block('textarea_widget') }}
     </div>
     <script type="text/javascript">
         onceSimpleMDEReady(function () {
@@ -65,8 +132,10 @@
             var config = {{ form.vars.editor_config|raw}};
             var simplemde_{{ id }} = new SimpleMDE(Object.assign(config, {'element': element}));
             var required = $("#{{ id }}").attr('required') === "required";
-            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () { //refresh
-                simplemde_{{ id }}.codemirror.refresh();
+            // refresh display
+            $(".simplemde-container[data-for={{ id }}]").one('modalOpen',function () {
+                // https://github.com/sparksuite/simplemde-markdown-editor/issues/313
+                setTimeout(function() { simplemde_{{ id }}.codemirror.refresh(); }, 0);
             });
             if (required){
                 $("#{{ id }}").removeAttr('required');

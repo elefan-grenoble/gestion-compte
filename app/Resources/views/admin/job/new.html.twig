@@ -1,10 +1,16 @@
 {% extends 'layout.html.twig' %}
 
-{% block content %}
-    <h4 class="">Nouveau poste</h4>
+{% block title %}Ajouter un poste de bénévolat - {{ site_name }}{% endblock %}
 
-    {% include "/admin/job/_form.html.twig" with { form: form  } %}
-
-
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('job_list') }}"><i class="material-icons">list</i>&nbsp;Liste des postes de bénévolat</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
+{% block content %}
+    <h4>Nouveau poste de bénévolat</h4>
+
+    {% include "admin/job/_form.html.twig" with { form: form } %}
+{% endblock %}

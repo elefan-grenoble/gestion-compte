@@ -3,7 +3,13 @@
 namespace AppBundle\Repository;
 
 use AppBundle\Entity\Beneficiary;
+use AppBundle\Entity\Job;
+use AppBundle\Entity\Membership;
+use AppBundle\Entity\PeriodPosition;
 use AppBundle\Entity\Shift;
+use AppBundle\Entity\User;
+use Doctrine\Common\Collections\ArrayCollection;
+use \Datetime;
 
 /**
  * ShiftRepository
@@ -13,14 +19,88 @@ use AppBundle\Entity\Shift;
  */
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
-
-    public function findFutures()
+    public function findBucket($shift)
     {
+        $qb = $this->createQueryBuilder('s');
+        $qb
+            ->leftJoin('s.shifter', 'b')
+            ->addSelect('b')
+            ->leftJoin('b.formations', 'f')
+            ->addSelect('f')
+            ->leftJoin('b.membership', 'm')
+            ->addSelect('m')
+            ->where('s.start = :start')
+            ->andWhere('s.end = :end')
+            ->andWhere('s.job = :job')
+            ->setParameter('start', $shift->getStart())
+            ->setParameter('end', $shift->getEnd())
+            ->setParameter('job', $shift->getJob())
+            ->addSelect('CASE WHEN s.formation IS NOT NULL THEN 1 ELSE 0 END as HIDDEN formation_is_not_null')
+            ->addSelect('CASE WHEN s.shifter IS NOT NULL THEN 1 ELSE 0 END as HIDDEN shifter_is_not_null')
+            ->addOrderBy('formation_is_not_null', 'DESC')
+            ->addOrderBy('shifter_is_not_null', 'DESC')
+            ->addOrderBy('s.bookedTime', 'DESC');  // ordering similar to ShiftBucket.compareShifts()
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findFrom(\DateTime $from, \DateTime $max = null, Job $job = null, $withShifters = null)
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->leftJoin('s.job', 'j')
+            ->addSelect('j')
+            ->leftJoin('s.formation', 'sf')
+            ->addSelect('sf')
+            ->where('s.start > :from')
+            ->setParameter('from', $from);
+
+        if ($max) {
+            $qb
+                ->andWhere('s.end < :max')
+                ->setParameter('max', $max);
+        }
+
+        if ($job) {
+            $qb
+                ->andWhere('s.job = :job')
+                ->setParameter('job', $job);
+        }
+
+        if ($withShifters) {
+            $qb
+                ->leftJoin('s.shifter', 'b')
+                ->addSelect('b')
+                ->leftJoin('b.formations', 'bf')
+                ->addSelect('bf');
+                // ->leftJoin('b.shifts', 'bs')  // for Beneficiary.isNew()
+                // ->addSelect('bs');
+        }
+
+        $qb->orderBy('s.start', 'ASC');
+
+        return $qb
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findFutures(\DateTime $max = null, Job $job = null, $withShifters = null)
+    {
+        $now = new \Datetime('now');
+
+        return $this->findFrom($now, $max, $job, $withShifters);
+    }
+
+    public function findInProgress()
+    {
+        $now = new \DateTime('now');
+
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->where('s.start > :now')
-            ->setParameter('now', new \Datetime('now'))
+            ->where(':date between s.start and s.end')
+            ->setParameter('date', $now)
             ->orderBy('s.start', 'ASC');
 
         return $qb
@@ -28,50 +108,13 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findFuturesWithJob($job, \DateTime $max = null)
+    public function findUpcomingToday()
     {
-        $qb = $this->createQueryBuilder('s');
+        $now = new \DateTime('now');
+        $end_of_day = new \DateTime('now');
+        $end_of_day->setTime(23, 59, 59);
 
-        $qb
-            ->join('s.job', "job")
-            ->where('s.start > :now')
-            ->andwhere('job.id = :jid')
-            ->setParameter('now', new \Datetime('now'))
-            ->setParameter('jid', $job->getId());
-
-        if ($max) {
-            $qb
-                ->andWhere('s.end < :max')
-                ->setParameter('max', $max);
-        }
-
-        $qb->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findFrom(\DateTime $from, \DateTime $max = null)
-    {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->select('s, f')
-            ->leftJoin('s.formation', 'f')
-            ->where('s.start > :from')
-            ->setParameter('from', $from);
-        if ($max) {
-            $qb
-                ->andWhere('s.end < :max')
-                ->setParameter('max', $max);
-        }
-
-        $qb->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
+        return $this->findFrom($now, $end_of_day);
     }
 
     /**
@@ -79,7 +122,7 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      * @return mixed
      * @throws NonUniqueResultException
      */
-    public function findFirst($user)
+    public function findFirst(User $user)
     {
         $qb = $this->createQueryBuilder('s');
 
@@ -87,7 +130,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->join('s.shifter', "ben")
             ->where('ben.user = :user')
             ->setParameter('user', $user)
-            ->andWhere('s.isDismissed = 0')
             ->orderBy('s.start', 'ASC')
             ->setMaxResults(1);
 
@@ -111,7 +153,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->join('s.shifter', "ben")
             ->where('ben.id = :id')
             ->setParameter('id', $beneficiary->getId())
-            ->andWhere('s.isDismissed = 0')
             ->andWhere('s.end < :today')
             ->setParameter('today',$now)
             ->orderBy('s.start', 'DESC')
@@ -127,8 +168,8 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $qb = $this->createQueryBuilder('s');
 
         $qb
-            ->where('s.start < :max')
-            ->andWhere('s.lastShifter is not null')
+            ->where('s.lastShifter is not null')
+            ->andWhere('s.start < :max')
             ->setParameter('max', $max);
 
         return $qb
@@ -144,9 +185,9 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
         $datePlusOne->modify('+1 day');
 
         $qb
-            ->where('s.start >= :date')
+            ->where('s.lastShifter is not null')
+            ->andWhere('s.start >= :date')
             ->andwhere('s.start < :datePlusOne')
-            ->andWhere('s.lastShifter is not null')
             ->setParameter('date', $date)
             ->setParameter('datePlusOne', $datePlusOne);
 
@@ -203,7 +244,6 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->andwhere('s.start = :start')
             ->andwhere('s.end = :end')
             ->andWhere('s.shifter is not null')
-            ->andWhere('s.isDismissed = false')
             ->setParameter('job', $shift->getJob())
             ->setParameter('start', $shift->getStart())
             ->setParameter('end', $shift->getEnd());
@@ -213,54 +253,172 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
             ->getResult();
     }
 
-    public function findInProgress(\DateTime $date)
-    {
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->where('s.shifter is not null')
-            ->andWhere('s.isDismissed = 0')
-            ->andwhere(':date between s.start and s.end')
-            ->setParameter('date', $date);
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function findRemainingToday()
-    {
-        $now = new \DateTime('now');
-        $end_of_day = new \DateTime('now');
-        $end_of_day->setTime(23, 59, 59);
-
-        $qb = $this->createQueryBuilder('s');
-
-        $qb
-            ->where('s.isDismissed = 0')
-            ->andwhere('(s.start > :now AND s.end < :end_of_day) OR (s.start < :now AND s.end > :now)')
-            ->setParameter('now', $now)
-            ->setParameter('end_of_day', $end_of_day)
-            ->orderBy('s.start', 'ASC');
-
-        return $qb
-            ->getQuery()
-            ->getResult();
-    }
-
-    public function getOnGoingShifts($beneficiary)
+    public function getYears()
     {
         $qb = $this->createQueryBuilder('s')
-                    ->where('s.end > :now')
-                    ->andwhere('s.start < :now_plus_ten')
-                    ->andwhere('s.shifter = :sid')
-                    ->setParameter('now', new \Datetime('now'))
-                    ->setParameter('now_plus_ten', new \Datetime('now +10 minutes'))
-                    ->setParameter('sid', $beneficiary->getId());
+            ->select('YEAR(s.start) as year')
+            ->distinct()
+            ->getQuery();
 
-        return $qb
-            ->getQuery()
-            ->getResult();
+        $result = $qb
+            ->getScalarResult();
+        return array_column($result, "year");
     }
 
+    /**
+     * Get shifts for a given membership grouped in cycles
+     * @param Membership $membership
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     */
+    public function findShiftsByCycles($membership, $start_after, $end_before)
+    {
+        $shifts = $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $start_after, $end_before);
+        $now = new DateTime('now');
+        $now->setTime(0, 0, 0);
+        // Compute the cycle number corresponding to the $start_after date
+        // 0 for current cycle, 1 for next, -1 for previous...
+        $startCycleNumber = intval($now->diff($start_after)->format('%r%a') / 28);
+        if ($start_after > $now) {
+            $startCycleNumber = $startCycleNumber + 1;
+        }
+        // Compute the cycle number corresponding to the $end_before date
+        $endCycleNumber = $startCycleNumber + intval($start_after->diff($end_before)->format('%a') / 28);
+        // Create empty arrays
+        $shiftsByCycles = [];
+        foreach(range($startCycleNumber, $endCycleNumber) as $cycle) {
+            $shiftsByCycles[$cycle] = [];
+        }
+        // Compute for each shift its cycle and assign it to the corresponding array
+        foreach($shifts as $shift) {
+            // Compute the number of elapsed cycles until today
+            $diff = $start_after->diff($shift->getStart())->format('%a');
+            $cycle = $startCycleNumber + intval($diff / 28);
+            $shiftsByCycles[$cycle][] = $shift;
+        }
+        return $shiftsByCycles;
+    }
+
+    /**
+     * Get in progress and upcoming shifts for a given membership
+     * @param Membership $membership
+     */
+    public function findInProgressAndUpcomingShiftsForMembership($membership)
+    {
+        $now = new \Datetime('now');
+        return $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $now, null);
+    }
+
+    /**
+     * Get shifts for a given membership at a given time
+     * @param Membership
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     */
+    public function findShiftsForMembership(Membership $membership, $start_after, $end_before)
+    {
+        return $this->findShiftsForBeneficiaries($membership->getBeneficiaries(), $start_after, $end_before);
+    }
+
+    /**
+     * Get shifts for a given beneficiary at a given time
+     * @param Beneficiary $beneficiary
+     * @param Datetime $start_after
+     * @param Datetime $end_before
+     * @param Datetime $start_before
+     * @param Datetime $end_after
+     */
+    public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $start_before = null, $end_after = null)
+    {
+        return $this->findShiftsForBeneficiaries([$beneficiary], $start_after, $end_before, $start_before, $end_after);
+    }
+
+    public function findShiftsForBeneficiaries($beneficiaries, $start_after = null, $end_before = null, $start_before = null, $end_after = null)
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->where('s.shifter IN (:beneficiaries)')
+            ->setParameter('beneficiaries', $beneficiaries);
+
+        if ($start_after != null) {
+            $qb->andwhere('s.start > :start_after')
+            ->setParameter('start_after', $start_after);
+        }
+
+        if ($end_before != null) {
+            $qb->andwhere('s.end < :end_before')
+                ->setParameter('end_before', $end_before);
+        }
+
+        if ($start_before != null) {
+            $qb->andwhere('s.start < :start_before')
+                ->setParameter('start_before', $start_before);
+        }
+
+        if ($end_after != null) {
+            $qb->andwhere('s.end > :end_after')
+                ->setParameter('end_after', $end_after);
+        }
+
+        $qb->orderBy("s.start", "ASC");
+
+        $result = $qb
+            ->getQuery()
+            ->getResult();
+
+        return new ArrayCollection($result);
+    }
+
+    /**
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow
+     * @param Beneficiary $beneficiary
+     * @param PeriodPosition $position
+     * @param bool $wasCarriedOut
+     * @param bool $endBeforeNow
+     */
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->select('count(s.id)')
+            ->where('s.shifter = :beneficiary')
+            ->setParameter('beneficiary', $beneficiary);
+
+        if ($position != null) {
+            $qb = $qb->andwhere('s.position = :position')
+                ->setParameter('position', $position);
+        }
+
+        if ($wasCarriedOut == true) {
+            $qb = $qb->andwhere('s.wasCarriedOut = 1');
+        }
+        elseif ($wasCarriedOut == false) {
+            $qb = $qb->andwhere('s.wasCarriedOut = 0');
+        }
+
+        if ($endBeforeNow == true) {
+            $qb = $qb->andwhere('s.end < :now')
+                ->setParameter('now', new \Datetime('now'));
+        }
+
+        return (int) $qb
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * Note: dates must be in the past to have valid results 
+     */
+    public function getMemberShiftMissedCount(Membership $member, $start_after, $end_before) {
+        $qb = $this->createQueryBuilder('s')
+            ->select('count(s.id)')
+            ->where('s.shifter IN (:beneficiaries)')
+            ->andwhere('s.start > :start_after')
+            ->andwhere('s.end < :end_before')
+            ->andwhere('s.wasCarriedOut = 0')
+            ->setParameter('beneficiaries', $member->getBeneficiaries())
+            ->setParameter('start_after', $start_after)
+            ->setParameter('end_before', $end_before);
+     
+        return (int) $qb->getQuery()
+            ->getSingleScalarResult();
+    }
 }

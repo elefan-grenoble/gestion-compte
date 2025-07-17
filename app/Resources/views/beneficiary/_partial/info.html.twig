@@ -1,76 +1,97 @@
-<span class="card-title">
-                <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}"
-                     class="circle responsive-img">
+<div class="card-title">
+    <!-- user icon -->
+    <img src="{{ gravatar(beneficiary.email,40) }}" alt="{{ beneficiary.firstname | lower | capitalize }}" class="circle responsive-img" />
+    <!-- user name -->
     {{ beneficiary.firstname | lower | capitalize }} {{ beneficiary.lastname | upper }}
-    {% if beneficiary.isMain %}<i class="material-icons">flag</i>{% endif %}
-    {% if beneficiary.membership.withdrawn %}<span class="red white-text badge"> fermé </span>{% endif %}
-    {% if beneficiary.membership.frozenChange %}
-        {% if beneficiary.membership.frozen %}<span class="deep-purple white-text badge"> Dégel à la fin du cycle</span>
-        {% else %}<span class="deep-purple white-text badge"> Gel à la fin du cycle</span>{% endif %}
+    <!-- badges -->
+    {% if beneficiary.isMain and maximum_nb_of_beneficiaries_in_membership > 1 %}
+        <span class="badge main-color white-text">{{ beneficiary_main_icon }} principal</span>
     {% endif %}
-    {% if beneficiary.membership.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
-    {% if beneficiary.membership.frozen %}<span
-            class="deep-purple white-text badge">❄️ gelé </span>{% endif %}
-                </span>
+    {% if use_fly_and_fixed %}
+        {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
+            {% if beneficiary.flying %}
+                <span class="badge teal white-text">{{ beneficiary_flying_icon }} Equipe volante</span>
+            {% else %}
+                <span class="badge main-color white-text">Equipe fixe</span>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% if beneficiary.membership.withdrawn %}
+        <span class="badge red white-text">{{ member_withdrawn_icon }} fermé</span>
+    {% endif %}
+    {% if beneficiary.isNew %}
+        <span class="badge red white-text">{{ beneficiary_new_icon }} nouveau</span>
+    {% endif %}
+    {% if member.isCurrentlyExemptedFromShifts() %}
+        <span class="badge teal white-text">{{ member_exempted_icon }} exempté</span>
+    {% endif %}
+    {% if beneficiary.membership.frozenChange %}
+        {% if beneficiary.membership.frozen %}
+            <span class="badge deep-purple white-text">Dégel à la fin du cycle</span>
+        {% else %}
+            <span class="badge deep-purple white-text">Gel à la fin du cycle</span>
+        {% endif %}
+    {% endif %}
+    {% if beneficiary.membership.frozen %}
+        <span class="badge deep-purple white-text">{{ member_frozen_icon }} gelé</span>
+    {% endif %}
+</div>
+
 <div class="row">
-    <div class="col s12 truncate"><i class="material-icons tiny">phone</i>&nbsp;{{ beneficiary.phone }}
+    <div class="col s12">
+        <i class="material-icons tiny">phone</i>
+        <span>{{ beneficiary.phone }}</span>
     </div>
     {% if phone_only is not defined %}
-        <div class="col s12 truncate"><i
-                    class="material-icons tiny">mail</i>&nbsp;{{ beneficiary.email }}</div>
+        <div class="col s12">
+            <i class="material-icons tiny">mail</i>
+            <span>{{ beneficiary.email }}</span>
+        </div>
         {% if beneficiary.address %}
-            <div class="col s12 truncate"><i
-                        class="material-icons tiny">location_on</i>
-                &nbsp;{{ beneficiary.address.street1 }}
+            <div class="col s12">
+                <i class="material-icons tiny">location_on</i>
+                {{ beneficiary.address.street1 }}
                 {% if beneficiary.address.street2 %}
-                    &nbsp;{{ beneficiary.address.street2 }}
+                    {{ beneficiary.address.street2 }}
                 {% endif %}
-                &nbsp;{{ beneficiary.address.zipCode }}
-                &nbsp;{{ beneficiary.address.city }}
-                </span>
+                {{ "%d"|format(beneficiary.address.zipCode) }}
+                {{ beneficiary.address.city }}
             </div>
         {% endif %}
     {% endif %}
-        <div class="col s12 truncate">
-            <i
-                    class="material-icons tiny">person</i>&nbsp;{{ beneficiary.user.username }}
-            {% if is_granted("ROLE_ADMIN") %}
-            (<i
-                    class="material-icons tiny" title="dernière connexion">exit_to_app</i>
+    <div class="col s12">
+        <i class="material-icons tiny">person</i>&nbsp;{{ beneficiary.user.username }}
+        {% if is_granted("ROLE_ADMIN") %}
+            (<i class="material-icons tiny" title="dernière connexion">exit_to_app</i>
             {% if beneficiary.user.lastlogin %}
-                {{ beneficiary.user.lastlogin | date_fr_with_time }}
+                {{ beneficiary.user.lastlogin | date_fr_full_with_time }}
             {% else %}
                 <span class="orange-text">la personne ne s'est jamais connectée</span>
             {% endif %})
-            {% endif %}
-        </div>
-        <div class="col s12 truncate">
-            <i class="material-icons tiny">accessibility</i>&nbsp;
-                {% if beneficiary.flying %}
-                    <div class="chip green-text">Equipe volante</div>
-                {% else %}
-                    <div class="chip green-text">Equipe fixe</div>
-                {% endif %}
-        </div>
+        {% endif %}
+    </div>
     {% if beneficiary.formations | length %}
-        <div class="col s12 truncate"><i
-                    class="material-icons tiny">assignment_ind</i>&nbsp;{% for formation in beneficiary.formations %}
-            <div class="chip red-text">{{ formation.name }}</div>{% endfor %}</div>
+        <div class="col s12">
+            <i class="material-icons tiny">assignment_ind</i>
+            {% for formation in beneficiary.formations %}
+                <div class="chip red-text">{{ formation.name }}</div>
+            {% endfor %}
+        </div>
     {% endif %}
     {% if beneficiary.commissions | length %}
-        <div class="col s12 truncate"><i
-                    class="material-icons tiny">group</i>&nbsp;{% for commission in beneficiary.commissions %}
-            <div class="chip blue-text">{{ commission.name }}</div>{% endfor %}</div>
+        <div class="col s12">
+            <i class="material-icons tiny">group</i>
+            {% for commission in beneficiary.commissions %}
+                <div class="chip blue-text">{{ commission.name }}</div>
+            {% endfor %}
+        </div>
     {% endif %}
     {% if beneficiary.user and beneficiary.user.roles | length %}
-        <div class="col s12 truncate"><i
-                    class="material-icons tiny">settings</i>&nbsp;{% for role in beneficiary.user.roles %}
-            <div class="chip purple-text">{{ role }}</div>{% endfor %}</div>
-    {% endif %}
-    {% if beneficiary.membership.lastRegistration %}
-        <div class="col s12 truncate">
-            <i class="material-icons tiny">perm_contact_calendar</i>&nbsp;
-            Adhésion du {{ beneficiary.membership.lastRegistration.date | date_fr_full }} au {{ beneficiary.membership | expire | date_fr_full }}
+        <div class="col s12">
+            <i class="material-icons tiny">settings</i>
+            {% for role in beneficiary.user.roles %}
+                <div class="chip purple-text">{{ role }}</div>
+            {% endfor %}
         </div>
     {% endif %}
 </div>

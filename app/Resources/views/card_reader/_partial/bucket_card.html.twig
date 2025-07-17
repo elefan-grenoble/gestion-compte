@@ -1,0 +1,57 @@
+{% set nbShifts = (bucket.shifts() | length) %}
+{% set shiftercount = 0 %}
+
+{# calculate the number of shifters on this shift #}
+{% for shift in bucket.shifts %}
+    {% if shift.shifter %}
+        {% set shiftercount = shiftercount + 1 %}
+    {% endif %}
+{% endfor %}
+
+<div class="card">
+    <div class="card-content {{ bucket.job.color }} lighten-4">
+        {% if (shiftercount == 0) %}
+            <div class="red-text" style="height: 30px">
+                <i class="material-icons tiny">warning</i>
+                Personne n'est inscrit sur ce créneau
+                <i class="material-icons tiny">warning</i>
+            </div>
+        {% endif %}
+        <div class="card-title">
+            <b class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</b> / <b>{{ bucket.start | date('G\\hi') }} à {{ bucket.end | date('G\\hi') }}</b>
+        </div>
+        <ul style="margin-bottom:0">
+            {% for shift in bucket.sortedShifts %}
+                <li>
+                    <div>
+                        {% if use_card_reader_to_validate_shifts %}
+                            <span class="{% if shift.wasCarriedOut %}green-text{% endif %}">
+                                &#9673;
+                            </span>&nbsp;
+                        {% endif %}
+                        {% if shift.shifter %}
+                            <span style="margin-right: 5px; font-size: 16px">{{ shift.shifter.publicDisplayNameWithMemberNumber }}</span>
+                        {% else %}
+                            <strong><i>libre</i></strong>
+                        {% endif %}
+                        {% if shift.formation %}
+                            <span class="chip" style="margin-left: 5px">
+                                <strong>{{ shift.formation }}</strong>
+                            </span>
+                        {% endif %}
+                        {% if shift.shifter %}
+                            {% if shift.shifter.isNew %}
+                                <span class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</span>
+                            {% endif %}
+                            {% if shift.isFirstByShifter %}
+                                <span class="chip red white-text" style="margin-left: 5px">
+                                    <strong>Premier créneau</strong>
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>

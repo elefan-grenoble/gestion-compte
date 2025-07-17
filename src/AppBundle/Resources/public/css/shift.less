@@ -6,7 +6,6 @@
   margin: auto;
   border: solid 1px;
   border-radius: 10px;
-
 }
 
 .shift-block {
@@ -18,23 +17,30 @@
 .shifter {
   font-size: 16px;
   width: 10px;
+  vertical-align: top;
+}
+
+.shifter-name {
+  padding-left: 6px;
+  line-height: 1.8;
 }
 
 .shift-with-role {
   color: #ff1744;
 }
-.shift-bucket{
+
+.shift-bucket {
   position: absolute;
   padding: 0 1px;
-  &:hover{
+  &:hover {
     z-index: 999;
   }
 }
 
-.admin-shift-warning{
+.admin-shift-warning {
   position: absolute;
   bottom: 0;
-  right: 0;
+  left: 0;
   opacity: 0.6;
   text-align: right;
   font-size: small;
@@ -44,7 +50,6 @@
  * Time counter
  */
 .time-counter {
-
   width: 100%;
   background-color: #e0e0e0;
   padding: 3px;
@@ -62,8 +67,6 @@
     span {
       padding-right: 10px;
     }
-
-
   }
 
 }

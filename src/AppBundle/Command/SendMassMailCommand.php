@@ -68,11 +68,11 @@ class SendMassMailCommand extends ContainerAwareCommand
             $body = $template->render(array());*/
         }
         $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('o');
-        $qb = $qb->andWhere('o.withdrawn = 0'); //do not include withdrawn
+        $qb = $em->getRepository("AppBundle:Membership")->createQueryBuilder('m');
+        $qb = $qb->andWhere('m.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
-            $qb = $qb->andWhere('o.frozen != 1');
+            $qb = $qb->andWhere('m.frozen != 1');
         }else{
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> les comptes gelés sont inclus </>');
         }
@@ -85,8 +85,8 @@ class SendMassMailCommand extends ContainerAwareCommand
 
         if ($tolerance >= 0 ) {
             $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière adhésion après le </><fg=yellow;>'.$last_registration->format('d M Y').' </>');
-            $qb = $qb->leftJoin("o.registrations", "r")->addSelect("r"); //registrations
-            $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
+            $qb = $qb->leftJoin("m.registrations", "r")->addSelect("r"); //registrations
+            $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
                 ->andWhere('lr.id IS NULL'); //registration is the last one registered
             $qb = $qb->andWhere('r.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
         }else{
@@ -100,7 +100,7 @@ class SendMassMailCommand extends ContainerAwareCommand
                 $to[] = $beneficiary->getEmail();
         }
         if (!$exclude_non_member){
-            $non_members = $em->getRepository("AppBundle:User")->findNonMember();
+            $non_members = $em->getRepository("AppBundle:User")->findNonMembers(true);
             foreach ($non_members as $user){
                 $to[] = $user->getEmail();
             }

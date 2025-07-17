@@ -5,7 +5,6 @@ namespace AppBundle\Controller;
 use AppBundle\Command\ImportUsersCommand;
 use AppBundle\Entity\AbstractRegistration;
 use AppBundle\Entity\Address;
-use AppBundle\Entity\AnonymousBeneficiary;
 use AppBundle\Entity\Beneficiary;
 use AppBundle\Entity\Commission;
 use AppBundle\Entity\HelloassoPayment;
@@ -13,8 +12,6 @@ use AppBundle\Entity\Registration;
 use AppBundle\Entity\Formation;
 use AppBundle\Entity\User;
 use AppBundle\Event\HelloassoEvent;
-use AppBundle\Form\BeneficiaryType;
-use AppBundle\Form\RegistrationType;
 use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\ResultSetMappingBuilder;
 use Doctrine\ORM\QueryBuilder;
@@ -28,235 +25,180 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
- * User controller.
+ * Admin controller.
  *
  * @Route("admin")
- * @Security("has_role('ROLE_USER_MANAGER')")
+ * @Security("has_role('ROLE_ADMIN_PANEL')")
  */
 class AdminController extends Controller
 {
     /**
      * Admin panel
      *
-     * @Route("/", name="admin")
-     * @Method("GET")
+     * @Route("/", name="admin", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN_PANEL')")
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         return $this->render('admin/index.html.twig');
     }
 
     /**
-     * @Route("/search", name="search")
-     * @Method("POST")
-     * @Security("has_role('ROLE_ADMIN')")
-     */
-    public function searchAction(Request $request)
-    {
-        if ($request->isXMLHttpRequest()) {
-            $key = preg_replace('/\s+/', '', $request->get('key'));
-            $return = array();
-
-            $em = $this->getDoctrine()->getManager();
-
-            $rsm = new ResultSetMappingBuilder($em);
-            $rsm->addRootEntityFromClassMetadata('AppBundle:Beneficiary', 'b');
-
-            $query = $em->createNativeQuery('SELECT b.* FROM beneficiary AS b LEFT JOIN fos_user as u ON u.id = b.user_id WHERE LOWER(CONCAT(u.username,u.email,b.lastname,b.firstname,b.lastname)) LIKE :key', $rsm);
-
-            $beneficiaries = $query->setParameter('key', '%' . $key . '%')
-                ->getResult();
-
-            foreach ($beneficiaries as $beneficiary) {
-                if ($beneficiary->getUser()) {
-                    $return[] = array(
-                        'name' => $beneficiary->getAutocompleteLabelFull(),
-                        'icon' => null,
-                        'url' => $this->generateUrl('member_show', array('member_number' => $beneficiary->getMembership()->getMemberNumber())),
-                        'id' => 'B'.$beneficiary->getId()
-                    );
-                }
-            }
-
-            $commissions = $em->getRepository(Commission::class)->findByString($key);
-            /** @var Commission $commission */
-            foreach ($commissions as $commission){
-                $return[] = array(
-                    'name' => 'COMMISSION : '.$commission->getName(),
-                    'icon' => null,
-                    'url' => $this->generateUrl('commission_edit', array('id' => $commission->getId())),
-                    'id' => 'C'.$commission->getId()
-                );
-            }
-
-            $admin_actions = array();
-            $admin_actions[] = array(
-                'name' => 'ACTION : liste des codes',
-                'icon' => null,
-                'url' => $this->generateUrl('codes_list'),
-                'id' => 'A'.'CODES'
-            );
-            $admin_actions[] = array(
-                'name' => 'ACTION : contenus dynamiques',
-                'icon' => null,
-                'url' => $this->generateUrl('dynamic_content_list'),
-                'id' => 'A'.'DYNAMIC_CONTENT'
-            );
-            $admin_actions[] = array(
-                'name' => 'ACTION : adhésions - réadhésions',
-                'icon' => null,
-                'url' => $this->generateUrl('registrations'),
-                'id' => 'A'.'REGISTRATION_LIST'
-            );
-            $admin_actions[] = array(
-                'name' => 'ACTION : paiements helloasso',
-                'icon' => null,
-                'url' => $this->generateUrl('helloasso_payments'),
-                'id' => 'A'.'HELLOASSO_LIST'
-            );
-            $admin_actions[] = array(
-                'name' => 'ACTION : helloasso explorer',
-                'icon' => null,
-                'url' => $this->generateUrl('helloasso_browser'),
-                'id' => 'A'.'HELLOASSO_BROWSER'
-            );
-            foreach ($admin_actions as $action){
-              if (strpos($action['name'],$key)){
-                  $return[] = $action;
-              }
-            }
-            
-            return new JsonResponse(array('count' => count($return), 'data' => array_values($return)));
-        }
-
-        return new Response('This is not ajax!', 400);
-    }
-
-    /**
      * Lists all user entities.
      *
-     * @param Request $request , SearchUserFormHelper $formHelper
+     * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
-     * @Route("/users", name="user_index")
-     * @Method({"GET","POST"})
+     * @Route("/users", name="user_index", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_MANAGER')")
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
-        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString());
+        $defaults = [
+            'withdrawn' => 1,
+            'sort' => 'm.member_number',
+            'dir' => 'ASC'
+        ];
+        $form = $formHelper->createMemberFilterForm($this->createFormBuilder(), $defaults);
         $form->handleRequest($request);
 
         $action = $form->get('action')->getData();
 
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
 
-        $page = 1;
-        $order = 'ASC';
-        $sort = 'o.member_number';
-
         if ($form->isSubmitted() && $form->isValid()) {
-
-            if ($form->get('page')->getData() > 0) {
-                $page = $form->get('page')->getData();
-            }
-            if ($form->get('sort')->getData()) {
-                $sort = $form->get('sort')->getData();
-            }
-            if ($form->get('dir')->getData()) {
-                $order = $form->get('dir')->getData();
-            }
-
             $formHelper->processSearchFormData($form, $qb);
-
+            $sort = $form->get('sort')->getData();
+            $order = $form->get('dir')->getData();
+            $currentPage = $form->get('page')->getData();
         } else {
-            $form->get('sort')->setData($sort);
-            $form->get('dir')->setData($order);
+            $sort = $defaults['sort'];
+            $order = $defaults['dir'];
+            $currentPage = 1;
+            $qb = $qb->andWhere('m.withdrawn = :withdrawn')
+                ->setParameter('withdrawn', $defaults['withdrawn']-1);
         }
-
-        $formHelper->processSearchQueryData($request->getQueryString(), $qb);
-
-        $limit = 25;
-
         $qb = $qb->orderBy($sort, $order);
+
+        // Export CSV
         if ($action == "csv") {
+            /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
+             * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
+             * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
+             *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
+             */
             $members = $qb->getQuery()->getResult();
-            $return = '';
-            $d = ','; // this is the default but i like to be explicit
-            foreach ($members as $member) {
-                foreach ($member->getBeneficiaries() as $beneficiary) {
-                    $return .=
-                        $beneficiary->getMemberNumber() . $d .
-                        $beneficiary->getFirstname() . $d .
-                        $beneficiary->getLastname() . $d .
-                        $beneficiary->getEmail() . $d .
-                        $beneficiary->getPhone() .
-                        "\n";
+
+            $response = new StreamedResponse(function () use ($members) {
+                $handle = fopen('php://output', 'wb');
+                $delimiter = ',';
+
+                $headers = ["Numéro de membre", "Prénom", "Nom", "Email", "Téléphone", "Compteur de temps", "Formations"];
+                fputcsv($handle, $headers, $delimiter);
+
+                foreach ($members as $member) {
+                    foreach ($member->getBeneficiaries() as $beneficiary) {
+                        $row = [
+                            $beneficiary->getMemberNumber(),
+                            $beneficiary->getFirstname(),
+                            $beneficiary->getLastname(),
+                            $beneficiary->getEmail(),
+                            $beneficiary->getPhone(),
+                            (string) round($member->getShiftTimeCount() / 60),
+                            /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
+                            * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
+                            */
+                            join(", ", $beneficiary->getFormations()->map(function($f) { return $f->getName(); })->toArray()),
+                        ];
+
+
+                        fputcsv($handle, $row, $delimiter);
+                    }
                 }
-            }
-            return new Response($return, 200, array(
-                'Content-Encoding: UTF-8',
-                'Content-Type' => 'application/force-download; charset=UTF-8',
-                'Content-Disposition' => 'attachment; filename="emails_' . date('dmyhis') . '.csv"'
-            ));
+                fclose($handle);
+            });
+
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Encoding', 'UTF-8');
+            $response->headers->set('Content-Type', 'application/force-download; charset=UTF-8');
+            $response->headers->set('Content-Disposition', 'attachment; filename="membres_' . date('Y-m-d-H-i-s') . '.csv"');
+
+            return $response;
+
+        // Envoyer un mail
         } else if ($action === "mail") {
             return $this->redirectToRoute('mail_edit', [
                 'request' => $request
             ], 307);
         } else {
-            $qb = $qb->setFirstResult(($page - 1) * $limit)->setMaxResults($limit);
-            $members = new Paginator($qb->getQuery());
-            $max = sizeof($members);
-            $nb_of_pages = intval($max / $limit);
-            $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
+            $limitPerPage = 25;
+            $paginator = new Paginator($qb);
+            $resultCount = count($paginator);
+            $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+            $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+            $paginator
+                ->getQuery()
+                ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+                ->setMaxResults($limitPerPage); // set the limit
         }
 
         return $this->render('admin/user/list.html.twig', array(
-            'members' => $members,
+            'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $max,
-            'page' => $page,
-            'nb_of_pages' => $nb_of_pages
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
     }
 
+    /**
+     * Lists all non-member users.
+     *
+     * @param Request $request
+     * @return Response
+     * @Route("/non_member_users", name="non_member_users_list", methods={"GET"})
+     * @Security("has_role('ROLE_ADMIN')")
+     */
+    public function nonMemberUsersAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $non_members = $em->getRepository("AppBundle:User")->findNonMembers();
+
+        return $this->render('admin/user/non_member_list.html.twig', array(
+            'non_members' => $non_members,
+        ));
+    }
 
     /**
      * Lists all users with ROLE_ADMIN.
      *
-     * @param Request $request , SearchUserFormHelper $formHelper
-     * @param SearchUserFormHelper $formHelper
+     * @param Request $request
      * @return Response
-     * @Route("/admin_users", name="admins_list")
-     * @Method({"GET","POST"})
+     * @Route("/admin_users", name="admin_users_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function adminUsersAction(Request $request, SearchUserFormHelper $formHelper)
+    public function adminUsersAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -276,54 +218,55 @@ class AdminController extends Controller
     }
 
     /**
-     * Widget generator
+     * Lists all roles.
      *
-     * @Route("/widget", name="widget_generator")
-     * @Method({"GET","POST"})
+     * @param Request $request
+     * @return Response
+     * @Route("/roles", name="roles_list", methods={"GET"})
      * @Security("has_role('ROLE_ADMIN')")
      */
-    public function widgetBuilderAction(Request $request){
-        $form = $this->createFormBuilder()
-            ->add('job', EntityType::class, array(
-                'label' => 'Poste',
-                'class' => 'AppBundle:Job',
-                'choice_label'=> 'name',
-                'multiple'     => false,
-                'required' => true
-            ))
-            ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin'))
-            ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides'))
-            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre'))
-            ->add('generate', SubmitType::class, array('label' => 'generer'))
-            ->getForm();
+    public function rolesListAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
 
-        if ($form->handleRequest($request)->isValid()) {
-            $data = $form->getData();
-            return $this->render('admin/widget/generate.html.twig', array(
-                'query_string' => 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0),
-                'form' => $form->createView(),
-            ));
+        $roles_hierarchy = $this->container->getParameter('security.role_hierarchy.roles');
+        $roles_list = array_merge(["ROLE_USER"], array_keys($roles_hierarchy));
+        $roles_list_enriched = array();
+
+        foreach ($roles_list as $role_code) {
+            $role = array();
+            $role_icon_key = strtolower($role_code) . "_material_icon";
+            $role_name_key = strtolower($role_code) . "_name";
+            $role["code"] = $role_code;
+            $role["icon"] = $this->get("twig")->getGlobals()[strtolower($role_icon_key)] ?? "";
+            $role["name"] = $this->get("twig")->getGlobals()[strtolower($role_name_key)] ?? "";
+            $role["children"] = in_array($role_code, array_keys($roles_hierarchy)) ? implode(", ", $roles_hierarchy[$role_code]) : "";
+            $role["user_count"] = count($em->getRepository("AppBundle:User")->findByRole($role_code));
+            array_push($roles_list_enriched, $role);
         }
 
-        return $this->render('admin/widget/generate.html.twig', array(
-            'form' => $form->createView(),
+        return $this->render('admin/user/roles_list.html.twig', array(
+            'roles' => $roles_list_enriched,
         ));
     }
 
     /**
      * Import from CSV
      *
-     * @Route("/importcsv", name="user_import_csv")
-     * @Method({"GET","POST"})
+     * @Route("/importcsv", name="user_import_csv", methods={"GET","POST"})
      * @Security("has_role('ROLE_SUPER_ADMIN')")
      */
     public function csvImportAction(Request $request, KernelInterface $kernel)
     {
         $form = $this->createFormBuilder()
             ->add('submitFile', FileType::class, array('label' => 'File to Submit'))
-            ->add('delimiter', ChoiceType::class, array('label' => 'delimiter','choices'  => array(
-                'virgule ,' => ',',
-                'point virgule ;' => ';',)))
+            ->add('delimiter', ChoiceType::class, array(
+                'label' => 'delimiter',
+                'choices'  => array(
+                    'virgule ,' => ',',
+                    'point virgule ;' => ';',
+                )
+            ))
             //->add('persist', CheckboxType::class, array('required' => false, 'label' => 'Sauver en base'))
             //->add('compute', SubmitType::class, array('label' => 'Importer les données'))
             ->getForm();

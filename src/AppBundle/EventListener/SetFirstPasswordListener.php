@@ -50,7 +50,7 @@ class SetFirstPasswordListener{
         }
         $user = $entity->getUser();
 
-        if (!$user->getId()){
+        if (!$user->getId() && (!$user->getBeneficiary() || $user->getBeneficiary()->getOpenId())) {
             $user->addRole(self::ROLE_PASSWORD_TO_SET);
         }
     }
@@ -63,8 +63,8 @@ class SetFirstPasswordListener{
         $this->em->flush();
     }
 
-    function forcePasswordChange(GetResponseEvent $event){
-
+    function forcePasswordChange(GetResponseEvent $event)
+    {
         $token = $this->token_storage->getToken();
         if ($token){
             $currentUser = $token->getUser();
@@ -78,7 +78,5 @@ class SetFirstPasswordListener{
                 }
             }
         }
-
     }
-
 }

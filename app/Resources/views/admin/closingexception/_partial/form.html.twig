@@ -1,0 +1,25 @@
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col m4">
+        <div class="errors">
+            {{ form_errors(form.date) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.date) }}
+            {{ form_label(form.date) }}
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col m4">
+        <div class="errors">
+            {{ form_errors(form.reason) }}
+        </div>
+        <div class="input-field">
+            {{ form_widget(form.reason) }}
+            {{ form_label(form.reason) }}
+        </div>
+    </div>
+</div>

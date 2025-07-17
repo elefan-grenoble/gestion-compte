@@ -1,185 +1,147 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Créneaux ADMIN - {{ site_name }}{% endblock %}
+{% block title %}Liste des créneaux - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">date_range</i><span>Créneaux ADMIN</span>
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">date_range</i>&nbsp;Liste des créneaux
 {% endblock %}
 
 {% block content %}
+<div class="row center">
+    <h4 class="header">Liste des créneaux</h4>
+</div>
 
-        <div class="row center">
-            <h4 class="header">Admin créneaux</h4>
+{# Filter form  --------- #}
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header">
+            <i class="material-icons">tune</i>Filtres
         </div>
-        <div class="row">
-            {#<ul class="collapsible" data-collapsible="accordion">#}
-                {#<li>#}
-                    {#<div class="collapsible-header"><i class="material-icons">help_outline</i>Outils</div>#}
-                    {#<div class="collapsible-body">#}
-                        {#<ul>#}
-                            {#<li>#}
-                            {#</li>#}
-                        {#</ul>#}
-                    {#</div>#}
-                {#</li>#}
-            {#</ul>#}
-        </div>
-
-
-    <ul class="collapsible" data-collapsible="accordion">
-        <li>
-            <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
-            <div class="collapsible-body">
-                {{ form_start(form) }}
-
-                <div class="row">
+        <div class="collapsible-body">
+            {{ form_start(filterForm) }}
+            <div class="row">
+                <div class="input-field col m3">
+                    {{ form_widget(filterForm.type, { 'id': 'SelectionTypeDropBox' }) }}
+                    {{ form_label(filterForm.type) }}
+                </div>
+                <div id="dateSelectionType">
                     <div class="input-field col m3">
-                        {{ form_widget(form.from) }}
-                        {{ form_label(form.from) }}
+                        {{ form_widget(filterForm.from) }}
+                        {{ form_label(filterForm.from) }}
                     </div>
                     <div class="input-field col m3">
-                        {{ form_widget(form.to) }}
-                        {{ form_label(form.to) }}
+                        {{ form_widget(filterForm.to) }}
+                        {{ form_label(filterForm.to) }}
                     </div>
                 </div>
-                {{ form_widget(form.filter) }}
-                {{ form_widget(form.booker) }}
-                {{ form_end(form) }}
-            </div>
-        </li>
-    </ul>
-
-
-        <div class="row">
-            <div class="col m2 hide-on-small-only">
-            </div>
-            <div class="col s12 m10">
-                <div style="display: flex;">
-                    {% for i in hours %}
-                        {#<span style="float: left; width: {{ 100 / (hours|length) }}%">#}
-                        <div style="flex: 1">
-                            <div style="text-align: center;width: 100%;margin-left: -50%;">
-                                {{ i }}h
-                            </div>
-                        </div>
-                    {% endfor %}
+                <div id="weekSelectionType">
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.week) }}
+                        {{ form_label(filterForm.week) }}
+                    </div>
+                    <div class="input-field col m3">
+                        {{ form_widget(filterForm.year) }}
+                        {{ form_label(filterForm.year) }}
+                    </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="input-field col m6">
+                    {{ form_widget(filterForm.job) }}
+                    {{ form_label(filterForm.job) }}
+                </div>
+                <div class="input-field col m6">
+                    {{ form_widget(filterForm.filling) }}
+                    {{ form_label(filterForm.filling) }}
+                </div>
+            </div>
+            {{ form_widget(filterForm.filter) }}
         </div>
-        {% set previousWeekIndex = -1 %}
-        {% for bucketsByjob in bucketsByDay %}
-            {% set date = false %}
-            {% set weekCycle = ["A", "B", "C", "D"] %}
-            {% for buckets in bucketsByjob %}
-                {% set weekIndex = (((buckets|first).start | date('W') - 1) % 4) %}
-                {% if not date and previousWeekIndex != weekIndex %}
-                    <h5>Semaine {{weekCycle[((buckets|first).start | date('W') - 1) % 4]}}</h5>
-                    {% set previousWeekIndex = weekIndex %}
-                {% endif %}
-                <div class="row center show-on-small hide-on-med-and-up ">
-                    {% if not date %}{{ (buckets|first).start|date_fr_long }}{% endif %}
-                </div>
-                <div class="row" style="display: flex;min-height: 70px;">
-                    <div class="col m2 hide-on-small-only valign-wrapper">
-                        <div>
-                            {% if not date %}
-                                <b>{{ (buckets|first).start|date_fr_long }}</b><br>{% set date = true %}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col m10 s12">
-                        <div style="position: relative">
-                            {% set lignes = {} %}
-                            {% for bucket in buckets %}
-                                {#compute lines #}
-                                {% set l = 0 %}
-                                {% set break = false %}
-                                {% for i in 0..100 if not break %}
-                                    {% if lignes[i~'_'] is not defined %}
-                                        {% set l = i %}
-                                        {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                        {% set break = true %}
-                                    {% else %}
-                                        {% if lignes[i~'_'] < bucket.start  %}
-                                            {% set l = i %}
-                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                            {% set break = true %}
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                                {# / compute lines #}
-                                {% include "admin/booking/_partial/shift.html.twig" with { bucket: bucket, start: hours|first, end: hours|last, line:l  } %}
-                            {% endfor %}
-                        </div>
+    </li>
+</ul>
+{{ form_end(filterForm) }}
+
+{# Calendar hour line --------- #}
+<div class="row">
+    <div class="col m2 hide-on-small-only">
+    </div>
+    <div class="col s12 m10">
+        <div style="display: flex;">
+            {% for i in range(6, 22) %}
+                <div style="flex: 1">
+                    <div style="text-align: center;width: 100%;margin-left: -50%;">
+                        {{ i }}h
                     </div>
                 </div>
             {% endfor %}
-        {% endfor %}
+        </div>
+    </div>
+</div>
 
-    {{ form_start(delete_bucket_form,{ 'attr' : { 'id' : 'delete_bucket'}}) }}
-    {{ form_widget(delete_bucket_form) }}
-    {{ form_end(delete_bucket_form) }}
+{% include "admin/booking/_partial/bucket_calendar.html.twig" with { bucketsByDay: bucketsByDay } %}
+
+<div id="modal-bucket" class="modal">
+    <div id="modal-bucket-content" class="modal-content">
+    </div>
+</div>
 
 {% endblock %}
 
 {% block stylesheets %}
 {% endblock %}
+
 {% block javascripts %}
     <script>
-        jQuery(function ($) {
-            $('input.empty-shift').autocomplete({
-                data: {
-                    {% for beneficiary in beneficiaries %}
-                        "{{ beneficiary.autocompleteLabel }}" : null,
-                    {% endfor %}
-                },
-                limit: 10, // The max amount of results that can be shown at once. Default: Infinity.
-                onAutocomplete: function(val) {
-                    // Callback function when value is autcompleted.
-                    $('button.add').removeAttr('disabled');
-                },
-                minLength: 2, // The minimum length of the input for the autocomplete to start. Default: 1.
-            });
-            $('input.empty-shift').keydown(function () {
-                $('button.add:not(:disabled)').attr('disabled','disabled');
-            });
-        })
-
-        function postShift(shiftId) {
-
-            {% if use_fly_and_fixed %}
-            let selectedTypeService = document.querySelector('.checkedTypeService'+shiftId+':checked');
-            {% else %}
-            let selectedTypeService = document.querySelector('input[name="typeService'+shiftId+'"]');
-            {% endif %}
-            let selectedBenef = document.getElementById('benef'+shiftId);
-
-            if (selectedTypeService != null && selectedBenef != null) {
-                let url = "{{ path('admin_shift_book',{'id': 'tmpId'}) }}";
-                url = url.replace("tmpId", shiftId);
-
-                let body = {
-                    "typeService": selectedTypeService.value,
-                    "beneficiary": selectedBenef.value
-                };
-
-                // If using old IE version
-                var xhttp = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-
-                xhttp.open("POST", url, true);
-                xhttp.onreadystatechange = function () {
-                    if (xhttp.readyState > 3) {
-                        if (200 <= xhttp.status && xhttp.status < 300) {
-                            window.location.replace(xhttp.responseText);
-                        } else {
-                            alert("une erreur est survenue");
-                        }
-                    }
-                };
-                xhttp.send(JSON.stringify(body));
-                return xhttp;
+        function ajaxError (jqXHR, exception) {
+            var msg = '';
+            if (jqXHR.status === 0) {
+                msg = 'Perte de connexion à internet. Vérifier votre connexion.';
+            } else if (jqXHR.status == 404) {
+                msg = 'Oups, le créneau n\'existe plus. Quelqu\'un d\'autre l\'a supprimé entre temps ?';
+            } else if (jqXHR.status == 500) {
+                msg = 'Erreur interne, il faut mettre les informaticiens sur le coup !';
+            } else if (exception === 'parsererror') {
+                msg = 'Réponse du serveur incompréhensible (JSON parse failed).';
+            } else if (exception === 'timeout') {
+                msg = 'Le serveur n\'a pas répondu dans les temps...';
+            } else if (exception === 'abort') {
+                msg = 'Ajax request aborted.';
+            } else {
+                var data = jqXHR.responseJSON;
+                msg = data.message;
             }
+            M.toast({ text: msg, displayLength: 5000, classes: 'red' });
         }
+
+        $(document).ready(function ($) {
+            // for the filter form ------------------
+            $('#SelectionTypeDropBox').on('change', function () {
+                if (this.value === "week") {
+                    $('#weekSelectionType').show();
+                    $('#dateSelectionType').hide();
+                } else {
+                    $('#weekSelectionType').hide();
+                    $('#dateSelectionType').show();
+                }
+            })
+            .trigger('change');
+
+            // for the bucket modals ------------------
+            $('#modal-bucket').modal({
+                onCloseEnd: function() {
+                    $('#modal-bucket-content').html('');
+                },
+                onOpenStart: function(modal, trigger) {
+                    var url = $(trigger).attr('data-source');
+                    $.get(url, function( data ) {
+                        $('#modal-bucket-content').html(data);
+                        $('#modal-bucket-content .collapsible').collapsible();
+                        $('#modal-bucket-content select').formSelect({ dropdownOptions: { container: document.body } });
+                    }).fail(ajaxError);
+                }
+            });
+        });
     </script>
 {% endblock %}

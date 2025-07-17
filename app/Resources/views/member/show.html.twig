@@ -1,48 +1,40 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}{{ member.autocompleteLabel }} - {{ site_name }}{% endblock %}
+{% block title %}{{ member.displayMemberNumber }} - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    {% if is_granted("ROLE_ADMIN") %}
-        <i class="material-icons">list</i><a href="{{ path('user_index') }}">liste membres</a> <i class="material-icons">chevron_right</i>
-    {% else %}
-        <i class="material-icons">build</i><a href="{{ path('user_office_tools') }}">Outils adhésion et ré-adhésion</a> <i class="material-icons">chevron_right</i>
-    {% endif %}
-    <i class="material-icons">person</i> {{ member.autocompleteLabel }}
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+{% if is_granted("ROLE_ADMIN") %}
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('user_index') }}"><i class="material-icons">people</i>&nbsp;Liste des membres</a><i class="material-icons">chevron_right</i>
+{% else %}
+    <a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>&nbsp;Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+{% endif %}
+<i class="material-icons">person</i>&nbsp;{{ member.displayMemberNumber }}
 {% endblock %}
 
 {% block content %}
     <h4>
-        {% if member.withdrawn %}
-        <del>{% endif %}
-            Membre #{{ member.memberNumber }}
-            {% if member.withdrawn %}</del>{% endif %}
-        {% if member.frozen %}<i class="material-icons">notifications_paused</i>{% endif %}
+        {% if member.withdrawn %}<del>{% endif %}
+        Membre #{{ member.memberNumber }}{% if member.withdrawn %}</del>{% endif %}
+        {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
     </h4>
-    <div class="row">
-        {% for beneficiary in member.beneficiaries %}
-            {% include "beneficiary/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, delete_form: delete_beneficiary_forms[beneficiary.id] } %}
-        {% endfor %}
-    </div>
-    {% if member.notes | length %}
-        <h5>Note{% if member.notes | length > 1 %}s{% endif %} à propos de ce membre</h5>
+
+    <!-- Détails sur le(s) bénéficiaire(s) -->
+    {% if member.beneficiaries | length %}
         <div class="row">
-            {% for note in member.notes %}
-                {% if not note.parent %}
-                    <div class="col s12 m6 offset-m2 l6">
-                        {% include "user/_partial/note.html.twig" with { note: note } %}
-                    </div>
-                {% endif %}
+            {% for beneficiary in member.beneficiariesWithMainInFirstPosition %}
+                {% include "beneficiary/_partial/beneficiary_card.html.twig" with { beneficiary: beneficiary, detach_form: detach_beneficiary_forms[beneficiary.id], delete_form: delete_beneficiary_forms[beneficiary.id] } %}
             {% endfor %}
         </div>
     {% endif %}
 
-    {% if is_granted("beneficiary_add", member) and member.beneficiaries|length < 2 %}{#todo put this value in conf#}
-        <ul class="collapsible" data-collapsible="accordion">
+    <!-- Ajouter un bénéficiaire -->
+    {% if is_granted("beneficiary_add", member) and member.beneficiaries | length < maximum_nb_of_beneficiaries_in_membership %}
+        <ul class="collapsible">
             <li>
                 <div class="collapsible-header"><i class="material-icons">person_add</i>Ajouter un bénéficiaire</div>
-                <div class="collapsible-body new_registration_form">
+                <div class="collapsible-body white new_registration_form">
                     {{ form_start(new_beneficiary_form) }}
                     {% include "beneficiary/_partial/beneficiary_form.html.twig" with { form: new_beneficiary_form } %}
                     <div class="col s3">
@@ -52,287 +44,339 @@
                 </div>
             </li>
         </ul>
-        {#{% else %}#}
     {% endif %}
 
-    <ul class="collapsible" data-collapsible="expandable">
+    <!-- Collapsible "informations" -->
+    <ul class="collapsible collapsible-expandable">
+        <!-- Adhésion(s) -->
         <li id="registration">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.registration_open is defined and frontend_cookie.user_show.registration_open %}active{% endif %}">
                 <i class="material-icons">card_membership</i>Adhésions
-            </div>
-            <div class="collapsible-body white">
-
-                <ul class="collapsible" data-collapsible="accordion">
-                    {% for registration in member.registrations %}
-                        <li>
-                            <div class="collapsible-header">{% if registration.mode == constant('TYPE_CREDIT_CARD', registration) or registration.mode == constant('TYPE_HELLOASSO', registration) %}
-                                    <i class="material-icons tiny">credit_card</i>
-                                {% else %}
-                                    <i class="material-icons tiny">attach_money</i>
-                                {% endif %}
-                                {{ registration.date | date('d F Y') }}
-                                {% if registration.mode == constant('TYPE_HELLOASSO', registration) %}<span
-                                        class="badge right">Helloasso</span>{% endif %}
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
-                {% if member | can_register and member.mainBeneficiary.user != app.user %}
-                    <ul class="collapsible" data-collapsible="accordion">
-                        <li>
-                            {% if not member.lastRegistration %}
-                                <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
-                            {% else %}
-                                <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
-                            {% endif %}
-                            <div class="collapsible-body new_registration_form">
-                                {{ form_start(new_registration_form) }}
-                                {% include "user/_partial/registration_form.html.twig" with { form: new_registration_form } %}
-                                {{ form_end(new_registration_form) }}
-                            </div>
-                        </li>
-                    </ul>
-                {% elseif (member.mainBeneficiary.user != app.user ) %}
-                    <ul class="collapsible" data-collapsible="accordion">
-                        <li>
-                            {% if not member.lastRegistration %}
-                                <div class="collapsible-header"><i class="material-icons">add_circle</i>Adhésion</div>
-                            {% else %}
-                                <div class="collapsible-header"><i class="material-icons">add_circle</i>Ré-adhésion</div>
-                            {% endif %}
-                            <div class="collapsible-body new_registration_form">
-                                Il est trop tôt pour ré-adhérer. Cette adhésion est valable encore {{ member | remainder | date('%a') }} jours.
-                            </div>
-                        </li>
-                    </ul>
+                {% if member.registrations | length == 0 %}
+                    <span style="margin-left:14px;">⚠️</span>
                 {% endif %}
             </div>
+            <div class="collapsible-body white">
+                {% include "member/_partial/registrations.html.twig" with { member: member, from_admin: true, new_registration_form: new_registration_form } %}
+            </div>
         </li>
-        {% if is_granted("create",note) %}
-            <li id="note">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
-                    <i class="material-icons">add</i>Ajouter une note
-                </div>
-                <div class="collapsible-body white">
-                    {{ form_start(note_form) }}
-                        {{ form_row(note_form.text) }}
-                    <div>
-                        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">add</i>Ajouter une note</button>
-                    </div>
-                    {{ form_end(note_form) }}
-                </div>
-            </li>
-        {% endif %}
 
+        <!-- Notes -->
+        <li id="note">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.note_open is defined and frontend_cookie.user_show.note_open %}active{% endif %}">
+                <i class="material-icons">chat_bubble_outline</i>Notes
+                {% if member.notes | length > 0 %}
+                    <span class="badge teal white-text" style="margin-left:14px;">{{ member.notes | length }}</span>
+                {% endif %}
+            </div>
+            <div class="collapsible-body white">
+                {% include "member/_partial/notes.html.twig"  with { member: member, note: note, note_form: note_form, notes_form: notes_form, note_delete_forms: note_delete_forms, new_notes_form: new_notes_form } %}
+            </div>
+        </li>
+
+        <!-- Compteur de temps -->
         <li id="time_log">
             <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.time_log_open is defined and frontend_cookie.user_show.time_log_open %}active{% endif %}">
                 <i class="material-icons">access_time</i>Compteur de temps
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/time_logs.html.twig" with { member: member, time_log_form: time_log_form } %}
+                {% include "member/_partial/time_logs.html.twig" with { member: member, from_admin: true, time_log_new_form: time_log_new_form, time_log_delete_forms: time_log_delete_forms } %}
             </div>
         </li>
 
+        <!-- Créneaux -->
         <li id="shifts">
-            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
+            <div class="collapsible-header {% if frontend_cookie and frontend_cookie.shifts_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shifts_open %}active{% endif %}">
                 <i class="material-icons">date_range</i>Créneaux
+                {% if not member.firstShiftDate %}
+                    <span style="margin-left:14px;">⚠️</span>
+                {% elseif use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' %}
+                    {% if member.flying and period_positions | length > 1 or not member.flying and period_positions | length == 0 %}
+                        <span style="margin-left:14px;">⚠️</span>
+                    {% endif %}
+                {% endif %}
             </div>
             <div class="collapsible-body white">
-                {% include "member/_partial/shifts.html.twig" %}
+                {% include "member/_partial/shifts.html.twig" with { member: member, period_positions: period_positions, shifts_by_cycle: shifts_by_cycle } %}
             </div>
         </li>
 
+        <!-- Créneaux annulés -->
+        {% if admin_member_display_shift_free_log %}
+            <li id="shiftfreelogs">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.shiftfreelogs_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.shiftfreelogs_open %}active{% endif %}">
+                    <i class="material-icons">delete_sweep</i>Historique des créneaux annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/shift_free_logs.html.twig" with { shiftFreeLogs: membership_service.getShiftFreeLogs(member), from_admin: true, custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Postes fixes annulés -->
+        {% if use_fly_and_fixed and admin_member_display_period_position_free_log %}
+            <li id="periodpositionfreelogs">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.periodpositionfreelogs_show is defined and frontend_cookie.user_show.shifts_open is defined and frontend_cookie.user_show.periodpositionfreelogs_open %}active{% endif %}">
+                    <i class="material-icons">delete_sweep</i>Historique des postes fixes annulés
+                </div>
+                <div class="collapsible-body">
+                    {% include "member/_partial/period_position_free_logs.html.twig" with { periodPositionFreeLogs: membership_service.getPeriodPositionFreeLogs(member), from_admin: true, custom_styles: "max-height:500px;overflow:scroll;" } %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Badges -->
         {% if is_granted("ROLE_USER_MANAGER") %}
             <li id="badges">
                 <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.badges_open is defined and frontend_cookie.user_show.badges_open %}active{% endif %}">
                     <i class="material-icons">credit_card</i>Badges
                 </div>
                 <div class="collapsible-body white">
-                    <ul>
-                        {% for beneficiary in member.beneficiaries %}
-                            <div class="row">
-                                <div class="col">
-                                    <h4>{{ beneficiary.firstname }}</h4>
-                                    {% if (beneficiary.getEnabledSwipeCards | length == 0) %}
-                                        <p><b class="red-text">Aucun badges actif</b></p>
-                                        <a href="#swipe_add_b{{ beneficiary.id }}" class="btn waves-effect waves-light modal-trigger"><i class="material-icons left">add</i>Associer un badge à ce compte</a>
-                                        <div id="swipe_add_b{{ beneficiary.id }}" class="modal">
-                                            <div class="modal-content">
-                                                <h4>Associer un badge</h4>
-                                                <form action="{{ path('active_swipe_for_beneficiary',{id:beneficiary.id})}}" method="post">
-                                                    <div class="row">
-                                                        <div class="input-field col s6">
-                                                            <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
-                                                            <input pattern=".{13,13}" type="text" name="code" autocomplete="off"/>
-                                                            <label for="code">Code du badge à 13 chiffres</label>
-                                                        </div>
-                                                        <div class="col s6">
-                                                            <br>
-                                                            <button type="submit" class="waves-effect waves-light btn-flat green white-text"><i class="material-icons left">check</i>Associer le badge</button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <a href="#!" class="modal-close waves-effect red-text btn-flat">Fermer</a>
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <div class="badge">
-                                            <img
-                                                    src="{{ absolute_url(path('swipe_br',{"code": beneficiary.getEnabledSwipeCards.first.code | vigenere_encode | url_encode})) }}"
-                                                    alt="barecode">
-                                        </div>
-                                        <br>
-                                    {% endif %}
-                                    {% if beneficiary.getSwipeCards | length %}
-                                        <a class="waves-effect waves-light btn modal-trigger blue-grey" href="#all_swipecards_b{{ beneficiary.id }}"><i class="material-icons left">credit_card</i>Badges de {{ beneficiary.firstname }}</a>
-                                        <div id="all_swipecards_b{{ beneficiary.id }}" class="modal bottom-sheet">
-                                            <div class="modal-content">
-                                                <h4>Tous les badges {{ beneficiary.firstname }}</h4>
-                                                {% include "swipeCard/_partial/list.html.twig" with { swipeCards: beneficiary.swipeCards | reverse, beneficiary_id: beneficiary.id } %}
-                                            </div>
-                                            <div class="modal-footer">
-                                                <a href="#!" class="modal-close waves-effect waves-green btn-flat red-text">Fermer</a>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </li>
-        {% endif %}
-
-        {% if is_granted("ROLE_USER_MANAGER") %}
-            <li id="freeze">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
-                    <i class="material-icons">ac_unit</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
-                </div>
-                <div class="collapsible-body white">
-
-                    {% if is_granted("freeze_change",member) %}
-                        {% if not member.frozen %}
-                            {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                    <i class="material-icons left">cancel</i>Annuler la demande de gel du compte</a>
-                            {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn deep-purple">
-                                    <i class="material-icons left">paused</i>Geler le compte à la fin du cycle</a>
-                            {% endif %}
-                        {% else %}
-                            {% if member.frozenChange %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}" class="waves-effect waves-light btn orange">
-                                    <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte</a>
-                            {% else %}
-                                <a href="{{ path("member_freeze_change",{"id":member.id}) }}"
-                                   class="waves-effect waves-light btn waves-purple purple lighten-2">
-                                    <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle</a>
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                    {% if is_granted("freeze",member) %}
-                        {% if not member.frozen %}
-                            <a href="#pause" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
-                                <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement</a>
-                            <div id="pause" class="modal">
-                                <div class="modal-content">
-                                    <h5><i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte</h5>
-                                    <p>Attention, le gel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin</p>
-                                    <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange"
-                                       href="{{ path('member_freeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce que
-                                        je fais !</a>
-                                </div>
-                            </div>
-                        {% else %}
-                            <a href="#unpause" class="waves-effect waves-light btn modal-trigger purple lighten-3">
-                                <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte
-                                immédiatement</a>
-                            <div id="unpause" class="modal">
-                                <div class="modal-content">
-                                    <h5><i class="material-icons left small">play_arrow</i>Dégel immédiat du compte</h5>
-                                    <p>Attention, le dégel immédiat sera effectif dés aujourd'hui, interdisant l'accès au magasin</p>
-                                    <p>De plus, les heures de bénévolat sont dues pour ce cycle.</p>
-                                </div>
-                                <div class="modal-footer">
-                                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                    <a class="btn waves-effect waves-light orange"
-                                       href="{{ path('member_unfreeze',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                        que je fais !</a>
-                                </div>
-                            </div>
-                        {% endif %}
-                        <br>
-                    {% endif %}
-                </div>
-            </li>
-        {% endif %}
-
-
-        {% if is_granted("ROLE_USER_MANAGER") and is_granted("close",member) %}
-            <li id="close">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
-                    <i class="material-icons">close</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
-                </div>
-                <div class="collapsible-body white">
-                    {% if not member.withdrawn %}
-                        <a href="#close-member" class="modal-trigger waves-effect waves-light btn red">
-                            <i class="material-icons left">close</i>Fermer le compte</a>
-                        <div id="close-member" class="modal">
-                            <div class="modal-content">
-                                <h5><i class="material-icons left small">remove_circle_outline</i>Fermeture du compte membre</h5>
-                                <p>Attention, vous êtes sur le point de fermer le compte du membre.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange"
-                                   href="{{ path('member_close',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                    que je fais !</a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="#reopen-member" class="modal-trigger waves-effect waves-light btn teal">
-                            <i class="material-icons left">check</i>Ré-ouvrir le compte</a>
-                        <div id="reopen-member" class="modal">
-                            <div class="modal-content">
-                                <h5><i class="material-icons left small">info_outline</i>Ré-ouverture du compte membre</h5>
-                                <p>Attention, vous êtes sur le point de ré-ouvrir le compte du membre.</p>
-                            </div>
-                            <div class="modal-footer">
-                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
-                                <a class="btn waves-effect waves-light orange"
-                                   href="{{ path('member_open',{ 'id' : member.id }) }}"><i class="material-icons left">check</i>Je sais ce
-                                    que je fais !</a>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
-            </li>
-        {% endif %}
-
-        {% if is_granted("ROLE_SUPER_ADMIN") %}
-            <li id="super">
-                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_open is defined and frontend_cookie.user_show.super_open %}active{% endif %}">
-                    <i class="material-icons">person</i>Actions super admin
-                </div>
-                <div class="collapsible-body white">
-                    {{ form_start(delete_form) }}
-                    {{ form_widget(delete_form) }}
-                    <button type="submit" class="btn red"><i class="material-icons left">delete</i>Supprimer ce membre</button>
-                    {{ form_end(delete_form) }}
-
-                    {% include "member/_partial/roles.html.twig" %}
-                    {% include "member/_partial/recorded_registrations.html.twig" %}
+                    {% include "member/_partial/swipe_cards.html.twig" with { member: member } %}
                 </div>
             </li>
         {% endif %}
     </ul>
 
+    <!-- Collapsible "actions" -->
+    <ul class="collapsible collapsible-expandable">
+        <!-- Passer fixe ou volant -->
+        {% if use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' and is_granted("ROLE_USER_MANAGER") and is_granted("flying",member) %}
+            <li id="flying">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.flying_open is defined and frontend_cookie.user_show.flying_open %}active{% endif %}">
+                    <i class="material-icons">{{ member_flying_material_icon }}</i>Passer en {% if member.flying %}fixe{% else %}volant{% endif %}
+                </div>
+                <div class="collapsible-body white">
+                    <a href="#flying-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn teal" {% if member.withdrawn %}disabled{% endif %}>
+                        {% if not member.flying %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> volant
+                        {% else %}
+                            <i class="material-icons left">cached</i><span class="hide-on-med-and-down">Passer en</span> fixe
+                        {% endif %}
+                    </a>
+                    <div id="flying-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">cached</i>Passage du compte membre en {% if member.flying %}fixe{% else %}volant{% endif %}
+                            </h5>
+                            <p>Attention, vous êtes sur le point de passer le compte du membre en {% if member.flying %}fixe{% else %}volant{% endif %}.</p>
+                            <ul>
+                                <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                            </ul>
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_start(flying_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>OK
+                            </button>
+                            {{ form_end(flying_form) }}
+                        </div>
+                    </div>
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Geler/Dégeler le compte -->
+        {% if is_granted("ROLE_USER_MANAGER") %}
+            <li id="freeze">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.freeze_open is defined and frontend_cookie.user_show.freeze_open %}active{% endif %}">
+                    <i class="material-icons">{{ member_frozen_material_icon }}</i>{% if member.frozen %}Dégeler le compte{% else %}Geler le compte{% endif %}
+                </div>
+                <div class="collapsible-body white">
+                    {% if is_granted("freeze_change", member) %}
+                        {{ form_start(freeze_change_form) }}
+                        {% if not member.frozen %}
+                            {% if member.frozenChange %}
+                                <button type="submit" class="btn waves-effect waves-light orange">
+                                    <i class="material-icons left">cancel</i>Annuler la demande de gel du compte
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn waves-effect waves-light deep-purple">
+                                    <i class="material-icons left">paused</i>Geler le compte à la fin du cycle
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            {% if member.frozenChange %}
+                                <button type="submit" class="btn waves-effect waves-light orange">
+                                    <i class="material-icons left">cancel</i>Annuler la demande de dégel du compte
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn waves-effect waves-light deep-purple lighten-2">
+                                    <i class="material-icons left">play_arrow</i>Dégeler le compte à la fin du cycle
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                        {{ form_end(freeze_change_form) }}
+                    {% endif %}
+                    {% if is_granted("freeze", member) %}
+                        {% if not member.frozen %}
+                            <a href="#freeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger deep-purple lighten-2">
+                                <i class="material-icons left">paused</i><i class="material-icons left">timer_off</i>Geler le compte immédiatement
+                            </a>
+                            {{ form_start(freeze_form) }}
+                            <div id="freeze-member-confirmation-modal" class="modal">
+                                <div class="modal-content">
+                                    <h5>
+                                        <i class="material-icons left small">pause_circle_filled</i>Gel immédiat du compte
+                                    </h5>
+                                    <p>Attention, le gel immédiat sera effectif dès aujourd'hui, interdisant l'accès au magasin.</p>
+                                    <p>De plus, à la fin du cycle, les heures effectuées ne seront pas décomptées.</p>
+                                    <ul>
+                                        {% if use_fly_and_fixed %}
+                                            <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                                        {% endif %}
+                                        <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                        <i class="material-icons left">check</i>Je sais ce que je fais !
+                                    </button>
+                                </div>
+                            </div>
+                            {{ form_end(freeze_form) }}
+                        {% else %}
+                            <a href="#unfreeze-member-confirmation-modal" class="waves-effect waves-light btn modal-trigger purple lighten-3">
+                                <i class="material-icons left">play_arrow</i><i class="material-icons left">timer_off</i> Dégeler le compte immédiatement
+                            </a>
+                            {{ form_start(unfreeze_form) }}
+                            <div id="unfreeze-member-confirmation-modal" class="modal">
+                                <div class="modal-content">
+                                    <h5>
+                                        <i class="material-icons left small">play_arrow</i>Dégel immédiat du compte
+                                    </h5>
+                                    <p>Attention, le dégel immédiat sera effectif dés aujourd'hui, réautorisant l'accès au magasin</p>
+                                    <p>De plus, les heures de bénévolat sont dues pour ce cycle.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                    <button type="submit" class="btn waves-effect waves-light orange">
+                                        <i class="material-icons left">check</i>Je sais ce que je fais !
+                                    </button>
+                                </div>
+                            </div>
+                            {{ form_end(unfreeze_form) }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Fermer le compte -->
+        {% if is_granted("ROLE_USER_MANAGER") and ((member.withdrawn and is_granted("open",member)) or (not member.withdrawn and is_granted("close",member))) %}
+            <li id="close">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.close_open is defined and frontend_cookie.user_show.close_open %}active{% endif %}">
+                    <i class="material-icons">{{ member_withdrawn_material_icon }}</i>{% if member.withdrawn %}Ré-ouvrir le compte{% else %}Fermer le compte{% endif %}
+                </div>
+                <div class="collapsible-body white">
+                    <a href="#withdrawn-member-confirmation-modal" class="modal-trigger waves-effect waves-light btn {% if not member.withdrawn %}red{% else %}teal{% endif %}">
+                        {% if not member.withdrawn %}
+                            <i class="material-icons left">{{ member_withdrawn_material_icon }}</i>Fermer <span class="hide-on-med-and-down">le compte</span>
+                        {% else %}
+                            <i class="material-icons left">check</i>Ré-ouvrir <span class="hide-on-med-and-down">le compte</span>
+                        {% endif %}
+                    </a>
+                    <div id="withdrawn-member-confirmation-modal" class="modal">
+                        <div class="modal-content">
+                            <h5>
+                                <i class="material-icons left small">{{ member_withdrawn_material_icon }}</i>{% if member.withdrawn %}Ré-ouverture{% else %}Fermeture{% endif %} du compte membre
+                            </h5>
+                            <p>Attention, vous êtes sur le point de {% if member.withdrawn %}ré-ouvrir{% else %}fermer{% endif %} le compte du membre.</p>
+                            {% if not member.withdrawn %}
+                                <ul>
+                                    {% if use_fly_and_fixed %}
+                                        <li>Ce membre a {{ period_positions | length }} créneau{% if period_positions | length > 1 %}x{% endif %} fixe.</li>
+                                    {% endif %}
+                                    <li>Ce membre a {{ in_progress_and_upcoming_shifts | length }} créneau{% if in_progress_and_upcoming_shifts | length > 1 %}x{% endif %} réservé à venir.</li>
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer">
+                            {{ form_start(withdrawn_form) }}
+                            <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                            <button type="submit" class="btn waves-effect waves-light orange">
+                                <i class="material-icons left">check</i>Je sais ce que je fais !
+                            </button>
+                            {{ form_end(withdrawn_form) }}
+                        </div>
+                    </div>
+                    {% if member.withdrawnDate %}
+                        <p>
+                            Compte fermé le <i>{{ member.withdrawnDate | date_fr }}</i>
+                            {% if member.withdrawnBy %}
+                                par {% include "admin/member/_partial/member_or_user_link.html.twig" with { user: member.withdrawnBy, target_blank: true } %}.
+                            {% endif %}
+                        </p>
+                    {% endif %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Rôles -->
+        {% if is_granted("ROLE_ADMIN") %}
+            <li id="super">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.admin_open is defined and frontend_cookie.user_show.admin_open %}active{% endif %}">
+                    <i class="material-icons">verified_user</i>Rôles
+                </div>
+                <div class="collapsible-body white">
+                    {% include "member/_partial/roles.html.twig" with { member: member } %}
+                </div>
+            </li>
+        {% endif %}
+
+        <!-- Actions super admin (supprimer le membre ; adhésions enregistrées) -->
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+            {% if not oidc_enable %}
+                <li id="super">
+                    <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.super_admin_open is defined and frontend_cookie.user_show.super_admin_open %}active{% endif %}">
+                        <i class="material-icons">build</i>Actions super admin
+                    </div>
+                    <div class="collapsible-body white">
+                        {{ form_start(delete_form) }}
+                        {{ form_widget(delete_form) }}
+                        <a href="#delete-member-confirmation-modal" class="modal-trigger btn red">
+                            <i class="material-icons left">delete</i>Supprimer le compte
+                        </a>
+                        <div id="delete-member-confirmation-modal" class="modal">
+                            <div class="modal-content">
+                                <h5>
+                                    <i class="material-icons left small">delete</i>Suppression du compte membre
+                                </h5>
+                                <p>Attention, vous êtes sur le point de <strong>supprimer</strong> le compte du membre.</p>
+                                <p>Cette action est <strong>irréversible</strong>.</p>
+                                {% if not member.withdrawn %}
+                                    <p>Le compte de ce membre n'est pas fermé. Ne voulez-vous pas plutôt "Fermer le compte" ?</p>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat green-text">Retour à la raison</a>
+                                <button type="submit" class="btn waves-effect waves-light orange">
+                                    <i class="material-icons left">check</i>Je sais ce que je fais !
+                                </button>
+                            </div>
+                        </div>
+                        {{ form_end(delete_form) }}
+
+                        {% include "member/_partial/recorded_registrations.html.twig" %}
+                    </div>
+                </li>
+            {% endif %}
+        {% endif %}
+
+        <!-- Informations sur le membre -->
+        {% if is_granted("ROLE_USER_MANAGER") %}
+            <li id="super">
+                <div class="collapsible-header {% if frontend_cookie and frontend_cookie.user_show is defined and frontend_cookie.user_show.admin_open is defined and frontend_cookie.user_show.info_open %}active{% endif %}">
+                    <i class="material-icons">info_outline</i>Informations diverses
+                </div>
+                <div class="collapsible-body white">
+                    {% include "member/_partial/info_misc.html.twig" with { member: member } %}
+                </div>
+            </li>
+        {% endif %}
+    </ul>
 {% endblock %}
 
 {% block javascripts %}
@@ -360,9 +404,20 @@
 
         {% if member.withdrawn %}
         body {
-            background: rgba(255, 50, 0, 0.2);
+            background-color: {{ member_withdrawn_background_color }};
         }
-
+        {% elseif member.frozen %}
+        body {
+            background-color: {{ member_frozen_background_color }};
+        }
+        {% elseif member.isCurrentlyExemptedFromShifts() %}
+        body {
+            background-color: {{ member_exempted_background_color }};
+        }
+        {% elseif not member | uptodate %}
+        body {
+            background-color: {{ member_registration_missing_background_color }};
+        }
         {% endif %}
     </style>
 {% endblock %}

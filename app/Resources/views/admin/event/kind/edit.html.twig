@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer un type d'événement - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_kind_list') }}"><i class="material-icons">list</i>&nbsp;Liste des types d'événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
+{% endblock %}
+
+{% block content %}
+<h4>Editer un type d'événement</h4>
+
+{{ form_start(form) }}
+{% include "/admin/event/kind/_partial/form.html.twig" with { form: form } %}
+<button type="submit" class="btn waves-effect waves-light" title="Enregistrer">
+    <i class="material-icons left">save</i>Enregistrer
+</button>
+{{ form_end(form) }}
+
+{% if is_granted("ROLE_ADMIN") %}
+    {{ form_start(delete_form) }}
+    {{ form_widget(delete_form) }}
+    <button type="submit" class="btn waves-effect waves-light red" onclick="return confirm('Etes-vous sûr ?!');">
+        <i class="material-icons left">delete</i>Supprimer
+    </button>
+    {{ form_end(delete_form) }}
+{% endif %}
+{% endblock %}

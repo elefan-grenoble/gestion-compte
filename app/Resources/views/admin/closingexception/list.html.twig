@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Fermetures exceptionnelles - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_closingexception_index') }}"><i class="material-icons">block</i>&nbsp;Fermetures exceptionnelles</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des fermetures exceptionnelles
+{% endblock %}
+
+{% block content %}
+<h4>Liste des fermetures exceptionnelles ({{ closingExceptions | length }})</h4>
+
+{% include "admin/closingexception/_partial/table.html.twig" with { closingExceptions: closingExceptions, delete_forms: delete_forms } %}
+{% endblock %}

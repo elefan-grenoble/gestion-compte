@@ -35,13 +35,4 @@ class CommissionJoinOrLeaveEvent extends Event
     {
         return $this->commission;
     }
-
-    /**
-     * @return int
-     */
-    public function getState()
-    {
-        return $this->state;
-    }
-
 }

@@ -1,0 +1,69 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Générer un widget (événement) - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_event_index') }}"><i class="material-icons">event</i>&nbsp;Événements</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">tune</i>&nbsp;Générer un widget
+{% endblock %}
+
+{% block content %}
+<h4>Générer un widget (événement)</h4>
+
+{{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_label(form.kind) }}
+        {{ form_widget(form.kind) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_label(form.date_max) }}
+        {{ form_widget(form.date_max) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col m6">
+        {{ form_label(form.limit) }}
+        {{ form_widget(form.limit) }}
+    </div>
+</div>
+<div class="row">
+    {{ form_errors(form.title) }}
+    <label>
+        {{ form_widget(form.title) }}
+        <span>{{ form.title.vars.label }}</span>
+    </label>
+</div>
+<div class="row">
+    {{ form_errors(form.links) }}
+    <label>
+        {{ form_widget(form.links) }}
+        <span>{{ form.links.vars.label }}</span>
+    </label>
+</div>
+{{ form_widget(form.generate, {'attr': {'class': 'btn waves-effect waves-light'}}) }}
+{{ form_end(form) }}
+
+{% if query_string is defined %}
+    <br />
+    <h4>Résultat</h4>
+    <div class="row">
+        <div class="col m4">
+            <iframe src="{{ path('event_widget') }}?{{ query_string }}" frameborder="0" style="border: 2px solid green;"></iframe>
+        </div>
+        <div class="col m8">
+            texte à copier-coller 👇
+            <div class="card-panel" style="overflow:scroll;">
+                <pre>&lt;iframe src="{{ absolute_url(path('event_widget')) }}?{{ query_string }}" frameborder="0"&gt;&lt;/iframe&gt;</pre>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

@@ -6,8 +6,7 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Task;
 use AppBundle\Form\TaskType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -25,11 +24,10 @@ class TaskController extends Controller
     /**
      * Lists all tasks.
      *
-     * @Route("/", name="tasks_list")
-     * @Method("GET")
+     * @Route("/", name="tasks_list", methods={"GET"})
      */
-    public function listAction(Request $request){
-
+    public function listAction(Request $request)
+    {
         $this->denyAccessUnlessGranted('view', new Task());
 
         $em = $this->getDoctrine()->getManager();
@@ -43,10 +41,10 @@ class TaskController extends Controller
     /**
      * add new task.
      *
-     * @Route("/new", name="task_new")
-     * @Method({"GET","POST"})
+     * @Route("/new", name="task_new", methods={"GET","POST"})
      */
-    public function newAction(Request $request){
+    public function newAction(Request $request)
+    {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -57,13 +55,11 @@ class TaskController extends Controller
         $em = $this->getDoctrine()->getManager();
 
         $task->setRegistrar($current_app_user);
-        $task->setCreatedAt(new \DateTime('now'));
 
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $date = $form->get('due_date')->getData();
             $new_date = new \DateTime($date);
             $task->setDueDate($new_date);
@@ -72,11 +68,10 @@ class TaskController extends Controller
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle tache a bien été créée !');
-
             return $this->redirectToRoute('task_edit',array('id'=>$task->getId()));
 
-        }elseif ($form->isSubmitted()){
-            foreach ($this->getErrorMessages($form) as $key => $errors){
+        } elseif ($form->isSubmitted()) {
+            foreach ($this->getErrorMessages($form) as $key => $errors) {
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);
             }
@@ -84,21 +79,20 @@ class TaskController extends Controller
         return $this->render('default/task/new.html.twig', array(
             'form' => $form->createView()
         ));
-
     }
 
     /**
      * add new task.
      *
-     * @Route("/edit/{id}", name="task_edit")
-     * @Method({"GET","POST"})
+     * @Route("/edit/{id}", name="task_edit", methods={"GET","POST"})
      */
-    public function editAction(Request $request,Task $task){
+    public function editAction(Request $request, Task $task)
+    {
         $session = new Session();
+        $em = $this->getDoctrine()->getManager();
 
         $this->denyAccessUnlessGranted('edit',$task);
 
-        $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
         $form->get('created_at')->setData($task->getCreatedAt()->format('Y-m-d'));
@@ -106,23 +100,21 @@ class TaskController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $due_date = $form->get('due_date')->getData();
+            $due_date = new \DateTime($due_date);
+            $task->setDueDate($due_date);
 
-            $date = $form->get('due_date')->getData();
-            $new_date = new \DateTime($date);
-            $task->setDueDate($new_date);
-
-            $date = $form->get('created_at')->getData();
-            $new_date = new \DateTime($date);
-            $task->setCreatedAt($new_date);
+            $created_at = $form->get('created_at')->getData();
+            $created_at = new \DateTime($created_at);
+            $task->setCreatedAt($created_at);
 
             $em->persist($task);
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La tache a bien été éditée !');
-
             return $this->redirectToRoute('tasks_list');
 
-        }elseif ($form->isSubmitted()){
+        } elseif ($form->isSubmitted()) {
             foreach ($this->getErrorMessages($form) as $key => $errors){
                 foreach ($errors as $error)
                     $session->getFlashBag()->add('error', $key." : ".$error);
@@ -133,28 +125,31 @@ class TaskController extends Controller
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($task)->createView()
         ));
-
     }
 
 
     /**
      * task delete
      *
-     * @Route("/{id}", name="task_delete")
-     * @Method({"DELETE"})
+     * @Route("/{id}", name="task_delete", methods={"DELETE"})
      */
-    public function removeAction(Request $request,Task $task)
+    public function deleteAction(Request $request, Task $task)
     {
-        $this->denyAccessUnlessGranted('delete',$task);
+        $this->denyAccessUnlessGranted('delete', $task);
+
         $session = new Session();
+
         $form = $this->getDeleteForm($task);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($task);
             $em->flush();
+
             $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
         }
+
         return $this->redirectToRoute('tasks_list');
     }
 

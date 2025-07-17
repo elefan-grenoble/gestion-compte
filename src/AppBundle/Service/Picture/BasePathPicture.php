@@ -7,11 +7,7 @@ use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 
 class BasePathPicture
 {
-
-    /** @var array */
-    protected $placeholders;
-
-    /** @var CacheManager */
+    protected $uploaderHelper;
     protected $imagineCacheManager;
 
     public function __construct(UploaderHelper $uploaderHelper, CacheManager $imagineCacheManager)
@@ -22,8 +18,8 @@ class BasePathPicture
 
     /**
      * @param $entity
-     * @param string $filter
      * @param string $fileField
+     * @param string $filter
      * @return string
      */
     public function getPicturePath($entity, string $fileField, string $filter)
@@ -32,5 +28,4 @@ class BasePathPicture
 
         return $this->imagineCacheManager->getBrowserPath($picturePath, $filter);
     }
-
 }

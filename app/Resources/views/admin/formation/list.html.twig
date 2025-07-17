@@ -1,0 +1,59 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Liste des formations - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des formations
+{% endblock %}
+
+{% block content %}
+    <h4>Liste des formations ({{ formations | length }})</h4>
+
+    <table class="responsive-table">
+        <thead>
+            <tr>
+                <th>Formation</th>
+                <th>Description</th>
+                <th>Lien<br />(vers une doc)</th>
+                <th>Nombre de membres</th>
+                <th>Rôles associés</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for formation in formations %}
+                <tr id="formation_{{ formation.id }}">
+                    <td>{{ formation.name }}</td>
+                    <td class="center-align">
+                        {% if formation.description is not empty %}
+                            <i class="material-icons" title="{{ formation.description }}">playlist_add_check</i>
+                        {% endif %}
+                    </td>
+                    <td class="center-align">
+                        {% if formation.url is not empty %}
+                            <a href="{{ formation.url }}" target="_blank">lien</a>
+                        {% endif %}
+                    </td>
+                    <td>{{ formation.beneficiaries | length }}</td>
+                    <td>
+                        {% for role in formation.roles %}
+                            <div class="chip purple-text">{{ role }}</div>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="{{ path("formation_edit", { 'id': formation.id }) }}">
+                            <i class="material-icons">edit</i>Editer
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br />
+    <a href="{{ path('formation_new') }}" class="btn">
+        <i class="material-icons left">add</i>Ajouter une formation
+    </a>
+{% endblock %}

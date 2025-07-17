@@ -1,77 +1,71 @@
 {% set nbShifts = bucket.shifts | length %}
-{% set nbBookableShifts = shift_service.bookableShifts(bucket, beneficiary) | length %}
-{% set availableShifts = shift_service.bookableShifts(bucket, beneficiary) %}
+{% set bookableShifts = shift_service.bookableShifts(bucket, beneficiary) %}
+{% set nbBookableShifts = bookableShifts | length %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
 {% set firstBookable = shift_service.firstBookable(bucket, beneficiary) %}
+
 <div id="book{{ firstBookable.id }}" class="modal">
     <div class="modal-content">
         <h5>Réserver ce créneau / <span class="{{ firstBookable.job.color }}-text">{{ firstBookable.job.name }}</span></h5>
-        <h6>{{ bucket.start|date_fr_long }} de {{ bucket.start|date('G\\hi') }} à {{ bucket.end|date('G\\hi') }}</h6>
+        <h6>{{ bucket.displayDateLongWithTime }}</h6>
 
         {% if not shift_service.canBookDuration(beneficiary, bucket.getFirst.getDuration, cycle) %}
-          <div class="alert card red lighten-4 red-text text-darken-4">
-            <div class="card-content">
-              {% if not shift_service.canBookDuration(beneficiary, shift_service.getMinimalShiftDuration, cycle) %}
-                <span class="card-title">Attention, tu as déjà fait ton quota d'heures sur ce cycle.</span>
-                <p>Ce créneau ne sera pas comptabilisé dans ton calcul d'heures car seul un maximum de {{ due_duration_by_cycle | duration_from_minutes }} est comptabilisé par cycle.</p>
-              {% else %}
-                <span class="card-title">Attention, avec ce créneau tu dépasseras les {{ due_duration_by_cycle | duration_from_minutes }} de bénévolat sur ton cycle.</span>
-                <p>Ce créneau ne sera qu'en partie comptabilisé dans ton calcul d'heures, car seul un maximum de {{ due_duration_by_cycle | duration_from_minutes }} est comptabilisé par cycle.</p>
-              {% endif %}
+            <div class="alert card red lighten-4 red-text text-darken-4">
+                <div class="card-content">
+                    {% if not shift_service.canBookDuration(beneficiary, shift_service.getMinimalShiftDuration, cycle) %}
+                        <span class="card-title">Attention, tu as déjà fait ton quota d'heures sur ce cycle.</span>
+                        <p>Ce créneau ne sera pas comptabilisé dans ton calcul d'heures car seul un maximum de {{ due_duration_by_cycle | duration_from_minutes }} est comptabilisé par cycle.</p>
+                    {% else %}
+                        <span class="card-title">Attention, avec ce créneau tu dépasseras les {{ due_duration_by_cycle | duration_from_minutes }} de bénévolat sur ton cycle.</span>
+                        <p>Ce créneau ne sera qu'en partie comptabilisé dans ton calcul d'heures, car seul un maximum de {{ due_duration_by_cycle | duration_from_minutes }} est comptabilisé par cycle.</p>
+                    {% endif %}
+                </div>
             </div>
-          </div>
         {% endif %}
 
-        {% if availableShifts | length == 1 %}
+        {% if bookableShifts | length == 1 %}
             {% if not firstBookable.formation and beneficiary.formations | length %}
-                <div class="row">
-                    <div class="col s12">
-                        <div class="card-panel teal warning">
-                            <span class="white-text">
-                                <i class="material-icons">warning</i>
-                                Ce créneau n'est <b>pas</b> qualifié. {{ beneficiary.firstname }} a
-                                {% if beneficiary.formations | length %}la formations
-                                {% else %} les formations
-                                {% endif %}
-                                {% for formation in beneficiary.formations %}
-                                {% if loop.last and loop.index > 1 %} et {% endif %}
-                                        <i>{{ formation.name }}</i>
-                                    {% if not loop.last %}, {% endif %}
-                                {% endfor %}.<br>
-                                Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
-                            </span>
-                        </div>
-                    </div>
+                <div class="card-panel teal warning white-text">
+                    <i class="material-icons">warning</i>
+                    Ce créneau n'est <b>pas</b> qualifié.
+                    <br>
+                    {{ beneficiary.firstname }} a {% if beneficiary.formations | length == 1 %}une formation{% else %}des formations{% endif %} ({{ beneficiary.formations | join(', ')}}).
+                    <br>
+                    Tes compétences sont précieuses, pense si possible à les valoriser sur <b>un créneau qualifié</b>.
                 </div>
-            {% endif %}
-            {% if firstBookable.isDismissed %}
-                <h6><i class="material-icons">star</i> Ceci est un créneau à reprendre</h6>
             {% endif %}
         {% endif %}
 
         {% if beneficiary.membership.beneficiaries | length < 1 %}
             <p>Vous n'avez pas de bénéficiares</p>
         {% else %}
-            <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
             {% if display_name_shifters %}
-              {% if nbBookableShifts < nbShifts %}
-                <ul>Personnes inscrites pour le moment :
-                  {% for shift in bucket.shifts %}
-                    {% if shift.shifter is not null %}
-                      <li>{{ shift.shifter.firstname }} {{ shift.shifter.lastname }}</li>
-                    {% endif %}
-                  {% endfor %}
-                </ul>
-              {% endif %}
+                {% if nbBookableShifts < nbShifts %}
+                    <p>Places déjà occupées : </p>
+                    {% for shift in bucket.sortedShifts() %}
+                        <div>
+                            {% if shift.shifter %}
+                                <i style="color: #5f5a5a; font-weight: 400;">
+                                    {{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname|first|upper }}.
+                                    {% if shift.formation %}
+                                        ({{ shift.formation.name }})
+                                    {% endif %}
+                                </i>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
             {% endif %}
-            {% for availableShift in availableShifts %}
+            <p>Nombre de places restantes : {{ nbBookableShifts }}/{{ nbShifts }}</p>
+            {% for bookableShift in bookableShifts %}
                 <div>
-                    <input type="radio" id="{{ availableShift.id }}" class="checkedFormation" name="formation"
-                           value="{{ availableShift.id }}">
-                    <label for="{{ availableShift.id }}" style="color: #5f5a5a; font-weight: 600;">
-                        {% if availableShift.formation %}
-                            {{ availableShift.formation.name }}
+                    {{ bookableShift.getShifter() }}
+                    <label for="{{ bookableShift.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        <input type="radio" id="{{ bookableShift.id }}" class="checkedFormation" name="formation" value="{{ bookableShift.id }}" />
+                        {% if bookableShift.formation %}
+                            <span>{{ bookableShift.formation.name }}</span>
                         {% else %}
-                            sans formation particulière
+                            <span>sans formation particulière</span>
                         {% endif %}
                     </label>
                 </div>
@@ -79,31 +73,30 @@
             {% if use_fly_and_fixed %}
                 <p>Ce créneau sera fait en tant que :</p>
                 <div>
-                    <input type="radio" id="volant{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=0>
-                    <label for="volant{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">volant (une seule fois)</label>
-                </div>
-                <div>
-                    <input type="radio" id="fixe{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=1>
-                    <label for="fixe{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">fixe (reporté à chaque cycle)</label>
+                    <label for="volant{{ firstBookable.id }}" style="color: #5f5a5a; font-weight: 600;">
+                        <input type="radio" id="volant{{ firstBookable.id }}" class="checkedTypeService" name="typeService" value=0 />
+                        <span>volant (une seule fois)</span>
+                    </label>
                 </div>
             {% else %}
-                <input type="hidden" name="typeService" value=0>
+                <input type="hidden" name="typeService" value=0 />
             {% endif %}
-            <div class="" style="position: fixed;top:0;width: 100%;left: 0;">
+            <div style="position: fixed;top:0;width: 100%;left: 0;">
                 {% if nbBookableShifts < nbShifts %}
-                    {% for shifter in 1..(nbShifts - nbBookableShifts) %}
+                    {% for shifter in 1..nbBookedShifts %}
                         <div class="green lighten-2 left" style="height:10px; width: {{ 100/(nbShifts) }}%"></div>
                     {% endfor %}
                 {% endif %}
             </div>
-            <p>Attention ! Cette inscription vous engage. <br>
+            <p>
+                Attention ! Cette inscription vous engage.
+                <br>
                 Pour pouvoir annuler, votre créneau devra trouver repreneur.
             </p>
         {% endif %}
     </div>
     <div class="modal-footer">
-        <a href="#!"
-           class="modal-action modal-close waves-effect waves-green btn-flat red-text" onclick="cancelAll()">Annuler</a>
+        <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat red-text" onclick="cancelAll()">Annuler</a>
         {% if beneficiary.membership.beneficiaries | length >= 1 %}
             <button id="confirmButton" onclick="postSelectedId({{ beneficiary.id }})" class="waves-effect waves-green btn teal">Confirmer</button>
         {% endif %}

@@ -3,29 +3,21 @@
 namespace AppBundle\Form;
 
 use AppBundle\Entity\Shift;
+use AppBundle\Form\JobHiddenType;
 use AppBundle\Repository\JobRepository;
-use AppBundle\Form\DataTransformer\JobToNumberTransformer;
+use AppBundle\Repository\FormationRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\GreaterThan;
 
-class ShiftType extends AbstractType implements DataMapperInterface
+class ShiftType extends AbstractType
 {
-
-    private $transformer;
-
-    public function __construct(JobToNumberTransformer $transformer)
-    {
-        $this->transformer = $transformer;
-    }
-
     /**
      * {@inheritdoc}
      */
@@ -33,11 +25,14 @@ class ShiftType extends AbstractType implements DataMapperInterface
     {
         if (!$options['only_add_formation']) {
             $builder
-                ->add('date', TextType::class, array('label' => 'Date', 'attr' => array('class' => 'datepicker')))
-                ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-                ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
+                ->add('start', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
+                ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text',
+                    'constraints' => [
+                        new GreaterThan([
+                            'propertyPath' => 'parent.all[start].data'
+                        ])]])
                 ->add('job', EntityType::class, array(
-                    'label' => 'Type',
+                    'label' => 'Poste',
                     'class' => 'AppBundle:Job',
                     'choice_label' => 'name',
                     'multiple' => false,
@@ -49,19 +44,12 @@ class ShiftType extends AbstractType implements DataMapperInterface
                             ->setParameter('1', '1')
                             ->orderBy('j.name', 'ASC');
                     }
-                ))
-                ->setDataMapper($this);
+                ));
         } else {
             $builder
-                ->add('date', HiddenType::class)
-                ->add('start', HiddenType::class)
-                ->add('end', HiddenType::class)
-                ->add('job', HiddenType::class);
-
-            $builder->get("job")
-                    ->addModelTransformer($this->transformer);
-            $builder
-                ->setDataMapper($this);
+                ->add('start', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
+                ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
+                ->add('job', JobHiddenType::class);
         }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
@@ -76,11 +64,16 @@ class ShiftType extends AbstractType implements DataMapperInterface
                     'class' => 'AppBundle:Formation',
                     'choice_label' => 'name',
                     'multiple' => false,
-                    'required' => false
+                    'required' => false,
+                    'query_builder' => function(FormationRepository $repository) {
+                        $qb = $repository->createQueryBuilder('f');
+                        return $qb->orderBy('f.name', 'ASC');
+                    }
                 ))
                 ->add('number', IntegerType::class, [
                     'label' => 'Nombre de postes disponibles',
                     'required' => true,
+                    'mapped' => false,
                     'data' => 1,
                     'attr' => [
                         'min' => 1
@@ -96,59 +89,6 @@ class ShiftType extends AbstractType implements DataMapperInterface
     public function getBlockPrefix()
     {
         return 'appbundle_shift';
-    }
-
-    /**
-     * @param Shift|null $data
-     */
-    public function mapDataToForms($data, $forms)
-    {
-        // there is no data yet, so nothing to prepopulate
-        if (null === $data) {
-            return;
-        }
-
-        // invalid data type
-        if (!$data instanceof Shift) {
-            throw new UnexpectedTypeException($data, Shift::class);
-        }
-
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-
-        // initialize form field values
-        if (!is_null($data->getStart())) {
-            $forms['date']->setData($data->getStart()->format('Y-m-d'));
-            $forms['start']->setData($data->getStart()->format('H:i'));
-        }
-        if (!is_null($data->getEnd())) {
-            $forms['end']->setData($data->getEnd()->format('H:i'));
-        }
-        $forms['job']->setData($data->getJob());
-    }
-
-    public function mapFormsToData($forms, &$data)
-    {
-        /** @var FormInterface[] $forms */
-        $forms = iterator_to_array($forms);
-
-        $date = new \DateTime($forms['date']->getData());
-        $start = new \DateTime($forms['start']->getData());
-        $end = new \DateTime($forms['end']->getData());
-
-        $year = intval($date->format('Y'));
-        $month = intval($date->format('n'));
-        $day = intval($date->format('d'));
-
-        $start->setDate($year, $month, $day);
-        $end->setDate($year, $month, $day);
-
-        $data->setStart($start);
-        $data->setEnd($end);
-        $data->setJob($forms['job']->getData());
-        if (array_key_exists('formation', $forms)) {
-            $data->setFormation($forms['formation']->getData());
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver)

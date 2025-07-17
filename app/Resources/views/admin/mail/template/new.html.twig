@@ -1,15 +1,16 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Ajouter un modèle d'email - {{ site_name }}{% endblock %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>modèles d'emails</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i>
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('email_template_list') }}"><i class="material-icons">list</i>&nbsp;Modèles d'emails</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Ajouter
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Nouveau modèle d'email</h4>
+    <h4>Nouveau modèle d'email</h4>
 
     <p>La balise <strong>{{ "{{template_content}}" }}</strong> dans le modèle sera remplacée par le contenu du mail.</p>
 
@@ -29,9 +30,9 @@
     </div>
 
     {{ form_widget(form.content) }}
+
     <div>
-        <button type="submit" class="btn-large waves-effect waves-light">Créer</button>
+        <button type="submit" class="btn waves-effect waves-light">Créer</button>
     </div>
     {{ form_end(form) }}
-
 {% endblock %}

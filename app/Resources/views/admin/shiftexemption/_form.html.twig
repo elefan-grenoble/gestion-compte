@@ -1,0 +1,9 @@
+{{ form_start(form) }}
+    <div class="row">
+        {{ form_label(form.name) }}
+        {{ form_errors(form.name) }}
+        {{ form_widget(form.name) }}
+    </div>
+    <a href="{{ path('admin_shiftexemption_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
+    <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
+{{ form_end(form) }}

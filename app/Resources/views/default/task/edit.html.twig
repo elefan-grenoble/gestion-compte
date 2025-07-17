@@ -1,7 +1,9 @@
 {% extends 'layout.html.twig' %}
 
+{% block title %}Editer la tâche - {{ site_name }}{% endblock %}
+
 {% block content %}
-    <h4 class="">editer tache</h4>
+    <h4>Editer la tâche</h4>
 
     {{ form_start(form) }}
     <div class="input-field">
@@ -27,9 +29,11 @@
             {{ form_label(form.due_date) }}
             {{ form_widget(form.due_date) }}
         </div>
-        <div class="col s3">
-            {{ form_widget(form.closed) }}
-            {{ form_label(form.closed) }}
+        <div class="input-field col s3">
+            <label>
+                {{ form_widget(form.closed) }}
+                <span>{{ form.closed.vars.label }}</span>
+            </label>
         </div>
         <div class="col s3">
             {{ form_label(form.priority) }}
@@ -42,7 +46,7 @@
     </div>
     {{ form_widget(form) }}
     <div>
-        <button type="submit" class="btn waves-effect waves-light">Enregistrer</button>
+        <button type="submit" class="btn waves-effect waves-light"><i class="material-icons left">save</i>Enregistrer</button>
     </div>
     {{ form_end(form) }}
 

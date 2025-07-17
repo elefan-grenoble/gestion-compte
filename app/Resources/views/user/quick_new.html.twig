@@ -1,25 +1,34 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('user_office_tools') }}"><i class="material-icons">build</i><span class="hide-on-small-and-down">Outils adhésion et ré-adhésion</span></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">add</i><span>Nouvelle adhésion réunion info</span>
+{% block title %}Adhésion rapide - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('user_office_tools') }}"><i class="material-icons">folder_shared</i>Adhésion et ré-adhésion</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">add</i>&nbsp;Nouvelle adhésion réunion info
 {% endblock %}
 
 {% block content %}
-    <h3>Adhésion rapide</h3>
+<h4>Adhésion rapide</h4>
 
-    {#<p>Pour une adhésion <span style="text-decoration: underline;">future</span>, choisir <span style="text-decoration: underline;">Helloasso</span> : la personne recevra un lien pour finaliser et payer son adhésion en ligne.</p>#}
-    {{ form_start(form) }}
-    {% include "user/_partial/user_quick_form.html.twig" with { form: form } %}
-    <div>
-        <button type="submit" class="btn-large waves-effect waves-light teal"><i class="material-icons left">check</i>Valider</button>
-        <br>
-        <a href="{{ path("user_office_tools") }}" class="btn-large white blue-grey-text"><i class="material-icons left">arrow_back</i>Retour</a>
-    </div>
-    <div class="" style="display: none">
-        {{ form_widget(form) }}
-    </div>
-    {{ form_end(form) }}
+<!--
+<p>
+    Pour une adhésion <span style="text-decoration: underline;">future</span>,
+    choisir <span style="text-decoration: underline;">Helloasso</span> :
+    la personne recevra un lien pour finaliser et payer son adhésion en ligne.
+</p>
+-->
 
+{{ form_start(form) }}
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+{% include "user/_partial/user_quick_form.html.twig" with { form: form } %}
+<div>
+    <a href="{{ path("user_office_tools") }}" class="btn white red-text" title="Annuler">Annuler</a>
+    <button type="submit" class="btn teal"><i class="material-icons left">check</i>Valider</button>
+</div>
+{{ form_row(form._token) }}
+{{ form_end(form, {'render_rest': false}) }}
 {% endblock %}

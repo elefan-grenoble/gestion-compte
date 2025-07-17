@@ -22,6 +22,7 @@
 # PHPUnit
 /app/phpunit.xml
 /phpunit.xml
+.phpunit.result.cache
 
 # Build data
 /build/
@@ -35,6 +36,8 @@
 /.idea
 /*.iml
 LICENSE
+docker-compose.yml
+/.docker/keycloak/data
 
 .!
 .buildpath
@@ -50,3 +53,5 @@ LICENSE
 
 **/*~
 .todo
+.direnv
+.devenv

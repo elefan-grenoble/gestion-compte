@@ -4,18 +4,20 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>{% block title %}{{ site_name }}{% endblock %}</title>
-        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('bundles/app/materialize/css/materialize-1.2.2.min.css') }}">
         <link rel="stylesheet" href="{{ asset('bundles/app/materialize/iconfont/material-icons.css') }}">
         {% block stylesheets %}{% endblock %}
         <link rel="stylesheet" href="{{ asset('bundles/app/css/custom.css') }}">
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon-lelefan.png') }}" />
         <script src="{{ asset('bundles/app/js/vanilla_top.js') }}"></script>
+        {% include "_partial/style_config.html.twig" %}
     </head>
     <body>
         <header>
         </header>
         <main>
             {% block beforecontainer %}{% endblock %}
+
             <div class="container">
                 <div class="section">
                     {% if app.request.hasPreviousSession %}
@@ -38,10 +40,9 @@
             </div>
 
             {% block aftercontainer %}{% endblock %}
-
         </main>
-        {% include "JqueryBundle:Jquery:jquery.html.twig" %}
-        <script src="{{ asset('bundles/app/materialize/js/materialize.min.js') }}"></script>
+        <script src="{{ asset('bundles/app/js/jquery-3.6.min.js') }}"></script>
+        <script src="{{ asset('bundles/app/materialize/js/materialize-1.2.2.min.js') }}"></script>
         {% block javascripts %}{% endblock %}
     </body>
 </html>

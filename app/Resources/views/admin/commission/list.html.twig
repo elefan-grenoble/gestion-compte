@@ -1,17 +1,20 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <a href="{{ path('admin') }}"><i class="material-icons">tune</i>admin</a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">list</i>commissions
+{% block title %}Liste des commissions - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">list</i>&nbsp;Liste des commissions
 {% endblock %}
 
 {% block content %}
-    <h4 class="">Liste des commissions</h4>
+    <h4>Liste des commissions ({{ commissions | length }})</h4>
+
     <div class="row">
         {% for commission in commissions %}
             <div class="col s12 m6">
-                <div class="card blue-grey darken-2 small">
+                <div id="commission_{{ commission.id }}" class="card blue-grey darken-2 small">
                     <div class="card-content white-text">
                         <span class="card-title">{{ commission.name }} <span class="chip right deep-purple lighten-5">x{{ commission.beneficiaries | length }}<i class="material-icons tiny left">person</i></span></span>
                         {{ commission.description | markdown | raw }}
@@ -21,7 +24,7 @@
                         <a href="mailto:{{ commission.email | email_encode | raw }}"><i class="material-icons left">email</i></a>
                         {% for owner in commission.owners %}
                             <a class="chip black-text" href="{{ path("member_show",{member_number:owner.user.beneficiary.membership.memberNumber}) }}" style="font-size: 9px;">
-                                <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayname }}">
+                                <img src="{{ gravatar(owner.email) }}" alt="{{ owner.displayNameWithMemberNumber }}">
                                 {{ owner.firstname }}
                             </a>
                         {% endfor %}
@@ -33,5 +36,4 @@
     {% if is_granted("ROLE_SUPER_ADMIN") %}
         <a href="{{ path('commission_new') }}" class="btn"><i class="material-icons left">add</i>Ajouter une commission</a>
     {% endif %}
-
 {% endblock %}

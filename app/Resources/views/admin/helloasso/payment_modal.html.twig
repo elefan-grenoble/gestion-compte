@@ -1,0 +1,56 @@
+
+<h4>Paiement #{{ payment.id }} / Recu le {{ payment.createdAt | date_fr_full_with_time }}</h4>
+
+<div class="row">
+    <div class="col s12 m6">
+        <h5>Références Helloasso</h5>
+        <ul>
+            <li>
+                Campagne: {{ payment.campaignId }}
+            </li>
+            <li>
+                Paiement: {{ payment.paymentId }}
+            </li>
+            <li>
+                Date du paiement: {{ payment.date | date_time }}
+            </li>
+            <li>
+                Montant: {{ payment.amount }} €
+            </li>
+        <ul>
+    </div>
+    <div class="col s12 m6">
+        <h5>Information Helloasso</h5>
+        <ul>
+            <li>
+                Prénom: {{ payment.payerFirstName }}
+            </li>
+            <li>
+                Nom: {{ payment.payerLastName }}
+            </li>
+            <li>
+                Email: {{ payment.email }}
+            </li>
+        </ul>
+    </div>
+    <div class="col s12">
+        <h5>Associer le paiement à un membre</h5>
+        {{ form_start(form, {'attr': { 'style':  'display:inline;'}}) }}
+        <div class="row">
+            <div class="col s12 m6 input-field">
+                {{ form_label(form.subscriber) }}
+                {{ form_errors(form.subscriber) }}
+                {{ form_widget(form.subscriber) }}
+            </div>
+            <div class="col s12">
+                <button type="submit" class="btn waves-effect waves-light teal" onclick="return confirm('Etes-vous sûr de vouloir associer ce paiement à ce membre ?!');">
+                    <i class="material-icons left">add</i>Modifier
+                </button>
+            </div>
+            <div class="col s12">
+                Attention, une fois le paiement associé à un membre, il n'est plus possible de le modifier.
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>

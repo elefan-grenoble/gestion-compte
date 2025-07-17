@@ -12,6 +12,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * Beneficiary
  *
  * @ORM\Table(name="beneficiary")
+ * @ORM\HasLifecycleCallbacks()
  * @ORM\Entity(repositoryClass="AppBundle\Repository\BeneficiaryRepository")
  */
 class Beneficiary
@@ -75,29 +76,41 @@ class Beneficiary
 
     /**
      * @var Membership
-     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries")
-     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id",onDelete="CASCADE")
+     * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries", cascade={"persist"})
+     * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter",cascade={"remove"})
+     * @ORM\Column(name="openid", type="string", length=255)
+     * @var string $openid
+     */
+    protected $openid;
+
+    /**
+     * @ORM\Column(name="openid_member_number", type="string", length=255)
+     * @var string $openid_member_number
+     */
+    protected $openid_member_number;
+
+    /**
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter", cascade={"remove"})
      * @OrderBy({"start" = "DESC"})
      */
     private $shifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="booker",cascade={"remove"})
-     */
-    private $booked_shifts;
-
-    /**
-     * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="Shift", mappedBy="lastShifter", cascade={"remove"})
      */
     private $reservedShifts;
 
     /**
-     * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary",cascade={"remove"})
+     * @ORM\OneToMany(targetEntity="PeriodPosition", mappedBy="shifter", cascade={"persist"})
+     */
+    private $periodPositions;
+
+    /**
+     * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary", cascade={"remove"})
      * @OrderBy({"number" = "DESC"})
      */
     private $swipe_cards;
@@ -133,7 +146,37 @@ class Beneficiary
      */
     private $received_proxies;
 
-    private $_counters = [];
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="created_at", type="datetime")
+     */
+    private $createdAt;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->commissions = new ArrayCollection();
+        $this->formations = new ArrayCollection();
+        $this->shifts = new ArrayCollection();
+    }
+
+    public function __toString()
+    {
+        return $this->getDisplayNameWithMemberNumber();
+    }
+
+    /**
+     * @ORM\PrePersist
+     */
+    public function setCreatedAtValue()
+    {
+        if (!$this->createdAt) {
+            $this->createdAt = new \DateTime();
+        }
+    }
 
     /**
      * Get id
@@ -152,7 +195,34 @@ class Beneficiary
      */
     public function getMemberNumber()
     {
-        return $this->getMembership()->getMemberNumber();
+        $membership = $this->getMembership();
+        if (!$membership)
+            return null;
+        return $membership->getMemberNumber();
+    }
+
+    /**
+     * Get firstname
+     *
+     * @return string
+     */
+    public function getFirstname()
+    {
+        return ucfirst(strtolower($this->firstname));
+    }
+
+    /**
+     * Set firstname
+     *
+     * @param string $firstname
+     *
+     * @return Beneficiary
+     */
+    public function setFirstname($firstname)
+    {
+        $this->firstname = $firstname;
+
+        return $this;
     }
 
     /**
@@ -179,43 +249,32 @@ class Beneficiary
         return strtoupper($this->lastname);
     }
 
-    /**
-     * Set firstname
-     *
-     * @param string $firstname
-     *
-     * @return Beneficiary
-     */
-    public function setFirstname($firstname)
+    public function getDisplayName(): string
     {
-        $this->firstname = $firstname;
-
-        return $this;
-    }
-
-    public function getDisplayName()
-    {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname();
-    }
-
-    public function getPublicDisplayName()
-    {
-        return '#' . $this->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname()[0];
-    }
-
-    public function __toString()
-    {
-        return $this->getDisplayName();
+        return $this->getFirstname() . ' ' . $this->getLastname();
     }
 
     /**
-     * Get firstname
+     * /!\ DO NOT MODIFY /!\
      *
-     * @return string
+     * Such a method is also used for autocomplete. If you want to
+     * change it, you HAVE to adapt the methods used in data
+     * transformer: BeneficiaryToStringTransformer. Otherwise,
+     * autocomplete will be broken.
      */
-    public function getFirstname()
+    public function getDisplayNameWithMemberNumber(): string
     {
-        return ucfirst(strtolower($this->firstname));
+        return '#' . $this->getMemberNumber() . ' ' . $this->getDisplayName();
+    }
+
+    public function getPublicDisplayName(): string
+    {
+        return $this->getFirstname() . ' ' . $this->getLastname()[0];
+    }
+
+    public function getPublicDisplayNameWithMemberNumber(): string
+    {
+        return '#' . $this->getMemberNumber() . ' ' . $this->getPublicDisplayName();
     }
 
     /**
@@ -244,6 +303,40 @@ class Beneficiary
         } else {
             return null;
         }
+    }
+
+    /**
+     * @return string
+     */
+    public function getOpenId() {
+        return $this->openid;
+    }
+
+    /**
+     * @param string $id
+     * @return $this
+     */
+    public function setOpenId(string $id) : Beneficiary
+    {
+        $this->openid = $id;
+        return $this;
+    }
+    /**
+     * @return string
+     */
+    public function getOpenIdMemberNumber() : ?string
+    {
+        return $this->openid_member_number;
+    }
+
+    /**
+     * @param string $number
+     * @return $this
+     */
+    public function setOpenIdMemberNumber(string $number) : Beneficiary
+    {
+        $this->openid_member_number = $number;
+        return $this;
     }
 
     /**
@@ -297,17 +390,6 @@ class Beneficiary
     public function isMain()
     {
         return $this === $this->getMembership()->getMainBeneficiary();
-    }
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->commissions = new ArrayCollection();
-        $this->formations = new ArrayCollection();
-        $this->shifts = new ArrayCollection();
-        $this->booked_shifts = new ArrayCollection();
     }
 
     /**
@@ -444,40 +526,6 @@ class Beneficiary
     }
 
     /**
-     * Add bookedShift
-     *
-     * @param \AppBundle\Entity\Shift $bookedShift
-     *
-     * @return Beneficiary
-     */
-    public function addBookedShift(\AppBundle\Entity\Shift $bookedShift)
-    {
-        $this->booked_shifts[] = $bookedShift;
-
-        return $this;
-    }
-
-    /**
-     * Remove bookedShift
-     *
-     * @param \AppBundle\Entity\Shift $bookedShift
-     */
-    public function removeBookedShift(\AppBundle\Entity\Shift $bookedShift)
-    {
-        $this->booked_shifts->removeElement($bookedShift);
-    }
-
-    /**
-     * Get bookedShifts
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getBookedShifts()
-    {
-        return $this->booked_shifts;
-    }
-
-    /**
      * Add task
      *
      * @param \AppBundle\Entity\Task $task
@@ -512,50 +560,6 @@ class Beneficiary
     }
 
     /**
-     * Add givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     *
-     * @return Beneficiary
-     */
-    public function addGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxys[] = $givenProxy;
-
-        return $this;
-    }
-
-    /**
-     * Remove givenProxy
-     *
-     * @param \AppBundle\Entity\Proxy $givenProxy
-     */
-    public function removeGivenProxy(\AppBundle\Entity\Proxy $givenProxy)
-    {
-        $this->given_proxys->removeElement($givenProxy);
-    }
-
-    /**
-     * Get givenProxys
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getGivenProxys()
-    {
-        return $this->given_proxys;
-    }
-
-    /**
-     * Get givenProxies
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getGivenProxies()
-    {
-        return $this->given_proxies;
-    }
-
-    /**
      * Add receivedProxy
      *
      * @param \AppBundle\Entity\Proxy $receivedProxy
@@ -587,16 +591,6 @@ class Beneficiary
     public function getReceivedProxies()
     {
         return $this->received_proxies;
-    }
-
-    public function getAutocompleteLabel()
-    {
-        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' (' . $this->getId() . ')';
-    }
-
-    public function getAutocompleteLabelFull()
-    {
-        return '#' . $this->getMembership()->getMemberNumber() . ' ' . $this->getFirstname() . ' ' . $this->getLastname() . ' ' . $this->getEmail() . ' (' . $this->getId() . ')';
     }
 
     /**
@@ -634,7 +628,17 @@ class Beneficiary
     }
 
     /**
-     * Add swipeCard.
+     * Get periodPositions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPeriodPositions()
+    {
+        return $this->periodPositions;
+    }
+
+    /**
+     * Add swipeCard
      *
      * @param \AppBundle\Entity\SwipeCard $swipeCard
      *
@@ -648,7 +652,7 @@ class Beneficiary
     }
 
     /**
-     * Remove swipeCard.
+     * Remove swipeCard
      *
      * @param \AppBundle\Entity\SwipeCard $swipeCard
      *
@@ -660,7 +664,7 @@ class Beneficiary
     }
 
     /**
-     * Get swipeCards.
+     * Get swipeCards
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -669,6 +673,11 @@ class Beneficiary
         return $this->swipe_cards;
     }
 
+    /**
+     * Get enabled swipeCards
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
     public function getEnabledSwipeCards()
     {
         return $this->swipe_cards->filter(function ($card) {
@@ -722,20 +731,26 @@ class Beneficiary
         $this->flying = $flying;
     }
 
-    public function getTimeCount($cycle = 0)
+    /**
+     * Get createdAt
+     *
+     * @return \DateTime
+     */
+    public function getCreatedAt()
     {
-        if (!isset($this->_counters[$cycle])) {
-            $this->_counters[$cycle] = 0;
-            $member = $this->getMembership();
-            //todo add a custom query for this
-            $beneficiary_shift_for_current_cycle = $this->getShifts()->filter(function (Shift $shift) use ($member, $cycle) {
-                return ($shift->getStart() > $member->startOfCycle($cycle) && $shift->getEnd() < $member->endOfCycle($cycle));
-            });
-            foreach ($beneficiary_shift_for_current_cycle as $s) {
-                $this->_counters[$cycle] += $s->getDuration();
-            }
-        }
-        return $this->_counters[$cycle];
+        return $this->createdAt;
     }
 
+    /**
+     * Simple method to detect new beneficiaires.
+     * TODO: move to Membership? Look at registration data instead?
+     * 
+     * @return bool
+     */
+    public function isNew()
+    {
+        $shiftCountThreshold = 3;
+
+        return $this->shifts->count() <= $shiftCountThreshold;
+    }
 }

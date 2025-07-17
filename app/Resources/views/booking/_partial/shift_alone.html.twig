@@ -1,16 +1,14 @@
 <div class="shift-alone card tooltipped {{ shift.job.color }} lighten-5 black-text" data-position="top" data-delay="100" data-tooltip="{{ shift.job.name }}">
     <div class="card-content">
-        <b>{{ shift.start|date_fr_long }}</b><br>
-        {{ shift.start|date('G\\hi') }} - {{ shift.end|date('G\\hi') }}
+        <b>{{ shift.start | date_fr_long }}</b>
+        <br />
+        {{ shift.start | date('G\\hi') }} - {{ shift.end | date('G\\hi') }}
         <span><i class="material-icons shifter {% if (app.user and not shift_service.isShiftBookable(shift, beneficiary)) or (not app.user and shift.shifter) %}grey-text {% else %}{% if (app.user)%}green{% else %}red{% endif %}-text {% endif %}">{% if shift.formation %}account_circle{% else %}person{% endif %}</i></span>
-        {% if shift.isDismissed %}
-            <span style="margin-left: 8px;"><i class="material-icons tiny">star_border</i></span>
-        {% endif %}
     </div>
     <div class="card-action">
         <form action="{{ path('shift_book',{'id':shift.id}) }}" method="post">
             <input type="hidden" name="beneficiaryId" value="{{ beneficiary.id }}">
-            <button type="submit" class="btn">reserver</button>
+            <button type="submit" class="btn">Réserver</button>
         </form>
     </div>
 </div>

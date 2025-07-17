@@ -1,9 +1,19 @@
 {% extends 'layout.html.twig' %}
 
-{% block content %}
-    <h3 class="center-align">Liste des membres ({{ nb_of_result }})</h3>
+{% block title %}Liste des membres - {{ site_name }}{% endblock %}
 
-    <ul class="collapsible" data-collapsible="accordion">
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">people</i>&nbsp;Liste des membres
+{% endblock %}
+
+{% block content %}
+    <div class="row center">
+        <h4 class="header">Liste des membres ({{ result_count }})</h4>
+    </div>
+
+    <ul class="collapsible">
         <li>
             <div class="collapsible-header"><i class="material-icons">tune</i>Filtres</div>
             <div class="collapsible-body">
@@ -13,115 +23,150 @@
                     <div class="col s12 m4">
                         <h5>Compte</h5>
                         <div class="row">
-                            <div class="col s4">
-                                fermé :
-                                {{ form_widget(form.withdrawn) }}
-                                {{ form_label(form.withdrawn) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.withdrawn) }}
+                                    {{ form_label(form.withdrawn) }}
+                                </div>
                             </div>
-                            <div class="col s4">
-                                activé :
-                                {{ form_widget(form.enabled) }}
-                                {{ form_label(form.enabled) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.enabled) }}
+                                    {{ form_label(form.enabled) }}
+                                </div>
                             </div>
-                            <div class="col s4">
-                                gelé :
-                                {{ form_widget(form.frozen) }}
-                                {{ form_label(form.frozen) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.frozen) }}
+                                    {{ form_label(form.frozen) }}
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.exempted) }}
+                                    {{ form_label(form.exempted) }}
+                                </div>
                             </div>
                         </div>
-                        <div>
-                            <div class="row">
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumber) }}
-                                        {{ form_label(form.membernumber) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberdiff) }}
-                                        {{ form_label(form.membernumberdiff) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumbergt) }}
-                                        {{ form_label(form.membernumbergt) }}
-                                    </div>
-                                </div>
-                                <div class="col s3">
-                                    <div class="input-field">
-                                        {{ form_widget(form.membernumberlt) }}
-                                        {{ form_label(form.membernumberlt) }}
-                                    </div>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.has_first_shift_date) }}
+                                    {{ form_label(form.has_first_shift_date) }}
                                 </div>
                             </div>
-                            <h5>Adhésion(s)</h5>
-                            <div class="row">
+                            {% if maximum_nb_of_beneficiaries_in_membership > 1 %}
                                 <div class="col s4">
                                     <div class="input-field">
-                                        {{ form_widget(form.registrationdate) }}
-                                        {{ form_label(form.registrationdate) }}
+                                        {{ form_widget(form.beneficiary_count) }}
+                                        {{ form_label(form.beneficiary_count) }}
                                     </div>
                                 </div>
+                            {% endif %}
+                            {% if use_fly_and_fixed and fly_and_fixed_entity_flying == 'Membership' %}
                                 <div class="col s4">
                                     <div class="input-field">
-                                        {{ form_widget(form.registrationdategt) }}
-                                        {{ form_label(form.registrationdategt) }}
+                                        {{ form_widget(form.flying) }}
+                                        {{ form_label(form.flying) }}
                                     </div>
                                 </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.registrationdatelt) }}
-                                        {{ form_label(form.registrationdatelt) }}
-                                    </div>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumber) }}
+                                    {{ form_label(form.membernumber) }}
                                 </div>
                             </div>
-                            <h5>Dernière Adhésion</h5>
-                            <div class="row">
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdate) }}
-                                        {{ form_label(form.lastregistrationdate) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdategt) }}
-                                        {{ form_label(form.lastregistrationdategt) }}
-                                    </div>
-                                </div>
-                                <div class="col s4">
-                                    <div class="input-field">
-                                        {{ form_widget(form.lastregistrationdatelt) }}
-                                        {{ form_label(form.lastregistrationdatelt) }}
-                                    </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberdiff) }}
+                                    {{ form_label(form.membernumberdiff) }}
                                 </div>
                             </div>
-                            <h5>Compteur</h5>
-                            <div class="row valign-wrapper">
-                                <div class="input-field col s3">
-                                    {{ form_widget(form.compteurgt) }}
-                                    {{ form_label(form.compteurgt) }}
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumbergt) }}
+                                    {{ form_label(form.membernumbergt) }}
                                 </div>
-                                <div class="col s6 center">
-                                    < &nbsp; compteur &nbsp; <
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.membernumberlt) }}
+                                    {{ form_label(form.membernumberlt) }}
                                 </div>
-                                <div class="input-field col s3">
-                                    {{ form_widget(form.compteurlt) }}
-                                    {{ form_label(form.compteurlt) }}
+                            </div>
+                        </div>
+                        <h5>Adhésion(s)</h5>
+                        <div class="row">
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.registration) }}
+                                    {{ form_label(form.registration) }}
                                 </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdate) }}
+                                    {{ form_label(form.registrationdate) }}
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdategt) }}
+                                    {{ form_label(form.registrationdategt) }}
+                                </div>
+                            </div>
+                            <div class="col s3">
+                                <div class="input-field">
+                                    {{ form_widget(form.registrationdatelt) }}
+                                    {{ form_label(form.registrationdatelt) }}
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Dernière Adhésion</h5>
+                        <div class="row">
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdate) }}
+                                    {{ form_label(form.lastregistrationdate) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdategt) }}
+                                    {{ form_label(form.lastregistrationdategt) }}
+                                </div>
+                            </div>
+                            <div class="col s4">
+                                <div class="input-field">
+                                    {{ form_widget(form.lastregistrationdatelt) }}
+                                    {{ form_label(form.lastregistrationdatelt) }}
+                                </div>
+                            </div>
+                        </div>
+                        <h5>Compteur</h5>
+                        <div class="row valign-wrapper">
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurgt) }}
+                                {{ form_label(form.compteurgt) }}
+                            </div>
+                            <div class="col s6 center">
+                                <span><</span>&nbsp;&nbsp;compteur&nbsp;&nbsp;<span><</span>
+                            </div>
+                            <div class="input-field col s3">
+                                {{ form_widget(form.compteurlt) }}
+                                {{ form_label(form.compteurlt) }}
                             </div>
                         </div>
                     </div>
                     <div class="col s12 m4">
-                        <div>
-                            <div class="input-field">
-                                {{ form_widget(form.username) }}
-                                {{ form_label(form.username) }}
-                            </div>
-                        </div>
                         <h5>Bénéficiaire(s)</h5>
+                        <div class="input-field">
+                            {{ form_widget(form.username) }}
+                            {{ form_label(form.username) }}
+                        </div>
                         <div class="input-field">
                             {{ form_widget(form.firstname) }}
                             {{ form_label(form.firstname) }}
@@ -134,52 +179,53 @@
                             {{ form_widget(form.email) }}
                             {{ form_label(form.email) }}
                         </div>
-                        <div class="">
-                            Téléphone :
+                        <div class="input-field">
                             {{ form_widget(form.phone) }}
                             {{ form_label(form.phone) }}
                         </div>
-                        <h5>Equipe</h5>
-                        <div class="input-field">
-                            {{ form_widget(form.flying) }}
-                            {{ form_label(form.flying) }}
-                        </div>
+                        {% if use_fly_and_fixed %}
+                            {% if fly_and_fixed_entity_flying == 'Beneficiary' %}
+                                <div class="input-field">
+                                    {{ form_widget(form.flying) }}
+                                    {{ form_label(form.flying) }}
+                                </div>
+                            {% endif %}
+                            <div class="input-field">
+                                {{ form_widget(form.has_period_position) }}
+                                {{ form_label(form.has_period_position) }}
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="col s12 m4">
-                        <div>
-                            <h5>Formations / Commissions</h5>
-                            <div class="row">
-                                <div class="input-field col s6">
-                                    {{ form_widget(form.formations) }}
-                                    {{ form_label(form.formations) }}
-                                </div>
-                                <div class="col s6 input-field">
-                                    {{ form_widget(form.or_and_exp_formations) }}
-                                    {{ form_label(form.or_and_exp_formations) }}
-                                </div>
+                        <h5>Formations / Commissions</h5>
+                        <div class="row">
+                            <div class="input-field col s6">
+                                {{ form_widget(form.formations) }}
+                                {{ form_label(form.formations) }}
                             </div>
-                            <div class="input-field">
-                                {{ form_widget(form.commissions) }}
-                                {{ form_label(form.commissions) }}
+                            <div class="col s6 input-field">
+                                {{ form_widget(form.or_and_exp_formations) }}
+                                {{ form_label(form.or_and_exp_formations) }}
                             </div>
                         </div>
-                        <div>
-                            <h5>!Formations / !Commissions</h5>
-                            <div class="input-field">
-                                {{ form_widget(form.not_formations) }}
-                                {{ form_label(form.not_formations) }}
-                            </div>
-                            <div class="input-field">
-                                {{ form_widget(form.not_commissions) }}
-                                {{ form_label(form.not_commissions) }}
-                            </div>
+                        <div class="input-field">
+                            {{ form_widget(form.commissions) }}
+                            {{ form_label(form.commissions) }}
                         </div>
-                        <div>
-                            <h5>Actions</h5>
-                            {{ form_widget(form.submit) }}
-                            {{ form_widget(form.csv) }}
-                            {{ form_widget(form.mail) }}
+                        <h5>!Formations / !Commissions</h5>
+                        <div class="input-field">
+                            {{ form_widget(form.not_formations) }}
+                            {{ form_label(form.not_formations) }}
                         </div>
+                        <div class="input-field">
+                            {{ form_widget(form.not_commissions) }}
+                            {{ form_label(form.not_commissions) }}
+                        </div>
+                        <br />
+                        <h5>Actions</h5>
+                        {{ form_widget(form.submit) }}
+                        {{ form_widget(form.csv) }}
+                        {{ form_widget(form.mail) }}
                     </div>
                 </div>
 
@@ -193,12 +239,12 @@
         <thead>
             <tr>
                 <th class="hide-on-med-and-down">Etat</th>
-                <th data-col="o.member_number">#</th>
+                <th data-col="m.member_number">#</th>
                 <th data-col="u.username">username</th>
                 <th data-col="b.firstname">prénom</th>
                 <th data-col="b.lastname">nom</th>
-                <th data-col="b.email">email</th>
-                <th class="hide-on-small-and-down" data-col="r.date">Adhésion(s)</th>
+                <th data-col="u.email">email</th>
+                <th data-col="r.date" class="hide-on-small-and-down">Adhésion(s)</th>
                 <th class="hide-on-med-and-down">Formation(s)</th>
                 <th class="hide-on-med-and-down">Commission(s)</th>
             </tr>
@@ -206,46 +252,42 @@
         <tbody>
         {% for member in members %}
             {% if member.mainBeneficiary %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
+                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% elseif member.frozen %}frozen{% elseif member.isCurrentlyExemptedFromShifts() %}exempted{% endif %}">
                     <td class="hide-on-med-and-down">
-                        {% if not member.withdrawn %}
-                            {% if not member.mainBeneficiary.user.isEnabled %}
-                                <i class="material-icons">phonelink_off</i>
-                            {% endif %}
-                            {% if member.frozen %}
-                                <i class="material-icons">notifications_paused</i>
-                            {% endif %}
-                        {% else %}
-                                <i class="material-icons">do_not_disturb</i>
-                        {% endif %}
+                        {% include "admin/member/_partial/status_icons.html.twig" with { member: member } %}
                     </td>
-                    <td><a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a></td>
-                    <td>{{ member.mainBeneficiary.user.username }}</td>
-
+                    <td>
+                        <a href="{{ path('member_show', { 'member_number': member.memberNumber }) }}">{{ member.memberNumber }}</a>
+                    </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.firstname }}<br/>
+                            {{ beneficiary.user.username }}<br />
                         {% endfor %}
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.lastname }}<br/>
+                            {{ beneficiary.firstname }}<br />
                         {% endfor %}
                     </td>
                     <td>
                         {% for beneficiary in member.beneficiaries %}
-                            {{ beneficiary.email }}<br/>
+                            {{ beneficiary.lastname }}<br />
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for beneficiary in member.beneficiaries %}
+                            {{ beneficiary.email }}<br />
                         {% endfor %}
                     </td>
                     <td class="hide-on-small-and-down">
                         {% for registration in member.registrations %}
                             {% if member.lastregistration %}
                                 {% if registration.id == member.lastregistration.id %}<strong>{% else %}<del>{% endif %}
-                                {{ registration.date | date('d/m/Y') }}
+                                {{ registration.date | date_short }}
                                 {% if registration.id == member.lastregistration.id %}</strong>{% else %}</del>{% endif %}
-                                <br/>
+                                <br />
                             {% else %}
-                                {{ registration.date | date('d/m/Y') }}
+                                {{ registration.date | date_short }}
                                 /!\ need fix
                             {% endif %}
                         {% endfor %}
@@ -253,7 +295,7 @@
                     <td class="hide-on-med-and-down">
                         {% for beneficiary in member.beneficiaries %}
                             {% for formation in beneficiary.formations %}
-                                <div class="chip truncate">
+                                <div class="chip">
                                     {{ formation.name }}
                                 </div>
                             {% endfor %}
@@ -262,7 +304,7 @@
                     <td class="hide-on-med-and-down">
                         {% for beneficiary in member.beneficiaries %}
                             {% for commission in beneficiary.commissions %}
-                                <div class="chip truncate">
+                                <div class="chip">
                                     {{ commission.name }}
                                 </div>
                             {% endfor %}
@@ -270,8 +312,8 @@
                     </td>
                 </tr>
             {% else %}
-                <tr class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" >
-                    <td colspan="9">{{ member.mainBeneficiary.user }}</td>
+                <tr id="member_{{ member.id }}" data-url="{{ path('member_show', { 'member_number': member.memberNumber }) }}" class="{% if member.withdrawn %}withdrawn{% endif %} {% if member.frozen %}frozen{% endif %}">
+                    <td colspan="9">{{ member }}</td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -279,82 +321,77 @@
     </table>
 <div class="container">
     <div class="section">
-    {% if nb_of_pages > 1 %}
+    {% if page_count > 1 %}
     <ul class="pagination">
-        <li class="{% if(page==1) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(page==1) %}#!{% else %}{{ path("user_index",{'page':page-1}) }}{% endif %}" data-page="{{ page-1 }}">
+        <li class="{% if(current_page==1) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==1) %}#!{% else %}{{ path("user_index", {'page':current_page-1}) }}{% endif %}" data-page="{{ current_page-1 }}">
                 <i class="material-icons">chevron_left</i>
             </a>
         </li>
-        {% if nb_of_pages < 10 %}
-            {% for i in range(1,nb_of_pages) %}
-                <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+        {% if page_count < 10 %}
+            {% for i in range(1, page_count) %}
+                <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
             {% endfor %}
         {% else %}
-            {% if page <= 3 %}
-                {% for i in range(1,page+1) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+            {% if current_page <= 3 %}
+                {% for i in range(1, current_page+1) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
                 <li>...</li>
-                {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                {% for i in range(page_count-1, page_count) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                 {% endfor %}
             {% else %}
-                {% if nb_of_pages - page <= 3 %}
-                    {% for i in range(1,2) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                {% if page_count - current_page <= 3 %}
+                    {% for i in range(1, 2) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(page-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(current_page-1, page_count) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% else %}
-                    {% for i in range(1,2) %}
-                    <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(1, 2) %}
+                    <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(page-1,page+1) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(current_page-1, current_page+1) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                     <li>...</li>
-                    {% for i in range(nb_of_pages-1,nb_of_pages) %}
-                        <li class="{% if(page==i) %}active{% else %}waves-effect{% endif %}"><a href="{{ path("user_index",{'page':i}) }}" data-page="{{ i }}">{{ i }}</a></li>
+                    {% for i in range(page_count-1, page_count) %}
+                        <li class="{% if(current_page==i) %}active{% else %}waves-effect{% endif %}"><a href="#" data-page="{{ i }}">{{ i }}</a></li>
                     {% endfor %}
                 {% endif %}
             {% endif %}
         {% endif %}
-        <li class="{% if(page==nb_of_pages) %}disabled{% else %}waves-effect{% endif %}">
-            <a href="{% if(page==nb_of_pages) %}#!{% else %}{{ path("user_index",{'page':page+1}) }}{% endif %}" data-page="{{ page+1}}">
+        <li class="{% if(current_page==page_count) %}disabled{% else %}waves-effect{% endif %}">
+            <a href="{% if(current_page==page_count) %}#!{% else %}{{ path("user_index", {'page':current_page+1}) }}{% endif %}" data-page="{{ current_page+1 }}">
                 <i class="material-icons">chevron_right</i>
             </a>
         </li>
     </ul>
     {% endif %}
-
 {% endblock %}
 
 {% block stylesheets %}
     <style>
-        td strong{
-            /*font-weight: 600;*/
+        th.active {
+            color: {{ main_color }};
         }
-        th.active{
-            color: #51CAE9;
+        th[data-col] {
+            cursor: pointer;
         }
-        tr.withdrawn{
-            background: rgba(255, 50, 0, 0.2);
-        }
-        tr.frozen{
-            background-color: rgba(0, 138, 255, 0.1);
+        tr.frozen {
             background-image: url({% image '@AppBundle/Resources/public/img/snowflakes.svg' %}{{ asset_url }}{% endimage %});
             background-position: top right;
             background-repeat: no-repeat;
             background-size: contain;
         }
-        tr.frozen td{
+        tr.frozen td {
             background-color: rgba(255, 255, 255, 0.5);
         }
-        tbody tr{
+        tbody tr {
             cursor: pointer;
         }
     </style>
@@ -376,12 +413,9 @@
             });
             $('.pagination li:not(.disabled) a').click(function(e){
                 e.preventDefault();
-                $('#form_page').val($(this).attr('data-page'));
+                $('#form_page').val($(this).data('page'));
                 $('form[name=form]').submit();
             });
-            // $('select').on('change', function() {
-            //     $('form[name=form]').submit();
-            // });
             $('th[data-col]').click(function(e){
                 e.preventDefault();
                 if ($('#form_sort').val() === $(this).attr('data-col')){

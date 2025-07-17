@@ -28,7 +28,8 @@ class ProcessUpdateExtension extends AbstractExtension
         );
     }
 
-    public function last_shift_date(Beneficiary $beneficiary){
+    // can return null in sore rare cases
+    public function last_shift_date(Beneficiary $beneficiary) {
         $lastShifted = $this->container->get('doctrine')->getManager()->getRepository(Shift::class)->findLastShifted($beneficiary);
         if ($lastShifted)
             return $lastShifted->getStart();
@@ -36,15 +37,15 @@ class ProcessUpdateExtension extends AbstractExtension
             return $beneficiary->getUser()->getLastLogin();
     }
 
-    public function updates_list_from_date(\DateTime $date){
+    public function updates_list_from_date(\DateTime $date) {
         return $this->container->get('doctrine')->getManager()->getRepository(ProcessUpdate::class)->findFrom($date);
     }
 
-    public function count_updates_list_from_date(\DateTime $date){
+    public function count_updates_list_from_date(\DateTime $date) {
         return $this->container->get('doctrine')->getManager()->getRepository(ProcessUpdate::class)->countFrom($date);
     }
 
-    public function w3c_to_date($w3c){
+    public function w3c_to_date($w3c) {
         return \DateTime::createFromFormat(\DateTimeInterface::W3C,$w3c);
     }
 }

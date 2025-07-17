@@ -1,12 +1,13 @@
 {% extends 'layout.html.twig' %}
 
-{% block breadcrumps %}
-    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a> <i class="material-icons">chevron_right</i>
-    <i class="material-icons">date_range</i><span>Créneaux</span>
+{% block title %}Créneaux - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<i class="material-icons">date_range</i>&nbsp;Créneaux
 {% endblock %}
 
 {% block content %}
-
     {% if beneficiary is not defined %}
         <div class="row center">
             <h5 class="col s12">Qui programme son bénévolat ?</h5>
@@ -19,25 +20,34 @@
         </div>
     {% else %}
         <div class="row center">
-            <h4 class="header">Créneaux disponibles pour <span
-                        class="teal-text">{{ beneficiary.firstname }}</span>{% if (beneficiary.membership.beneficiaries | length > 1) %}
-                <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer
-                    ]</a>{% endif %}</h4>
+            <h4 class="header">
+                Créneaux disponibles pour
+                <span class="teal-text">{{ beneficiary.firstname }}</span>
+                {% if (beneficiary.membership.beneficiaries | length > 1) %}
+                    <a href="{{ path("booking") }}" style="font-family: 'Raleway', sans-serif; font-size: 12px;">[ changer ]</a>
+                {% endif %}
+            </h4>
             {% if not shift_service.canBookSomething(beneficiary) %}
                 <span class="red-text">NB: {{ beneficiary.firstname }} ne peut plus réserver de créneau sur le cycle actuel</span>
             {% endif %}
-            <p>Mon cycle actuel commence le <b>{{ beneficiary.membership.startOfCycle |date_fr_long }}</b> et termine
-                le <b>{{ beneficiary.membership.endOfCycle |date_fr_long }}</b></p>
+            <p>
+                Ton cycle actuel commence le <b>{{ membership_service.startOfCycle(beneficiary.membership) | date_fr_long }}</b>
+                et termine le <b>{{ membership_service.endOfCycle(beneficiary.membership) | date_fr_long }}</b>
+            </p>
         </div>
         <div class="row">
-            <ul class="collapsible" data-collapsible="accordion" id="legend">
+            <ul class="collapsible" id="legend">
                 <li>
-                    <div class="collapsible-header {% if frontend_cookie is defined and frontend_cookie.booking is defined and frontend_cookie.booking.legend_closed is defined and frontend_cookie.booking.legend_closed %}{% else %}active{% endif %}"><i class="material-icons">help_outline</i>legende</div>
+                    <div class="collapsible-header {% if frontend_cookie is defined and frontend_cookie.booking is defined and frontend_cookie.booking.legend_closed is defined and frontend_cookie.booking.legend_closed %}{% else %}active{% endif %}">
+                        <i class="material-icons">help_outline</i>Légende
+                    </div>
                     <div class="collapsible-body">
                         <ul>
+                            <!-- Not used anymore?
                             <li>
                                 <span class="blue-text"><i class="material-icons">star</i></span><i class="material-icons tiny red-text">radio_button_checked</i> Créneau annulé, à reprendre : aide un bénévole en galère !
                             </li>
+                            -->
                             <li class="hide-on-med-and-down">
                                 <i class="material-icons tiny grey-text text-darken-2">radio_button_unchecked</i>/<i class="material-icons tiny green-text">radio_button_checked</i> Place disponible / indisponible
                             </li>
@@ -46,32 +56,28 @@
                             </li>
                             <li class="row">
                                 {% for job in jobs %}
-                                <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
-                                    <div style="padding: 3px;margin:5px"
-                                     class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper">
-                                        <p>{{ job.name }}</p>
+                                    <div class="col s12 m4 {% if job.description is not empty %}legend_job {% endif %}" data-description="{{ job.description | markdown | raw }}">
+                                        <div class="{{ job.color }} z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
+                                            <p>{{ job.name }}</p>
+                                        </div>
                                     </div>
-                                </div>
                                 {% endfor %}
                             </li>
                             <li class="row">
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px"
-                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                    <div class="z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
                                         <p>Aucun bénévole inscrit</p>
                                         <span class="red-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px"
-                                         class="z-depth-1 lighten-5 valign-wrapper">
+                                    <div class="z-depth-1 lighten-5 valign-wrapper" style="padding: 3px;margin:5px">
                                         <p>Pas assez de bénévoles inscrits pour ouvrir</p>
                                         <span class="orange-text"><i class="material-icons tiny">warning</i>&nbsp;sous-effectif</span>
                                     </div>
                                 </div>
                                 <div class="col s12 m4">
-                                    <div style="padding: 3px;margin:5px;cursor: not-allowed"
-                                         class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1">
+                                    <div class="z-depth-1 grey lighten-3 valign-wrapper grey-text text-lighten-1" style="padding: 3px;margin:5px;cursor: not-allowed">
                                         <i class="material-icons tiny">lock</i>
                                         <p class="black-text">Créneau complet ou inaccessible pour {{ beneficiary.firstname }} <small>(quota d'heures dépassé ou formation insuffisante)</small></p>
                                     </div>
@@ -82,27 +88,8 @@
                 </li>
             </ul>
         </div>
-        {% if dismissedShifts | length %}
-        <div class="row">
-            <ul class="collapsible" data-collapsible="expandable" id="dismissed">
-                <li>
-                    <div class="collapsible-header active"><i class="material-icons">star_border</i>Créneau à reprendre, aide un bénévole en galère !</div>
-                    <div class="collapsible-body row">
-                        {% for shift in dismissedShifts %}
-                            {% if shift_service.isShiftBookable(shift, beneficiary) %}
-                            <div class="col s6 m3">
-                                {% include "booking/_partial/shift_alone.html.twig" with { shift: shift } %}
-                            </div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </li>
-            </ul>
-        </div>
-        {% endif %}
         {% include "booking/_partial/list.html.twig" with { bucketsByDay: bucketsByDay } %}
     {% endif %}
-
 
     <div id="modallegend" class="modal">
         <div class="modal-content">
@@ -111,7 +98,6 @@
             </div>
         </div>
     </div>
-
 {% endblock %}
 
 {% block stylesheets %}
@@ -124,11 +110,11 @@
         }
     </style>
 {% endblock %}
+
 {% block javascripts %}
     <script>
-        jQuery(function () {
+        $(document).ready(function () {
             $('.collapsible li').click();
-            $('.modal').modal();
             $('#legend .collapsible-header').on('click',function () {
                 var data_raw = Cookies.get("frontend");
                 var data = undefined;
@@ -141,10 +127,6 @@
                 data.booking.legend_closed = $(this).hasClass("active");
                 Cookies.set("frontend",data);
             });
-            //todo put it server side
-            if ($('#dismissed .collapsible-header div').length < 1){
-                $('#dismissed').hide();
-            }
 
             //affichage de la description du job dans la modal
             $('.legend_job').click(function () {
@@ -182,9 +164,9 @@
 
             if (selectedFormation !== null && selectedTypeService !== null) {
 
-                // let url = "/booking/shift/" + checkedValue +"/book";
+                // let url = "/shift/" + checkedValue + "/book";
 
-                let url = "{{ path('shift_book',{'id': 'tmpId'}) }}";
+                let url = "{{ path('shift_book', { 'id': 'tmpId' }) }}";
                 url = url.replace("tmpId", selectedFormation.value);
 
                 let body = {

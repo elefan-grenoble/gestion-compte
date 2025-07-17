@@ -11,196 +11,292 @@ use AppBundle\Form\NoteType;
 use AppBundle\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
- * Task controller.
+ * Ambassador controller
  *
  * @Route("ambassador")
  */
 class AmbassadorController extends Controller
 {
     private $timeAfterWhichMembersAreLateWithShifts;
+    private $registrationEveryCivilYear;
 
-    public function __construct($timeAfterWhichMembersAreLateWithShifts)
+    public function __construct($timeAfterWhichMembersAreLateWithShifts, $registrationEveryCivilYear)
     {
         $this->timeAfterWhichMembersAreLateWithShifts = $timeAfterWhichMembersAreLateWithShifts;
+        $this->registrationEveryCivilYear = $registrationEveryCivilYear;
     }
 
     /**
-     * Lists all users with a registration date older than one year.
+     * List all members without a registration
      *
+     * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
-     * @Route("/membership", name="ambassador_membership_list")
-     * @Method({"GET","POST"})
      */
-    public function membershipAction(Request $request, SearchUserFormHelper $formHelper)
+    public function memberNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
+        $defaults = [
+            'withdrawn' => 1,
+            'registration' => 1,
+            'sort' => 'r.date',
+            'dir' => 'DESC'
+        ];
+        $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt', 'lastregistrationdategt'];
 
-        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
-
-        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
+        $form = $formHelper->createMemberNoRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $action = $form->get('action')->getData();
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'noregistration');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+        $qb = $qb->andWhere('r.date IS NULL');
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
 
-        $page = $request->get('page');
-        if (!intval($page))
-            $page = 1;
-        $order = 'DESC';
-        $sort = 'r.date';
-
-        $session = new Session();
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('page')->getData() > 0) {
-                $page = $form->get('page')->getData();
-            }
-            if ($form->get('sort')->getData()) {
-                $sort = $form->get('sort')->getData();
-            }
-            if ($form->get('dir')->getData()) {
-                $order = $form->get('dir')->getData();
-            }
-            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "membership");
-        }else{
-            $lastYear = new \DateTime('last year');
-            if (!$form->isSubmitted()) {
-                $form->get('sort')->setData($sort);
-                $form->get('dir')->setData($order);
-                $form->get('lastregistrationdatelt')->setData($lastYear->format('Y-m-d'));
-                $form->get('withdrawn')->setData(1);
-            }
-            $qb = $qb->andWhere('o.withdrawn = 0');
-            $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-                    ->setParameter('lastregistrationdatelt', $lastYear->format('Y-m-d'));
-        }
-
-        $limit = 25;
-        $qb2 = clone $qb;
-        $max = $qb2->select('count(DISTINCT o.id)')->getQuery()->getSingleScalarResult();
-        $nb_of_pages = intval($max/$limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-
+        $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
-        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-        $members = new Paginator($qb->getQuery());
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "d'adhésion",
-            'path' => 'ambassador_membership_list',
-            'members' => $members,
+            'reason' => "Liste des membres sans adhésion",
+            'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $max,
-            'page'=>$page,
-            'nb_of_pages'=>$nb_of_pages
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
-
     }
 
     /**
-     * Lists all users with shift time logs older than 9 hours.
+     * List all members with a registration date older than one year
      *
+     * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
-     * @Route("/shifttimelog", name="ambassador_shifttimelog_list")
-     * @Method({"GET","POST"})
      */
-    public function shiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
+    public function memberLateRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
+        if ($this->registrationEveryCivilYear) {
+            $endLastRegistration = new \DateTime('last day of December last year');
+        } else {
+            $endLastRegistration = new \DateTime('last year');
+        }
+        $endLastRegistration->setTime(0,0);
 
-        $this->denyAccessUnlessGranted('view', $this->get('security.token_storage')->getToken()->getUser());
+        $defaults = [
+            'withdrawn' => 1,
+            'registration' => 2,
+            'lastregistrationdatelt' => $endLastRegistration,
+            'sort' => 'r.date',
+            'dir' => 'DESC'
+        ];
+        $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt'];
 
-        $form = $formHelper->getSearchForm($this->createFormBuilder(), $request->getQueryString(), true);
+        $form = $formHelper->createMemberLateRegistrationFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
         $form->handleRequest($request);
 
-        $action = $form->get('action')->getData();
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'lateregistration');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+        $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
+            ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
 
-        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager());
-        $qb = $qb->leftJoin("o.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
-            ->where('lr.id IS NULL') //registration is the last one registere
-            ->leftJoin("o.timeLogs", "c")->addSelect("c")
-            ->addSelect("(SELECT SUM(ti.time) FROM AppBundle\Entity\TimeLog ti WHERE ti.membership = o.id) AS HIDDEN time");
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
 
-        $page = $request->get('page');
-        if (!intval($page))
-            $page = 1;
-        $order = 'DESC';
-        $sort = 'time';
-
-        $session = new Session();
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            if ($form->get('page')->getData() > 0) {
-                $page = $form->get('page')->getData();
-            }
-            if ($form->get('sort')->getData()) {
-                $sort = $form->get('sort')->getData();
-            }
-            if ($form->get('dir')->getData()) {
-                $order = $form->get('dir')->getData();
-            }
-            $formHelper->processSearchFormAmbassadorData($form, $qb, $session, "shifttimelog");
-        }else{
-            if (!$form->isSubmitted()) {
-                $form->get('sort')->setData($sort);
-                $form->get('dir')->setData($order);
-                $form->get('compteurlt')->setData($this->timeAfterWhichMembersAreLateWithShifts);
-                $form->get('withdrawn')->setData(1);
-                $form->get('frozen')->setData(1);
-            }
-            $qb = $qb->andWhere('o.withdrawn = 0');
-            $qb = $qb->andWhere('o.frozen = 0');
-            $qb = $qb->andWhere('b.membership IN (SELECT IDENTITY(t.membership) FROM AppBundle\Entity\TimeLog t GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-                ->setParameter('compteurlt', $this->timeAfterWhichMembersAreLateWithShifts);
-        }
-
-        $limit = 25;
-        $qb2 = clone $qb;
-        $max = $qb2->select('count(DISTINCT o.id)')->resetDQLPart('groupBy')->getQuery()->getSingleScalarResult();
-        $nb_of_pages = intval($max/$limit);
-        $nb_of_pages += (($max % $limit) > 0) ? 1 : 0;
-
+        $limitPerPage = 25;
         $qb = $qb->orderBy($sort, $order);
-        $qb = $qb->setFirstResult( ($page - 1)*$limit )->setMaxResults( $limit );
-        $members = new Paginator($qb->getQuery());
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
 
         return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "de créneaux",
-            'path' => 'ambassador_shifttimelog_list',
-            'members' => $members,
+            'reason' => "Liste des membres en retard de ré-adhésion",
+            'members' => $paginator,
             'form' => $form->createView(),
-            'nb_of_result' => $max,
-            'page'=>$page,
-            'nb_of_pages'=>$nb_of_pages
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
         ));
-
     }
 
     /**
-     * display a member phones.
+     * List all members with negative shift time count
      *
-     * @Route("/phone/{member_number}", name="ambassador_phone_show")
-     * @Method("GET")
+     * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     */
+    public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
+    {
+        $action = $request->request->get("form")["csv"] ?? null;
+
+        $defaults = [
+            'withdrawn' => 1,
+            'frozen' => 1,
+            'registration' => 2,
+            'compteurlt' => 0,
+            'sort' => 'time',
+            'dir' => 'ASC'
+        ];
+        $disabledFields = ['withdrawn', 'registration'];
+
+        $form = $formHelper->createMemberShiftTimeLogFilterForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form->handleRequest($request);
+
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'shifttimelog');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
+
+        $qb = $qb->orderBy($sort, $order);
+
+        // Export CSV
+        if ($action == "csv") {
+            /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
+             * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
+             * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
+             *  « Iterate with fetch join in class AppBundle\Entity\Beneficiary using association membership not allowed. »
+             */
+            $members = $qb->getQuery()->getResult();
+
+            $response = new StreamedResponse(function () use ($members) {
+                $handle = fopen('php://output', 'wb');
+                foreach ($members as $member) {
+                    $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
+                    $row = [
+                        $member->getMemberNumber(),
+                        join($names->toArray(), " & "),
+                        $member->getLastRegistration()->getDate()->format("d/m/Y"),
+                        $member->getShiftTimeCount() / 60
+                        /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
+                         * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
+                         */
+                    ];
+                    fputcsv($handle, $row, ',');
+                }
+                fclose($handle);
+            });
+
+            $response->setStatusCode(Response::HTTP_OK);
+            $response->headers->set('Content-Encoding', 'UTF-8');
+            $response->headers->set('Content-Type', 'text/csv');
+            $response->headers->set('Content-Disposition', 'attachment; filename="relances_créneaux_' . date('dmyhis') . '.csv"');
+
+            return $response;
+        }
+
+        $limitPerPage = 25;
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "Liste des membres en retard de créneaux",
+            'members' => $paginator,
+            'form' => $form->createView(),
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
+        ));
+    }
+
+    /**
+     * List all beneficiaries "fixe" without periodposition
+     * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'
+     *
+     * @Route("/beneficiary_fixe_without_periodposition", name="ambassador_beneficiary_fixe_without_periodposition_list", methods={"GET","POST"})
+     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @param request $request , searchuserformhelper $formhelper
+     * @return response
+     */
+    public function beneficiaryFixeWithoutPeriodPosition(Request $request, SearchUserFormHelper $formHelper)
+    {
+        $defaults = [
+            'withdrawn' => 1,
+            'frozen' => 1,
+            'registration' => 2,
+            'flying' => 1,
+            'has_period_position' => 1,
+            'sort' => 'm.member_number',
+            'dir' => 'ASC'
+        ];
+        $disabledFields = ['withdrawn', 'registration', 'flying', 'has_period_position'];
+
+        $form = $formHelper->createBeneficiaryFixeWithoutPeriodPositionForm($this->createFormBuilder(), $defaults, $disabledFields);
+        $form->handleRequest($request);
+
+        $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'fixe_without_periodposition');
+        $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
+
+        $sort = $form->get('sort')->getData();
+        $order = $form->get('dir')->getData();
+        $currentPage = $form->get('page')->getData();
+
+        $limitPerPage = 25;
+        $qb = $qb->orderBy($sort, $order);
+        $paginator = new Paginator($qb);
+        $resultCount = count($paginator);
+        $pageCount = ($resultCount == 0) ? 1 : ceil($resultCount / $limitPerPage);
+        $currentPage = ($currentPage > $pageCount) ? $pageCount : $currentPage;
+
+        $paginator
+            ->getQuery()
+            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
+            ->setMaxResults($limitPerPage); // set the limit
+
+        return $this->render('ambassador/phone/list.html.twig', array(
+            'reason' => "Liste des bénéficiaires fixes sans poste fixe",
+            'members' => $paginator,
+            'form' => $form->createView(),
+            'result_count' => $resultCount,
+            'current_page' => $currentPage,
+            'page_count' => $pageCount
+        ));
+    }
+
+    /**
+     * Display a member phones
+     *
+     * @Route("/phone/{member_number}", name="ambassador_phone_show", methods={"GET"})
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
@@ -210,7 +306,7 @@ class AmbassadorController extends Controller
     }
 
     /**
-     * Creates a form to delete a note entity.
+     * Creates a form to delete a note entity
      *
      * @param Note $note the note entity
      *
@@ -225,9 +321,9 @@ class AmbassadorController extends Controller
     }
 
     /**
+     * Create a note
      *
-     * @Route("/note/{member_number}", name="ambassador_new_note")
-     * @Method("POST")
+     * @Route("/note/{member_number}", name="ambassador_new_note", methods={"POST"})
      * @param Membership $member
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse

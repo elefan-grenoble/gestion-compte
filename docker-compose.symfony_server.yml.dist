@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  database:
+    container_name: database
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: symfony
+      MARIADB_USER: symfony
+      MARIADB_PASSWORD: symfony
+    volumes:
+      - ./mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", '-u', 'root', '-psecret']
+      timeout: 20s
+      retries: 10
+
+  php:
+    container_name: php
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+    build:
+      context: .
+      dockerfile: .docker/Dockerfile
+    command: >
+      bash -c "./wait-for.sh -t 60 database:3306 -- composer install -n
+      && php bin/console doctrine:migration:migrate
+      && php bin/console server:run *:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+          - .:/var/www/app
+    restart: always
+    depends_on:
+      - database
+      - mailcatcher
+
+  mailcatcher:
+    container_name: mailcatcher
+    image: lelefan/mailcatcher:0.8.2
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: secret
+      UPLOAD_LIMIT: 50000000
+    ports:
+      - "8081:80"
+    depends_on:
+      - database
+
+  keycloak:
+    image: jboss/keycloak:16.1.1
+    container_name: keycloak
+    volumes:
+    - .docker/keycloak/data:/opt/jboss/keycloak/standalone/data/
+    environment:
+    - KEYCLOAK_USER=admin
+    - KEYCLOAK_PASSWORD=admin
+    - DB_VENDOR=h2
+    ports:
+    - "8080:8080"

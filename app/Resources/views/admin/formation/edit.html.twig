@@ -1,0 +1,25 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Editer une formation - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('formation_list') }}"><i class="material-icons">list</i>&nbsp;Liste des formations</a><i class="material-icons">chevron_right</i>
+<i class="material-icons">edit</i>&nbsp;Editer
+{% endblock %}
+
+{% block content %}
+    <h4>Editer une formation</h4>
+
+    {% include "admin/formation/_form.html.twig" with { form: form } %}
+
+    {% if is_granted("ROLE_SUPER_ADMIN") %}
+        {{ form_start(delete_form) }}
+        {{ form_widget(delete_form) }}
+        <div>
+            <button type="submit" class="btn waves-effect waves-light red">Supprimer</button>
+        </div>
+        {{ form_end(delete_form) }}
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,30 @@
+{% if member.notes | length > 0 %}
+    <div class="row">
+        {% for note in member.notes %}
+            {% if not note.parent %}
+                <div class="col s12 m6 offset-m2 l6">
+                    {% include "user/_partial/note.html.twig" with { note: note } %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}
+
+{% if is_granted("create", note) %}
+    <button class="btn waves-effect waves-light modal-trigger" href="#modal-note"><i class="material-icons left">add</i>Ajouter une note</button>
+{% endif %}
+
+<div id="modal-note" class="modal">
+    <div class="modal-content">
+        <h4>Ajouter une note</h4>
+        {{ form_start(note_form, {'attr': {'id': 'form_note_create'}}) }}
+        {{ form_row(note_form.text) }}
+        {{ form_end(note_form) }}
+    </div>
+    <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close btn-flat">Retour</a>
+        {% if is_granted("create",note) %}
+            <a href="#!" class="modal-action modal-close green waves-effect waves-green btn" onclick="document.getElementById('form_note_create').submit();"><i class="material-icons left">add</i>Créer</a>
+        {% endif %}
+    </div>
+</div>

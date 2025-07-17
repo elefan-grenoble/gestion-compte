@@ -4,6 +4,7 @@ namespace AppBundle\Security;
 
 use AppBundle\Entity\Membership;
 use AppBundle\Entity\User;
+use AppBundle\Helper\PlaceIP;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -16,10 +17,12 @@ class MembershipVoter extends Voter
     const CREATE = 'create';
     const VIEW = 'view';
     const EDIT = 'edit';
+    const BOOK = 'book';
     const OPEN = 'open';
     const CLOSE = 'close';
     const FREEZE = 'freeze';
     const FREEZE_CHANGE = 'freeze_change';
+    const FLYING = 'flying';
     const ROLE_REMOVE = 'role_remove';
     const ROLE_ADD = 'role_add';
     const ANNOTATE = 'annotate';
@@ -40,12 +43,14 @@ class MembershipVoter extends Voter
         if (!in_array($attribute, array(
                 self::VIEW,
                 self::EDIT,
+                self::BOOK,
                 self::OPEN,
                 self::CLOSE,
                 self::ROLE_REMOVE,
                 self::ROLE_ADD,
                 self::FREEZE,
                 self::FREEZE_CHANGE,
+                self::FLYING,
                 self::CREATE,
                 self::ANNOTATE,
                 self::ACCESS_TOOLS,
@@ -71,17 +76,20 @@ class MembershipVoter extends Voter
             return false;
         }
 
-        // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
-            return true;
-        }
-        // on user ROLE_USER_MANAGER can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
-            return true;
+        if (!$this->container->getParameter("oidc_enable"))
+        {
+            // ROLE_SUPER_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_ADMIN can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                return true;
+            }
+            // on user ROLE_USER_MANAGER can do anything! The power!
+            if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+                return true;
+            }
         }
 
         // you know $subject is a Post object, thanks to supports
@@ -89,10 +97,11 @@ class MembershipVoter extends Voter
             case self::ACCESS_TOOLS:
             case self::BENEFICIARY_ADD:
             case self::CREATE:
-                return $this->isLocationOk();
+                return $this->container->get(PlaceIP::class)->isLocationOk();
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
+            case self::BOOK:
             case self::FREEZE_CHANGE:
                 if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject) {
                     return true;
@@ -103,6 +112,8 @@ class MembershipVoter extends Voter
             case self::ROLE_ADD:
             case self::ROLE_REMOVE:
             case self::EDIT:
+                return $this->canEdit($subject, $token);
+            case self::FLYING:
                 return $this->canEdit($subject, $token);
         }
 
@@ -125,6 +136,10 @@ class MembershipVoter extends Voter
 
     private function canEdit(Membership $subject, TokenInterface $token)
     {
+        if ($this->container->getParameter("oidc_enable")){
+            return false;
+        }
+
         $user = $token->getUser();
 
         if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership
@@ -142,14 +157,5 @@ class MembershipVoter extends Voter
         }
 
         return false;
-
-    }
-
-    private function isLocationOk()
-    {
-        $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
-        $ips = $this->container->getParameter('place_local_ip_address');
-        $ips = explode(',', $ips);
-        return (isset($ip) and in_array($ip, $ips));
     }
 }

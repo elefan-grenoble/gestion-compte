@@ -15,9 +15,12 @@ class FormationType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name', TextType::class, array('label' => 'Nom'));
+        $builder
+            ->add('name', TextType::class, array('label' => 'Nom de la formation'))
+            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
+            ->add('url', TextType::class, array('label' => 'Lien vers une documentation', 'required' => false));
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -35,6 +38,4 @@ class FormationType extends AbstractType
     {
         return 'appbundle_formation';
     }
-
-
 }

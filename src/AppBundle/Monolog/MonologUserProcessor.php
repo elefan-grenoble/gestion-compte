@@ -16,18 +16,18 @@ class MonologUserProcessor
 
     public function processRecord(array $record)
     {
-        /** @var User $user */
-        $user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
+        /** @var User $current_user */
+        $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
 
-        if (is_object($user)) {
-            $text = $user->getId();
-            $beneficiary = $user->getBeneficiary();
+        if (is_object($current_user)) {
+            $text = $current_user->getId();
+            $beneficiary = $current_user->getBeneficiary();
             if ($beneficiary) {
-                $text .= ' (' . $beneficiary->getDisplayName() . ')';
+                $text .= ' (' . $beneficiary->getDisplayNameWithMemberNumber() . ')';
             }
             $record['extra']['user'] = $text;
-        } else if ($user) {
-            $record['extra']['user'] = $user;
+        } else if ($current_user) {
+            $record['extra']['user'] = $current_user;
         }
 
         return $record;

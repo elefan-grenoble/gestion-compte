@@ -6,17 +6,15 @@ use AppBundle\Entity\Membership;
 use AppBundle\Entity\Registration;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class MemberType extends AbstractType
 {
-
     private $tokenStorage;
 
     public function __construct(TokenStorageInterface $tokenStorage)
@@ -41,27 +39,32 @@ class MemberType extends AbstractType
             $form = $event->getForm();
             $memberData = $event->getData();
 
-            if (is_object($user) && ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN'))){
-                $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
+            if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
+                $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
             }else{
-                $form->add('member_number',IntegerType::class, array('label'=> 'Numéro d\'adhérent','disabled' => true));
+                $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent', 'disabled' => true));
             }
 
-            if (is_object($user)){
-                if ($user->hasRole('ROLE_USER_MANAGER')||$user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')){
+            if (is_object($user)) {
+                if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')){
                     if ($memberData && $memberData->getId()) { //in not new
-                        $form->add('withdrawn', CheckboxType::class, array('label' => 'Compte fermé', 'required' => false));
-                        $form->add('frozen', CheckboxType::class, array('label' => 'Compte gelé', 'required' => false));
+                        $form->add('withdrawn', CheckboxType::class, array(
+                            'label' => 'Compte fermé',
+                            'required' => false,
+                            'attr' => array('class' => 'filled-in')));
+                        $form->add('frozen', CheckboxType::class, array(
+                            'label' => 'Compte gelé',
+                            'required' => false,
+                            'attr' => array('class' => 'filled-in')));
                     }
                 }
             }
 
-            $form->add('mainBeneficiary', BeneficiaryType::class,array('label'=>' '));
+            $form->add('mainBeneficiary', BeneficiaryType::class, array('label'=>' '));
 
-            if ($memberData && !$memberData->getId()){
+            if ($memberData && !$memberData->getId()) {
                 $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
             }
-
         });
     }
 
@@ -82,6 +85,4 @@ class MemberType extends AbstractType
     {
         return 'appbundle_membership';
     }
-
-
 }

@@ -2,6 +2,8 @@
 
 use Symfony\Component\HttpFoundation\Request;
 
+setlocale(LC_TIME, 'fr_FR.UTF8');
+
 require __DIR__.'/../vendor/autoload.php';
 if (PHP_VERSION_ID < 70000) {
     include_once __DIR__.'/../var/bootstrap.php.cache';
