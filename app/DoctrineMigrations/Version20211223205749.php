@@ -86,11 +86,12 @@ final class Version20211223205749 extends AbstractMigration
             FROM shift s
         EOT;
         $shifts = $this->connection->fetchAllAssociative($selectShifts);
-        $usedPositionIds = [-1]; // Init with -1 to prevent SQL error when empty
+        $usedPositionIds = [];
         foreach($shifts as $shift) {
             $weekCycleIndex = (date_create($shift['start'])->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51 (based on ShiftGenerateCommand)
             $weekCycleChar = chr(65 + $weekCycleIndex);
             $usedPositionIdsStr = implode(',', $usedPositionIds);
+            $usedPositionIdsTest = $usedPositionIdsStr ? "AND pos.id NOT IN ($usedPositionIdsStr)" : "";
             $selectMatchingPositions = <<<EOT
                 SELECT pos.id
                 FROM period_position pos
@@ -100,8 +101,8 @@ final class Version20211223205749 extends AbstractMigration
                     AND per.end = "{$shift['end']}"
                     AND per.job_id = {$shift['job_id']}
                     AND pos.formation_id = {$shift['formation_id']}
-                    AND pos.id NOT IN ($usedPositionIdsStr)
                     AND pos.week_cycle = "$weekCycleChar"
+                    $usedPositionIdsTest
             EOT;
 
             if ($matchingPosition = $this->connection->fetchAssociative($selectMatchingPositions)) {
