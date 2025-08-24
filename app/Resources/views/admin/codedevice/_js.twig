@@ -1,0 +1,16 @@
+<script>
+    function displayIgloohomeFields() {
+        if ($('#appbundle_codedevice_type').val() == "igloohome") {
+            document.getElementById("api_key").style.display = "block";
+            document.getElementById("lock_id").style.display = "block";
+            document.getElementById("appbundle_codedevice_igloohome_api_key").required = "required";
+            document.getElementById("appbundle_codedevice_igloohome_lock_id").required = "required";
+        } else {
+            document.getElementById("api_key").style.display = "none";
+            document.getElementById("lock_id").style.display = "none";
+            document.getElementById("appbundle_codedevice_igloohome_api_key").required = "";
+            document.getElementById("appbundle_codedevice_igloohome_lock_id").required = "";
+        }
+    }
+    $(document).ready(displayIgloohomeFields());
+</script>
