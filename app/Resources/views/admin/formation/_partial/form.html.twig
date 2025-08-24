@@ -1,0 +1,33 @@
+{% set edit = edit ?? false %}
+
+{{ form_start(form) }}
+
+<div class="errors">
+    {{ form_errors(form) }}
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form_row(form.name) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form_row(form.description) }}
+    </div>
+</div>
+<div class="row">
+    <div class="col s12">
+        {{ form_row(form.url) }}
+    </div>
+</div>
+
+{% include "admin/member/_partial/created_updated_card.html.twig" with { item: formation } %}
+
+<div>
+    <button type="submit" class="btn waves-effect waves-light">
+        <i class="material-icons left">save</i>
+        {% if edit %}Enregistrer{% else %}Créer{% endif %}
+    </button>
+</div>
+
+{{ form_end(form) }}

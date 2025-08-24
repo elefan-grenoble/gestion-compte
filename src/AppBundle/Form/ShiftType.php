@@ -4,6 +4,7 @@ namespace AppBundle\Form;
 
 use AppBundle\Entity\Shift;
 use AppBundle\Form\JobHiddenType;
+use AppBundle\Repository\FormationRepository;
 use AppBundle\Repository\JobRepository;
 use AppBundle\Repository\FormationRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
