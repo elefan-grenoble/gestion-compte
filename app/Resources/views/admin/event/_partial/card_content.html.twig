@@ -30,6 +30,6 @@
     {% endif %}
     {% if not only_header %}
         <br />
-        {{ event.description | markdown | raw }}
+        {{ event.description | nl2br | markdown | raw }}
     {% endif %}
 </div>
