@@ -55,7 +55,8 @@ final class Version20211223205749 extends AbstractMigration
                 foreach($positions as $pos) {
                     for($i = 0 ; $i < $pos['nb_of_shifter'] ; $i++) {
                         $shouldInsertPositions = true; // at least one position needs to be added
-                        $insertPositions .= "({$per['id']}, {$pos['formation_id']}, '{$charWeek}'), ";
+                        $formationId = $pos['formation_id'] ?: 'NULL';
+                        $insertPositions .= "({$per['id']}, $formationId, '$charWeek'), ";
                     }
                 }
             }
