@@ -64,7 +64,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
             $closingException = $em->getRepository('AppBundle:ClosingException')->findBy(['date' => $date]);
             if ($closingException) {
-                $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau sera généré</>');
+                $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau ne sera généré</>');
             } else {
                 $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6 = 7-1 (for Sunday)
                 $periods = $em->getRepository('AppBundle:Period')->createQueryBuilder('p')

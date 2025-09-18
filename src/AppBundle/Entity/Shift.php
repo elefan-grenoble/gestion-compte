@@ -336,7 +336,7 @@ class Shift
 
     public function getIntervalCode()
     {
-        return $this->start->format("h-i") . $this->end->format("h-i");
+        return $this->start->format("H-i") . $this->end->format("H-i");
     }
 
     /**
