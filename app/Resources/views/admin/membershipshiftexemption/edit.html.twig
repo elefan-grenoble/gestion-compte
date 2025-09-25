@@ -17,31 +17,26 @@
         {{ form_errors(form) }}
     </div>
     <div class="row">
-        <div class="col s6">
+        <div class="col s12 m6">
             <label for="membership">Membre</label>
             <input id='membership' type="text" value="{{ membershipShiftExemption.membership.memberNumberWithBeneficiaryListString }}" disabled>
         </div>
-        <div class="col s6">
-            {{ form_label(form.shiftExemption) }}
-            {{ form_errors(form.shiftExemption) }}
-            {{ form_widget(form.shiftExemption) }}
+        <div class="col s12 m6">
+            {{ form_row(form.shiftExemption) }}
         </div>
-        <div class="col s12 input-field">
-            {{ form_label(form.description) }}
-            {{ form_errors(form.description) }}
-            {{ form_widget(form.description) }}
+        <div class="col s12">
+            {{ form_row(form.description) }}
         </div>
-        <div class="col s6 input-field">
-            {{ form_label(form.start) }}
-            {{ form_errors(form.start) }}
-            {{ form_widget(form.start) }}
-        </div>
-        <div class="col s6 input-field">
-            {{ form_label(form.end) }}
-            {{ form_errors(form.end) }}
-            {{ form_widget(form.end) }}
+        <div class="row">
+            <div class="col s12 m6">
+                {{ form_row(form.start) }}
+            </div>
+            <div class="col s12 m6">
+                {{ form_row(form.end) }}
+            </div>
         </div>
     </div>
+    {% include "admin/member/_partial/created_updated_card.html.twig" with { item: membershipShiftExemption } %}
     <a href="{{ path('admin_membershipshiftexemption_index') }}" class="waves-effect waves-light btn red white-text" title="Annuler">Annuler</a>
     <button type="submit" class="btn waves-effect waves-light">
         <i class="material-icons left">save</i>Enregistrer

@@ -13,7 +13,7 @@
     <h4>Nouveau créneau type</h4>
 
     {{ form_start(form) }}
-    {{ form_widget(form) }}
+    {% include "/admin/period/_partial/form.html.twig" with { form: form } %}
     <div>
         <button type="submit" class="btn waves-effect waves-light">Créer</button>
     </div>
