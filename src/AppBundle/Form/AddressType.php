@@ -17,12 +17,12 @@ class AddressType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('street1',TextType::class,array('label'=>'Rue'))
-            ->add('street2',TextType::class,array('label'=>'Rue 2','required'=>false))
-            ->add('zipcode',TextType::class,array('label'=>'Code postal'))
-            ->add('city',TextType::class,array('label'=>'Ville'));
+            ->add('street1', TextType::class, array('label' => 'Rue'))
+            ->add('street2', TextType::class, array('label' => 'Rue 2', 'required' => false))
+            ->add('zipcode', TextType::class, array('label' => 'Code postal'))
+            ->add('city', TextType::class, array('label' => 'Ville'));
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -40,6 +40,4 @@ class AddressType extends AbstractType
     {
         return 'appbundle_address';
     }
-
-
 }
