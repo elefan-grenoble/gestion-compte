@@ -17,7 +17,7 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
         return $this->findBy(array(), array('date' => 'DESC'));
     }
 
-    public function findFutureOrOngoing(EventKind $eventKind = null, bool $dislayedHome = false, \DateTime $max = null, int $limit = null)
+    public function findFutureOrOngoing(array $eventKinds = null, bool $dislayedHome = false, \DateTime $max = null, int $limit = null)
     {
         $qb = $this->createQueryBuilder('e')
             ->leftJoin('e.kind', 'ek')
@@ -25,10 +25,10 @@ class EventRepository extends \Doctrine\ORM\EntityRepository
             ->where('e.date > :now OR e.date < :now AND e.end IS NOT NULL AND e.end > :now')
             ->setParameter('now', new \Datetime('now'));
 
-        if ($eventKind) {
+        if ($eventKinds) {
             $qb
-                ->andwhere('e.kind = :kind')
-                ->setParameter('kind', $eventKind);
+                ->andwhere('e.kind in (:kinds)')
+                ->setParameter('kinds', $eventKinds);
         }
 
         if ($dislayedHome) {
