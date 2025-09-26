@@ -37,6 +37,7 @@
 /*.iml
 LICENSE
 docker-compose.yml
+compose.yaml
 /.docker/keycloak/data
 
 .!
