@@ -130,6 +130,8 @@ parameters:
   project_url_display: '%env(PROJECT_URL_DISPLAY)%'
   registration_duration: '%env(REGISTRATION_DURATION)%'
   registration_every_civil_year: '%env(bool:REGISTRATION_EVERY_CIVIL_YEAR)%'
+  reserve_new_shift_to_prior_shifter: '%env(bool:RESERVE_NEW_SHIFT_TO_PRIOR_SHIFTER)%'
+  reserve_new_shift_to_prior_shifter_delay: '%env(bool:RESERVE_NEW_SHIFT_TO_PRIOR_SHIFTER_DELAY)%'
   site_name: '%env(SITE_NAME)%'
   super_admin.initial_password: '%env(SUPER_ADMIN_INITIAL_PASSWORD)%'
   super_admin.username: '%env(SUPER_ADMIN_USERNAME)%'
