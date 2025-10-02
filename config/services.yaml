@@ -65,9 +65,6 @@ parameters:
   logging.mattermost.enabled: '%env(bool:LOGGING_MATTERMOST_ENABLED)%'
   logging.mattermost.level: '%env(LOGGING_MATTERMOST_LEVEL)%'
   logging.mattermost.url: '%env(LOGGING_MATTERMOST_URL)%'
-  logging.swiftmailer.enabled: '%env(bool:LOGGING_SWIFTMAILER_ENABLED)%'
-  logging.swiftmailer.level: '%env(LOGGING_SWIFTMAILER_LEVEL)%'
-  logging.swiftmailer.recipient: '%env(LOGGING_SWIFTMAILER_RECIPIENT)%'
   main_color: '%env(MAIN_COLOR)%'
   max_event_proxy_per_member: '%env(MAX_EVENT_PROXY_PER_MEMBER)%'
   max_nb_of_past_cycles_to_display: '%env(MAX_NB_OF_PAST_CYCLES_TO_DISPLAY)%'
@@ -155,7 +152,6 @@ services:
     autowire: true      # Automatically injects dependencies in your services.
     autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
     bind:
-      $mailer: '@swiftmailer.mailer.default'
       $local_currency_name: '%local_currency_name%'
       $use_fly_and_fixed: '%use_fly_and_fixed%'
       $cycle_type: '%cycle_type%'
@@ -480,13 +476,6 @@ services:
       - '@security.token_storage'
     tags:
       - { name: monolog.processor, method: processRecord }
-
-  logging.handler.swiftmailer:
-    class: App\Monolog\ToggleableHandler
-    decorates: monolog.handler.swiftmailer
-    arguments:
-      - '@logging.handler.swiftmailer.inner'
-      - '%logging.swiftmailer.enabled%'
 
   # factories
   doctrine.fixtures.purger.orm_purger_factory:
