@@ -8,8 +8,10 @@ use App\Entity\User;
 use App\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
-use Swift_Mailer;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class HelloassoEventListener
@@ -19,7 +21,7 @@ class HelloassoEventListener
     protected $mailer;
     protected $member_email;
 
-    public function __construct(EntityManager $entityManager, Container $container, Swift_Mailer $mailer)
+    public function __construct(EntityManager $entityManager, Container $container, Mailer $mailer)
     {
         $this->em = $entityManager;
         $this->container = $container;
@@ -39,10 +41,11 @@ class HelloassoEventListener
                 'code' => urlencode($this->container->get('App\Helper\SwipeCard')->vigenereEncode($payment->getEmail()))
                 ),UrlGeneratorInterface::ABSOLUTE_URL);
 
-            $needInfo = (new \Swift_Message('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?'))
-                ->setFrom($this->member_email['address'], $this->member_email['from_name'])
-                ->setTo($payment->getEmail())
-                ->setBody(
+            $needInfo = (new Email())
+                ->subject('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?')
+                ->from(new Address($this->member_email['address'], $this->member_email['from_name']))
+                ->to($payment->getEmail())
+                ->html(
                     $this->renderView(
                         'emails/helloasso_wrong_email.html.twig',
                         array(
@@ -51,8 +54,7 @@ class HelloassoEventListener
                             'project_name' => $this->container->getParameter('project_name'),
                             'url' => $url
                         )
-                    ),
-                    'text/html'
+                    )
                 );
             $this->mailer->send($needInfo);
             //throw new \LogicException('user not found');

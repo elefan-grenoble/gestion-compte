@@ -17,6 +17,10 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -102,7 +106,7 @@ class MailController extends Controller
      *
      * @Route("/send", name="mail_send", methods={"POST"})
      */
-    public function sendAction(Request $request, \Swift_Mailer $mailer)
+    public function sendAction(Request $request, Mailer $mailer)
     {
         $session = new Session();
         $mailform = $this->getMailForm();
@@ -140,7 +144,6 @@ class MailController extends Controller
                 $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
             }
-            $contentType = 'text/html';
             $content = $mailform->get('message')->getData();
             $parser = new Markdown;
             $parser->hard_wrap=true;
@@ -154,16 +157,14 @@ class MailController extends Controller
             foreach ($beneficiaries as $beneficiary) {
                 $body = $this->get('twig')->render($template, array('beneficiary' => $beneficiary));
                 try {
-                    $message = (new \Swift_Message($mailform->get('subject')->getData()))
-                        ->setFrom($from)
-                        ->setTo([$beneficiary->getEmail() => $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()])
-                        ->addPart(
-                            $body,
-                            $contentType
-                        );
+                    $message = (new Email())
+                        ->subject($mailform->get('subject')->getData())
+                        ->from($from)
+                        ->to(new Address($beneficiary->getEmail(), $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()))
+                        ->html($body);
                     $mailer->send($message);
                     $nb++;
-                } catch (\Swift_RfcComplianceException $exception) {
+                } catch (TransportExceptionInterface $exception) {
                     $errored[] = $beneficiary->getEmail();
                 }
             }

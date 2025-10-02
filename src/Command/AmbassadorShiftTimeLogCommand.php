@@ -2,11 +2,12 @@
 // src/App/Command/AmbassadorShiftTimeLogCommand.php
 namespace App\Command;
 
-use Swift_Message;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Doctrine\ORM\Query\Expr\Join;
 
 class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
@@ -58,15 +59,15 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
                 $template = 'emails/shift_late_alerts_default.html.twig';
             }
 
-            $email = (new Swift_Message($subject))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                ->setTo($recipients)
-                ->setBody(
+            $email = (new Email())
+                ->subject()
+                ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
+                ->to($recipients)
+                ->html(
                     $this->getContainer()->get('twig')->render(
                         $template,
                         array('membership_late_alerts' => $alerts)
-                    ),
-                    'text/plain'
+                    )
                 );
             $mailer->send($email);
             $output->writeln('<fg=cyan;>Email(s) sent</>');
