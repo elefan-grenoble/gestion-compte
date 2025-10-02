@@ -27,6 +27,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -623,7 +625,7 @@ class ShiftController extends Controller
     /**
      * @Route("/{id}/contact_form", name="shift_contact_form", methods={"GET","POST"})
      */
-    public function contactFormAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    public function contactFormAction(Request $request, Shift $shift, Mailer $mailer)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -641,11 +643,12 @@ class ShiftController extends Controller
                 $emails[] = $beneficiary->getEmail();
                 $firstnames[] = $beneficiary->getFirstname();
             }
-            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1)))
-                ->setFrom($this->getParameter('transactional_mailer_user'))
-                ->setReplyTo($from->getEmail())
-                ->setBcc($emails)
-                ->setBody(
+            $message = (new Email())
+                ->subject('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1))
+                ->from($this->getParameter('transactional_mailer_user'))
+                ->replyTo($from->getEmail())
+                ->bcc($emails)
+                ->html(
                     $this->renderView(
                         'emails/coshifter_message.html.twig',
                         array(
@@ -654,8 +657,7 @@ class ShiftController extends Controller
                             'firstnames' => $firstnames,
                             'shift' => $shift
                         )
-                    ),
-                    'text/html'
+                    )
                 );
             $mailer->send($message);
 

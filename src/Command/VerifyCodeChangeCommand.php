@@ -9,6 +9,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
@@ -59,15 +61,15 @@ class VerifyCodeChangeCommand extends ContainerAwareCommand
                     $router = $this->getContainer()->get('router');
                     $code_change_done_url = $router->generate('code_change_done', array('token' => $this->getContainer()->get('App\Helper\SwipeCard')->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
                     $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-                    $reminder = (new \Swift_Message('[ESPACE MEMBRES] As tu réussi à changer le code du boîtier ?'))
-                        ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                        ->setTo($last->getRegistrar()->getEmail())
-                        ->setBody(
+                    $reminder = (new Email())
+                        ->suject('[ESPACE MEMBRES] As tu réussi à changer le code du boîtier ?')
+                        ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
+                        ->to($last->getRegistrar()->getEmail())
+                        ->html(
                             $this->getContainer()->get('twig')->render(
                                 'emails/code_need_change_confirmation.html.twig',
                                 array('code' => $last,'changeCodeUrl' => $code_change_done_url)
-                            ),
-                            'text/html'
+                            )
                         );
                     $mailer->send($reminder);
                     $message = 'email envoyé';

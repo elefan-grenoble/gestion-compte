@@ -9,6 +9,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Validator\Constraints\Date;
 
 class SendMassMailCommand extends ContainerAwareCommand
@@ -105,21 +107,19 @@ class SendMassMailCommand extends ContainerAwareCommand
                 $to[] = $user->getEmail();
             }
         }
-        $message = (new \Swift_Message($subject))
-            ->setFrom($from)
-            ->addPart(
-                $body,
-                'text/html'
-            );
+        $message = (new Email())
+            ->subject($subject)
+            ->from($from)
+            ->html($body);
         if ($test_email && filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=cyan;>>>> mode test, BAT envoyé à '.$test_email.' </>');
-            $message->setTo($test_email);
+            $message->to($test_email);
         }else if($test_email && !filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=red;> Mail BAT wrong format ! </>');
             return;
         }else{
-            $message->setTo($from);
-            $message->setBcc($to);
+            $message->to($from);
+            $message->bcc($to);
         }
         $mailer->send($message);
 
