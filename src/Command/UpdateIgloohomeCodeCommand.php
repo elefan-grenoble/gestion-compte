@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 
 class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
 {
@@ -49,10 +51,11 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
             $output->writeln('<fg=red;> Echec de la création du code (code http retourné : ' . $status . '). Réponse : ' . $content . '</>');
             $mailer = $this->getContainer()->get('mailer');
             $shiftEmail = $this->getContainer()->getParameter('emails.shift');
-            $mail = (new \Swift_Message('[ESPACE MEMBRES] Echec de création du code du boitier'))
-                ->setFrom($shiftEmail['address'], $shiftEmail['from_name'])
-                ->setTo($recipients)
-                ->setBody('Echec de génération du code du boitier Igloohome');
+            $mail = (new Email())
+                ->subject('[ESPACE MEMBRES] Echec de création du code du boitier')
+                ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
+                ->to($recipients)
+                ->text('Echec de génération du code du boitier Igloohome');
             $mailer->send($mail);
             return;
         }
