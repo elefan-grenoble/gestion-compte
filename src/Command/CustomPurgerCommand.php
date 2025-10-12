@@ -36,6 +36,8 @@ class CustomPurgerCommand extends ContainerAwareCommand
         $purger->purge();
 
         $output->writeln('Database purged successfully with custom purger.');
+
+        return 0;
     }
 
 }

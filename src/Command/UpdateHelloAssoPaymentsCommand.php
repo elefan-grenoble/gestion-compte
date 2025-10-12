@@ -50,6 +50,8 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
         $output->writeln('Searching from '.$from->format('Y-m-d'));
 
         $this->processPage($formSlug, $from, 1);
+
+        return 0;
     }
 
     private function processPage(string $formSlug, \DateTimeInterface $from, int $page)

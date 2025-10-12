@@ -23,7 +23,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int
      * @throws \Doctrine\ORM\ORMException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -57,5 +57,7 @@ class InitTimeLogCommand extends ContainerAwareCommand
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
         $output->writeln($countCycleBeginning . ' logs de début de cycle créés');
+
+        return 0;
     }
 }

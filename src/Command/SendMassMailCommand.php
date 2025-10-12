@@ -50,12 +50,12 @@ class SendMassMailCommand extends ContainerAwareCommand
         }else{
             //email not listed !
             $output->writeln('<fg=red;> cet expéditeur n\'est pas autorisé ! </>');
-            return;
+            return 2;
         }
 
         if (!$subject){
             $output->writeln('<fg=red;> le sujet est requis ! </>');
-            return;
+            return 2;
         }
 
         $mailer = $this->getContainer()->get('mailer');
@@ -64,7 +64,7 @@ class SendMassMailCommand extends ContainerAwareCommand
 
         if (!$body){
             $output->writeln('<fg=red;> file content not found ! </>');
-            return;
+            return 2;
         }else{
             /*$template = $this->getContainer()->get('twig')->createTemplate($body);
             $body = $template->render(array());*/
@@ -116,7 +116,7 @@ class SendMassMailCommand extends ContainerAwareCommand
             $message->to($test_email);
         }else if($test_email && !filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=red;> Mail BAT wrong format ! </>');
-            return;
+            return 2;
         }else{
             $message->to($from);
             $message->bcc($to);
@@ -124,5 +124,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         $mailer->send($message);
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> message envoyé à '.count($to).' beneficiaires ('.count($memberships).' comptes membre) </>');
+
+        return 0;
     }
 }

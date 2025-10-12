@@ -49,5 +49,7 @@ class FixBeneficiariesWithoutAddressCommand extends ContainerAwareCommand
         }
 
         $em->flush();
+
+        return 0;
     }
 }

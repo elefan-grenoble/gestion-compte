@@ -41,7 +41,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         $date = date_create_from_format('Y-m-d', $date_given);
         if (!$date || $date->format('Y-m-d') != $date_given) {
             $output->writeln('<error>Wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $date->setTime(0, 0);
 
@@ -66,6 +66,8 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
         } else {
             $output->writeln('<comment>No shift alert to send</>');
         }
+
+        return 0;
     }
 
     private function computeAlerts(DateTime $date, $jobs) {
