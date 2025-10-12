@@ -28,14 +28,14 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
         $reserve_new_shift_to_prior_shifter = $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter');
         if (!$reserve_new_shift_to_prior_shifter) {
             $output->writeln('<fg=red;> reserve_new_shift_to_prior_shifter parameter must be true </>');
-            return;
+            return 1;
         }
 
         $date_given = $input->getArgument('date');
         $date = date_create_from_format('Y-m-d',$date_given);
         if (!$date || $date->format('Y-m-d') != $date_given){
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $date->setTime(0,0);
         $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
@@ -52,5 +52,7 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
 
         $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
         $output->writeln($message);
+
+        return 0;
     }
 }

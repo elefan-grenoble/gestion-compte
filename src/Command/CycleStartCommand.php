@@ -27,7 +27,7 @@ class CycleStartCommand extends ContainerAwareCommand
             $from = date_create_from_format('Y-m-d', $date);
             if (!$from || $from->format('Y-m-d') != $date) {
                 $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-                return;
+                return 2;
             }
             $date = $from->setTime(0, 0, 0);
         } else {
@@ -52,6 +52,8 @@ class CycleStartCommand extends ContainerAwareCommand
         }
         $message = $count . ' event(s) created';
         $output->writeln($message);
+
+        return 0;
     }
 
 }

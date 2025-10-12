@@ -40,7 +40,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
         if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         if ($to_given) {
             $to = date_create_from_format('Y-m-d', $to_given);
@@ -138,6 +138,8 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');
         $this->printRecapMessage($output, $count_new_all, $count_existing_all);
+
+        return 0;
     }
 
     protected function lastCycleDate(\DateTime $date)

@@ -57,7 +57,7 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
                 ->to($recipients)
                 ->text('Echec de génération du code du boitier Igloohome');
             $mailer->send($mail);
-            return;
+            return 1;
         }
 
         $newCodeValue = $response->toArray()['code'];
@@ -92,6 +92,8 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
         $em->flush();
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> Nouveau code généré avec succès </>');
+
+        return 0;
     }
 
 }

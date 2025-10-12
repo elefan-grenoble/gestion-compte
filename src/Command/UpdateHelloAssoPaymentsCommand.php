@@ -31,7 +31,7 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 
         if (!$campaignJson){
             $output->writeln('Campaign not found :(');
-            return;
+            return 1;
         }
 
         $delay = $input->getOption('delay');
@@ -43,7 +43,7 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 
         if (!$paymentsJson || !isset($paymentsJson->resources) || !is_array($paymentsJson->resources) || !isset($paymentsJson->pagination)) {
             $output->writeln('Incorrect payments result :(');
-            return;
+            return 1;
         }
 
         $nbOfPages = $paymentsJson->pagination->max_page;
@@ -57,6 +57,8 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
             $paymentsJson = $helloAssoClient->get('campaigns/' . $campaignId . '/payments', array('from' => $from->toDateString(), 'page' => $i));
             $this->processPage($paymentsJson->resources, $output);
         }
+
+        return 0;
     }
 
     private function processPage(array $resources, OutputInterface $output)
