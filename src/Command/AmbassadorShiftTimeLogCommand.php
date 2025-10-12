@@ -40,6 +40,8 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
         } else {
             $output->writeln('<fg=cyan;>No shift alert to send</>');
         }
+
+        return 0;
     }
 
 

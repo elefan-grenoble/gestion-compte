@@ -233,6 +233,8 @@ class ImportUsersCommand extends CsvCommand
             $output->writeln("");
         }
         //$progress->finish();
+
+        return 0;
     }
 
 }

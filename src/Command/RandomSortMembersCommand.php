@@ -33,14 +33,14 @@ class RandomSortMembersCommand extends ContainerAwareCommand
         $last_registration = date_create_from_format('Y-m-d',$given_date);
         if (!$last_registration || $last_registration->format('Y-m-d') != $given_date){
             $output->writeln('<fg=red;> wrong date format for minimum date. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $given_mdate = $input->getOption('max_date');
         if ($given_mdate){
             $max_last_registration = date_create_from_format('Y-m-d',$given_mdate);
             if (!$max_last_registration || $max_last_registration->format('Y-m-d') != $given_mdate){
                 $output->writeln('<fg=red;> wrong date format for maximum date. Use Y-m-d </>');
-                return;
+                return 2;
             }
         }
         $file = $input->getOption('file');
@@ -94,5 +94,6 @@ class RandomSortMembersCommand extends ContainerAwareCommand
             echo $csv;
         }
 
+        return 0;
     }
 }

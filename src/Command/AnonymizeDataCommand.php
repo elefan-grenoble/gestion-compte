@@ -14,12 +14,12 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 class AnonymizeDataCommand extends ContainerAwareCommand
@@ -41,7 +41,6 @@ class AnonymizeDataCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         // Create a new question helper instance
         $helper = $this->getHelper('question');
 

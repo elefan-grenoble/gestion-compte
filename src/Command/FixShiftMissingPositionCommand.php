@@ -35,7 +35,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
             // TODO : add filter on weekCycle
             // what if the cycle changed ?
             $output->writeln('<error>Currently only works for coops without cycle_type.</error>');
-            return;
+            return 1;
         }
 
         if ($shifts_without_position) {
@@ -101,5 +101,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
                 $output->writeln('<info>' . $shifts_without_position_fixed . ' créneau' . (($shifts_without_position_fixed>1) ? 'x':'') . ' réparé' . (($shifts_without_position_fixed>1) ? 's':'') . '</info>');
             }
         }
+
+        return 0;
     }
 }

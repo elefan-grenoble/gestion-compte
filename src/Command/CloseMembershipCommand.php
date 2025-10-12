@@ -57,6 +57,8 @@ class CloseMembershipCommand extends ContainerAwareCommand
 
         $message = $count . ' membership(s) closed';
         $output->writeln($message);
+
+        return 0;
     }
 
 }

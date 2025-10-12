@@ -49,5 +49,7 @@ class FixTimeLogCommand extends ContainerAwareCommand
 
         $em->flush();
         $output->writeln($countShiftLogs . ' logs de créneaux réalisés créés');
+
+        return 0;
     }
 }

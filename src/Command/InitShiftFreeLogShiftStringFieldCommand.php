@@ -21,7 +21,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends ContainerAwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int
      * @throws \Doctrine\ORM\ORMException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -44,5 +44,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends ContainerAwareCommand
 
         $em->flush();
         $output->writeln($countShiftFreeLogs . ' logs mis à jour !');
+
+        return 0;
     }
 }

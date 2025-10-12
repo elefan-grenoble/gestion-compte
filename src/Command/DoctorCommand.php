@@ -128,5 +128,6 @@ class DoctorCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>>>></><fg=green;>'.$counter.' correction(s) apportée(s) aux adhésion(s)'.' </>');
         }
 
+        return 0;
     }
 }

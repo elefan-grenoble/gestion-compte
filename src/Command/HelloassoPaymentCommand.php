@@ -63,6 +63,8 @@ class HelloassoPaymentCommand extends ContainerAwareCommand
                 $output->writeln("<error>No payement found for id #".$save_after_id."</error>");
             }
         }
+
+        return 0;
     }
 
 }

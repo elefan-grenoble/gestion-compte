@@ -37,6 +37,8 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
         $em->flush();
         $message = $count . ' membre' . (($count > 1) ? 's' : '') . ' mis à jour';
         $output->writeln($message);
+
+        return 0;
     }
 
 }

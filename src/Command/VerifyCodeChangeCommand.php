@@ -28,7 +28,6 @@ class VerifyCodeChangeCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $last_run = $input->getOption('last_run');
         $last_run_date = new \DateTime();
         $last_run_date->modify("-".$last_run." hours");
@@ -84,5 +83,6 @@ class VerifyCodeChangeCommand extends ContainerAwareCommand
             }
         }
 
+        return 0;
     }
 }

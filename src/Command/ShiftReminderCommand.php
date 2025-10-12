@@ -29,7 +29,7 @@ class ShiftReminderCommand extends ContainerAwareCommand
         $from = date_create_from_format('Y-m-d',$from_given);
         if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $output->writeln('<fg=cyan;>'.$from->format('d M Y').'</>');
 
@@ -55,5 +55,7 @@ class ShiftReminderCommand extends ContainerAwareCommand
 
         $message = $count_reminder_sent . ' email' . (($count_reminder_sent>1) ? 's':'') . ' envoyé' . (($count_reminder_sent>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
+
+        return 0;
     }
 }
