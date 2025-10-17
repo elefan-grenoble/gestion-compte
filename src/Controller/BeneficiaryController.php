@@ -237,7 +237,8 @@ class BeneficiaryController extends Controller
                 ->getForm();
         }
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $firstname = $form->get('firstname')->getData();
             $beneficiaries = $em->getRepository(Beneficiary::class)->findActiveFromFirstname($firstname);
 

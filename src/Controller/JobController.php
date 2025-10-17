@@ -194,7 +194,8 @@ class JobController extends Controller
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0);
