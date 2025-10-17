@@ -633,7 +633,8 @@ class ShiftController extends Controller
         $coShifters = $em->getRepository('App:Beneficiary')->findCoShifters($shift);
         $form = $this->createShiftContactForm($shift, $coShifters);
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
             $from = $em->getRepository('App:Beneficiary')->findOneBy(array('id' => $from));

@@ -271,7 +271,8 @@ class AdminController extends Controller
             //->add('compute', SubmitType::class, array('label' => 'Importer les données'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
 
             // Get file
             $file = $form->get('submitFile');
