@@ -479,7 +479,8 @@ class MembershipController extends Controller
             ->add('find', SubmitType::class, array('label' => 'Activer mon compte'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
             $ms = $em->getRepository('App:Membership')->findOneBy(array('member_number' => $member_number));

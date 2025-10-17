@@ -298,7 +298,8 @@ class EventController extends Controller
             ->setMethod('POST')
             ->getForm();
 
-        if ($search_form->handleRequest($request)->isValid()) {
+        $search_form->handleRequest($request);
+        if ($search_form->isSubmitted() && $search_form->isValid()) {
             $firstname = $search_form->get('firstname')->getData();
             $qb = $em->createQueryBuilder();
             $beneficiaries_request = $qb->select('b')->from('App\Entity\Beneficiary', 'b')
