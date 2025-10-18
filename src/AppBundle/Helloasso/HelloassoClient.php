@@ -79,7 +79,7 @@ class HelloassoClient
     /**
      * @throws ClientExceptionInterface
      */
-    public function getFormPayments(string $formType, string $formSlug, int $page = 1): \stdClass
+    public function getFormPayments(string $formType, string $formSlug, array $params): \stdClass
     {
         $result = $this->getClient()->get(
             sprintf(
@@ -89,7 +89,7 @@ class HelloassoClient
                 $formSlug,
             ),
             [
-                'query' => ['page' => $page],
+                'query' => $params,
             ],
         );
 

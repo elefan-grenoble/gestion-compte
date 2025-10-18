@@ -94,7 +94,7 @@ class HelloassoController extends Controller
     {
         $currentPage = $request->get('page', 1);
         try {
-            $payments = $helloassoClient->getFormPayments($formType, $slug, $currentPage);
+            $payments = $helloassoClient->getFormPayments($formType, $slug, ['page' => $currentPage]);
             $details = $helloassoClient->getFormDetails($formType, $slug);
         } catch (ClientExceptionInterface $e) {
             $session = new Session();

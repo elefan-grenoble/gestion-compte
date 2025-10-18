@@ -84,7 +84,7 @@ parameters:
     registration_every_civil_year: false
     registration_manual_enabled: true
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
-    helloasso_campaign_id:
+    helloasso_campaign_slug:
     helloasso_client_id:
     helloasso_client_secret:
     helloasso_organization_slug:
