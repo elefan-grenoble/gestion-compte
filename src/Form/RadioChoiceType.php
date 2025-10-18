@@ -17,7 +17,6 @@ class RadioChoiceType extends AbstractType
         $resolver->setDefaults([
             'expanded' => true,
             'multiple' => false,
-            'block_prefix' => 'radio_choice'
         ]);
     }
 
