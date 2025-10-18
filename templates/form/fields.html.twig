@@ -14,13 +14,16 @@
         <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     {% endspaceless %}
     <script>
-        defer(function(){
-            // Init autocomplete
+        function autocomplete_membership_widget() {
             $('#{{ id }}').autocomplete({
                 data: {{ membership_service.autocompleteMemberships | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
                 limit: 6,
             });
-        });
+        }
+
+        document.readyState === "loading" ?
+            document.addEventListener('DOMContentLoaded', autocomplete_membership_widget) :
+            autocomplete_membership_widget();
     </script>
 {% endblock %}
 
@@ -29,13 +32,16 @@
         <input type="text" {{ block('widget_attributes') }} {% if value is not empty %}value="{{ value }}" {% endif %}/>
     {% endspaceless %}
     <script>
-        defer(function(){
-            // Init autocomplete
+        function autocomplete_beneficiary_widget() {
             $('#{{ id }}').autocomplete({
                 data: {{ beneficiary_service.autocompleteBeneficiaries | json_encode(constant('JSON_UNESCAPED_UNICODE')) | raw }},
                 limit: 6,
             });
-        });
+        }
+
+        document.readyState === "loading" ?
+            document.addEventListener('DOMContentLoaded', autocomplete_beneficiary_widget) :
+            autocomplete_beneficiary_widget();
     </script>
 {% endblock %}
 
@@ -50,7 +56,7 @@
     <div {% if id is not empty %}id="{{ id }}_chips"{% endif %} class="chips">
     </div>
     <script>
-        defer(function() {
+        function autocomplete_beneficiary_collection_widget() {
             function updateInput{{ id }}Forms() {
                 var chipsData = M.Chips.getInstance($('#{{ id }}_chips')).chipsData;
                 var list = $('#{{ id }}');
@@ -90,7 +96,11 @@
                 onChipAdd: updateInput{{ id }}Forms,
                 onChipDelete: updateInput{{ id }}Forms,
             });
-        });
+        }
+
+        document.readyState === "loading" ?
+            document.addEventListener('DOMContentLoaded', autocomplete_beneficiary_collection_widget) :
+            autocomplete_beneficiary_collection_widget();
     </script>
 {% endblock %}
 
