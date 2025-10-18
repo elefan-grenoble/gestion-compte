@@ -59,47 +59,49 @@
                 {% endif %}
                 <script>
                     var max_b = {{ maximum_nb_of_beneficiaries_in_membership }};
-                    defer(function() {
-                        jQuery(document).ready(function () {
-                            jQuery('#appbundle_anonymous_beneficiary_mode').change(function () {
-                                var $amount = jQuery('#appbundle_anonymous_beneficiary_amount');
-                                if (jQuery(this).val()==='{{ constant('App\\Entity\\Registration::TYPE_HELLOASSO') }}'){
-                                    var old_val = $amount.val();
-                                    $amount.data('old-amount',old_val);
-                                    $amount.val('--');
-                                    $amount.attr('disabled','disabled');
-                                }else if ($amount.is(':disabled')){
-                                    var old_val = $amount.data('old-amount');
-                                    $amount.val(old_val);
-                                    $amount.removeAttr('disabled');
-                                }
-                            });
-                            jQuery('.add-another-collection-widget').click(function (e) {
-                                e.preventDefault();
-                                var list = $($(this).attr('data-list-selector'));
-                                // Try to find the counter of the list or use the length of the list
-                                var counter = list.data('widget-counter') | list.children().length;
-
-                                // grab the prototype template
-                                var newWidget = list.attr('data-prototype');
-                                // replace the "__name__" used in the id and name of the prototype
-                                // with a number that's unique to your emails
-                                // end name attribute looks like name="contact[emails][2]"
-                                newWidget = newWidget.replace(/__name__/g, counter);
-                                // Increase the counter
-                                counter++;
-                                // And store it, the length cannot be used if deleting widgets is allowed
-                                list.data('widget-counter', counter);
-
-                                // create a new list element and add it to the list
-                                var newElem = jQuery(list.attr('data-widget-tags')).html(newWidget);
-                                newElem.appendTo(list);
-                                if ((max_b-1)<=counter){
-                                    $(this).hide();
-                                }
-                            });
+                    function user_quick_form() {
+                        jQuery('#appbundle_anonymous_beneficiary_mode').change(function () {
+                            var $amount = jQuery('#appbundle_anonymous_beneficiary_amount');
+                            if (jQuery(this).val()==='{{ constant('App\\Entity\\Registration::TYPE_HELLOASSO') }}'){
+                                var old_val = $amount.val();
+                                $amount.data('old-amount',old_val);
+                                $amount.val('--');
+                                $amount.attr('disabled','disabled');
+                            }else if ($amount.is(':disabled')){
+                                var old_val = $amount.data('old-amount');
+                                $amount.val(old_val);
+                                $amount.removeAttr('disabled');
+                            }
                         });
-                    });
+                        jQuery('.add-another-collection-widget').click(function (e) {
+                            e.preventDefault();
+                            var list = $($(this).attr('data-list-selector'));
+                            // Try to find the counter of the list or use the length of the list
+                            var counter = list.data('widget-counter') | list.children().length;
+
+                            // grab the prototype template
+                            var newWidget = list.attr('data-prototype');
+                            // replace the "__name__" used in the id and name of the prototype
+                            // with a number that's unique to your emails
+                            // end name attribute looks like name="contact[emails][2]"
+                            newWidget = newWidget.replace(/__name__/g, counter);
+                            // Increase the counter
+                            counter++;
+                            // And store it, the length cannot be used if deleting widgets is allowed
+                            list.data('widget-counter', counter);
+
+                            // create a new list element and add it to the list
+                            var newElem = jQuery(list.attr('data-widget-tags')).html(newWidget);
+                            newElem.appendTo(list);
+                            if ((max_b-1)<=counter){
+                                $(this).hide();
+                            }
+                        });
+                    }
+
+                    document.readyState === "loading" ?
+                        document.addEventListener('DOMContentLoaded', user_quick_form) :
+                        user_quick_form();
                 </script>
             </div>
         </div>
