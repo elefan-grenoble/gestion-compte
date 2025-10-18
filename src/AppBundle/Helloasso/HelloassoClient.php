@@ -89,7 +89,7 @@ class HelloassoClient
                 $formSlug,
             ),
             [
-                'query' => $params,
+                'query' => array_merge($params, ['states' => ['Authorized']]),
             ],
         );
 
@@ -116,13 +116,14 @@ class HelloassoClient
     /**
      * @throws ClientExceptionInterface
      */
-    public function getPaymentDetails(string $paymentId): \stdClass
+    public function getPayments(string $paymentId): \stdClass
     {
         $result = $this->getClient()->get(
             sprintf(
                 'payments/%s',
                 $paymentId,
             ),
+            ['query' => ['states' => ['Authorized']]]
         );
 
         return json_decode((string)$result->getBody());

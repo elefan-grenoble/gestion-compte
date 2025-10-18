@@ -137,7 +137,7 @@ class HelloassoController extends Controller
         }
 
         try {
-            $payment = $helloassoClient->getPaymentDetails($paymentId);
+            $payment = $helloassoClient->getPayments($paymentId);
         } catch (ClientExceptionInterface $e) {
             $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
             if ($knownCampaign) {
