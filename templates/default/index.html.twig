@@ -131,7 +131,7 @@
                 </a>
 
                 <script>
-                    defer(function () {
+                    function index() {
                         var cookie_data = myCookieInit({'last_processupdates_check' : "{{ app.user.beneficiary | last_shift_date | date_w3c }}".replace('+','_')});
                         jQuery.ajax(process_update_count_unread_url,{
                             data: {date: cookie_data.last_processupdates_check.replace('_','+')},
@@ -145,7 +145,11 @@
                             }
                         }
                         });
-                    });
+                    }
+
+                    document.readyState === "loading" ?
+                        document.addEventListener('DOMContentLoaded', index) :
+                        index();
                 </script>
             </div>
 

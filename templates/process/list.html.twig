@@ -56,7 +56,7 @@
     </div>
     {% if app.user.beneficiary %}
     <script>
-        defer(function () {
+        function process_list() {
             var data_raw = Cookies.get("frontend");
             var cookie_data = undefined;
             if (data_raw)
@@ -65,7 +65,11 @@
                 cookie_data = {};
             cookie_data.last_processupdates_check = "{{ date('now') | date_w3c }}".replace('+','_'); //checked now
             Cookies.set("frontend", cookie_data);
-        });
+        }
+
+        document.readyState === "loading" ?
+            document.addEventListener('DOMContentLoaded', process_list) :
+            process_list();
     </script>
     {% endif %}
     {% if is_granted("ROLE_PROCESS_MANAGER") %}
