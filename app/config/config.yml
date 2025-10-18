@@ -38,6 +38,8 @@ framework:
   assets: ~
   php_errors:
     log: true
+  cache:
+    app: cache.adapter.filesystem
 
 # Twig Configuration
 twig:
