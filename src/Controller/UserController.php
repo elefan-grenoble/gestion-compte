@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -154,7 +154,7 @@ class UserController extends Controller
      * @Route("/quick_new", name="user_quick_new", methods={"GET","POST"})
      * @Security("has_role('ROLE_USER_VIEWER')")
      */
-    public function quickNewAction(Request $request, Mailer $mailer)
+    public function quickNewAction(Request $request, MailerInterface $mailer)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();

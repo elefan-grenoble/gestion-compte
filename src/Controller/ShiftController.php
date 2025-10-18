@@ -27,7 +27,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -625,7 +625,7 @@ class ShiftController extends Controller
     /**
      * @Route("/{id}/contact_form", name="shift_contact_form", methods={"GET","POST"})
      */
-    public function contactFormAction(Request $request, Shift $shift, Mailer $mailer)
+    public function contactFormAction(Request $request, Shift $shift, MailerInterface $mailer)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();

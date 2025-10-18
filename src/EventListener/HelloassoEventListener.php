@@ -9,7 +9,7 @@ use App\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -21,7 +21,7 @@ class HelloassoEventListener
     protected $mailer;
     protected $member_email;
 
-    public function __construct(EntityManager $entityManager, Container $container, Mailer $mailer)
+    public function __construct(EntityManager $entityManager, Container $container, MailerInterface $mailer)
     {
         $this->em = $entityManager;
         $this->container = $container;

@@ -21,7 +21,7 @@ use App\Event\ShiftDeletedEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -38,7 +38,7 @@ class EmailingEventListener
     protected $wiki_keys_url;
     protected $reserve_new_shift_to_prior_shifter_delay;
 
-    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, Mailer $mailer)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, MailerInterface $mailer)
     {
         $this->em = $entityManager;
         $this->logger = $logger;
