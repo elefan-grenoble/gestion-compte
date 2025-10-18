@@ -23,7 +23,6 @@ class AutocompleteMembershipType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'block_prefix' => 'autocomplete_membership',
             'attr' => ['class' => 'autocomplete'],
         ]);
     }
@@ -37,5 +36,4 @@ class AutocompleteMembershipType extends AbstractType
     {
         $builder->addModelTransformer($this->transformer);
     }
-
 }
