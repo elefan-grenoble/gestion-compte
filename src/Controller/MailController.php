@@ -18,7 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
-use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
@@ -106,7 +106,7 @@ class MailController extends Controller
      *
      * @Route("/send", name="mail_send", methods={"POST"})
      */
-    public function sendAction(Request $request, Mailer $mailer)
+    public function sendAction(Request $request, MailerInterface $mailer)
     {
         $session = new Session();
         $mailform = $this->getMailForm();
@@ -138,7 +138,9 @@ class MailController extends Controller
             $mailerService = $this->get('mailer_service');
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailerService->getAllowedEmails())) {
-                $from = array($from_email => array_search($from_email, $mailerService->getAllowedEmails()));
+                $from_name_and_address = array_search($from_email, $mailerService->getAllowedEmails());
+                $from_name = preg_replace("/<.*>$/", "", $from_name_and_address);
+                $from = new Address($from_email, $from_name);
             } else {
                 //email not listed !
                 $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
