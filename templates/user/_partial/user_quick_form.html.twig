@@ -60,8 +60,8 @@
                 <script>
                     var max_b = {{ maximum_nb_of_beneficiaries_in_membership }};
                     function user_quick_form() {
-                        jQuery('#appbundle_anonymous_beneficiary_mode').change(function () {
-                            var $amount = jQuery('#appbundle_anonymous_beneficiary_amount');
+                        jQuery('#anonymous_beneficiary_mode').change(function () {
+                            var $amount = jQuery('#anonymous_beneficiary_amount');
                             if (jQuery(this).val()==='{{ constant('App\\Entity\\Registration::TYPE_HELLOASSO') }}'){
                                 var old_val = $amount.val();
                                 $amount.data('old-amount',old_val);
