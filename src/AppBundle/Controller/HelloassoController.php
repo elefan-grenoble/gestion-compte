@@ -6,6 +6,7 @@ use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
 use AppBundle\Helloasso\HelloassoClient;
+use AppBundle\Helloasso\HelloassoPaymentHandler;
 use Psr\Http\Client\ClientExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -116,44 +117,30 @@ class HelloassoController extends Controller
      * @Route("/manualPaimentAdd/{paymentId}", name="helloasso_manual_paiement_add", methods={"POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, string $paymentId)
+    public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $paymentHandler, string $paymentId)
     {
         $session = new Session();
-
-        $formType = $request->get("formType");
-        $slug = $request->get("slug");
-        $knownCampaign = is_string($formType) && is_string($slug);
-
-        $em = $this->getDoctrine()->getManager();
-        $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(['paymentId' => $paymentId]);
-
-        if ($exist) {
-            $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
-            if ($knownCampaign) {
-                return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $formType, 'slug' => $slug]);
-            }
-
-            return $this->redirectToRoute('helloasso_browser');
-        }
 
         try {
             $payment = $helloassoClient->getPayments($paymentId);
         } catch (ClientExceptionInterface $e) {
             $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
-            if ($knownCampaign) {
+            $formType = $request->get("formType");
+            $slug = $request->get("slug");
+            if (is_string($formType) && is_string($slug)) {
                 return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $formType, 'slug' => $slug]);
             }
 
             return $this->redirectToRoute('helloasso_browser');
         }
 
-        $paymentEntity = HelloassoPayment::createFromPayementObject($payment);
-        $em->persist($paymentEntity);
-        $em->flush();
+        $newPayment = $paymentHandler->savePayments([$payment]);
 
-        $this->get('event_dispatcher')->dispatch(HelloassoEvent::PAYMENT_AFTER_SAVE, new HelloassoEvent($paymentEntity));
-
-        $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
+        if (count($newPayment) === 0) {
+            $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
+        } else {
+            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
+        }
 
         return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $payment->order->formType, 'slug' => $payment->order->formSlug]);
     }
