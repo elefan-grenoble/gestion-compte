@@ -116,14 +116,13 @@ class HelloassoClient
     /**
      * @throws ClientExceptionInterface
      */
-    public function getPayments(string $paymentId): \stdClass
+    public function getPayment(string $paymentId): \stdClass
     {
         $result = $this->getClient()->get(
             sprintf(
                 'payments/%s',
                 $paymentId,
             ),
-            ['query' => ['states' => ['Authorized']]]
         );
 
         return json_decode((string)$result->getBody());

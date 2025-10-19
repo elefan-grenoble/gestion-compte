@@ -122,7 +122,7 @@ class HelloassoController extends Controller
         $session = new Session();
 
         try {
-            $payment = $helloassoClient->getPayments($paymentId);
+            $payment = $helloassoClient->getPayment($paymentId);
         } catch (ClientExceptionInterface $e) {
             $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
             $formType = $request->get("formType");
