@@ -9,7 +9,8 @@ use App\Entity\Proxy;
 use App\Event\EventProxyCreatedEvent;
 use App\Form\ProxyType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("events")
  */
-class EventController extends Controller
+class EventController extends AbstractController
 {
     /**
      * Event widget display
@@ -102,7 +103,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function giveProxyAction(Event $event, Request $request)
+    public function giveProxyAction(Event $event, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -187,8 +188,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
             }
 
             return $this->redirectToRoute('homepage');
@@ -238,8 +238,7 @@ class EventController extends Controller
                     $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()) {
-                        $dispatcher = $this->get('event_dispatcher');
-                        $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                        $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
                     }
 
                     return $this->redirectToRoute('homepage');
@@ -377,7 +376,7 @@ class EventController extends Controller
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function acceptProxyAction(Event $event, Request $request)
+    public function acceptProxyAction(Event $event, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -434,8 +433,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
             }
 
             return $this->redirectToRoute('homepage');

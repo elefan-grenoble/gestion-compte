@@ -7,7 +7,7 @@ use App\Entity\Job;
 use App\Entity\Period;
 use App\Service\PeriodFormHelper;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -17,7 +17,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("period")
  */
-class PeriodController extends Controller
+class PeriodController extends AbstractController
 {
     /**
      * Display all the period (available and reserved) anonymized

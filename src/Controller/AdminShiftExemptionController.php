@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\ShiftExemption;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("admin/shifts/exemptions")
  */
-class AdminShiftExemptionController extends Controller
+class AdminShiftExemptionController extends AbstractController
 {
     /**
      * Lists all shiftExemption entities.

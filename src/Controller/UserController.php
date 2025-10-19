@@ -17,8 +17,10 @@ use App\Form\AnonymousBeneficiaryType;
 use App\Form\BeneficiaryType;
 use App\Form\NoteType;
 use App\Form\UserAdminType;
+use App\Service\MembershipService;
 use FOS\UserBundle\Event\UserEvent;
 use FOS\UserBundle\FOSUserEvents;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -28,7 +30,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
@@ -41,7 +43,7 @@ use Twig\Sandbox\SecurityError;
  *
  * @Route("user")
  */
-class UserController extends Controller
+class UserController extends AbstractController
 {
     private $_current_app_user;
 
@@ -110,7 +112,7 @@ class UserController extends Controller
      * @param Request $request
      * @return Response
      */
-    public function changePasswordAction(Request $request)
+    public function changePasswordAction(Request $request, EventDispatcherInterface $event_dispatcher)
     {
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
@@ -130,9 +132,8 @@ class UserController extends Controller
                 $em->persist($this->getUser());
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 $event = new UserEvent($this->getUser(), $request);
-                $dispatcher->dispatch(FOSUserEvents::USER_PASSWORD_CHANGED, $event);
+                $event_dispatcher->dispatch(FOSUserEvents::USER_PASSWORD_CHANGED, $event);
 
                 $session = new Session();
                 $session->getFlashBag()->add('success', 'Mot de passe enregistré, merci !');
@@ -154,7 +155,7 @@ class UserController extends Controller
      * @Route("/quick_new", name="user_quick_new", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER_VIEWER')")
      */
-    public function quickNewAction(Request $request, MailerInterface $mailer)
+    public function quickNewAction(Request $request, MailerInterface $mailer, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -169,8 +170,7 @@ class UserController extends Controller
             $em->persist($ab);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
+            $event_dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
 
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
             return $this->redirectToRoute('user_quick_new');
@@ -256,11 +256,11 @@ class UserController extends Controller
      * @Route("/self_register", name="user_self_register", methods={"GET"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function selfRegistrationAction()
+    public function selfRegistrationAction(MembershipService $membership_service)
     {
         $session = new Session();
         $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
-        if (!$this->get('membership_service')->canRegister($membership)) {
+        if (!$membership_service->canRegister($membership)) {
             $session->getFlashBag()->add('warning', 'Pas besoin de ré-adhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }
@@ -353,10 +353,9 @@ class UserController extends Controller
      * @Route("/pre_users/{id}/recall", name="pre_user_recall", methods={"GET"})
      * @Security("is_granted('ROLE_USER_VIEWER')")
      */
-    public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary)
+    public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary, EventDispatcherInterface $event_dispatcher)
     {
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
+        $event_dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
 
         $anonymousBeneficiary->setRecallDate(new \DateTime());
         $em = $this->getDoctrine()->getManager();

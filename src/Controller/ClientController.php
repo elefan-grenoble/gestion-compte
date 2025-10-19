@@ -7,7 +7,7 @@ use App\Entity\Client;
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ClientType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("admin/clients")
  */
-class ClientController extends Controller
+class ClientController extends AbstractController
 {
 
     /**

@@ -10,7 +10,8 @@ use App\Form\AutocompleteBeneficiaryType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Psr\Http\Client\ClientExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -20,7 +21,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("helloasso")
  */
-class HelloassoController extends Controller
+class HelloassoController extends AbstractController
 {
 
     /**
@@ -179,7 +180,7 @@ class HelloassoController extends Controller
      * @Route("/payment/{id}/edit", name="helloasso_payment_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
-    public function editPaymentAction(Request $request, HelloassoPayment $payment)
+    public function editPaymentAction(Request $request, HelloassoPayment $payment, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
 
@@ -194,8 +195,7 @@ class HelloassoController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $form->get("subscriber")->getData();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 HelloassoEvent::ORPHAN_SOLVE,
                 new HelloassoEvent($payment, $beneficiary->getUser())
             );
@@ -267,14 +267,13 @@ class HelloassoController extends Controller
      * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan", methods={"GET"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function confirmOrphan(HelloassoPayment $payment,$code){
+    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher){
         $code = urldecode($code);
         $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
             $session->getFlashBag()->add('success', 'Merci !');
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 HelloassoEvent::ORPHAN_SOLVE,
                 new HelloassoEvent($payment, $this->getUser())
             );
