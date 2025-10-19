@@ -7,18 +7,18 @@ use App\Event\HelloassoEvent;
 use App\Form\AutocompleteBeneficiaryType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Helloasso controller.
  *
  * @Route("helloasso")
  */
-class HelloassoController extends Controller
+class HelloassoController extends AbstractController
 {
 
     /**
@@ -125,7 +125,7 @@ class HelloassoController extends Controller
      * @Route("/manualPaimentAdd/", name="helloasso_manual_paiement_add", methods={"POST"})
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoManualPaimentAddAction(Request $request)
+    public function helloassoManualPaimentAddAction(Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         if (!($paiementId = $request->get('paiementId'))) {
@@ -144,7 +144,6 @@ class HelloassoController extends Controller
 
             $payments = array();
             $action_json = null;
-            $dispatcher = $this->get('event_dispatcher');
             foreach ($payment_json->actions as $action) {
                 $action_json = $this->container->get('App\Helper\Helloasso')->get('actions/' . $action->id);
                 $payment = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
@@ -161,7 +160,7 @@ class HelloassoController extends Controller
                 $payments[$payment->getId()] = $payment;
             }
             foreach ($payments as $payment) {
-                $dispatcher->dispatch(
+                $event_dispatcher->dispatch(
                     HelloassoEvent::PAYMENT_AFTER_SAVE,
                     new HelloassoEvent($payment)
                 );
@@ -205,7 +204,7 @@ class HelloassoController extends Controller
      * @Route("/payment/{id}/edit", name="helloasso_payment_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
-    public function editPaymentAction(Request $request, HelloassoPayment $payment)
+    public function editPaymentAction(Request $request, HelloassoPayment $payment, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
 
@@ -220,8 +219,7 @@ class HelloassoController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $form->get("subscriber")->getData();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 HelloassoEvent::ORPHAN_SOLVE,
                 new HelloassoEvent($payment, $beneficiary->getUser())
             );
@@ -293,14 +291,13 @@ class HelloassoController extends Controller
      * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan", methods={"GET"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function confirmOrphan(HelloassoPayment $payment,$code){
+    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher){
         $code = urldecode($code);
         $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
             $session->getFlashBag()->add('success', 'Merci !');
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 HelloassoEvent::ORPHAN_SOLVE,
                 new HelloassoEvent($payment, $this->getUser())
             );

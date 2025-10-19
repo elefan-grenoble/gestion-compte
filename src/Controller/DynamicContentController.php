@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\DynamicContent;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,7 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("content")
  */
-class DynamicContentController extends Controller
+class DynamicContentController extends AbstractController
 {
     /**
      * Lists all dynamic contents.

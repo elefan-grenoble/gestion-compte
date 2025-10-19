@@ -14,8 +14,11 @@ use App\Form\RadioChoiceType;
 use App\Form\ShiftType;
 use App\Repository\JobRepository;
 use App\Security\ShiftVoter;
+use App\Service\MembershipService;
+use App\Service\ShiftService;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -36,7 +39,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("booking")
  */
-class BookingController extends Controller
+class BookingController extends AbstractController
 {
     /**
      * @var boolean
@@ -61,15 +64,15 @@ class BookingController extends Controller
     /**
      * @return Response
      */
-    public function homepageShiftsAction(): Response
+    public function homepageShiftsAction(MembershipService $membership_service): Response
     {
         $em = $this->getDoctrine()->getManager();
 
         $member = $this->getUser()->getBeneficiary()->getMembership();
 
-        $period_positions = $this->get('membership_service')->getPeriodPositions($member);
-        $preceding_previous_cycle_start = $this->get('membership_service')->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
-        $next_cycle_end = $this->get('membership_service')->getEndOfCycle($member, 1);
+        $period_positions = $membership_service->getPeriodPositions($member);
+        $preceding_previous_cycle_start = $membership_service->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
+        $next_cycle_end = $membership_service->getEndOfCycle($member, 1);
         $shifts_by_cycle = $em->getRepository('App:Shift')->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
 
         $shiftFreeForms = [];
@@ -90,7 +93,7 @@ class BookingController extends Controller
      * @Route("/", name="booking", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER')")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, MembershipService $membership_service, ShiftService $shift_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -100,8 +103,8 @@ class BookingController extends Controller
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
-            if (!$this->get('membership_service')->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
-+               $remainder = $this->get('membership_service')->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+            if (!$membership_service->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
++               $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
                 $session->getFlashBag()->add('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
             }
@@ -137,7 +140,7 @@ class BookingController extends Controller
             }
 
             $shifts = $em->getRepository('App:Shift')->findFutures(null, null, $this->display_name_shifters);
-            $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+            $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
             $hours = array();
             for ($i = 6; $i < 22; $i++) { //todo put this in conf
@@ -300,14 +303,14 @@ class BookingController extends Controller
      * @Route("/admin", name="booking_admin", methods={"GET","POST"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function adminAction(Request $request): Response
+    public function adminAction(Request $request, ShiftService $shift_service): Response
     {
         $em = $this->getDoctrine()->getManager();
         $filter = $this->adminFilterFormFactory($em, $request);
 
         $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"], true);
-        $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
-        $bucketsByDay = $this->get('shift_service')->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
+        $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
+        $bucketsByDay = $shift_service->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
 
         return $this->render('admin/booking/index.html.twig', [
             'filterForm' => $filter["form"]->createView(),
@@ -399,7 +402,7 @@ class BookingController extends Controller
      * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function lockUnlockBucketAction(Request $request, Shift $shift)
+    public function lockUnlockBucketAction(Request $request, Shift $shift, ShiftService $shift_service)
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
@@ -411,7 +414,7 @@ class BookingController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $lock = $form->get('lock')->getData() == 1;
-            $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+            $bucket = $shift_service->getShiftBucketFromShift($shift);
             $current = $bucket->getFirst()->isLocked() == 1;
             if ($lock == $current) {
                 $success = false;
@@ -457,7 +460,7 @@ class BookingController extends Controller
      * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function deleteBucketAction(Request $request, Shift $bucket)
+    public function deleteBucketAction(Request $request, Shift $bucket, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -474,8 +477,7 @@ class BookingController extends Controller
             $count = 0;
             foreach ($shifts as $shift) {
                 $beneficiary = $shift->getShifter();
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+                $event_dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
                 $em->remove($shift);
                 $count++;
             }

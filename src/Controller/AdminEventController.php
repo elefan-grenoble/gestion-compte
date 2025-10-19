@@ -10,7 +10,8 @@ use App\Form\EventType;
 use App\Form\ProxyType;
 use App\Repository\EventKindRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -29,7 +30,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  *
  * @Route("admin/events")
  */
-class AdminEventController extends Controller
+class AdminEventController extends AbstractController
 {
     /**
      * Filter form
@@ -265,7 +266,7 @@ class AdminEventController extends Controller
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
-    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request)
+    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -297,8 +298,7 @@ class AdminEventController extends Controller
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -318,8 +318,7 @@ class AdminEventController extends Controller
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -335,8 +334,7 @@ class AdminEventController extends Controller
                 $em->persist($proxy);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
 
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());

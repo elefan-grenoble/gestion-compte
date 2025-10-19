@@ -11,8 +11,9 @@ use App\Form\AutocompleteBeneficiaryType;
 use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
 use App\Service\PeriodFormHelper;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -29,7 +30,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
  *
  * @Route("admin/period")
  */
-class AdminPeriodController extends Controller
+class AdminPeriodController extends AbstractController
 {
     private $cycle_type;
 
@@ -315,7 +316,7 @@ class AdminPeriodController extends Controller
      * @Route("/{id}/position/{position}/free", name="admin_periodposition_free", methods={"POST"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
+    public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -336,8 +337,7 @@ class AdminPeriodController extends Controller
             $em->persist($position);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
+            $event_dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }

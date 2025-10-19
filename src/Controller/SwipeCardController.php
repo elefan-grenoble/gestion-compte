@@ -8,9 +8,10 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -25,7 +26,7 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
  *
  * @Route("sw") //keep it short for qr size
  */
-class SwipeCardController extends Controller
+class SwipeCardController extends AbstractController
 {
 
 
@@ -45,7 +46,7 @@ class SwipeCardController extends Controller
      * @return Response
      * @Route("/in/{code}", name="swipe_in", methods={"GET"})
      */
-    public function swipeInAction(Request $request, $code)
+    public function swipeInAction(Request $request, $code, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -63,7 +64,7 @@ class SwipeCardController extends Controller
             $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
             $this->get("security.token_storage")->setToken($token);
             $event = new InteractiveLoginEvent($request, $token);
-            $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+            $event_dispatcher->dispatch("security.interactive_login", $event);
         }
 
         return $this->redirectToRoute('homepage');

@@ -5,7 +5,7 @@ namespace App\Controller;
 
 use App\Entity\ClosingException;
 use App\Form\ClosingExceptionType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("admin/closingexceptions")
  */
-class AdminClosingExceptionController extends Controller
+class AdminClosingExceptionController extends AbstractController
 {
     /**
      * Admin closing exception home

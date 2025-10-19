@@ -4,21 +4,24 @@ namespace App\Controller;
 use App\Entity\HelloassoPayment;
 use App\Entity\Membership;
 use App\Event\HelloassoEvent;
+use App\Service\MembershipService;
+use App\Service\ShiftService;
 use App\Twig\Extension\AppExtension;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 
-class DefaultController extends Controller
+class DefaultController extends AbstractController
 {
 
     /**
      * @Route("/", name="homepage")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, MembershipService $membership_service, ShiftService $shift_service)
     {
         $first = null;
         $em = $this->getDoctrine()->getManager();
@@ -40,7 +43,7 @@ class DefaultController extends Controller
                     return $this->redirectToRoute('homepage');
                 }
 
-                $cycle_end = $this->get('membership_service')->getEndOfCycle($membership);
+                $cycle_end = $membership_service->getEndOfCycle($membership);
                 $dayAfterEndOfCycle = clone $cycle_end;
                 $dayAfterEndOfCycle->modify('+1 day');
                 $profileUrlHtml = "<a style=\"text-decoration:underline;color:white;\" href=\"" . $this->get('router')->generate('fos_user_profile_show') . "\"><i class=\"material-icons tiny\">settings</i> ton profil</a>.";
@@ -61,11 +64,11 @@ class DefaultController extends Controller
                         "<br />Pour annuler, visite " . $profileUrlHtml);
                 }
 
-                if ($this->get('membership_service')->canRegister($membership)) {
+                if ($membership_service->canRegister($membership)) {
                     if ($membership->getRegistrations()->count() <= 0) {
                         $session->getFlashBag()->add('warning', 'Pour poursuivre entre ton adhésion en ligne !');
                     }else{
-                        $remainder = $this->get('membership_service')->getRemainder($membership);
+                        $remainder = $membership_service->getRemainder($membership);
                         $remainingDays = intval($remainder->format("%R%a"));
                         if ($remainingDays < 0)
                             $session->getFlashBag()->add('error', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
@@ -86,7 +89,7 @@ class DefaultController extends Controller
             $to = new \DateTime();
             $to->modify('+7 days');
             $shifts = $em->getRepository('App:Shift')->findFrom($from, $to);
-            $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+            $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
             return $this->render('default/index_anon.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
@@ -132,7 +135,7 @@ class DefaultController extends Controller
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function scheduleAction()
+    public function scheduleAction(ShiftService $shift_service)
     {
         $em = $this->getDoctrine()->getManager();
 
@@ -140,7 +143,7 @@ class DefaultController extends Controller
         $to = new \DateTime();
         $to->modify('+7 days');
         $shifts = $em->getRepository('App:Shift')->findFrom($from, $to);
-        $bucketsByDay = $this->get('shift_service')->generateShiftBucketsByDayAndJob($shifts);
+        $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
         return $this->render('booking/schedule.html.twig', [
             'bucketsByDay' => $bucketsByDay,
@@ -163,7 +166,7 @@ class DefaultController extends Controller
      * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
      * https://github.com/Mailforgood/HelloAsso.Api.Doc/blob/master/HelloAsso.Api.Samples/php/helloasso_stat.php
      */
-    public function helloassoNotify(Request $request)
+    public function helloassoNotify(Request $request, EventDispatcherInterface $event_dispatcher)
     {
 
         $logger = $this->get('logger');
@@ -212,7 +215,6 @@ class DefaultController extends Controller
 
         $payments = array();
         $action_json = null;
-        $dispatcher = $this->get('event_dispatcher');
         foreach ($payment_json->actions as $action) {
             $action_json = $this->container->get('App\Helper\Helloasso')->get('actions/' . $action->id);
             $payment = $em->getRepository('App:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
@@ -229,7 +231,7 @@ class DefaultController extends Controller
             $payments[$payment->getId()] = $payment;
         }
         foreach ($payments as $payment) {
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 HelloassoEvent::PAYMENT_AFTER_SAVE,
                 new HelloassoEvent($payment)
             );

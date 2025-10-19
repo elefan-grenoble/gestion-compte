@@ -12,12 +12,13 @@ use App\Form\AutocompleteBeneficiaryType;
 use App\Form\CommissionType;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -27,7 +28,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("/commissions")
  */
-class CommissionController extends Controller
+class CommissionController extends AbstractController
 {
 
     /**
@@ -143,7 +144,7 @@ class CommissionController extends Controller
      *
      * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary", methods={"POST"})
      */
-    public function addBeneficiaryAction(Request $request,Commission $commission)
+    public function addBeneficiaryAction(Request $request, Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -162,8 +163,7 @@ class CommissionController extends Controller
                 $em->persist($beneficiary);
                 $em->flush();
                 $message = $beneficiary->getFirstname().' a bien été ajouté à la commission';
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(
+                $event_dispatcher->dispatch(
                     CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME,
                     new CommissionJoinOrLeaveEvent($beneficiary,$commission)
                 );
@@ -191,7 +191,7 @@ class CommissionController extends Controller
      *
      * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary", methods={"POST"})
      */
-    public function removeBeneficiaryAction(Request $request,Commission $commission)
+    public function removeBeneficiaryAction(Request $request,Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -207,8 +207,7 @@ class CommissionController extends Controller
             $beneficiary->removeCommission($commission);
             $em->persist($beneficiary);
             $em->flush();
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
+            $event_dispatcher->dispatch(
                 CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME,
                 new CommissionJoinOrLeaveEvent($beneficiary,$commission)
             );
