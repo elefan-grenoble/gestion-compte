@@ -231,7 +231,7 @@ id = "modal-bucket"
                 data: $(event.currentTarget).serialize(),
                 method: 'POST',
                 success: function (data) {
-                    M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
+                    M.toast({ html: data.message, displayLength: 2500, classes: 'green' });
                     if (this.data.includes("bucket_delete_form") || data.card === null) {
                         $('#main-bucket-{{ bucket.id }}').remove();
                         M.Modal.getInstance($('#modal-bucket')).close();
