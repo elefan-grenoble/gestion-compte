@@ -28,7 +28,7 @@ class SocialNetworkController extends Controller
      * List all social networks.
      *
      * @Route("/", name="admin_socialnetwork_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
     {
@@ -44,7 +44,7 @@ class SocialNetworkController extends Controller
      * Add new social network.
      *
      * @Route("/new", name="admin_socialnetwork_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -73,7 +73,7 @@ class SocialNetworkController extends Controller
      * Edit social network.
      *
      * @Route("/edit/{id}", name="admin_socialnetwork_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, SocialNetwork $socialNetwork)
     {
@@ -101,7 +101,7 @@ class SocialNetworkController extends Controller
      * Delete social network.
      *
      * @Route("/{id}", name="admin_socialnetwork_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, SocialNetwork $socialNetwork)
     {

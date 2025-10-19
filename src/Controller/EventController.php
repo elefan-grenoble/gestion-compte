@@ -65,7 +65,7 @@ class EventController extends Controller
      * Event home
      *
      * @Route("/", name="event_index", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
@@ -100,7 +100,7 @@ class EventController extends Controller
      * Proxy new
      *
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function giveProxyAction(Event $event, Request $request)
     {
@@ -278,7 +278,7 @@ class EventController extends Controller
      *
      * Goes with the Twig template views/beneficiary/find_member_number.html.twig
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function findBeneficiaryAction(Event $event, Request $request)
     {
@@ -353,7 +353,7 @@ class EventController extends Controller
      * Proxy remove
      *
      * @Route("/{id}/proxy/{proxy}/remove", name="event_proxy_lite_delete", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function deleteProxyLiteAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -375,7 +375,7 @@ class EventController extends Controller
      * Proxy take
      *
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function acceptProxyAction(Event $event, Request $request)
     {

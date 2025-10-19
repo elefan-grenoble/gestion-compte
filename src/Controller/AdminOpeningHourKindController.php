@@ -22,7 +22,7 @@ class AdminOpeningHourKindController extends Controller
      * Lists all opening hour kinds
      *
      * @Route("/", name="admin_openinghour_kind_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction()
     {
@@ -39,7 +39,7 @@ class AdminOpeningHourKindController extends Controller
      * Add new opening hour kind
      *
      * @Route("/new", name="admin_openinghour_kind_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -69,7 +69,7 @@ class AdminOpeningHourKindController extends Controller
      * Edit opening hour kind
      *
      * @Route("/{id}/edit", name="admin_openinghour_kind_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, OpeningHourKind $openingHourKind)
     {
@@ -100,7 +100,7 @@ class AdminOpeningHourKindController extends Controller
      * Delete opening hour kind
      *
      * @Route("/{id}", name="admin_openinghour_kind_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, OpeningHourKind $openingHourKind)
     {

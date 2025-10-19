@@ -34,7 +34,7 @@ class CommissionController extends Controller
      * Comissions list
      *
      * @Route("/", name="admin_commissions", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -46,7 +46,7 @@ class CommissionController extends Controller
      * Comission new
      *
      * @Route("/new", name="commission_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -78,7 +78,7 @@ class CommissionController extends Controller
      * Commission edit
      *
      * @Route("/{id}/edit", name="commission_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request,Commission $commission)
     {
@@ -226,7 +226,7 @@ class CommissionController extends Controller
      * Comission delete
      *
      * @Route("/{id}", name="commission_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request,Commission $commission)
     {

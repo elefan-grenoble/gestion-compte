@@ -48,7 +48,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * Admin controller.
  *
  * @Route("admin")
- * @Security("has_role('ROLE_ADMIN_PANEL')")
+ * @Security("is_granted('ROLE_ADMIN_PANEL')")
  */
 class AdminController extends Controller
 {
@@ -56,7 +56,7 @@ class AdminController extends Controller
      * Admin panel
      *
      * @Route("/", name="admin", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN_PANEL')")
+     * @Security("is_granted('ROLE_ADMIN_PANEL')")
      */
     public function indexAction(Request $request)
     {
@@ -69,7 +69,7 @@ class AdminController extends Controller
      * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/users", name="user_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -177,7 +177,7 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/non_member_users", name="non_member_users_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function nonMemberUsersAction(Request $request)
     {
@@ -196,7 +196,7 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/admin_users", name="admin_users_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function adminUsersAction(Request $request)
     {
@@ -223,7 +223,7 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/roles", name="roles_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function rolesListAction(Request $request)
     {
@@ -254,7 +254,7 @@ class AdminController extends Controller
      * Import from CSV
      *
      * @Route("/importcsv", name="user_import_csv", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function csvImportAction(Request $request, KernelInterface $kernel)
     {

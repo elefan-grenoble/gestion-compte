@@ -27,7 +27,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Email controller.
  *
  * @Route("admin/mail")
- * @Security("has_role('ROLE_USER_MANAGER')")
+ * @Security("is_granted('ROLE_USER_MANAGER')")
  */
 class MailController extends Controller
 {

@@ -42,7 +42,7 @@ class AmbassadorController extends Controller
      * List all members without a registration
      *
      * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -93,7 +93,7 @@ class AmbassadorController extends Controller
      * List all members with a registration date older than one year
      *
      * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -153,7 +153,7 @@ class AmbassadorController extends Controller
      * List all members with negative shift time count
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -244,7 +244,7 @@ class AmbassadorController extends Controller
      * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'
      *
      * @Route("/beneficiary_fixe_without_periodposition", name="ambassador_beneficiary_fixe_without_periodposition_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */

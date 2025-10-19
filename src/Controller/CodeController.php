@@ -41,7 +41,7 @@ class CodeController extends Controller
      * Lists all codes.
      *
      * @Route("/", name="codes_list", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function listAction(Request $request)
     {
@@ -76,7 +76,7 @@ class CodeController extends Controller
      * add new code.
      *
      * @Route("/new", name="code_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function newAction(Request $request)
     {
@@ -130,7 +130,7 @@ class CodeController extends Controller
      * generate new code.
      *
      * @Route("/generate", name="code_generate", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function generateAction(Request $request)
     {
@@ -202,7 +202,7 @@ class CodeController extends Controller
      * toggle code 
      *
      * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function toggleAction(Request $request, Code $code)
     {

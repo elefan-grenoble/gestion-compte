@@ -30,7 +30,7 @@ class TimeLogController extends Controller
      * Create a new log
      *
      * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      * @param Membership $member
      */
     public function newAction(Request $request, Membership $member)
@@ -69,7 +69,7 @@ class TimeLogController extends Controller
      * Delete time log
      *
      * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      * @param Membership $member
      * @param $timelog_id
      * @return \Symfony\Component\HttpFoundation\RedirectResponse

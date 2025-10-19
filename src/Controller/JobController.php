@@ -62,7 +62,7 @@ class JobController extends Controller
      * Lists all jobs.
      *
      * @Route("/", name="job_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
     {
@@ -89,7 +89,7 @@ class JobController extends Controller
      * add new job.
      *
      * @Route("/new", name="job_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -122,7 +122,7 @@ class JobController extends Controller
      * Edit job.
      *
      * @Route("/{id}/edit", name="job_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Job $job)
     {
@@ -153,7 +153,7 @@ class JobController extends Controller
      * Delete job.
      *
      * @Route("/{id}", name="job_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request,Job $job)
     {
@@ -176,7 +176,7 @@ class JobController extends Controller
      * Job shifts widget generator
      *
      * @Route("/widget_generator", name="job_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function widgetGeneratorAction(Request $request)
     {

@@ -28,7 +28,7 @@ class ProcessUpdateController extends Controller
      * Lists all process updates.
      *
      * @Route("/", name="process_update_list", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function listAction(Request $request)
     {
@@ -67,7 +67,7 @@ class ProcessUpdateController extends Controller
      * @param Request $request
      * @return Response | JsonResponse
      * @throws
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function countUnreadAction(Request $request)
     {
@@ -86,7 +86,7 @@ class ProcessUpdateController extends Controller
      * Create a process update
      *
      * @Route("/new", name="process_update_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -117,7 +117,7 @@ class ProcessUpdateController extends Controller
      * Edit a process update
      *
      * @Route("/{id}/edit", name="process_update_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, ProcessUpdate $processUpdate)
     {

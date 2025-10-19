@@ -60,7 +60,7 @@ class ShiftController extends Controller
 
     /**
      * @Route("/new", name="shift_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -133,7 +133,7 @@ class ShiftController extends Controller
      * Book a shift.
      *
      * @Route("/{id}/book", name="shift_book", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function bookShiftAction(Request $request, Shift $shift): Response
     {
@@ -187,7 +187,7 @@ class ShiftController extends Controller
      * Book a shift (admin side).
      *
      * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift)
     {
@@ -271,7 +271,7 @@ class ShiftController extends Controller
      * Free a shift.
      *
      * @Route("/{id}/free", name="shift_free", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function freeShiftAction(Request $request, Shift $shift)
     {
@@ -323,7 +323,7 @@ class ShiftController extends Controller
      * Free a shift (admin side).
      *
      * @Route("/{id}/free_admin", name="shift_free_admin", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function freeShiftAdminAction(Request $request, Shift $shift)
     {
@@ -415,7 +415,7 @@ class ShiftController extends Controller
      * validate / invalidate a shift.
      *
      * @Route("/{id}/validate_admin", name="shift_validate_admin", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function validateShiftAction(Request $request, Shift $shift)
     {
@@ -571,7 +571,7 @@ class ShiftController extends Controller
      * delete a shift.
      *
      * @Route("/{id}", name="shift_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteShiftAction(Request $request, Shift $shift)
     {

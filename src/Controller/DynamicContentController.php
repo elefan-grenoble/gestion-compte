@@ -20,7 +20,7 @@ class DynamicContentController extends Controller
      * Lists all dynamic contents.
      *
      * @Route("/", name="dynamic_content_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
@@ -45,7 +45,7 @@ class DynamicContentController extends Controller
      * Edit a dynamic content
      *
      * @Route("/{id}/edit", name="dynamic_content_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)
     {

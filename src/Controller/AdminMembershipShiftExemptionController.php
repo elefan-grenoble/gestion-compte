@@ -73,7 +73,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Lists all membershipShiftExemption entities.
      *
      * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function indexAction(Request $request)
     {
@@ -120,7 +120,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Creates a new membershipShiftExemption entity.
      *
      * @Route("/new", name="admin_membershipshiftexemption_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -158,7 +158,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Displays a form to edit an existing membershipShiftExemption entity.
      *
      * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
@@ -189,7 +189,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Deletes a membershipShiftExemption entity.
      *
      * @Route("/{id}", name="admin_membershipshiftexemption_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function deleteAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {

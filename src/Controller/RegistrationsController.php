@@ -51,7 +51,7 @@ class RegistrationsController extends Controller
      * Registrations list
      *
      * @Route("/", name="registrations", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
     {
@@ -189,7 +189,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * edit registration
      *
      * @Route("/{id}/edit", name="registration_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function editRegistrationAction(Request $request, Registration $registration)
     {
@@ -211,7 +211,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * remove registration
      *
      * @Route("/{id}/remove", name="registration_remove", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function removeRegistrationAction(Request $request, Registration $registration)
     {

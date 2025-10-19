@@ -26,7 +26,7 @@ class AdminClosingExceptionController extends Controller
      * Admin closing exception home
      *
      * @Route("/", name="admin_closingexception_index", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -53,7 +53,7 @@ class AdminClosingExceptionController extends Controller
      * Admin closing exception list
      *
      * @Route("/list", name="admin_closingexception_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
     {
@@ -78,7 +78,7 @@ class AdminClosingExceptionController extends Controller
      * Add new closing exception
      *
      * @Route("/new", name="admin_closingexception_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -110,7 +110,7 @@ class AdminClosingExceptionController extends Controller
      * Closing exception delete
      *
      * @Route("/{id}", name="admin_closingexception_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, ClosingException $closingException)
     {
@@ -134,7 +134,7 @@ class AdminClosingExceptionController extends Controller
      * Closing exception widget generator
      *
      * @Route("/widget_generator", name="admin_closingexception_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {
