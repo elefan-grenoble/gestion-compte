@@ -39,7 +39,6 @@
             e.preventDefault();
         });
     })
-    var barcode_submit_url = "{{ path('card_reader_check') }}";
 </script>
-<script src="{{ asset('bundles/app/js/barcode.js') }}"></script>
+<input type="hidden" id="barcode_submit_url" value="{{ path('card_reader_check') }}" />
 {% endblock %}
