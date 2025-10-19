@@ -78,7 +78,7 @@ class SwipeCardController extends Controller
      * activate (pair) Swipe Card
      *
      * @Route("/activate", name="activate_swipe", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function activateSwipeCardAction(Request $request)
     {
@@ -144,7 +144,7 @@ class SwipeCardController extends Controller
      * enable existing Swipe Card
      *
      * @Route("/enable", name="enable_swipe", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function enableSwipeCardAction(Request $request)
     {
@@ -193,7 +193,7 @@ class SwipeCardController extends Controller
      * disable Swipe Card
      *
      * @Route("/disable", name="disable_swipe", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function disableSwipeCardAction(Request $request)
     {
@@ -234,7 +234,7 @@ class SwipeCardController extends Controller
      * remove Swipe Card
      *
      * @Route("/delete", name="delete_swipe", methods={"POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request)
     {
@@ -265,7 +265,7 @@ class SwipeCardController extends Controller
      * @param SwipeCard $card
      * @return Response A Response instance
      * @Route("/{id}/show", name="swipe_show", methods={"GET"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function showAction(SwipeCard $card){
         return $this->render('user/swipe_card.html.twig', [

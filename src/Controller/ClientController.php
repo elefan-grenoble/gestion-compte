@@ -27,7 +27,7 @@ class ClientController extends Controller
      * Lists all clients.
      *
      * @Route("/", name="client_list", methods={"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function listAction()
     {
@@ -40,7 +40,7 @@ class ClientController extends Controller
      * Add new Client //todo put this auto in service création
      *
      * @Route("/new", name="client_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -80,7 +80,7 @@ class ClientController extends Controller
      * edit client.
      *
      * @Route("/{id}/edit", name="client_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request, Client $client)
     {
@@ -127,7 +127,7 @@ class ClientController extends Controller
      * delete client.
      *
      * @Route("/{id}", name="client_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, Client $client)
     {

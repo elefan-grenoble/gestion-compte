@@ -20,7 +20,7 @@ class AdminShiftExemptionController extends Controller
      * Lists all shiftExemption entities.
      *
      * @Route("/", name="admin_shiftexemption_index", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -37,7 +37,7 @@ class AdminShiftExemptionController extends Controller
      * Creates a new shiftExemption entity.
      *
      * @Route("/new", name="admin_shiftexemption_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -66,7 +66,7 @@ class AdminShiftExemptionController extends Controller
      * Displays a form to edit an existing shiftExemption entity.
      *
      * @Route("/{id}/edit", name="admin_shiftexemption_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, ShiftExemption $shiftExemption)
     {
@@ -94,7 +94,7 @@ class AdminShiftExemptionController extends Controller
      * Deletes a shiftExemption entity.
      *
      * @Route("/{id}", name="admin_shiftexemption_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, ShiftExemption $shiftExemption)
     {

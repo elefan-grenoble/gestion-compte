@@ -26,7 +26,7 @@ class AdminOpeningHourController extends Controller
      * List all opening hours
      *
      * @Route("/", name="admin_openinghour_index", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -45,7 +45,7 @@ class AdminOpeningHourController extends Controller
      * Add new opening hour
      *
      * @Route("/new", name="admin_openinghour_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -79,7 +79,7 @@ class AdminOpeningHourController extends Controller
      * Edit opening hour
      *
      * @Route("/edit/{id}", name="admin_openinghour_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, OpeningHour $openingHour)
     {
@@ -119,7 +119,7 @@ class AdminOpeningHourController extends Controller
      * Delete opening hour
      *
      * @Route("/{id}", name="admin_openinghour_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, OpeningHour $openingHour)
     {
@@ -144,7 +144,7 @@ class AdminOpeningHourController extends Controller
      * Opening hours widget generator
      *
      * @Route("/widget_generator", name="admin_openinghour_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {

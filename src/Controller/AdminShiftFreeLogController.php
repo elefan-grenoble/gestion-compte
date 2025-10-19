@@ -96,7 +96,7 @@ class AdminShiftFreeLogController extends Controller
      * Lists all ShiftFreeLog entities.
      *
      * @Route("/", name="admin_shiftfreelog_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function indexAction(Request $request)
     {

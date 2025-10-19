@@ -44,7 +44,7 @@ class NoteController extends Controller
      * reply to a note
      *
      * @Route("/note/{id}/reply", name="note_reply", methods={"POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function noteReplyAction(Request $request, Note $note)
     {
