@@ -16,7 +16,7 @@ require('materialize-css/')
 
 require('./barcode.js');
 require('./datepicker.js');
-require('./js.cookie.js');
+global.Cookies = require('./js.cookie.js');
 
 require("../less/card.less");
 require("../less/custom.less");
@@ -49,7 +49,7 @@ $(document).ready(function() {
     // $('input.autocomplete').autocomplete();  // see specific files for initialization & configuration
 });
 
-function myCookieInit(defaultData){
+global.myCookieInit = function(defaultData){
     var data_raw = Cookies.get("frontend");
     var data = undefined;
     if (data_raw)
