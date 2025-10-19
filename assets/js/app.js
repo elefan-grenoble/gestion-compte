@@ -1,5 +1,7 @@
 
-require('simplemde/dist/simplemde.min.js');
+const SimpleMDE = require('simplemde/dist/simplemde.min.js');
+global.SimpleMDE = SimpleMDE;
+
 require('simplemde/dist/simplemde.min.css');
 
 // require jQuery normally
