@@ -7,11 +7,12 @@ use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\AutocompleteBeneficiaryCollectionType;
 use App\Form\MarkdownEditorType;
+use App\Service\MailerService;
 use App\Service\SearchUserFormHelper;
 use Michelf\Markdown;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -29,7 +30,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @Route("admin/mail")
  * @Security("is_granted('ROLE_USER_MANAGER')")
  */
-class MailController extends Controller
+class MailController extends AbstractController
 {
 
     /**
@@ -37,9 +38,9 @@ class MailController extends Controller
      *
      * @Route("/to/{id}", name="mail_edit_one_beneficiary", methods={"GET","POST"})
      */
-    public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary)
+    public function editActionOneBeneficiary(Request $request, Beneficiary $beneficiary, MailerService $mailer_service)
     {
-        $mailform = $this->getMailForm(array($beneficiary));
+        $mailform = $this->getMailForm($mailer_service, array($beneficiary));
         $non_members = $this->getNonMemberEmails();
         return $this->render('admin/mail/send.html.twig', array(
             'form' => $mailform->createView(),
@@ -50,7 +51,7 @@ class MailController extends Controller
     /**
      * @Route("/to_bucket/{id}", name="mail_bucketshift", methods={"GET","POST"})
      */
-    public function mailBucketShift(Request $request, Shift $shift)
+    public function mailBucketShift(Request $request, Shift $shift, MailerService $mailer_service)
     {
         if ($shift) {
             $em = $this->getDoctrine()->getManager();
@@ -61,7 +62,7 @@ class MailController extends Controller
                     $beneficiaries[] = $shift->getShifter();
                 }
             }
-            $mailform = $this->getMailForm($beneficiaries);
+            $mailform = $this->getMailForm($mailer_service, $beneficiaries);
             $non_members = $this->getNonMemberEmails();
             return $this->render('admin/mail/send.html.twig', array(
                 'form' => $mailform->createView(),
@@ -75,7 +76,7 @@ class MailController extends Controller
      *
      * @Route("/", name="mail_edit", methods={"GET","POST"})
      */
-    public function editAction(Request $request, SearchUserFormHelper $formHelper)
+    public function editAction(Request $request, SearchUserFormHelper $formHelper, MailerService $mailer_service)
     {
         $form = $formHelper->getSearchForm($this->createFormBuilder());
         $form->handleRequest($request);
@@ -93,7 +94,7 @@ class MailController extends Controller
         }
         $non_members = $this->getNonMemberEmails();
 
-        $mailform = $this->getMailForm($to);
+        $mailform = $this->getMailForm($mailer_service, $to);
         return $this->render('admin/mail/send.html.twig', array(
             'form' => $mailform->createView(),
             'non_members' => $non_members
@@ -106,10 +107,10 @@ class MailController extends Controller
      *
      * @Route("/send", name="mail_send", methods={"POST"})
      */
-    public function sendAction(Request $request, MailerInterface $mailer)
+    public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service)
     {
         $session = new Session();
-        $mailform = $this->getMailForm();
+        $mailform = $this->getMailForm($mailer_service);
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
             $em = $this->getDoctrine()->getManager();
@@ -135,10 +136,9 @@ class MailController extends Controller
             $nb = 0;
             $errored = [];
 
-            $mailerService = $this->get('mailer_service');
             $from_email = $mailform->get('from')->getData();
-            if (in_array($from_email, $mailerService->getAllowedEmails())) {
-                $from_name_and_address = array_search($from_email, $mailerService->getAllowedEmails());
+            if (in_array($from_email, $mailer_service->getAllowedEmails())) {
+                $from_name_and_address = array_search($from_email, $mailer_service->getAllowedEmails());
                 $from_name = preg_replace("/<.*>$/", "", $from_name_and_address);
                 $from = new Address($from_email, $from_name);
             } else {
@@ -182,15 +182,14 @@ class MailController extends Controller
         return $this->redirectToRoute('mail_edit');
     }
 
-    private function getMailForm($to = []) {
-        $mailerService = $this->get('mailer_service');
+    private function getMailForm(MailerService $mailer_service, $to = []) {
         $mailform = $this->createFormBuilder()
             ->setAction($this->generateUrl('mail_send'))
             ->setMethod('POST')
             ->add('from', ChoiceType::class, array(
                 'label' => 'Depuis',
                 'required' => false,
-                'choices' => $mailerService->getAllowedEmails()
+                'choices' => $mailer_service->getAllowedEmails()
             ))
             ->add('to', AutocompleteBeneficiaryCollectionType::class, [
                 'data' => $to,

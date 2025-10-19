@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\OpeningHourKind;
 use App\Form\OpeningHourKindType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -16,7 +16,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("admin/openinghours/kinds")
  */
-class AdminOpeningHourKindController extends Controller
+class AdminOpeningHourKindController extends AbstractController
 {
     /**
      * Lists all opening hour kinds

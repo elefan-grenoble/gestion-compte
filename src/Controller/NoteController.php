@@ -15,7 +15,7 @@ use App\Form\NoteType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
@@ -28,7 +28,7 @@ use Twig\Sandbox\SecurityError;
  *
  * @Route("note")
  */
-class NoteController extends Controller
+class NoteController extends AbstractController
 {
     private $_current_app_user;
 

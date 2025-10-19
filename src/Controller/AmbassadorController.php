@@ -12,8 +12,7 @@ use App\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -27,7 +26,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("ambassador")
  */
-class AmbassadorController extends Controller
+class AmbassadorController extends AbstractController
 {
     private $timeAfterWhichMembersAreLateWithShifts;
     private $registrationEveryCivilYear;

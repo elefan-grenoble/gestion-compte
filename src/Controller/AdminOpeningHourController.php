@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\OpeningHour;
 use App\Form\OpeningHourType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
@@ -20,7 +20,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("admin/openinghours")
  */
-class AdminOpeningHourController extends Controller
+class AdminOpeningHourController extends AbstractController
 {
     /**
      * List all opening hours

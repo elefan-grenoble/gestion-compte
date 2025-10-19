@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\MembershipShiftExemption;
 use App\Form\AutocompleteMembershipType;
 use App\Repository\ShiftExemptionRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Service\MembershipService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -21,7 +22,7 @@ use \Datetime;
  *
  * @Route("admin/membershipshiftexemption")
  */
-class AdminMembershipShiftExemptionController extends Controller
+class AdminMembershipShiftExemptionController extends AbstractController
 {
     /**
      * Filter form.
@@ -122,7 +123,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * @Route("/new", name="admin_membershipshiftexemption_new", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, MembershipService $membership_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -136,7 +137,7 @@ class AdminMembershipShiftExemptionController extends Controller
             $membership = $form->get("membership")->getData();
             $membershipShiftExemption->setMembership($membership);
 
-            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+            if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
                 $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $membershipShiftExemption->setCreatedBy($current_user);
@@ -160,7 +161,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit", methods={"GET","POST"})
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
+    public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption, MembershipService $membership_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -169,7 +170,7 @@ class AdminMembershipShiftExemptionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+            if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
                 $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $em->flush();

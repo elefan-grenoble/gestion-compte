@@ -7,7 +7,7 @@ use http\Env\Response;
 use OAuth2\OAuth2;
 use Ornicar\GravatarBundle\GravatarApi;
 use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,7 +18,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("api")
  */
-class ApiController extends Controller
+class ApiController extends AbstractController
 {
 
     protected function getUser(){

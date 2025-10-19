@@ -6,7 +6,7 @@ use App\Entity\DynamicContent;
 use App\Entity\ProcessUpdate;
 use App\Entity\Shift;
 use App\Form\ProcessUpdateType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints\Date;
  *
  * @Route("process/updates")
  */
-class ProcessUpdateController extends Controller
+class ProcessUpdateController extends AbstractController
 {
 
     /**

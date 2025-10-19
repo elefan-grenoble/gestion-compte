@@ -6,7 +6,7 @@ namespace App\Controller;
 use App\Entity\SocialNetwork;
 use App\Entity\Task;
 use App\Form\SocialNetworkType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,7 +22,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("admin/socialnetworks")
  */
-class SocialNetworkController extends Controller
+class SocialNetworkController extends AbstractController
 {
     /**
      * List all social networks.

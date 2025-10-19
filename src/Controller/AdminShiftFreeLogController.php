@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\ShiftFreeLog;
 use App\Form\AutocompleteBeneficiaryType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -21,7 +21,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  *
  * @Route("admin/shifts/freelogs")
  */
-class AdminShiftFreeLogController extends Controller
+class AdminShiftFreeLogController extends AbstractController
 {
     /**
      * Filter form.

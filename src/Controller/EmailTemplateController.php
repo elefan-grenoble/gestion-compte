@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\EmailTemplate;
 use App\Form\EmailTemplateType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +15,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("emailTemplate")
  */
-class EmailTemplateController extends Controller
+class EmailTemplateController extends AbstractController
 {
     /**
      * Lists all email templates.

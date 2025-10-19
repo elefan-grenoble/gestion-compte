@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Job;
 use App\Form\JobType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -20,7 +20,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("admin/job")
  */
-class JobController extends Controller
+class JobController extends AbstractController
 {
     /**
      * Filter form.
