@@ -23,7 +23,7 @@ class PeriodController extends Controller
      * Display all the period (available and reserved) anonymized
      *
      * @Route("/", name="period_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function indexAction(Request $request, PeriodFormHelper $formHelper)
     {

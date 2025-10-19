@@ -79,7 +79,7 @@ class AdminEventController extends Controller
      * Admin event home
      *
      * @Route("/", name="admin_event_index", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function indexAction(Request $request)
     {
@@ -100,7 +100,7 @@ class AdminEventController extends Controller
      * Admin event list
      *
      * @Route("/list", name="admin_event_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
@@ -143,7 +143,7 @@ class AdminEventController extends Controller
      * Event new
      *
      * @Route("/new", name="admin_event_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -173,7 +173,7 @@ class AdminEventController extends Controller
      * Event edit
      *
      * @Route("/{id}/edit", name="admin_event_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, Event $event)
     {
@@ -204,7 +204,7 @@ class AdminEventController extends Controller
      * Event delete
      *
      * @Route("/{id}", name="admin_event_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, Event $event)
     {
@@ -228,7 +228,7 @@ class AdminEventController extends Controller
      * Lists all proxy
      *
      * @Route("/proxies", name="admin_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listProxiesAction()
     {
@@ -247,7 +247,7 @@ class AdminEventController extends Controller
      * Lists all proxy for one event
      *
      * @Route("/{id}/proxies", name="admin_event_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listEventProxiesAction(Event $event, Request $request)
     {
@@ -263,7 +263,7 @@ class AdminEventController extends Controller
      * Proxy edit
      *
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function editEventProxyAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -357,7 +357,7 @@ class AdminEventController extends Controller
      * Proxy delete
      *
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteEventProxyAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -384,7 +384,7 @@ class AdminEventController extends Controller
      * the member with an expired registration.
      *
      * @Route("/{id}/signatures/", name="admin_event_signatures", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function signaturesListAction(Request $request,Event $event): Response
     {
@@ -422,7 +422,7 @@ class AdminEventController extends Controller
      * Event widget generator
      *
      * @Route("/widget_generator", name="admin_event_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function widgetGeneratorAction(Request $request)
     {

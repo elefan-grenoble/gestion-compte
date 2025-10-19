@@ -38,7 +38,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/swipe/in", name="api_swipe_in",  methods={"POST"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function swipeInAction(){
         return new JsonResponse(array(
@@ -48,7 +48,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/oauth/user", name="api_user",  methods={"GET"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function userAction()
     {
@@ -67,7 +67,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/oauth/nextcloud_user", name="api_nextcloud_user",  methods={"GET"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function nextcloudUserAction()
     {

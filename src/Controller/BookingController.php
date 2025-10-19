@@ -88,7 +88,7 @@ class BookingController extends Controller
 
     /**
      * @Route("/", name="booking", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
@@ -298,7 +298,7 @@ class BookingController extends Controller
      * main administration page for booking shift
      *
      * @Route("/admin", name="booking_admin", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function adminAction(Request $request): Response
     {
@@ -317,7 +317,7 @@ class BookingController extends Controller
 
     /**
      * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function showBucketAction(Request $request, Shift $bucket)
     {
@@ -354,7 +354,7 @@ class BookingController extends Controller
      * When the user click on the 'edit' button on the bucket popup.
      *
      * @Route("/bucket/{id}/edit", name="bucket_edit", methods={"GET", "POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function editBucketAction(Request $request,Shift $shift)
     {
@@ -395,7 +395,7 @@ class BookingController extends Controller
      * on the bucket popup.
      *
      * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function lockUnlockBucketAction(Request $request, Shift $shift)
     {
@@ -453,7 +453,7 @@ class BookingController extends Controller
      * (used when the user clicks on the 'supprimer' button in the bucket popup)
      *
      * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteBucketAction(Request $request, Shift $bucket)
     {

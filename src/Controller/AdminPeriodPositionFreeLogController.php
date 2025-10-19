@@ -75,7 +75,7 @@ class AdminPeriodPositionFreeLogController extends Controller
      * Lists all PeriodPositionFreeLog entities.
      *
      * @Route("/", name="admin_periodpositionfreelog_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function listAction(Request $request)
     {

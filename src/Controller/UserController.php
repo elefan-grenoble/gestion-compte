@@ -152,7 +152,7 @@ class UserController extends Controller
      * Creates a new user entity
      *
      * @Route("/quick_new", name="user_quick_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function quickNewAction(Request $request, MailerInterface $mailer)
     {
@@ -186,7 +186,7 @@ class UserController extends Controller
      * remove role of user
      *
      * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param User $user
      * @param $role
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -220,7 +220,7 @@ class UserController extends Controller
      * add role of user
      *
      * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      * @param User $user
      * @param $role
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -254,7 +254,7 @@ class UserController extends Controller
      * self_register
      *
      * @Route("/self_register", name="user_self_register", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function selfRegistrationAction()
     {
@@ -305,7 +305,7 @@ class UserController extends Controller
      * Deletes a user entity
      *
      * @Route("/{id}/delete", name="user_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param User $user
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -332,7 +332,7 @@ class UserController extends Controller
      * List all unconfirmed users
      *
      * @Route("/pre_users", name="pre_user_index", methods={"GET"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function preUsersAction()
     {
@@ -351,7 +351,7 @@ class UserController extends Controller
      * Recall unconfirmed user
      *
      * @Route("/pre_users/{id}/recall", name="pre_user_recall", methods={"GET"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary)
     {
@@ -375,7 +375,7 @@ class UserController extends Controller
      * Delete unconfirmed user
      * 
      * @Route("/pre_users/{id}/delete", name="pre_user_delete", methods={"GET"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function preUsersDeleteAction(AnonymousBeneficiary $anonymousBeneficiary, SessionInterface $session)
     {

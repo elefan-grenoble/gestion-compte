@@ -363,7 +363,7 @@ class MembershipController extends Controller
      * Displays a form to edit an existing member entity.
      *
      * @Route("/edit", name="member_edit_firewall", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|Response
      */
@@ -505,7 +505,7 @@ class MembershipController extends Controller
      * Change flying status member
      *
      * @Route("/{id}/flying", name="member_flying", methods={"POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -658,7 +658,7 @@ class MembershipController extends Controller
      * Close/Re-open member
      *
      * @Route("/{id}/withdrawn", name="member_withdrawn", methods={"POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -707,7 +707,7 @@ class MembershipController extends Controller
      * Delete member
      *
      * @Route("/{id}", name="member_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      * @param Request $request
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse
@@ -958,7 +958,7 @@ class MembershipController extends Controller
      * Join two members
      *
      * @Route("/join", name="member_join", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function joinAction(Request $request)
     {
@@ -1008,7 +1008,7 @@ class MembershipController extends Controller
      * Office tools: membership creation & management
      *
      * @Route("/office_tools", name="user_office_tools", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function officeToolsAction(Request $request)
     {
@@ -1064,7 +1064,7 @@ class MembershipController extends Controller
      * Export all emails of members (including beneficiary)
      *
      * @Route("/emails_csv", name="admin_emails_csv", methods={"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function exportEmails(Request $request)
     {
