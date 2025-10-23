@@ -228,7 +228,7 @@ class AdminController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $roles_hierarchy = $this->container->getParameter('security.role_hierarchy.roles');
+        $roles_hierarchy = $this->getParameter('security.role_hierarchy.roles');
         $roles_list = array_merge(["ROLE_USER"], array_keys($roles_hierarchy));
         $roles_list_enriched = array();
 
