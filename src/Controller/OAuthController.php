@@ -27,7 +27,7 @@ class OAuthController extends AbstractController
      */
     public function logout(ClientRegistry $clientRegistry): RedirectResponse
     {
-        $oidc_enable = $this->container->getParameter('oidc_enable');
+        $oidc_enable = $this->getParameter('oidc_enable');
         if ($oidc_enable) {
             /** @var KeycloakClient $client */
             $client = $clientRegistry->getClient('keycloak');

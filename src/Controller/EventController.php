@@ -108,7 +108,7 @@ class EventController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
+        $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
 
         // check if member hasn't already given a proxy
         $member_given_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership()));
@@ -323,7 +323,7 @@ class EventController extends AbstractController
                 ->getQuery()
                 ->getResult();
 
-            $min_time_count = $this->container->getParameter("time_after_which_members_are_late_with_shifts");
+            $min_time_count = $this->getParameter("time_after_which_members_are_late_with_shifts");
 
             $filtered_beneficiaries = array_filter(
                 $beneficiaries,
@@ -420,7 +420,7 @@ class EventController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if member doesn't already have the maximum nomber of proxies (%max_event_proxy_per_member%)
-            $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
+            $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
             $myproxy = $em->getRepository('App:Proxy')->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
             if (count($myproxy) >= $max_event_proxy_per_member) {
                 $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_member .' procuration.');
