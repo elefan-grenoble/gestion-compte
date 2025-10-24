@@ -62,9 +62,9 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
             }
 
             $email = (new Email())
-                ->subject()
+                ->subject($subject)
                 ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
-                ->to($recipients)
+                ->to(...$recipients)
                 ->html(
                     $this->getContainer()->get('twig')->render(
                         $template,
