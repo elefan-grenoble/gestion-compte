@@ -89,8 +89,13 @@ final class Version20211223205749 extends AbstractMigration
         $shifts = $this->connection->fetchAllAssociative($selectShifts);
         $usedPositionIds = [];
         foreach($shifts as $shift) {
+            $perStartTest = $shift['start'] ? "per.start = \"{$shift['start']}\"" : "per.start IS NULL";
+            $perEndTest = $shift['end'] ? "per.end = \"{$shift['end']}\"" : "per.end IS NULL";
+            $perJobIdTest = $shift['job_id'] ? "per.job_id = \"{$shift['job_id']}\"" : "per.job_id IS NULL";
+            $formationIdTest = $shift['formation_id'] ? "AND pos.formation_id = {$shift['formation_id']}" : "AND pos.formation_id IS NULL";
             $weekCycleIndex = (date_create($shift['start'])->format('W') - 1) % 4; //0 = (1-1)%4 (first week) through 51 (based on ShiftGenerateCommand)
             $weekCycleChar = chr(65 + $weekCycleIndex);
+            $weekCycleTest = "AND pos.week_cycle = \"$weekCycleChar\"";
             $usedPositionIdsStr = implode(',', $usedPositionIds);
             $usedPositionIdsTest = $usedPositionIdsStr ? "AND pos.id NOT IN ($usedPositionIdsStr)" : "";
             $selectMatchingPositions = <<<EOT
@@ -98,11 +103,11 @@ final class Version20211223205749 extends AbstractMigration
                 FROM period_position pos
                 LEFT JOIN period per ON per.id = pos.period_id
                 WHERE
-                    per.start = "{$shift['start']}"
-                    AND per.end = "{$shift['end']}"
-                    AND per.job_id = {$shift['job_id']}
-                    AND pos.formation_id = {$shift['formation_id']}
-                    AND pos.week_cycle = "$weekCycleChar"
+                    $perStartTest
+                    $perEndTest
+                    $perJobIdTest
+                    $formationIdTest
+                    $weekCycleTest
                     $usedPositionIdsTest
             EOT;
 
