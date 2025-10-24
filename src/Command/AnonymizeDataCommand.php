@@ -12,8 +12,8 @@ use App\Entity\Commission;
 use App\Entity\Shift;
 use App\Entity\User;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,8 +22,19 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class AnonymizeDataCommand extends ContainerAwareCommand
+class AnonymizeDataCommand extends Command
 {
+    private $em;
+
+    public function __construct(
+        EntityManagerInterface $em
+    )
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -93,10 +104,8 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             "La perfection est atteinte, non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer."
         ];
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         $output->writeln('<info>Anonymizing User & Beneficiary data</>');
-        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
+        $beneficiaries = $this->em->getRepository(Beneficiary::class)->findAll();
         foreach ($beneficiaries as $beneficiary) {
             $firstname = $this->randomValue($firstnames);
             $lastname = $this->randomValue($lastnames);
@@ -117,13 +126,13 @@ class AnonymizeDataCommand extends ContainerAwareCommand
             $address->setZipcode(array_search($city,$cities));
             $address->setStreet1($this->randomValue($streets));
             $address->setStreet2('');
-            $em->persist($address);
+            $this->em->persist($address);
 
             // anonymize User username & email
             $user = $beneficiary->getUser();
             $user->setUsername($username);
             $user->setEmail($email);
-            $em->persist($user);
+            $this->em->persist($user);
 
             // anonymize Membership registrations via Helloasso
             $member_registrations = $beneficiary->getMembership()->getRegistrations();
@@ -133,55 +142,55 @@ class AnonymizeDataCommand extends ContainerAwareCommand
                     $helloassopayment->setEmail($email);
                     $helloassopayment->setPayerFirstName($firstname);
                     $helloassopayment->setPayerLastName($lastname);
-                    $em->persist($helloassopayment);
+                    $this->em->persist($helloassopayment);
                 }
             }
 
-            $em->persist($beneficiary);
+            $this->em->persist($beneficiary);
         }
 
         $output->writeln('<info>Deleting AnonymousBeneficiary data</>');
-        $em->getRepository(AnonymousBeneficiary::class)->createQueryBuilder('c')
+        $this->em->getRepository(AnonymousBeneficiary::class)->createQueryBuilder('c')
             ->delete()
             ->getQuery()
             ->execute();
 
         $output->writeln('<info>Deleting HelloassoPayment orphans data</>');
-        $em->getRepository(HelloassoPayment::class)->createQueryBuilder('hp')
+        $this->em->getRepository(HelloassoPayment::class)->createQueryBuilder('hp')
             ->where('hp.registration IS NULL')
             ->delete()
             ->getQuery()
             ->execute();
 
         $output->writeln('<info>Anonymizing Commission data</>');
-        $comissions = $em->getRepository(Commission::class)->findAll();
+        $comissions = $this->em->getRepository(Commission::class)->findAll();
         foreach ($comissions as $comission) {
             $comission->setName('comission '.$comission->getId());
             $comission->setDescription($this->randomValue($texts));
-            $em->persist($comission);
+            $this->em->persist($comission);
         }
 
         $output->writeln('<info>Anonymizing Event data</>');
-        $events = $em->getRepository(Event::class)->findAll();
+        $events = $this->em->getRepository(Event::class)->findAll();
         foreach ($events as $event) {
             $event->setTitle('event '.$event->getId());
             $event->setDescription($this->randomValue($texts));
-            $em->persist($event);
+            $this->em->persist($event);
         }
 
         $output->writeln('<info>Deleting Client data</>');
-        $em->getRepository(Client::class)->createQueryBuilder('c')
+        $this->em->getRepository(Client::class)->createQueryBuilder('c')
             ->delete()
             ->getQuery()
             ->execute();
 
         $output->writeln('<info>Deleting Note data</>');
-        $em->getRepository(Note::class)->createQueryBuilder('n')
+        $this->em->getRepository(Note::class)->createQueryBuilder('n')
             ->delete()
             ->getQuery()
             ->execute();
 
-        $em->flush();
+        $this->em->flush();
         $output->writeln('<info>Done!</>');
 
         return 0;

@@ -2,16 +2,40 @@
 // src/App/Command/AmbassadorShiftTimeLogCommand.php
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Doctrine\ORM\Query\Expr\Join;
+use Symfony\Component\Templating\EngineInterface;
 
-class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
+class AmbassadorShiftTimeLogCommand extends Command
 {
+    private $em;
+    private $params;
+    private $twig;
+    private $mailer;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params,
+        EngineInterface $twig,
+        MailerInterface $mailer
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+        $this->twig = $twig;
+        $this->mailer = $mailer;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -24,14 +48,13 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $locale = $this->getContainer()->getParameter('locale');
+        $locale = $this->params->get('locale');
         setlocale(LC_TIME, $locale);
         $email_template = $input->getOption('emailTemplate');
 
-        $time_after_which_members_are_late_with_shifts = $this->getContainer()->getParameter('time_after_which_members_are_late_with_shifts');
+        $time_after_which_members_are_late_with_shifts = $this->params->get('time_after_which_members_are_late_with_shifts');
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $alerts = $em->getRepository("App:Membership")
+        $alerts = $this->em->getRepository("App:Membership")
                      ->findLateShifters($time_after_which_members_are_late_with_shifts);
         $nbAlerts = count($alerts);
         if ($nbAlerts > 0) {
@@ -46,17 +69,15 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
 
 
     private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, $alerts, $template) {
-        $mailer = $this->getContainer()->get('mailer');
         $recipients = $input->getOption('emails') ? explode(',', $input->getOption('emails')) : null;
         if ($recipients) {
             $subject = '[ALERTE RETARDS] Membres en retard de créneaux';
-            $shiftEmail = $this->getContainer()->getParameter('emails.shift');
+            $shiftEmail = $this->params->get('emails.shift');
 
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $dynamicContent = $em->getRepository('App:DynamicContent')->findOneByCode($template);
+            $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode($template);
 
             if ($dynamicContent) {
-                $template = $this->getContainer()->get('twig')->createTemplate($dynamicContent->getContent());
+                $template = $this->twig->createTemplate($dynamicContent->getContent());
             } else {
                 $template = 'emails/shift_late_alerts_default.html.twig';
             }
@@ -66,12 +87,12 @@ class AmbassadorShiftTimeLogCommand extends ContainerAwareCommand
                 ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
                 ->to(...$recipients)
                 ->html(
-                    $this->getContainer()->get('twig')->render(
+                    $this->twig->render(
                         $template,
                         array('membership_late_alerts' => $alerts)
                     )
                 );
-            $mailer->send($email);
+            $this->mailer->send($email);
             $output->writeln('<fg=cyan;>Email(s) sent</>');
         }
     }

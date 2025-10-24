@@ -6,13 +6,33 @@ use App\Entity\HelloassoPayment;
 use App\Event\HelloassoEvent;
 use App\Helper\Helloasso;
 use Carbon\Carbon;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
+class UpdateHelloAssoPaymentsCommand extends Command
 {
+    private $em;
+    private $params;
+    private $event_dispatcher;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params,
+        EventDispatcherInterface $event_dispatcher
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+        $this->event_dispatcher = $event_dispatcher;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -23,10 +43,11 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        # FIXME: this->getContainer ne fonctionne plus en symfony 4+
         $helloAssoClient = $this->getContainer()->get(Helloasso::class);
 
         // Campaign id needs to be 12 digits so let's add some 0 at the begining
-        $campaignId = str_pad($this->getContainer()->getParameter('helloasso_campaign_id'), 12, '0', STR_PAD_LEFT);
+        $campaignId = str_pad($this->params->get('helloasso_campaign_id'), 12, '0', STR_PAD_LEFT);
         $campaignJson = $helloAssoClient->get('campaigns/' . $campaignId);
 
         if (!$campaignJson){
@@ -82,8 +103,7 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 
         $output->write('Processing payment : ' . $date . ' / Email ' . $email . ' / Amount : ' . $amount . ' / payment id : ' . $paymentId . '  : ');
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $exist = $em->getRepository(HelloassoPayment::class)->findOneBy(array('paymentId' => $paymentId));
+        $exist = $this->em->getRepository(HelloassoPayment::class)->findOneBy(array('paymentId' => $paymentId));
 
         if ($exist) {
             $output->writeln('Already exist, skipping...');
@@ -91,13 +111,12 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
         }
 
         $payment = new HelloassoPayment();
-        $payment->fromPaymentObj($entry, $this->getContainer()->getParameter('helloasso_campaign_id'));
+        $payment->fromPaymentObj($entry, $this->params->get('helloasso_campaign_id'));
 
-        $em->persist($payment);
-        $em->flush();
+        $this->em->persist($payment);
+        $this->em->flush();
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->dispatch(
+        $this->event_dispatcher->dispatch(
             HelloassoEvent::PAYMENT_AFTER_SAVE,
             new HelloassoEvent($payment)
         );

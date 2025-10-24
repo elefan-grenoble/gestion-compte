@@ -57,6 +57,7 @@ parameters:
   helloasso_api_base_url: '%env(HELLOASSO_API_BASE_URL)%'
   helloasso_api_key: '%env(HELLOASSO_API_KEY)%'
   helloasso_api_password: '%env(HELLOASSO_API_PASSWORD)%'
+  helloasso_campaign_id: '%env(HELLOASSO_CAMPAIGN_ID)%'
   helloasso_registration_campaign_url: '%env(HELLOASSO_REGISTRATION_CAMPAIGN_URL)%'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   locale: fr_FR

@@ -2,17 +2,33 @@
 // src/App/Command/FreeReservedShiftsCommand.php
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
 /**
  * Works only for coops with 'reserve_new_shift_to_prior_shifter' true.
  * Note: should be run 'reserve_new_shift_to_prior_shifter_delay' days after ShiftGenerateCommand.
  */
-class FreeReservedShiftsCommand extends ContainerAwareCommand
+class FreeReservedShiftsCommand extends Command
 {
+    private $em;
+    private $params;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -25,7 +41,7 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $reserve_new_shift_to_prior_shifter = $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter');
+        $reserve_new_shift_to_prior_shifter = $this->params->get('reserve_new_shift_to_prior_shifter');
         if (!$reserve_new_shift_to_prior_shifter) {
             $output->writeln('<fg=red;> reserve_new_shift_to_prior_shifter parameter must be true </>');
             return 1;
@@ -41,14 +57,13 @@ class FreeReservedShiftsCommand extends ContainerAwareCommand
         $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
 
         $count = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findReservedAt($date);
+        $shifts = $this->em->getRepository('App:Shift')->findReservedAt($date);
         foreach ($shifts as $shift) {
             $shift->setLastShifter(null);
-            $em->persist($shift);
+            $this->em->persist($shift);
             $count++;
         }
-        $em->flush();
+        $this->em->flush();
 
         $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
         $output->writeln($message);
