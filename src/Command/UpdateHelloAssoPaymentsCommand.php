@@ -6,13 +6,12 @@ use App\Helloasso\HelloassoClient;
 use App\Helloasso\HelloassoPaymentHandler;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
+class UpdateHelloAssoPaymentsCommand extends Command
 {
     /** @var HelloassoClient */
     private $helloassoClient;
@@ -26,7 +25,6 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
     public function __construct(
         HelloassoClient $helloassoClient,
         HelloassoPaymentHandler $paymentHandler,
-        EventDispatcherInterface $eventDispatcher,
         LoggerInterface $logger
     ) {
         parent::__construct('app:member:update_payments');

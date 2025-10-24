@@ -4,11 +4,11 @@ namespace App\Command;
 
 use App\DataFixtures\Purger\CustomPurgerFactory;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CustomPurgerCommand extends ContainerAwareCommand
+class CustomPurgerCommand extends Command
 {
 
     protected static $defaultName = 'app:custom-purge';

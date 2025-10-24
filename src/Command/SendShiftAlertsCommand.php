@@ -7,14 +7,30 @@ use App\Entity\ShiftBucket;
 use App\Event\ShiftAlertsEvent;
 use App\Event\ShiftAlertsMattermostEvent;
 use DateTime;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class SendShiftAlertsCommand extends ContainerAwareCommand
+class SendShiftAlertsCommand extends Command
 {
+    private $em;
+    private $event_dispatcher;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        EventDispatcherInterface $event_dispatcher
+    )
+    {
+        $this->em = $em;
+        $this->event_dispatcher = $event_dispatcher;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -51,15 +67,13 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
 
             // email 
             if ($emails) {
-                $dispatcher = $this->getContainer()->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftAlertsEvent::NAME, new ShiftAlertsEvent($alerts, $date, $email_template, $emails));
+                $this->event_dispatcher->dispatch(ShiftAlertsEvent::NAME, new ShiftAlertsEvent($alerts, $date, $email_template, $emails));
                 $output->writeln('<comment>Email(s) sent</>');
             }
 
             // mattermost
             if ($mattermost_hook_url) {
-                $dispatcher = $this->getContainer()->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftAlertsMattermostEvent::NAME, new ShiftAlertsMattermostEvent($alerts, $date, $mattermost_template, $mattermost_hook_url));
+                $this->event_dispatcher->dispatch(ShiftAlertsMattermostEvent::NAME, new ShiftAlertsMattermostEvent($alerts, $date, $mattermost_template, $mattermost_hook_url));
                 $output->writeln('<comment>Alerts posted on Mattermost</>');
             }
 
@@ -71,8 +85,7 @@ class SendShiftAlertsCommand extends ContainerAwareCommand
     }
 
     private function computeAlerts(DateTime $date, $jobs) {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findAt($date, $jobs);
+        $shifts = $this->em->getRepository('App:Shift')->findAt($date, $jobs);
 
         // Build buckets from shifts
         $buckets = array();

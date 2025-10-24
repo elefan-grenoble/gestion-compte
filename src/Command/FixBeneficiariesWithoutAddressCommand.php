@@ -7,12 +7,23 @@ namespace App\Command;
 use App\Entity\Address;
 use App\Entity\Beneficiary;
 use Doctrine\ORM\EntityManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FixBeneficiariesWithoutAddressCommand extends ContainerAwareCommand
+class FixBeneficiariesWithoutAddressCommand extends Command
 {
+    private $em;
+
+    public function __construct(
+        EntityManagerInterface $em
+    )
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
     protected function configure()
     {
         $this
@@ -23,9 +34,7 @@ class FixBeneficiariesWithoutAddressCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /** @var EntityManager $em */
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository(Beneficiary::class)->createQueryBuilder('b');
+        $qb = $this->em->getRepository(Beneficiary::class)->createQueryBuilder('b');
         $qb->leftJoin('b.membership', 'm')
             ->leftJoin('m.mainBeneficiary', 'mb')
             ->where('b.address IS NULL')
@@ -45,10 +54,10 @@ class FixBeneficiariesWithoutAddressCommand extends ContainerAwareCommand
             $newAddress->setZipcode($mainBeneficiary->getAddress()->getZipcode());
             $newAddress->setCity($mainBeneficiary->getAddress()->getCity());
 
-            $em->persist($newAddress);
+            $this->em->persist($newAddress);
         }
 
-        $em->flush();
+        $this->em->flush();
 
         return 0;
     }
