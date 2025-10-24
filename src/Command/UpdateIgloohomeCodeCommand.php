@@ -30,7 +30,7 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
     {
         $api_key = $input->getArgument('api_key');
         $lock_id = $input->getArgument('lock_id');
-        $recipients = $input->getArgument('alert_recipients');
+        $recipients = explode(',', $input->getArgument('alert_recipients'));
         $start = $input->getArgument('start');
         $end = $input->getArgument('end');
 
@@ -54,7 +54,7 @@ class UpdateIgloohomeCodeCommand extends ContainerAwareCommand
             $mail = (new Email())
                 ->subject('[ESPACE MEMBRES] Echec de création du code du boitier')
                 ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
-                ->to($recipients)
+                ->to(...$recipients)
                 ->text('Echec de génération du code du boitier Igloohome');
             $mailer->send($mail);
             return 1;
