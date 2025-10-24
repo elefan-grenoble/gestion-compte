@@ -6,13 +6,13 @@ use App\Helloasso\HelloassoClient;
 use App\Helloasso\HelloassoPaymentHandler;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
-class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
+class UpdateHelloAssoPaymentsCommand extends Command
 {
     /** @var HelloassoClient */
     private $helloassoClient;
@@ -20,18 +20,21 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
     /** @var HelloassoPaymentHandler */
     private $paymentHandler;
 
+    private $params;
+
     /** @var LoggerInterface */
     private $logger;
 
     public function __construct(
         HelloassoClient $helloassoClient,
         HelloassoPaymentHandler $paymentHandler,
-        EventDispatcherInterface $eventDispatcher,
+        ContainerBagInterface $params,
         LoggerInterface $logger
     ) {
         parent::__construct('app:member:update_payments');
         $this->helloassoClient = $helloassoClient;
         $this->paymentHandler = $paymentHandler;
+        $this->params = $params;
         $this->logger = $logger;
     }
 
@@ -44,7 +47,7 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $formSlug = $this->getContainer()->getParameter('helloasso_campaign_slug');
+        $formSlug = $this->params->get('helloasso_campaign_slug');
         $from = Carbon::now()->sub($input->getOption('delay'));
 
         $output->writeln('Searching from '.$from->format('Y-m-d'));

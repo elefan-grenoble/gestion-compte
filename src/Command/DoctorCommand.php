@@ -3,15 +3,27 @@
 namespace App\Command;
 
 use App\Entity\Shift;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
 
-class DoctorCommand extends ContainerAwareCommand
+class DoctorCommand extends Command
 {
+    private $em;
+
+    public function __construct(
+        EntityManagerInterface $em
+    )
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -26,7 +38,6 @@ class DoctorCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         $fix_phone = $input->getOption('phone');
         $fix_status = $input->getOption('status');
         $fix_registration = $input->getOption('registration');
@@ -34,8 +45,7 @@ class DoctorCommand extends ContainerAwareCommand
         if ($fix_phone){
             $counter = 0;
             $debug = array();
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $members = $em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository('App:Membership')->findAll();
             foreach ($members as $member){
                 foreach ($member->getBeneficiaries() as $beneficiary){
                     $phone = $beneficiary->getPhone();
@@ -76,12 +86,12 @@ class DoctorCommand extends ContainerAwareCommand
                             $phone = null;
                         }
                         $beneficiary->setPhone($phone);
-                        $em->persist($beneficiary);
+                        $this->em->persist($beneficiary);
                         $counter++;
                     }
                 }
             }
-            $em->flush();
+            $this->em->flush();
             $output->writeln('<fg=cyan;>>>></><fg=green;> PHONES FIX </>');
             if ($input->getOption('verbose')){
                 foreach ($debug as $d){
@@ -93,37 +103,35 @@ class DoctorCommand extends ContainerAwareCommand
 
         if ($fix_status) {
             $counter = 0;
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $members = $em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository('App:Membership')->findAll();
             foreach ($members as $member) {
                 if (($member->getFrozen() === null)||($member->getWithdrawn() === null)){
                     if ($member->getFrozen() === null)
                         $member->setFrozen(false);
                     if ($member->getWithdrawn() === null)
                         $member->setWithdrawn(false);
-                    $em->persist($member);
+                    $this->em->persist($member);
                     $counter++;
                 }
             }
-            $em->flush();
+            $this->em->flush();
             $output->writeln('<fg=cyan;>>>></><fg=green;> STATUS FIX </>');
             $output->writeln('<fg=cyan;>>>></><fg=green;>'.$counter.' status vide(s) corrigé(s)'.' </>');
         }
 
         if ($fix_registration) {
             $counter = 0;
-            $em = $this->getContainer()->get('doctrine')->getManager();
-            $members = $em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository('App:Membership')->findAll();
             foreach ($members as $member) {
                 foreach ($member->getRegistrations() as $registration) {
                     if ($registration->getCreatedAt()->format('Y') < 0) {
                         $registration->setCreatedAt($registration->getDate());
                         $counter++;
-                        $em->persist($registration);
+                        $this->em->persist($registration);
                     }
                 }
             }
-            $em->flush();
+            $this->em->flush();
             $output->writeln('<fg=cyan;>>>></><fg=green;> REGISTRATION FIX </>');
             $output->writeln('<fg=cyan;>>>></><fg=green;>'.$counter.' correction(s) apportée(s) aux adhésion(s)'.' </>');
         }
