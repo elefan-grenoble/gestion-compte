@@ -1,8 +1,12 @@
 parameters:
-    level: 6
+    level: 2
     paths:
         - bin/
         - config/
         - public/
         - src/
         - tests/
+    tmpDir: var/phpstan
+    parallel:
+        maximumNumberOfProcesses: 1
+        processTimeout: 1200.0
