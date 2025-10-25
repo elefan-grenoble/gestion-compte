@@ -64,7 +64,7 @@ class SwipeCardController extends AbstractController
             $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
             $this->get("security.token_storage")->setToken($token);
             $event = new InteractiveLoginEvent($request, $token);
-            $event_dispatcher->dispatch("security.interactive_login", $event);
+            $event_dispatcher->dispatch($event, "security.interactive_login");
         }
 
         return $this->redirectToRoute('homepage');

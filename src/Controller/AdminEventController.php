@@ -298,7 +298,7 @@ class AdminEventController extends AbstractController
                     $em->remove($proxy);
                     $em->flush();
 
-                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -318,7 +318,7 @@ class AdminEventController extends AbstractController
                     $em->remove($proxy);
                     $em->flush();
 
-                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -334,7 +334,7 @@ class AdminEventController extends AbstractController
                 $em->persist($proxy);
                 $em->flush();
 
-                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
 
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());

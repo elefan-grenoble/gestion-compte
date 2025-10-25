@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Membership;
 use Symfony\Component\EventDispatcher\Event;
 
-class MemberCreatedEvent extends Event
+class MemberCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'member.created';
 

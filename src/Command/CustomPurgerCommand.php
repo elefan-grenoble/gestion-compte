@@ -30,7 +30,7 @@ class CustomPurgerCommand extends Command
             ->setHelp('This command allows you to purge the database while excluding specific tables (migration_versions, dynamic_content)');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $purger = $this->purgerFactory->createForEntityManager('default', $this->entityManager, []);
         $purger->purge();

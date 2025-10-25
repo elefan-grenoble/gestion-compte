@@ -50,7 +50,7 @@ class ImportUsersCommand extends CsvCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $file = $input->getArgument('file');
         $delimiter= $input->getOption('delimiter');

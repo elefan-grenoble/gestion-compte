@@ -40,7 +40,7 @@ class CycleStartCommand extends Command
             ->setHelp('This command allows you to send emails to member with a cycle starting today and with shift remaining to book');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $date = $input->getOption('date');
         if ($date) {
@@ -63,7 +63,7 @@ class CycleStartCommand extends Command
         $members_with_cycle_starting_today = $this->em->getRepository('App:Membership')->findWithNewCycleStarting($date, $cycle_type);
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
-            $this->event_dispatcher->dispatch(MemberCycleEndEvent::NAME, new MemberCycleEndEvent($member, $date));
+            $this->event_dispatcher->dispatch(new MemberCycleEndEvent($member, $date), MemberCycleEndEvent::NAME);
             $count++;
             $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);

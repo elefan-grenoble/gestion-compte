@@ -40,7 +40,7 @@ class FixTimeLogCommand extends Command
             ->setHelp('This command allows you to fix time logs data');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $members = $this->em->getRepository('App:Membership')->findAll();
 

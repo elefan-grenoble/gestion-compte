@@ -46,7 +46,7 @@ class UpdateIgloohomeCodeCommand extends Command
             ->addArgument('alert_recipients', InputArgument::REQUIRED, 'Alert email recipients (comma separated)');;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $api_key = $input->getArgument('api_key');
         $lock_id = $input->getArgument('lock_id');

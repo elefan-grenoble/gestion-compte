@@ -161,8 +161,8 @@ class HelloassoController extends AbstractController
             }
             foreach ($payments as $payment) {
                 $event_dispatcher->dispatch(
-                    HelloassoEvent::PAYMENT_AFTER_SAVE,
-                    new HelloassoEvent($payment)
+                    new HelloassoEvent($payment),
+                    HelloassoEvent::PAYMENT_AFTER_SAVE
                 );
             }
 
@@ -220,8 +220,8 @@ class HelloassoController extends AbstractController
             $beneficiary = $form->get("subscriber")->getData();
 
             $event_dispatcher->dispatch(
-                HelloassoEvent::ORPHAN_SOLVE,
-                new HelloassoEvent($payment, $beneficiary->getUser())
+                new HelloassoEvent($payment, $beneficiary->getUser()),
+                HelloassoEvent::ORPHAN_SOLVE
             );
 
             $session->getFlashBag()->add('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
@@ -298,8 +298,8 @@ class HelloassoController extends AbstractController
         if ($email == $payment->getEmail()) {
             $session->getFlashBag()->add('success', 'Merci !');
             $event_dispatcher->dispatch(
-                HelloassoEvent::ORPHAN_SOLVE,
-                new HelloassoEvent($payment, $this->getUser())
+                new HelloassoEvent($payment, $this->getUser()),
+                HelloassoEvent::ORPHAN_SOLVE
             );
         }else{
             $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');

@@ -44,7 +44,7 @@ class CycleHalfCommand extends Command
             ->setHelp('This command allows you to generate events for the members on the middle of their cycle');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $date = $input->getOption('date');
         if ($date) {
@@ -70,7 +70,7 @@ class CycleHalfCommand extends Command
             $current_cycle_start = $this->membership_service->getStartOfCycle($member, 0);
             $current_cycle_end = $this->membership_service->getEndOfCycle($member, 0);
             $currentCycleShifts = $this->em->getRepository('App:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
-            $this->event_dispatcher->dispatch(MemberCycleHalfEvent::NAME, new MemberCycleHalfEvent($member, $date, $currentCycleShifts));
+            $this->event_dispatcher->dispatch(new MemberCycleHalfEvent($member, $date, $currentCycleShifts), MemberCycleHalfEvent::NAME);
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
             $count++;

@@ -46,7 +46,7 @@ class InitTimeLogCommand extends Command
      * @return int
      * @throws \Doctrine\ORM\ORMException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $countShiftLogs = 0;
         $countCycleBeginning = 0;

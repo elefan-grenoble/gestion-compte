@@ -164,8 +164,8 @@ class CommissionController extends AbstractController
                 $em->flush();
                 $message = $beneficiary->getFirstname().' a bien été ajouté à la commission';
                 $event_dispatcher->dispatch(
-                    CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME,
-                    new CommissionJoinOrLeaveEvent($beneficiary,$commission)
+                    new CommissionJoinOrLeaveEvent($beneficiary,$commission),
+                    CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME
                 );
             }else{
                 $success = false;
@@ -208,8 +208,8 @@ class CommissionController extends AbstractController
             $em->persist($beneficiary);
             $em->flush();
             $event_dispatcher->dispatch(
-                CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME,
-                new CommissionJoinOrLeaveEvent($beneficiary,$commission)
+                new CommissionJoinOrLeaveEvent($beneficiary,$commission),
+                CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME
             );
         }
         if ($request->isXmlHttpRequest()){

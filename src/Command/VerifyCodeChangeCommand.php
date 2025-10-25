@@ -34,7 +34,7 @@ class VerifyCodeChangeCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params,
-        EngineInterface $twig,
+        \Twig\Environment $twig,
         MailerInterface $mailer,
         TokenStorageInterface $token_storage,
         AuthorizationCheckerInterface $authorization_checker,
@@ -62,7 +62,7 @@ class VerifyCodeChangeCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         # FIXME: this->getContainer ne fonctionne plus en symfony 4+
         # (utilisé plus bas dans le code)

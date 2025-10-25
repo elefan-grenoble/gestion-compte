@@ -36,7 +36,7 @@ class DoctorCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $fix_phone = $input->getOption('phone');
         $fix_status = $input->getOption('status');

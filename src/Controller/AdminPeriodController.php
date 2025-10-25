@@ -337,7 +337,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($position);
             $em->flush();
 
-            $event_dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
+            $event_dispatcher->dispatch(new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime), PeriodPositionFreedEvent::NAME);
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }

@@ -477,7 +477,7 @@ class BookingController extends AbstractController
             $count = 0;
             foreach ($shifts as $shift) {
                 $beneficiary = $shift->getShifter();
-                $event_dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+                $event_dispatcher->dispatch(new ShiftDeletedEvent($shift, $beneficiary), ShiftDeletedEvent::NAME);
                 $em->remove($shift);
                 $count++;
             }

@@ -34,7 +34,7 @@ class CloseMembershipCommand extends Command
             ->addArgument('delay', InputArgument::REQUIRED, "Delay (example: '1 month')");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $output->writeln('<fg=green;>close accounts command</>');
 

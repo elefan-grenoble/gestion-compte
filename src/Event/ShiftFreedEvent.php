@@ -7,7 +7,7 @@ use App\Entity\Membership;
 use App\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftFreedEvent extends Event
+class ShiftFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.freed';
 

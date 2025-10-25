@@ -232,8 +232,8 @@ class DefaultController extends AbstractController
         }
         foreach ($payments as $payment) {
             $event_dispatcher->dispatch(
-                HelloassoEvent::PAYMENT_AFTER_SAVE,
-                new HelloassoEvent($payment)
+                new HelloassoEvent($payment),
+                HelloassoEvent::PAYMENT_AFTER_SAVE
             );
         }
 
