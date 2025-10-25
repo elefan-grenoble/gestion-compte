@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Shift;
+use App\Helper\SwipeCard;
 use App\Security\CodeVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -30,6 +31,7 @@ class VerifyCodeChangeCommand extends Command
     private $token_storage;
     private $authorization_checker;
     private $router;
+    private $swipeCard;
 
     public function __construct(
         EntityManagerInterface $em,
@@ -38,7 +40,8 @@ class VerifyCodeChangeCommand extends Command
         MailerInterface $mailer,
         TokenStorageInterface $token_storage,
         AuthorizationCheckerInterface $authorization_checker,
-        RouterInterface $router
+        RouterInterface $router,
+        SwipeCard $swipeCard
     )
     {
         $this->em = $em;
@@ -48,6 +51,7 @@ class VerifyCodeChangeCommand extends Command
         $this->token_storage = $token_storage;
         $this->authorization_checker = $authorization_checker;
         $this->router = $router;
+        $this->swipeCard = $swipeCard;
 
         parent::__construct();
     }
@@ -64,10 +68,6 @@ class VerifyCodeChangeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        # FIXME: this->getContainer ne fonctionne plus en symfony 4+
-        # (utilisé plus bas dans le code)
-        $this->getContainer()->get('App\Helper\SwipeCard');
-
         $last_run = $input->getOption('last_run');
         $last_run_date = new \DateTime();
         $last_run_date->modify("-".$last_run." hours");
@@ -98,12 +98,12 @@ class VerifyCodeChangeCommand extends Command
                     $code_change_done_url = $this->router->generate(
                         'code_change_done',
                         array(
-                            'token' => $this->getContainer()->get('App\Helper\SwipeCard')->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId())
+                            'token' => $this->swipeCard->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId())
                         ), UrlGeneratorInterface::ABSOLUTE_URL
                     );
                     $shiftEmail = $this->params->get('emails.shift');
                     $reminder = (new Email())
-                        ->suject('[ESPACE MEMBRES] As tu réussi à changer le code du boîtier ?')
+                        ->subject('[ESPACE MEMBRES] As tu réussi à changer le code du boîtier ?')
                         ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
                         ->to($last->getRegistrar()->getEmail())
                         ->html(

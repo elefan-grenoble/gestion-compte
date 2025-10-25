@@ -8,6 +8,7 @@ use App\Repository\ShiftExemptionRepository;
 use App\Service\MembershipService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -222,10 +223,8 @@ class AdminMembershipShiftExemptionController extends AbstractController
      * Creates a form to delete a membershipShiftExemption entity.
      *
      * @param MembershipShiftExemption $membershipShiftExemption The membershipShiftExemption entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function getDeleteForm(MembershipShiftExemption $membershipShiftExemption)
+    private function getDeleteForm(MembershipShiftExemption $membershipShiftExemption): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_membershipshiftexemption_delete', array('id' => $membershipShiftExemption->getId())))

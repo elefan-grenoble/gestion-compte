@@ -312,7 +312,7 @@ class AdminEventController extends AbstractController
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
                 $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
-                if ($proxy_waiting && $proxy_waiting != $proxy) {
+                if ($proxy_waiting instanceof Proxy && $proxy_waiting !== $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
                     $em->remove($proxy);

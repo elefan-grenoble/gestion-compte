@@ -134,9 +134,9 @@ class BeneficiaryController extends AbstractController
                 // then we create a new membership
                 $new_member = new Membership();
                 // init member id
-                $m = $em->getRepository('App:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
+                $m = $em->getRepository('App:Membership')->findBy([], ['member_number' => 'DESC'], 1)[0];
                 $mm = 1;
-                if ($m)
+                if ($m instanceof Membership)
                     $mm = $m->getMemberNumber() + 1;
                 $new_member->setMemberNumber($mm);
                 // set main beneficiary

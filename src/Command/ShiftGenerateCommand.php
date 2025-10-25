@@ -154,7 +154,7 @@ class ShiftGenerateCommand extends Command
         }
 
         foreach ($reservedShifts as $i => $shift) {
-            $event_dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[$i]));
+            $this->event_dispatcher->dispatch(new ShiftReservedEvent($shift, $formerShifts[$i]), ShiftReservedEvent::NAME);
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');
