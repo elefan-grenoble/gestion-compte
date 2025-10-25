@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8da634415ebe23912571ba41951bc4c3",
+    "content-hash": "76befeda740b6c13cda73fd6df6e6219",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4256,20 +4256,20 @@
         },
         {
             "name": "stevenmaguire/oauth2-keycloak",
-            "version": "4.0.0",
+            "version": "5.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stevenmaguire/oauth2-keycloak.git",
-                "reference": "05ead6bb6bcd2b6f96dfae87c769dcd3e5f6129d"
+                "reference": "1b690b7377dfe7a23e1590373f37e12cf40a6d75"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stevenmaguire/oauth2-keycloak/zipball/05ead6bb6bcd2b6f96dfae87c769dcd3e5f6129d",
-                "reference": "05ead6bb6bcd2b6f96dfae87c769dcd3e5f6129d",
+                "url": "https://api.github.com/repos/stevenmaguire/oauth2-keycloak/zipball/1b690b7377dfe7a23e1590373f37e12cf40a6d75",
+                "reference": "1b690b7377dfe7a23e1590373f37e12cf40a6d75",
                 "shasum": ""
             },
             "require": {
-                "firebase/php-jwt": "^4.0 || ^5.0 || ^6.0",
+                "firebase/php-jwt": "^6.0",
                 "league/oauth2-client": "^2.0",
                 "php": "~7.2 || ~8.0"
             },
@@ -4311,9 +4311,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stevenmaguire/oauth2-keycloak/issues",
-                "source": "https://github.com/stevenmaguire/oauth2-keycloak/tree/4.0.0"
+                "source": "https://github.com/stevenmaguire/oauth2-keycloak/tree/5.1.0"
             },
-            "time": "2023-03-14T09:43:47+00:00"
+            "time": "2023-10-24T06:10:44+00:00"
         },
         {
             "name": "symfony/asset",

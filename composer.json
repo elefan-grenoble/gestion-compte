@@ -37,7 +37,7 @@
         "picqer/php-barcode-generator": "^2.4",
         "sensio/framework-extra-bundle": "^6.0",
         "spipu/html2pdf": "^5.2.5",
-        "stevenmaguire/oauth2-keycloak": "^4.0",
+        "stevenmaguire/oauth2-keycloak": "^5.1",
         "symfony/asset": "4.4.*",
         "symfony/browser-kit": "4.4.*",
         "symfony/console": "4.4.*",
