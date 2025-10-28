@@ -21,7 +21,7 @@ jobs:
     - uses: actions/stale@v5
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Stale issue message'
-        stale-pr-message: 'Stale pull request message'
+        stale-issue-message: 'Cette issue semble avoir été oubliée. Sans nouvelle activité, elle sera fermée dans 7 jours.'
+        stale-pr-message: 'Cette PR semble avoir été oubliée. Sans nouvelle activité, elle sera fermée dans 7 jours.'
         stale-issue-label: 'no-issue-activity'
         stale-pr-label: 'no-pr-activity'
