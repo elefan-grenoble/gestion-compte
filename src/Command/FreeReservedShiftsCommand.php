@@ -39,7 +39,7 @@ class FreeReservedShiftsCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $reserve_new_shift_to_prior_shifter = $this->params->get('reserve_new_shift_to_prior_shifter');
         if (!$reserve_new_shift_to_prior_shifter) {

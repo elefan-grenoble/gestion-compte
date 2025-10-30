@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Code;
 use Symfony\Component\EventDispatcher\Event;
 
-class CodeNewEvent extends Event
+class CodeNewEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'code.new';
 

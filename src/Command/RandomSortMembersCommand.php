@@ -43,7 +43,7 @@ class RandomSortMembersCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $given_date = $input->getArgument('date');
         $last_registration = date_create_from_format('Y-m-d',$given_date);

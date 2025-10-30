@@ -50,7 +50,7 @@ class AnonymizeDataCommand extends Command
         return $a[$int];
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Create a new question helper instance
         $helper = $this->getHelper('question');

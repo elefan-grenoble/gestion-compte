@@ -36,7 +36,7 @@ class RegistrationType extends AbstractType
             );
         }
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             // ... adding the name field if needed
             $form = $event->getForm();
             $registration = $event->getData();

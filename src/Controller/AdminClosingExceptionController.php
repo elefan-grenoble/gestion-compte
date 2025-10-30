@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Entity\ClosingException;
 use App\Form\ClosingExceptionType;
+use App\Repository\ClosingExceptionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
@@ -32,9 +33,11 @@ class AdminClosingExceptionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $closingExceptionsFuture = $em->getRepository('App:ClosingException')->findFutures();
-        $closingExceptionsOngoing = $em->getRepository('App:ClosingException')->findOngoing();
-        $closingExceptionsPast = $em->getRepository('App:ClosingException')->findPast(null, 10);  # only the 10 last
+        /** @var ClosingExceptionRepository $repository */
+        $repository = $em->getRepository(ClosingException::class);
+        $closingExceptionsFuture = $repository->findFutures();
+        $closingExceptionsOngoing = $repository->findOngoing();
+        $closingExceptionsPast = $repository->findPast(null, 10);  # only the 10 last
 
         $delete_forms = array();
         foreach ($closingExceptionsFuture as $closingException) {
@@ -59,7 +62,7 @@ class AdminClosingExceptionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $closingExceptions = $em->getRepository('App:ClosingException')->findAll();
+        $closingExceptions = $em->getRepository(ClosingException::class)->findAll();
 
         $delete_forms = array();
         foreach ($closingExceptions as $closingException) {

@@ -99,7 +99,7 @@ class CardReaderController extends AbstractController
                     $em->persist($shift);
                     $em->flush();
 
-                    $event_dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $event_dispatcher->dispatch(new ShiftValidatedEvent($shift), ShiftValidatedEvent::NAME);
 
                     $ongoingShiftsValidated += 1;
                 }
@@ -114,7 +114,7 @@ class CardReaderController extends AbstractController
             if ($this->swipeCardLoggingAnonymous) {
                 $card = null;
             }
-            $event_dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
+            $event_dispatcher->dispatch(new SwipeCardEvent($card, $counter), SwipeCardEvent::SWIPE_CARD_SCANNED);
         }
 
         return $this->render('card_reader/check.html.twig', [

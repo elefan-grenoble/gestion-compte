@@ -45,7 +45,7 @@ class SendShiftAlertsCommand extends Command
             ->addOption('mattermostTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in Mattermost alerts', 'SHIFT_ALERT_MARKDOWN');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $date_given = $input->getArgument('date');
         $jobs = explode(',', $input->getArgument('jobs'));
@@ -67,13 +67,13 @@ class SendShiftAlertsCommand extends Command
 
             // email 
             if ($emails) {
-                $this->event_dispatcher->dispatch(ShiftAlertsEvent::NAME, new ShiftAlertsEvent($alerts, $date, $email_template, $emails));
+                $this->event_dispatcher->dispatch(new ShiftAlertsEvent($alerts, $date, $email_template, $emails), ShiftAlertsEvent::NAME);
                 $output->writeln('<comment>Email(s) sent</>');
             }
 
             // mattermost
             if ($mattermost_hook_url) {
-                $this->event_dispatcher->dispatch(ShiftAlertsMattermostEvent::NAME, new ShiftAlertsMattermostEvent($alerts, $date, $mattermost_template, $mattermost_hook_url));
+                $this->event_dispatcher->dispatch(new ShiftAlertsMattermostEvent($alerts, $date, $mattermost_template, $mattermost_hook_url), ShiftAlertsMattermostEvent::NAME);
                 $output->writeln('<comment>Alerts posted on Mattermost</>');
             }
 

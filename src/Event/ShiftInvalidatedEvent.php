@@ -7,7 +7,7 @@ use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftInvalidatedEvent extends Event
+class ShiftInvalidatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.invalidated';
 

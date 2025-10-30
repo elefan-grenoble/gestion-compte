@@ -132,7 +132,6 @@ class DefaultController extends AbstractController
     /**
      * @Route("/schedule", name="schedule", methods={"GET","POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function scheduleAction(ShiftService $shift_service)
@@ -232,8 +231,8 @@ class DefaultController extends AbstractController
         }
         foreach ($payments as $payment) {
             $event_dispatcher->dispatch(
-                HelloassoEvent::PAYMENT_AFTER_SAVE,
-                new HelloassoEvent($payment)
+                new HelloassoEvent($payment),
+                HelloassoEvent::PAYMENT_AFTER_SAVE
             );
         }
 

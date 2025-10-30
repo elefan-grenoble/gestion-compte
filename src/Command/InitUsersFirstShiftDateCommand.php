@@ -29,7 +29,7 @@ class InitUsersFirstShiftDateCommand extends Command
             ->setHelp('This command allows you to init users first shift date');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $count = 0;
         $shifts = $this->em->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();

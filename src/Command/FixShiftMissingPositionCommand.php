@@ -34,7 +34,7 @@ class FixShiftMissingPositionCommand extends Command
             ->addOption('dry_run', null, InputOption::VALUE_NONE, 'Dry run');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $cycle_type = $this->params->get('cycle_type');
         $dry_run = $input->getOption('dry_run');

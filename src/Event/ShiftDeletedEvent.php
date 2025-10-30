@@ -7,7 +7,7 @@ use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftDeletedEvent extends Event
+class ShiftDeletedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.deleted';
 

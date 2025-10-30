@@ -62,7 +62,7 @@ class CommissionType extends AbstractType
         ));
         $builder->add('next_meeting_desc', TextType::class, array('required' => false, 'label' => 'Libelé de la prochaine réunion'));
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
             $commission = $event->getData();
             if ($user->hasRole('ROLE_ADMIN')||$user->hasRole('ROLE_SUPER_ADMIN')) {

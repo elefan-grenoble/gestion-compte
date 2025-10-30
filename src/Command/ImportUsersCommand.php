@@ -50,7 +50,7 @@ class ImportUsersCommand extends CsvCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $file = $input->getArgument('file');
         $delimiter= $input->getOption('delimiter');
@@ -178,7 +178,7 @@ class ImportUsersCommand extends CsvCommand
                         $beneficiary->setLastname($last_name);
                         $beneficiary->setPhone($phone);
 
-                        $event_dispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
+                        $this->event_dispatcher->dispatch(new BeneficiaryCreatedEvent($beneficiary), BeneficiaryCreatedEvent::NAME);
 
                         $beneficiary->setEmail($email);
                         $beneficiary->setFlying(false);

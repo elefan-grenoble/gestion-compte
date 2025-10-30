@@ -36,7 +36,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends Command
      * @return int
      * @throws \Doctrine\ORM\ORMException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $countShiftFreeLogs = 0;
         $shiftFreeLogs = $this->em->getRepository('App:ShiftFreeLog')->findAll();

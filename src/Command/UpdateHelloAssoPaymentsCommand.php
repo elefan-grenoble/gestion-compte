@@ -41,7 +41,7 @@ class UpdateHelloAssoPaymentsCommand extends Command
             ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         # FIXME: this->getContainer ne fonctionne plus en symfony 4+
         $helloAssoClient = $this->getContainer()->get(Helloasso::class);
@@ -117,8 +117,8 @@ class UpdateHelloAssoPaymentsCommand extends Command
         $this->em->flush();
 
         $this->event_dispatcher->dispatch(
-            HelloassoEvent::PAYMENT_AFTER_SAVE,
-            new HelloassoEvent($payment)
+            new HelloassoEvent($payment),
+            HelloassoEvent::PAYMENT_AFTER_SAVE
         );
 
         $output->writeln(' DONE !');

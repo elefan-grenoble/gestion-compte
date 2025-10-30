@@ -21,7 +21,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class ApiController extends AbstractController
 {
 
-    protected function getUser(){
+    protected function getUser(): array
+    {
         $user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $user->getBeneficiary();
         $withDrawn = false;
