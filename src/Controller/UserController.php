@@ -133,7 +133,7 @@ class UserController extends AbstractController
                 $em->flush();
 
                 $event = new UserEvent($this->getUser(), $request);
-                $event_dispatcher->dispatch(FOSUserEvents::USER_PASSWORD_CHANGED, $event);
+                $event_dispatcher->dispatch($event, FOSUserEvents::USER_PASSWORD_CHANGED);
 
                 $session = new Session();
                 $session->getFlashBag()->add('success', 'Mot de passe enregistré, merci !');
@@ -170,7 +170,7 @@ class UserController extends AbstractController
             $em->persist($ab);
             $em->flush();
 
-            $event_dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($ab));
+            $event_dispatcher->dispatch(new AnonymousBeneficiaryCreatedEvent($ab), AnonymousBeneficiaryCreatedEvent::NAME);
 
             $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
             return $this->redirectToRoute('user_quick_new');
@@ -355,7 +355,7 @@ class UserController extends AbstractController
      */
     public function quickNewRecallAction(Request $request, AnonymousBeneficiary $anonymousBeneficiary, EventDispatcherInterface $event_dispatcher)
     {
-        $event_dispatcher->dispatch(AnonymousBeneficiaryRecallEvent::NAME, new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary));
+        $event_dispatcher->dispatch(new AnonymousBeneficiaryRecallEvent($anonymousBeneficiary), AnonymousBeneficiaryRecallEvent::NAME);
 
         $anonymousBeneficiary->setRecallDate(new \DateTime());
         $em = $this->getDoctrine()->getManager();

@@ -41,7 +41,7 @@ class HelloassoPaymentCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $save_after_id = $input->getArgument('save_after_id');
         $list_orphan = $input->getOption('list_orphan');
@@ -69,8 +69,8 @@ class HelloassoPaymentCommand extends Command
             if ($payment){
                 $output->writeln("<info>Event HelloassoEvent::PAYMENT_AFTER_SAVE (".HelloassoEvent::PAYMENT_AFTER_SAVE.") will be triggered on payment id #".$payment->getId()."</info>");
                 $this->event_dispatcher->dispatch(
-                    HelloassoEvent::PAYMENT_AFTER_SAVE,
-                    new HelloassoEvent($payment)
+                    new HelloassoEvent($payment),
+                    HelloassoEvent::PAYMENT_AFTER_SAVE
                 );
             }else{
                 $output->writeln("<error>No payement found for id #".$save_after_id."</error>");

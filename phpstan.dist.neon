@@ -1,3 +1,9 @@
+includes:
+    - vendor/phpstan/phpstan-symfony/extension.neon
+    - vendor/phpstan/phpstan-doctrine/extension.neon
+    - phpstan-baseline.risky.neon
+    - phpstan-baseline.neon
+
 parameters:
     level: 6
     paths:
@@ -6,3 +12,12 @@ parameters:
         - public/
         - src/
         - tests/
+    tmpDir: var/phpstan
+    symfony:
+        containerXmlPath: var/cache/dev/srcApp_KernelDevDebugContainer.xml
+        consoleApplicationLoader: tests/console-application.php
+    doctrine:
+        objectManagerLoader: tests/object-manager.php
+    parallel:
+        maximumNumberOfProcesses: 1
+        processTimeout: 1200.0

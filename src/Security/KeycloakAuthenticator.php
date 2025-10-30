@@ -320,7 +320,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
             $beneficiary->getMembership()->setFlying(true);
         }
         if (!$beneficiary->getId())
-            $this->eventDispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
+            $this->eventDispatcher->dispatch(new BeneficiaryCreatedEvent($beneficiary), BeneficiaryCreatedEvent::NAME);
 
         //email once user exist
         $value = $this->getKeycloakUserAttribute($keycloakUser,'email');

@@ -188,7 +188,7 @@ class EventController extends AbstractController
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
             }
 
             return $this->redirectToRoute('homepage');
@@ -238,7 +238,7 @@ class EventController extends AbstractController
                     $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()) {
-                        $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                        $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
                     }
 
                     return $this->redirectToRoute('homepage');
@@ -433,7 +433,7 @@ class EventController extends AbstractController
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
             }
 
             return $this->redirectToRoute('homepage');

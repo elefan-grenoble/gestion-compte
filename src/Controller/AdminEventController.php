@@ -298,7 +298,7 @@ class AdminEventController extends AbstractController
                     $em->remove($proxy);
                     $em->flush();
 
-                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -312,13 +312,13 @@ class AdminEventController extends AbstractController
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
                 $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
-                if ($proxy_waiting && $proxy_waiting != $proxy) {
+                if ($proxy_waiting instanceof Proxy && $proxy_waiting !== $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
                     $em->remove($proxy);
                     $em->flush();
 
-                    $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -334,7 +334,7 @@ class AdminEventController extends AbstractController
                 $em->persist($proxy);
                 $em->flush();
 
-                $event_dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
 
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());

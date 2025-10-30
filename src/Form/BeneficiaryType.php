@@ -60,7 +60,7 @@ class BeneficiaryType extends AbstractType
             ->add('phone', TextType::class, array('label' => 'Téléphone', 'required' => false))
             ->add('address', AddressType::class, array('label' => false));
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
             if (is_object($user) && ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {

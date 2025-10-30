@@ -187,7 +187,7 @@ class CodeController extends AbstractController
 
         $logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
 
-        $event_dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $old_codes));
+        $event_dispatcher->dispatch(new CodeNewEvent($code, $old_codes), CodeNewEvent::NAME);
 
         $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
 

@@ -178,7 +178,7 @@ class ShiftController extends AbstractController
 
         $em->flush();
 
-        $event_dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
         $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
         return new Response($this->generateUrl('homepage'), 200);
@@ -235,7 +235,7 @@ class ShiftController extends AbstractController
                 }
                 $em->flush();
 
-                $event_dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+                $event_dispatcher->dispatch(new ShiftBookedEvent($shift, true), ShiftBookedEvent::NAME);
 
                 $message = "Créneau réservé avec succès pour " . $shift->getShifter();
                 $success = true;
@@ -305,7 +305,7 @@ class ShiftController extends AbstractController
             $em->persist($shift);
             $em->flush();
 
-            $event_dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+            $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
             $session->getFlashBag()->add('success', "Le créneau a été annulé !");
             if ($this->use_time_log_saving) {
@@ -368,9 +368,9 @@ class ShiftController extends AbstractController
                 $em->flush();
 
                 if ($wasCarriedOut) {
-                    $event_dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+                    $event_dispatcher->dispatch(new ShiftInvalidatedEvent($shift, $beneficiary), ShiftInvalidatedEvent::NAME);
                 }
-                $event_dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+                $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
@@ -451,10 +451,10 @@ class ShiftController extends AbstractController
                 $em->flush();
 
                 if ($validate) {
-                    $event_dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $event_dispatcher->dispatch(new ShiftValidatedEvent($shift), ShiftValidatedEvent::NAME);
                 } else {
                     $beneficiary = $shift->getShifter();
-                    $event_dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+                    $event_dispatcher->dispatch(new ShiftInvalidatedEvent($shift, $beneficiary), ShiftInvalidatedEvent::NAME);
                 }
 
                 $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
@@ -522,7 +522,7 @@ class ShiftController extends AbstractController
         $em->persist($shift);
         $em->flush();
 
-        $event_dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
         $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
         return $this->redirectToRoute('homepage');
@@ -579,7 +579,7 @@ class ShiftController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $shift->getShifter();
-            $event_dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+            $event_dispatcher->dispatch(new ShiftDeletedEvent($shift, $beneficiary), ShiftDeletedEvent::NAME);
             $em->remove($shift);
             $em->flush();
 

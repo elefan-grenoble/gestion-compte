@@ -15,7 +15,7 @@ use App\Entity\HelloassoPayment;
 use App\Entity\User;
 use Symfony\Component\EventDispatcher\Event;
 
-class HelloassoEvent extends Event
+class HelloassoEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const PAYMENT_AFTER_SAVE = 'helloasso.payment_after_save';
     const ORPHAN_SOLVE = 'helloasso.orphan_solve';

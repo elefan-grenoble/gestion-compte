@@ -37,7 +37,7 @@ class ShiftReminderCommand extends Command
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $from_given = $input->getArgument('date');
         $from = date_create_from_format('Y-m-d',$from_given);
@@ -61,7 +61,7 @@ class ShiftReminderCommand extends Command
         $count_reminder_sent = 0;
         foreach ($shifts as $shift) {
             if ($shift->getShifter()) {
-                $this->event_dispatcher->dispatch(ShiftReminderEvent::NAME, new ShiftReminderEvent($shift));
+                $this->event_dispatcher->dispatch(new ShiftReminderEvent($shift), ShiftReminderEvent::NAME);
                 $count_reminder_sent++;
             }
         }

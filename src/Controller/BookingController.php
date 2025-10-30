@@ -26,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -467,6 +468,7 @@ class BookingController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var Shift[] $shifts */
             $shifts = $em->getRepository('App:Shift')->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
@@ -475,7 +477,7 @@ class BookingController extends AbstractController
             $count = 0;
             foreach ($shifts as $shift) {
                 $beneficiary = $shift->getShifter();
-                $event_dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+                $event_dispatcher->dispatch(new ShiftDeletedEvent($shift, $beneficiary), ShiftDeletedEvent::NAME);
                 $em->remove($shift);
                 $count++;
             }
@@ -599,10 +601,8 @@ class BookingController extends AbstractController
      * // TODO: how to avoid having similar createShiftFreeForm in ShiftController ?
      *
      * @param Shift $shift The shift entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createShiftFreeForm(Shift $shift)
+    private function createShiftFreeForm(Shift $shift): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
