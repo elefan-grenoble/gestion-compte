@@ -107,7 +107,7 @@ class AdminController extends AbstractController
              */
             $members = $qb->getQuery()->getResult();
 
-            $response = new StreamedResponse(function () use ($members) {
+            $response = new StreamedResponse(function () use ($members): void {
                 $handle = fopen('php://output', 'wb');
                 $delimiter = ',';
 

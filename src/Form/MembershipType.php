@@ -38,7 +38,7 @@ class MembershipType extends AbstractType
 
         $builder->add('mainBeneficiary', BeneficiaryType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user, $options) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user, $options): void {
             $form = $event->getForm();
             /** @var Membership $userData */
             $userData = $event->getData();

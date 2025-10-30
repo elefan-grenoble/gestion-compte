@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Membership;
 use Symfony\Component\EventDispatcher\Event;
 
-class MemberCycleStartEvent extends Event
+class MemberCycleStartEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'member.cycle.start';
 

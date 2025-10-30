@@ -40,7 +40,7 @@ class UpdateHelloAssoPaymentsCommand extends Command
             ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $formSlug = $this->getContainer()->getParameter('helloasso_campaign_slug');
         $from = Carbon::now()->sub($input->getOption('delay'));

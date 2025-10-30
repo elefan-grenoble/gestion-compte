@@ -32,7 +32,7 @@ class FixBeneficiariesWithoutAddressCommand extends Command
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $qb = $this->em->getRepository(Beneficiary::class)->createQueryBuilder('b');
         $qb->leftJoin('b.membership', 'm')

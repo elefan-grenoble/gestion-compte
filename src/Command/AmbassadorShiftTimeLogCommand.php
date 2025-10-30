@@ -24,7 +24,7 @@ class AmbassadorShiftTimeLogCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params,
-        EngineInterface $twig,
+        \Twig\Environment $twig,
         MailerInterface $mailer
     )
     {
@@ -46,7 +46,7 @@ class AmbassadorShiftTimeLogCommand extends Command
             ->addOption('emailTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in email alerts', 'SHIFT_LATE_ALERT_EMAIL');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $locale = $this->params->get('locale');
         setlocale(LC_TIME, $locale);

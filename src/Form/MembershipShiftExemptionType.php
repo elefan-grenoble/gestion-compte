@@ -22,7 +22,7 @@ class MembershipShiftExemptionType extends AbstractType
     {
         $builder->add('shiftExemption', null, ['label' => 'Nature de l\'exemption'])
                 ->add('description', TextareaType::class, ['label' => 'Commentaire', 'attr' => ['class' => 'materialize-textarea']])
-                ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
+                ->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
                     $membershipShiftExemption = $event->getData();
                     $form = $event->getForm();
 

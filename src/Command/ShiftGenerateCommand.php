@@ -47,7 +47,7 @@ class ShiftGenerateCommand extends Command
             ->addOption('to', 't', InputOption::VALUE_OPTIONAL, 'Every day until this date (not included)', '');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $admin = $this->em->getRepository('App:User')->findSuperAdminAccount();
         $use_fly_and_fixed = $this->params->get('use_fly_and_fixed');
@@ -154,7 +154,7 @@ class ShiftGenerateCommand extends Command
         }
 
         foreach ($reservedShifts as $i => $shift) {
-            $event_dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[$i]));
+            $this->event_dispatcher->dispatch(new ShiftReservedEvent($shift, $formerShifts[$i]), ShiftReservedEvent::NAME);
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');

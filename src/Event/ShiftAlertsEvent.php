@@ -4,7 +4,7 @@ namespace App\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftAlertsEvent extends Event
+class ShiftAlertsEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.alerts';
 

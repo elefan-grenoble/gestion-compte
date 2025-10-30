@@ -336,7 +336,7 @@ class MembershipController extends AbstractController
             $beneficiary = $beneficiaryForm->getData();
 
             $event = new FormEvent($beneficiaryForm->get('user'), $request);
-            $event_dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $event_dispatcher->dispatch($event, FOSUserEvents::REGISTRATION_SUCCESS);
 
             if (count($member->getBeneficiaries()) <= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
                 $beneficiary->setMembership($member);
@@ -345,7 +345,7 @@ class MembershipController extends AbstractController
                 $em->persist($beneficiary);
                 $em->flush();
 
-                $event_dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
+                $event_dispatcher->dispatch(new BeneficiaryAddEvent($beneficiary), BeneficiaryAddEvent::NAME);
                 $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
             } else {
                 $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
@@ -813,7 +813,7 @@ class MembershipController extends AbstractController
             $member->setFrozenChange(false);
 
             $event = new FormEvent($form->get('mainBeneficiary')->get('user'), $request);
-            $event_dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $event_dispatcher->dispatch($event, FOSUserEvents::REGISTRATION_SUCCESS);
 
             $em->persist($member);
             if ($a_beneficiary) {
@@ -826,13 +826,13 @@ class MembershipController extends AbstractController
                     $em->persist($new_anonymous_beneficiary);
 
                     //dispatch to send mail
-                    $event_dispatcher->dispatch(AnonymousBeneficiaryCreatedEvent::NAME, new AnonymousBeneficiaryCreatedEvent($new_anonymous_beneficiary));
+                    $event_dispatcher->dispatch(new AnonymousBeneficiaryCreatedEvent($new_anonymous_beneficiary), AnonymousBeneficiaryCreatedEvent::NAME);
                 }
                 $em->remove($a_beneficiary);
             }
             $em->flush();
 
-            $event_dispatcher->dispatch(MemberCreatedEvent::NAME, new MemberCreatedEvent($member));
+            $event_dispatcher->dispatch(new MemberCreatedEvent($member), MemberCreatedEvent::NAME);
 
             $securityContext = $this->container->get('security.authorization_checker');
             if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
@@ -926,13 +926,13 @@ class MembershipController extends AbstractController
             $beneficiary->setMembership($member);
 
             $event = new FormEvent($form->get('beneficiary')->get('user'), $request);
-            $event_dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
+            $event_dispatcher->dispatch($event, FOSUserEvents::REGISTRATION_SUCCESS);
 
             $em->persist($beneficiary);
             $em->remove($a_beneficiary);
             $em->flush();
 
-            $event_dispatcher->dispatch(BeneficiaryAddEvent::NAME, new BeneficiaryAddEvent($beneficiary));
+            $event_dispatcher->dispatch(new BeneficiaryAddEvent($beneficiary), BeneficiaryAddEvent::NAME);
 
             $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
             return $this->redirectToRoute('fos_user_registration_check_email');

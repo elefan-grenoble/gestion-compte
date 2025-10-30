@@ -138,7 +138,6 @@ class DefaultController extends AbstractController
     /**
      * @Route("/schedule", name="schedule", methods={"GET","POST"})
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @param Request $request
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
     public function scheduleAction(ShiftService $shift_service)

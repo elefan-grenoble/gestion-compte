@@ -12,6 +12,7 @@ use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
 use App\Service\PeriodFormHelper;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -337,7 +338,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($position);
             $em->flush();
 
-            $event_dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
+            $event_dispatcher->dispatch(new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime), PeriodPositionFreedEvent::NAME);
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
@@ -476,10 +477,8 @@ class AdminPeriodController extends AbstractController
      * Creates a form to delete a period entity.
      *
      * @param Period $period The period entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createPeriodDeleteForm(Period $period)
+    private function createPeriodDeleteForm(Period $period): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_period_delete', array('id' => $period->getId())))
@@ -491,10 +490,8 @@ class AdminPeriodController extends AbstractController
      * Creates a form to add a period position entity.
      *
      * @param Period $period The period entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createPeriodPositionAddForm(Period $period)
+    private function createPeriodPositionAddForm(Period $period): FormInterface
     {
         return $this->createForm(
             PeriodPositionType::class,

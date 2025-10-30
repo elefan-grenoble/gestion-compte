@@ -191,7 +191,7 @@ class AmbassadorController extends AbstractController
              */
             $members = $qb->getQuery()->getResult();
 
-            $response = new StreamedResponse(function () use ($members) {
+            $response = new StreamedResponse(function () use ($members): void {
                 $handle = fopen('php://output', 'wb');
                 foreach ($members as $member) {
                     $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });

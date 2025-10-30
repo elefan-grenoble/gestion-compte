@@ -29,7 +29,7 @@ class OidcFirewallListener
      * @param PeriodPositionFreedEvent $event
      * @throws \Doctrine\ORM\ORMException
      */
-    public function onKernelRequest(GetResponseEvent $event)
+    public function onKernelRequest(\Symfony\Component\HttpKernel\Event\RequestEvent $event)
     {
         $oidc_enable = $this->container->getParameter('oidc_enable');
         if ($oidc_enable){

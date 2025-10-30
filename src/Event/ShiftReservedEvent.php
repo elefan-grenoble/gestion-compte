@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Shift;
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftReservedEvent extends Event
+class ShiftReservedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.reserved';
 
