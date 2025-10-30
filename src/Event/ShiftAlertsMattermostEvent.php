@@ -4,7 +4,7 @@ namespace App\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-class ShiftAlertsMattermostEvent extends Event
+class ShiftAlertsMattermostEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'shift.alerts.mattermost';
 

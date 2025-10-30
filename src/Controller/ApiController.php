@@ -7,7 +7,7 @@ use http\Env\Response;
 use OAuth2\OAuth2;
 use Ornicar\GravatarBundle\GravatarApi;
 use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,10 +18,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("api")
  */
-class ApiController extends Controller
+class ApiController extends AbstractController
 {
 
-    protected function getUser(){
+    protected function getUser(): array
+    {
         $user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $user->getBeneficiary();
         $withDrawn = false;
@@ -38,7 +39,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/swipe/in", name="api_swipe_in",  methods={"POST"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function swipeInAction(){
         return new JsonResponse(array(
@@ -48,7 +49,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/oauth/user", name="api_user",  methods={"GET"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function userAction()
     {
@@ -67,7 +68,7 @@ class ApiController extends Controller
 
     /**
      * @Route("/oauth/nextcloud_user", name="api_nextcloud_user",  methods={"GET"})
-     * @Security("has_role('ROLE_OAUTH_LOGIN')")
+     * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function nextcloudUserAction()
     {

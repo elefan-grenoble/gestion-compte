@@ -25,14 +25,6 @@ monolog:
             type: server_log
             process_psr_3_messages: false
             host: 127.0.0.1:9911
-        swiftmailer:
-            type: swift_mailer
-            from_email: '%transactional_mailer_user%'
-            to_email: '%logging.swiftmailer.recipient%'
-            subject: '%%level_name%% detected on %site_name% !'
-            level: '%logging.swiftmailer.level%'
-            formatter: monolog.formatter.html
-            content_type: text/html
         # uncomment to get logging in your browser
         # you may have to allow bigger header sizes in your Web server configuration
         #firephp:

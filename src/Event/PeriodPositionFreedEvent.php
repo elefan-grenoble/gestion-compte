@@ -7,7 +7,7 @@ use App\Entity\Membership;
 use App\Entity\PeriodPosition;
 use Symfony\Component\EventDispatcher\Event;
 
-class PeriodPositionFreedEvent extends Event
+class PeriodPositionFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'period_position.freed';
 

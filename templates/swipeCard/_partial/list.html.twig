@@ -74,10 +74,14 @@
         </tbody>
     </table>
     <script>
-        defer(function () {
+        function swipecard_list() {
             jQuery('.swipe-card-status-switcher input').on('click',function () {
                 jQuery(this).closest('form').submit();
             });
-        });
+        }
+
+        document.readyState === "loading" ?
+            document.addEventListener('DOMContentLoaded', swipecard_list) :
+            swipecard_list();
     </script>
 {% endif %}

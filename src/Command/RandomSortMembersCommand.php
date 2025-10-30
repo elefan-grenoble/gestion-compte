@@ -4,16 +4,32 @@ namespace App\Command;
 
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Validator\Constraints\Date;
 
-class RandomSortMembersCommand extends ContainerAwareCommand
+class RandomSortMembersCommand extends Command
 {
+    private $em;
+    private $params;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -27,28 +43,27 @@ class RandomSortMembersCommand extends ContainerAwareCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $given_date = $input->getArgument('date');
         $last_registration = date_create_from_format('Y-m-d',$given_date);
         if (!$last_registration || $last_registration->format('Y-m-d') != $given_date){
             $output->writeln('<fg=red;> wrong date format for minimum date. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $given_mdate = $input->getOption('max_date');
         if ($given_mdate){
             $max_last_registration = date_create_from_format('Y-m-d',$given_mdate);
             if (!$max_last_registration || $max_last_registration->format('Y-m-d') != $given_mdate){
                 $output->writeln('<fg=red;> wrong date format for maximum date. Use Y-m-d </>');
-                return;
+                return 2;
             }
         }
         $file = $input->getOption('file');
         $exclude_frozen = $input->getOption('exclude_frozen');
 
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository(Beneficiary::class)->createQueryBuilder('b');
+        $qb = $this->em->getRepository(Beneficiary::class)->createQueryBuilder('b');
         $qb = $qb->leftJoin("b.membership", "m")->addSelect("m");
         $qb = $qb->leftJoin("m.registrations", "r")->addSelect("r"); //registrations
         $qb = $qb->leftJoin("m.registrations", "lr", Join::WITH,'lr.date > r.date')->addSelect("lr")
@@ -61,7 +76,7 @@ class RandomSortMembersCommand extends ContainerAwareCommand
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> les comptes gelés sont inclus </>');
         }
 
-        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
+        $last_registration->modify("-".$this->params->get('registration_duration'));
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> membres avec dernière (re)adhésion après le </><fg=yellow;>'.$last_registration->format('D d M Y').' </>');
         $qb = $qb->andWhere('r.date > :lastregistrationdategt')->setParameter('lastregistrationdategt', $last_registration);
@@ -94,5 +109,6 @@ class RandomSortMembersCommand extends ContainerAwareCommand
             echo $csv;
         }
 
+        return 0;
     }
 }

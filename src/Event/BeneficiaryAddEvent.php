@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Beneficiary;
 use Symfony\Component\EventDispatcher\Event;
 
-class BeneficiaryAddEvent extends Event
+class BeneficiaryAddEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'beneficiary.add';
 

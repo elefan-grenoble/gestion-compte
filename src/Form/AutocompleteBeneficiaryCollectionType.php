@@ -19,7 +19,6 @@ class AutocompleteBeneficiaryCollectionType extends AbstractType
             'entry_type' => AutocompleteBeneficiaryHiddenType::class,
             'allow_add' => true,
             'prototype' => false,
-            'block_prefix' => 'autocomplete_beneficiary_collection'
         ]);
     }
 
@@ -27,5 +26,4 @@ class AutocompleteBeneficiaryCollectionType extends AbstractType
     {
         return CollectionType::class;
     }
-
 }

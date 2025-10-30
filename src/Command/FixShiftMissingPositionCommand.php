@@ -2,13 +2,29 @@
 
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
-class FixShiftMissingPositionCommand extends ContainerAwareCommand
+class FixShiftMissingPositionCommand extends Command
 {
+    private $em;
+    private $params;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -18,24 +34,23 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
             ->addOption('dry_run', null, InputOption::VALUE_NONE, 'Dry run');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $cycle_type = $this->getContainer()->getParameter('cycle_type');
+        $cycle_type = $this->params->get('cycle_type');
         $dry_run = $input->getOption('dry_run');
 
         if ($dry_run) {
             $output->writeln("<comment>Dry run: won't impact the database</comment>");
         }
 
-        $shifts_without_position = $em->getRepository('App:Shift')->findBy(array('position' => null), array('start' => 'ASC'));
+        $shifts_without_position = $this->em->getRepository('App:Shift')->findBy(array('position' => null), array('start' => 'ASC'));
         $output->writeln(count($shifts_without_position) . ' créneau' . ((count($shifts_without_position)>1) ? 'x':'') . ' sans poste type trouvé' . ((count($shifts_without_position)>1) ? 's':'') . '...');
 
         if ($cycle_type == 'abcd') {
             // TODO : add filter on weekCycle
             // what if the cycle changed ?
             $output->writeln('<error>Currently only works for coops without cycle_type.</error>');
-            return;
+            return 1;
         }
 
         if ($shifts_without_position) {
@@ -44,7 +59,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
 
             $shifts_without_position_fixed = 0;
             // faster to loop on periodPositions
-            $period_positions = $em->getRepository('App:PeriodPosition')
+            $period_positions = $this->em->getRepository('App:PeriodPosition')
                 ->createQueryBuilder('pp')
                 ->leftJoin('pp.period', 'p')->addSelect('p')
                 ->getQuery()
@@ -53,7 +68,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
 
             foreach ($period_positions as $period_position) {
                 // find shifts_without_position corresponding to this period_position
-                $period_position_shifts_without_position = $em->getRepository('App:Shift')->createQueryBuilder('s')
+                $period_position_shifts_without_position = $this->em->getRepository('App:Shift')->createQueryBuilder('s')
                     // ->set('DATEFIRST', 1)
                     ->where('s.position is null')
                     ->andWhere("DATE_FORMAT(s.start, '%H:%i') = :period_start_time")
@@ -88,7 +103,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
                     }
 
                     if (!$dry_run) {
-                        $em->createQuery("UPDATE App:Shift s SET s.position = :position WHERE s.id in (:ids)")
+                        $this->em->createQuery("UPDATE App:Shift s SET s.position = :position WHERE s.id in (:ids)")
                             ->setParameter('position', $period_position)
                             ->setParameter('ids', $period_position_shifts_without_position_filtered)
                             ->execute();
@@ -101,5 +116,7 @@ class FixShiftMissingPositionCommand extends ContainerAwareCommand
                 $output->writeln('<info>' . $shifts_without_position_fixed . ' créneau' . (($shifts_without_position_fixed>1) ? 'x':'') . ' réparé' . (($shifts_without_position_fixed>1) ? 's':'') . '</info>');
             }
         }
+
+        return 0;
     }
 }

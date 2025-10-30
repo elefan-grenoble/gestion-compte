@@ -99,14 +99,4 @@ class AnonymousBeneficiaryType extends AbstractType
             'data_class' => AnonymousBeneficiary::class
         ));
     }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix()
-    {
-        return 'App_anonymous_beneficiary';
-    }
-
-
 }

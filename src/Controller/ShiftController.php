@@ -19,7 +19,9 @@ use App\Form\RadioChoiceType;
 use App\Form\ShiftType;
 use App\Security\MembershipVoter;
 use App\Security\ShiftVoter;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Service\ShiftService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +29,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -34,7 +38,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 /**
  * @Route("shift")
  */
-class ShiftController extends Controller
+class ShiftController extends AbstractController
 {
     private $forbid_own_shift_book_admin;
     private $forbid_own_shift_free_admin;
@@ -58,9 +62,9 @@ class ShiftController extends Controller
 
     /**
      * @Route("/new", name="shift_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, ShiftService $shift_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -98,7 +102,7 @@ class ShiftController extends Controller
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $bucket = $shift_service->getShiftBucketFromShift($shift);
                 $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
                     'bucket' => $bucket,
                     'start' => 6,
@@ -131,9 +135,9 @@ class ShiftController extends Controller
      * Book a shift.
      *
      * @Route("/{id}/book", name="shift_book", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function bookShiftAction(Request $request, Shift $shift): Response
+    public function bookShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher): Response
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -148,7 +152,7 @@ class ShiftController extends Controller
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
         if (!$beneficiary
-            || !$this->get('shift_service')->isShiftBookable($shift, $beneficiary)
+            || !$shift_service->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::BOOK, $beneficiary->getMembership())
         ) {
             $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
@@ -174,8 +178,7 @@ class ShiftController extends Controller
 
         $em->flush();
 
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
         $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
         return new Response($this->generateUrl('homepage'), 200);
@@ -185,9 +188,9 @@ class ShiftController extends Controller
      * Book a shift (admin side).
      *
      * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function bookShiftAdminAction(Request $request, Shift $shift)
+    public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -232,8 +235,7 @@ class ShiftController extends Controller
                 }
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, true));
+                $event_dispatcher->dispatch(new ShiftBookedEvent($shift, true), ShiftBookedEvent::NAME);
 
                 $message = "Créneau réservé avec succès pour " . $shift->getShifter();
                 $success = true;
@@ -245,7 +247,7 @@ class ShiftController extends Controller
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $bucket = $shift_service->getShiftBucketFromShift($shift);
                 $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
                     'bucket' => $bucket,
                     'start' => 6,
@@ -269,9 +271,9 @@ class ShiftController extends Controller
      * Free a shift.
      *
      * @Route("/{id}/free", name="shift_free", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function freeShiftAction(Request $request, Shift $shift)
+    public function freeShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -285,7 +287,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if beneficiary can free this shift
-            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($current_user->getBeneficiary(), $shift);
+            $shift_can_be_freed = $shift_service->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
                 $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
@@ -303,8 +305,7 @@ class ShiftController extends Controller
             $em->persist($shift);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+            $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
             $session->getFlashBag()->add('success', "Le créneau a été annulé !");
             if ($this->use_time_log_saving) {
@@ -321,9 +322,9 @@ class ShiftController extends Controller
      * Free a shift (admin side).
      *
      * @Route("/{id}/free_admin", name="shift_free_admin", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function freeShiftAdminAction(Request $request, Shift $shift)
+    public function freeShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -336,7 +337,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $shifter_is_current_user = $current_user->getBeneficiary() == $shift->getShifter();
-            $shift_can_be_freed = $this->get('shift_service')->canFreeShift($shift->getShifter(), $shift, true);
+            $shift_can_be_freed = $shift_service->canFreeShift($shift->getShifter(), $shift, true);
             // check if user is allowed to free shift
             if ($shifter_is_current_user && $this->forbid_own_shift_free_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
@@ -366,11 +367,10 @@ class ShiftController extends Controller
                 $em->persist($shift);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 if ($wasCarriedOut) {
-                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+                    $event_dispatcher->dispatch(new ShiftInvalidatedEvent($shift, $beneficiary), ShiftInvalidatedEvent::NAME);
                 }
-                $dispatcher->dispatch(ShiftFreedEvent::NAME, new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason));
+                $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
                 $success = true;
                 $message = "Le créneau a bien été libéré !";
@@ -388,7 +388,7 @@ class ShiftController extends Controller
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $bucket = $shift_service->getShiftBucketFromShift($shift);
                 $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
                     'bucket' => $bucket,
                     'start' => 6,
@@ -413,9 +413,9 @@ class ShiftController extends Controller
      * validate / invalidate a shift.
      *
      * @Route("/{id}/validate_admin", name="shift_validate_admin", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function validateShiftAction(Request $request, Shift $shift)
+    public function validateShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -450,12 +450,11 @@ class ShiftController extends Controller
                 $em->persist($shift);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
                 if ($validate) {
-                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $event_dispatcher->dispatch(new ShiftValidatedEvent($shift), ShiftValidatedEvent::NAME);
                 } else {
                     $beneficiary = $shift->getShifter();
-                    $dispatcher->dispatch(ShiftInvalidatedEvent::NAME, new ShiftInvalidatedEvent($shift, $beneficiary));
+                    $event_dispatcher->dispatch(new ShiftInvalidatedEvent($shift, $beneficiary), ShiftInvalidatedEvent::NAME);
                 }
 
                 $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
@@ -468,7 +467,7 @@ class ShiftController extends Controller
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $bucket = $shift_service->getShiftBucketFromShift($shift);
                 $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
                     'bucket' => $bucket,
                     'start' => 6,
@@ -494,7 +493,7 @@ class ShiftController extends Controller
      *
      * @Route("/{id}/accept", name="shift_accept_reserved", methods={"GET"})
      */
-    public function acceptReservedShiftAction(Request $request, Shift $shift)
+    public function acceptReservedShiftAction(Request $request, Shift $shift, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -523,8 +522,7 @@ class ShiftController extends Controller
         $em->persist($shift);
         $em->flush();
 
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(ShiftBookedEvent::NAME, new ShiftBookedEvent($shift, false));
+        $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
         $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
         return $this->redirectToRoute('homepage');
@@ -569,9 +567,9 @@ class ShiftController extends Controller
      * delete a shift.
      *
      * @Route("/{id}", name="shift_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function deleteShiftAction(Request $request, Shift $shift)
+    public function deleteShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -581,8 +579,7 @@ class ShiftController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $shift->getShifter();
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(ShiftDeletedEvent::NAME, new ShiftDeletedEvent($shift, $beneficiary));
+            $event_dispatcher->dispatch(new ShiftDeletedEvent($shift, $beneficiary), ShiftDeletedEvent::NAME);
             $em->remove($shift);
             $em->flush();
 
@@ -595,7 +592,7 @@ class ShiftController extends Controller
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $bucket = $this->get('shift_service')->getShiftBucketFromShift($shift);
+                $bucket = $shift_service->getShiftBucketFromShift($shift);
                 if (count($bucket->getShifts()) > 0) {
                     $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
                         'bucket' => $bucket,
@@ -623,7 +620,7 @@ class ShiftController extends Controller
     /**
      * @Route("/{id}/contact_form", name="shift_contact_form", methods={"GET","POST"})
      */
-    public function contactFormAction(Request $request, Shift $shift, \Swift_Mailer $mailer)
+    public function contactFormAction(Request $request, Shift $shift, MailerInterface $mailer)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -631,7 +628,8 @@ class ShiftController extends Controller
         $coShifters = $em->getRepository('App:Beneficiary')->findCoShifters($shift);
         $form = $this->createShiftContactForm($shift, $coShifters);
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
             $from = $em->getRepository('App:Beneficiary')->findOneBy(array('id' => $from));
@@ -641,11 +639,12 @@ class ShiftController extends Controller
                 $emails[] = $beneficiary->getEmail();
                 $firstnames[] = $beneficiary->getFirstname();
             }
-            $message = (new \Swift_Message('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1)))
-                ->setFrom($this->getParameter('transactional_mailer_user'))
-                ->setReplyTo($from->getEmail())
-                ->setBcc($emails)
-                ->setBody(
+            $message = (new Email())
+                ->subject('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1))
+                ->from($this->getParameter('transactional_mailer_user'))
+                ->replyTo($from->getEmail())
+                ->bcc($emails)
+                ->html(
                     $this->renderView(
                         'emails/coshifter_message.html.twig',
                         array(
@@ -654,8 +653,7 @@ class ShiftController extends Controller
                             'firstnames' => $firstnames,
                             'shift' => $shift
                         )
-                    ),
-                    'text/html'
+                    )
                 );
             $mailer->send($message);
 

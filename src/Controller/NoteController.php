@@ -15,7 +15,7 @@ use App\Form\NoteType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
@@ -28,7 +28,7 @@ use Twig\Sandbox\SecurityError;
  *
  * @Route("note")
  */
-class NoteController extends Controller
+class NoteController extends AbstractController
 {
     private $_current_app_user;
 
@@ -44,7 +44,7 @@ class NoteController extends Controller
      * reply to a note
      *
      * @Route("/note/{id}/reply", name="note_reply", methods={"POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function noteReplyAction(Request $request, Note $note)
     {

@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\OpeningHour;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
  *
  * @Route("openinghours")
  */
-class OpeningHourController extends Controller
+class OpeningHourController extends AbstractController
 {
     /**
      * Opening hours widget display

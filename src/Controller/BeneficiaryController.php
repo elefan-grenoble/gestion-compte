@@ -11,7 +11,7 @@ use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -22,7 +22,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  *
  * @Route("beneficiary")
  */
-class BeneficiaryController extends Controller
+class BeneficiaryController extends AbstractController
 {
     private $_current_app_user;
 
@@ -134,9 +134,9 @@ class BeneficiaryController extends Controller
                 // then we create a new membership
                 $new_member = new Membership();
                 // init member id
-                $m = $em->getRepository('App:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
+                $m = $em->getRepository('App:Membership')->findBy([], ['member_number' => 'DESC'], 1)[0];
                 $mm = 1;
-                if ($m)
+                if ($m instanceof Membership)
                     $mm = $m->getMemberNumber() + 1;
                 $new_member->setMemberNumber($mm);
                 // set main beneficiary
@@ -237,7 +237,8 @@ class BeneficiaryController extends Controller
                 ->getForm();
         }
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $firstname = $form->get('firstname')->getData();
             $beneficiaries = $em->getRepository(Beneficiary::class)->findActiveFromFirstname($firstname);
 
