@@ -84,10 +84,12 @@ parameters:
     registration_every_civil_year: false
     registration_manual_enabled: true
     helloasso_registration_campaign_url: https://www.helloasso.com/associations/my-local-coop/adhesions/re-adhesion
-    helloasso_campaign_id:
-    helloasso_api_key:
-    helloasso_api_password:
-    helloasso_api_base_url: https://api.helloasso.com/v3/
+    helloasso_campaign_slug:
+    helloasso_client_id:
+    helloasso_client_secret:
+    helloasso_organization_slug:
+    helloasso_api_base_url: https://api.helloasso.com/v5/
+    helloasso_api_auth_url: https://api.helloasso.com/oauth2/token
 
     # Shifting configuration
     due_duration_by_cycle: 180

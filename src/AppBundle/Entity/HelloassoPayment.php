@@ -311,6 +311,21 @@ class HelloassoPayment
         return $this;
     }
 
+    public static function createFromPayementObject($paymentObject): self
+    {
+        $payment = new self();
+        $payment->setPaymentId($paymentObject->id);
+        $payment->setDate(new \DateTime($paymentObject->date));
+        $payment->setAmount($paymentObject->amount / 100);
+        $payment->setCampaignId($paymentObject->order->id);
+        $payment->setPayerFirstName($paymentObject->payer->firstName);
+        $payment->setPayerLastName($paymentObject->payer->lastName);
+        $payment->setEmail($paymentObject->payer->email);
+        $payment->setStatus($paymentObject->state);
+
+        return $payment;
+    }
+
     /**
      * Set campaignId
      *

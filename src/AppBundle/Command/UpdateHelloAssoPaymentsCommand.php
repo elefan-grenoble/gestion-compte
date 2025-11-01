@@ -2,104 +2,71 @@
 
 namespace AppBundle\Command;
 
-use AppBundle\Entity\HelloassoPayment;
-use AppBundle\Event\HelloassoEvent;
-use AppBundle\Helper\Helloasso;
+use AppBundle\Helloasso\HelloassoClient;
+use AppBundle\Helloasso\HelloassoPaymentHandler;
 use Carbon\Carbon;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
 {
+    /** @var HelloassoClient */
+    private $helloassoClient;
+
+    /** @var HelloassoPaymentHandler */
+    private $paymentHandler;
+
+    /** @var LoggerInterface */
+    private $logger;
+
+    public function __construct(
+        HelloassoClient $helloassoClient,
+        HelloassoPaymentHandler $paymentHandler,
+        EventDispatcherInterface $eventDispatcher,
+        LoggerInterface $logger
+    ) {
+        parent::__construct('app:member:update_payments');
+        $this->helloassoClient = $helloassoClient;
+        $this->paymentHandler = $paymentHandler;
+        $this->logger = $logger;
+    }
+
     protected function configure()
     {
         $this
-            ->setName('app:member:update_payments')
             ->setDescription('Update missing payments by browsing HelloAsso API')
             ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')");
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $helloAssoClient = $this->getContainer()->get(Helloasso::class);
+        $formSlug = $this->getContainer()->getParameter('helloasso_campaign_slug');
+        $from = Carbon::now()->sub($input->getOption('delay'));
 
-        // Campaign id needs to be 12 digits so let's add some 0 at the begining
-        $campaignId = str_pad($this->getContainer()->getParameter('helloasso_campaign_id'), 12, '0', STR_PAD_LEFT);
-        $campaignJson = $helloAssoClient->get('campaigns/' . $campaignId);
+        $output->writeln('Searching from '.$from->format('Y-m-d'));
 
-        if (!$campaignJson){
-            $output->writeln('Campaign not found :(');
-            return;
-        }
-
-        $delay = $input->getOption('delay');
-        // Compute the date to search from based on the delay
-        $from = Carbon::now()->sub($delay);
-        $output->writeln('Searching from ' . $from->toDateString());
-
-        $paymentsJson = $helloAssoClient->get('campaigns/' . $campaignId . '/payments', array('from' => $from->toDateString()));
-
-        if (!$paymentsJson || !isset($paymentsJson->resources) || !is_array($paymentsJson->resources) || !isset($paymentsJson->pagination)) {
-            $output->writeln('Incorrect payments result :(');
-            return;
-        }
-
-        $nbOfPages = $paymentsJson->pagination->max_page;
-        $output->writeln('Found ' . count($paymentsJson->resources) . ' payments and ' . $nbOfPages . ' pages !');
-
-        $this->processPage($paymentsJson->resources, $output);
-
-        // Process additional pages if we have more
-        for ($i = 2; $i <= $nbOfPages; $i++) {
-            $output->writeln('Processing page ' . $i);
-            $paymentsJson = $helloAssoClient->get('campaigns/' . $campaignId . '/payments', array('from' => $from->toDateString(), 'page' => $i));
-            $this->processPage($paymentsJson->resources, $output);
-        }
+        $this->processPage($formSlug, $from, 1);
     }
 
-    private function processPage(array $resources, OutputInterface $output)
+    private function processPage(string $formSlug, \DateTimeInterface $from, int $page)
     {
-        foreach ($resources as $resource) {
-            $this->processEntry($resource, $output);
-        }
-    }
-
-    private function processEntry($entry, OutputInterface $output)
-    {
-        if (!isset($entry->payer_email) || !isset($entry->id) || !isset($entry->amount)) {
-            $output->writeln('Unable to process an entry :(');
-            return;
-        }
-
-        $email = $entry->payer_email;
-        $paymentId = $entry->id;
-        $amount = $entry->amount;
-        $date = $entry->date;
-
-        $output->write('Processing payment : ' . $date . ' / Email ' . $email . ' / Amount : ' . $amount . ' / payment id : ' . $paymentId . '  : ');
-
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $exist = $em->getRepository(HelloassoPayment::class)->findOneBy(array('paymentId' => $paymentId));
-
-        if ($exist) {
-            $output->writeln('Already exist, skipping...');
-            return;
-        }
-
-        $payment = new HelloassoPayment();
-        $payment->fromPaymentObj($entry, $this->getContainer()->getParameter('helloasso_campaign_id'));
-
-        $em->persist($payment);
-        $em->flush();
-
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
-        $dispatcher->dispatch(
-            HelloassoEvent::PAYMENT_AFTER_SAVE,
-            new HelloassoEvent($payment)
+        $this->logger->info('Fetching page '.$page);
+        $results = $this->helloassoClient->getFormPayments(
+            'Membership',
+            $formSlug,
+            ['from' => $from->format('Y-m-d'), 'page' => $page],
         );
+        $lastPage = max($results->pagination->totalPages, 1);
+        $this->logger->info(sprintf('%d results in page %d', count($results->data), $page));
 
-        $output->writeln(' DONE !');
+        $this->paymentHandler->savePayments($results->data);
+
+        if ($page < $lastPage) {
+            $this->processPage($formSlug, $from, $page + 1);
+        }
     }
 }

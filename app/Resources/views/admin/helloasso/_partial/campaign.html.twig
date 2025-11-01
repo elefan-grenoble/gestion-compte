@@ -1,43 +1,37 @@
 {% if campaign %}
-        <div class="card-panel {% if campaign.state == 'DISABLED' %}blue-grey{% elseif campaign.state == 'PRIVATE' %}blue{% else %}teal{% endif %} lighten-4">
+        <div class="card-panel {% if campaign.state == 'Disabled' %}blue-grey{% elseif campaign.state == 'Private' %}blue{% else %}teal{% endif %} lighten-4">
             <div class="">
-                <h5 class="card-title">{{ campaign.name }}</h5>
+                <h5 class="card-title">{{ campaign.title }}</h5>
                 <table>
                     <tr>
                         <td>type</td>
                         <td>
-                            {% if campaign.type == 'FUNDRAISER' %}
+                            {% if campaign.formType == 'CrowdFunding' %}
                                 <i class="material-icons">people</i>Crowdfounding
-                            {% elseif campaign.type == 'MEMBERSHIP' %}
+                            {% elseif campaign.formType == 'Membership' %}
                                 <i class="material-icons">card_membership</i>Adhésion
-                            {% elseif campaign.type == 'FORM' %}
+                            {% elseif campaign.formType == 'PaymentForm' %}
                                 Formulaire
                             {% else %}
-                                {{ campaign.type }}
+                                {{ campaign.formType }}
                             {% endif %}
                         </td>
                     </tr>
                     <tr>
                         <td>status</td>
                         <td>
-                            {% if campaign.state == 'PRIVATE' %}
+                            {% if campaign.state == 'Private' %}
                                 <i class="material-icons tiny">visibility_off</i> privé
-                            {% elseif campaign.state == 'DISABLED' %}
+                            {% elseif campaign.state == 'Disabled' %}
                                 <i class="material-icons tiny">block</i> désactivé
-                            {% elseif campaign.state == 'PUBLIC' %}
+                            {% elseif campaign.state == 'Public' %}
                                 <i class="material-icons tiny">public</i> publique
                             {% else %}
                                 {{ campaign.state }}
                             {% endif %}
                         </td>
                     </tr>
-                    <tr>
-                        <td>chiffres</td>
-                        <td>
-                            {{ campaign.funding }}€ / {{ campaign.supporters }}<i class="material-icons tiny">person</i>
-                        </td>
-                    </tr>
-                    {% if campaign.state != 'DISABLED' %}
+                    {% if campaign.state != 'Disabled' %}
                     <tr>
                         <td>lien web</td>
                         <td><i class="material-icons tiny">link</i><a href="{{ campaign.url }}" target="_blank" class=""><small>{{ campaign.url }}</small></a></td>
@@ -45,7 +39,7 @@
                     {% endif %}
                 </table>
                 {% if no_link is not defined %}
-                <a href="{{ path("helloasso_browser",{campaign:campaign.id}) }}" class="btn"><i class="material-icons tiny left">attach_money</i>Voir les paiments</a>
+                <a href="{{ path("helloasso_campaign_details",{formType: campaign.formType, slug: campaign.formSlug}) }}" class="btn"><i class="material-icons tiny left">attach_money</i>Voir les paiments</a>
                 {% endif %}
             </div>
         </div>
