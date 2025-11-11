@@ -1,14 +1,17 @@
-name: Auto Author Assign
+name: PR Auto Assignee (author)
 
 on:
-  pull_request_target:
-    types: [opened, reopened]
-
-permissions:
-  pull-requests: write
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
 
 jobs:
-  assign-author:
+  add-assignee:
+    name: "PR: add assignee (author)"
     runs-on: ubuntu-slim
     steps:
-      - uses: toshimaru/auto-author-assign@v2.1.0
+      - uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: .github/auto_add_assignees.yml
