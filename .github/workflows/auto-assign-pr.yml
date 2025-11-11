@@ -1,0 +1,17 @@
+name: PR Auto Assignee (author)
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - reopened
+
+jobs:
+  add-assignee:
+    name: "PR: add assignee (author)"
+    runs-on: ubuntu-slim
+    steps:
+      - uses: kentaro-m/auto-assign-action@v2.0.0
+        with:
+          configuration-path: .github/auto_add_assignees.yml
