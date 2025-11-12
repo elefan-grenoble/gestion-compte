@@ -6,7 +6,8 @@ monolog:
             handler: grouped
         grouped:
             type: group
-            members: [file, mattermost, deduplicated]
+            # members: [file, mattermost, deduplicated]
+            members: [file, mattermost]
         file:
             type: stream
             path: '%kernel.logs_dir%/%kernel.environment%.log'
@@ -25,7 +26,7 @@ monolog:
             include_extra: true
             level: '%logging.mattermost.level%'
         # Avoid getting spammed multiple times by the same exception
-        deduplicated:
-            type: deduplication
-            time: 20
-            handler: mailer
+        # deduplicated:
+        #     type: deduplication
+        #     time: 20
+        #     handler: mailer
