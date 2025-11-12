@@ -57,6 +57,9 @@
         "symfony/yaml": "4.4.*",
         "vich/uploader-bundle": "^1.4"
     },
+    "conflict": {
+        "twig/twig": ">=3.0"
+    },
     "require-dev": {
         "phpstan/phpstan": "^2.1.31",
         "phpstan/phpstan-doctrine": "^2.0",
