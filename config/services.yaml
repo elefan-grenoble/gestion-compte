@@ -70,6 +70,8 @@ parameters:
   logging.mattermost.enabled: '%env(bool:LOGGING_MATTERMOST_ENABLED)%'
   logging.mattermost.level: '%env(LOGGING_MATTERMOST_LEVEL)%'
   logging.mattermost.url: '%env(LOGGING_MATTERMOST_URL)%'
+  logging.stdout.enabled: '%env(bool:LOGGING_STDOUT_ENABLED)%'
+  logging.stdout.level: '%env(LOGGING_STDOUT_LEVEL)%'
   main_color: '%env(MAIN_COLOR)%'
   max_event_proxy_per_member: '%env(MAX_EVENT_PROXY_PER_MEMBER)%'
   max_nb_of_past_cycles_to_display: '%env(MAX_NB_OF_PAST_CYCLES_TO_DISPLAY)%'
@@ -488,6 +490,13 @@ services:
       - '@security.token_storage'
     tags:
       - { name: monolog.processor, method: processRecord }
+
+  logging.handler.stdout:
+    class: App\Monolog\ToggleableHandler
+    decorates: monolog.handler.stdout
+    arguments:
+      - '@logging.handler.stdout.inner'
+      - '%logging.stdout.enabled%'
 
   # factories
   doctrine.fixtures.purger.orm_purger_factory:
