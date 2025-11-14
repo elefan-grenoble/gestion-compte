@@ -7,11 +7,15 @@ monolog:
         grouped:
             type: group
             # members: [file, mattermost, deduplicated]
-            members: [file, mattermost]
+            members: [file, mattermost, stdout]
+        stdout:
+            type: stream
+            path: "php://stdout"
+            level: '%logging.stdout.level%'
         file:
             type: stream
             path: '%kernel.logs_dir%/%kernel.environment%.log'
-            level: debug
+            level: warning
         console:
             type: console
             process_psr_3_messages: false
