@@ -5,6 +5,10 @@ monolog:
             path: '%kernel.logs_dir%/%kernel.environment%.log'
             level: debug
             channels: ['!event']
+        stdout:
+            type: stream
+            path: "php://stdout"
+            level: '%logging.stdout.level%'
 #        mattermost:
 #            type: slackwebhook
 #            webhook_url: "%logging.mattermost.url%"
