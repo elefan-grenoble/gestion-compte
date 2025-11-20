@@ -60,7 +60,7 @@ parameters:
   helloasso_campaign_id: '%env(HELLOASSO_CAMPAIGN_ID)%'
   helloasso_registration_campaign_url: '%env(HELLOASSO_REGISTRATION_CAMPAIGN_URL)%'
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
-  locale: fr_FR
+  locale: fr_FR.UTF8
   local_currency_name: '%env(LOCAL_CURRENCY_NAME)%'
   logging.mattermost.channel: '%env(LOGGING_MATTERMOST_CHANNEL)%'
   logging.mattermost.enabled: '%env(bool:LOGGING_MATTERMOST_ENABLED)%'
