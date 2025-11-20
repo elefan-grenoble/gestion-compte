@@ -24,7 +24,6 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -37,7 +36,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
@@ -48,15 +47,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * Admin controller.
  *
  * @Route("admin")
- * @Security("has_role('ROLE_ADMIN_PANEL')")
+ * @Security("is_granted('ROLE_ADMIN_PANEL')")
  */
-class AdminController extends Controller
+class AdminController extends AbstractController
 {
     /**
      * Admin panel
      *
      * @Route("/", name="admin", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN_PANEL')")
+     * @Security("is_granted('ROLE_ADMIN_PANEL')")
      */
     public function indexAction(Request $request)
     {
@@ -69,7 +68,7 @@ class AdminController extends Controller
      * @param Request $request, SearchUserFormHelper $formHelper
      * @return Response
      * @Route("/users", name="user_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function usersAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -108,7 +107,7 @@ class AdminController extends Controller
              */
             $members = $qb->getQuery()->getResult();
 
-            $response = new StreamedResponse(function () use ($members) {
+            $response = new StreamedResponse(function () use ($members): void {
                 $handle = fopen('php://output', 'wb');
                 $delimiter = ',';
 
@@ -177,7 +176,7 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/non_member_users", name="non_member_users_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function nonMemberUsersAction(Request $request)
     {
@@ -196,7 +195,7 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/admin_users", name="admin_users_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function adminUsersAction(Request $request)
     {
@@ -223,13 +222,13 @@ class AdminController extends Controller
      * @param Request $request
      * @return Response
      * @Route("/roles", name="roles_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function rolesListAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $roles_hierarchy = $this->container->getParameter('security.role_hierarchy.roles');
+        $roles_hierarchy = $this->getParameter('security.role_hierarchy.roles');
         $roles_list = array_merge(["ROLE_USER"], array_keys($roles_hierarchy));
         $roles_list_enriched = array();
 
@@ -254,7 +253,7 @@ class AdminController extends Controller
      * Import from CSV
      *
      * @Route("/importcsv", name="user_import_csv", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function csvImportAction(Request $request, KernelInterface $kernel)
     {
@@ -271,7 +270,8 @@ class AdminController extends Controller
             //->add('compute', SubmitType::class, array('label' => 'Importer les données'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
 
             // Get file
             $file = $form->get('submitFile');

@@ -3,12 +3,15 @@
 namespace App\Service;
 
 use Doctrine\ORM\EntityManager;
-use FOS\UserBundle\Mailer\MailerInterface;
+use FOS\UserBundle\Mailer\MailerInterface as FOSMailerInterface;
 use FOS\UserBundle\Model\UserInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
-class MailerService implements MailerInterface
+class MailerService implements FOSMailerInterface
 {
     private $baseDomain;
     private $memberEmail;
@@ -20,7 +23,7 @@ class MailerService implements MailerInterface
     private $templating;
 
     public function __construct(
-        $mailer,
+        MailerInterface $mailer,
         string $baseDomain,
         array $memberEmail,
         string $project_name,
@@ -79,10 +82,11 @@ class MailerService implements MailerInterface
         $dynamicContent = $this->entity_manager->getRepository('App:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
 
         $login_url = $url = $this->router->generate('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
-        $welcome = (new \Swift_Message($emailObject))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-            ->setTo($emailTo)
-            ->setBody(
+        $welcome = (new Email())
+            ->subject($emailObject)
+            ->from(new Address($this->memberEmail['address'], $this->memberEmail['from_name']))
+            ->to($emailTo)
+            ->html(
                 $this->renderView(
                     'emails/welcome.html.twig',
                     array(
@@ -90,8 +94,7 @@ class MailerService implements MailerInterface
                         'dynamicContent' => $dynamicContent,
                         'login_url' => $login_url,
                     )
-                ),
-                'text/html'
+                )
             );
         $this->mailer->send($welcome);
     }
@@ -108,18 +111,18 @@ class MailerService implements MailerInterface
 
         $confirmationUrl = $this->router->generate('fos_user_resetting_reset', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $forgot = (new \Swift_Message($emailObject))
-            ->setFrom($this->memberEmail['address'], $this->memberEmail['from_name'])
-            ->setTo($emailTo)
-            ->setBody(
+        $forgot = (new Email())
+            ->subject($emailObject)
+            ->from(new Address($this->memberEmail['address'], $this->memberEmail['from_name']))
+            ->to($emailTo)
+            ->html(
                 $this->renderView(
                     'emails/forgot.html.twig',
                     array(
                         'user' => $user,
                         'confirmationUrl' => $confirmationUrl,
                     )
-                ),
-                'text/html'
+                )
             );
         $this->mailer->send($forgot);
     }

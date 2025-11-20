@@ -4,12 +4,24 @@ namespace App\Command;
 
 use App\Entity\ShiftFreeLog;
 use Doctrine\ORM\EntityManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitShiftFreeLogShiftStringFieldCommand extends ContainerAwareCommand
+class InitShiftFreeLogShiftStringFieldCommand extends Command
 {
+    private $em;
+
+    public function __construct(
+        EntityManagerInterface $em
+    )
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -21,28 +33,28 @@ class InitShiftFreeLogShiftStringFieldCommand extends ContainerAwareCommand
     /**
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int|null|void
+     * @return int
      * @throws \Doctrine\ORM\ORMException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         $countShiftFreeLogs = 0;
-        $shiftFreeLogs = $em->getRepository('App:ShiftFreeLog')->findAll();
+        $shiftFreeLogs = $this->em->getRepository('App:ShiftFreeLog')->findAll();
 
         foreach ($shiftFreeLogs as $shiftFreeLog) {
             if (!$shiftFreeLog->getShiftString()) {
                 if ($shiftFreeLog->getShift()) {
                     $shiftString = $shiftFreeLog->getShift()->getJob()->getName() . ' - ' . $shiftFreeLog->getShift()->getDisplayDateSeperateTime();
                     $shiftFreeLog->setShiftString($shiftString);
-                    $em->persist($shiftFreeLog);
+                    $this->em->persist($shiftFreeLog);
                     $countShiftFreeLogs++;
                 }
             }
         }
 
-        $em->flush();
+        $this->em->flush();
         $output->writeln($countShiftFreeLogs . ' logs mis à jour !');
+
+        return 0;
     }
 }

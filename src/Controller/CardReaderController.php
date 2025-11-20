@@ -9,9 +9,11 @@ use App\Entity\Membership;
 use App\Entity\SwipeCard;
 use App\Event\SwipeCardEvent;
 use App\Event\ShiftValidatedEvent;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use App\Service\MembershipService;
+use App\Service\ShiftService;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -21,7 +23,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("card_reader")
  */
-class CardReaderController extends Controller
+class CardReaderController extends AbstractController
 {
     private $swipeCardLogging;
     private $swipeCardLoggingAnonymous;
@@ -35,17 +37,17 @@ class CardReaderController extends Controller
     /**
      * @Route("/", name="card_reader_index")
      */
-    public function indexAction(Request $request)
+    public function indexAction(Request $request, ShiftService $shift_service)
     {
         $this->denyAccessUnlessGranted('card_reader', $this->getUser());
         $em = $this->getDoctrine()->getManager();
 
         // in progress shifts
         $shifts_in_progress = $em->getRepository('App:Shift')->findInProgress();
-        $buckets_in_progress = $this->get('shift_service')->generateShiftBuckets($shifts_in_progress);
+        $buckets_in_progress = $shift_service->generateShiftBuckets($shifts_in_progress);
         // upcoming shifts
         $shifts_upcoming = $em->getRepository('App:Shift')->findUpcomingToday();
-        $buckets_upcoming = $this->get('shift_service')->generateShiftBuckets($shifts_upcoming);
+        $buckets_upcoming = $shift_service->generateShiftBuckets($shifts_upcoming);
 
         $dynamicContent = $em->getRepository('App:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 
@@ -59,7 +61,7 @@ class CardReaderController extends Controller
     /**
      * @Route("/check", name="card_reader_check", methods={"POST"})
      */
-    public function checkAction(Request $request)
+    public function checkAction(Request $request, MembershipService $membership_service, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -97,8 +99,7 @@ class CardReaderController extends Controller
                     $em->persist($shift);
                     $em->flush();
 
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(ShiftValidatedEvent::NAME, new ShiftValidatedEvent($shift));
+                    $event_dispatcher->dispatch(new ShiftValidatedEvent($shift), ShiftValidatedEvent::NAME);
 
                     $ongoingShiftsValidated += 1;
                 }
@@ -107,14 +108,13 @@ class CardReaderController extends Controller
             $em->refresh($member);  // added to prevent from returning cached (old) data
         }
 
-        $cycle_end = $this->get('membership_service')->getEndOfCycle($member, 0);
+        $cycle_end = $membership_service->getEndOfCycle($member, 0);
         $counter = $member->getShiftTimeCount($cycle_end);
         if ($this->swipeCardLogging) {
             if ($this->swipeCardLoggingAnonymous) {
                 $card = null;
             }
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(SwipeCardEvent::SWIPE_CARD_SCANNED, new SwipeCardEvent($card, $counter));
+            $event_dispatcher->dispatch(new SwipeCardEvent($card, $counter), SwipeCardEvent::SWIPE_CARD_SCANNED);
         }
 
         return $this->render('card_reader/check.html.twig', [

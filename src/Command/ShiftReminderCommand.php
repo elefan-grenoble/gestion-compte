@@ -4,14 +4,30 @@ namespace App\Command;
 
 use App\Entity\Shift;
 use App\Event\ShiftReminderEvent;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ShiftReminderCommand extends ContainerAwareCommand
+class ShiftReminderCommand extends Command
 {
+    private $em;
+    private $event_dispatcher;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        EventDispatcherInterface $event_dispatcher
+    )
+    {
+        $this->em = $em;
+        $this->event_dispatcher = $event_dispatcher;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -21,19 +37,17 @@ class ShiftReminderCommand extends ContainerAwareCommand
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         $from_given = $input->getArgument('date');
         $from = date_create_from_format('Y-m-d',$from_given);
         if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         $output->writeln('<fg=cyan;>'.$from->format('d M Y').'</>');
 
-        $qb = $em->getRepository('App:Shift')->createQueryBuilder('s')
+        $qb = $this->em->getRepository('App:Shift')->createQueryBuilder('s')
             ->where('s.start >= :start')
             ->andWhere('s.end < :end')
             ->setParameter('start', $from->format('Y-m-d'))
@@ -45,15 +59,16 @@ class ShiftReminderCommand extends ContainerAwareCommand
         $output->writeln('<fg=cyan;>'.$message.'</>');
 
         $count_reminder_sent = 0;
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($shifts as $shift) {
             if ($shift->getShifter()) {
-                $dispatcher->dispatch(ShiftReminderEvent::NAME, new ShiftReminderEvent($shift));
+                $this->event_dispatcher->dispatch(new ShiftReminderEvent($shift), ShiftReminderEvent::NAME);
                 $count_reminder_sent++;
             }
         }
 
         $message = $count_reminder_sent . ' email' . (($count_reminder_sent>1) ? 's':'') . ' envoyé' . (($count_reminder_sent>1) ? 's':'');
         $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
+
+        return 0;
     }
 }

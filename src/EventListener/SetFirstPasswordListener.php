@@ -64,7 +64,7 @@ class SetFirstPasswordListener{
         $this->em->flush();
     }
 
-    function forcePasswordChange(GetResponseEvent $event)
+    function forcePasswordChange(\Symfony\Component\HttpKernel\Event\RequestEvent $event)
     {
         $token = $this->token_storage->getToken();
         if ($token){

@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\ShiftBucket;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -13,7 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * 
  * @Route("widget")
  */
-class WidgetController extends Controller
+class WidgetController extends AbstractController
 {
 
     /**

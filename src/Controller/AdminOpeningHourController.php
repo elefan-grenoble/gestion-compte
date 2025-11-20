@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\OpeningHour;
 use App\Form\OpeningHourType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
@@ -20,13 +20,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("admin/openinghours")
  */
-class AdminOpeningHourController extends Controller
+class AdminOpeningHourController extends AbstractController
 {
     /**
      * List all opening hours
      *
      * @Route("/", name="admin_openinghour_index", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -45,7 +45,7 @@ class AdminOpeningHourController extends Controller
      * Add new opening hour
      *
      * @Route("/new", name="admin_openinghour_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -79,7 +79,7 @@ class AdminOpeningHourController extends Controller
      * Edit opening hour
      *
      * @Route("/edit/{id}", name="admin_openinghour_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, OpeningHour $openingHour)
     {
@@ -119,7 +119,7 @@ class AdminOpeningHourController extends Controller
      * Delete opening hour
      *
      * @Route("/{id}", name="admin_openinghour_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, OpeningHour $openingHour)
     {
@@ -144,7 +144,7 @@ class AdminOpeningHourController extends Controller
      * Opening hours widget generator
      *
      * @Route("/widget_generator", name="admin_openinghour_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {
@@ -175,7 +175,8 @@ class AdminOpeningHourController extends Controller
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&kind_title=' . ($data['kind_title'] ? 1 : 0) . '&align=' . $data['align'];

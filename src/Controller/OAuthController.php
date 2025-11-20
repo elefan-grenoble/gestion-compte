@@ -5,12 +5,12 @@ namespace App\Controller;
 
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class OAuthController extends Controller
+class OAuthController extends AbstractController
 {
     /**
     * @Route("/oauth/login", name="oauth_login")
@@ -27,7 +27,7 @@ class OAuthController extends Controller
      */
     public function logout(ClientRegistry $clientRegistry): RedirectResponse
     {
-        $oidc_enable = $this->container->getParameter('oidc_enable');
+        $oidc_enable = $this->getParameter('oidc_enable');
         if ($oidc_enable) {
             /** @var KeycloakClient $client */
             $client = $clientRegistry->getClient('keycloak');

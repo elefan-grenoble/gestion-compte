@@ -1,0 +1,1345 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:getContainer\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Command/UpdateHelloAssoPaymentsCommand.php
+
+		-
+			message: '#^Call to static method create\(\) on an unknown class Symfony\\Component\\HttpClient\\HttpClient\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Command/UpdateIgloohomeCodeCommand.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:User\>\:\:findByRole\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/AdminController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:User\>\:\:findNonMembers\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AdminController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AdminController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findFutures\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findOngoing\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findPast\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to method getGiver\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to method getOwner\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to method setGiver\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Call to method setOwner\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Controller/AdminEventController.php
+
+		-
+			message: '#^Cannot call method hasRole\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/AdminMembershipShiftExemptionController.php
+
+		-
+			message: '#^Call to method addPosition\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method getPositions\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method setCreatedAt\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method setCreatedBy\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method setDayOfWeek\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method setUpdatedAtValue\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Call to method setUpdatedBy\(\) on an unknown class App\:Period\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Method Doctrine\\ORM\\EntityRepository\<App\:Period\>\:\:findAll\(\) invoked with 3 parameters, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/AdminPeriodController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/ApiController.php
+
+		-
+			message: '#^Cannot call method isEnabled\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/ApiController.php
+
+		-
+			message: '#^Method App\\Controller\\ApiController\:\:getUser\(\) overrides @final method Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:\:getUser\(\)\.$#'
+			identifier: method.parentMethodFinalByPhpDoc
+			count: 1
+			path: src/Controller/ApiController.php
+
+		-
+			message: '#^Call to method getMemberNumber\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Call to method setFlying\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Call to method setFrozen\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Call to method setFrozenChange\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Call to method setMainBeneficiary\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Call to method setWithdrawn\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BeneficiaryController.php
+
+		-
+			message: '#^Binary operation "\*" between \-1 and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method App\\Repository\\JobRepository\<App\\Entity\\Job\>\:\:findByEnabled\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findBucket\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findFutures\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findShiftsByCycles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to method setEnd\(\) on an unknown class App\:Shift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to method setJob\(\) on an unknown class App\:Shift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to method setStart\(\) on an unknown class App\:Shift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Variable \$bucket might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:DynamicContent\>\:\:findOneByCode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findInProgress\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findShiftsForBeneficiaries\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findUpcomingToday\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Call to method getBeneficiary\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Controller/CardReaderController.php
+
+		-
+			message: '#^Call to an undefined method FOS\\OAuthServerBundle\\Model\\ClientInterface\:\:setService\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/ClientController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:ClosingException\>\:\:findFuturesOrOngoing\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/ClosingExceptionController.php
+
+		-
+			message: '#^Call to method getCreatedAt\(\) on an unknown class App\:Code\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Call to method getRegistrar\(\) on an unknown class App\:Code\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Call to method getRoles\(\) on an unknown class App\:User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Call to method getUsername\(\) on an unknown class App\:User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Call to method setClosed\(\) on an unknown class App\:Code\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/CodeController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: src/Controller/CommissionController.php
+
+		-
+			message: '#^Cannot call method hasRole\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 5
+			path: src/Controller/CommissionController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Controller/CommissionController.php
+
+		-
+			message: '#^Variable \$beneficiary might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Controller/CommissionController.php
+
+		-
+			message: '#^Variable \$message might not be defined\.$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Controller/CommissionController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:DynamicContent\>\:\:findOneByCode\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findFutureOrOngoing\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findFrom\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:SocialNetwork\>\:\:findAllDisplayedFooter\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to an undefined method Twig\\Extension\\ExtensionInterface\:\:date_fr_long\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to method getAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to method setAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/DefaultController.php
+
+		-
+			message: '#^Call to method getType\(\) on an unknown class App\:DynamicContent\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/DynamicContentController.php
+
+		-
+			message: '#^Binary operation "\*" between string and 60 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findFutureOrOngoing\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findFutures\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findOngoing\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Event\>\:\:findPast\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:createQueryBuilder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to method getGiver\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to method getMembership\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to method getOwner\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to method getPublicDisplayNameWithMemberNumber\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to method setGiver\(\) on an unknown class App\:Proxy\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 8
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Cannot call method getOwner\(\) on list\<App\:Proxy\>\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Controller/EventController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:createQueryBuilder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Call to method getAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Call to method getCampaignId\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Call to method setAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Cannot access property \$resources on array\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Controller/HelloassoController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:User\>\:\:findNonMembers\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/MailController.php
+
+		-
+			message: '#^Binary operation "\*" between \-1 and string results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findInProgressAndUpcomingShiftsForMembership\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findShiftsByCycles\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Request\:\:getName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getAmount\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getBeneficiariesEmailsAsArray\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getCreatedAt\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getEmail\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getEmail\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getFirstname\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:Note\.$#'
+			identifier: class.notFound
+			count: 5
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getJoinTo\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getLastname\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getMainBeneficiary\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getMemberNumber\(\) on an unknown class App\:Membership\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getMembership\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getMode\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to method getRegistrar\(\) on an unknown class App\:AnonymousBeneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 7
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 247 on line 7$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Controller/MembershipController.php
+
+		-
+			message: '#^Call to an undefined method League\\OAuth2\\Client\\Provider\\AbstractProvider\:\:getLogoutUrl\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/OAuthController.php
+
+		-
+			message: '#^Method Doctrine\\ORM\\EntityRepository\<App\:OpeningHour\>\:\:findAll\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/OpeningHourController.php
+
+		-
+			message: '#^Method Doctrine\\ORM\\EntityRepository\<App\:Period\>\:\:findAll\(\) invoked with 3 parameters, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/PeriodController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:ProcessUpdate\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/ProcessUpdateController.php
+
+		-
+			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     \* ", expected type at offset 173 on line 5$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Controller/ProcessUpdateController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\Mapping\\ClassMetadata\:\:getTableName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/RegistrationsController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:createQueryBuilder\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/RegistrationsController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\Persistence\\ObjectManager\:\:getConnection\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/RegistrationsController.php
+
+		-
+			message: '#^Binary operation "\+\=" between ''Le créneau a bien…'' and ''Grâce au compteur…'' results in an error\.$#'
+			identifier: assignOp.invalid
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Beneficiary\>\:\:findCoShifters\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findFutures\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to method getEmail\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to method getFirstName\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to method getLastName\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Call to method getMembership\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 4
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:free\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Method Doctrine\\ORM\\EntityRepository\<App\:TimeLog\>\:\:findAll\(\) invoked with 3 parameters, 0 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 9
+			path: src/Controller/ShiftController.php
+
+		-
+			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:SwipeCard\>\:\:findLast\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:SwipeCard\>\:\:findLastEnable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:writeString\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getBarcode\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getBeneficiary\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getCode\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getDisabledAt\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getEnable\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getEnabledSwipeCards\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getNumber\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getSwipeCards\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getUser\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method setDisabledAt\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method setEnable\(\) on an unknown class App\:SwipeCard\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:TimeLog\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/TimeLogController.php
+
+		-
+			message: '#^Call to method getMembership\(\) on an unknown class App\:TimeLog\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Controller/TimeLogController.php
+
+		-
+			message: '#^Cannot call method getMembership\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/TimeLogController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:User\>\:\:findByRole\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Call to method getId\(\) on an unknown class App\:Client\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Method Doctrine\\Persistence\\ObjectManager\:\:flush\(\) invoked with 1 parameter, 0 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findFutures\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/WidgetController.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/ClosingException.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$date$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Event.php
+
+		-
+			message: '#^Property App\\Entity\\Event\:\:\$imgFile has unknown class App\\Entity\\File as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Event.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Formation.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createdAt$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/HelloassoPayment.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Job.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Membership.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/MembershipShiftExemption.php
+
+		-
+			message: '#^Binary operation "\." between '' \- Semaine '' and non\-empty\-array results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Entity/PeriodPosition.php
+
+		-
+			message: '#^Method App\\Entity\\PeriodPosition\:\:setBookedTime\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/PeriodPosition.php
+
+		-
+			message: '#^Method App\\Entity\\PeriodPosition\:\:setBooker\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/PeriodPosition.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createdAt$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Registration.php
+
+		-
+			message: '#^Property App\\Entity\\Service\:\:\$logoFile has unknown class App\\Entity\\File as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Service.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:invalidateShiftParticipation\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:setBookedTime\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:setBooker\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:setShifter\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:setWasCarriedOut\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^Method App\\Entity\\Shift\:\:validateShiftParticipation\(\) has invalid return type App\\Entity\\BookedShift\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(\\App\\Entity\\Formation formation\)\: Unexpected token "formation", expected variable at offset 68 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/Shift.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(\\DateTime\? \$disabledAt\)\: Unexpected token "\?", expected variable at offset 56 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Entity/SwipeCard.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/TimeLog.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$created_at$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Entity/TimeLog.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$client with type FOS\\OAuthServerBundle\\Model\\ClientInterface is not subtype of native type App\\Entity\\Client\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Constructor of class App\\Event\\ShiftBookedEvent has an unused parameter \$fromAdmin\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: src/Event/ShiftBookedEvent.php
+
+		-
+			message: '#^Call to static method create\(\) on an unknown class Symfony\\Component\\HttpClient\\HttpClient\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/EventListener/MattermostEventListener.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$event with type App\\Event\\PeriodPositionFreedEvent is incompatible with native type Symfony\\Component\\HttpKernel\\Event\\RequestEvent\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/EventListener/OidcFirewallListener.php
+
+		-
+			message: '#^Call to an undefined method App\\Entity\\Membership\:\:getDisplayNameWithMemberNumber\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Form/DataTransformer/MembershipToStringTransformer.php
+
+		-
+			message: '#^Anonymous function has an unused use \$user\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Form/EventType.php
+
+		-
+			message: '#^Anonymous function has an unused use \$options\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Form/MembershipType.php
+
+		-
+			message: '#^Anonymous function has an unused use \$options\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Form/PeriodPositionType.php
+
+		-
+			message: '#^Anonymous function has an unused use \$user\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Form/ServiceType.php
+
+		-
+			message: '#^Anonymous function has an unused use \$user\.$#'
+			identifier: closure.unusedUse
+			count: 1
+			path: src/Form/SocialNetworkType.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$delay$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Repository/MembershipRepository.php
+
+		-
+			message: '#^Cannot call method toArray\(\) on array\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Repository/PeriodPositionRepository.php
+
+		-
+			message: '#^Binary operation "/" between non\-falsy\-string and 28 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 3
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(Membership\)\: Unexpected token "\\n     \* ", expected variable at offset 85 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^PHPDoc tag @throws with type App\\Repository\\NonUniqueResultException is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Security/KeycloakAuthenticator.php
+
+		-
+			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Security/MembershipVoter.php
+
+		-
+			message: '#^PHPDoc tag @var for variable \$task contains unknown class App\\Security\\Task\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Security/ShiftVoter.php
+
+		-
+			message: '#^Variable \$task in PHPDoc tag @var does not match assigned variable \$shift\.$#'
+			identifier: varTag.differentVariable
+			count: 1
+			path: src/Security/ShiftVoter.php
+
+		-
+			message: '#^Cannot call method getId\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Security/UserVoter.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$includeLeadingSpace$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Service/BeneficiaryService.php
+
+		-
+			message: '#^Binary operation "/" between non\-falsy\-string and 28 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Service/MembershipService.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$cycleIndex$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Service/MembershipService.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$start_after with type App\\Service\\Datetime is not subtype of native type DateTime\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Service/ShiftService.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$start_before with type App\\Service\\Datetime is not subtype of native type DateTime\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Service/ShiftService.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$end_before$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Service/ShiftService.php
+
+		-
+			message: '#^Parameter \$start_after of method App\\Service\\ShiftService\:\:isBeneficiaryHasShifts\(\) has invalid type App\\Service\\Datetime\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/ShiftService.php
+
+		-
+			message: '#^Parameter \$start_before of method App\\Service\\ShiftService\:\:isBeneficiaryHasShifts\(\) has invalid type App\\Service\\Datetime\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Service/ShiftService.php
+
+		-
+			message: '#^PHPDoc tag @param references unknown parameter\: \$shift$#'
+			identifier: parameter.notFound
+			count: 1
+			path: src/Service/TimeLogService.php
+
+		-
+			message: '#^Access to an undefined property App\\Twig\\Extension\\AppExtension\:\:\$container\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Twig/Extension/AppExtension.php
+
+		-
+			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Twig/Extension/AppExtension.php
+
+		-
+			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:getContentType\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Twig/Extension/AppExtension.php
+
+		-
+			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:writeString\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Twig/Extension/AppExtension.php
+
+		-
+			message: '#^PHPDoc tag @param has invalid value \(\: \\DateTime\|\\DateTimeImmutable \$date\)\: Unexpected token "\:", expected type at offset 72 on line 4$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Twig/Extension/AppExtension.php
+
+		-
+			message: '#^Access to an undefined property Symfony\\Component\\Validator\\Constraint\:\:\$message\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Validator/Constraints/BeneficiaryCanHostValidator.php
+
+		-
+			message: '#^Access to an undefined property Symfony\\Component\\Validator\\Constraint\:\:\$message\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Validator/Constraints/UniqueEmailValidator.php
+
+		-
+			message: '#^Call to method getCommissions\(\) on an unknown class App\:Beneficiary\.$#'
+			identifier: class.notFound
+			count: 4
+			path: tests/Functionnal/Controller/AdminControllerTest.php
+
+		-
+			message: '#^Call to an undefined method PHPUnit\\Framework\\MockObject\\MockObject\:\:hasPreviousValidShifts\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Integration/Service/ShiftServiceTest.php
+
+		-
+			message: '#^Call to an undefined method Symfony\\Component\\Dotenv\\Dotenv\:\:bootEnv\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/bootstrap.php

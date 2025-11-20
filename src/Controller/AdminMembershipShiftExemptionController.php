@@ -5,8 +5,10 @@ namespace App\Controller;
 use App\Entity\MembershipShiftExemption;
 use App\Form\AutocompleteMembershipType;
 use App\Repository\ShiftExemptionRepository;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Service\MembershipService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -21,7 +23,7 @@ use \Datetime;
  *
  * @Route("admin/membershipshiftexemption")
  */
-class AdminMembershipShiftExemptionController extends Controller
+class AdminMembershipShiftExemptionController extends AbstractController
 {
     /**
      * Filter form.
@@ -73,7 +75,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Lists all membershipShiftExemption entities.
      *
      * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function indexAction(Request $request)
     {
@@ -120,9 +122,9 @@ class AdminMembershipShiftExemptionController extends Controller
      * Creates a new membershipShiftExemption entity.
      *
      * @Route("/new", name="admin_membershipshiftexemption_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request, MembershipService $membership_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -136,7 +138,7 @@ class AdminMembershipShiftExemptionController extends Controller
             $membership = $form->get("membership")->getData();
             $membershipShiftExemption->setMembership($membership);
 
-            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+            if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
                 $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $membershipShiftExemption->setCreatedBy($current_user);
@@ -158,9 +160,9 @@ class AdminMembershipShiftExemptionController extends Controller
      * Displays a form to edit an existing membershipShiftExemption entity.
      *
      * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
+    public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption, MembershipService $membership_service)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -169,7 +171,7 @@ class AdminMembershipShiftExemptionController extends Controller
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if ($this->get('membership_service')->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
+            if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
                 $session->getFlashBag()->add("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $em->flush();
@@ -189,7 +191,7 @@ class AdminMembershipShiftExemptionController extends Controller
      * Deletes a membershipShiftExemption entity.
      *
      * @Route("/{id}", name="admin_membershipshiftexemption_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function deleteAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
     {
@@ -221,10 +223,8 @@ class AdminMembershipShiftExemptionController extends Controller
      * Creates a form to delete a membershipShiftExemption entity.
      *
      * @param MembershipShiftExemption $membershipShiftExemption The membershipShiftExemption entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function getDeleteForm(MembershipShiftExemption $membershipShiftExemption)
+    private function getDeleteForm(MembershipShiftExemption $membershipShiftExemption): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_membershipshiftexemption_delete', array('id' => $membershipShiftExemption->getId())))

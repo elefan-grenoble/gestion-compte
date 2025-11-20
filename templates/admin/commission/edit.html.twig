@@ -123,7 +123,7 @@
             </div>
 
             <script>
-                defer(function (){
+                function admin_commission_edit() {
                     $('.list .chips').click(function (e) {
                         if ($(e.target).is('.close')){
                             e.preventDefault()
@@ -174,7 +174,11 @@
                                 });
                             }
                         });
-                    });
+                    }
+
+                    document.readyState === "loading" ?
+                        document.addEventListener('DOMContentLoaded', admin_commission_edit) :
+                        admin_commission_edit();
                 });
             </script>
 

@@ -2,13 +2,25 @@
 // src/App/Command/InitUsersFirstShiftDateCommand.php
 namespace App\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
+class InitUsersFirstShiftDateCommand extends Command
 {
+    private $em;
+
+    public function __construct(
+        EntityManagerInterface $em
+    )
+    {
+        $this->em = $em;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -17,11 +29,10 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
             ->setHelp('This command allows you to init users first shift date');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $count = 0;
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $shifts = $em->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();
+        $shifts = $this->em->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();
         $last_member_id = null;
         foreach ($shifts as $shift) {
             $membership = $shift->getShifter()->getMembership();
@@ -30,13 +41,15 @@ class InitUsersFirstShiftDateCommand extends ContainerAwareCommand
                 $firstDate = clone($shift->getStart());
                 $firstDate->setTime(0, 0, 0);
                 $membership->setFirstShiftDate($firstDate);
-                $em->persist($membership);
+                $this->em->persist($membership);
                 $count++;
             }
         }
-        $em->flush();
+        $this->em->flush();
         $message = $count . ' membre' . (($count > 1) ? 's' : '') . ' mis à jour';
         $output->writeln($message);
+
+        return 0;
     }
 
 }
