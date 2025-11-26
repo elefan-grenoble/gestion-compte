@@ -5,13 +5,14 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Event\HelloassoEvent;
 use AppBundle\Form\AutocompleteBeneficiaryType;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use AppBundle\Helloasso\HelloassoClient;
+use AppBundle\Helloasso\HelloassoPaymentHandler;
+use Psr\Http\Client\ClientExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
  * Helloasso controller.
@@ -52,20 +53,10 @@ class HelloassoController extends Controller
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
         }
 
-        //todo: save this somewhere ?
-        $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
-
         $campaigns = array();
-        if ($campaigns_json && array_key_exists('resources', $campaigns_json)) {
-            foreach ($campaigns_json->resources as $c) {
-                $campaigns[intval($c->id)] = $c;
-            }
-        } else {
-            $campaign_ids = array_unique(array_map(function($payment) { return $payment->getCampaignId(); }, $payments));
-            foreach ($campaign_ids as $id) {
-                $campaigns[intval($id)] = ["url" => null, "name" => null];
-            }
-
+        $campaign_ids = array_unique(array_map(function($payment) { return $payment->getCampaignId(); }, $payments));
+        foreach ($campaign_ids as $id) {
+            $campaigns[intval($id)] = ["url" => null, "name" => null];
         }
 
         return $this->render('admin/helloasso/payments.html.twig', array(
@@ -83,93 +74,75 @@ class HelloassoController extends Controller
      * @Route("/browser", name="helloasso_browser", methods={"GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoBrowserAction(Request $request)
+    public function helloassoBrowserAction(HelloassoClient $helloassoClient)
     {
-        if (!($currentPage = $request->get('page')))
-            $currentPage = 1;
-
-        if (!($campaignId = $request->get('campaign'))) {
-            $campaigns_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns');
-            if ($campaigns_json && array_key_exists('resources', $campaigns_json)) {
-                $campaigns = $campaigns_json->resources;
-            } else {
-                $campaigns = null;
-            }
-            return $this->render('admin/helloasso/browser.html.twig', array('campaigns' => $campaigns));
-        } else {
-            $campaignId = str_pad($campaignId, 12, '0', STR_PAD_LEFT);
-            $campaign_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId);
-            if (!$campaign_json){
-                $session = new Session();
-                $session->getFlashBag()->add('error','campaign not found');
-                return $this->redirectToRoute('helloasso_browser');
-            }
-            $payments_json = $this->container->get('AppBundle\Helper\Helloasso')->get('campaigns/' . $campaignId . '/payments', array('page' => $currentPage));
-            $currentPage = $payments_json->pagination->page;
-            $page_count = $payments_json->pagination->max_page;
-            $results_per_page = $payments_json->pagination->results_per_page;
-
-            return $this->render('admin/helloasso/browser.html.twig', array(
-                'payments' => $payments_json->resources,
-                'campaign' => $campaign_json,
-                'current_page' => $currentPage,
-                'page_count' => $page_count
-            ));
+        try {
+            $campaigns = $helloassoClient->getForms();
+        } catch (ClientExceptionInterface $e) {
+            $session = new Session();
+            $session->getFlashBag()->add('error','Connexion à helloasso impossible');
+            return $this->redirectToRoute('admin');
         }
 
+        return $this->render('admin/helloasso/browser.html.twig', ['campaigns' => $campaigns]);
+    }
+
+    /**
+     * @Route("/browser/{formType}/{slug}", name="helloasso_campaign_details", methods={"GET"})
+     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     */
+    public function helloassoCampaignDetailsAction(Request $request, HelloassoClient $helloassoClient, string $formType, string $slug)
+    {
+        $currentPage = $request->get('page', 1);
+        try {
+            $payments = $helloassoClient->getFormPayments($formType, $slug, ['page' => $currentPage]);
+            $details = $helloassoClient->getFormDetails($formType, $slug);
+        } catch (ClientExceptionInterface $e) {
+            $session = new Session();
+            $session->getFlashBag()->add('error','campaign not found');
+            return $this->redirectToRoute('helloasso_browser');
+        }
+
+        return $this->render('admin/helloasso/browser.html.twig', [
+            'payments' => $payments->data,
+            'campaign' => $details,
+            'current_page' => $currentPage,
+            'page_count' => max($payments->pagination->totalPages, 1),
+        ]);
     }
 
     /**
      * Helloasso manual paiement add
      *
-     * @Route("/manualPaimentAdd/", name="helloasso_manual_paiement_add", methods={"POST"})
+     * @Route("/manualPaimentAdd/{paymentId}", name="helloasso_manual_paiement_add", methods={"POST"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoManualPaimentAddAction(Request $request)
+    public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $paymentHandler, string $paymentId)
     {
         $session = new Session();
-        if (!($paiementId = $request->get('paiementId'))) {
-            $session->getFlashBag()->add('error', 'missing paiment id');
+
+        try {
+            $payment = $helloassoClient->getPayment($paymentId);
+        } catch (ClientExceptionInterface $e) {
+            $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
+            $formType = $request->get("formType");
+            $slug = $request->get("slug");
+            if (is_string($formType) && is_string($slug)) {
+                return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $formType, 'slug' => $slug]);
+            }
+
             return $this->redirectToRoute('helloasso_browser');
-        } else {
-            $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $paiementId);
-
-            $em = $this->getDoctrine()->getManager();
-            $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-
-            if ($exist) {
-                $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
-                return $this->redirectToRoute('helloasso_browser', array('campaign' => $exist->getCampaignId()));
-            }
-
-            $payments = array();
-            $action_json = null;
-            $dispatcher = $this->get('event_dispatcher');
-            foreach ($payment_json->actions as $action) {
-                $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-                $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-                if ($payment) { //payment already exist (created from a previous actions in THIS loop)
-                    $amount = $action_json->amount;
-                    $amount = str_replace(',', '.', $amount);
-                    $payment->setAmount($payment->getAmount() + $amount);
-                } else {
-                    $payment = new HelloassoPayment();
-                    $payment->fromActionObj($action_json);
-                }
-                $em->persist($payment);
-                $em->flush();
-                $payments[$payment->getId()] = $payment;
-            }
-            foreach ($payments as $payment) {
-                $dispatcher->dispatch(
-                    HelloassoEvent::PAYMENT_AFTER_SAVE,
-                    new HelloassoEvent($payment)
-                );
-            }
-
-            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
-            return $this->redirectToRoute('helloasso_browser', array('campaign' => $action_json->id_campaign));
         }
+
+        $newPayment = $paymentHandler->savePayments([$payment]);
+
+        if (count($newPayment) === 0) {
+            $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
+        } else {
+            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
+        }
+
+        return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $payment->order->formType, 'slug' => $payment->order->formSlug]);
     }
 
     /**

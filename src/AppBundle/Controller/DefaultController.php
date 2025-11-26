@@ -2,19 +2,15 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Code;
-use AppBundle\Entity\HelloassoPayment;
 use AppBundle\Entity\Membership;
-use AppBundle\Entity\Registration;
-use AppBundle\Entity\Shift;
-use AppBundle\Entity\ShiftBucket;
-use AppBundle\Entity\User;
-use AppBundle\Event\HelloassoEvent;
+use AppBundle\Helloasso\HelloassoClient;
+use AppBundle\Helloasso\HelloassoPaymentHandler;
+use AppBundle\Helloasso\HelloassoNotificationRequest;
 use AppBundle\Twig\Extension\AppExtension;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Psr\Http\Client\ClientExceptionInterface;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -166,83 +162,30 @@ class DefaultController extends Controller
 
     /**
      * @Route("/helloassoNotify", name="helloasso_notify", methods={"POST"})
-     * inspiré de
-     * https://github.com/Breizhicoop/HelloDoli/blob/master/adhesion.php
-     * https://github.com/Mailforgood/HelloAsso.Api.Doc/blob/master/HelloAsso.Api.Samples/php/helloasso_stat.php
      */
-    public function helloassoNotify(Request $request)
+    public function helloassoNotify(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $handler): Response
     {
-
-        $logger = $this->get('logger');
-        $logger->info('helloasso notify', $_POST);
-
-        $actionId = $_POST['action_id'];
-
-        if (!$actionId) { //missing notification id
-            $logger->critical("missing action id");
-            return $this->json(array('success' => false, "message" => "missing action id in POST content"));
+        try {
+            $notification = HelloassoNotificationRequest::createFromRequest($request);
+        } catch (\InvalidArgumentException $e) {
+            return new Response($e->getMessage(), Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $actionId = str_pad($actionId, 12, '0', STR_PAD_LEFT);
-
-        $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $actionId);
-
-        if (!isset($action_json->id)) {
-            $message = 'Unable to find an action for action id ' . $actionId;
-            if (isset($action_json->code)) {
-                $logger->critical($message . ' code ' . $action_json->code);
-                return $this->json(array('success' => false, "code" => $action_json->code, "message" => $action_json->message));
-            } else {
-                $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response for actions/" . $actionId));
-            }
-        }
-        $payment_json = $this->container->get('AppBundle\Helper\Helloasso')->get('payments/' . $action_json->id_payment);
-        if (!isset($payment_json->id)) {
-            $message = 'Unable to find a payment for payment id ' . $action_json->id_payment;
-            if (isset($payment_json->code)) {
-                $logger->critical($message . ' code ' . $payment_json->code);
-                return $this->json(array('success' => false, "code" => $payment_json->code, "message" => $payment_json->message));
-            } else {
-                $logger->critical($message);
-                return $this->json(array('success' => false, "message" => "wrong api response for payments/" . $action_json->id_payment));
-            }
+        if (!$notification->isPaymentValidated()) {
+            return new Response('Successfully handled, but not validated payment.', Response::HTTP_OK);
         }
 
-        $em = $this->getDoctrine()->getManager();
-        $exist = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-
-        if ($exist) { //notification already exist
-            $logger->info("notification already exist");
-            return $this->json(array('success' => false, "message" => "notification already exist"));
+        // la notification devrait pouvoir être traitée directement, mais la signature permettant d'authentifier
+        // les notifications ne sont disponibles que pour les partenaires pour le moment
+        // https://dev.helloasso.com/docs/secure-webhook#signature-de-notification
+        // On va donc chercher les données depuis l'api helloasso pour s'assurer que les données sont correctes
+        try {
+            $payment = $helloassoClient->getPayment($notification->data['id']);
+        } catch (ClientExceptionInterface $e) {
+            return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $payments = array();
-        $action_json = null;
-        $dispatcher = $this->get('event_dispatcher');
-        foreach ($payment_json->actions as $action) {
-            $action_json = $this->container->get('AppBundle\Helper\Helloasso')->get('actions/' . $action->id);
-            $payment = $em->getRepository('AppBundle:HelloassoPayment')->findOneBy(array('paymentId' => $payment_json->id));
-            if ($payment) { //payment already exist (created from a previous actions in THIS loop)
-                $amount = $action_json->amount;
-                $amount = str_replace(',', '.', $amount);
-                $payment->setAmount($payment->getAmount() + $amount);
-            } else {
-                $payment = new HelloassoPayment();
-                $payment->fromActionObj($action_json);
-            }
-            $em->persist($payment);
-            $em->flush();
-            $payments[$payment->getId()] = $payment;
-        }
-        foreach ($payments as $payment) {
-            $dispatcher->dispatch(
-                HelloassoEvent::PAYMENT_AFTER_SAVE,
-                new HelloassoEvent($payment)
-            );
-        }
-
-        return $this->json(array('success' => true));
-
+        $handler->savePayments([$payment]);
+        return new Response('Successfully handled.', Response::HTTP_CREATED);
     }
 }
