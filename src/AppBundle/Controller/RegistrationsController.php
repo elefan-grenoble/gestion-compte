@@ -172,7 +172,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
             }
         }
 
-        return $this->render('registrations/list.html.twig',
+        return $this->render('admin/registrations/list.html.twig',
             array(
                 'R' => new Registration(),
                 'registrations' => $registrations,
@@ -204,7 +204,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
             return $this->redirectToRoute("registrations");
         }
 
-        return $this->render('registrations/edit.html.twig', array('edit_form' => $edit_form->createView(),'registration' => $registration));
+        return $this->render('admin/registrations/edit.html.twig', array('edit_form' => $edit_form->createView(),'registration' => $registration));
     }
 
     /**
