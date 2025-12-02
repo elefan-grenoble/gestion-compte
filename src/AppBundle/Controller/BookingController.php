@@ -340,8 +340,6 @@ class BookingController extends Controller
 
         return $this->render('admin/booking/_partial/bucket_modal.html.twig', [
             'shifts' => $shifts,
-            'display_send_email_button' => true,
-            'display_edit_button' => true,
             'bucket_shift_add_form' => $bucketShiftAddForm->createView(),
             'shift_book_forms' => $shiftBookForms,
             'shift_delete_forms' => $shiftDeleteForms,

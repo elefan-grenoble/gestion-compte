@@ -1,0 +1,172 @@
+{% if (display_names ?? true) %}
+    {% set display_names = display_name_shifters %}
+{% endif %}
+{% set nbBookableShifts = shifts | filter ( shift => not shift.shifter) | length %}
+{% set nbShifts = (shifts | length) %}
+{% set nbBookedShifts = nbShifts - nbBookableShifts %}
+{% set bucket = (shifts | sort((a, b) => a.id <=> b.id) | first) %}
+
+{# header #}
+{% if bucket.locked %}
+    <i class="material-icons left large">lock</i>
+{% endif %}
+<h4>
+    Créneaux / <span class="{{ bucket.job.color }}-text">{{ bucket.job.name }}</span>
+</h4>
+<h5>
+    {{ bucket.displayDateLongWithTime }}
+</h5>
+<span>
+    remplissage : {{ nbBookedShifts }}/{{ nbShifts }} ({{ ((nbBookedShifts / nbShifts)*100) | round }}%)
+</span>
+
+{# bucket shifts #}
+<ul class="collapsible">
+    {% for shift in shifts %}
+        {% if shift.shifter %}{# is booked #}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px">
+                        <div id="modal-shift-{{ shift.id }}" class="col s12">
+                            {% if is_granted('ROLE_USER') %}
+                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                    <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
+                                {% endif %}
+                                {% if display_names %}
+                                    {{ shift.shifter.displayNameWithMemberNumber }}
+                                {% endif %}
+                                {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if not shift.formation and shift.shifter.formations | length > 0 %}
+                                    &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
+                                {% endif %}
+                                {% if shift.shifter.isNew %}
+                                    &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                {% endif %}
+                                {% if shift.isFirstByShifter %}
+                                    &nbsp;<strong class="red-text">(Premier créneau)</strong>
+                                {% endif %}
+                            {% else %} Réservé {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if is_granted('ROLE_USER') %}
+                    <div class="collapsible-body">
+                        <p>
+                            Créneau
+                            {% if use_fly_and_fixed %}
+                                <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
+                            {% endif %}
+                            réservé
+                            {% if shift.shifter != shift.booker.beneficiary and display_names %}
+                                pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
+                            {% endif %}
+                            le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
+                            par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true, display_names: display_names } %}.
+                        </p>
+                        <!-- shift (in)validate & free forms -->
+                        {% if is_granted('free', shift) %}
+                            {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                {{ form_start(shift_validate_invalidate_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
+                                    {% if shift.wasCarriedOut %}
+                                        <button type="submit" class="btn orange" title="Invalider la participation">
+                                            <i class="material-icons left">highlight_off</i>Invalider la participation
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn green" title="Valider la participation">
+                                            <i class="material-icons left">check_circle</i>Valider la participation
+                                        </button>
+                                    {% endif %}
+                                {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
+                            {% endif %}
+                        {% endif %}
+                        <!-- shift.createdBy -->
+                        {% if shift.createdBy %}
+                            <p>
+                                Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                                par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </li>
+        {% else %}
+            <li>
+                <div class="collapsible-header" style="display: block;">
+                    <div class="row" style="margin-bottom: 0px;">
+                        <div class="col s12">
+                            <b>
+                                <span style="font-style: italic">
+                                    {% if shift.lastShifter %}
+                                        réservé
+                                        {% if display_names %}
+                                            à {{ shift.lastShifter.displayNameWithMemberNumber }}
+                                        {% endif %}
+                                    {% else %}
+                                        libre
+                                    {% endif %}
+                                </span>
+                            </b>
+                            {% if shift.formation %}
+                                </b>&nbsp;({{ shift.formation.name }})
+                            {% else %}
+                                </b>&nbsp;(sans formation particulière)
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% if is_granted('ROLE_USER') %}
+                    <div class="collapsible-body">
+                        <!-- shift.createdBy -->
+                        {% if shift.createdBy %}
+                            <p>
+                                Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                                par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>
+
+<script>
+    function makeAjaxCall(event) {
+        if (event.data.confirmation) {
+            var result = confirm(event.data.confirmation);
+        } else {
+            var result = true;
+        }
+        if (result) {
+            $.ajax({
+                url: $(event.currentTarget).attr('action'),
+                data: $(event.currentTarget).serialize(),
+                method: 'POST',
+                success: function (data) {
+                    M.toast({ text: data.message, displayLength: 2500, classes: 'green' });
+                    if (this.data.includes("bucket_delete_form") || data.card === null) {
+                        $('#main-bucket-{{ bucket.id }}').remove();
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    } else if (data.modal) {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        if (this.data.includes("shift_delete_forms_") && (this.url.substring(this.url.lastIndexOf('/') + 1) == {{ bucket.id }})) {
+                            // Change id as bucket id has been removed
+                            $('#main-bucket-{{ bucket.id }}').attr("id",$(data.card).attr('id'));
+                        }
+                        $('#modal-bucket-content').html(data.modal);
+                        $('#modal-bucket-content .collapsible').collapsible();
+                        $('#modal-bucket-content select').formSelect();
+                    } else {
+                        $('#main-bucket-{{ bucket.id }}').html($(data.card).children());
+                        M.Modal.getInstance($('#modal-bucket')).close();
+                    }
+                },
+                error: ajaxError
+            });
+        }
+        event.preventDefault();
+    }
+    $('form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
+    $('form[name^="shift_validate_invalidate_forms_"]').on('submit', {}, makeAjaxCall);
+    $('.tooltipped').tooltip();
+</script>
