@@ -1,0 +1,72 @@
+{
+  "changelog-sections": [
+    {
+      "hidden": false,
+      "section": "Nouveautés",
+      "type": "feat"
+    },
+    {
+      "hidden": false,
+      "section": "Corrections (bugs, typos...)",
+      "type": "fix"
+    },
+    {
+      "hidden": false,
+      "section": "Traductions",
+      "type": "l10n"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "style"
+    },
+    {
+      "hidden": false,
+      "section": "Documentation",
+      "type": "docs"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "test"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "chore"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "refactor"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "perf"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "ci"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "build"
+    },
+    {
+      "hidden": false,
+      "section": "Technique",
+      "type": "revert"
+    }
+  ],
+  "packages": {
+    ".": {
+      "release-type": "php",
+      "extra-files": [
+        "app/config/config.yml"
+      ]
+    }
+  }
+}
