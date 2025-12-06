@@ -1,0 +1,11 @@
+# Configuration file for https://github.com/kentaro-m/auto-assign-action
+
+# Not configured yet
+addReviewers: false
+
+# Set to true to add assignees to pull requests
+# Set to 'author' to set the PR creator as the assignee
+addAssignees: author
+
+# Set to true to run on draft pull requests
+runOnDraft: true
