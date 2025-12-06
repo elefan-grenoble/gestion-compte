@@ -63,22 +63,6 @@
                             le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
                             par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true, display_names: display_names } %}.
                         </p>
-                        <!-- shift (in)validate & free forms -->
-                        {% if is_granted('free', shift) %}
-                            {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                {{ form_start(shift_validate_invalidate_forms[shift.id], {'attr': { 'style': 'display:inline;' }}) }}
-                                    {% if shift.wasCarriedOut %}
-                                        <button type="submit" class="btn orange" title="Invalider la participation">
-                                            <i class="material-icons left">highlight_off</i>Invalider la participation
-                                        </button>
-                                    {% else %}
-                                        <button type="submit" class="btn green" title="Valider la participation">
-                                            <i class="material-icons left">check_circle</i>Valider la participation
-                                        </button>
-                                    {% endif %}
-                                {{ form_end(shift_validate_invalidate_forms[shift.id]) }}
-                            {% endif %}
-                        {% endif %}
                         <!-- shift.createdBy -->
                         {% if shift.createdBy %}
                             <p>
@@ -167,6 +151,5 @@
         event.preventDefault();
     }
     $('form[name^="shift_book_forms_"]').on('submit', {}, makeAjaxCall);
-    $('form[name^="shift_validate_invalidate_forms_"]').on('submit', {}, makeAjaxCall);
     $('.tooltipped').tooltip();
 </script>
