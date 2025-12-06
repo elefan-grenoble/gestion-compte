@@ -1,6 +1,6 @@
 {% set target_blank = target_blank ?? false %}
 
-{% if user %}
+{% if user and display_names ?? true %}
     {% if user.beneficiary %}
         <a href="{{ path("member_show", { 'member_number': user.beneficiary.membership.memberNumber }) }}" {% if target_blank %}target="_blank"{% endif %}>
             {{ user.beneficiary }}
