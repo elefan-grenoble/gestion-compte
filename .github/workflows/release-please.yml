@@ -1,3 +1,5 @@
+# https://github.com/googleapis/release-please-action
+
 name: Run release-please
 
 on:
