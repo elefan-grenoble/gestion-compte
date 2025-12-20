@@ -55,6 +55,7 @@ parameters:
   github_repo_url: 'elefan-grenoble/gestion-compte'
   github_current_release: 'v1.45.7'  # x-release-please-version
 
+  helloasso_registration_campaign_url: '%env(HELLOASSO_REGISTRATION_CAMPAIGN_URL)%'
   helloasso_campaign_slug: '%env(HELLOASSO_CAMPAIGN_SLUG)%'
   helloasso_client_id: '%env(HELLOASSO_CLIENT_ID)%'
   helloasso_client_secret: '%env(HELLOASSO_CLIENT_SECRET)%'

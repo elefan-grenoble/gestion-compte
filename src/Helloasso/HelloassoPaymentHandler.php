@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace AppBundle\Helloasso;
+namespace App\Helloasso;
 
-use AppBundle\Entity\HelloassoPayment;
-use AppBundle\Event\HelloassoEvent;
+use App\Entity\HelloassoPayment;
+use App\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
