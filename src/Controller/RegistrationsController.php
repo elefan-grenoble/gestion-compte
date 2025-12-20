@@ -24,7 +24,6 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -32,7 +31,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use DateTime;
@@ -44,14 +43,14 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  *
  * @Route("registrations")
  */
-class RegistrationsController extends Controller
+class RegistrationsController extends AbstractController
 {
 
     /**
      * Registrations list
      *
      * @Route("/", name="registrations", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function registrationsAction(Request $request)
     {
@@ -189,7 +188,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * edit registration
      *
      * @Route("/{id}/edit", name="registration_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function editRegistrationAction(Request $request, Registration $registration)
     {
@@ -211,7 +210,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      * remove registration
      *
      * @Route("/{id}/remove", name="registration_remove", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function removeRegistrationAction(Request $request, Registration $registration)
     {

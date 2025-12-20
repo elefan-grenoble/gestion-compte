@@ -11,8 +11,10 @@ use App\Form\AutocompleteBeneficiaryType;
 use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
 use App\Service\PeriodFormHelper;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -29,7 +31,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
  *
  * @Route("admin/period")
  */
-class AdminPeriodController extends Controller
+class AdminPeriodController extends AbstractController
 {
     private $cycle_type;
 
@@ -42,7 +44,7 @@ class AdminPeriodController extends Controller
      * Display all the periods in a schedule (available and reserved)
      *
      * @Route("/", name="admin_period_index", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function indexAction(Request $request, PeriodFormHelper $formHelper)
     {
@@ -87,7 +89,7 @@ class AdminPeriodController extends Controller
      * Create a period
      *
      * @Route("/new", name="admin_period_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function newPeriodAction(Request $request)
     {
@@ -129,7 +131,7 @@ class AdminPeriodController extends Controller
      * Edit a period
      *
      * @Route("/{id}/edit", name="admin_period_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function editPeriodAction(Request $request, Period $period)
     {
@@ -197,7 +199,7 @@ class AdminPeriodController extends Controller
      * Create a position
      *
      * @Route("/{id}/position/add", name="admin_periodposition_new", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function newPeriodPositionAction(Request $request, Period $period)
     {
@@ -246,7 +248,7 @@ class AdminPeriodController extends Controller
      * Delete a position
      *
      * @Route("/{id}/position/{position}", name="admin_periodposition_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
@@ -270,7 +272,7 @@ class AdminPeriodController extends Controller
      * Book a position
      *
      * @Route("/{id}/position/{position}/book", name="admin_periodposition_book", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
     {
@@ -313,9 +315,9 @@ class AdminPeriodController extends Controller
      * Free a position
      *
      * @Route("/{id}/position/{position}/free", name="admin_periodposition_free", methods={"POST"})
-     * @Security("has_role('ROLE_SHIFT_MANAGER')")
+     * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
+    public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -336,8 +338,7 @@ class AdminPeriodController extends Controller
             $em->persist($position);
             $em->flush();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(PeriodPositionFreedEvent::NAME, new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime));
+            $event_dispatcher->dispatch(new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime), PeriodPositionFreedEvent::NAME);
 
             $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
@@ -349,7 +350,7 @@ class AdminPeriodController extends Controller
      * Delete a period
      *
      * @Route("/{id}", name="admin_period_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deletePeriodAction(Request $request, Period $period)
     {
@@ -373,7 +374,7 @@ class AdminPeriodController extends Controller
      * Duplicate a period
      *
      * @Route("/copy", name="admin_period_copy", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function copyPeriodAction(Request $request)
     {
@@ -432,7 +433,7 @@ class AdminPeriodController extends Controller
      * Generate shifts for a given date
      *
      * @Route("/generateShifts/", name="admin_shifts_generation", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel)
     {
@@ -476,10 +477,8 @@ class AdminPeriodController extends Controller
      * Creates a form to delete a period entity.
      *
      * @param Period $period The period entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createPeriodDeleteForm(Period $period)
+    private function createPeriodDeleteForm(Period $period): FormInterface
     {
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_period_delete', array('id' => $period->getId())))
@@ -491,10 +490,8 @@ class AdminPeriodController extends Controller
      * Creates a form to add a period position entity.
      *
      * @param Period $period The period entity
-     *
-     * @return \Symfony\Component\Form\Form The form
      */
-    private function createPeriodPositionAddForm(Period $period)
+    private function createPeriodPositionAddForm(Period $period): FormInterface
     {
         return $this->createForm(
             PeriodPositionType::class,

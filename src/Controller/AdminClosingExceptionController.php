@@ -5,7 +5,8 @@ namespace App\Controller;
 
 use App\Entity\ClosingException;
 use App\Form\ClosingExceptionType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use App\Repository\ClosingExceptionRepository;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -20,21 +21,23 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("admin/closingexceptions")
  */
-class AdminClosingExceptionController extends Controller
+class AdminClosingExceptionController extends AbstractController
 {
     /**
      * Admin closing exception home
      *
      * @Route("/", name="admin_closingexception_index", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $closingExceptionsFuture = $em->getRepository('App:ClosingException')->findFutures();
-        $closingExceptionsOngoing = $em->getRepository('App:ClosingException')->findOngoing();
-        $closingExceptionsPast = $em->getRepository('App:ClosingException')->findPast(null, 10);  # only the 10 last
+        /** @var ClosingExceptionRepository $repository */
+        $repository = $em->getRepository(ClosingException::class);
+        $closingExceptionsFuture = $repository->findFutures();
+        $closingExceptionsOngoing = $repository->findOngoing();
+        $closingExceptionsPast = $repository->findPast(null, 10);  # only the 10 last
 
         $delete_forms = array();
         foreach ($closingExceptionsFuture as $closingException) {
@@ -53,13 +56,13 @@ class AdminClosingExceptionController extends Controller
      * Admin closing exception list
      *
      * @Route("/list", name="admin_closingexception_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $closingExceptions = $em->getRepository('App:ClosingException')->findAll();
+        $closingExceptions = $em->getRepository(ClosingException::class)->findAll();
 
         $delete_forms = array();
         foreach ($closingExceptions as $closingException) {
@@ -78,7 +81,7 @@ class AdminClosingExceptionController extends Controller
      * Add new closing exception
      *
      * @Route("/new", name="admin_closingexception_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -110,7 +113,7 @@ class AdminClosingExceptionController extends Controller
      * Closing exception delete
      *
      * @Route("/{id}", name="admin_closingexception_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, ClosingException $closingException)
     {
@@ -134,7 +137,7 @@ class AdminClosingExceptionController extends Controller
      * Closing exception widget generator
      *
      * @Route("/widget_generator", name="admin_closingexception_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {
@@ -148,7 +151,8 @@ class AdminClosingExceptionController extends Controller
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0);

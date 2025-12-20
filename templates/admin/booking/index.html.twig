@@ -112,7 +112,7 @@
                 var data = jqXHR.responseJSON;
                 msg = data.message;
             }
-            M.toast({ text: msg, displayLength: 5000, classes: 'red' });
+            M.toast({ html: msg, displayLength: 5000, classes: 'red' });
         }
 
         $(document).ready(function ($) {

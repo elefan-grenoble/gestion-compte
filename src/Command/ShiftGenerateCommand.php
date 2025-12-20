@@ -5,14 +5,38 @@ namespace App\Command;
 use App\Entity\Shift;
 use App\Entity\ClosingException;
 use App\Event\ShiftReservedEvent;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use App\Service\PeriodService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class ShiftGenerateCommand extends ContainerAwareCommand
+class ShiftGenerateCommand extends Command
 {
+    private $em;
+    private $params;
+    private $event_dispatcher;
+    private $period_service;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params,
+        EventDispatcherInterface $event_dispatcher,
+        PeriodService $period_service
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+        $this->event_dispatcher = $event_dispatcher;
+        $this->period_service = $period_service;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -23,15 +47,13 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             ->addOption('to', 't', InputOption::VALUE_OPTIONAL, 'Every day until this date (not included)', '');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
-        $admin = $em->getRepository('App:User')->findSuperAdminAccount();
-        $use_fly_and_fixed = $this->getContainer()->getParameter('use_fly_and_fixed');
-        $reserve_new_shift_to_prior_shifter = $this->getContainer()->getParameter('reserve_new_shift_to_prior_shifter');
-        $cycle_type = $this->getContainer()->getParameter('cycle_type');
-        $week_cycle_array = $this->getContainer()->get('period_service')->getWeekCycleArray();
+        $admin = $this->em->getRepository('App:User')->findSuperAdminAccount();
+        $use_fly_and_fixed = $this->params->get('use_fly_and_fixed');
+        $reserve_new_shift_to_prior_shifter = $this->params->get('reserve_new_shift_to_prior_shifter');
+        $cycle_type = $this->params->get('cycle_type');
+        $week_cycle_array = $this->period_service->getWeekCycleArray();
 
         $from_given = $input->getArgument('date');
         $to_given = $input->getOption('to');
@@ -40,7 +62,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
 
         if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
-            return;
+            return 2;
         }
         if ($to_given) {
             $to = date_create_from_format('Y-m-d', $to_given);
@@ -62,12 +84,12 @@ class ShiftGenerateCommand extends ContainerAwareCommand
             $count_existing_period = 0;
             $output->writeln('<fg=cyan;>'.$date->format('D d M Y').'</>');
 
-            $closingException = $em->getRepository('App:ClosingException')->findBy(['date' => $date]);
+            $closingException = $this->em->getRepository('App:ClosingException')->findBy(['date' => $date]);
             if ($closingException) {
                 $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau ne sera généré</>');
             } else {
                 $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6 = 7-1 (for Sunday)
-                $periods = $em->getRepository('App:Period')->createQueryBuilder('p')
+                $periods = $this->em->getRepository('App:Period')->createQueryBuilder('p')
                     ->where('p.dayOfWeek = :dow')
                     ->setParameter('dow', $dayOfWeek)
                     ->orderBy('p.start')
@@ -90,11 +112,11 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                             }
                         }
 
-                        $already_generated = $em->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
+                        $already_generated = $this->em->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
                         if (!$already_generated) {
                             $lastStart = $this->lastCycleDate($start);
                             $lastEnd = $this->lastCycleDate($end);
-                            $last_cycle_shift = $em->getRepository('App:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
+                            $last_cycle_shift = $this->em->getRepository('App:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
                             $current_shift = clone $shift;
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());
@@ -116,7 +138,7 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                                 $current_shift->setBooker(null);
                             }
 
-                            $em->persist($current_shift);
+                            $this->em->persist($current_shift);
                             $count_new_period++;
                             $count_new_all++;
                         } else {
@@ -125,19 +147,20 @@ class ShiftGenerateCommand extends ContainerAwareCommand
                         }
                     }
                 }
-                $em->flush();
+                $this->em->flush();
 
                 $this->printRecapMessage($output, $count_new_period, $count_existing_period);
             }
         }
 
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
         foreach ($reservedShifts as $i => $shift) {
-            $dispatcher->dispatch(ShiftReservedEvent::NAME, new ShiftReservedEvent($shift, $formerShifts[$i]));
+            $this->event_dispatcher->dispatch(new ShiftReservedEvent($shift, $formerShifts[$i]), ShiftReservedEvent::NAME);
         }
 
         $output->writeln('<fg=yellow;>=== Recap ===</>');
         $this->printRecapMessage($output, $count_new_all, $count_existing_all);
+
+        return 0;
     }
 
     protected function lastCycleDate(\DateTime $date)

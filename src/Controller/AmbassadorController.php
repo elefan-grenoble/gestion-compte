@@ -12,8 +12,7 @@ use App\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -27,7 +26,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("ambassador")
  */
-class AmbassadorController extends Controller
+class AmbassadorController extends AbstractController
 {
     private $timeAfterWhichMembersAreLateWithShifts;
     private $registrationEveryCivilYear;
@@ -42,7 +41,7 @@ class AmbassadorController extends Controller
      * List all members without a registration
      *
      * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -93,7 +92,7 @@ class AmbassadorController extends Controller
      * List all members with a registration date older than one year
      *
      * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_VIEWER')")
+     * @Security("is_granted('ROLE_USER_VIEWER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -153,7 +152,7 @@ class AmbassadorController extends Controller
      * List all members with negative shift time count
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */
@@ -192,7 +191,7 @@ class AmbassadorController extends Controller
              */
             $members = $qb->getQuery()->getResult();
 
-            $response = new StreamedResponse(function () use ($members) {
+            $response = new StreamedResponse(function () use ($members): void {
                 $handle = fopen('php://output', 'wb');
                 foreach ($members as $member) {
                     $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
@@ -244,7 +243,7 @@ class AmbassadorController extends Controller
      * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'
      *
      * @Route("/beneficiary_fixe_without_periodposition", name="ambassador_beneficiary_fixe_without_periodposition_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER_MANAGER')")
+     * @Security("is_granted('ROLE_USER_MANAGER')")
      * @param request $request , searchuserformhelper $formhelper
      * @return response
      */

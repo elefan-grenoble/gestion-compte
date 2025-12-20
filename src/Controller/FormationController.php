@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Entity\Formation;
 use App\Form\FormationType;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -14,16 +14,16 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  * Formation controller.
  *
  * @Route("admin/formations")
- * @Security("has_role('ROLE_ADMIN')")
+ * @Security("is_granted('ROLE_ADMIN')")
  */
-class FormationController extends Controller
+class FormationController extends AbstractController
 {
 
     /**
      * Formations list
      *
      * @Route("/", name="formation_list", methods={"GET"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
@@ -38,7 +38,7 @@ class FormationController extends Controller
      * Formation new
      *
      * @Route("/new", name="formation_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -71,7 +71,7 @@ class FormationController extends Controller
      * Formation edit
      *
      * @Route("/{id}/edit", name="formation_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Formation $formation)
     {
@@ -100,7 +100,7 @@ class FormationController extends Controller
      * Formation delete
      *
      * @Route("/{id}", name="formation_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, Formation $formation)
     {

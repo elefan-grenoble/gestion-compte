@@ -46,7 +46,7 @@ class PeriodPositionType extends AbstractType
                 'required' => false
             ));
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options): void {
             $period_position = $event->getData();
             $form = $event->getForm();
 

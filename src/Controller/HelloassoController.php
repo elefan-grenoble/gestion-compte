@@ -10,7 +10,8 @@ use App\Form\AutocompleteBeneficiaryType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Psr\Http\Client\ClientExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -20,14 +21,14 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("helloasso")
  */
-class HelloassoController extends Controller
+class HelloassoController extends AbstractController
 {
 
     /**
      * Helloasso payments list
      *
      * @Route("/payments", name="helloasso_payments", methods={"GET"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoPaymentsAction(Request $request)
     {
@@ -73,7 +74,7 @@ class HelloassoController extends Controller
      * Helloasso browser
      *
      * @Route("/browser", name="helloasso_browser", methods={"GET"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoBrowserAction(HelloassoClient $helloassoClient)
     {
@@ -116,7 +117,7 @@ class HelloassoController extends Controller
      * Helloasso manual paiement add
      *
      * @Route("/manualPaimentAdd/{paymentId}", name="helloasso_manual_paiement_add", methods={"POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $paymentHandler, string $paymentId)
     {
@@ -150,7 +151,7 @@ class HelloassoController extends Controller
      * remove payment
      *
      * @Route("/payments/{id}", name="helloasso_payment_remove", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function removePaymentAction(Request $request, HelloassoPayment $payment)
     {
@@ -177,9 +178,9 @@ class HelloassoController extends Controller
      * edit payment
      *
      * @Route("/payment/{id}/edit", name="helloasso_payment_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_FINANCE_MANAGER')")
+     * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
-    public function editPaymentAction(Request $request, HelloassoPayment $payment)
+    public function editPaymentAction(Request $request, HelloassoPayment $payment, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
 
@@ -194,10 +195,9 @@ class HelloassoController extends Controller
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiary = $form->get("subscriber")->getData();
 
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
-                HelloassoEvent::ORPHAN_SOLVE,
-                new HelloassoEvent($payment, $beneficiary->getUser())
+            $event_dispatcher->dispatch(
+                new HelloassoEvent($payment, $beneficiary->getUser()),
+                HelloassoEvent::ORPHAN_SOLVE
             );
 
             $session->getFlashBag()->add('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
@@ -241,7 +241,7 @@ class HelloassoController extends Controller
      * resolve orphan payment
      *
      * @Route("/payment/{id}/resolve_orphan/{code}", name="helloasso_resolve_orphan", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function resolveOrphan(HelloassoPayment $payment,$code){
         $code = urldecode($code);
@@ -265,18 +265,17 @@ class HelloassoController extends Controller
      * confirm resolve orphan payment
      *
      * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function confirmOrphan(HelloassoPayment $payment,$code){
+    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher){
         $code = urldecode($code);
         $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
             $session->getFlashBag()->add('success', 'Merci !');
-            $dispatcher = $this->get('event_dispatcher');
-            $dispatcher->dispatch(
-                HelloassoEvent::ORPHAN_SOLVE,
-                new HelloassoEvent($payment, $this->getUser())
+            $event_dispatcher->dispatch(
+                new HelloassoEvent($payment, $this->getUser()),
+                HelloassoEvent::ORPHAN_SOLVE
             );
         }else{
             $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
@@ -288,7 +287,7 @@ class HelloassoController extends Controller
      * exit app and redirect to resolve
      *
      * @Route("/payment/{id}/orphan_exit_and_back/{code}", name="helloasso_orphan_exit_and_back", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function orphanExitAndConfirm(Request $request,HelloassoPayment $payment,$code){
         $this->get('security.token_storage')->setToken(null);

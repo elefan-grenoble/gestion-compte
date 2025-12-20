@@ -5,7 +5,7 @@ namespace App\Event;
 use App\Entity\Proxy;
 use Symfony\Component\EventDispatcher\Event;
 
-class EventProxyCreatedEvent extends Event
+class EventProxyCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
     const NAME = 'event.proxy.created';
 

@@ -34,7 +34,7 @@ class ToggleableHandler extends AbstractHandler
         return call_user_func_array(array($this->nestedHandler, $method), $args);
     }
 
-    public function handle(array $record)
+    public function handle(array $record): bool
     {
         if ($this->enabled) {
             return $this->nestedHandler->handle($record);

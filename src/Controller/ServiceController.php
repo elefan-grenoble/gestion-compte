@@ -6,7 +6,7 @@ namespace App\Controller;
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ServiceType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
@@ -22,13 +22,13 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("services")
  */
-class ServiceController extends Controller
+class ServiceController extends AbstractController
 {
     /**
      * Lists all services.
      *
      * @Route("/", name="service_list", methods={"GET"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function listAction(Request $request)
     {
@@ -44,7 +44,7 @@ class ServiceController extends Controller
      * Lists all services (header navlist)
      *
      * @Route("/navlist", name="service_navlist", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function navlistAction()
     {
@@ -59,7 +59,7 @@ class ServiceController extends Controller
      * add new services.
      *
      * @Route("/new", name="service_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
     {
@@ -92,7 +92,7 @@ class ServiceController extends Controller
      * edit service.
      *
      * @Route("/{id}/edit", name="service_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request, Service $service)
     {
@@ -124,7 +124,7 @@ class ServiceController extends Controller
      * delete service.
      *
      * @Route("/{id}", name="service_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request,Service $service)
     {

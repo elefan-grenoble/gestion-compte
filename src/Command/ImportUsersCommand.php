@@ -9,6 +9,7 @@ use App\Entity\Membership;
 use App\Entity\Registration;
 use App\Entity\User;
 use App\Event\BeneficiaryCreatedEvent;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,10 +17,24 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 class ImportUsersCommand extends CsvCommand
 {
+    private $em;
+    private $event_dispatcher;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        EventDispatcherInterface $event_dispatcher
+    )
+    {
+        $this->em = $em;
+        $this->event_dispatcher = $event_dispatcher;
+
+        parent::__construct();
+    }
 
     protected function configure()
     {
@@ -35,7 +50,7 @@ class ImportUsersCommand extends CsvCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $file = $input->getArgument('file');
         $delimiter= $input->getOption('delimiter');
@@ -92,8 +107,6 @@ class ImportUsersCommand extends CsvCommand
 
         $progress = new ProgressBar($output,$lines);
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-
         $row = 0;
         if (($handle = fopen($file, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 10000, $delimiter)) !== FALSE) {
@@ -128,14 +141,14 @@ class ImportUsersCommand extends CsvCommand
 
                     $membership = new Membership();
                     if ($add_to){
-                        $parent_user = $em->getRepository(User::class)->findOneBy(array('email'=>$add_to));
+                        $parent_user = $this->em->getRepository(User::class)->findOneBy(array('email'=>$add_to));
                         if ($parent_user && $parent_user->getId()){
                             $membership = $parent_user->getBeneficiary()->getMembership();
                             $output->writeln("<info>Membership found for parent email <fg=cyan>$add_to</> (#<fg=cyan>".$membership->getMemberNumber()."</>), using it</info>",OutputInterface::VERBOSITY_DEBUG);
                         }
                     }
                     if (!$membership->getId()){
-                        $membership = $em->getRepository(Membership::class)->findOneBy(array('member_number'=>$member_number));
+                        $membership = $this->em->getRepository(Membership::class)->findOneBy(array('member_number'=>$member_number));
                         if ($membership && $membership->getId()){
                             $output->writeln("<info>Membership with number <fg=cyan>$member_number</> exist, using it</info>",OutputInterface::VERBOSITY_DEBUG);
                         }else{
@@ -147,11 +160,11 @@ class ImportUsersCommand extends CsvCommand
                             $membership->setWithdrawn(false);
                             $membership->setFrozen(false);
                             $membership->setFrozenChange(false);
-                            $em->persist($membership);
+                            $this->em->persist($membership);
                         }
                     }
 
-                    $user = $em->getRepository(User::class)->findOneBy(array('email'=>$email));
+                    $user = $this->em->getRepository(User::class)->findOneBy(array('email'=>$email));
                     $beneficiary = new Beneficiary();
 
                     if ($user && $user->getId()){
@@ -165,13 +178,12 @@ class ImportUsersCommand extends CsvCommand
                         $beneficiary->setLastname($last_name);
                         $beneficiary->setPhone($phone);
 
-                        $dispatcher = $this->getContainer()->get('event_dispatcher');
-                        $dispatcher->dispatch(BeneficiaryCreatedEvent::NAME, new BeneficiaryCreatedEvent($beneficiary));
+                        $this->event_dispatcher->dispatch(new BeneficiaryCreatedEvent($beneficiary), BeneficiaryCreatedEvent::NAME);
 
                         $beneficiary->setEmail($email);
                         $beneficiary->setFlying(false);
 
-                        $em->persist($beneficiary);
+                        $this->em->persist($beneficiary);
                     }
 
                     $address = new Address();
@@ -183,15 +195,15 @@ class ImportUsersCommand extends CsvCommand
                     $address->setStreet1($street1);
                     $address->setStreet2($street2);
                     $address->setZipcode($zip);
-                    $em->persist($address);
+                    $this->em->persist($address);
 
                     $beneficiary->setAddress($address);
                     $beneficiary->setMembership($membership);
                     if ($membership_is_new){
                         $membership->setMainBeneficiary($beneficiary);
-                        $em->persist($membership);
+                        $this->em->persist($membership);
                     }
-                    $em->persist($beneficiary);
+                    $this->em->persist($beneficiary);
 
                     $registration = new Registration();
                     if (!$user_is_new){ //do not add registration
@@ -207,15 +219,15 @@ class ImportUsersCommand extends CsvCommand
                         $registration->setDate($date);
                         $registration->setMembership($membership);
                         $registration->setAmount($amount);
-                        $registrar = $em->getRepository(User::class)->findOneBy(array('id'=>$registrar));
+                        $registrar = $this->em->getRepository(User::class)->findOneBy(array('id'=>$registrar));
                         $registration->setRegistrar($registrar);
                         $registration->setMode($mode);
-                        $em->persist($registration);
+                        $this->em->persist($registration);
                     }
 
                     foreach ($commissions as $commission_id){
                         if ($commission_id){
-                            $commission =  $em->getRepository(Commission::class)->findOneBy(array('id'=>$commission_id));
+                            $commission =  $this->em->getRepository(Commission::class)->findOneBy(array('id'=>$commission_id));
                             if ($commission){
                                 $beneficiary->addCommission($commission);
                             }else{
@@ -223,9 +235,9 @@ class ImportUsersCommand extends CsvCommand
                             }
                         }
                     }
-                    $em->persist($beneficiary);
+                    $this->em->persist($beneficiary);
 
-                    $em->flush();
+                    $this->em->flush();
 
                 }
             }
@@ -233,6 +245,8 @@ class ImportUsersCommand extends CsvCommand
             $output->writeln("");
         }
         //$progress->finish();
+
+        return 0;
     }
 
 }

@@ -9,7 +9,8 @@ use App\Entity\Proxy;
 use App\Event\EventProxyCreatedEvent;
 use App\Form\ProxyType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,7 +22,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  *
  * @Route("events")
  */
-class EventController extends Controller
+class EventController extends AbstractController
 {
     /**
      * Event widget display
@@ -65,7 +66,7 @@ class EventController extends Controller
      * Event home
      *
      * @Route("/", name="event_index", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function indexAction(Request $request)
     {
@@ -100,14 +101,14 @@ class EventController extends Controller
      * Proxy new
      *
      * @Route("/{id}/proxy/give", name="event_proxy_give", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function giveProxyAction(Event $event, Request $request)
+    public function giveProxyAction(Event $event, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-        $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
+        $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
 
         // check if member hasn't already given a proxy
         $member_given_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership()));
@@ -187,8 +188,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
             }
 
             return $this->redirectToRoute('homepage');
@@ -238,8 +238,7 @@ class EventController extends Controller
                     $session->getFlashBag()->add('success', 'Procuration donnée à '. $proxy->getOwner()->getMembership()->getMemberNumberWithBeneficiaryListString() .' !');
 
                     if ($proxy->getGiver() && $proxy->getOwner()) {
-                        $dispatcher = $this->get('event_dispatcher');
-                        $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                        $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
                     }
 
                     return $this->redirectToRoute('homepage');
@@ -278,7 +277,7 @@ class EventController extends Controller
      *
      * Goes with the Twig template views/beneficiary/find_member_number.html.twig
      * @Route("/{id}/proxy/find_beneficiary", name="event_proxy_find_beneficiary", methods={"POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function findBeneficiaryAction(Event $event, Request $request)
     {
@@ -298,7 +297,8 @@ class EventController extends Controller
             ->setMethod('POST')
             ->getForm();
 
-        if ($search_form->handleRequest($request)->isValid()) {
+        $search_form->handleRequest($request);
+        if ($search_form->isSubmitted() && $search_form->isValid()) {
             $firstname = $search_form->get('firstname')->getData();
             $qb = $em->createQueryBuilder();
             $beneficiaries_request = $qb->select('b')->from('App\Entity\Beneficiary', 'b')
@@ -323,7 +323,7 @@ class EventController extends Controller
                 ->getQuery()
                 ->getResult();
 
-            $min_time_count = $this->container->getParameter("time_after_which_members_are_late_with_shifts");
+            $min_time_count = $this->getParameter("time_after_which_members_are_late_with_shifts");
 
             $filtered_beneficiaries = array_filter(
                 $beneficiaries,
@@ -352,7 +352,7 @@ class EventController extends Controller
      * Proxy remove
      *
      * @Route("/{id}/proxy/{proxy}/remove", name="event_proxy_lite_delete", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function deleteProxyLiteAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -374,9 +374,9 @@ class EventController extends Controller
      * Proxy take
      *
      * @Route("/{id}/proxy/take", name="event_proxy_take", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function acceptProxyAction(Event $event, Request $request)
+    public function acceptProxyAction(Event $event, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -420,7 +420,7 @@ class EventController extends Controller
 
         if ($form->isSubmitted() && $form->isValid()) {
             // check if member doesn't already have the maximum nomber of proxies (%max_event_proxy_per_member%)
-            $max_event_proxy_per_member = $this->container->getParameter("max_event_proxy_per_member");
+            $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
             $myproxy = $em->getRepository('App:Proxy')->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
             if (count($myproxy) >= $max_event_proxy_per_member) {
                 $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_member .' procuration.');
@@ -433,8 +433,7 @@ class EventController extends Controller
             $session->getFlashBag()->add('success', 'Procuration acceptée !');
 
             if ($proxy->getGiver() && $proxy->getOwner()) {
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
             }
 
             return $this->redirectToRoute('homepage');

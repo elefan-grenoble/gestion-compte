@@ -3,16 +3,42 @@
 namespace App\Command;
 
 use App\Entity\Shift;
+use App\Service\MailerService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query\Expr\Join;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Validator\Constraints\Date;
 
-class SendMassMailCommand extends ContainerAwareCommand
+class SendMassMailCommand extends Command
 {
+    private $em;
+    private $params;
+    private $mailer_service;
+    private $mailer;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        ContainerBagInterface $params,
+        MailerService $mailer_service,
+        MailerInterface $mailer
+    )
+    {
+        $this->em = $em;
+        $this->params = $params;
+        $this->mailer_service = $mailer_service;
+        $this->mailer = $mailer;
+
+        parent::__construct();
+    }
+
     protected function configure()
     {
         $this
@@ -30,7 +56,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         ;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $from_email = $input->getArgument('from');
         $subject = $input->getArgument('subject');
@@ -40,35 +66,31 @@ class SendMassMailCommand extends ContainerAwareCommand
         $frozen = $input->getOption('frozen');
         $exclude_non_member = $input->getOption('exclude_non_member');
 
-        $mailerService = $this->getContainer()->get('mailer_service');
-        $allowed_from_emails = $mailerService->getAllowedEmails();
+        $allowed_from_emails = $this->mailer_service->getAllowedEmails();
 
         if (in_array($from_email,$allowed_from_emails)){
             $from = array($from_email => array_search($from_email, $allowed_from_emails));
         }else{
             //email not listed !
             $output->writeln('<fg=red;> cet expéditeur n\'est pas autorisé ! </>');
-            return;
+            return 2;
         }
 
         if (!$subject){
             $output->writeln('<fg=red;> le sujet est requis ! </>');
-            return;
+            return 2;
         }
-
-        $mailer = $this->getContainer()->get('mailer');
 
         $body = file_get_contents($file);
 
         if (!$body){
             $output->writeln('<fg=red;> file content not found ! </>');
-            return;
+            return 2;
         }else{
             /*$template = $this->getContainer()->get('twig')->createTemplate($body);
             $body = $template->render(array());*/
         }
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $qb = $em->getRepository("App:Membership")->createQueryBuilder('m');
+        $qb = $this->em->getRepository("App:Membership")->createQueryBuilder('m');
         $qb = $qb->andWhere('m.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
@@ -78,7 +100,7 @@ class SendMassMailCommand extends ContainerAwareCommand
         }
 
         $last_registration = new \DateTime();
-        $last_registration->modify("-".$this->getContainer()->getParameter('registration_duration'));
+        $last_registration->modify("-".$this->params->get('registration_duration'));
         if ($tolerance && $tolerance > 0){
             $last_registration->modify("-".$tolerance." days");
         }
@@ -100,29 +122,29 @@ class SendMassMailCommand extends ContainerAwareCommand
                 $to[] = $beneficiary->getEmail();
         }
         if (!$exclude_non_member){
-            $non_members = $em->getRepository("App:User")->findNonMembers(true);
+            $non_members = $this->em->getRepository("App:User")->findNonMembers(true);
             foreach ($non_members as $user){
                 $to[] = $user->getEmail();
             }
         }
-        $message = (new \Swift_Message($subject))
-            ->setFrom($from)
-            ->addPart(
-                $body,
-                'text/html'
-            );
+        $message = (new Email())
+            ->subject($subject)
+            ->from($from)
+            ->html($body);
         if ($test_email && filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=cyan;>>>> mode test, BAT envoyé à '.$test_email.' </>');
-            $message->setTo($test_email);
+            $message->to($test_email);
         }else if($test_email && !filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=red;> Mail BAT wrong format ! </>');
-            return;
+            return 2;
         }else{
-            $message->setTo($from);
-            $message->setBcc($to);
+            $message->to($from);
+            $message->bcc($to);
         }
-        $mailer->send($message);
+        $this->mailer->send($message);
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> message envoyé à '.count($to).' beneficiaires ('.count($memberships).' comptes membre) </>');
+
+        return 0;
     }
 }

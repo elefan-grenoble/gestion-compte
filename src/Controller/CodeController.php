@@ -5,7 +5,8 @@ namespace App\Controller;
 use App\Entity\Code;
 use App\Event\CodeNewEvent;
 use App\Security\CodeVoter;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -23,7 +24,7 @@ use Symfony\Component\Validator\Constraints\DateTime;
  *
  * @Route("codes")
  */
-class CodeController extends Controller
+class CodeController extends AbstractController
 {
     public function homepageDashboardAction()
     {
@@ -41,7 +42,7 @@ class CodeController extends Controller
      * Lists all codes.
      *
      * @Route("/", name="codes_list", methods={"GET"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function listAction(Request $request)
     {
@@ -76,7 +77,7 @@ class CodeController extends Controller
      * add new code.
      *
      * @Route("/new", name="code_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function newAction(Request $request)
     {
@@ -130,9 +131,9 @@ class CodeController extends Controller
      * generate new code.
      *
      * @Route("/generate", name="code_generate", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
-    public function generateAction(Request $request)
+    public function generateAction(Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -186,8 +187,7 @@ class CodeController extends Controller
 
         $logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
 
-        $dispatcher = $this->get('event_dispatcher');
-        $dispatcher->dispatch(CodeNewEvent::NAME, new CodeNewEvent($code, $old_codes));
+        $event_dispatcher->dispatch(new CodeNewEvent($code, $old_codes), CodeNewEvent::NAME);
 
         $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
 
@@ -202,7 +202,7 @@ class CodeController extends Controller
      * toggle code 
      *
      * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
-     * @Security("has_role('ROLE_USER')")
+     * @Security("is_granted('ROLE_USER')")
      */
     public function toggleAction(Request $request, Code $code)
     {

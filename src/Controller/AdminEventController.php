@@ -10,7 +10,8 @@ use App\Form\EventType;
 use App\Form\ProxyType;
 use App\Repository\EventKindRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -29,7 +30,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  *
  * @Route("admin/events")
  */
-class AdminEventController extends Controller
+class AdminEventController extends AbstractController
 {
     /**
      * Filter form
@@ -79,7 +80,7 @@ class AdminEventController extends Controller
      * Admin event home
      *
      * @Route("/", name="admin_event_index", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function indexAction(Request $request)
     {
@@ -100,7 +101,7 @@ class AdminEventController extends Controller
      * Admin event list
      *
      * @Route("/list", name="admin_event_list", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
@@ -143,7 +144,7 @@ class AdminEventController extends Controller
      * Event new
      *
      * @Route("/new", name="admin_event_new", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
     {
@@ -173,7 +174,7 @@ class AdminEventController extends Controller
      * Event edit
      *
      * @Route("/{id}/edit", name="admin_event_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, Event $event)
     {
@@ -204,7 +205,7 @@ class AdminEventController extends Controller
      * Event delete
      *
      * @Route("/{id}", name="admin_event_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_ADMIN')")
+     * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, Event $event)
     {
@@ -228,7 +229,7 @@ class AdminEventController extends Controller
      * Lists all proxy
      *
      * @Route("/proxies", name="admin_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listProxiesAction()
     {
@@ -247,7 +248,7 @@ class AdminEventController extends Controller
      * Lists all proxy for one event
      *
      * @Route("/{id}/proxies", name="admin_event_proxies_list", methods={"GET"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listEventProxiesAction(Event $event, Request $request)
     {
@@ -263,9 +264,9 @@ class AdminEventController extends Controller
      * Proxy edit
      *
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_edit", methods={"GET","POST"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
-    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request)
+    public function editEventProxyAction(Event $event, Proxy $proxy, Request $request, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -297,8 +298,7 @@ class AdminEventController extends Controller
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -312,14 +312,13 @@ class AdminEventController extends Controller
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
                 $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
-                if ($proxy_waiting && $proxy_waiting != $proxy) {
+                if ($proxy_waiting instanceof Proxy && $proxy_waiting !== $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
                     $em->remove($proxy);
                     $em->flush();
 
-                    $dispatcher = $this->get('event_dispatcher');
-                    $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy_waiting));
+                    $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
                     $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
                     $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
@@ -335,8 +334,7 @@ class AdminEventController extends Controller
                 $em->persist($proxy);
                 $em->flush();
 
-                $dispatcher = $this->get('event_dispatcher');
-                $dispatcher->dispatch(EventProxyCreatedEvent::NAME, new EventProxyCreatedEvent($proxy));
+                $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
 
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());
@@ -357,7 +355,7 @@ class AdminEventController extends Controller
      * Proxy delete
      *
      * @Route("/{id}/proxies/{proxy}", name="admin_event_proxy_delete", methods={"DELETE"})
-     * @Security("has_role('ROLE_SUPER_ADMIN')")
+     * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteEventProxyAction(Event $event, Proxy $proxy, Request $request)
     {
@@ -384,7 +382,7 @@ class AdminEventController extends Controller
      * the member with an expired registration.
      *
      * @Route("/{id}/signatures/", name="admin_event_signatures", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function signaturesListAction(Request $request,Event $event): Response
     {
@@ -422,7 +420,7 @@ class AdminEventController extends Controller
      * Event widget generator
      *
      * @Route("/widget_generator", name="admin_event_widget_generator", methods={"GET","POST"})
-     * @Security("has_role('ROLE_PROCESS_MANAGER')")
+     * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function widgetGeneratorAction(Request $request)
     {
@@ -459,7 +457,8 @@ class AdminEventController extends Controller
             ->add('generate', SubmitType::class, array('label' => 'Générer'))
             ->getForm();
 
-        if ($form->handleRequest($request)->isValid()) {
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
             $widgetQueryString = 'event_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&date_max=' . ($data['date_max'] ? $data['date_max'] : '') . '&limit=' . ($data['limit'] ? $data['limit'] : '') . '&title=' . ($data['title'] ? 1 : 0) . '&links=' . ($data['links'] ? 1 : 0);

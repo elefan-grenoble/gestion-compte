@@ -6,13 +6,12 @@ use App\Helloasso\HelloassoClient;
 use App\Helloasso\HelloassoPaymentHandler;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
+class UpdateHelloAssoPaymentsCommand extends Command
 {
     /** @var HelloassoClient */
     private $helloassoClient;
@@ -26,7 +25,6 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
     public function __construct(
         HelloassoClient $helloassoClient,
         HelloassoPaymentHandler $paymentHandler,
-        EventDispatcherInterface $eventDispatcher,
         LoggerInterface $logger
     ) {
         parent::__construct('app:member:update_payments');
@@ -42,7 +40,7 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
             ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')");
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $formSlug = $this->getContainer()->getParameter('helloasso_campaign_slug');
         $from = Carbon::now()->sub($input->getOption('delay'));
@@ -50,6 +48,8 @@ class UpdateHelloAssoPaymentsCommand extends ContainerAwareCommand
         $output->writeln('Searching from '.$from->format('Y-m-d'));
 
         $this->processPage($formSlug, $from, 1);
+
+        return 0;
     }
 
     private function processPage(string $formSlug, \DateTimeInterface $from, int $page)
