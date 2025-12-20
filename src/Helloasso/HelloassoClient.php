@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AppBundle\Helloasso;
+namespace App\Helloasso;
 
 use GuzzleHttp\Client;
 use League\OAuth2\Client\Provider\GenericProvider;
