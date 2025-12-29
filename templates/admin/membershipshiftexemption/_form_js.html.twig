@@ -12,7 +12,7 @@
                         - 3 + (week1.getDay() + 6) % 7) / 7);
     }
     $(document).ready(function() {
-        $('#appbundle_membershipshiftexemption_start').datepicker({
+        $('#app_membershipshiftexemption_start').datepicker({
             disableDayFn: function(date) {
                 if(date.getDay() == 1 && (date.getWeek() % 4) == 1)
                     return false;
@@ -22,7 +22,7 @@
             minDate: new Date(),
             format: 'yyyy-mm-dd'
         });
-        $('#appbundle_membershipshiftexemption_end').datepicker({
+        $('#app_membershipshiftexemption_end').datepicker({
             disableDayFn: function(date) {
                 if(date.getDay() == 0 && (date.getWeek() % 4) == 0)
                     return false;

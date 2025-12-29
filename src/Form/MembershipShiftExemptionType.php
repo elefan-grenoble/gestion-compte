@@ -73,6 +73,6 @@ class MembershipShiftExemptionType extends AbstractType
      */
     public function getBlockPrefix()
     {
-        return 'App_membershipshiftexemption';
+        return 'app_membershipshiftexemption';
     }
 }
