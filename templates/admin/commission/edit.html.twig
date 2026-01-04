@@ -183,7 +183,9 @@
             </script>
 
             {{ form_start(add_form) }}
-            {{ form_widget(add_form) }}
+            <div class="input-field">
+                {{ form_widget(add_form) }}
+            </div>
             <div>
                 <button type="submit" id="add_beneficiary" class="btn waves-effect waves-light blue"><i class="material-icons left">add</i>ajouter</button>
             </div>
