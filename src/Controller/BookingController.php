@@ -160,7 +160,21 @@ class BookingController extends AbstractController
                 'beneficiary_form' => $beneficiaryForm->createView(),
             ]);
         }
+    }
 
+    /**
+     * @Route("/bucket/{id}/show/for/{beneficiary}/cycle/{cycle}", name="bucket_show", methods={"GET"})
+     * @Security("is_granted('ROLE_USER')")
+     */
+    public function notAdminShowBucketAction(Shift $shift, Beneficiary $beneficiary, int $cycle, ShiftService $shift_service)
+    {
+        $bucket = $shift_service->getShiftBucketFromShift($shift);
+
+        return $this->render('booking/_partial/bucket.html.twig', [
+            'bucket' => $bucket,
+            'beneficiary' => $beneficiary,
+            'cycle' => $cycle,
+        ]);
     }
 
     /**
@@ -320,7 +334,7 @@ class BookingController extends AbstractController
     }
 
     /**
-     * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     * @Route("/admin/bucket/{id}/show", name="admin_bucket_show", methods={"GET"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function showBucketAction(Request $request, Shift $bucket)

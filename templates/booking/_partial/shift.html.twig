@@ -2,7 +2,6 @@
 {% set nbShifts = bucket.shifts | length %}
 {% set nbBookableShifts = shift_service.getBookableShiftsCount(bucket) %}
 {% set nbBookedShifts = nbShifts - nbBookableShifts %}
-{% set firstBookableShift = shift_service.firstBookable(bucket, beneficiary) %}
 
 <div class="shift-bucket"
      data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
@@ -14,13 +13,7 @@
             {% endfor %}
         {% endif %}
     </div>
-    <a
-        {% if firstBookableShift %}
-            href="#book{{ firstBookableShift.id }}"
-        {% else %}
-            href="#show{{ bucket.id }}"
-        {% endif %}
-       class="modal-trigger tooltipped" data-position="top" data-delay="100" data-tooltip="{{ bucket.sortedShifts.first.job.name }}">
+    <a href="#modal-bucket" data-source="{{ path('bucket_show', { 'id': bucket.id, 'beneficiary': beneficiary.id, cycle: cycle }) }}" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}">
         <div class="z-depth-1 {{ bucket.sortedShifts.first.job.color }} lighten-5 black-text" style="position: relative">
             <div class="shift-block">
                 <span class="small hide-on-med-and-up" style="font-size: 10px">
@@ -68,12 +61,3 @@
         </div>
     </a>
 </div>
-{% if firstBookableShift %}
-    {% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, cycle: cycle } %}
-{% else %}
-    <div id="show{{ bucket.id }}" class="modal">
-        <div class="modal-content">
-            {% include "booking/_partial/bucket_modal.html.twig" with { shifts: bucket.getSortedShifts() } %}
-        </div>
-    </div>
-{% endif %}

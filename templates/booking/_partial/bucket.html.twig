@@ -1,0 +1,8 @@
+{% set firstBookableShift = shift_service.firstBookable(bucket, beneficiary) %}
+
+{% if firstBookableShift %}
+    {% include "booking/_partial/modal.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, cycle: cycle } %}
+{% else %}
+    {% include "booking/_partial/bucket_modal.html.twig" with { shifts: bucket.getSortedShifts() } %}
+{% endif %}
+
