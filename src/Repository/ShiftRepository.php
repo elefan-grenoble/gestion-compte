@@ -9,6 +9,9 @@ use App\Entity\PeriodPosition;
 use App\Entity\Shift;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 use \Datetime;
 
 /**
@@ -19,6 +22,18 @@ use \Datetime;
  */
 class ShiftRepository extends \Doctrine\ORM\EntityRepository
 {
+    private static $functions_result_cache;
+
+    public static function functionsResultCache()
+    {
+        if (isset(self::$functions_result_cache))
+            return self::$functions_result_cache;
+
+        self::$functions_result_cache = new FilesystemAdapter();
+
+        return self::$functions_result_cache;
+    }
+
     public function findBucket($shift)
     {
         $qb = $this->createQueryBuilder('s');
@@ -330,42 +345,60 @@ class ShiftRepository extends \Doctrine\ORM\EntityRepository
      */
     public function findShiftsForBeneficiary(Beneficiary $beneficiary, $start_after, $end_before, $start_before = null, $end_after = null)
     {
-        return $this->findShiftsForBeneficiaries([$beneficiary], $start_after, $end_before, $start_before, $end_after);
+        return $this->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), $start_after, $end_before, $start_before, $end_after);
     }
 
-    public function findShiftsForBeneficiaries($beneficiaries, $start_after = null, $end_before = null, $start_before = null, $end_after = null)
+    public function findShiftsForBeneficiaries(Collection $beneficiaries, $start_after = null, $end_before = null, $start_before = null, $end_after = null)
     {
-        $qb = $this->createQueryBuilder('s')
-            ->where('s.shifter IN (:beneficiaries)')
-            ->setParameter('beneficiaries', $beneficiaries);
+        $key_bits = ["findShiftsForBeneficiaries-"];
+        array_push(
+            $key_bits,
+            $start_after ? $start_after->format('U') : null,
+            $end_before ? $end_before->format('U') : null,
+            $start_before ? $start_before->format('U') : null,
+            $end_after ? $end_after->format('U') : null,
+            ...$beneficiaries->map(function ($b) { return $b->getId(); } ),
+        );
 
-        if ($start_after != null) {
-            $qb->andwhere('s.start > :start_after')
-            ->setParameter('start_after', $start_after);
-        }
+        $cache_key = join(",", $key_bits);
 
-        if ($end_before != null) {
-            $qb->andwhere('s.end < :end_before')
-                ->setParameter('end_before', $end_before);
-        }
+        return self::functionsResultCache()->get($cache_key, function (ItemInterface $item) use ($beneficiaries, $start_after, $end_before, $start_before, $end_after)
+        {
+            // On met le résultat de la requête en cache, juste assez de temps pour le calcul d'une page
+            $item->expiresAfter(5);
 
-        if ($start_before != null) {
-            $qb->andwhere('s.start < :start_before')
-                ->setParameter('start_before', $start_before);
-        }
+            $qb = $this->createQueryBuilder('s')
+                ->where('s.shifter IN (:beneficiaries)')
+                ->setParameter('beneficiaries', $beneficiaries);
 
-        if ($end_after != null) {
-            $qb->andwhere('s.end > :end_after')
-                ->setParameter('end_after', $end_after);
-        }
+            if ($start_after != null) {
+                $qb->andwhere('s.start > :start_after')
+                    ->setParameter('start_after', $start_after);
+            }
 
-        $qb->orderBy("s.start", "ASC");
+            if ($end_before != null) {
+                $qb->andwhere('s.end < :end_before')
+                    ->setParameter('end_before', $end_before);
+            }
 
-        $result = $qb
-            ->getQuery()
-            ->getResult();
+            if ($start_before != null) {
+                $qb->andwhere('s.start < :start_before')
+                    ->setParameter('start_before', $start_before);
+            }
 
-        return new ArrayCollection($result);
+            if ($end_after != null) {
+                $qb->andwhere('s.end > :end_after')
+                    ->setParameter('end_after', $end_after);
+            }
+
+            $qb->orderBy("s.start", "ASC");
+
+            $result = $qb
+                ->getQuery()
+                ->getResult();
+
+            return new ArrayCollection($result);
+        });
     }
 
     /**
