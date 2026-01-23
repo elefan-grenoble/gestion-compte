@@ -13,7 +13,13 @@
             {% endfor %}
         {% endif %}
     </div>
-    <a href="#modal-bucket" data-source="{{ path('bucket_show', { 'id': bucket.id, 'beneficiary': beneficiary.id, cycle: cycle }) }}" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}">
+    <a href="#modal-bucket" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}"
+        {% if beneficiary %}
+            data-source="{{ path('bucket_show_for_beneficiary', { 'id': bucket.id, 'beneficiary': beneficiary.id, cycle: cycle }) }}"
+        {% else %}
+            data-source="{{ path('bucket_show', { 'id': bucket.id }) }}"
+        {% endif %}
+        >
         <div class="z-depth-1 {{ bucket.sortedShifts.first.job.color }} lighten-5 black-text" style="position: relative">
             <div class="shift-block">
                 <span class="small hide-on-med-and-up" style="font-size: 10px">
