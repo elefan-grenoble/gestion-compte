@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.47.2](https://github.com/elefan-grenoble/gestion-compte/compare/v1.47.1...v1.47.2) (2026-01-24)
+
+
+### Corrections (bugs, typos...)
+
+* erreur 500 sur le planning, form inexistant ([#1157](https://github.com/elefan-grenoble/gestion-compte/issues/1157)) ([4cf0bac](https://github.com/elefan-grenoble/gestion-compte/commit/4cf0bac7b82cf9fa79a804df3dd0a8ed6dbbbcfd))
+
+
+### Technique
+
+* ajout d'une Github Action pour assign automatiquement l'auteur ([#1115](https://github.com/elefan-grenoble/gestion-compte/issues/1115)) ([2f64030](https://github.com/elefan-grenoble/gestion-compte/commit/2f64030f5d2a6c1da53aa48a4d0fec52c561a26b))
+* **master:** release 1.47.1 ([#1163](https://github.com/elefan-grenoble/gestion-compte/issues/1163)) ([39c7d3f](https://github.com/elefan-grenoble/gestion-compte/commit/39c7d3fde3d5df039a4bfb9a6742db4d2d5b041f))
+* release 1.47.2 ([43edf01](https://github.com/elefan-grenoble/gestion-compte/commit/43edf0150616dc24418986eef12a780adbbf44f5))
+* **release-please:** ajout d'une Github Action pour vérifier le nom des PR (conventional commits) ([#1162](https://github.com/elefan-grenoble/gestion-compte/issues/1162)) ([1ce5cf8](https://github.com/elefan-grenoble/gestion-compte/commit/1ce5cf820efe2b76144e4e0635a9faa37c7d508c))
+* **release-please:** il manquait le fichier release-please-manifest.json. suite à [#1049](https://github.com/elefan-grenoble/gestion-compte/issues/1049) & [#1155](https://github.com/elefan-grenoble/gestion-compte/issues/1155) ([bca65ed](https://github.com/elefan-grenoble/gestion-compte/commit/bca65edabacaaa3574c48af33d63d14f28aa99d8))
+* **release-please:** maj de la config à la v4 (depuis la v3) ([#1155](https://github.com/elefan-grenoble/gestion-compte/issues/1155)) ([beff8ca](https://github.com/elefan-grenoble/gestion-compte/commit/beff8caf376f8aa7146885cf7181f23a8dedb760))
+* **stale:** maj à la v10. ajout de commentaires dans la config ([#1158](https://github.com/elefan-grenoble/gestion-compte/issues/1158)) ([4eaba83](https://github.com/elefan-grenoble/gestion-compte/commit/4eaba836692a845c05c13854712b03bfe5a4fe57))
+
 ## [1.47.1](https://github.com/elefan-grenoble/gestion-compte/compare/v1.47.0...v1.47.1) (2025-12-10)
 
 
