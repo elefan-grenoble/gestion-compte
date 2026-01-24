@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.47.1](https://github.com/elefan-grenoble/gestion-compte/compare/v1.47.0...v1.47.1) (2025-12-10)
+
+
+### Corrections (bugs, typos...)
+
+* erreur 500 sur le planning, form inexistant ([#1157](https://github.com/elefan-grenoble/gestion-compte/issues/1157)) ([4cf0bac](https://github.com/elefan-grenoble/gestion-compte/commit/4cf0bac7b82cf9fa79a804df3dd0a8ed6dbbbcfd))
+* Les noms des adhérents ne sont plus visible dans la gestion des créneaux ([#1154](https://github.com/elefan-grenoble/gestion-compte/issues/1154)) ([689492c](https://github.com/elefan-grenoble/gestion-compte/commit/689492c899ca003e465192b23940046ecfd3d206)), closes [#1153](https://github.com/elefan-grenoble/gestion-compte/issues/1153)
+
+
+### Technique
+
+* ajout d'une Github Action pour assign automatiquement l'auteur ([#1115](https://github.com/elefan-grenoble/gestion-compte/issues/1115)) ([2f64030](https://github.com/elefan-grenoble/gestion-compte/commit/2f64030f5d2a6c1da53aa48a4d0fec52c561a26b))
+* **release-please:** ajout d'une Github Action pour vérifier le nom des PR (conventional commits) ([#1162](https://github.com/elefan-grenoble/gestion-compte/issues/1162)) ([1ce5cf8](https://github.com/elefan-grenoble/gestion-compte/commit/1ce5cf820efe2b76144e4e0635a9faa37c7d508c))
+* **release-please:** il manquait le fichier release-please-manifest.json. suite à [#1049](https://github.com/elefan-grenoble/gestion-compte/issues/1049) & [#1155](https://github.com/elefan-grenoble/gestion-compte/issues/1155) ([bca65ed](https://github.com/elefan-grenoble/gestion-compte/commit/bca65edabacaaa3574c48af33d63d14f28aa99d8))
+* **release-please:** maj de la config à la v4 (depuis la v3) ([#1155](https://github.com/elefan-grenoble/gestion-compte/issues/1155)) ([beff8ca](https://github.com/elefan-grenoble/gestion-compte/commit/beff8caf376f8aa7146885cf7181f23a8dedb760))
+* **stale:** maj à la v10. ajout de commentaires dans la config ([#1158](https://github.com/elefan-grenoble/gestion-compte/issues/1158)) ([4eaba83](https://github.com/elefan-grenoble/gestion-compte/commit/4eaba836692a845c05c13854712b03bfe5a4fe57))
+
 ## [v1.45.7](https://github.com/elefan-grenoble/gestion-compte/compare/v1.45.6...v1.45.7) (2023-11-17)
 
 * Créneaux : Alertes : refactoring de l'envoi via l'EmailingEventListener & MattermostEventListener by @raphodn in https://github.com/elefan-grenoble/gestion-compte/pull/1057
