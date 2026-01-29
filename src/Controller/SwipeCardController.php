@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Entity\SwipeCard;
+use App\Helper\SwipeCard;
+use App\Entity\SwipeCard as SwipeCardEntity;
 use App\Security\SwipeCardVoter;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\ErrorCorrectionLevel;
@@ -31,10 +32,12 @@ class SwipeCardController extends AbstractController
 
 
     private $logger;
+    private SwipeCard $swipeCardHelper;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, SwipeCard $swipeCardHelper)
     {
         $this->logger = $logger;
+        $this->swipeCardHelper = $swipeCardHelper;
     }
 
     /**
@@ -51,7 +54,7 @@ class SwipeCardController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
         $card = $em->getRepository('App:SwipeCard')->findLastEnable($code);
 
         if (!$card) {
@@ -155,7 +158,7 @@ class SwipeCardController extends AbstractController
 
         $referer = $request->headers->get('referer');
         $code = $request->get("code");
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
         $beneficiaryId = $request->get("beneficiary");
 
         // get beneficiary
@@ -204,7 +207,7 @@ class SwipeCardController extends AbstractController
 
         $referer = $request->headers->get('referer');
         $code = $request->get("code");
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
         $beneficiaryId = $request->get("beneficiary");
 
         // get beneficiary
@@ -244,7 +247,7 @@ class SwipeCardController extends AbstractController
 
         $referer = $request->headers->get('referer');
         $code = $request->get("code");
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
 
         $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
 
@@ -300,14 +303,14 @@ class SwipeCardController extends AbstractController
      */
     public function qrAction(Request $request, $code){
         $code = urldecode($code);
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();
         }
 
-        $url = $this->generateUrl('swipe_in',array('code'=>$this->get('App\Helper\SwipeCard')->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
+        $url = $this->generateUrl('swipe_in',array('code'=>$this->swipeCardHelper->vigenereEncode($card->getCode())),UrlGeneratorInterface::ABSOLUTE_URL);
         $content = base64_decode($this->_getQr($url));
         $response = new Response();
         $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'qr.png');
@@ -328,10 +331,10 @@ class SwipeCardController extends AbstractController
      */
     public function brAction(Request $request, $code){
         $code = urldecode($code);
-        $code = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $code = $this->swipeCardHelper->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
         $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
-        if (!$card){
+        if (!$card instanceof SwipeCardEntity){
             throw $this->createAccessDeniedException();
         }
         $content = base64_decode($card->getBarcode());

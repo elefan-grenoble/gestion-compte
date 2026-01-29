@@ -140,6 +140,7 @@ parameters:
   site_name: '%env(SITE_NAME)%'
   super_admin.initial_password: '%env(SUPER_ADMIN_INITIAL_PASSWORD)%'
   super_admin.username: '%env(SUPER_ADMIN_USERNAME)%'
+  swipe_card_secret: '%env(SWIPE_CARD_SECRET)%'
   swipe_card_logging: '%env(bool:SWIPE_CARD_LOGGING)%'
   swipe_card_logging_anonymous: '%env(bool:SWIPE_CARD_LOGGING_ANONYMOUS)%'
   time_after_which_members_are_late_with_shifts: '%env(TIME_AFTER_WHICH_MEMBERS_ARE_LATE_WITH_SHIFTS)%'
@@ -193,6 +194,7 @@ services:
       $useFlyAndFixed: '%use_fly_and_fixed%'
       $allowExtraShifts: '%allow_extra_shifts%'
       $maxTimeInAdvanceToBookExtraShifts: '%max_time_in_advance_to_book_extra_shifts%'
+      $swipeCardSecret: '%swipe_card_secret%'
       $swipeCardLogging: '%swipe_card_logging%'
       $entity_manager: "@doctrine.orm.entity_manager"
       $router: "@router"
@@ -274,6 +276,9 @@ services:
   #        arguments: ['@service_container']
   #        tags:
   #            - { name: twig.extension }
+  App\Helper\SwipeCard:
+    autowire: true
+    autoconfigure: true
   app.form.registration:
     class: App\Form\RegistrationType
     tags:

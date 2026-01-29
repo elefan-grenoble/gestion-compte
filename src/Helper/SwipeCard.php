@@ -2,20 +2,18 @@
 
 namespace App\Helper;
 
-use Symfony\Component\DependencyInjection\ContainerInterface as Container;
-
 class SwipeCard {
 
     const PADLENGTH = 8;
 
-    private $container;
+    private string $swipeCardSecret;
 
-    public function __construct(Container $container) {
-        $this->container = $container;
+    public function __construct(string $swipeCardSecret) {
+        $this->swipeCardSecret = $swipeCardSecret;
     }
 
     private function getKey($length){
-        $key = $this->container->getParameter('secret');
+        $key = $this->swipeCardSecret;
         if (strlen($key) >= $length){
             return substr($key,0,$length);
         }else{
