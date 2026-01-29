@@ -1,5 +1,9 @@
 FROM php:7.4
 
+COPY --link \
+    --from=ghcr.io/symfony-cli/symfony-cli:latest \
+    /usr/local/bin/symfony /usr/local/bin/symfony
+
 # Paramétrage de l'heure du conteneur
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
