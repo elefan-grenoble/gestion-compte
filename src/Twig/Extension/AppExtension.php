@@ -248,7 +248,7 @@ class AppExtension extends AbstractExtension
                 $name = '€ en CARTE CREDIT';
                 break;
             case Registration::TYPE_LOCAL :
-                $name = $this->container->getParameter('local_currency_name');
+                $name = $this->localCurrencyName;
                 break;
             case Registration::TYPE_CASH :
                 $name = '€ en ESPECE';
@@ -271,7 +271,7 @@ class AppExtension extends AbstractExtension
                 $name .= 'carte';
                 break;
             case Registration::TYPE_LOCAL :
-                $name = $this->container->getParameter('local_currency_name');
+                $name = $this->localCurrencyName;
                 break;
             case Registration::TYPE_CASH :
                 $name .= 'espèce';
