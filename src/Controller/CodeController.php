@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Code;
 use App\Event\CodeNewEvent;
 use App\Security\CodeVoter;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
@@ -26,6 +27,13 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class CodeController extends AbstractController
 {
+    private LoggerInterface $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     public function homepageDashboardAction()
     {
         $em = $this->getDoctrine()->getManager();
@@ -49,8 +57,7 @@ class CodeController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $logger = $this->get('logger');
-        $logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
+        $this->logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
 
         if ($this->getUser()->hasRole('ROLE_ADMIN')){
             $codes = $em->getRepository('App:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
@@ -150,10 +157,8 @@ class CodeController extends AbstractController
             throw $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
         }
 
-        $logger = $this->get('logger');
-
         if (count($my_open_codes)){
-            $logger->info('CODE : code_new make change screen',array('username'=>$current_app_user->getUsername()));
+            $this->logger->info('CODE : code_new make change screen',array('username'=>$current_app_user->getUsername()));
             if (count($old_codes) > 1){
                 return $this->render('default/code/generate.html.twig', array(
                     'display' =>  true,
@@ -172,7 +177,7 @@ class CodeController extends AbstractController
         // no code open for this user
 
         if ($request->get('generate') === null){ // first visit
-            $logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
+            $this->logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
             return $this->render('default/code/generate.html.twig');
         }
 
@@ -185,7 +190,7 @@ class CodeController extends AbstractController
         $em->persist($code);
         $em->flush();
 
-        $logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
+        $this->logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
 
         $event_dispatcher->dispatch(new CodeNewEvent($code, $old_codes), CodeNewEvent::NAME);
 
@@ -238,11 +243,9 @@ class CodeController extends AbstractController
         $logged_out = false;
         $previousToken = null;
 
-        $logger = $this->get('logger');
-
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            $logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
+            $this->logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
         }else{
             $token = $request->get('token');
             $username = explode(',',$this->get('App\Helper\SwipeCard')->vigenereDecode($token))[0];
@@ -252,7 +255,7 @@ class CodeController extends AbstractController
                 $logged_out = true;
                 $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
                 $this->get("security.token_storage")->setToken($token);
-                $logger->info('CODE : confirm code change (logged out)',array('username'=>$current_app_user->getUsername()));
+                $this->logger->info('CODE : confirm code change (logged out)',array('username'=>$current_app_user->getUsername()));
             }else{
                 //mute
                 return $this->redirectToRoute('homepage');
