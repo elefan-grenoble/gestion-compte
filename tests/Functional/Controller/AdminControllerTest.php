@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Tests\Functionnal\Controller;
+namespace App\Tests\Functional\Controller;
 
-use App\Tests\Functionnal\DatabasePrimer;
+use App\Tests\Functional\DatabasePrimer;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Functionnal;
+namespace App\Tests\Functional;
 
 use App\DataFixtures\Purger\CustomPurger;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
