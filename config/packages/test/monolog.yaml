@@ -15,6 +15,10 @@ monolog:
 #            use_short_attachment: true
 #            include_extra: true
 #            level: '%logging.mattermost.level%'
+        stdout:
+            type: stream
+            path: "php://stdout"
+            level: error
         console:
             type: console
             process_psr_3_messages: false
