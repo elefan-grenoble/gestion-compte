@@ -13,23 +13,29 @@ use Symfony\Component\Console\Output\BufferedOutput;
 
 class AdminControllerTest extends DatabasePrimer
 {
+    public function csvDelimiterProvider(): array
+    {
+        return [
+            'comma-separated' => [__DIR__ . '/../Mocks/mocked_users.csv', ','],
+            'semicolon-separated' => [__DIR__ . '/../Mocks/mocked_users_semicolon.csv', ';'],
+        ];
+    }
 
     /**
+     * @dataProvider csvDelimiterProvider
+     *
      * @throws Exception
      */
-    public function testCsvImportForEmptyBaseWithCommas()
+    public function testCsvImportForEmptyBase(string $csvPath, string $delimiter)
     {
         $client = static::createClient();
-
-        // Path to the mock CSV file
-        $csvPath = __DIR__ . '/../Mocks/mocked_users.csv';
 
         $application = new Application($client->getKernel());
         $application->setAutoExit(false);
 
         $input = new ArrayInput([
             'command' => 'app:import:users',
-            '--delimiter' => ',',
+            '--delimiter' => $delimiter,
             'file' => $csvPath,
             '--default_mapping' => true
         ]);
@@ -40,94 +46,38 @@ class AdminControllerTest extends DatabasePrimer
         $content = $output->fetch();
 
         // Check if the response is successful
-        $this->assertTrue(strpos($content, 'Dealing with 50 lines') !== false);
+        $this->assertStringContainsString('Dealing with 50 lines', $content);
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository(User::class)->findAll();
 
-        // Assert that the number of users in the database matches the number in the CSV
+        $users = $em->getRepository(User::class)->findAll();
         $this->assertCount(50, $users);
 
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
-
-        // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);
 
         $memberships = $em->getRepository(Membership::class)->findAll();
-
-        // Assert that the number of memberships in the database matches the number in the CSV
         $this->assertCount(50, $memberships);
-
     }
 
-
     /**
+     * @dataProvider csvDelimiterProvider
+     *
      * @throws Exception
      */
-    public function testCsvImportForEmptyBaseWithSemiColons()
-    {
-        $client = static::createClient();
-
-        // Path to the mock CSV file
-        $csvPath = __DIR__ . '/../Mocks/mocked_users_semicolon.csv';
-
-        $application = new Application($client->getKernel());
-        $application->setAutoExit(false);
-
-        $input = new ArrayInput([
-            'command' => 'app:import:users',
-            '--delimiter' => ';',
-            'file' => $csvPath,
-            '--default_mapping' => true
-        ]);
-
-        $output = new BufferedOutput();
-        $application->run($input, $output);
-
-        $content = $output->fetch();
-
-        // Check if the response is successful
-        $this->assertTrue(strpos($content, 'Dealing with 50 lines') !== false);
-
-        // Fetch data from the test database and assert
-        $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository(User::class)->findAll();
-
-        // Assert that the number of users in the database matches the number in the CSV
-        $this->assertCount(50, $users);
-
-        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
-
-        // Assert that the number of beneficiaries in the database matches the number in the CSV
-        $this->assertCount(50, $beneficiaries);
-
-        $memberships = $em->getRepository(Membership::class)->findAll();
-
-        // Assert that the number of memberships in the database matches the number in the CSV
-        $this->assertCount(50, $memberships);
-
-    }
-
-
-    /**
-     * @throws Exception
-     */
-    public function testCsvImportForCommissionFiledBaseWithCommas()
+    public function testCsvImportForCommissionFilledBase(string $csvPath, string $delimiter)
     {
         $this->loadFixturesWithGroups(['commission']);
 
         $client = static::createClient();
 
-        // Path to the mock CSV file
-        $csvPath = __DIR__ . '/../Mocks/mocked_users.csv';
-
         $application = new Application($client->getKernel());
         $application->setAutoExit(false);
 
         $input = new ArrayInput([
             'command' => 'app:import:users',
-            '--delimiter' => ';',
+            '--delimiter' => $delimiter,
             'file' => $csvPath,
             '--default_mapping' => true
         ]);
@@ -137,64 +87,14 @@ class AdminControllerTest extends DatabasePrimer
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
         $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
-
-        // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);
 
-        // count the number of links between beneficiaries and commissions
+        // Count the number of links between beneficiaries and commissions
         $count = 0;
         foreach ($beneficiaries as $beneficiary) {
-            if ($beneficiary->getCommissions()->count() > 0) {
-                $count+= $beneficiary->getCommissions()->count();
-            }
+            $count += $beneficiary->getCommissions()->count();
         }
 
-        // Assert that the number of links between beneficiaries and commissions in the database matches the number in the CSV
         $this->assertEquals(67, $count);
-
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function testCsvImportForCommissionFiledBaseWithSemicolons()
-    {
-        $this->loadFixturesWithGroups(['commission']);
-
-        $client = static::createClient();
-
-        // Path to the mock CSV file
-        $csvPath = __DIR__ . '/../Mocks/mocked_users_semicolon.csv';
-
-        $application = new Application($client->getKernel());
-        $application->setAutoExit(false);
-
-        $input = new ArrayInput([
-            'command' => 'app:import:users',
-            '--delimiter' => ';',
-            'file' => $csvPath,
-            '--default_mapping' => true
-        ]);
-
-        $application->run($input);
-
-        // Fetch data from the test database and assert
-        $em = $client->getContainer()->get('doctrine')->getManager();
-        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
-
-        // Assert that the number of beneficiaries in the database matches the number in the CSV
-        $this->assertCount(50, $beneficiaries);
-
-        // count the number of links between beneficiaries and commissions
-        $count = 0;
-        foreach ($beneficiaries as $beneficiary) {
-            if ($beneficiary->getCommissions()->count() > 0) {
-                $count+= $beneficiary->getCommissions()->count();
-            }
-        }
-
-        // Assert that the number of links between beneficiaries and commissions in the database matches the number in the CSV
-        $this->assertEquals(67, $count);
-
     }
 }
