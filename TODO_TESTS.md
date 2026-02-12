@@ -40,36 +40,31 @@
 
 ---
 
-## Étape 1 — Nettoyage et correction des tests existants
+## Étape 1 — Nettoyage et correction des tests existants ✅ DONE
 
 ### Commit 1.1 : `fix(tests): rename Functionnal → Functional (typo)`
-- [ ] Renommer le dossier `tests/Functionnal/` en `tests/Functional/`
-- [ ] Mettre à jour le namespace dans `DatabasePrimer.php` : `App\Tests\Functional`
-- [ ] Mettre à jour le namespace dans `AdminControllerTest.php` : `App\Tests\Functional\Controller`
-- [ ] Mettre à jour le `use` dans `AdminControllerTest.php`
+- [x] Renommer le dossier `tests/Functionnal/` en `tests/Functional/`
+- [x] Mettre à jour le namespace dans `DatabasePrimer.php` : `App\Tests\Functional`
+- [x] Mettre à jour le namespace dans `AdminControllerTest.php` : `App\Tests\Functional\Controller`
+- [x] Mettre à jour le `use` dans `AdminControllerTest.php`
 
-### Commit 1.2 : `refactor(tests): remove debug echo statements from AdminControllerTest`
-- [ ] Supprimer les 4 lignes `echo "\n\033[32m ... \033[0m\n";` dans `AdminControllerTest.php`
-  (PHPUnit affiche déjà les noms des tests)
+### Commit 1.2+1.3+1.6 : `refactor(tests): clean up AdminControllerTest`
+- [x] Supprimer les 4 lignes `echo "\n\033[32m ... \033[0m\n";` dans `AdminControllerTest.php`
+- [x] Renommer la variable `$Beneficiaries` en `$beneficiaries` (2 occurrences)
+- [x] Remplacer `'App:User'` par `User::class`, `'App:Beneficiary'` par `Beneficiary::class`, `'App:Membership'` par `Membership::class`
+- [x] Ajouter les `use` correspondants
 
-### Commit 1.3 : `refactor(tests): fix PSR naming convention in AdminControllerTest`
-- [ ] Renommer la variable `$Beneficiaries` en `$beneficiaries` (2 occurrences)
+### Commit 1.4 : `refactor(tests): replace deprecated PHPUnit mock methods in ShiftServiceTest`
+- [x] Remplacer `setMethods([...])` par `onlyMethods([...])` (3 occurrences)
+- [x] Remplacer `setMethodsExcept([...])` par `onlyMethods([])` (compatible PHPUnit 9+)
+- [x] Utiliser `addMethods()` pour les méthodes custom du repository (`findShiftsForBeneficiary`)
+- [x] Note : `'App:Shift'` conservé dans le mock car le code source (`ShiftService`, `BeneficiaryService`) l'utilise encore
 
-### Commit 1.4 : `refactor(tests): replace deprecated setMethods() with onlyMethods() in ShiftServiceTest`
-- [ ] Remplacer `setMethods([...])` par `onlyMethods([...])` (3 occurrences)
-- [ ] Remplacer `setMethodsExcept([...])` par l'alternative compatible PHPUnit 9+
-
-### Commit 1.5 : `refactor(tests): use data providers to reduce duplication in AdminControllerTest`
-- [ ] Créer un `@dataProvider csvImportProvider` pour factoriser les 2 tests d'import CSV sur base vide
-- [ ] Créer un `@dataProvider csvImportWithCommissionsProvider` pour factoriser les 2 tests avec commissions
-- [ ] Résultat attendu : passer de 4 méthodes quasi identiques à 2 méthodes paramétrées
-
-### Commit 1.6 : `fix(tests): replace deprecated App:Entity syntax with Entity::class in tests`
-- [ ] Remplacer `'App:User'` par `User::class` dans `AdminControllerTest.php`
-- [ ] Remplacer `'App:Beneficiary'` par `Beneficiary::class`
-- [ ] Remplacer `'App:Membership'` par `Membership::class`
-- [ ] Remplacer `'App:Shift'` par `Shift::class` dans `ShiftServiceTest.php`
-- [ ] Ajouter les `use` correspondants
+### Commit 1.5 : `refactor(tests): use data providers in AdminControllerTest`
+- [x] Créer un `@dataProvider csvDelimiterProvider` unique pour les 2 variantes (comma/semicolon)
+- [x] Factoriser 4 méthodes quasi identiques en 2 méthodes paramétrées
+- [x] Remplacer `strpos()` + `assertTrue()` par `assertStringContainsString()`
+- [x] Correction du typo : `CommissionFiled` → `CommissionFilled`
 
 ---
 
