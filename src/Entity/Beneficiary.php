@@ -82,14 +82,14 @@ class Beneficiary
     private $membership;
 
     /**
-     * @ORM\Column(name="openid", type="string", length=255)
-     * @var string $openid
+     * @ORM\Column(name="openid", type="string", length=255, nullable=true)
+     * @var string|null $openid
      */
     protected $openid;
 
     /**
-     * @ORM\Column(name="openid_member_number", type="string", length=255)
-     * @var string $openid_member_number
+     * @ORM\Column(name="openid_member_number", type="string", length=255, nullable=true)
+     * @var string|null $openid_member_number
      */
     protected $openid_member_number;
 
@@ -306,17 +306,17 @@ class Beneficiary
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getOpenId() {
+    public function getOpenId(): ?string {
         return $this->openid;
     }
 
     /**
-     * @param string $id
+     * @param string|null $id
      * @return $this
      */
-    public function setOpenId(string $id) : Beneficiary
+    public function setOpenId(?string $id) : Beneficiary
     {
         $this->openid = $id;
         return $this;
@@ -330,10 +330,10 @@ class Beneficiary
     }
 
     /**
-     * @param string $number
+     * @param string|null $number
      * @return $this
      */
-    public function setOpenIdMemberNumber(string $number) : Beneficiary
+    public function setOpenIdMemberNumber(?string $number) : Beneficiary
     {
         $this->openid_member_number = $number;
         return $this;
