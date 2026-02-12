@@ -179,19 +179,19 @@
 - [ ] Créer `tests/Unit/UnitTestCase.php` : base pour les tests unitaires avec helpers de mocking partagés (container mock, em mock)
 - [ ] Créer `tests/Functional/FunctionalTestCase.php` : renommer/étendre `DatabasePrimer` en ajoutant un helper `loginAs($username)`
 
-### Commit 5.2 : `test(infra): add phpunit test suites separation`
-- [ ] Modifier `phpunit.xml.dist` pour séparer les suites de tests :
-  - `unit` → `tests/Unit`
-  - `integration` → `tests/Integration`
-  - `functional` → `tests/Functional`
-- [ ] Permettre de lancer `./vendor/bin/phpunit --testsuite=unit` (rapide, sans BDD)
+### Commit 5.2 — DONE (étape 0.2) : séparation des test suites PHPUnit
 
-### Commit 5.3 : `ci: add GitHub Actions workflow for running tests`
-- [ ] Créer `.github/workflows/tests.yml`
-- [ ] Configurer PHP + extensions nécessaires
-- [ ] Lancer `composer install`
-- [ ] Lancer `./vendor/bin/phpunit --testsuite=unit` (sans BDD, toujours exécutable)
-- [ ] Optionnel : lancer aussi les tests d'intégration avec une base SQLite
+### Commit 5.3 : `ci: improve GitHub Actions workflow`
+Améliorations du fichier `.github/workflows/ci.yaml` existant :
+- [x] Ajouter `push:` au trigger pour exécuter la CI à chaque push, quelle que soit la branche
+- [ ] Fixer `${{ matrix.php-versions }}` dans les jobs `phpStan`, `symfony-tests`, `cypress-tests`
+  (la variable est vide car la matrice n'est déclarée que dans le job `setup` ; hardcoder `'7.4'`)
+- [ ] Ajouter un job `fast-tests` sans BDD pour les suites `unit` + `integration`
+  (rapide, pas besoin de MariaDB ni d'attente de connexion)
+- [ ] Uploader les screenshots/vidéos Cypress en cas d'échec
+  (`actions/upload-artifact` sur `cypress/screenshots/` et `cypress/videos/`)
+- [ ] Cacher `node_modules` / le binaire Cypress pour accélérer le job `cypress-tests`
+- [ ] Renommer le step "Run unit and functional tests" pour refléter les suites réelles
 
 ### Commit 5.4 : `test(infra): add code coverage configuration`
 - [ ] Vérifier que la section `<coverage>` dans `phpunit.xml.dist` est correctement configurée
