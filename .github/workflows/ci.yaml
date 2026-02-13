@@ -77,6 +77,23 @@ jobs:
   phpStan:
       needs: setup
       runs-on: ubuntu-22.04
+
+      services:
+        mariadb:
+          image: mariadb:10.4
+          env:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: symfony
+            MYSQL_USER: user
+            MYSQL_PASSWORD: password
+          ports:
+            - 3306:3306
+          options: >-
+            --health-cmd="mysqladmin ping -psecret"
+            --health-interval=10s
+            --health-timeout=5s
+            --health-retries=5
+
       steps:
         - uses: actions/checkout@v4
 
@@ -94,6 +111,14 @@ jobs:
             php-version: '7.4'
             tools: composer:2.2
             extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+
+#         SET ENVIRONMENT VARIABLES ----------------
+        - name: Set up environment variables
+          run: cp .env.test .env
+
+#         WARM UP CACHE (generates container XML needed by phpstan-symfony) ----
+        - name: Warm up Symfony cache
+          run: php bin/console cache:warmup --env=dev
 
         - name: Set executable permissions for PHPStan
           run: chmod +x ./vendor/bin/phpstan
@@ -210,9 +235,6 @@ jobs:
       - name: Set up test environment variables
         run: cp .env.test .env
 
-      - name: Start Symfony server
-        run: symfony server:start --no-tls -d --port=8000
-
 #       RUN MIGRATIONS ----------------
       - name: Run migrations
         run: php bin/console doctrine:migrations:migrate --no-interaction
@@ -230,6 +252,10 @@ jobs:
 
       - name: Build front-end assets
         run: ./node_modules/.bin/encore production --progress
+
+#       START SYMFONY SERVER ----------------
+      - name: Start Symfony server
+        run: symfony server:start --no-tls -d --port=8000
 
 #       RUN CYPRESS TESTS ----------------
       - name: Run Cypress tests
