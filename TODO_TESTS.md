@@ -1,6 +1,6 @@
 # TODO — Amélioration des tests
 
-> **Branche** : `improve-tests`  
+> **Branche** : `chriskaya/improve-tests-sf4`  
 > **Règle** : aucune modification du code fonctionnel (`src/`, `templates/`, etc.)  
 > **Principe** : chaque étape = un commit atomique, clair et compréhensible.
 

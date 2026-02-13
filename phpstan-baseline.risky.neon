@@ -1327,12 +1327,6 @@ parameters:
 			path: src/Validator/Constraints/UniqueEmailValidator.php
 
 		-
-			message: '#^Call to method getCommissions\(\) on an unknown class App\:Beneficiary\.$#'
-			identifier: class.notFound
-			count: 4
-			path: tests/Functionnal/Controller/AdminControllerTest.php
-
-		-
 			message: '#^Call to an undefined method PHPUnit\\Framework\\MockObject\\MockObject\:\:hasPreviousValidShifts\(\)\.$#'
 			identifier: method.notFound
 			count: 1

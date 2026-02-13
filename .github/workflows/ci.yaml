@@ -91,7 +91,7 @@ jobs:
         - name: Setup PHP, extensions and composer with shivammathur/setup-php
           uses: shivammathur/setup-php@verbose
           with:
-            php-version: ${{ matrix.php-versions }}
+            php-version: '7.4'
             tools: composer:2.2
             extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
@@ -106,6 +106,23 @@ jobs:
   symfony-tests:
     needs: setup
     runs-on: ubuntu-22.04
+
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: symfony
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -117,40 +134,16 @@ jobs:
           path: vendor/
 
 #      INSTALL DEPENDENCIES ----------------
-      - name: Install MySQL Client
-        run: sudo apt-get update && sudo apt-get install -y mysql-client
-
       - name: Setup PHP, extensions and composer with shivammathur/setup-php
         uses: shivammathur/setup-php@verbose
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: '7.4'
           tools: composer:2.2
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
 #       SET ENVIRONMENT VARIABLES ----------------
       - name: Set up test environment variables
         run: cp .env.test .env
-
-#       START SERVICES ----------------
-      - name: Set up MySQL
-        uses: getong/mariadb-action@v1.1
-        with:
-          host port: 3306 # Optional, default value is 3306. The port of host
-          container port: 3306 # Optional, default value is 3306. The port of container
-          character set server: 'utf8mb4' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
-          collation server: 'utf8mb4_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
-          mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MySQL
-          mysql database: 'symfony' # Optional, default value is "test". The specified database which will be created
-          mysql root password: 'secret' # Required if "mysql user" is empty, default is empty. The root superuser password
-          mysql user: 'user' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
-          mysql password: 'password' # Required if "mysql user" exists. The password for the "mysql user"
-
-      - name: Wait for MySQL to become available
-        run: |
-          until mysql -h 127.0.0.1 -u root -psecret -e "SELECT 1"; do
-            echo 'Waiting for MySQL...'
-            sleep 1
-          done
 
 #       RUN MIGRATIONS ----------------
       - name: Run migrations
@@ -165,6 +158,23 @@ jobs:
   cypress-tests:
     needs: setup
     runs-on: ubuntu-22.04
+
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: symfony
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -176,16 +186,13 @@ jobs:
           path: vendor/
 
 #       INSTALL DEPENDENCIES ----------------
-      - name: Install MySQL Client
-        run: sudo apt-get update && sudo apt-get install -y mysql-client
-
       - name: Install Cypress dependencies
-        run: sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth
 
       - name: Setup PHP, extensions and composer with shivammathur/setup-php
         uses: shivammathur/setup-php@verbose
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: '7.4'
           tools: composer:2.2
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
@@ -202,27 +209,6 @@ jobs:
 #       SET ENVIRONMENT VARIABLES ----------------
       - name: Set up test environment variables
         run: cp .env.test .env
-
-#       START SERVICES ----------------
-      - name: Set up MySQL
-        uses: getong/mariadb-action@v1.1
-        with:
-          host port: 3306 # Optional, default value is 3306. The port of host
-          container port: 3306 # Optional, default value is 3306. The port of container
-          character set server: 'utf8mb4' # Optional, default value is 'utf8mb4'. The '--character-set-server' option for mysqld
-          collation server: 'utf8mb4_general_ci' # Optional, default value is 'utf8mb4_general_ci'. The '--collation-server' option for mysqld
-          mariadb version: '10.4.10' # Optional, default value is "latest". The version of the MySQL
-          mysql database: 'symfony' # Optional, default value is "test". The specified database which will be created
-          mysql root password: 'secret' # Required if "mysql user" is empty, default is empty. The root superuser password
-          mysql user: 'user' # Required if "mysql root password" is empty, default is empty. The superuser for the specified database. Can use secrets, too
-          mysql password: 'password' # Required if "mysql user" exists. The password for the "mysql user"
-
-      - name: Wait for MySQL to become available
-        run: |
-          until mysql -h 127.0.0.1 -u root -psecret -e "SELECT 1"; do
-            echo 'Waiting for MySQL...'
-            sleep 1
-          done
 
       - name: Start Symfony server
         run: symfony server:start --no-tls -d --port=8000
