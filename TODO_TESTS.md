@@ -112,31 +112,44 @@
 ## Étape 3 — Tests unitaires des entités (logique métier)
 
 ### Commit 3.1 : `test(Entity/Membership): add unit tests for membership entity`
-- [ ] Créer `tests/Unit/Entity/MembershipTest.php`
-- [ ] Tester les getters/setters essentiels
-- [ ] Tester `getMainBeneficiary()` / `setMainBeneficiary()`
-- [ ] Tester `getFrozen()` / `setFrozen()` / `getFrozenChange()`
-- [ ] Tester les méthodes de calcul si présentes dans l'entité
+- [x] Créer `tests/Unit/Entity/MembershipTest.php`
+- [x] Tester constructeur, member number, getDisplayMemberNumber, __toString
+- [x] Tester beneficiaries: add/remove, setMainBeneficiary (also adds), fallback to first, getBeneficiariesWithMainInFirstPosition, getMemberNumberWithBeneficiaryListString
+- [x] Tester withdrawn: setWithdrawn(false) clears date and by
+- [x] Tester frozen/frozenChange/flying getters/setters
+- [x] Tester registrations: add/remove, getLastRegistration, hasValidRegistrationBefore
+- [x] Tester timeLogs: getShiftTimeLogs (excludes saving), getSavingTimeLogs, getShiftTimeCount (with before filter), getSavingTimeCount
+- [x] Tester notes/proxies (reflection pour init collections non initialisées dans le constructeur)
+- [x] Tester getTmpToken (deterministic, different keys), shift exemptions (isCurrentlyExemptedFromShifts, getCurrentMembershipShiftExemptions)
+- [x] 37 tests, 63 assertions
 
 ### Commit 3.2 : `test(Entity/Shift): add unit tests for shift entity`
-- [ ] Créer `tests/Unit/Entity/ShiftTest.php`
-- [ ] Tester `getIsPast()` : shift passé, futur, en cours
-- [ ] Tester `getDuration()` : calcul correct entre start et end
-- [ ] Tester `getIntervalCode()`
-- [ ] Tester les relations (shifter, formation, etc.)
+- [x] Créer `tests/Unit/Entity/ShiftTest.php`
+- [x] Tester constructor defaults, start/end setters, getDuration (3h et 90min), getIntervalCode
+- [x] Tester temporal: getIsPast, getIsCurrent, getIsPastOrCurrent, getIsFuture, getIsUpcoming, isBefore
+- [x] Tester booking: booker, bookedTime, shifter, free() clears all
+- [x] Tester validate/invalidateShiftParticipation, formation/job, locked/fixe, lastShifter
+- [x] Tester isFirstByShifter (no shifter, true, false), getTmpToken, display methods, createdAt
+- [x] 41 tests, 48 assertions
 
-### Commit 3.3 : `test(Entity/ShiftBucket): add unit tests for shift bucket entity`
-- [ ] Créer `tests/Unit/Entity/ShiftBucketTest.php`
-- [ ] Tester `addShift()` / `removeShift()` / `getShifterCount()`
-- [ ] Tester `getStart()` / `getEnd()` / `getDuration()`
-- [ ] Tester `getJob()` / `getFormation()`
+### Commit 3.3 : `test(Entity/Beneficiary): add unit tests for beneficiary entity`
+- [x] Créer `tests/Unit/Entity/BeneficiaryTest.php`
+- [x] Tester constructor, firstname (ucfirst+strtolower), lastname (strtoupper)
+- [x] Tester display names: getDisplayName, getDisplayNameWithMemberNumber, getPublicDisplayName, __toString
+- [x] Tester getMemberNumber (delegates to membership, null without), isMain (true/false)
+- [x] Tester isNew (threshold <= 3), flying, commissions (owned filter), formations, shifts
+- [x] Tester swipeCards (reflection init, getEnabledSwipeCards filter), user/email delegation, phone, openId
+- [x] 32 tests, 49 assertions
 
-### Commit 3.4 : `test(Entity/Beneficiary): add unit tests for beneficiary entity`
-- [ ] Créer `tests/Unit/Entity/BeneficiaryTest.php`
-- [ ] Tester `getDisplayName()` / `__toString()`
-- [ ] Tester `getMembership()` / `getMemberNumber()`
-- [ ] Tester `getCommissions()` : ajout, suppression
-- [ ] Tester `getShifts()` : collection de shifts
+### Commit 3.4 : `test(Entity/ShiftBucket): add unit tests for shift bucket entity`
+- [x] Créer `tests/Unit/Entity/ShiftBucketTest.php`
+- [x] Tester constructor, addShift/addShifts (skips non-Shift), getFirst
+- [x] Tester delegation: getJob, getStart, getEnd, getDuration, getIntervalCode
+- [x] Tester getShifterCount (0, partial, all), removeEmptyShift (multiple vs single)
+- [x] Tester getSortedShifts (null when empty, collection when not)
+- [x] Tester canBookInterval (no booking, already booked, already reserved, different interval)
+- [x] Tester statics: compareShifts, shiftIntersectFormations, filterByFormations, createShiftFilterCallback
+- [x] 31 tests, 46 assertions
 
 ---
 
