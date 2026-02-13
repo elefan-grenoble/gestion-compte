@@ -271,21 +271,24 @@ jobs:
         run: |
           docker run -d \
           --name keycloak \
-          -e KEYCLOAK_USER=admin \
-          -e KEYCLOAK_PASSWORD=admin \
-          -e DB_VENDOR=h2 \
-          -e KEYCLOAK_IMPORT=/config/realm-export.json \
-          -v ${{ github.workspace }}/.docker/keycloak/config/realm-export.localhost.json:/config/realm-export.json \
+          -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+          -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+          -v ${{ github.workspace }}/.docker/keycloak/config/realm-export.localhost.json:/opt/keycloak/data/import/realm-export.json \
           -p 8080:8080 \
-          --user root \
-          jboss/keycloak:16.1.1
+          quay.io/keycloak/keycloak:26.0 \
+          start-dev --import-realm
 
 #       Wait for Keycloak to start
       - name: Wait for Keycloak to be ready
         run: |
-          until $(curl --output /dev/null --silent --head --fail http://localhost:8080/auth); do
-              printf '.'
-              sleep 5
+          echo "Waiting for Keycloak..."
+          for i in $(seq 1 60); do
+            if curl --output /dev/null --silent --fail http://localhost:8080/realms/elefan; then
+              echo " Keycloak is ready!"
+              break
+            fi
+            printf '.'
+            sleep 5
           done
 
 #       RUN CYPRESS TESTS ----------------
