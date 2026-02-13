@@ -583,38 +583,8 @@ parameters:
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
 		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has parameter \$entry with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
 			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has parameter \$resources with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$em has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$event_dispatcher has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
@@ -1825,12 +1795,6 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: '#^Method App\\Controller\\DefaultController\:\:helloassoNotify\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: '#^Method App\\Controller\\DefaultController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1844,12 +1808,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Controller/DefaultController.php
@@ -2095,6 +2053,12 @@ parameters:
 			path: src/Controller/HelloassoController.php
 
 		-
+			message: '#^Method App\\Controller\\HelloassoController\:\:helloassoCampaignDetailsAction\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Controller/HelloassoController.php
+
+		-
 			message: '#^Method App\\Controller\\HelloassoController\:\:helloassoManualPaimentAddAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2139,7 +2103,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Controller/HelloassoController.php
 
 		-
@@ -3013,6 +2977,48 @@ parameters:
 			path: src/Controller/SocialNetworkController.php
 
 		-
+			message: '#^Call to an undefined method App\\Helper\\SwipeCard\:\:getcode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method App\\Helper\\SwipeCard\:\:setBeneficiary\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method App\\Helper\\SwipeCard\:\:setCode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method App\\Helper\\SwipeCard\:\:setEnable\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined method App\\Helper\\SwipeCard\:\:setNumber\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Call to an undefined static method App\\Helper\\SwipeCard\:\:checkEAN13\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Controller/SwipeCardController.php
+
+		-
+			message: '#^Class App\\Helper\\SwipeCard constructor invoked with 0 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 2
+			path: src/Controller/SwipeCardController.php
+
+		-
 			message: '#^Method App\\Controller\\SwipeCardController\:\:_getQr\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3061,12 +3067,6 @@ parameters:
 			path: src/Controller/SwipeCardController.php
 
 		-
-			message: '#^Parameter \#1 \$beneficiary of method App\\Entity\\SwipeCard\:\:setBeneficiary\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
 			identifier: argument.type
 			count: 3
@@ -3076,12 +3076,6 @@ parameters:
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SwipeCard\>, string given\.$#'
 			identifier: argument.type
 			count: 9
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$enable of method App\\Entity\\SwipeCard\:\:setEnable\(\) expects bool\|null, int given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -4279,10 +4273,16 @@ parameters:
 			path: src/Entity/Formation.php
 
 		-
-			message: '#^Property App\\Entity\\Formation\:\:\$roles has no type specified\.$#'
-			identifier: missingType.property
+			message: '#^Property App\\Entity\\Formation\:\:\$roles type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Formation.php
+
+		-
+			message: '#^Method App\\Entity\\HelloassoPayment\:\:createFromPayementObject\(\) has parameter \$paymentObject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Entity/HelloassoPayment.php
 
 		-
 			message: '#^Method App\\Entity\\HelloassoPayment\:\:fromPaymentObj\(\) has no return type specified\.$#'
@@ -8209,6 +8209,78 @@ parameters:
 			path: src/Form/UserWithBeneficiaryType.php
 
 		-
+			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:getParameter\(\)\.$#'
+			identifier: method.notFound
+			count: 7
+			path: src/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Helloasso\\HelloassoClient\:\:getFormPayments\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Helloasso\\HelloassoClient\:\:getForms\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Property App\\Helloasso\\HelloassoClient\:\:\$cache has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Helloasso\\HelloassoNotificationRequest\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Property App\\Helloasso\\HelloassoNotificationRequest\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Method App\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) has parameter \$payments with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method App\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Parameter \#1 \$event of method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) expects object, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Property App\\Helloasso\\HelloassoPaymentHandler\:\:\$helloassoPaymentRepository has no type specified\.$#'
+			identifier: missingType.property
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Unable to resolve the template type TEvent in call to method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Helloasso/HelloassoPaymentHandler.php
+
+		-
 			message: '#^Method App\\Helper\\Html2Pdf\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8343,12 +8415,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$input of function str_pad expects string, int\<0, 100000000\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Helper/SwipeCard.php
-
-		-
-			message: '#^Property App\\Helper\\SwipeCard\:\:\$container has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: src/Helper/SwipeCard.php
 
@@ -8971,8 +9037,8 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with generic interface Doctrine\\Common\\Collections\\Collection but does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Repository/ShiftRepository.php
 
@@ -9019,6 +9085,12 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
+			message: '#^Method App\\Repository\\ShiftRepository\:\:functionsResultCache\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getBeneficiaryShiftCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9045,6 +9117,12 @@ parameters:
 		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getYears\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^Property App\\Repository\\ShiftRepository\:\:\$functions_result_cache has no type specified\.$#'
+			identifier: missingType.property
 			count: 1
 			path: src/Repository/ShiftRepository.php
 
@@ -10873,12 +10951,6 @@ parameters:
 			path: src/Twig/Extension/AppExtension.php
 
 		-
-			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$localCurrencyName is never read, only written\.$#'
-			identifier: property.onlyWritten
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
 			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$logger has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -11009,237 +11081,3 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
-
-		-
-			message: '#^Method App\\Tests\\Functional\\Controller\\AdminControllerTest\:\:testCsvImportForEmptyBase\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Functional/Controller/AdminControllerTest.php
-
-		-
-			message: '#^Method App\\Tests\\Functional\\Controller\\AdminControllerTest\:\:testCsvImportForCommissionFilledBase\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Functional/Controller/AdminControllerTest.php
-
-		-
-			message: '#^Method App\\Tests\\Functional\\DatabasePrimer\:\:loadFixturesWithGroups\(\) has parameter \$group with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: tests/Functional/DatabasePrimer.php
-
-		-
-			message: '#^Parameter \#1 \$entityManager of class App\\DataFixtures\\Purger\\CustomPurger constructor expects Doctrine\\ORM\\EntityManagerInterface, Doctrine\\Persistence\\ObjectManager given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Functional/DatabasePrimer.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doIsShiftBookableTest\(\) has parameter \$beginner with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doTestHasPreviousValidShifts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doTestHasPreviousValidShifts\(\) has parameter \$shiftDate with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doTestIsBeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doTestIsBeginner\(\) has parameter \$beginner with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:doTestIsBeginner\(\) has parameter \$newUserStartAsBeginner with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testHasPreviousValidShiftsWithDismissedShift\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testHasPreviousValidShiftsWithShift\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testHasPreviousValidShiftsWithShiftInTheFuture\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testHasPreviousValidShiftsWithoutShift\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsBeginnerNewUsersBeginnerWithBeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsBeginnerNewUsersBeginnerWithNotABeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsBeginnerNewUsersNotBeginnerWithBeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsBeginnerNewUsersNotBeginnerWithNotABeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsShiftBookableWithEmptyShiftAndBeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsShiftBookableWithEmptyShiftAndNotABeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testIsShiftBookableWithNotEmptyShiftAndBeginner\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Method App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:testShiftTimeByCycle\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$allow_extra_shifts has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$container has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$cycle_type has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$due_duration_by_cycle has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$em has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$fly_and_fixed_allow_fixed_shift_free has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$forbid_shift_overlap_time has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$max_time_in_advance_to_book_extra_shifts has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$min_shift_duration has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$new_users_start_as_beginner has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$registration_duration has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$registration_every_civil_year has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$time_log_saving_shift_free_allow_only_if_enough_saving has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$time_log_saving_shift_free_min_time_in_advance_days has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$use_fly_and_fixed has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Property App\\Tests\\Integration\\Service\\ShiftServiceTest\:\:\$use_time_log_saving has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Symfony\\\\Component\\\\Dotenv\\\\Dotenv'' and ''bootEnv'' will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: tests/bootstrap.php

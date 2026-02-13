@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to an undefined method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:getContainer\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
 			message: '#^Call to static method create\(\) on an unknown class Symfony\\Component\\HttpClient\\HttpClient\.$#'
 			identifier: class.notFound
 			count: 1
@@ -409,33 +403,9 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: '#^Call to method getAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Call to method getId\(\) on an unknown class App\:HelloassoPayment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Call to method setAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
 			path: src/Controller/DefaultController.php
 
 		-
@@ -535,39 +505,21 @@ parameters:
 			path: src/Controller/HelloassoController.php
 
 		-
-			message: '#^Call to method getAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
 			message: '#^Call to method getCampaignId\(\) on an unknown class App\:HelloassoPayment\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Controller/HelloassoController.php
 
 		-
 			message: '#^Call to method getId\(\) on an unknown class App\:HelloassoPayment\.$#'
 			identifier: class.notFound
-			count: 2
-			path: src/Controller/HelloassoController.php
-
-		-
-			message: '#^Call to method setAmount\(\) on an unknown class App\:HelloassoPayment\.$#'
-			identifier: class.notFound
 			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
-			message: '#^Cannot access property \$resources on array\.$#'
-			identifier: property.nonObject
-			count: 2
 			path: src/Controller/HelloassoController.php
 
 		-
 			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
 			identifier: arguments.count
-			count: 3
+			count: 2
 			path: src/Controller/HelloassoController.php
 
 		-
@@ -1285,12 +1237,6 @@ parameters:
 			path: src/Service/TimeLogService.php
 
 		-
-			message: '#^Access to an undefined property App\\Twig\\Extension\\AppExtension\:\:\$container\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Twig/Extension/AppExtension.php
-
-		-
 			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
 			identifier: class.notFound
 			count: 1
@@ -1325,15 +1271,3 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
-
-		-
-			message: '#^Call to an undefined method PHPUnit\\Framework\\MockObject\\MockObject\:\:hasPreviousValidShifts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: tests/Integration/Service/ShiftServiceTest.php
-
-		-
-			message: '#^Call to an undefined method Symfony\\Component\\Dotenv\\Dotenv\:\:bootEnv\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: tests/bootstrap.php
