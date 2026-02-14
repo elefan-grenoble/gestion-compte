@@ -20,7 +20,7 @@ describe('super admin can freeze and unfreeze user', function () {
         // navigate to users page
         cy.get('[data-cy=users_link]').click()
 
-        cy.get('[data-cy=member_9]').click()
+        cy.get('[data-cy^=member_]').first().click()
 
         // open on freeze options
         cy.get('[data-cy=freeze]').click()
