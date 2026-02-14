@@ -184,17 +184,16 @@
 
 ### Commit 5.2 — DONE (étape 0.2) : séparation des test suites PHPUnit
 
-### Commit 5.3 : `ci: improve GitHub Actions workflow`
+### Commit 5.3 : `ci: improve GitHub Actions workflow` ✅ DONE
 Améliorations du fichier `.github/workflows/ci.yaml` existant :
 - [x] Ajouter `push:` au trigger pour exécuter la CI à chaque push, quelle que soit la branche
-- [ ] Fixer `${{ matrix.php-versions }}` dans les jobs `phpStan`, `symfony-tests`, `cypress-tests`
-  (la variable est vide car la matrice n'est déclarée que dans le job `setup` ; hardcoder `'7.4'`)
-- [ ] Ajouter un job `fast-tests` sans BDD pour les suites `unit` + `integration`
-  (rapide, pas besoin de MariaDB ni d'attente de connexion)
-- [ ] Uploader les screenshots/vidéos Cypress en cas d'échec
-  (`actions/upload-artifact` sur `cypress/screenshots/` et `cypress/videos/`)
+- [x] Fixer `php-version: '7.4'` en dur dans les jobs `phpStan`, `symfony-tests`, `cypress-tests`
+- [x] Ajouter un job `fast-tests` sans BDD pour les suites `unit` + `integration`
+- [x] Supprimer le service MariaDB inutile du job `phpStan`
+- [x] Restreindre `symfony-tests` à la suite `functional` uniquement (besoin DB)
+- [x] Uploader les screenshots Cypress en cas d'échec (retention: 7 jours)
+- [x] Renommer les steps pour plus de clarté
 - [ ] Cacher `node_modules` / le binaire Cypress pour accélérer le job `cypress-tests`
-- [ ] Renommer le step "Run unit and functional tests" pour refléter les suites réelles
 
 ### Commit 5.4 : `test(infra): add code coverage configuration`
 - [ ] Vérifier que la section `<coverage>` dans `phpunit.xml.dist` est correctement configurée
@@ -230,21 +229,22 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 | 🔴 Haute | Étape 5.1-5.2 (infra) | Exécutabilité et organisation |
 | 🟡 Moyenne | Étape 3 (entités) | Couverture des modèles |
 | 🟡 Moyenne | Étape 4 (contrôleurs) | Détection des régressions HTTP |
-| 🟡 Moyenne | Étape 5.3-5.4 (CI) | Automatisation |
+| 🟡 Moyenne | Étape 5.3 (CI) ✅ / 5.4 (coverage) | Automatisation |
 | 🟢 Basse | Étape 6 (Cypress) | Couverture E2E |
 
 ---
 
 ## Métriques cibles
 
-| Métrique | Actuel | Cible après TODO |
-|----------|--------|-----------------|
-| Fichiers de test PHP | 8 | ~20 |
-| Méthodes de test | ~112 | ~150+ |
-| Services testés | 5/14 | 5/14 |
-| Entités testées | 0/42 | 4/42 (les plus critiques) |
-| Contrôleurs testés | 1/43 | Smoke test global + 1-2 détaillés |
-| Specs Cypress | 3 | 5 |
+| Métrique | Initial | Actuel | Cible après TODO |
+|----------|---------|--------|------------------|
+| Fichiers de test PHP | 2 | 14 | ~20 |
+| Méthodes de test | 16 | 320 | ~350+ |
+| Services testés | 1/14 | 5/14 | 5/14 |
+| Entités testées | 0/42 | 4/42 | 4/42 (les plus critiques) |
+| Contrôleurs testés | 1/43 | Smoke test (67 routes) | Smoke test + 1-2 détaillés |
+| Specs Cypress | 3 | 3 | 5 |
+| Jobs CI | 3 | 4 (+ fast-tests) | 4 |
 
 ---
 
