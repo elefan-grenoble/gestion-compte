@@ -83,58 +83,72 @@ jobs:
           name: build-dir
           path: public/build/
 
+  fast-tests:
+    needs: setup
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+#       GET CACHED DIRECTORIES ----------------
+      - name: Download Vendor Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-dir
+          path: vendor/
+
+#       INSTALL DEPENDENCIES ----------------
+      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+        uses: shivammathur/setup-php@verbose
+        with:
+          php-version: '7.4'
+          tools: composer:2.2
+          extensions: mbstring, xml, ctype, iconv, intl, dom, filter, gd, json
+
+#       SET ENVIRONMENT VARIABLES ----------------
+      - name: Set up test environment variables
+        run: cp .env.test .env
+
+#       RUN UNIT + INTEGRATION TESTS (no DB needed) ----------------
+      - name: Run unit and integration tests
+        run: php ./vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite unit,integration
+
   phpStan:
-      needs: setup
-      runs-on: ubuntu-22.04
+    needs: setup
+    runs-on: ubuntu-22.04
 
-      services:
-        mariadb:
-          image: mariadb:10.4
-          env:
-            MYSQL_ROOT_PASSWORD: secret
-            MYSQL_DATABASE: symfony
-            MYSQL_USER: user
-            MYSQL_PASSWORD: password
-          ports:
-            - 3306:3306
-          options: >-
-            --health-cmd="mysqladmin ping -psecret"
-            --health-interval=10s
-            --health-timeout=5s
-            --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
 
-      steps:
-        - uses: actions/checkout@v4
+#       GET CACHED DIRECTORIES ----------------
+      - name: Download Vendor Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-dir
+          path: vendor/
 
-#         GET CACHED DIRECTORIES ----------------
-        - name: Download Vendor Directory
-          uses: actions/download-artifact@v4
-          with:
-              name: vendor-dir
-              path: vendor/
+#       INSTALL DEPENDENCIES ----------------
+      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+        uses: shivammathur/setup-php@verbose
+        with:
+          php-version: '7.4'
+          tools: composer:2.2
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
-#         INSTALL DEPENDENCIES ----------------
-        - name: Setup PHP, extensions and composer with shivammathur/setup-php
-          uses: shivammathur/setup-php@verbose
-          with:
-            php-version: '7.4'
-            tools: composer:2.2
-            extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+#       SET ENVIRONMENT VARIABLES ----------------
+      - name: Set up environment variables
+        run: cp .env.test .env
 
-#         SET ENVIRONMENT VARIABLES ----------------
-        - name: Set up environment variables
-          run: cp .env.test .env
+#       WARM UP CACHE (generates container XML needed by phpstan-symfony) ----
+      - name: Warm up Symfony cache
+        run: php bin/console cache:warmup --env=dev
 
-#         WARM UP CACHE (generates container XML needed by phpstan-symfony) ----
-        - name: Warm up Symfony cache
-          run: php bin/console cache:warmup --env=dev
+      - name: Set executable permissions for PHPStan
+        run: chmod +x ./vendor/bin/phpstan
 
-        - name: Set executable permissions for PHPStan
-          run: chmod +x ./vendor/bin/phpstan
-
-#         RUN PHPSTAN ----------------
-        - name: Run PHPStan
-          run: ./vendor/bin/phpstan analyse src
+#       RUN PHPSTAN ----------------
+      - name: Run PHPStan
+        run: ./vendor/bin/phpstan analyse src
 
 
   symfony-tests:
@@ -190,9 +204,8 @@ jobs:
         run: php bin/console doctrine:migrations:migrate --no-interaction
 
 #       RUN TESTS ----------------
-      - name: Run unit and functional tests
-        run: |
-          php ./vendor/bin/phpunit --configuration phpunit.xml.dist
+      - name: Run functional tests
+        run: php ./vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite functional
 
 
   cypress-tests:
@@ -265,7 +278,7 @@ jobs:
           name: build-dir
           path: public/build/
 
-      - name : install packages
+      - name: Install NPM packages (for Cypress binary)
         run: npm install
 
 #       START SYMFONY SERVER ----------------
@@ -273,9 +286,8 @@ jobs:
         run: symfony server:start --no-tls -d --port=8000
 
 #       RUN CYPRESS TESTS ----------------
-      - name: Run Cypress tests
+      - name: Run Cypress main tests
         run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:main
-
 
 #       CHANGE ENV VARIABLES ----------------
       - name: Set up test environment variables
@@ -307,6 +319,14 @@ jobs:
           done
 
 #       RUN CYPRESS TESTS ----------------
-      - name: Run Cypress tests
+      - name: Run Cypress OIDC tests
         run: CYPRESS_BASE_URL=http://localhost:8000 CYPRESS_KEYCLOAK_URL=http://localhost:8080 npm run cy:test:oidc
 
+#       UPLOAD SCREENSHOTS ON FAILURE ----------------
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          retention-days: 7
