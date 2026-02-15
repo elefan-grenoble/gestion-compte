@@ -278,8 +278,15 @@ jobs:
           name: build-dir
           path: public/build/
 
-      - name: Install NPM packages (for Cypress binary)
-        run: npm install
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-cypress-
+
+      - name: Install NPM packages
+        run: npm ci
 
 #       START SYMFONY SERVER ----------------
       - name: Start Symfony server

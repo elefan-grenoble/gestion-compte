@@ -196,7 +196,7 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 - [x] Restreindre `symfony-tests` à la suite `functional` uniquement (besoin DB)
 - [x] Uploader les screenshots Cypress en cas d'échec (retention: 7 jours)
 - [x] Renommer les steps pour plus de clarté
-- [ ] Cacher `node_modules` / le binaire Cypress pour accélérer le job `cypress-tests`
+- [x] Cacher `node_modules` / le binaire Cypress pour accélérer le job `cypress-tests`
 
 ### Commit 5.4 : `test(infra): add code coverage configuration`
 - [ ] Vérifier que la section `<coverage>` dans `phpunit.xml.dist` est correctement configurée
