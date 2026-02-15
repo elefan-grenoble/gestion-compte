@@ -2,7 +2,7 @@
 
 namespace App\Tests\Functional\Controller;
 
-use App\Tests\Functional\DatabasePrimer;
+use App\Tests\Functional\FunctionalTestCase;
 
 /**
  * Functional tests for MembershipController.
@@ -12,7 +12,7 @@ use App\Tests\Functional\DatabasePrimer;
  * (see TODO_TESTS.md annexe #7). Only routes that don't have this issue
  * are tested here. The blocked routes are documented in the skipped tests section.
  */
-class MembershipControllerTest extends DatabasePrimer
+class MembershipControllerTest extends FunctionalTestCase
 {
     private static bool $fixturesLoaded = false;
 
@@ -22,25 +22,6 @@ class MembershipControllerTest extends DatabasePrimer
             $this->loadFixturesWithGroups(['period']);
             self::$fixturesLoaded = true;
         }
-    }
-
-    /**
-     * Helper to log in as a given user via the login form.
-     *
-     * @return \Symfony\Bundle\FrameworkBundle\Client
-     */
-    private function loginAs(string $username, string $password = 'password')
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/login');
-
-        $form = $crawler->selectButton('_submit')->form([
-            '_username' => $username,
-            '_password' => $password,
-        ]);
-        $client->submit($form);
-
-        return $client;
     }
 
     // -------------------------------------------------------

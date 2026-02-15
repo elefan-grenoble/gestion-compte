@@ -5,13 +5,13 @@ namespace App\Tests\Functional\Controller;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\User;
-use App\Tests\Functional\DatabasePrimer;
+use App\Tests\Functional\FunctionalTestCase;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-class AdminControllerTest extends DatabasePrimer
+class AdminControllerTest extends FunctionalTestCase
 {
     public function csvDelimiterProvider(): array
     {

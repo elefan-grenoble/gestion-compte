@@ -2,7 +2,7 @@
 
 namespace App\Tests\Functional\Controller;
 
-use App\Tests\Functional\DatabasePrimer;
+use App\Tests\Functional\FunctionalTestCase;
 
 /**
  * Smoke tests for routes with database fixtures loaded.
@@ -11,7 +11,7 @@ use App\Tests\Functional\DatabasePrimer;
  * The 'period' fixture group is loaded once per class and includes all entities
  * (users, admins, jobs, shifts, events, opening hours, dynamic content, etc.).
  */
-class SmokeTest extends DatabasePrimer
+class SmokeTest extends FunctionalTestCase
 {
     private static bool $fixturesLoaded = false;
 
@@ -21,25 +21,6 @@ class SmokeTest extends DatabasePrimer
             $this->loadFixturesWithGroups(['period']);
             self::$fixturesLoaded = true;
         }
-    }
-
-    /**
-     * Helper to log in as a given user via the login form.
-     *
-     * @return \Symfony\Bundle\FrameworkBundle\Client
-     */
-    private function loginAs(string $username, string $password = 'password')
-    {
-        $client = static::createClient();
-        $crawler = $client->request('GET', '/login');
-
-        $form = $crawler->selectButton('_submit')->form([
-            '_username' => $username,
-            '_password' => $password,
-        ]);
-        $client->submit($form);
-
-        return $client;
     }
 
     // -------------------------------------------------------
