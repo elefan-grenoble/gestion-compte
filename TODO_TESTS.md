@@ -208,17 +208,24 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 
 ## Étape 6 — Amélioration des tests Cypress (E2E)
 
-### Commit 6.1 : `test(cypress): add custom commands in support/commands.js`
+### Commit 6.1 : `test(cypress): stabilize freeze/unfreeze test` ✅ DONE
+- [x] Filtrer les membres déjà gelés avec `.not('.frozen')` pour éviter les faux positifs
+- [x] Cibler `.collapsible-header` directement pour ouvrir le collapsible Materialize
+- [x] Ajouter `.should('be.visible')` avant chaque clic sur bouton modal (attente animation)
+- [x] Remplacer `cy.contains('gelé')` fragile par des assertions structurelles sur le header et le badge
+- [x] Supprimer le regex lookbehind `(?<!dé)gelé` non fiable
+
+### Commit 6.2 : `test(cypress): add custom commands in support/commands.js`
 - [ ] Déplacer la logique de `login_reusables.cytools.js` dans `cypress/support/commands.js` en tant que `Cypress.Commands.add('login', ...)`
 - [ ] Adapter les tests existants pour utiliser `cy.login()` au lieu de l'import
 - [ ] Garder le login Keycloak séparé : `Cypress.Commands.add('loginKeycloak', ...)`
 
-### Commit 6.2 : `test(cypress): add E2E tests for member shift booking flow`
+### Commit 6.3 : `test(cypress): add E2E tests for member shift booking flow`
 - [ ] Créer `cypress/e2e/shift/member_can_book_shift.cy.js`
 - [ ] Tester le parcours : login → voir les créneaux → réserver un créneau → confirmation
 - [ ] Vérifier que le créneau apparaît dans "mes créneaux"
 
-### Commit 6.3 : `test(cypress): add E2E tests for membership registration flow`
+### Commit 6.4 : `test(cypress): add E2E tests for membership registration flow`
 - [ ] Créer `cypress/e2e/membership/member_can_register.cy.js`
 - [ ] Tester : login → accéder à la page d'adhésion → formulaire → confirmation
 
