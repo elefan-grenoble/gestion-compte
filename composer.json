@@ -78,7 +78,11 @@
         ],
         "post-update-cmd": [
             "@auto-scripts"
-        ]
+        ],
+        "test": "php vendor/bin/phpunit",
+        "test-unit": "php vendor/bin/phpunit --testsuite unit,integration",
+        "test-functional": "php vendor/bin/phpunit --testsuite functional",
+        "test-coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html var/coverage"
     },
     "config": {
         "preferred-install": {

@@ -198,10 +198,11 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 - [x] Renommer les steps pour plus de clarté
 - [x] Cacher `node_modules` / le binaire Cypress pour accélérer le job `cypress-tests`
 
-### Commit 5.4 : `test(infra): add code coverage configuration`
-- [ ] Vérifier que la section `<coverage>` dans `phpunit.xml.dist` est correctement configurée
-- [ ] Ajouter un script `composer test-coverage` dans `composer.json`
-- [ ] Documenter le seuil de couverture minimum visé dans ce fichier TODO
+### Commit 5.4 : `test(infra): add code coverage configuration` ✅ DONE
+- [x] Vérifier que la section `<coverage>` dans `phpunit.xml.dist` est correctement configurée
+- [x] Exclure `src/Migrations`, `src/DataFixtures`, `src/Kernel.php` de la couverture
+- [x] Ajouter les scripts `composer test`, `test-unit`, `test-functional`, `test-coverage` dans `composer.json`
+- [x] Seuil de couverture : pas de minimum imposé pour l'instant (xdebug non installé en CI)
 
 ---
 
