@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Helloasso\HelloassoClient;
-use App\Helloasso\HelloassoPaymentHandler;
+use App\Providers\Helloasso\HelloassoClient;
+use App\Providers\Helloasso\HelloassoPaymentHandler;
 use Carbon\Carbon;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;

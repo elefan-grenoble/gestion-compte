@@ -4,17 +4,16 @@ namespace App\Controller;
 
 use App\Entity\HelloassoPayment;
 use App\Event\HelloassoEvent;
-use App\Helloasso\HelloassoClient;
-use App\Helloasso\HelloassoPaymentHandler;
 use App\Form\AutocompleteBeneficiaryType;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Providers\Helloasso\HelloassoClient;
+use App\Providers\Helloasso\HelloassoPaymentHandler;
 use Psr\Http\Client\ClientExceptionInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Helloasso controller.

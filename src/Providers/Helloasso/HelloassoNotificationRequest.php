@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Helloasso;
+namespace App\Providers\Helloasso;
 
 use Symfony\Component\HttpFoundation\Request;
 
