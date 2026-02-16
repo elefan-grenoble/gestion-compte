@@ -246,8 +246,7 @@ class SwipeCard
     public function getBarcode()
     {
         $generator = new BarcodeGeneratorPNG();
-        $barcode = $generator->getBarcode($this->getCode(), $generator::TYPE_EAN_13, 2, 25);
-        return 'data:image/png;base64,' . base64_encode($barcode);
+        return $generator->getBarcode($this->getCode(), $generator::TYPE_EAN_13, 2, 25);
     }
 
     //FROM : \CodeItNow\BarcodeBundle\Generator\CINean13::calculateChecksum

@@ -10,6 +10,7 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -337,15 +338,17 @@ class SwipeCardController extends AbstractController
         if (!$card instanceof SwipeCardEntity){
             throw $this->createAccessDeniedException();
         }
-        $content = base64_decode($card->getBarcode());
-        $response = new Response();
-        $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'br.png');
-        $response->headers->set('Content-Disposition', $disposition);
-        $response->headers->set("Content-length",strlen($content));
-        $response->headers->set('Content-Type', 'image/png');
-        $response->setContent($content);
+        $content = $card->getBarcode();
 
-        return $response;
+        return new Response(
+            $content,
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'image/png',
+                'Content-Length' => strlen($content),
+                'Content-Disposition' => HeaderUtils::makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE,'br.png')
+            ]
+        );
     }
 
 
