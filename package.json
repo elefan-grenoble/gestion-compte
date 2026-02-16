@@ -35,7 +35,8 @@
         "build": "npx encore production --progress",
         "cy:open": "cypress open",
         "cy:test:oidc": "cypress run --spec 'cypress/e2e/keycloak/**/*'",
-        "cy:test:main": "cypress run --spec 'cypress/e2e/login/**/*'"
+        "cy:test:main": "cypress run --spec 'cypress/e2e/login/**/*'",
+        "cy:test:shift": "cypress run --spec 'cypress/e2e/shift/**/*'"
     },
     "repository": {
         "type": "git",
