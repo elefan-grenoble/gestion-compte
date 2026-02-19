@@ -4,60 +4,46 @@ declare(strict_types=1);
 
 namespace App\Providers\Helloasso;
 
+use App\Providers\OauthAuthenticatorInterface;
 use GuzzleHttp\Client;
-use League\OAuth2\Client\Provider\GenericProvider;
-use League\OAuth2\Client\Token\AccessTokenInterface;
-use Psr\Cache\CacheItemInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientExceptionInterface;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class HelloassoClient
 {
-    /** @var ContainerInterface */
-    private $container;
+    private OauthAuthenticatorInterface $authenticator;
+    private string $helloAssoClientId;
+    private string $helloAssoClientSecret;
+    private string $helloAssoApiAuthUrl;
+    private string $helloAssoApiBaseUrl;
+    private string $helloAssoOrganizationSlug;
 
-    private $cache;
-
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-        $this->cache = new FilesystemAdapter();
-    }
-
-    private function getToken(): AccessTokenInterface
-    {
-        $item = $this->cache->getItem('helloasso_token');
-        if (!$item->isHit() || !$item->get() instanceof AccessTokenInterface || $item->get()->hasExpired()) {
-            return $this->refreshToken($item);
-        }
-
-        return $item->get();
-    }
-
-    private function refreshToken(CacheItemInterface $item): AccessTokenInterface
-    {
-        $provider = new GenericProvider([
-            'clientId' => $this->container->getParameter('helloasso_client_id'),
-            'clientSecret' => $this->container->getParameter('helloasso_client_secret'),
-            'urlAccessToken' => $this->container->getParameter('helloasso_api_auth_url'),
-            'urlAuthorize' => '',
-            'urlResourceOwnerDetails' => ''
-        ]);
-
-        $token = $provider->getAccessToken('client_credentials');
-
-        $item->set($token);
-        $this->cache->save($item);
-
-        return $token;
+    public function __construct(
+        OauthAuthenticatorInterface $authenticator,
+        string $helloAssoClientId,
+        string $helloAssoClientSecret,
+        string $helloAssoApiAuthUrl,
+        string $helloAssoApiBaseUrl,
+        string $helloAssoOrganizationSlug
+    ) {
+        $this->helloAssoOrganizationSlug = $helloAssoOrganizationSlug;
+        $this->helloAssoApiBaseUrl = $helloAssoApiBaseUrl;
+        $this->helloAssoApiAuthUrl = $helloAssoApiAuthUrl;
+        $this->helloAssoClientSecret = $helloAssoClientSecret;
+        $this->helloAssoClientId = $helloAssoClientId;
+        $this->authenticator = $authenticator;
     }
 
     private function getClient(): Client
     {
         return new Client([
-            'base_uri' => $this->container->getParameter('helloasso_api_base_url'),
-            'headers' => ['Authorization' => 'Bearer '.$this->getToken()->getToken()],
+            'base_uri' => $this->helloAssoApiBaseUrl,
+            'headers' => [
+                'Authorization' => 'Bearer '.$this->authenticator->getToken(
+                        $this->helloAssoApiAuthUrl,
+                        $this->helloAssoClientId,
+                        $this->helloAssoClientSecret,
+                    )
+            ],
         ]);
     }
 
@@ -69,7 +55,7 @@ class HelloassoClient
         $result = $this->getClient()->get(
             sprintf(
                 'organizations/%s/forms',
-                $this->container->getParameter('helloasso_organization_slug'),
+                $this->helloAssoOrganizationSlug,
             ),
         );
 
@@ -84,7 +70,7 @@ class HelloassoClient
         $result = $this->getClient()->get(
             sprintf(
                 'organizations/%s/forms/%s/%s/payments',
-                $this->container->getParameter('helloasso_organization_slug'),
+                $this->helloAssoOrganizationSlug,
                 $formType,
                 $formSlug,
             ),
@@ -104,7 +90,7 @@ class HelloassoClient
         $result = $this->getClient()->get(
             sprintf(
                 'organizations/%s/forms/%s/%s/public',
-                $this->container->getParameter('helloasso_organization_slug'),
+                $this->helloAssoOrganizationSlug,
                 $formType,
                 $formSlug,
             ),

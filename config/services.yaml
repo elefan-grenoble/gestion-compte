@@ -199,6 +199,11 @@ services:
       $entity_manager: "@doctrine.orm.entity_manager"
       $router: "@router"
       $templating: "@twig"
+      $helloAssoClientId: '%helloasso_client_id%'
+      $helloAssoClientSecret: '%helloasso_client_secret%'
+      $helloAssoApiAuthUrl: '%helloasso_api_auth_url%'
+      $helloAssoApiBaseUrl: '%helloasso_api_base_url%'
+      $helloAssoOrganizationSlug: '%helloasso_organization_slug%'
 
   # makes classes in src available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
@@ -238,6 +243,15 @@ services:
   App\Controller\TimeLogController:
     arguments:
       - "%forbid_own_timelog_new_admin%"
+
+  App\Providers\ClientCredentialOauthAuthenticator: ~
+  App\Providers\CacheOauthAuthenticatorDecorator:
+    decorates: App\Providers\ClientCredentialOauthAuthenticator
+    arguments:
+      - '@App\Providers\CacheOauthAuthenticatorDecorator.inner'
+  App\Providers\OauthAuthenticatorInterface:
+    alias: App\Providers\ClientCredentialOauthAuthenticator
+
   App\Helper\:
     resource: '../src/Helper'
     arguments: [ '@service_container' ]
