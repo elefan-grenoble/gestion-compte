@@ -63,6 +63,11 @@ parameters:
   helloasso_api_base_url: '%env(default::HELLOASSO_API_BASE_URL)%'
   helloasso_api_auth_url: '%env(default::HELLOASSO_API_AUTH_URL)%'
 
+  igloohome_client_id: '%env(default::IGLOOHOME_CLIENT_ID)%'
+  igloohome_client_secret: '%env(default::IGLOOHOME_CLIENT_SECRET)%'
+  igloohome_api_auth_url: '%env(default::IGLOOHOME_API_AUTH_URL)%'
+  igloohome_api_device: '%env(default::IGLOOHOME_API_DEVICE)%'
+
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   locale: fr_FR.UTF8
   local_currency_name: '%env(LOCAL_CURRENCY_NAME)%'
@@ -204,6 +209,10 @@ services:
       $helloAssoApiAuthUrl: '%helloasso_api_auth_url%'
       $helloAssoApiBaseUrl: '%helloasso_api_base_url%'
       $helloAssoOrganizationSlug: '%helloasso_organization_slug%'
+      $igloohomeClientId: '%igloohome_client_id%'
+      $igloohomeClientSecret: '%igloohome_client_secret%'
+      $igloohomeApiAuthUrl: '%igloohome_api_auth_url%'
+      $igloohomeApiDevice: '%igloohome_api_device%'
 
   # makes classes in src available to be used as services
   # this creates a service per class whose id is the fully-qualified class name
