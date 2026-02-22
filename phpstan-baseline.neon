@@ -583,38 +583,8 @@ parameters:
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
 		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has parameter \$entry with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
 			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has parameter \$resources with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$em has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$event_dispatcher has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
@@ -1825,12 +1795,6 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: '#^Method App\\Controller\\DefaultController\:\:helloassoNotify\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: '#^Method App\\Controller\\DefaultController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1844,12 +1808,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Controller/DefaultController.php
@@ -2139,7 +2097,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Controller/HelloassoController.php
 
 		-
@@ -3061,12 +3019,6 @@ parameters:
 			path: src/Controller/SwipeCardController.php
 
 		-
-			message: '#^Parameter \#1 \$beneficiary of method App\\Entity\\SwipeCard\:\:setBeneficiary\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
 			identifier: argument.type
 			count: 3
@@ -3076,12 +3028,6 @@ parameters:
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SwipeCard\>, string given\.$#'
 			identifier: argument.type
 			count: 9
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$enable of method App\\Entity\\SwipeCard\:\:setEnable\(\) expects bool\|null, int given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -3099,7 +3045,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$values of method Symfony\\Component\\HttpFoundation\\ResponseHeaderBag\:\:set\(\) expects array\<string\>\|string\|null, int\<0, max\> given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -4274,12 +4220,6 @@ parameters:
 
 		-
 			message: '#^Property App\\Entity\\Formation\:\:\$createdBy has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Entity/Formation.php
-
-		-
-			message: '#^Property App\\Entity\\Formation\:\:\$roles has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: src/Entity/Formation.php
@@ -8347,12 +8287,6 @@ parameters:
 			path: src/Helper/SwipeCard.php
 
 		-
-			message: '#^Property App\\Helper\\SwipeCard\:\:\$container has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Helper/SwipeCard.php
-
-		-
 			message: '#^Call to function is_object\(\) with App\\Entity\\User will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -8967,12 +8901,6 @@ parameters:
 		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Repository/ShiftRepository.php
-
-		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Repository/ShiftRepository.php
 
@@ -10869,12 +10797,6 @@ parameters:
 		-
 			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$localCurrencyName has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$localCurrencyName is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Twig/Extension/AppExtension.php
 
