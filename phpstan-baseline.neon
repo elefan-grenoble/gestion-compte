@@ -4225,6 +4225,18 @@ parameters:
 			path: src/Entity/Formation.php
 
 		-
+			message: '#^Property App\\Entity\\Formation\:\:\$roles type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Entity/Formation.php
+
+		-
+			message: '#^Method App\\Entity\\HelloassoPayment\:\:createFromPayementObject\(\) has parameter \$paymentObject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Entity/HelloassoPayment.php
+
+		-
 			message: '#^Method App\\Entity\\HelloassoPayment\:\:fromPaymentObj\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8347,6 +8359,48 @@ parameters:
 			path: src/Monolog/ToggleableHandler.php
 
 		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoClient\:\:getFormPayments\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoClient\:\:getForms\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoNotificationRequest\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Property App\\Providers\\Helloasso\\HelloassoNotificationRequest\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) has parameter \$payments with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
+
+		-
 			message: '#^Class App\\Repository\\AddressRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
 			identifier: missingType.generics
 			count: 1
@@ -8905,6 +8959,12 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
+			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with generic interface Doctrine\\Common\\Collections\\Collection but does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$end_after with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -8947,6 +9007,12 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
+			message: '#^Method App\\Repository\\ShiftRepository\:\:functionsResultCache\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getBeneficiaryShiftCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8973,6 +9039,12 @@ parameters:
 		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getYears\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^Property App\\Repository\\ShiftRepository\:\:\$functions_result_cache has no type specified\.$#'
+			identifier: missingType.property
 			count: 1
 			path: src/Repository/ShiftRepository.php
 

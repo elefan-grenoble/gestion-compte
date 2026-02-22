@@ -817,27 +817,9 @@ parameters:
 			path: src/Controller/SwipeCardController.php
 
 		-
-			message: '#^Call to method getEnabledSwipeCards\(\) on an unknown class App\:Beneficiary\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Call to method getNumber\(\) on an unknown class App\:SwipeCard\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Call to method getSwipeCards\(\) on an unknown class App\:Beneficiary\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Call to method getUser\(\) on an unknown class App\:Beneficiary\.$#'
-			identifier: class.notFound
-			count: 3
 			path: src/Controller/SwipeCardController.php
 
 		-

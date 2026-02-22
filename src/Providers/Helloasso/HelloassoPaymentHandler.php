@@ -7,6 +7,7 @@ namespace App\Providers\Helloasso;
 use App\Entity\HelloassoPayment;
 use App\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -15,6 +16,7 @@ class HelloassoPaymentHandler
     /** @var EntityManagerInterface */
     private $entityManager;
 
+    /** @var ObjectRepository<HelloassoPayment>  */
     private $helloassoPaymentRepository;
 
     /** @var EventDispatcherInterface */
@@ -55,10 +57,7 @@ class HelloassoPaymentHandler
 
         foreach ($newPayments as $payment) {
             $this->logger->info(sprintf('Dispatch %s event for payement #%d', HelloassoEvent::PAYMENT_AFTER_SAVE, $payment->getId()));
-            $this->eventDispatcher->dispatch(
-                HelloassoEvent::PAYMENT_AFTER_SAVE,
-                new HelloassoEvent($payment),
-            );
+            $this->eventDispatcher->dispatch(new HelloassoEvent($payment), HelloassoEvent::PAYMENT_AFTER_SAVE);
         }
 
         return $newPayments;

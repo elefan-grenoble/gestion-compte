@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Helper\SwipeCard;
+use App\Entity\Beneficiary;
+use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Entity\SwipeCard as SwipeCardEntity;
 use App\Security\SwipeCardVoter;
 use Endroid\QrCode\QrCode;
@@ -33,9 +34,9 @@ class SwipeCardController extends AbstractController
 
 
     private $logger;
-    private SwipeCard $swipeCardHelper;
+    private SwipeCardHelper $swipeCardHelper;
 
-    public function __construct(LoggerInterface $logger, SwipeCard $swipeCardHelper)
+    public function __construct(LoggerInterface $logger, SwipeCardHelper $swipeCardHelper)
     {
         $this->logger = $logger;
         $this->swipeCardHelper = $swipeCardHelper;
@@ -89,7 +90,7 @@ class SwipeCardController extends AbstractController
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
-        $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCard());
+        $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCardEntity());
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $referer = $request->headers->get('referer');
@@ -97,7 +98,7 @@ class SwipeCardController extends AbstractController
         $beneficiaryId = $request->get("beneficiary");
 
         // verify code
-        if (!SwipeCard::checkEAN13($code)) {
+        if (!SwipeCardEntity::checkEAN13($code)) {
             $session->getFlashBag()->add('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
             return new RedirectResponse($referer);
         }
@@ -108,6 +109,7 @@ class SwipeCardController extends AbstractController
         }
 
         // get beneficiary
+        /** @var Beneficiary|null $beneficiary */
         $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
 
         // beneficiary should have 0 enabled cards
@@ -133,11 +135,11 @@ class SwipeCardController extends AbstractController
         }
 
         $lastCard = $em->getRepository('App:SwipeCard')->findLast($beneficiary);
-        $card = new SwipeCard();
+        $card = new SwipeCardEntity();
         $card->setBeneficiary($beneficiary);
         $card->setCode($code);
         $card->setNumber($lastCard ? max($lastCard->getNumber(),$beneficiary->getSwipeCards()->count()) + 1 : 1);
-        $card->setEnable(1);
+        $card->setEnable(true);
         $em->persist($card);
         $em->flush();
 
@@ -163,6 +165,7 @@ class SwipeCardController extends AbstractController
         $beneficiaryId = $request->get("beneficiary");
 
         // get beneficiary
+        /** @var Beneficiary|null $beneficiary */
         $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
 
         // beneficiary should have 0 enabled cards
@@ -212,6 +215,7 @@ class SwipeCardController extends AbstractController
         $beneficiaryId = $request->get("beneficiary");
 
         // get beneficiary
+        /** @var Beneficiary|null $beneficiary */
         $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
 
         $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
@@ -267,12 +271,12 @@ class SwipeCardController extends AbstractController
     /**
      * show Swipe Card
      *
-     * @param SwipeCard $card
+     * @param SwipeCardEntity $card
      * @return Response A Response instance
      * @Route("/{id}/show", name="swipe_show", methods={"GET"})
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function showAction(SwipeCard $card){
+    public function showAction(SwipeCardEntity $card){
         return $this->render('user/swipe_card.html.twig', [
             'card' => $card
         ]);
