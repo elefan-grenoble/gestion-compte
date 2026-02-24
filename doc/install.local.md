@@ -83,6 +83,12 @@ docker compose exec database mariadb -uroot -psecret symfony < espace_membres.sq
 
 Vous pouvez aussi le faire directement sur phpmyadmin : [http://localhost:8080](http://localhost:8080)
 
+## Tests
+
+Voir le guide dédié : [Environnement de test local (Linux)](install.tests.linux.md)
+
+Raccourci : `make setup-test` puis `make test` (voir le `Makefile` à la racine).
+
 ## Troubleshooting
 
 ### Erreurs de permission sur les volumes avec un système immuable
