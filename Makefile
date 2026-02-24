@@ -40,7 +40,7 @@ else
                  cypress/included:$(CYPRESS_VERSION)
 endif
 
-.PHONY: help check-docker setup-test \
+.PHONY: help check-docker check-hosts setup-test \
         test test-unit test-func test-coverage lint \
         test-e2e test-e2e-main test-e2e-shift test-e2e-membership test-e2e-oidc \
         npm-install encore-build encore-stubs \
@@ -62,6 +62,11 @@ check-docker: ## Vérifie que Docker est accessible
 	@docker info >/dev/null 2>&1 || \
 		{ echo "❌ Impossible de contacter le daemon Docker."; \
 		  echo "   sudo usermod -aG docker \"\$$USER\" puis ouvre un nouveau terminal."; exit 1; }
+
+check-hosts: ## Vérifie que membres.yourcoop.local est dans /etc/hosts
+	@grep -qE '^\s*127\.0\.0\.1\s+.*membres\.yourcoop\.local' /etc/hosts || \
+		{ echo "❌ membres.yourcoop.local absent de /etc/hosts"; \
+		  echo "   echo '127.0.0.1 membres.yourcoop.local' | sudo tee -a /etc/hosts"; exit 1; }
 
 # ------------------------------------------------------------------
 # Fichiers de configuration (local uniquement)
@@ -146,7 +151,7 @@ db-fixtures-load: ## Charge les fixtures (sans reset DB)
 # Setup complet (local)
 # ------------------------------------------------------------------
 
-setup-test: vendor encore-stubs db-fixtures cache-clear ## Bootstrap complet de l'environnement de test
+setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap complet de l'environnement de test
 	@echo ""
 	@echo "✅ Environnement de test prêt."
 	@echo "  make test          Tous les tests"
