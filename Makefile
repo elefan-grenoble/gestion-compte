@@ -2,25 +2,45 @@
 # Makefile — commandes de développement et de test
 # ------------------------------------------------------------------
 #
+# Fonctionne en deux modes :
+#   - Local : les commandes PHP s'exécutent dans Docker Compose
+#   - CI    : les commandes PHP s'exécutent directement (CI=true)
+#
 # Usage :
-#   make setup-test   Bootstrap complet (Docker + DB + fixtures)
+#   make setup-test    Bootstrap complet (Docker + DB + fixtures)
 #   make test          Tous les tests PHPUnit
-#   make test-unit     Tests unitaires + intégration (sans DB)
-#   make test-func     Tests fonctionnels (avec DB)
+#   make test-unit     Tests unitaires + intégration
+#   make test-func     Tests fonctionnels
+#   make lint          Analyse statique PHPStan
+#   make test-e2e      Tests Cypress E2E (hors OIDC)
 #   make clean         Arrête les conteneurs et supprime les volumes
 #
 # ------------------------------------------------------------------
 
-# Détection automatique de docker compose vs docker-compose
-COMPOSE := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
-EXEC    := $(COMPOSE) exec -T php
+# ---- Mode CI vs Local ------------------------------------------------
+ifdef CI
+  EXEC        :=
+  _DOCKER_DEP :=
+else
+  COMPOSE     := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+  EXEC        := $(COMPOSE) exec -T php
+  _DOCKER_DEP := up
+endif
 
-.PHONY: help check-docker setup-test test test-unit test-func test-coverage \
-        db-reset db-fixtures encore-stubs up down clean cache-clear
+CYPRESS_BASE_URL     ?= http://localhost:8000
+CYPRESS_KEYCLOAK_URL ?= http://localhost:8080
+
+.PHONY: help check-docker setup-test \
+        test test-unit test-func test-coverage lint \
+        test-e2e test-e2e-main test-e2e-shift test-e2e-membership test-e2e-oidc \
+        npm-install encore-build encore-stubs \
+        db-reset db-migrate db-fixtures db-fixtures-load \
+        env-ci env-ci-oidc serve \
+        up down clean cache-clear
 
 help: ## Affiche cette aide
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z0-9_-]+:.*## ' $(MAKEFILE_LIST) | sort | \
+		awk 'BEGIN {FS = ":.*## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 # ------------------------------------------------------------------
 # Prérequis
@@ -34,7 +54,7 @@ check-docker: ## Vérifie que Docker est accessible
 		  echo "   sudo usermod -aG docker \"\$$USER\" puis ouvre un nouveau terminal."; exit 1; }
 
 # ------------------------------------------------------------------
-# Fichiers de configuration
+# Fichiers de configuration (local uniquement)
 # ------------------------------------------------------------------
 
 compose.yaml:
@@ -53,7 +73,7 @@ compose.yaml:
 	@echo "✔ .env.test.local créé"
 
 # ------------------------------------------------------------------
-# Docker
+# Docker (local uniquement)
 # ------------------------------------------------------------------
 
 up: check-docker compose.yaml .env .env.test.local ## Démarre les conteneurs
@@ -78,8 +98,14 @@ clean: ## Arrête les conteneurs et supprime volumes + fichiers générés
 # Dépendances & assets
 # ------------------------------------------------------------------
 
-vendor: up
+vendor: $(_DOCKER_DEP)
 	$(EXEC) composer install --no-interaction --prefer-dist
+
+npm-install: ## Installe les paquets NPM
+	npm ci
+
+encore-build: ## Build les assets front-end (production)
+	./node_modules/.bin/encore production --progress
 
 encore-stubs: ## Crée des stubs Webpack Encore (évite les 500 en test)
 	@mkdir -p public/build
@@ -97,11 +123,17 @@ db-reset: vendor ## Drop + recreate le schéma de test
 	$(EXEC) php bin/console --env=test doctrine:database:create
 	$(EXEC) php bin/console --env=test doctrine:schema:create
 
+db-migrate: ## Exécute les migrations Doctrine (env test)
+	$(EXEC) php bin/console --env=test doctrine:migrations:migrate --no-interaction
+
 db-fixtures: db-reset ## Reset DB + charge les fixtures
 	$(EXEC) php bin/console --env=test doctrine:fixtures:load --no-interaction
 
+db-fixtures-load: ## Charge les fixtures (sans reset DB)
+	$(EXEC) php bin/console --env=test doctrine:fixtures:load --no-interaction
+
 # ------------------------------------------------------------------
-# Setup complet
+# Setup complet (local)
 # ------------------------------------------------------------------
 
 setup-test: vendor encore-stubs db-fixtures cache-clear ## Bootstrap complet de l'environnement de test
@@ -110,9 +142,11 @@ setup-test: vendor encore-stubs db-fixtures cache-clear ## Bootstrap complet de 
 	@echo "  make test          Tous les tests"
 	@echo "  make test-unit     Unit + intégration"
 	@echo "  make test-func     Fonctionnels"
+	@echo "  make lint          PHPStan"
+	@echo "  make test-e2e      Cypress E2E"
 
 # ------------------------------------------------------------------
-# Tests
+# Tests PHPUnit
 # ------------------------------------------------------------------
 
 test: ## Tous les tests PHPUnit
@@ -126,6 +160,45 @@ test-func: ## Tests fonctionnels (avec DB)
 
 test-coverage: ## Tests avec rapport de couverture HTML
 	$(EXEC) composer test-coverage
+
+# ------------------------------------------------------------------
+# Analyse statique
+# ------------------------------------------------------------------
+
+lint: ## Analyse PHPStan
+	$(EXEC) php bin/console cache:warmup --env=dev
+	$(EXEC) php vendor/bin/phpstan analyse src
+
+# ------------------------------------------------------------------
+# Tests Cypress E2E
+# ------------------------------------------------------------------
+
+test-e2e: test-e2e-main test-e2e-shift test-e2e-membership ## Tous les tests Cypress (hors OIDC)
+
+test-e2e-main: ## Cypress — tests login
+	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:main
+
+test-e2e-shift: ## Cypress — tests créneaux
+	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:shift
+
+test-e2e-membership: ## Cypress — tests adhésion
+	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:membership
+
+test-e2e-oidc: ## Cypress — tests OIDC / Keycloak
+	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) CYPRESS_KEYCLOAK_URL=$(CYPRESS_KEYCLOAK_URL) npm run cy:test:oidc
+
+# ------------------------------------------------------------------
+# Helpers CI
+# ------------------------------------------------------------------
+
+env-ci: ## Configure l'environnement CI
+	cp .env.test .env
+
+env-ci-oidc: ## Configure l'environnement CI pour OIDC
+	cp .env.oidc.test .env.test
+
+serve: ## Démarre le serveur Symfony (CI / host)
+	symfony server:start --no-tls -d --port=8000
 
 # ------------------------------------------------------------------
 # Utilitaires
