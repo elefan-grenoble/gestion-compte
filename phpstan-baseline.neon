@@ -421,24 +421,6 @@ parameters:
 			path: src/Command/SendMassMailCommand.php
 
 		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:bcc\(\) expects string\|Symfony\\Component\\Mime\\Address, list given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:from\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string, bool\|int\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string, bool\|int\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
 			message: '#^Property App\\Command\\SendMassMailCommand\:\:\$em has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -2852,12 +2834,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$shifter of method App\\Entity\\Shift\:\:setShifter\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:bcc\(\) expects string\|Symfony\\Component\\Mime\\Address, list given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Controller/ShiftController.php
@@ -6765,24 +6741,6 @@ parameters:
 		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: src/EventListener/EmailingEventListener.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:replyTo\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/EventListener/EmailingEventListener.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/EventListener/EmailingEventListener.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string\> given\.$#'
-			identifier: argument.type
 			count: 2
 			path: src/EventListener/EmailingEventListener.php
 

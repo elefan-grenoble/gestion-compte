@@ -129,7 +129,7 @@ class SendMassMailCommand extends Command
         }
         $message = (new Email())
             ->subject($subject)
-            ->from($from)
+            ->from(...$from)
             ->html($body);
         if ($test_email && filter_var($test_email, FILTER_VALIDATE_EMAIL)){
             $output->writeln('<fg=cyan;>>>> mode test, BAT envoyé à '.$test_email.' </>');
@@ -138,8 +138,8 @@ class SendMassMailCommand extends Command
             $output->writeln('<fg=red;> Mail BAT wrong format ! </>');
             return 2;
         }else{
-            $message->to($from);
-            $message->bcc($to);
+            $message->to(...$from);
+            $message->bcc(...$to);
         }
         $this->mailer->send($message);
 

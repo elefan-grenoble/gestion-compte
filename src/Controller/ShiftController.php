@@ -643,7 +643,7 @@ class ShiftController extends AbstractController
                 ->subject('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1))
                 ->from($this->getParameter('transactional_mailer_user'))
                 ->replyTo($from->getEmail())
-                ->bcc($emails)
+                ->bcc(...$emails)
                 ->html(
                     $this->renderView(
                         'emails/coshifter_message.html.twig',

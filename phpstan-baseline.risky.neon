@@ -1051,12 +1051,6 @@ parameters:
 			path: src/Event/ShiftBookedEvent.php
 
 		-
-			message: '#^Call to static method create\(\) on an unknown class Symfony\\Component\\HttpClient\\HttpClient\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/EventListener/MattermostEventListener.php
-
-		-
 			message: '#^PHPDoc tag @param for parameter \$event with type App\\Event\\PeriodPositionFreedEvent is incompatible with native type Symfony\\Component\\HttpKernel\\Event\\RequestEvent\.$#'
 			identifier: parameter.phpDocType
 			count: 1
